@@ -192,6 +192,39 @@
 }
 @media (hover: none) { .shot figcaption span { opacity: 1; transform: none; } }
 
+/* ---------- Références clients ---------- */
+.ref { display: grid; grid-template-columns: 0.95fr 1.05fr; gap: clamp(36px, 6vw, 90px); align-items: center; }
+.ref__photo {
+  position: relative; margin: 0; border-radius: 24px; overflow: hidden; aspect-ratio: 4 / 5;
+  border: 1px solid rgba(212, 169, 79, 0.35); box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.9);
+  transform: perspective(1100px) rotateX(calc(var(--ty, 0) * 1deg)) rotateY(calc(var(--tx, 0) * 1deg));
+  transition: transform 0.6s var(--ease-out), opacity 1s var(--ease-out);
+}
+.ref__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; transform: scale(1.04); filter: saturate(0.8) contrast(1.05) brightness(0.92); transition: transform 1.4s var(--ease-out), filter 0.8s; }
+.ref__photo:hover img { transform: scale(1.1); filter: saturate(1.05) contrast(1.05) brightness(1); }
+.ref__photo::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(200deg, rgba(79, 107, 255, 0.18), transparent 45%), linear-gradient(180deg, transparent 55%, rgba(7, 8, 22, 0.85)); }
+.ref__photo::after { content: ""; position: absolute; inset: 12px; z-index: 1; border-radius: 16px; border: 1px solid rgba(240, 216, 152, 0.35); pointer-events: none; }
+.ref__badge { position: absolute; top: 24px; left: 24px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 99px; background: rgba(7, 8, 22, 0.8); border: 1px solid rgba(255, 255, 255, 0.14); color: var(--text); font-family: var(--font-display); font-size: 11.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+.ref__caption { position: absolute; left: 28px; right: 28px; bottom: 26px; z-index: 2; display: grid; gap: 4px; }
+.ref__caption b { font-family: var(--font-display); font-weight: 600; color: var(--text); font-size: 1.1rem; }
+.ref__caption span { font-family: var(--font-serif); font-style: italic; color: var(--gold-light); }
+.ref__copy { display: grid; gap: 24px; justify-items: start; }
+.ref__copy .lead { max-width: 520px; }
+.ref__card { position: relative; width: 100%; max-width: 540px; display: grid; gap: 6px; padding: 24px 26px 24px 30px; border-radius: 18px; background: linear-gradient(170deg, #161936, #0e1028); border: 1px solid rgba(212, 169, 79, 0.3); overflow: hidden; transition: border-color 0.4s, transform 0.5s var(--ease-out); }
+.ref__card:hover { border-color: rgba(212, 169, 79, 0.6); transform: translateY(-4px); }
+.ref__card::before { /* liseré aux couleurs de la Colombie */ content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: linear-gradient(180deg, #fcd116 0 50%, #003893 50% 75%, #ce1126 75% 100%); }
+.ref__card small { font-family: var(--font-display); font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); display: flex; align-items: center; gap: 8px; }
+.ref__card b { font-family: var(--font-display); font-weight: 700; font-size: clamp(1.15rem, 1rem + 0.6vw, 1.4rem); color: var(--text); }
+.ref__card p { font-size: 15px; }
+.ref__tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.ref__tags li { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 99px; border: 1px solid var(--line-strong); font-size: 14px; color: var(--text); transition: border-color 0.3s, background-color 0.3s; }
+.ref__tags li:hover { border-color: var(--gold); background: var(--gold-soft); }
+.ref__tags .icon { width: 16px; height: 16px; color: var(--gold); }
+@media (max-width: 980px) {
+  .ref { grid-template-columns: 1fr; }
+  .ref__photo { max-width: 520px; width: 100%; margin-inline: auto; aspect-ratio: 4 / 4.2; }
+}
+
 /* ---------- Bandeau avis clients ---------- */
 .reviews-band { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; padding: clamp(28px, 4vw, 44px); border-radius: 22px; background: radial-gradient(120% 140% at 0% 0%, rgba(212, 169, 79, 0.16), transparent 55%), linear-gradient(170deg, #161936, #0e1028); border: 1px solid rgba(212, 169, 79, 0.3); }
 .reviews-band__stars { display: flex; gap: 4px; color: var(--gold); margin-bottom: 10px; }

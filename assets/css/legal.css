@@ -21,6 +21,7 @@
 .legal dt { color: var(--muted-2); font-size: 14px; }
 .legal dd { color: var(--text); }
 .legal dl > :nth-last-child(-n + 2) { border-bottom: 0; }
+.legal dl + dl { margin-top: 12px; }
 
 .todo { display: inline-block; padding: 1px 9px; border-radius: 6px; border: 1px dashed var(--gold); background: var(--gold-soft); color: var(--gold-light); font-size: 0.92em; }
 

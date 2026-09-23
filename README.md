@@ -19,7 +19,12 @@ Pour voir le site : double-cliquez sur `index.html`.
 
 ## Informations de l'entreprise
 
-Déjà en place : téléphone +33 7 84 73 90 70, email bdasecurite@gmail.com, Paris, et les informations légales de BDASECURITE (SARL, SIRET, TVA, siège, gérant, hébergeur Netlify). La page `mentions-legales.html` contient aussi la politique de confidentialité (RGPD).
+Déjà en place : téléphone +33 7 84 73 90 70, email bdasecurite@gmail.com, Paris, et les informations légales des deux structures :
+
+- BDASECURITE, EURL, SIRET 109 076 463 00016 ;
+- Abdelouahab Bouidia EI (BDA SECURITE), SIRET 977 933 316 00019.
+
+S'y ajoutent le siège, le gérant et l'hébergeur OVH. La page `mentions-legales.html` contient aussi la politique de confidentialité (RGPD).
 
 Le n° d'autorisation CNAPS (AUT-075-2124-07-01-20250906336) figure dans le pied de page de l'accueil, dans celui du recrutement et dans les mentions légales.
 

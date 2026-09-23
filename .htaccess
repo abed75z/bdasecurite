@@ -3,6 +3,12 @@
 # Encodage des pages
 AddDefaultCharset UTF-8
 
+# Adresse unique et sécurisée : tout est redirigé vers https://bdasecurite.com
+RewriteEngine On
+RewriteCond %{HTTP_HOST} !^bdasecurite\.com$ [NC,OR]
+RewriteCond %{SERVER_PORT} 80
+RewriteRule ^(.*)$ https://bdasecurite.com/$1 [R=301,L]
+
 # Pas d'affichage de la liste des fichiers d'un dossier
 Options -Indexes
 

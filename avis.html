@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Avis clients — BDA Sécurité &amp; VTC Premium à Paris</title>
+  <meta name="description" content="Découvrez les avis des clients de BDA Sécurité & VTC Premium (sécurité privée et chauffeurs VTC à Paris) et partagez votre expérience.">
+  <meta name="theme-color" content="#070816">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/hero.css">
+  <link rel="stylesheet" href="assets/css/sections.css">
+  <link rel="stylesheet" href="assets/css/devis.css">
+  <link rel="stylesheet" href="assets/css/recrutement.css">
+  <link rel="stylesheet" href="assets/css/avis.css">
+</head>
+<body>
+
+<svg class="svg-sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="bda-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7e2a6"/><stop offset=".45" stop-color="#d4a94f"/><stop offset="1" stop-color="#a07526"/></linearGradient>
+  </defs>
+  <symbol id="bda-mark" viewBox="0 0 200 240">
+    <path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" fill="none" stroke="url(#bda-gold)" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M100 30 164 54s2 70-11 97c-14 30-42 47-53 55-11-8-39-25-53-55-13-27-11-97-11-97Z" fill="none" stroke="url(#bda-gold)" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M62 128 100 84l38 44" fill="none" stroke="#f3f0ea" stroke-width="12"/>
+    <path d="M93 104h14l-2 52-5 24-5-24Z" fill="#f3f0ea"/>
+  </symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+</svg>
+
+<div class="ambient" aria-hidden="true"></div>
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<!-- ============ Navigation ============ -->
+<header class="nav">
+  <div class="nav__inner">
+    <a class="brand" href="index.html" aria-label="BDA Sécurité &amp; VTC Premium — accueil">
+      <svg class="brand__mark" viewBox="0 0 200 240" aria-hidden="true"><use href="#bda-mark"/></svg>
+      <span class="brand__text"><span class="brand__name">BDA</span><span class="brand__tag">Sécurité &amp; VTC Premium</span></span>
+    </a>
+    <nav class="nav__links" aria-label="Navigation principale">
+      <a href="index.html">Accueil</a>
+      <a href="index.html#services">Services</a>
+      <a href="index.html#securite">Sécurité</a>
+      <a href="index.html#vtc">VTC Premium</a>
+      <a href="avis.html" aria-current="page">Avis</a>
+      <a href="recrutement.html" class="nav__hot">Recrutement</a>
+    </nav>
+    <div class="nav__actions">
+      <a class="btn btn--outline" href="tel:+33784739070" aria-label="Appeler"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span>Appeler</span></a>
+      <a class="btn btn--gold" href="devis.html">Demander un devis</a>
+      <button class="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a class="mobile-menu__link" href="index.html" style="--i:0">Accueil</a>
+  <a class="mobile-menu__link" href="index.html#services" style="--i:1">Services</a>
+  <a class="mobile-menu__link" href="#liste-avis" style="--i:2">Les avis</a>
+  <a class="mobile-menu__link" href="#laisser-un-avis" style="--i:3">Laisser un avis</a>
+  <a class="mobile-menu__link" href="recrutement.html" style="--i:4">Recrutement</a>
+  <div class="mobile-menu__foot">
+    <a class="btn btn--gold btn--block" href="devis.html">Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    <a class="btn btn--outline btn--block" href="tel:+33784739070"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Appeler</a>
+  </div>
+</div>
+
+<main>
+  <!-- ============ HERO ============ -->
+  <section class="rv-hero" aria-labelledby="rv-title" data-anim>
+    <div class="rv-hero__photo" aria-hidden="true">
+      <img src="https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=1400&amp;q=72" srcset="https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=900&amp;q=72 900w, https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=1400&amp;q=72 1400w, https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=2000&amp;q=70 2000w" sizes="(max-width: 1020px) 100vw, 62vw" alt="" width="1400" height="1922" fetchpriority="high">
+    </div>
+    <div class="container rv-hero__grid">
+      <div class="rv-hero__copy">
+        <p class="kicker" data-reveal="fade">Avis clients</p>
+        <h1 class="h1 shimmer" id="rv-title" data-split>Ils nous font <em>confiance.</em></h1>
+        <p class="lead" data-reveal style="--d:300ms">Chaque avis est lu avec attention. Découvrez les retours de nos clients sur nos prestations de sécurité et de VTC, et partagez le vôtre.</p>
+        <div class="hero__ctas" data-reveal style="--d:450ms">
+          <a class="btn btn--gold" href="#laisser-un-avis" data-magnetic>Laisser un avis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--outline" href="#liste-avis">Lire les avis</a>
+        </div>
+      </div>
+
+      <aside class="rv-summary" data-reveal="scale" style="--d:250ms" aria-label="Note moyenne">
+        <div class="rv-summary__top">
+          <span class="rv-summary__avg" data-avg>—</span>
+          <div><div class="stars" data-avg-stars></div><p class="rv-summary__count" data-avg-count>Chargement des avis…</p></div>
+        </div>
+        <div class="rv-bars">
+          <div class="rv-bar" data-bar="5"><span>5 <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg></span><i></i><b>0</b></div>
+          <div class="rv-bar" data-bar="4"><span>4 <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg></span><i></i><b>0</b></div>
+          <div class="rv-bar" data-bar="3"><span>3 <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg></span><i></i><b>0</b></div>
+          <div class="rv-bar" data-bar="2"><span>2 <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg></span><i></i><b>0</b></div>
+          <div class="rv-bar" data-bar="1"><span>1 <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg></span><i></i><b>0</b></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ LISTE DES AVIS ============ -->
+  <section class="section" id="liste-avis" aria-labelledby="list-title" style="padding-top:clamp(40px,6vw,80px)">
+    <div class="container">
+      <div class="section__head">
+        <p class="kicker kicker--center" data-reveal="fade">Ce qu'ils en disent</p>
+        <h2 class="h2" id="list-title" data-split>La parole <em>à nos clients.</em></h2>
+      </div>
+      <div class="rv-list" data-avis-list aria-live="polite"></div>
+      <div class="rv-empty" data-avis-empty hidden>
+        <div class="stars" aria-hidden="true"><svg viewBox="0 0 24 24" style="--i:0"><use href="#i-star"/></svg><svg viewBox="0 0 24 24" style="--i:1"><use href="#i-star"/></svg><svg viewBox="0 0 24 24" style="--i:2"><use href="#i-star"/></svg><svg viewBox="0 0 24 24" style="--i:3"><use href="#i-star"/></svg><svg viewBox="0 0 24 24" style="--i:4"><use href="#i-star"/></svg></div>
+        <h3 class="h3">Soyez le premier <em>à donner votre avis.</em></h3>
+        <p>Aucun avis n'est encore publié. Vous avez fait appel à nos services ? Votre retour nous aide à progresser.</p>
+        <a class="btn btn--gold" href="#laisser-un-avis">Laisser un avis</a>
+      </div>
+      <div class="rv-more" data-avis-more hidden><button class="btn btn--outline" type="button">Voir plus d'avis</button></div>
+      <p class="rv-note"><b>Comment sont gérés les avis ?</b> Les avis sont déposés librement par nos clients et publiés après une vérification de leur conformité (propos respectueux, lien avec une prestation). Ils sont affichés du plus récent au plus ancien, avec leur date. Aucune contrepartie n'est proposée en échange d'un avis, et aucun avis n'est modifié.</p>
+    </div>
+  </section>
+
+  <!-- ============ LAISSER UN AVIS ============ -->
+  <section class="section" id="laisser-un-avis" aria-labelledby="form-title" style="padding-top:0">
+    <div class="container rv-form-grid">
+      <div class="rv-form-aside">
+        <p class="kicker">Votre avis</p>
+        <h2 class="h2" id="form-title">Partagez <em>votre expérience.</em></h2>
+        <p class="lead">Une minute suffit : une note, quelques mots, et votre avis sera publié après validation.</p>
+        <figure>
+          <img src="https://images.unsplash.com/photo-1596032457104-baa1f5f9372a?auto=format&amp;fit=crop&amp;w=900&amp;h=680&amp;q=72" alt="Chauffeur en costume au volant, vu depuis la banquette arrière" width="900" height="680" loading="lazy" decoding="async">
+        </figure>
+      </div>
+
+      <div class="apply-card" data-reveal>
+        <form id="avis-form" novalidate>
+          <div class="field">
+            <span class="label">Votre note</span>
+            <div class="star-pick" role="radiogroup" aria-label="Note sur 5">
+              <input type="radio" name="note" id="n5" value="5"><label for="n5" title="Excellent"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg><span class="sr-only">5 étoiles</span></label>
+              <input type="radio" name="note" id="n4" value="4"><label for="n4" title="Très bien"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg><span class="sr-only">4 étoiles</span></label>
+              <input type="radio" name="note" id="n3" value="3"><label for="n3" title="Bien"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg><span class="sr-only">3 étoiles</span></label>
+              <input type="radio" name="note" id="n2" value="2"><label for="n2" title="Moyen"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg><span class="sr-only">2 étoiles</span></label>
+              <input type="radio" name="note" id="n1" value="1"><label for="n1" title="Décevant"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-star"/></svg><span class="sr-only">1 étoile</span></label>
+            </div>
+            <p class="star-label" aria-live="polite"></p>
+            <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Choisissez une note.</span></p>
+          </div>
+          <div class="fields">
+            <div class="field">
+              <label for="a-nom">Votre prénom ou société</label>
+              <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><input class="input" type="text" id="a-nom" name="nom" maxlength="60" autocomplete="given-name" placeholder="Ex. : Marie D." required></div>
+              <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Indiquez un nom (2 caractères minimum).</span></p>
+            </div>
+            <div class="field">
+              <label for="a-prestation">Prestation <em>facultatif</em></label>
+              <select class="input" id="a-prestation" name="prestation">
+                <option value="">Choisissez…</option>
+                <option>Sécurité privée</option>
+                <option>Protection rapprochée</option>
+                <option>Sécurité événementielle</option>
+                <option>VTC Premium</option>
+                <option>Chauffeur + sécurité</option>
+                <option>Autre</option>
+              </select>
+            </div>
+            <div class="field field--full">
+              <label for="a-texte">Votre avis</label>
+              <textarea class="input" id="a-texte" name="texte" rows="5" maxlength="1200" placeholder="Racontez-nous votre expérience : accueil, ponctualité, discrétion, confort…" required></textarea>
+              <span class="counter">0 / 1200</span>
+              <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Écrivez quelques mots (10 caractères minimum).</span></p>
+            </div>
+            <div class="field field--full">
+              <label for="a-email">Email <em>facultatif, jamais publié</em></label>
+              <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><input class="input" type="email" id="a-email" name="email" autocomplete="email" inputmode="email" placeholder="Pour vous répondre si besoin"></div>
+              <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Adresse email invalide.</span></p>
+            </div>
+          </div>
+          <label class="check"><input type="checkbox" id="a-consent" name="consentement" required><span class="check__box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span>J'accepte que mon prénom (ou ma société), ma note et mon avis soient publiés sur ce site. <a href="mentions-legales.html#donnees" target="_blank" rel="noopener" style="color:var(--gold-light);text-decoration:underline">En savoir plus</a></span></label>
+          <div class="hp" aria-hidden="true"><label for="a-site">Ne pas remplir</label><input type="text" id="a-site" name="site_web" tabindex="-1" autocomplete="off"></div>
+          <p class="step-error" role="alert"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span></span></p>
+          <button type="submit" class="btn btn--gold"><span class="btn__label">Publier mon avis <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></span></button>
+          <p class="rv-wait" role="status" hidden>Envoi en cours, cela peut prendre quelques secondes…</p>
+        </form>
+
+        <div class="apply-done" role="status">
+          <svg class="ok" viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="44"/><path d="M30 50l12 12 24-26"/></svg>
+          <h3 class="h3">Merci <span data-done-name></span>, <em>avis bien reçu !</em></h3>
+          <p>Votre avis sera publié sur cette page après une rapide vérification. Merci d'avoir pris le temps de partager votre expérience.</p>
+          <div class="apply-done__actions">
+            <a class="btn btn--gold" href="index.html">Retour à l'accueil</a>
+            <a class="btn btn--outline" href="devis.html">Demander un devis</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__about">
+        <a class="brand" href="index.html" aria-label="BDA Sécurité &amp; VTC Premium — accueil">
+          <svg class="brand__mark" viewBox="0 0 200 240" aria-hidden="true"><use href="#bda-mark"/></svg>
+          <span class="brand__text"><span class="brand__name">BDA</span><span class="brand__tag">Sécurité &amp; VTC Premium</span></span>
+        </a>
+        <p>Sécurité privée et transport haut de gamme : protection, ponctualité et sérénité, 24h/24 et 7j/7.</p>
+      </div>
+      <div>
+        <h4>Nos services</h4>
+        <ul>
+          <li><a href="index.html#securite">Sécurité privée</a></li>
+          <li><a href="index.html#vtc">VTC Premium</a></li>
+          <li><a href="index.html#duo">Chauffeur + sécurité</a></li>
+          <li><a href="devis.html">Demander un devis</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>BDA</h4>
+        <ul>
+          <li><a href="avis.html">Avis clients</a></li>
+          <li><a href="recrutement.html">Recrutement</a></li>
+          <li><a href="index.html#faq">FAQ</a></li>
+          <li><a href="mentions-legales.html">Mentions légales</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <ul class="footer__contact">
+          <li><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><a href="tel:+33784739070">+33 7 84 73 90 70</a></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><a href="mailto:bdasecurite@gmail.com">bdasecurite@gmail.com</a></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span>Paris, France</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__legal">
+      <p>© <span data-year>2026</span> BDASECURITE (BDA Sécurité &amp; VTC Premium) — SARL au capital de 2 000 € — SIRET 109 076 463 00016 — <a href="mentions-legales.html">Mentions légales &amp; confidentialité</a></p>
+      <p>Autorisation d'exercice CNAPS n° AUT-075-2124-07-01-20250906336. « L'autorisation d'exercice ne confère aucune prérogative de puissance publique à l'entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du Code de la sécurité intérieure)</p>
+    </div>
+  </div>
+</footer>
+
+<a class="wa" href="https://wa.me/33784739070?text=Bonjour%20BDA%2C%20je%20souhaite%20un%20renseignement." target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
+  <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3.2A12.7 12.7 0 0 0 5.1 22.4L3.4 28.8l6.6-1.7A12.7 12.7 0 1 0 16 3.2Zm0 23.1c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-3.9 1 1-3.8-.3-.4a10.5 10.5 0 1 1 9 4.9Zm5.8-7.9c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.6 8.6 0 0 1-4.3-3.7c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.1.9 2.9 1 3.9.8.6-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5-.1-.2-.3-.3-.7-.4Z"/></svg>
+  <span>Écrivez-nous</span>
+</a>
+
+<div class="mobile-bar">
+  <a class="btn btn--outline" href="tel:+33784739070"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Appeler</a>
+  <a class="btn btn--gold" href="#laisser-un-avis">Laisser un avis</a>
+</div>
+
+<script src="assets/js/core.js"></script>
+<script src="assets/js/avis-data.js"></script>
+<script src="assets/js/avis.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Merci pour votre demande — BDA Sécurité &amp; VTC Premium</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0a0a0c">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/hero.css">
+  <link rel="stylesheet" href="assets/css/merci.css">
+</head>
+<body>
+
+<svg class="svg-sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="bda-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc9c"/><stop offset=".45" stop-color="#c9a14a"/><stop offset="1" stop-color="#9c7424"/></linearGradient>
+    <linearGradient id="ok-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc9c"/><stop offset=".5" stop-color="#c9a14a"/><stop offset="1" stop-color="#9c7424"/></linearGradient>
+  </defs>
+  <symbol id="bda-mark" viewBox="0 0 200 240">
+    <path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" fill="none" stroke="url(#bda-gold)" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M100 30 164 54s2 70-11 97c-14 30-42 47-53 55-11-8-39-25-53-55-13-27-11-97-11-97Z" fill="none" stroke="url(#bda-gold)" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M62 128 100 84l38 44" fill="none" stroke="#f3f0ea" stroke-width="12"/>
+    <path d="M93 104h14l-2 52-5 24-5-24Z" fill="#f3f0ea"/>
+  </symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M11 18l-6-6 6-6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></symbol>
+</svg>
+
+<div class="ambient" aria-hidden="true"></div>
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="nav__inner">
+    <a class="brand" href="index.html" aria-label="BDA Sécurité &amp; VTC Premium — retour à l'accueil">
+      <svg class="brand__mark" viewBox="0 0 200 240" aria-hidden="true"><use href="#bda-mark"/></svg>
+      <span class="brand__text"><span class="brand__name">BDA</span><span class="brand__tag">Sécurité &amp; VTC Premium</span></span>
+    </a>
+    <div class="nav__actions" style="margin-left:auto">
+      <!-- À PERSONNALISER : votre numéro -->
+      <a class="btn btn--outline" href="tel:+33784739070" aria-label="Appeler"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span>Appeler</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="thanks">
+  <svg class="road" data-road viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
+
+  <div class="thanks__inner">
+    <div class="ok-badge" aria-hidden="true">
+      <span class="ok-badge__ring"></span><span class="ok-badge__ring"></span>
+      <svg viewBox="0 0 132 132"><circle class="disc" cx="66" cy="66" r="58"/><circle class="stroke" cx="66" cy="66" r="58" transform="rotate(-90 66 66)"/><path class="tick" d="M43 68l15 15 31-33"/></svg>
+    </div>
+
+    <p class="kicker kicker--center" data-reveal="fade" style="--d:600ms">Demande envoyée</p>
+    <h1 class="h1 thanks__title" data-thanks-title data-split style="--d:700ms">Merci&nbsp;!</h1>
+    <p class="lead thanks__lead" data-thanks-lead data-reveal style="--d:1000ms">Votre demande de devis a bien été transmise à notre équipe. Nous l'étudions et revenons vers vous très rapidement, par téléphone ou par email.</p>
+
+    <div class="summary" data-summary data-reveal style="--d:1150ms" hidden>
+      <div class="summary__head">
+        <b>Récapitulatif</b>
+        <span class="summary__ref"><span data-ref></span><button type="button" data-copy aria-label="Copier la référence"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg></button></span>
+      </div>
+      <dl>
+        <dt><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg> Prestation</dt><dd data-prestation></dd>
+        <dt><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg> Date souhaitée</dt><dd data-date></dd>
+        <dt><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg> Réponse à</dt><dd data-email></dd>
+      </dl>
+    </div>
+
+    <ol class="next" data-reveal style="--d:1250ms">
+      <li class="is-current"><span class="next__num">01</span><b>Analyse de votre besoin</b><small><span class="status-dot" aria-hidden="true"></span> En cours</small></li>
+      <li><span class="next__num">02</span><b>Appel de confirmation</b><small>Très bientôt</small></li>
+      <li><span class="next__num">03</span><b>Devis personnalisé</b><small>Gratuit et sans engagement</small></li>
+    </ol>
+
+    <div class="thanks__actions" data-reveal style="--d:1450ms">
+      <a class="btn btn--gold" href="index.html" data-magnetic><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"/></svg> Retour à l'accueil</a>
+      <!-- À PERSONNALISER : votre numéro -->
+      <a class="btn btn--outline" href="tel:+33784739070"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Une urgence&nbsp;? Appelez-nous</a>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/merci.js"></script>
+<script src="assets/js/core.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+/* =========================================================
+   PAGE MENTIONS LÉGALES & CONFIDENTIALITÉ
+   ========================================================= */
+
+.legal { padding: calc(var(--nav-h) + 60px) 0 110px; }
+.legal__inner { width: min(860px, 100% - 2 * var(--gutter)); margin-inline: auto; display: grid; gap: 22px; }
+.legal__head { display: grid; gap: 18px; padding-bottom: 36px; border-bottom: 1px solid var(--line); }
+.legal__head .h1 { font-size: clamp(2rem, 1.2rem + 2.8vw, 3.2rem); }
+.legal__updated { font-size: 14px; color: var(--muted-2); }
+
+.legal section { padding: 34px 0 10px; display: grid; gap: 14px; scroll-margin-top: calc(var(--nav-h) + 20px); }
+.legal h2 { font-family: var(--font-display); font-weight: 600; font-size: 1.3rem; color: var(--text); display: flex; align-items: center; gap: 14px; }
+.legal h2 span { font-family: var(--font-serif); font-style: italic; font-weight: 500; font-size: 1.05rem; color: var(--gold); }
+.legal p, .legal li { line-height: 1.75; }
+.legal ul { display: grid; gap: 6px; padding-left: 18px; list-style: disc; }
+.legal ul li::marker { color: var(--gold); }
+.legal a { color: var(--gold-light); text-decoration: underline; text-underline-offset: 3px; }
+
+.legal dl { display: grid; grid-template-columns: minmax(170px, 0.4fr) 1fr; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: rgba(255, 255, 255, 0.02); }
+.legal dt, .legal dd { padding: 13px 18px; border-bottom: 1px solid var(--line); }
+.legal dt { color: var(--muted-2); font-size: 14px; }
+.legal dd { color: var(--text); }
+.legal dl > :nth-last-child(-n + 2) { border-bottom: 0; }
+
+.todo { display: inline-block; padding: 1px 9px; border-radius: 6px; border: 1px dashed var(--gold); background: var(--gold-soft); color: var(--gold-light); font-size: 0.92em; }
+
+.legal__foot { margin-top: 30px; padding-top: 28px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted-2); }
+
+@media (max-width: 600px) {
+  .legal dl { grid-template-columns: 1fr; }
+  .legal dt { padding-bottom: 2px; border-bottom: 0; }
+  .legal dd { padding-top: 2px; }
+}

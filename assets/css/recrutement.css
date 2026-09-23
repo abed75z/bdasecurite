@@ -1,0 +1,122 @@
+/* =========================================================
+   PAGE RECRUTEMENT
+   ========================================================= */
+
+/* ---------- Hero ---------- */
+.jobs-hero { position: relative; overflow: hidden; min-height: 92svh; padding: calc(var(--nav-h) + 60px) 0 110px; display: flex; align-items: center; }
+.jobs-hero .hero__bg::after { background: linear-gradient(180deg, transparent 70%, var(--bg)); }
+.jobs-hero__grid { position: relative; z-index: 2; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(40px, 6vw, 90px); align-items: center; }
+.jobs-hero__copy { display: grid; gap: 28px; justify-items: start; }
+.jobs-hero__copy .lead { max-width: 540px; }
+
+/* Tableau « recrutement ouvert » animé */
+.board { position: relative; border-radius: 20px; padding: 22px; background: linear-gradient(180deg, rgba(22, 25, 56, 0.95), rgba(16, 18, 43, 0.95)); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.9); transform: perspective(1100px) rotateY(calc(-6deg + var(--tx, 0) * 1deg)) rotateX(calc(3deg + var(--ty, 0) * 1deg)); transition: transform 0.6s var(--ease-out); }
+.board::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; background: linear-gradient(135deg, rgba(79, 107, 255, 0.7), transparent 40%, transparent 60%, rgba(212, 169, 79, 0.7)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+.board__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.board__head b { font-family: var(--font-display); font-weight: 600; color: var(--text); font-size: 15px; }
+.board__list { display: grid; gap: 10px; }
+.board__item { display: flex; align-items: center; gap: 14px; padding: 13px 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.06); animation: board-in 0.8s var(--ease-out) both; animation-delay: calc(0.4s + var(--i, 0) * 0.15s); transition: border-color 0.4s, transform 0.5s var(--ease-out), background-color 0.4s; }
+.board__item:hover { border-color: rgba(var(--accent), 0.6); background: rgba(var(--accent), 0.1); transform: translateX(6px); }
+.board__ico { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, rgba(var(--accent), 1), rgba(var(--accent), 0.55)); box-shadow: 0 10px 22px -10px rgba(var(--accent), 0.9); flex: none; }
+.board__ico .icon { width: 19px; height: 19px; }
+.board__item b { display: block; color: var(--text); font-weight: 500; font-size: 14.5px; line-height: 1.3; }
+.board__item small { font-size: 12.5px; color: var(--muted-2); }
+.board__item .pill { margin-left: auto; }
+@keyframes board-in { from { opacity: 0; transform: translateY(16px); } }
+.board__foot { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+.board__foot b { color: var(--gold-light); font-family: var(--font-display); }
+
+/* ---------- Postes ouverts ---------- */
+.jobs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+.jobs > div { display: flex; }
+.job {
+  position: relative; overflow: hidden; isolation: isolate; width: 100%;
+  padding: 34px; border-radius: 20px; display: flex; flex-direction: column; gap: 18px;
+  background: radial-gradient(120% 80% at 100% 0%, rgba(var(--accent), 0.18), transparent 60%), linear-gradient(170deg, #161936, #0e1028);
+  border: 1px solid rgba(var(--accent), 0.25);
+  transform: perspective(1000px) rotateX(calc(var(--ty, 0) * 1deg)) rotateY(calc(var(--tx, 0) * 1deg));
+  transition: transform 0.6s var(--ease-out), border-color 0.5s;
+}
+.job::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity 0.5s; background: radial-gradient(380px circle at var(--gx, 50%) var(--gy, 50%), rgba(var(--accent), 0.2), transparent 60%); }
+.job:hover { border-color: rgba(var(--accent), 0.6); }
+.job:hover::before { opacity: 1; }
+.job__top { display: flex; align-items: center; gap: 16px; }
+.job__ico { width: 56px; height: 56px; border-radius: 14px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, rgba(var(--accent), 1), rgba(var(--accent), 0.5)); box-shadow: 0 14px 30px -12px rgba(var(--accent), 0.9); flex: none; transition: transform 0.6s var(--ease-out); }
+.job__ico .icon { width: 26px; height: 26px; }
+.job:hover .job__ico { transform: rotate(-10deg) scale(1.06); }
+.job h3 { font-size: 1.3rem; }
+.job__tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.job__tags span { padding: 4px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; color: var(--text); background: rgba(255, 255, 255, 0.07); border: 1px solid rgba(255, 255, 255, 0.08); }
+.job__tags span:first-child { background: rgba(var(--accent), 0.2); border-color: rgba(var(--accent), 0.45); }
+.job__req { display: grid; gap: 9px; }
+.job__req li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; color: var(--text); }
+.job__req .icon { width: 17px; height: 17px; margin-top: 3px; color: rgb(var(--accent)); stroke-width: 2.4; }
+.job .btn { margin-top: auto; align-self: flex-start; }
+.jobs > div:nth-child(1) .job { --accent: 79, 107, 255; }
+.jobs > div:nth-child(2) .job { --accent: 224, 71, 158; }
+.jobs > div:nth-child(3) .job { --accent: 34, 199, 240; }
+.jobs > div:nth-child(4) .job { --accent: 212, 169, 79; }
+
+/* ---------- Étapes ---------- */
+.steps4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; counter-reset: s; position: relative; }
+.steps4::before { content: ""; position: absolute; left: 6%; right: 6%; top: 36px; height: 2px; background: linear-gradient(90deg, var(--blue), var(--cyan), var(--violet), var(--gold)); opacity: 0.35; }
+.steps4 li { position: relative; display: grid; gap: 12px; justify-items: center; text-align: center; padding: 0 8px; }
+.steps4 .dot { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; background: #10122b; border: 1px solid rgba(var(--accent), 0.6); color: #fff; box-shadow: 0 0 0 6px var(--bg), 0 16px 40px -14px rgba(var(--accent), 0.9); transition: transform 0.6s var(--ease-out), background-color 0.4s; }
+.steps4 .dot .icon { width: 26px; height: 26px; }
+.steps4 li:hover .dot { transform: translateY(-6px) scale(1.06); background: rgba(var(--accent), 0.3); }
+.steps4 li:nth-child(1) { --accent: 79, 107, 255; }
+.steps4 li:nth-child(2) { --accent: 34, 199, 240; }
+.steps4 li:nth-child(3) { --accent: 139, 92, 246; }
+.steps4 li:nth-child(4) { --accent: 212, 169, 79; }
+.steps4 b { font-family: var(--font-display); color: var(--text); font-size: 1.05rem; }
+.steps4 small { font-size: 14px; max-width: 230px; }
+
+/* ---------- Formulaire de candidature ---------- */
+.apply { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: clamp(32px, 5vw, 72px); align-items: start; }
+.apply__aside { position: sticky; top: calc(var(--nav-h) + 30px); display: grid; gap: 22px; }
+.apply__aside ul { display: grid; gap: 12px; }
+.apply__aside li { display: flex; gap: 12px; align-items: flex-start; }
+.apply__aside li .icon { width: 18px; height: 18px; margin-top: 3px; color: var(--gold); stroke-width: 2.2; }
+.apply__photo { position: relative; margin: 6px 0 0; border-radius: 20px; overflow: hidden; aspect-ratio: 4 / 3; border: 1px solid rgba(255, 255, 255, 0.08); }
+.apply__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 30% 30%; transition: transform 1.2s var(--ease-out); }
+.apply__photo:hover img { transform: scale(1.06); }
+.apply__photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgba(7, 8, 22, 0.7)); }
+@media (max-width: 1020px) { .apply__photo { display: none; } }
+.apply-card { position: relative; border-radius: 22px; padding: clamp(24px, 4vw, 40px); background: linear-gradient(180deg, #161936, #10122b); border: 1px solid rgba(212, 169, 79, 0.28); box-shadow: 0 50px 120px -50px rgba(0, 0, 0, 0.9); }
+.apply-card form { display: grid; gap: 20px; }
+select.input { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 44px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23f0d898' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; }
+select.input option { background: #10122b; color: var(--text); }
+.pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.pick label { position: relative; cursor: pointer; }
+.pick input { position: absolute; opacity: 0; pointer-events: none; }
+.pick span { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 99px; border: 1px solid var(--line-strong); font-size: 14px; color: var(--muted); transition: border-color 0.25s, background-color 0.25s, color 0.25s; }
+.pick span::before { content: ""; width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid currentColor; transition: background-color 0.25s; }
+.pick label:hover span { border-color: rgba(212, 169, 79, 0.6); color: var(--text); }
+.pick input:checked + span { border-color: var(--gold); background: var(--gold-soft); color: var(--gold-light); }
+.pick input:checked + span::before { background: var(--gold); border-color: var(--gold); }
+.pick input:focus-visible + span { outline: 2px solid var(--gold-light); outline-offset: 3px; }
+.field .label { color: var(--text); font-weight: 500; font-size: 14.5px; }
+.apply-card .btn[type="submit"] { justify-self: start; }
+
+/* Succès */
+.apply-done { display: none; text-align: center; justify-items: center; gap: 18px; padding: 20px 0; }
+.apply-card.is-done form { display: none; }
+.apply-card.is-done .apply-done { display: grid; animation: board-in 0.7s var(--ease-out) both; }
+.apply-done .ok { width: 96px; height: 96px; }
+.apply-done .ok circle { fill: none; stroke: url(#bda-gold); stroke-width: 3; stroke-dasharray: 300; stroke-dashoffset: 300; animation: draw-ok 1s 0.2s var(--ease-out) forwards; }
+.apply-done .ok path { fill: none; stroke: url(#bda-gold); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 60; stroke-dashoffset: 60; animation: draw-ok 0.6s 0.8s var(--ease-out) forwards; }
+@keyframes draw-ok { to { stroke-dashoffset: 0; } }
+.apply-done .h3 em { font-family: var(--font-serif); }
+.apply-done__actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 6px; }
+
+@media (max-width: 1020px) {
+  .jobs-hero__grid, .apply { grid-template-columns: 1fr; }
+  .jobs-hero__copy { justify-items: center; text-align: center; }
+  .jobs-hero__copy .kicker::after { content: ""; width: 34px; height: 1px; background: var(--gold-grad); }
+  .jobs-hero .hero__ctas, .jobs-hero .hero__trust { justify-content: center; }
+  .board { max-width: 520px; width: 100%; margin-inline: auto; transform: none; }
+  .apply__aside { position: static; }
+}
+@media (max-width: 900px) { .steps4 { grid-template-columns: 1fr 1fr; row-gap: 40px; } .steps4::before { display: none; } }
+@media (max-width: 760px) { .jobs { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .steps4 { grid-template-columns: 1fr; } .job { padding: 26px; } .board__item .pill { display: none; } }

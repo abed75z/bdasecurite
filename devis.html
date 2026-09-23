@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demander un devis — BDA Sécurité &amp; VTC Premium</title>
+  <meta name="description" content="Demandez votre devis gratuit et sans engagement : sécurité privée, protection rapprochée, chauffeur VTC premium ou formule sur-mesure. Réponse rapide.">
+  <meta name="theme-color" content="#0a0a0c">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/devis.css">
+</head>
+<body>
+
+<svg class="svg-sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="bda-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc9c"/><stop offset=".45" stop-color="#c9a14a"/><stop offset="1" stop-color="#9c7424"/></linearGradient>
+  </defs>
+  <symbol id="bda-mark" viewBox="0 0 200 240">
+    <path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" fill="none" stroke="url(#bda-gold)" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M100 30 164 54s2 70-11 97c-14 30-42 47-53 55-11-8-39-25-53-55-13-27-11-97-11-97Z" fill="none" stroke="url(#bda-gold)" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M62 128 100 84l38 44" fill="none" stroke="#f3f0ea" stroke-width="12"/>
+    <path d="M93 104h14l-2 52-5 24-5-24Z" fill="#f3f0ea"/>
+  </symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+  <symbol id="i-plane" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-building" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/></symbol>
+  <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 17v2M13 11v2"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-diamond" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+</svg>
+
+<div class="ambient" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav">
+  <div class="nav__inner">
+    <a class="brand" href="index.html" aria-label="BDA Sécurité &amp; VTC Premium — retour à l'accueil">
+      <svg class="brand__mark" viewBox="0 0 200 240" aria-hidden="true"><use href="#bda-mark"/></svg>
+      <span class="brand__text"><span class="brand__name">BDA</span><span class="brand__tag">Sécurité &amp; VTC Premium</span></span>
+    </a>
+    <div class="nav__actions" style="margin-left:auto">
+      <!-- À PERSONNALISER : votre numéro -->
+      <a class="btn btn--outline" href="tel:+33784739070" aria-label="Appeler"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span>Appeler</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="quote">
+  <div class="container quote__grid">
+    <aside class="quote__aside">
+      <p class="kicker">Gratuit · Sans engagement</p>
+      <h1 class="h1">Demandez votre <em>devis sur-mesure.</em></h1>
+      <p class="lead">Répondez à quelques questions : nous revenons vers vous rapidement avec une proposition claire et adaptée.</p>
+      <ul class="quote__points">
+        <li><span class="q-icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span><div><b>2 minutes suffisent</b><span>4 étapes simples, sans création de compte.</span></div></li>
+        <li><span class="q-icon"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg></span><div><b>Confidentialité garantie</b><span>Vos informations servent uniquement à traiter votre demande.</span></div></li>
+        <li><span class="q-icon"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg></span><div><b>Un interlocuteur unique</b><span>Sécurité et transport organisés par la même équipe.</span></div></li>
+      </ul>
+      <!-- À PERSONNALISER : votre numéro -->
+      <div class="quote__urgent"><span class="q-icon"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg></span><div><b>Une demande urgente ?</b><a href="tel:+33784739070">+33 7 84 73 90 70</a></div></div>
+    </aside>
+
+    <div class="form-card">
+      <form id="devis-form" novalidate>
+        <div class="form-card__head">
+          <div class="stepper" aria-label="Progression">
+            <button type="button"><i>1</i><b>Prestation</b></button>
+            <button type="button"><i>2</i><b>Date</b></button>
+            <button type="button"><i>3</i><b>Coordonnées</b></button>
+            <button type="button"><i>4</i><b>Détails</b></button>
+          </div>
+          <div class="form-card__progress" aria-hidden="true"><span></span></div>
+        </div>
+
+        <div class="form-card__body">
+          <!-- Étape 1 : prestation -->
+          <fieldset class="step-panel is-active">
+            <legend>Quel type de prestation recherchez-vous&nbsp;?</legend>
+            <div class="opts-wrap">
+              <div class="opt-group">
+                <h3>Sécurité privée</h3>
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="prestation" value="Gardiennage &amp; surveillance de site" data-id="gardiennage" data-group="securite"><span class="opt__card"><span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg></span><span><b>Gardiennage &amp; surveillance</b><small>Sites, locaux, chantiers</small></span><span class="opt__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></span></label>
+                  <label class="opt"><input type="radio" name="prestation" value="Protection rapprochée" data-id="protection" data-group="securite"><span class="opt__card"><span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span><span><b>Protection rapprochée</b><small>Garde du corps, escorte VIP</small></span><span class="opt__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></span></label>
+                  <label class="opt"><input type="radio" name="prestation" value="Sécurité événementielle" data-id="evenementiel" data-group="securite"><span class="opt__card"><span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-ticket"/></svg></span><span><b>Sécurité événementielle</b><small>Soirées, salons, concerts</small></span><span class="opt__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></span></label>
+                </div>
+              </div>
+              <div class="opt-group">
+                <h3>VTC Premium</h3>
+                <div class="opts">
+                  <label class="opt"><input type="radio" name="prestation" value="Transfert aéroport / gare" data-id="transfert" data-group="vtc"><span class="opt__card"><span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-plane"/></svg></span><span><b>Transfert aéroport / gare</b><small>Accueil personnalisé</small></span><span class="opt__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></span></label>
+                  <label class="opt"><input type="radio" name="prestation" value="Chauffeur à disposition" data-id="disposition" data-group="vtc"><span class="opt__card"><span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span><span><b>Chauffeur à disposition</b><small>À l'heure ou à la journée</small></span><span class="opt__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></span></label>
+                  <label class="opt"><input type="radio" name="prestation" value="Mariage &amp; événement (VTC)" data-id="evenement" data-group="vtc"><span class="opt__card"><span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg></span><span><b>Mariage &amp; événement</b><small>Véhicule de prestige</small></span><span class="opt__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></span></label>
+                </div>
+              </div>
+              <div class="opt-group">
+                <h3>Sur-mesure</h3>
+                <div class="opts opts--2">
+                  <label class="opt"><input type="radio" name="prestation" value="Chauffeur + agent de sécurité" data-id="duo" data-group="surmesure"><span class="opt__card"><span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-diamond"/></svg></span><span><b>Chauffeur + agent de sécurité</b><small>Le duo pour vos soirées et VIP</small></span><span class="opt__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></span></label>
+                  <label class="opt"><input type="radio" name="prestation" value="Autre demande" data-id="autre" data-group="surmesure"><span class="opt__card"><span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg></span><span><b>Autre demande</b><small>Décrivez-nous votre besoin</small></span><span class="opt__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></span></label>
+                </div>
+              </div>
+            </div>
+            <p class="step-error" role="alert"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span></span></p>
+          </fieldset>
+
+          <!-- Étape 2 : date -->
+          <fieldset class="step-panel">
+            <legend>Pour quand&nbsp;?</legend>
+            <p class="hint">Indiquez la date souhaitée : nous confirmerons ensemble les horaires précis.</p>
+            <div class="fields">
+              <div class="field">
+                <label for="f-date">Date souhaitée</label>
+                <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-calendar"/></svg><input class="input" type="date" id="f-date" name="date" required></div>
+                <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Indiquez une date à partir d'aujourd'hui.</span></p>
+              </div>
+              <div class="field">
+                <label for="f-heure">Heure <em>facultatif</em></label>
+                <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><input class="input" type="time" id="f-heure" name="heure"></div>
+              </div>
+              <label class="check field--full"><input type="checkbox" id="f-flex" name="dates_flexibles" value="Oui"><span class="check__box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span>Mes dates sont flexibles</span></label>
+            </div>
+          </fieldset>
+
+          <!-- Étape 3 : coordonnées -->
+          <fieldset class="step-panel">
+            <legend>Vos coordonnées</legend>
+            <p class="hint">Pour vous envoyer votre devis et vous rappeler si besoin.</p>
+            <div class="fields">
+              <div class="field field--full">
+                <label for="f-nom">Nom ou société</label>
+                <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><input class="input" type="text" id="f-nom" name="nom" autocomplete="name" placeholder="Ex. : Marie Martin ou Société Durand" required></div>
+                <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Indiquez votre nom ou celui de votre société.</span></p>
+              </div>
+              <div class="field">
+                <label for="f-tel">Téléphone</label>
+                <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><input class="input" type="tel" id="f-tel" name="telephone" autocomplete="tel" inputmode="tel" placeholder="06 12 34 56 78" required></div>
+                <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Numéro invalide (ex. : 06 12 34 56 78).</span></p>
+              </div>
+              <div class="field">
+                <label for="f-email">Email</label>
+                <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><input class="input" type="email" id="f-email" name="email" autocomplete="email" inputmode="email" placeholder="vous@exemple.fr" required></div>
+                <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Adresse email invalide.</span></p>
+              </div>
+            </div>
+          </fieldset>
+
+          <!-- Étape 4 : détails -->
+          <fieldset class="step-panel">
+            <legend>Détails de votre demande</legend>
+            <div class="recap" aria-label="Récapitulatif de votre demande"></div>
+            <div class="field">
+              <label for="f-details">Votre besoin</label>
+              <textarea class="input" id="f-details" name="details" rows="5" required></textarea>
+              <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Décrivez votre besoin en quelques mots (10 caractères minimum).</span></p>
+            </div>
+            <label class="check"><input type="checkbox" id="f-consent" name="consentement" value="Oui" required><span class="check__box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span>J'accepte que mes informations soient utilisées pour traiter ma demande de devis et être recontacté(e). Elles ne seront jamais revendues. <a href="mentions-legales.html#donnees" target="_blank" rel="noopener" style="color:var(--gold-light);text-decoration:underline">En savoir plus</a></span></label>
+            <div class="hp" aria-hidden="true"><label for="f-site">Ne pas remplir</label><input type="text" id="f-site" name="site_web" tabindex="-1" autocomplete="off"></div>
+            <p class="step-error" role="alert"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span></span></p>
+          </fieldset>
+        </div>
+
+        <div class="form-card__foot">
+          <span class="form-card__count">Étape 1 sur 4</span>
+          <button type="button" class="btn btn--outline" data-prev hidden><span class="btn__label"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg> Retour</span></button>
+          <button type="button" class="btn btn--gold" data-next><span class="btn__label">Continuer <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></span></button>
+          <button type="submit" class="btn btn--gold" data-submit hidden><span class="btn__label">Envoyer ma demande <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></span></button>
+        </div>
+        <p class="form-card__note"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg> Vos données restent confidentielles et servent uniquement à traiter votre demande.</p>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script src="assets/js/core.js"></script>
+<script src="assets/js/devis.js"></script>
+</body>
+</html>

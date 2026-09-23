@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 64" width="300" height="64" role="img" aria-label="BDA Sécurité &amp; VTC Premium">
+  <!-- Logo BDA adapté aux fonds sombres (version horizontale). Pour utiliser votre fichier d'origine, remplacez ce fichier. -->
+  <defs>
+    <linearGradient id="bda-gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f3dc9c"/>
+      <stop offset=".45" stop-color="#c9a14a"/>
+      <stop offset="1" stop-color="#9c7424"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(4 2) scale(.25)">
+    <path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" fill="none" stroke="url(#bda-gold)" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M100 26 166 51s2 72-11 100c-15 31-44 49-55 57-11-8-40-26-55-57-13-28-11-100-11-100Z" fill="none" stroke="url(#bda-gold)" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M66 122 100 82l34 40" fill="none" stroke="#f3f0ea" stroke-width="10" stroke-linejoin="miter"/>
+    <path d="M94 100h12l-2 52-4 22-4-22Z" fill="#f3f0ea"/>
+  </g>
+  <text x="66" y="31" font-family="Montserrat, 'Segoe UI', Arial, sans-serif" font-weight="700" font-size="24" letter-spacing="3" fill="#f3f0ea">BDA</text>
+  <text x="67" y="49" font-family="Montserrat, 'Segoe UI', Arial, sans-serif" font-weight="600" font-size="9" letter-spacing="2.6" fill="url(#bda-gold)">SÉCURITÉ &amp; VTC PREMIUM</text>
+</svg>

@@ -31,7 +31,16 @@ Reste à compléter :
 
 Le logo est le blason BDA redessiné en or sur fond noir. Il est intégré aux pages (symbole `bda-mark`) et existe aussi en fichier : `assets/img/logo.svg`.
 
-**Après chaque modification**, remettez le dossier en ligne : sur Netlify, ouvrez votre projet, onglet « Deploys », puis glissez-déposez le dossier.
+## Mise en ligne (OVH + GitHub)
+
+Le site est hébergé chez OVH (hébergement `bdasecj.cluster129`, dossier `www`) et publié sur **bdasecurite.com** et **www.bdasecurite.com**.
+
+Le dossier est relié au dépôt GitHub **abed75z/bdasecurite** (branche `main`) :
+
+- chaque modification envoyée sur GitHub est déployée automatiquement par OVH, grâce au webhook ;
+- en secours, dans l'espace OVH : Mes sites, puis ⋮ et « Déployer Git ».
+
+Le certificat https (Let's Encrypt) est géré par OVH, dans l'onglet « Certificats SSL ».
 
 ## Réception des demandes de devis par email
 

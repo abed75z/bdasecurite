@@ -8,6 +8,7 @@ import {
   euro, nombre, arrondi, fmtHeures, lireHeures, lireNombre, fr, frVersDate, isoVersFr, cap, MOIS, pad, iso,
 } from './outils.js';
 import { totauxDuMois } from './planning.js';
+import { telechargerPdf } from './pdf.js';
 
 const CONFIG = {
   devis: { route: 'devis', titre: 'Devis', nouveau: 'Nouveau devis', un: 'le devis', statuts: ['brouillon', 'envoye', 'accepte', 'refuse'] },
@@ -155,9 +156,12 @@ export async function editeurDocument(ctx, type, param) {
     selClient.value = '';
   } }, h('option', { value: '' }, clients.length ? 'Choisir dans mes clients…' : 'Aucun client enregistré'), clients.map((c) => h('option', { value: c.id }, c.nom)));
 
-  const imprimer = () => { plusTard.annuler(); enregistrer().then(() => imprimerFeuille(`${type === 'facture' ? 'Facture' : 'Devis'} ${data.numero} - ${data.client.nom || 'client'}`)); };
+  const nomFichier = () => `${type === 'facture' ? 'Facture' : 'Devis'} ${data.numero} - ${data.client.nom || 'client'}`;
+  const imprimer = () => { plusTard.annuler(); enregistrer().then(() => imprimerFeuille(nomFichier())); };
+  const pdf = async () => { plusTard.annuler(); await enregistrer(); await telechargerPdf(feuille.el, nomFichier()); };
   const actions = [
-    h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: imprimer }, icone('imprimer'), 'Imprimer / PDF'),
+    h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: pdf }, icone('telecharger'), 'Télécharger en PDF'),
+    h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: imprimer }, icone('imprimer'), 'Imprimer'),
     type === 'devis' ? h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => versFacture() }, icone('facture'), 'Transformer en facture') : null,
     type === 'facture' ? h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => importerPlanning() }, icone('planning'), 'Importer les heures du planning') : null,
     h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => dupliquer() }, icone('copier'), 'Dupliquer'),
@@ -173,7 +177,7 @@ export async function editeurDocument(ctx, type, param) {
 
   ctx.titre(`${type === 'devis' ? 'Devis' : 'Facture'} ${data.numero}`);
   ctx.actions(h('a', { class: 'btn btn--ghost', href: `#/${C.route}` }, icone('retour'), h('span', null, C.titre)), indicateur,
-    h('button', { class: 'btn btn--gold', type: 'button', onclick: imprimer }, icone('imprimer'), h('span', null, 'PDF')));
+    h('button', { class: 'btn btn--gold', type: 'button', onclick: pdf }, icone('telecharger'), h('span', null, 'Télécharger PDF')));
   const zone = h('div', { class: 'feuille-zone' }, feuille.el);
   ctx.afficher(h('div', { class: 'editeur' }, zone, panneau));
   ajusterZoom(zone, feuille.el);

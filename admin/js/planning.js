@@ -4,6 +4,7 @@
    Calcul automatique : heures totales, de nuit, du dimanche, fériées.
    ========================================================= */
 import { api, h, $, $$, icone, toast, erreur, modale, champ, attendre, MOIS, cap, pad, iso, fr, fmtHeures, lireHeures } from './outils.js';
+import { telechargerPdf } from './pdf.js';
 
 const JOURS = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 
@@ -123,6 +124,7 @@ export async function pagePlanning(ctx) {
 
   ctx.titre('Planning');
   ctx.actions(indicateur,
+    h('button', { class: 'btn btn--ghost', type: 'button', onclick: async () => { await enregistrer.maintenant(); telechargerPdf(feuille, `Planning ${libelle} - ${p.client || 'BDA'}`, { paysage: true }); } }, icone('telecharger'), h('span', null, 'Télécharger en PDF')),
     h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => imprimer() }, icone('imprimer'), h('span', null, 'Imprimer')),
     h('button', { class: 'btn btn--gold', type: 'button', onclick: () => creerFacture() }, icone('facture'), h('span', null, 'Créer la facture du mois')));
 

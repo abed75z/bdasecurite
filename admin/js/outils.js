@@ -214,6 +214,7 @@ export function toast(message, type = 'ok') {
   zone.append(t);
   requestAnimationFrame(() => t.classList.add('is-in'));
   setTimeout(() => { t.classList.remove('is-in'); setTimeout(() => t.remove(), 400); }, type === 'erreur' ? 5000 : 2600);
+  return t;
 }
 export const erreur = (e) => toast(e?.message || String(e), 'erreur');
 

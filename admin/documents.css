@@ -151,3 +151,15 @@
   .plan td { height: 9mm; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* ---------- Téléchargement PDF : même rendu qu'à l'impression ---------- */
+.capture-pdf { margin: 0; background: #fff; }
+.capture-pdf .feuille { box-shadow: none; border-radius: 0; margin: 0; zoom: 1 !important; }
+.capture-pdf .feuille [contenteditable], .capture-pdf .f-in { box-shadow: none !important; background: transparent !important; }
+.capture-pdf .feuille [contenteditable]:empty::before { content: ""; }
+.capture-pdf .f-outils, .capture-pdf .f-ajout, .capture-pdf .f-outil-agent, .capture-pdf .f-pct { display: none !important; }
+.capture-pdf .f-print { display: inline; }
+.capture-pdf .plan .cell input { display: none; }
+.capture-pdf .plan .cell .pv { font-size: 6.4pt; }
+.capture-pdf .plan { font-size: 7pt; }
+.capture-pdf .plan td { height: 9mm; }

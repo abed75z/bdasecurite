@@ -86,7 +86,7 @@ Pour modifier le numéro de téléphone un jour : il apparaît dans toutes les p
 Un espace privé, protégé par identifiant et mot de passe, pour gérer l'entreprise et le site :
 
 - **Accueil** : créer en un clic (devis, facture, planning, carte agent, flyer) et la liste de ce qui attend une action (demandes, avis, candidatures, factures à relancer, cartes pro à renouveler). Aucun graphique ni chiffre d'affaires.
-- **Devis / Factures** : feuilles A4 à nos couleurs, modifiables directement, enregistrées automatiquement, impression ou PDF en un clic. Un devis accepté se transforme en facture ; une facture peut reprendre les heures du planning.
+- **Devis / Factures** : feuilles A4 à nos couleurs, modifiables directement, enregistrées automatiquement, bouton « Télécharger en PDF » (fichier direct) ou impression. Un devis accepté se transforme en facture ; une facture peut reprendre les heures du planning.
 - **Planning** : planning mensuel des agents (heures, nuit, dimanche, fériés), impression paysage, création de la facture du mois.
 - **Demandes / Candidatures** : chaque formulaire du site y arrive, en plus de l'email FormSubmit. Une demande devient un devis en un clic.
 - **Avis clients** : les nouveaux avis attendent votre validation avant d'être publiés sur le site.

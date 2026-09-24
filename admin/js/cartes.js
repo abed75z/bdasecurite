@@ -3,14 +3,14 @@
    Carte au format carte bancaire (85,6 × 54 mm), recto et verso,
    photo recadrable, impression sur A4 (à découper) ou en format carte.
    ========================================================= */
-import { api, h, icone, ecusson, toast, erreur, confirmer, champ, saisie, zoneTexte, isoVersFr, iso } from './outils.js';
+import { api, h, icone, ecusson, toast, erreur, confirmer, champ, saisie, zoneTexte } from './outils.js';
 import { enregistreurAuto, ajusterEchelle, imprimerPages } from './creations.js';
 
 const FONCTIONS = ['Agent de sécurité privée', 'Agent de sécurité (ADS)', "Chef d'équipe sécurité", 'Agent de protection rapprochée', 'Agent événementiel', 'Agent SSIAP', 'Chauffeur VTC'];
 const estVtc = (f) => /vtc|chauffeur/i.test(f || '');
 
 export const CARTE_DEFAUT = {
-  prenom: '', nom: '', fonction: FONCTIONS[0], numero: '', validite: '',
+  prenom: '', nom: '', fonction: FONCTIONS[0], numero: '', site: 'bdasecurite.com',
   photo: '', zoom: 1, px: 50, py: 35,
   type: 'AGENT', labelNumero: 'N° carte pro CNAPS', zone: 'Paris & Île-de-France', dispo: '24/7',
   verso: true,
@@ -39,7 +39,7 @@ export function recto(d) {
         ligne('Nom', (d.nom || '').toUpperCase()), ligne('Prénom', d.prenom), ligne('Fonction', d.fonction), ligne(d.labelNumero || 'N° carte pro', d.numero))),
     h('div', { class: 'cp__pied' },
       h('span', null, d.zone, d.zone && d.dispo ? ' · ' : '', h('b', null, d.dispo)),
-      h('span', null, 'Valable jusqu\'au : ', h('b', null, d.validite ? isoVersFr(d.validite) : '__ / __ / ____'))));
+      h('b', null, d.site)));
 }
 export function verso(d) {
   return h('div', { class: 'cp cp--verso' },
@@ -104,11 +104,10 @@ async function listeCartes(ctx) {
       h('div', null, h('h2', null, 'Créez la carte de vos agents'), h('p', null, 'Saisissez le nom, la fonction et le numéro de carte pro, ajoutez une photo : la carte est prête à imprimer ou à enregistrer en PDF.'),
         h('a', { class: 'btn btn--gold', href: '#/cartes/nouvelle' }, icone('plus'), 'Créer une carte'))));
   }
-  const auj = iso(new Date());
   ctx.afficher(h('div', { class: 'galerie' }, cartes.map((c) => h('a', { class: 'galerie__item', href: `#/cartes/${c.id}` },
     h('div', { class: 'galerie__visuel galerie__visuel--carte' }, recto(c.data)),
     h('div', { class: 'galerie__txt' }, h('b', null, nomComplet(c.data) || 'Sans nom'),
-      h('small', null, c.data.fonction, c.data.validite && c.data.validite < auj ? h('span', { class: 'txt-alerte' }, ' · expirée') : null))))));
+      h('small', null, c.data.fonction))))));
 }
 
 async function editeurCarte(ctx, id, agentId) {
@@ -136,7 +135,6 @@ async function editeurCarte(ctx, id, agentId) {
   const prenom = lier(saisie({ placeholder: 'ex. Karim' }), 'prenom');
   const nom = lier(saisie({ placeholder: 'ex. Benali' }), 'nom');
   const numero = lier(saisie({ placeholder: 'ex. CAR-075-2030-01-01-…' }), 'numero');
-  const validite = lier(saisie({ type: 'date' }), 'validite');
   const autre = saisie({ placeholder: 'Précisez la fonction' });
   const fonction = h('select', { class: 'input' }, FONCTIONS.map((f) => h('option', { value: f }, f)), h('option', { value: '__autre' }, 'Autre…'));
   const majFonction = () => {
@@ -165,9 +163,8 @@ async function editeurCarte(ctx, id, agentId) {
     d.type = estVtc(d.fonction) ? 'CHAUFFEUR' : 'AGENT';
     d.labelNumero = estVtc(d.fonction) ? 'N° carte pro VTC' : 'N° carte pro CNAPS';
     d.numero = a.carte || '';
-    d.validite = a.validite || '';
     d.agentId = a.id;
-    [[prenom, 'prenom'], [nom, 'nom'], [numero, 'numero'], [validite, 'validite']].forEach(([el, k]) => { el.value = d[k]; });
+    [[prenom, 'prenom'], [nom, 'nom'], [numero, 'numero']].forEach(([el, k]) => { el.value = d[k]; });
     options.type.value = d.type; options.labelNumero.value = d.labelNumero;
     majFonction();
     change();
@@ -202,6 +199,7 @@ async function editeurCarte(ctx, id, agentId) {
     type: lier(saisie(), 'type', (v) => v.toUpperCase()),
     labelNumero: lier(saisie(), 'labelNumero'),
     zone: lier(saisie(), 'zone'),
+    site: lier(saisie(), 'site'),
     dispo: lier(saisie(), 'dispo'),
     texteVerso: lier(zoneTexte({ rows: 3 }), 'texteVerso'),
     autorisation: lier(saisie(), 'autorisation'),
@@ -216,15 +214,14 @@ async function editeurCarte(ctx, id, agentId) {
       choixAgent,
       h('div', { class: 'form-grille form-grille--2' }, champ('Prénom', prenom), champ('Nom', nom)),
       champ('Fonction', fonction), autre,
-      champ('N° de carte professionnelle', numero),
-      champ('Valable jusqu\'au', validite)),
+      champ('N° de carte professionnelle', numero)),
     h('div', { class: 'panneau__bloc' }, h('h3', null, 'Photo'), fichier, btnPhoto, reglagesPhoto, retirer),
     h('div', { class: 'panneau__bloc' }, h('h3', null, 'Imprimer'),
       h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerCartes([d], 'a4', titreImpression()); } }, icone('imprimer'), 'Imprimer / PDF (feuille A4)'),
       h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerCartes([d], 'carte', titreImpression()); } }, icone('badge'), 'Format carte (imprimante à badges)'),
       h('p', { class: 'panneau__astuce' }, 'Sur A4 : recto et verso côte à côte, à découper puis plier au milieu (ou à plastifier).')),
     h('details', { class: 'panneau__bloc panneau__plus' }, h('summary', null, 'Plus d\'options'),
-      champ('Titre de la carte', options.type), champ('Libellé du numéro', options.labelNumero),
+      champ('Titre de la carte', options.type), champ('Libellé du numéro', options.labelNumero), champ('Site (en bas à droite)', options.site),
       h('div', { class: 'form-grille form-grille--2' }, champ('Zone', options.zone), champ('Disponibilité', options.dispo)),
       h('label', { class: 'case' }, caseVerso, h('span', null, 'Imprimer aussi le verso')),
       champ('Texte du verso', options.texteVerso), champ('Autorisation CNAPS', options.autorisation), champ('Contact (verso)', options.contact)),

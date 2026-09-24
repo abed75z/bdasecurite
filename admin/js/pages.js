@@ -1,22 +1,26 @@
 /* =========================================================
-   ESPACE ADMIN BDA — pages : tableau de bord, demandes,
-   candidatures, avis, clients, agents, paramètres
+   ESPACE ADMIN BDA — pages : accueil, demandes, candidatures,
+   avis, clients, agents, paramètres
    ========================================================= */
 import {
   api, h, $, $$, icone, toast, erreur, modale, confirmer, champ, saisie, zoneTexte, statutPastille,
-  euro, euroRond, nombre, dateLisible, ilYa, isoVersFr, MOIS, cap, pad, iso,
+  nombre, dateLisible, ilYa, isoVersFr, MOIS, cap, pad, iso,
 } from './outils.js';
 import { listeDocuments, editeurDocument } from './documents.js';
 import { pagePlanning } from './planning.js';
+import { pageCartes } from './cartes.js';
+import { pageFlyers } from './flyers.js';
 
 export const PAGES = {
-  '': tableauDeBord,
+  '': pageAccueil,
   demandes: pageDemandes,
   devis: (ctx) => (ctx.params[0] ? editeurDocument(ctx, 'devis', ctx.params[0]) : listeDocuments(ctx, 'devis')),
   factures: (ctx) => (ctx.params[0] ? editeurDocument(ctx, 'facture', ctx.params[0]) : listeDocuments(ctx, 'facture')),
   planning: pagePlanning,
   clients: pageClients,
   agents: pageAgents,
+  cartes: pageCartes,
+  flyers: pageFlyers,
   avis: pageAvis,
   candidatures: pageCandidatures,
   parametres: pageParametres,
@@ -39,155 +43,60 @@ function filtres(options, actif, surChoix) {
 }
 
 /* =========================================================
-   TABLEAU DE BORD
+   ACCUEIL : créer en un clic, ce qui attend une action, derniers éléments
    ========================================================= */
-async function tableauDeBord(ctx) {
-  ctx.titre('Tableau de bord');
+async function pageAccueil(ctx) {
+  ctx.titre('Accueil');
   const auj = new Date();
   const moisCourant = `${auj.getFullYear()}-${pad(auj.getMonth() + 1)}`;
-  ctx.actions(
-    h('a', { class: 'btn btn--ghost', href: '#/devis/nouveau' }, icone('plus'), h('span', null, 'Devis')),
-    h('a', { class: 'btn btn--gold', href: '#/factures/nouveau' }, icone('plus'), h('span', null, 'Facture')));
-  const [{ tableau: t }, { reglages }] = await Promise.all([api('tableau'), api('reglages')]);
+  const { accueil: a } = await api('accueil');
+  const c = a.compteurs;
 
   const salut = auj.getHours() < 18 ? 'Bonjour' : 'Bonsoir';
-  const entete = h('div', { class: 'accueil' },
-    h('div', null, h('p', { class: 'accueil__date' }, cap(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(auj))),
-      h('h2', { class: 'accueil__titre' }, `${salut},`, h('em', null, ' bienvenue dans votre espace.'))),
-    h('div', { class: 'raccourcis' },
-      h('a', { href: '#/devis/nouveau' }, icone('devis'), 'Nouveau devis'),
-      h('a', { href: '#/factures/nouveau' }, icone('facture'), 'Nouvelle facture'),
-      h('a', { href: `#/planning/${moisCourant}` }, icone('planning'), 'Planning du mois'),
-      h('a', { href: '/', target: '_blank', rel: 'noopener' }, icone('site'), 'Voir le site')));
+  const entete = h('div', { class: 'bienvenue' },
+    h('div', null, h('p', { class: 'bienvenue__date' }, cap(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(auj))),
+      h('h2', null, `${salut}, `, h('em', null, 'que fait-on aujourd\'hui ?'))));
 
-  const installation = !reglages.iban ? carte(null, h('div', { class: 'installation' },
+  const action = (href, ic, titre, sous) => h('a', { class: 'action', href }, h('span', { class: 'action__ic' }, icone(ic)), icone('plus', 'action__plus'), h('span', null, h('b', null, titre), h('small', null, sous)));
+  const creer = h('div', { class: 'creer' },
+    action('#/devis/nouveau', 'devis', 'Devis', 'Nouveau devis client'),
+    action('#/factures/nouveau', 'facture', 'Facture', 'Nouvelle facture'),
+    action(`#/planning/${moisCourant}`, 'planning', 'Planning', `${cap(MOIS[auj.getMonth()])} ${auj.getFullYear()}`),
+    action('#/cartes/nouvelle', 'badge', 'Carte agent', 'Carte pro à imprimer'),
+    action('#/flyers/nouveau', 'flyer', 'Flyer', 'Flyer A4 ou A5'));
+
+  const installation = a.installation ? h('section', { class: 'carte installation' },
     h('div', null, h('span', { class: 'kicker' }, 'Dernière étape'), h('h3', null, 'Terminez l\'installation de votre espace'),
-      h('p', null, 'Importez le fichier « BDA-import-admin.json » (dossier « BDA Gestion » sur votre Bureau) : vos informations de paiement et la facture du Consulat seront ajoutées automatiquement. Vous pouvez aussi saisir votre IBAN dans Paramètres.')),
-    h('div', { class: 'installation__actions' },
-      boutonImport(() => ctx.aller('#/factures')),
-      h('a', { class: 'btn btn--ghost', href: '#/parametres' }, 'Saisir mon IBAN')))) : null;
+      h('p', null, 'Importez le fichier « BDA-import-admin.json » (dossier « BDA Gestion » sur votre Bureau) : vos informations de paiement et la facture du Consulat seront ajoutées automatiquement.')),
+    h('div', { class: 'installation__actions' }, boutonImport(() => ctx.aller('#/factures')), h('a', { class: 'btn btn--ghost', href: '#/parametres' }, 'Saisir mon IBAN'))) : null;
 
-  const c = t.compteurs;
-  const tuiles = h('div', { class: 'tuiles' },
-    tuile('euro', `Chiffre d'affaires — ${MOIS[auj.getMonth()]}`, euro.format(t.caMois), `${euroRond.format(t.caAnnee)} depuis janvier`, '#/factures'),
-    tuile('horloge', 'À encaisser', euro.format(t.aEncaisser.s), `${t.aEncaisser.n} facture${t.aEncaisser.n > 1 ? 's' : ''} envoyée${t.aEncaisser.n > 1 ? 's' : ''}`, '#/factures'),
-    tuile('alerte', 'En retard de paiement', euro.format(t.enRetard.s), t.enRetard.n ? `${t.enRetard.n} facture${t.enRetard.n > 1 ? 's' : ''} à relancer` : 'Aucun retard', '#/factures', t.enRetard.n ? 'alerte' : 'ok'),
-    tuile('devis', 'Devis en attente', euro.format(t.devisAttente.s), `${t.devisAttente.n} devis envoyé${t.devisAttente.n > 1 ? 's' : ''}`, '#/devis'),
-    tuile('avis', 'Avis clients', t.noteMoyenne.n ? `${nombre.format(Math.round(t.noteMoyenne.m * 10) / 10)} / 5` : '—', `${t.noteMoyenne.n} avis publié${t.noteMoyenne.n > 1 ? 's' : ''}${c.avis ? ` · ${c.avis} à valider` : ''}`, '#/avis', c.avis ? 'info' : ''));
+  const pluriel = (n, un, plusieurs) => `${n} ${n > 1 ? plusieurs : un}`;
+  const taches = [
+    c.demandes && { n: c.demandes, href: '#/demandes', titre: pluriel(c.demandes, 'nouvelle demande de devis', 'nouvelles demandes de devis'), sous: 'Reçues depuis le site' },
+    c.avis && { n: c.avis, href: '#/avis', titre: pluriel(c.avis, 'avis à valider', 'avis à valider'), sous: 'Publiez-les ou refusez-les' },
+    c.candidatures && { n: c.candidatures, href: '#/candidatures', titre: pluriel(c.candidatures, 'nouvelle candidature', 'nouvelles candidatures'), sous: 'Page Recrutement' },
+    c.retards && { n: c.retards, href: '#/factures', titre: pluriel(c.retards, 'facture à relancer', 'factures à relancer'), sous: 'Échéance dépassée', alerte: true },
+    ...a.agentsAlerte.map((ag) => ({ n: '!', href: '#/agents', titre: `Carte pro de ${ag.nom}`, sous: `${ag.validite < a.aujourdhui ? 'Expirée le' : 'Expire le'} ${isoVersFr(ag.validite)}`, alerte: ag.validite < a.aujourdhui })),
+  ].filter(Boolean);
+  const aFaire = taches.length ? h('ul', { class: 'todo' }, taches.map((t) => h('li', null, h('a', { href: t.href },
+    h('span', { class: `todo__n ${t.alerte ? 'todo__n--alerte' : ''}` }, t.n), h('span', { class: 'todo__txt' }, h('b', null, t.titre), h('small', null, t.sous)), icone('suivant')))))
+    : h('div', { class: 'a-jour' }, icone('coche'), h('span', null, 'Tout est à jour. Rien ne vous attend.'));
 
-  // Séries complètes (mois et jours sans valeur = 0)
-  const ca = Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(auj.getFullYear(), auj.getMonth() - 11 + i, 1);
-    const k = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
-    const v = t.ca12.find((x) => x.mois === k);
-    return { court: cap(MOIS[d.getMonth()].slice(0, 3)), label: `${cap(MOIS[d.getMonth()])} ${d.getFullYear()}`, valeur: v ? +v.total : 0 };
-  });
-  const visites = Array.from({ length: 30 }, (_, i) => {
-    const d = new Date(auj.getFullYear(), auj.getMonth(), auj.getDate() - 29 + i);
-    const v = t.visites.find((x) => x.jour === iso(d));
-    return { court: String(d.getDate()), label: dateLisible(iso(d)), valeur: v ? +v.n : 0 };
-  });
-  const totalVisites = visites.reduce((s, v) => s + v.valeur, 0);
+  const TYPES = {
+    devis: { ic: 'devis', lien: 'devis', nom: 'Devis' }, facture: { ic: 'facture', lien: 'factures', nom: 'Facture' },
+    carte: { ic: 'badge', lien: 'cartes', nom: 'Carte agent' }, flyer: { ic: 'flyer', lien: 'flyers', nom: 'Flyer' },
+  };
+  const recents = a.recents.length ? h('ul', { class: 'recents' }, a.recents.map((r) => {
+    const T = TYPES[r.type] || TYPES.devis;
+    return h('li', null, h('a', { href: `#/${T.lien}/${r.id}` }, h('span', { class: 'recents__ic' }, icone(T.ic)),
+      h('span', { class: 'recents__txt' }, h('b', null, [r.titre || 'Sans titre', r.sous].filter(Boolean).join(' — ')), h('small', null, `${T.nom} · modifié ${ilYa(r.maj)}`)),
+      r.statut ? statutPastille(r.statut) : null));
+  })) : vide('Vos devis, factures, cartes et flyers apparaîtront ici.', 'horloge');
 
-  const grCa = h('div', { class: 'graph' });
-  const grVis = h('div', { class: 'graph' });
-  const nomsPages = { '/': 'Accueil' };
-  const maxPage = Math.max(1, ...t.pages.map((p) => +p.n));
-  const pages = t.pages.length ? h('ul', { class: 'top-pages' }, t.pages.map((p) => h('li', null,
-    h('span', null, nomsPages[p.page] || cap(p.page.slice(1).replace(/-/g, ' '))), h('b', null, nombre.format(p.n)),
-    h('i', { style: { '--v': (+p.n / maxPage).toFixed(3) } })))) : vide('Les visites apparaîtront ici dès les premières pages vues.', 'graphique');
-
-  const demandes = t.demandes.length ? h('ul', { class: 'liste' }, t.demandes.map((d) => h('li', null,
-    h('a', { href: `#/demandes/${d.id}` }, h('span', { class: 'liste__titre' }, d.data['Nom / Société'] || 'Demande', ' ', statutPastille(d.statut)),
-      h('small', null, `${d.data.Prestation || ''} · ${ilYa(d.recu)}`))))) : vide('Aucune demande pour le moment.', 'demande');
-
-  const relances = t.aRelancer.length ? h('ul', { class: 'liste' }, t.aRelancer.map((f) => h('li', null,
-    h('a', { href: `#/factures/${f.id}` }, h('span', { class: 'liste__titre' }, `${f.numero} — ${f.client || 'Client'}`, ' ', f.echeance && f.echeance < t.aujourdhui ? statutPastille('retard') : null),
-      h('small', null, `${euro.format(f.total)} · échéance ${isoVersFr(f.echeance) || '—'}`))))) : vide('Toutes vos factures sont réglées.');
-
-  const alertes = t.agentsAlerte.length ? h('ul', { class: 'liste' }, t.agentsAlerte.map((a) => h('li', null,
-    h('a', { href: '#/agents' }, h('span', { class: 'liste__titre' }, a.nom, ' ', (a.validite < t.aujourdhui ? statutPastille('retard', 'Expirée') : statutPastille('nouvelle', 'Expire bientôt'))),
-      h('small', null, `Carte professionnelle : ${a.validite < t.aujourdhui ? 'expirée le' : 'expire le'} ${isoVersFr(a.validite)}`))))) : null;
-
-  ctx.afficher(entete, installation, tuiles,
+  ctx.afficher(entete, installation, creer,
     h('div', { class: 'grille-2' },
-      carte([h('h2', null, 'Chiffre d\'affaires'), h('small', null, '12 derniers mois · factures envoyées et payées')], grCa),
-      carte([h('h2', null, 'Visites du site'), h('small', null, `${nombre.format(totalVisites)} page${totalVisites > 1 ? 's' : ""} vue${totalVisites > 1 ? 's' : ""} en 30 jours`)], grVis)),
-    h('div', { class: 'grille-3' },
-      carte([h('h2', null, 'Dernières demandes'), h('a', { class: 'lien-btn', href: '#/demandes' }, 'Tout voir')], demandes),
-      carte([h('h2', null, 'Factures à suivre'), h('a', { class: 'lien-btn', href: '#/factures' }, 'Tout voir')], relances),
-      carte([h('h2', null, 'Pages les plus vues'), h('small', null, '30 jours')], pages)),
-    alertes ? carte([h('h2', null, 'Cartes professionnelles à renouveler'), h('small', null, 'dans les 3 mois')], alertes) : null);
-
-  graphiqueBarres(grCa, ca, (v) => euroRond.format(v), 'Chiffre d\'affaires par mois', 1, (v) => (v >= 1000 ? `${nombre.format(v / 1000)} k€` : `${nombre.format(v)} €`));
-  graphiqueBarres(grVis, visites, (v) => `${nombre.format(v)} page${v > 1 ? 's' : ''} vue${v > 1 ? 's' : ''}`, 'Pages vues par jour', 5, (v) => nombre.format(v));
-}
-function tuile(ic, label, valeur, sous, lien, ton = '') {
-  return h('a', { class: `tuile tuile--${ton}`, href: lien }, h('span', { class: 'tuile__ic' }, icone(ic)), h('span', { class: 'tuile__label' }, label), h('b', { class: 'tuile__valeur' }, valeur), h('small', null, sous));
-}
-
-/* ---------- Graphique en barres (une série, info-bulle au survol) ---------- */
-function graphiqueBarres(zone, points, format, titre, pasEtiquettes = 1, formatAxe = String) {
-  const NS = 'http://www.w3.org/2000/svg';
-  const bulle = h('div', { class: 'bulle', hidden: true });
-  const svgBox = h('div', { class: 'graph__svg' });
-  const tableAcc = h('table', { class: 'sr-only' }, h('caption', null, titre), h('tbody', null, points.map((p) => h('tr', null, h('th', null, p.label), h('td', null, format(p.valeur))))));
-  zone.replaceChildren(svgBox, bulle, tableAcc);
-  const el = (tag, attrs) => { const e = document.createElementNS(NS, tag); Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v)); return e; };
-
-  function dessiner() {
-    const W = Math.max(280, svgBox.clientWidth), H = 220, G = 52, D = 8, HAUT = 12, BAS = 26;
-    const max = Math.max(...points.map((p) => p.valeur));
-    const pas = echelle(max);
-    const top = Math.max(pas * 4, pas);
-    const y = (v) => HAUT + (H - HAUT - BAS) * (1 - v / top);
-    const larg = (W - G - D) / points.length;
-    const barre = Math.min(28, Math.max(4, larg - 2 * Math.max(2, larg * 0.18)));
-    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'img', 'aria-label': titre });
-    for (let v = 0; v <= top + 1e-9; v += pas) {
-      svg.append(el('line', { x1: G, x2: W - D, y1: y(v), y2: y(v), class: v === 0 ? 'axe' : 'grille' }));
-      const t = el('text', { x: G - 8, y: y(v) + 4, 'text-anchor': 'end', class: 'etiq' });
-      t.textContent = formatAxe(v);
-      svg.append(t);
-    }
-    points.forEach((p, i) => {
-      const cx = G + larg * i + larg / 2;
-      const yy = y(p.valeur), bas = y(0), r = Math.min(4, barre / 2, bas - yy);
-      if (p.valeur > 0) {
-        const x0 = cx - barre / 2, x1 = cx + barre / 2;
-        svg.append(el('path', { class: 'barre', d: `M${x0},${bas} V${yy + r} Q${x0},${yy} ${x0 + r},${yy} H${x1 - r} Q${x1},${yy} ${x1},${yy + r} V${bas} Z`, 'data-i': i }));
-      }
-      if (i % pasEtiquettes === (points.length - 1) % pasEtiquettes) {
-        const t = el('text', { x: cx, y: H - 8, 'text-anchor': 'middle', class: 'etiq' });
-        t.textContent = p.court;
-        svg.append(t);
-      }
-      const cible = el('rect', { x: G + larg * i, y: HAUT, width: larg, height: H - HAUT - BAS, class: 'cible', 'data-i': i });
-      svg.append(cible);
-    });
-    svg.addEventListener('pointermove', (e) => {
-      const i = e.target.getAttribute?.('data-i');
-      if (i === null || i === undefined) return;
-      const p = points[+i];
-      $$('.barre', svg).forEach((b) => b.classList.toggle('is-survol', b.getAttribute('data-i') === i));
-      bulle.replaceChildren(h('small', null, p.label), h('b', null, format(p.valeur)));
-      bulle.hidden = false;
-      const zr = zone.getBoundingClientRect();
-      const x = Math.min(Math.max(e.clientX - zr.left, 60), zr.width - 60);
-      bulle.style.left = `${x}px`;
-      bulle.style.top = `${Math.max(0, y(p.valeur) - 58)}px`;
-    });
-    svg.addEventListener('pointerleave', () => { bulle.hidden = true; $$('.barre', svg).forEach((b) => b.classList.remove('is-survol')); });
-    svgBox.replaceChildren(svg);
-  }
-  dessiner();
-  new ResizeObserver(() => dessiner()).observe(svgBox);
-}
-function echelle(max) {
-  if (max <= 0) return 1;
-  const brut = max / 4;
-  const p = 10 ** Math.floor(Math.log10(brut));
-  return Math.max(1, [1, 2, 2.5, 5, 10].map((m) => m * p).find((s) => s >= brut));
+      carte([h('h2', null, 'À traiter'), h('small', null, taches.length ? pluriel(taches.length, 'élément', 'éléments') : '')], aFaire),
+      carte([h('h2', null, 'Derniers éléments modifiés')], recents)));
 }
 
 /* ---------- Import du fichier de démarrage ---------- */
@@ -340,21 +249,11 @@ async function pageCandidatures(ctx) {
 async function pageAvis(ctx) {
   ctx.titre('Avis clients');
   let { avis } = await api('avis');
-  const importer = h('button', { class: 'btn btn--ghost', type: 'button', onclick: async () => {
-    try { const { importes } = await api('avis.importer', {}); toast(importes ? `${importes} avis repris de Google Sheets.` : 'Aucun nouvel avis dans Google Sheets.'); ({ avis } = await api('avis')); dessiner(); } catch (e) { erreur(e); }
-  } }, icone('telecharger'), h('span', null, 'Reprendre Google Sheets'));
-  ctx.actions(importer, h('a', { class: 'btn btn--ghost', href: '/avis', target: '_blank', rel: 'noopener' }, icone('site'), h('span', null, 'Page Avis')));
+  ctx.actions(h('a', { class: 'btn btn--ghost', href: '/avis', target: '_blank', rel: 'noopener' }, icone('site'), h('span', null, 'Voir la page Avis')));
   let filtre = avis.some((a) => a.statut === 'attente') ? 'attente' : 'tous';
   const liste = h('div', { class: 'cartes-liste' });
   const etoiles = (n) => h('span', { class: 'etoiles', 'aria-label': `${n} sur 5` }, Array.from({ length: 5 }, (_, i) => h('span', { class: i < n ? 'on' : '' }, '★')));
-  const resume = h('div', { class: 'minis' });
   function dessiner() {
-    const pub = avis.filter((a) => a.statut === 'publie');
-    const moy = pub.length ? pub.reduce((s, a) => s + +a.note, 0) / pub.length : 0;
-    resume.replaceChildren(
-      h('div', { class: 'mini' }, h('span', null, 'Note moyenne publiée'), h('b', null, pub.length ? `${nombre.format(Math.round(moy * 10) / 10)} / 5` : '—')),
-      h('div', { class: 'mini' }, h('span', null, 'Avis publiés'), h('b', null, pub.length)),
-      h('div', { class: 'mini' }, h('span', null, 'En attente'), h('b', null, avis.filter((a) => a.statut === 'attente').length)));
     const vis = avis.filter((a) => filtre === 'tous' || a.statut === filtre);
     liste.replaceChildren(...(vis.length ? vis.map((a) => h('article', { class: `fiche fiche--avis ${a.statut === 'attente' ? 'fiche--nouvelle' : ''}` },
       h('div', { class: 'fiche__tete' }, h('b', null, a.nom), statutPastille(a.statut)),
@@ -374,7 +273,7 @@ async function pageAvis(ctx) {
     try { await api('avis.supprimer', { id: a.id }); avis = avis.filter((x) => x !== a); dessiner(); ctx.compteurs(); } catch (e) { erreur(e); }
   }
   const n = (s) => avis.filter((a) => a.statut === s).length;
-  ctx.afficher(resume, carte(null, h('div', { class: 'carte__outils' }, filtres([['attente', 'À valider', n('attente')], ['publie', 'Publiés', n('publie')], ['refuse', 'Refusés', n('refuse')], ['tous', 'Tous', avis.length]], filtre, (f) => { filtre = f; dessiner(); })), liste),
+  ctx.afficher(carte(null, h('div', { class: 'carte__outils' }, filtres([['attente', 'À valider', n('attente')], ['publie', 'Publiés', n('publie')], ['refuse', 'Refusés', n('refuse')], ['tous', 'Tous', avis.length]], filtre, (f) => { filtre = f; dessiner(); })), liste),
     h('p', { class: 'astuce' }, 'Seuls les avis publiés apparaissent sur le site. Ne publiez jamais un faux avis : c\'est interdit et sanctionné.'));
   dessiner();
 }
@@ -438,7 +337,8 @@ async function pageAgents(ctx) {
   const corps = h('tbody');
   const dessiner = () => corps.replaceChildren(...(agents.length ? agents.map((a) => h('tr', { class: `ligne-clic ${+a.actif ? '' : 'inactif'}`, tabindex: 0, onclick: () => editer(a), onkeydown: (e) => { if (e.key === 'Enter') editer(a); } },
     h('td', null, h('b', null, a.nom), +a.actif ? null : h('span', { class: 'muet' }, ' (inactif)')), h('td', null, a.poste), h('td', null, a.tel),
-    h('td', { class: 'mono' }, a.carte || '—'), h('td', null, a.validite ? isoVersFr(a.validite) : '—', ' ', etatCarte(a.validite)))) : [h('tr', null, h('td', { colspan: 5, class: 'vide-ligne' }, 'Aucun agent. Ajoutez vos agents pour les retrouver dans le planning et suivre la validité de leur carte professionnelle.'))]));
+    h('td', { class: 'mono' }, a.carte || '—'), h('td', null, a.validite ? isoVersFr(a.validite) : '—', ' ', etatCarte(a.validite)),
+    h('td', { class: 'td-actions' }, h('a', { class: 'btn btn--ghost btn--petit', href: `#/cartes/agent/${a.id}`, onclick: (e) => e.stopPropagation() }, icone('badge'), 'Carte')))) : [h('tr', null, h('td', { colspan: 6, class: 'vide-ligne' }, 'Aucun agent. Ajoutez vos agents pour les retrouver dans le planning et suivre la validité de leur carte professionnelle.'))]));
   async function editer(a = { nom: '', poste: 'ADS', tel: '', carte: '', validite: '', notes: '', actif: 1 }) {
     const f = {
       nom: saisie({ value: a.nom, required: true }),
@@ -471,8 +371,8 @@ async function pageAgents(ctx) {
     } catch (e) { erreur(e); }
   }
   ctx.afficher(carte(null, h('div', { class: 'tableau-defil' }, h('table', { class: 'tableau' },
-    h('thead', null, h('tr', null, h('th', null, 'Nom'), h('th', null, 'Poste'), h('th', null, 'Téléphone'), h('th', null, 'Carte professionnelle'), h('th', null, 'Validité'))), corps))),
-    h('p', { class: 'astuce' }, 'Les cartes qui expirent dans moins de 3 mois apparaissent aussi sur le tableau de bord.'));
+    h('thead', null, h('tr', null, h('th', null, 'Nom'), h('th', null, 'Poste'), h('th', null, 'Téléphone'), h('th', null, 'Carte professionnelle'), h('th', null, 'Validité'), h('th', null, ''))), corps))),
+    h('p', { class: 'astuce' }, "Les cartes pro qui expirent dans moins de 3 mois apparaissent sur l'accueil. Le bouton « Carte » crée la carte agent BDA à imprimer."));
   dessiner();
 }
 
@@ -499,11 +399,12 @@ async function pageParametres(ctx) {
   } },
   carte([h('h2', null, 'Votre entreprise'), h('small', null, 'Apparaît en haut de vos devis et factures')], h('div', { class: 'form-grille' }, champ('Nom affiché', c.nom), champ('Coordonnées (une info par ligne)', c.emetteur, 'Gardez la mention « EI » après votre nom : elle est obligatoire.'), champ('Email (sur les devis)', c.email))),
   carte([h('h2', null, 'Paiement'), h('small', null, 'Imprimé sur vos factures — reste privé, jamais publié sur le site')], h('div', { class: 'form-grille' }, champ('Bénéficiaire', c.beneficiaire), champ('IBAN', c.iban))),
+  h('details', { class: 'avance' }, h('summary', null, icone('reglages'), 'Réglages avancés', h('small', null, 'mentions légales, numérotation, valeurs par défaut')),
   carte([h('h2', null, 'Mentions et conditions')], h('div', { class: 'form-grille' }, champ('Conditions des factures', c.conditionsFacture), champ('Conditions des devis', c.conditionsDevis), champ('Pied de page (CNAPS, SIRET…)', c.pied, 'La mention de l\'autorisation CNAPS est obligatoire sur tous vos documents.'))),
   carte([h('h2', null, 'Numérotation et valeurs par défaut')], h('div', { class: 'form-grille form-grille--2' },
     champ('Numéros de facture', c.prefixeFacture, '{AAAA} = année en cours. Ex. FA-2026-001'), champ('Numéros de devis', c.prefixeDevis),
     champ('Taux horaire agent (€/h)', c.tauxHoraire), champ('Échéance des factures (jours)', c.echeanceJours),
-    champ('Acompte des devis (%)', c.acompte), champ('Validité des devis', c.validiteDevis))),
+    champ('Acompte des devis (%)', c.acompte), champ('Validité des devis', c.validiteDevis)))),
   h('div', { class: 'barre-enregistrer' }, enregistrer));
 
   // Mot de passe

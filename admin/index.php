@@ -5,14 +5,14 @@ require __DIR__ . '/../app/bootstrap.php';
 entetes_securite();
 header('Cache-Control: no-store');
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'");
-$v = '1';
+$v = '2';
 ?><!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#070816">
+<meta name="theme-color" content="#09090b">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="BDA Admin">
 <title>Espace admin — BDA Sécurité &amp; VTC Premium</title>
@@ -21,9 +21,10 @@ $v = '1';
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="admin.css?v=<?= $v ?>">
 <link rel="stylesheet" href="documents.css?v=<?= $v ?>">
+<link rel="stylesheet" href="creations.css?v=<?= $v ?>">
 <style id="format-page">@page { size: A4 portrait; margin: 0; }</style>
 </head>
 <body>

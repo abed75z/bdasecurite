@@ -23,7 +23,7 @@ if ($methode === 'POST') {
 $libres = ['session', 'connexion', 'activation', 'secours'];
 if (!in_array($action, $libres, true) && !connecte()) echec('Connexion requise.', 401);
 
-$lecture = ['session', 'tableau', 'compteurs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
+$lecture = ['session', 'accueil', 'compteurs', 'creations', 'creation', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -110,8 +110,8 @@ try {
     case 'compteurs':
       repondre(['ok' => true, 'compteurs' => compteurs()]);
 
-    case 'tableau':
-      repondre(['ok' => true, 'tableau' => tableau_de_bord()]);
+    case 'accueil':
+      repondre(['ok' => true, 'accueil' => accueil()]);
 
     /* ================= Réglages ================= */
     case 'reglages':
@@ -209,6 +209,43 @@ try {
       db()->prepare('INSERT INTO plannings (mois, data, maj) VALUES (?, ?, ?) ON CONFLICT(mois) DO UPDATE SET data = excluded.data, maj = excluded.maj')->execute([$mois, $json, maintenant()]);
       repondre(['ok' => true]);
 
+    /* ================= Cartes agents et flyers ================= */
+    case 'creations':
+      $st = db()->prepare('SELECT id, type, titre, data, maj FROM creations WHERE type = ? ORDER BY maj DESC');
+      $st->execute([type_creation((string)($_GET['type'] ?? ''))]);
+      $lignes = $st->fetchAll();
+      foreach ($lignes as &$l) $l['data'] = json_decode((string)$l['data'], true) ?: [];
+      repondre(['ok' => true, 'creations' => $lignes]);
+
+    case 'creation':
+      $st = db()->prepare('SELECT * FROM creations WHERE id = ?');
+      $st->execute([(int)($_GET['id'] ?? 0)]);
+      $c = $st->fetch();
+      if (!$c) echec('Élément introuvable.', 404);
+      $c['data'] = json_decode((string)$c['data'], true) ?: [];
+      repondre(['ok' => true, 'creation' => $c]);
+
+    case 'creation.enregistrer':
+      $b = corps();
+      $type = type_creation(chaine($b['type'] ?? ''));
+      if (!is_array($b['data'] ?? null)) echec('Contenu vide.');
+      $json = json_encode($b['data'], JSON_UNESCAPED_UNICODE);
+      if ($json === false || strlen($json) > 1200000) echec('Trop volumineux : choisissez une photo plus légère.');
+      $titre = texte($b['titre'] ?? '', 120);
+      $id = (int)($b['id'] ?? 0);
+      if ($id > 0) {
+        $st = db()->prepare('UPDATE creations SET titre = ?, data = ?, maj = ? WHERE id = ? AND type = ?');
+        $st->execute([$titre, $json, maintenant(), $id, $type]);
+        if ($st->rowCount() === 0) echec('Élément introuvable.', 404);
+      } else {
+        db()->prepare('INSERT INTO creations (type, titre, data, cree, maj) VALUES (?, ?, ?, ?, ?)')->execute([$type, $titre, $json, maintenant(), maintenant()]);
+        $id = (int)db()->lastInsertId();
+      }
+      repondre(['ok' => true, 'id' => $id]);
+
+    case 'creation.supprimer':
+      supprimer_ligne('creations', (int)(corps()['id'] ?? 0));
+
     /* ================= Clients et agents ================= */
     case 'clients':
       repondre(['ok' => true, 'clients' => db()->query('SELECT * FROM clients ORDER BY nom COLLATE NOCASE')->fetchAll()]);
@@ -276,7 +313,7 @@ try {
 
     case 'export':
       $export = ['format' => 'bda-admin-sauvegarde', 'version' => 1, 'date' => maintenant(), 'reglages' => reglages()];
-      foreach (['documents', 'plannings', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'visites'] as $t) {
+      foreach (['documents', 'plannings', 'clients', 'agents', 'creations', 'demandes', 'candidatures', 'avis'] as $t) {
         $export[$t] = db()->query("SELECT * FROM $t")->fetchAll();
       }
       header('Content-Disposition: attachment; filename="bda-sauvegarde-' . date('Y-m-d') . '.json"');
@@ -296,6 +333,11 @@ try {
 function type_document(string $t): string
 {
   if (!isset(STATUTS[$t]) || !in_array($t, ['devis', 'facture'], true)) echec('Type de document inconnu.');
+  return $t;
+}
+function type_creation(string $t): string
+{
+  if (!in_array($t, ['carte', 'flyer'], true)) echec('Type inconnu.');
   return $t;
 }
 function mois_valide(string $m): string
@@ -354,43 +396,26 @@ function compteurs(): array
     'retards' => (int)$retards->fetchColumn(),
   ];
 }
-function tableau_de_bord(): array
+// Page d'accueil : ce qui attend une action, et les derniers éléments modifiés (aucun montant)
+function accueil(): array
 {
   $db = db();
-  $un = function (string $sql, array $p = []) use ($db) {
-    $st = $db->prepare($sql);
-    $st->execute($p);
-    return $st->fetch() ?: [];
-  };
   $tous = function (string $sql, array $p = []) use ($db) {
     $st = $db->prepare($sql);
     $st->execute($p);
     return $st->fetchAll();
   };
-  $auj = date('Y-m-d');
-  $factures = "type = 'facture' AND statut IN ('envoyee', 'payee')";
-  $debut12 = date('Y-m-01', strtotime('first day of -11 months'));
-  $debut30 = date('Y-m-d', strtotime('-29 days'));
-
-  $agentsAlerte = $tous("SELECT id, nom, validite FROM agents WHERE actif = 1 AND validite <> '' AND validite <= ? ORDER BY validite", [date('Y-m-d', strtotime('+90 days'))]);
-  $demandes = $tous('SELECT id, recu, statut, data FROM demandes ORDER BY id DESC LIMIT 5');
-  foreach ($demandes as &$d) $d['data'] = json_decode((string)$d['data'], true) ?: [];
-
+  $recents = array_merge(
+    $tous("SELECT id, type, numero AS titre, client AS sous, statut, maj FROM documents ORDER BY maj DESC LIMIT 6"),
+    $tous("SELECT id, type, titre, '' AS sous, '' AS statut, maj FROM creations ORDER BY maj DESC LIMIT 6")
+  );
+  usort($recents, fn($a, $b) => strcmp((string)$b['maj'], (string)$a['maj']));
   return [
     'compteurs' => compteurs(),
-    'caMois' => (float)($un("SELECT COALESCE(SUM(total), 0) s FROM documents WHERE $factures AND substr(date, 1, 7) = ?", [date('Y-m')])['s'] ?? 0),
-    'caAnnee' => (float)($un("SELECT COALESCE(SUM(total), 0) s FROM documents WHERE $factures AND substr(date, 1, 4) = ?", [date('Y')])['s'] ?? 0),
-    'aEncaisser' => $un("SELECT COUNT(*) n, COALESCE(SUM(total), 0) s FROM documents WHERE type = 'facture' AND statut = 'envoyee'"),
-    'enRetard' => $un("SELECT COUNT(*) n, COALESCE(SUM(total), 0) s FROM documents WHERE type = 'facture' AND statut = 'envoyee' AND echeance <> '' AND echeance < ?", [$auj]),
-    'devisAttente' => $un("SELECT COUNT(*) n, COALESCE(SUM(total), 0) s FROM documents WHERE type = 'devis' AND statut = 'envoye'"),
-    'noteMoyenne' => $un("SELECT COUNT(*) n, COALESCE(AVG(note), 0) m FROM avis WHERE statut = 'publie'"),
-    'ca12' => $tous("SELECT substr(date, 1, 7) mois, SUM(total) total FROM documents WHERE $factures AND date >= ? GROUP BY mois ORDER BY mois", [$debut12]),
-    'visites' => $tous('SELECT jour, SUM(n) n FROM visites WHERE jour >= ? GROUP BY jour ORDER BY jour', [$debut30]),
-    'pages' => $tous('SELECT page, SUM(n) n FROM visites WHERE jour >= ? GROUP BY page ORDER BY n DESC LIMIT 6', [$debut30]),
-    'demandes' => $demandes,
-    'aRelancer' => $tous("SELECT id, numero, client, total, echeance FROM documents WHERE type = 'facture' AND statut = 'envoyee' ORDER BY echeance LIMIT 5"),
-    'agentsAlerte' => $agentsAlerte,
-    'aujourdhui' => $auj,
+    'agentsAlerte' => $tous("SELECT id, nom, validite FROM agents WHERE actif = 1 AND validite <> '' AND validite <= ? ORDER BY validite", [date('Y-m-d', strtotime('+90 days'))]),
+    'recents' => array_slice($recents, 0, 7),
+    'installation' => reglages()['iban'] === '',
+    'aujourdhui' => date('Y-m-d'),
   ];
 }
 // Fichier de démarrage préparé sur l'ordinateur (réglages privés, clients, documents)

@@ -4,8 +4,8 @@
   "start_url": "/admin/",
   "scope": "/admin/",
   "display": "standalone",
-  "background_color": "#070816",
-  "theme_color": "#070816",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
   "icons": [
     { "src": "/assets/img/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
     { "src": "/assets/img/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }

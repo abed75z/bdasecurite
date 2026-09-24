@@ -1,0 +1,177 @@
+/* =========================================================
+   ESPACE ADMIN BDA — cartes agents et flyers
+   Dimensions réelles en millimètres (impression à l'échelle 1)
+   ========================================================= */
+
+/* ---------- Éditeurs ---------- */
+.editeur--carte, .editeur--flyer { grid-template-columns: minmax(0, 1fr) 320px; }
+.apercu { display: grid; gap: 16px; align-content: start; }
+.apercu__face { display: grid; gap: 12px; padding: 18px 18px 22px; border-radius: var(--radius); border: 1px solid var(--line); background: radial-gradient(80% 90% at 50% 0%, rgba(201, 165, 92, 0.07), transparent 70%), var(--surface); }
+.apercu__label { font-size: 10px; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); }
+.apercu-carte { display: flex; justify-content: center; min-width: 0; }
+.apercu-flyer { display: flex; justify-content: center; min-width: 0; padding: 22px; border-radius: var(--radius); border: 1px solid var(--line); background: #111114; }
+.echelle { width: max-content; }
+.apercu-carte .cp { box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.06); }
+.apercu-flyer .fl { box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.9); }
+.curseurs { display: grid; gap: 10px; }
+.curseur { display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+.panneau__plus summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; font-weight: 500; color: var(--text-2); }
+.panneau__plus summary::-webkit-details-marker { display: none; }
+.panneau__plus summary::after { content: "+"; color: var(--gold); font-size: 18px; line-height: 1; }
+.panneau__plus[open] summary::after { content: "−"; }
+.panneau__plus[open] summary { margin-bottom: 4px; }
+.panneau__liens { display: flex; justify-content: space-between; gap: 10px; padding: 2px 6px; }
+.lien-btn--danger { color: #f4a0a0; }
+.panneau__bloc--astuce { grid-template-columns: auto 1fr; align-items: start; border-color: rgba(201, 165, 92, 0.3); background: var(--gold-soft); color: var(--gold-light); }
+.panneau__bloc--astuce p { margin: 0; font-size: 12.5px; color: var(--text-2); }
+
+/* Paramètres avancés repliés */
+.avance { display: grid; gap: 20px; }
+.avance summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-radius: var(--radius); border: 1px dashed var(--line-2); color: var(--text-2); font-weight: 500; }
+.avance summary::-webkit-details-marker { display: none; }
+.avance summary small { color: var(--muted); font-weight: 400; }
+.avance summary .ic { color: var(--gold); }
+.avance[open] summary { border-style: solid; }
+
+/* ---------- Galeries ---------- */
+.galerie { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.galerie--flyers { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.galerie__item { display: grid; border-radius: var(--radius); border: 1px solid var(--line); background: var(--surface); overflow: hidden; transition: border-color 0.25s, transform 0.35s var(--ease); }
+.galerie__item:hover { border-color: rgba(201, 165, 92, 0.55); transform: translateY(-2px); }
+.galerie__visuel { display: grid; place-items: center; padding: 22px 16px; background: radial-gradient(80% 90% at 50% 0%, rgba(201, 165, 92, 0.08), transparent 70%), #0f0f12; overflow: hidden; }
+.galerie__visuel--carte .cp { zoom: 0.8; box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.9); }
+.galerie__visuel--flyer { height: 290px; place-items: start center; padding-bottom: 0; }
+.galerie__visuel--flyer .fl { zoom: 0.3; }
+.galerie__txt { display: grid; gap: 2px; padding: 12px 16px 14px; border-top: 1px solid var(--line); }
+.galerie__txt b { color: var(--text); font-weight: 500; }
+.galerie__txt small { color: var(--muted); font-size: 12px; }
+.vide-grand { grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 36px; padding: 32px; }
+.vide-grand h2 { font-family: var(--serif); font-weight: 500; font-size: 26px; margin-bottom: 8px; }
+.vide-grand p { margin: 0 0 18px; color: var(--text-2); max-width: 460px; }
+.vide-grand__visuel .cp { zoom: 1.05; box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.9); transform: rotate(-3deg); }
+.vide-grand__visuel--flyer { height: 300px; overflow: hidden; border-radius: 10px; }
+.vide-grand__visuel--flyer .fl { zoom: 0.3; }
+
+/* =========================================================
+   CARTE AGENT — 85,6 × 54 mm
+   ========================================================= */
+.cp { position: relative; width: 85.6mm; height: 54mm; border-radius: 3.2mm; overflow: hidden; display: flex; flex-direction: column; background: #fff; color: #111; font-family: "Poppins", Arial, sans-serif; line-height: 1.2; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.cp__haut { height: 13mm; flex: none; display: flex; align-items: center; gap: 2.6mm; padding: 0 4mm; background: #0b0b0d; }
+.cp__logo { width: 8.6mm; height: 9.5mm; }
+.cp__marque b { display: block; font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 4.5mm; letter-spacing: 0.03em; color: #fff; line-height: 1; }
+.cp__marque small { display: block; margin-top: 1mm; font-size: 1.5mm; font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase; color: #c9a55c; }
+.cp__type { margin-left: auto; text-align: right; }
+.cp__type small { display: block; font-size: 1.5mm; letter-spacing: 0.3em; text-transform: uppercase; color: #c9a55c; }
+.cp__type b { display: block; font-size: 2.8mm; font-weight: 700; letter-spacing: 0.06em; color: #fff; }
+.cp__filet { height: 0.8mm; flex: none; background: linear-gradient(90deg, #a2803d, #ecd79f 50%, #a2803d); }
+.cp__corps { flex: 1; min-height: 0; display: flex; align-items: center; gap: 3.6mm; padding: 2.2mm 4mm 1.8mm; }
+.cp__photo { position: relative; width: 20.5mm; height: 26.5mm; flex: none; display: grid; place-items: center; border: 0.45mm solid #c9a55c; border-radius: 1.4mm; background: #f8f5ee; overflow: hidden; }
+.cp__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cp__sans-photo { display: grid; justify-items: center; gap: 1.2mm; color: #b9ab8c; font-size: 1.6mm; letter-spacing: 0.25em; }
+.cp__sans-photo .ic { width: 9mm; height: 9mm; stroke-width: 1.2; }
+.cp__champs { flex: 1; min-width: 0; margin: 0; display: grid; gap: 1.1mm; }
+.cp__champ { padding-bottom: 0.5mm; border-bottom: 0.25mm solid #ddd3bf; min-width: 0; }
+.cp__champ dt { font-size: 1.5mm; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: #b8934a; }
+.cp__champ dd { margin: 0.3mm 0 0; min-height: 3.3mm; font-size: 2.55mm; font-weight: 500; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cp__pied { height: 5.6mm; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 2mm; padding: 0 4mm; background: #f8f5ee; border-top: 0.25mm solid #e3dac8; border-bottom: 0.8mm solid #0b0b0d; font-size: 1.75mm; color: #5d5a54; white-space: nowrap; }
+.cp__pied b { color: #111; font-weight: 700; }
+
+/* Verso */
+.cp--verso { padding: 2.2mm; background: #0b0b0d; color: #dcd8cf; }
+.cp__cadre { height: 100%; display: flex; flex-direction: column; gap: 1.5mm; padding: 2.8mm 3.8mm 2.6mm; border: 0.3mm solid rgba(201, 165, 92, 0.55); border-radius: 2mm; }
+.cp__verso-marque { display: flex; align-items: center; gap: 2.4mm; margin-bottom: 0.6mm; }
+.cp__verso-marque .cp__logo { width: 6.8mm; height: 7.5mm; }
+.cp__verso-marque b { display: block; font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 3.5mm; color: #fff; line-height: 1; }
+.cp__verso-marque small { display: block; margin-top: 0.7mm; font-size: 1.3mm; letter-spacing: 0.3em; text-transform: uppercase; color: #c9a55c; font-weight: 600; }
+.cp__verso-texte { margin: 0; font-size: 1.85mm; line-height: 1.45; color: #ebe7de; }
+.cp__verso-aut { margin: 0; font-size: 1.7mm; font-weight: 600; color: #c9a55c; }
+.cp__verso-legal { margin: 0; font-size: 1.4mm; line-height: 1.4; font-style: italic; color: #8f8b82; }
+.cp__verso-pied { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 3mm; font-size: 1.75mm; color: #fff; }
+.cp__signature { min-width: 24mm; padding-top: 0.7mm; border-top: 0.25mm solid #6d6a63; text-align: center; font-size: 1.35mm; color: #8f8b82; }
+
+/* =========================================================
+   FLYER — A4 (210 × 297 mm), réduit à 70,7 % pour l'A5
+   ========================================================= */
+.fl { position: relative; width: 210mm; height: 297mm; display: flex; flex-direction: column; overflow: hidden; background: #fff; color: #16161a; font-family: "Poppins", Arial, sans-serif; line-height: 1.35; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.fl p, .fl h1, .fl h2, .fl h3 { margin: 0; }
+.fl__hero { display: grid; gap: 3.5mm; padding: 9.5mm 16mm 8mm; color: #fff; background: radial-gradient(130mm 90mm at 100% 0%, rgba(201, 165, 92, 0.2), transparent 62%), #0b0b0d; }
+.fl__marque { display: flex; align-items: center; gap: 4mm; }
+.fl__logo { width: 14mm; height: 15.4mm; }
+.fl__marque b { display: block; font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 8mm; letter-spacing: 0.04em; line-height: 1; color: #fff; }
+.fl__marque small { display: block; margin-top: 1.8mm; font-size: 2.7mm; font-weight: 600; letter-spacing: 0.4em; text-transform: uppercase; color: #c9a55c; }
+.fl__titre { font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 11.5mm; line-height: 1.08; letter-spacing: -0.01em; }
+.fl__t1 { display: block; color: #fff; }
+.fl__t2 { display: block; color: #c9a55c; }
+.fl__intro { max-width: 165mm; font-size: 3.6mm; line-height: 1.5; color: #cfcbc2; white-space: pre-wrap; }
+.fl__secteurs { display: flex; flex-wrap: wrap; gap: 2.6mm; }
+.fl__secteur { padding: 1.8mm 5mm; border: 0.35mm solid #c9a55c; border-radius: 99px; font-size: 2.8mm; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: #fff; }
+.fl__filet { height: 1.4mm; flex: none; background: linear-gradient(90deg, #a2803d, #ecd79f 50%, #a2803d); }
+.fl__offres { padding: 7mm 16mm 3mm; }
+.fl__kicker { font-size: 2.8mm; font-weight: 700; letter-spacing: 0.38em; text-transform: uppercase; color: #b8934a; }
+.fl__section { margin: 1.5mm 0 4mm !important; font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 7.4mm; color: #111; }
+.fl__cartes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5mm; }
+.fl__carte { display: grid; gap: 1.2mm; align-content: start; padding: 4.5mm 5mm 4.5mm; background: #f8f5ee; border-top: 1mm solid #c9a55c; border-radius: 0 0 2mm 2mm; }
+.fl__ic { display: grid; place-items: center; width: 10mm; height: 10mm; margin-bottom: 1.5mm; border-radius: 50%; background: #0b0b0d; color: #c9a55c; border: 0; padding: 0; }
+.fl__ic .ic { width: 5mm; height: 5mm; stroke-width: 1.6; }
+.fl--modifiable .fl__ic { cursor: pointer; }
+.fl--modifiable .fl__ic:hover { box-shadow: 0 0 0 0.6mm rgba(201, 165, 92, 0.5); }
+.fl__carte-titre { font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 4.8mm; white-space: nowrap; color: #111; }
+.fl__carte-sous { font-size: 3mm; font-style: italic; color: #7b7466; }
+.fl__carte ul { list-style: none; margin: 2mm 0 0; padding: 0; display: grid; gap: 1.6mm; }
+.fl__point { position: relative; padding-left: 4.6mm; font-size: 3.2mm; line-height: 1.35; color: #26262b; }
+.fl__point::before { content: ""; position: absolute; left: 0.5mm; top: 1.3mm; width: 1.7mm; height: 1.7mm; background: #c9a55c; transform: rotate(45deg); }
+.fl__chiffres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 3mm 16mm 0; border-top: 0.3mm solid #e6dfcf; border-bottom: 0.3mm solid #e6dfcf; }
+.fl__chiffres > div { display: grid; gap: 1.2mm; align-content: start; padding: 3mm 4mm; text-align: center; }
+.fl__chiffres > div + div { border-left: 0.3mm solid #e6dfcf; }
+.fl__chiffre { font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 8.5mm; font-variant-numeric: lining-nums; line-height: 1; color: #111; }
+.fl__chiffre-txt { font-size: 3mm; line-height: 1.35; color: #6f6a60; }
+.fl__reference { margin: 4mm 16mm 0 !important; padding-left: 4mm; border-left: 1mm solid #c9a55c; font-size: 3.6mm; font-weight: 500; color: #26262b; }
+.fl__contact { position: relative; display: flex; align-items: center; gap: 7mm; margin: auto 16mm 5mm; padding: 5.5mm 6mm 5.5mm 8.5mm; border-radius: 4mm; background: #0b0b0d; color: #fff; }
+.fl__contact::before { content: ""; position: absolute; inset: 2mm; border: 0.3mm solid rgba(201, 165, 92, 0.5); border-radius: 3mm; pointer-events: none; }
+.fl__contact-txt { flex: 1; min-width: 0; display: grid; gap: 2.6mm; }
+.fl__kicker--clair { color: #c9a55c; }
+.fl__contact-titre { font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 7.2mm; color: #fff; }
+.fl__tels { display: flex; gap: 8mm; }
+.fl__tels > div { display: grid; gap: 1mm; }
+.fl__tel-label { font-size: 2.6mm; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #c9a55c; }
+.fl__tel { font-size: 6.4mm; font-weight: 700; letter-spacing: 0.02em; line-height: 1.1; color: #fff; white-space: nowrap; }
+.fl__infos { font-size: 3.3mm; color: #d8d4cb; white-space: pre-wrap; }
+.fl__qr { position: relative; display: grid; justify-items: center; gap: 0.5mm; width: 35mm; flex: none; padding: 3mm 3mm 2.6mm; border-radius: 3mm; background: #fff; text-align: center; }
+.fl__qr svg { width: 27mm; height: 27mm; display: block; }
+.fl__qr-titre { font-size: 3.4mm; font-weight: 700; color: #111; }
+.fl__qr-sous { font-size: 2.9mm; color: #b8934a; }
+.fl__qr-erreur { font-size: 3mm; color: #c0392b; }
+.fl__pied { flex: none; padding: 3.2mm 16mm; background: #f8f5ee; font-size: 2.3mm; line-height: 1.5; text-align: center; color: #6f6a60; white-space: pre-wrap; }
+
+/* Textes modifiables (à l'écran seulement) */
+.fl--modifiable [contenteditable] { cursor: text; transition: box-shadow 0.15s, background-color 0.15s; outline: none; }
+.fl--modifiable [contenteditable]:hover { box-shadow: 0 0 0 0.5mm rgba(201, 165, 92, 0.55); }
+.fl--modifiable [contenteditable]:focus { box-shadow: 0 0 0 0.6mm #c9a55c; background: rgba(201, 165, 92, 0.1); }
+.fl--modifiable .est-vide::before { content: attr(data-ph); color: #a59f93; font-style: italic; }
+.fl:not(.fl--modifiable) .est-vide { display: none; }
+
+/* ---------- Planches d'impression ---------- */
+.impression { display: none; }
+.planche { width: 210mm; height: 297mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9mm; }
+.planche + .planche, .page-carte + .page-carte { break-before: page; }
+.planche__ligne { display: flex; outline: 0.2mm dashed #b5b5b5; }
+.planche__ligne .cp { border-radius: 0; }
+.planche__ligne .cp + .cp { box-shadow: -0.2mm 0 0 #b5b5b5; }
+.page-carte { width: 85.6mm; height: 54mm; overflow: hidden; }
+.page-carte .cp { border-radius: 0; }
+
+@media (max-width: 1100px) {
+  .editeur--carte, .editeur--flyer { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .vide-grand { grid-template-columns: 1fr; padding: 22px; justify-items: center; text-align: center; }
+  .vide-grand__visuel .cp { zoom: 0.85; }
+  .apercu-flyer { padding: 10px; }
+}
+
+@media print {
+  body.impression-dediee > *:not(.impression) { display: none !important; }
+  body.impression-dediee .impression { display: block; }
+  .impression .fl--a5 { zoom: 0.70711; }
+  .impression .cp, .impression .fl { box-shadow: none !important; transform: none !important; }
+}

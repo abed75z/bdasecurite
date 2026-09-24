@@ -85,19 +85,21 @@ Pour modifier le numéro de téléphone un jour : il apparaît dans toutes les p
 
 Un espace privé, protégé par identifiant et mot de passe, pour gérer l'entreprise et le site :
 
-- **Tableau de bord** : chiffre d'affaires, factures à encaisser ou en retard, devis en attente, visites du site, cartes pro à renouveler.
+- **Accueil** : créer en un clic (devis, facture, planning, carte agent, flyer) et la liste de ce qui attend une action (demandes, avis, candidatures, factures à relancer, cartes pro à renouveler). Aucun graphique ni chiffre d'affaires.
 - **Devis / Factures** : feuilles A4 à nos couleurs, modifiables directement, enregistrées automatiquement, impression ou PDF en un clic. Un devis accepté se transforme en facture ; une facture peut reprendre les heures du planning.
 - **Planning** : planning mensuel des agents (heures, nuit, dimanche, fériés), impression paysage, création de la facture du mois.
 - **Demandes / Candidatures** : chaque formulaire du site y arrive, en plus de l'email FormSubmit. Une demande devient un devis en un clic.
 - **Avis clients** : les nouveaux avis attendent votre validation avant d'être publiés sur le site.
-- **Clients, Agents, Paramètres** : fiches, coordonnées de l'entreprise, IBAN, mentions, numérotation, sauvegarde complète.
+- **Cartes agents** : carte BDA au format carte bancaire (recto + verso, photo recadrable), remplie depuis la liste des agents, imprimée sur A4 à découper ou en format carte, ou enregistrée en PDF.
+- **Flyers** : flyer A4 ou A5 à nos couleurs, chaque texte se modifie au clic, sections masquables, QR code généré automatiquement.
+- **Clients, Agents, Paramètres** : fiches, coordonnées de l'entreprise, IBAN, sauvegarde complète (réglages avancés repliés).
 
 Première connexion : ouvrez `https://bdasecurite.com/admin`, saisissez le **code d'activation** remis par le développeur, puis choisissez votre identifiant et votre mot de passe. Le même code sert ensuite de code de secours en cas de mot de passe oublié : gardez-le en lieu sûr.
 
 Technique :
 
 - `admin/` : l'application (PHP + JavaScript, sans dépendance).
-- `api/` : réception des formulaires, avis et visites.
+- `api/` : réception des formulaires et des avis.
 - `app/` : code serveur commun, inaccessible depuis le web.
 - Les données (base SQLite) sont stockées **hors du dossier public**, dans `bda-admin-data/`, à côté de `www/` sur l'hébergement OVH. Elles ne sont ni sur GitHub ni accessibles depuis le web. Pensez à télécharger régulièrement une sauvegarde (Paramètres → Sauvegarde).
 - L'IBAN et les données clients ne sont jamais dans le code : ils se saisissent dans l'admin (ou via le fichier d'import gardé sur l'ordinateur).

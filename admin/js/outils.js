@@ -62,6 +62,20 @@ export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
 /* ---------- Icônes ---------- */
 const TRACES = {
+  personne: '<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/>',
+  accueil: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  badge: '<rect x="2" y="5" width="20" height="14" rx="2.5"/><circle cx="8" cy="11" r="2.2"/><path d="M4.8 16.2c.6-1.6 1.8-2.4 3.2-2.4s2.6.8 3.2 2.4M14 10h5M14 13.5h3.5"/>',
+  flyer: '<path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v6h6"/><rect x="7.5" y="12" width="9" height="6" rx="1"/>',
+  photo: '<rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="12" cy="12.5" r="3.5"/><path d="M8 5l1.5-2h5L16 5"/>',
+  qr: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 17h4v4h-4"/>',
+  bouclier: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+  voiture: '<path d="M5 17h14M5 17a2 2 0 1 1-4 0v-4l2.5-5.5A2 2 0 0 1 5.3 6h13.4a2 2 0 0 1 1.8 1.5L23 13v4a2 2 0 1 1-4 0"/><path d="M3.5 12h17"/><circle cx="7" cy="15" r=".6"/><circle cx="17" cy="15" r=".6"/>',
+  etoile: '<path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/>',
+  couronne: '<path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/><path d="M5 22h14"/>',
+  camera: '<path d="M3 7h13v10H3zM16 10l5-3v10l-5-3"/>',
+  cle: '<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.3-9.3M17 6l3 3M15 8l2 2"/>',
+  oeilv: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  vide: '',
   tableau: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
   demande: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
   devis: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
@@ -106,14 +120,18 @@ export function icone(nom, cls = '') {
   svg.innerHTML = TRACES[nom] || '';
   return svg;
 }
-export function blason(cls = '') {
+// Écusson « BDA » (même dessin que sur les cartes agents et les flyers)
+let nEcusson = 0;
+export function ecusson(cls = '') {
   const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  s.setAttribute('viewBox', '0 0 200 240');
-  s.setAttribute('class', cls);
+  const id = `ec${++nEcusson}`;
+  s.setAttribute('viewBox', '0 0 100 110');
+  s.setAttribute('class', `ecusson ${cls}`.trim());
   s.setAttribute('aria-hidden', 'true');
-  s.innerHTML = '<defs><linearGradient id="gb" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc9c"/><stop offset=".45" stop-color="#c9a14a"/><stop offset="1" stop-color="#9c7424"/></linearGradient></defs>'
-    + '<path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" fill="none" stroke="url(#gb)" stroke-width="10" stroke-linejoin="round"/>'
-    + '<path d="M62 128 100 84l38 44" fill="none" stroke="#f3f0ea" stroke-width="12"/><path d="M93 104h14l-2 52-5 24-5-24Z" fill="#f3f0ea"/>';
+  s.innerHTML = `<defs><linearGradient id="${id}o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#efd9a0"/><stop offset=".5" stop-color="#c9a55c"/><stop offset="1" stop-color="#a2803d"/></linearGradient>`
+    + `<linearGradient id="${id}f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a251b"/><stop offset="1" stop-color="#0f0e0c"/></linearGradient></defs>`
+    + `<path d="M50 5C62 11 76 13 91 13v39c0 28-19 46-41 54C28 98 9 80 9 52V13c15 0 29-2 41-8Z" fill="url(#${id}f)" stroke="url(#${id}o)" stroke-width="5" stroke-linejoin="round"/>`
+    + `<text x="50" y="65" text-anchor="middle" font-family="Playfair Display, Georgia, serif" font-size="25" font-weight="500" fill="#e8cf95">BDA</text>`;
   return s;
 }
 

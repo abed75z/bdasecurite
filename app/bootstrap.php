@@ -96,22 +96,32 @@ function db(): PDO
 }
 function schema(PDO $db): void
 {
-  if ((int)$db->query('PRAGMA user_version')->fetchColumn() >= 1) return;
-  $db->exec(<<<'SQL'
-    CREATE TABLE IF NOT EXISTS utilisateurs (id INTEGER PRIMARY KEY, login TEXT NOT NULL UNIQUE COLLATE NOCASE, hash TEXT NOT NULL, cree TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS tentatives (k TEXT NOT NULL, t INTEGER NOT NULL);
-    CREATE INDEX IF NOT EXISTS i_tentatives ON tentatives (k, t);
-    CREATE TABLE IF NOT EXISTS reglages (k TEXT PRIMARY KEY, v TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS documents (id INTEGER PRIMARY KEY, type TEXT NOT NULL, numero TEXT NOT NULL, statut TEXT NOT NULL, client TEXT NOT NULL DEFAULT '', total REAL NOT NULL DEFAULT 0, date TEXT NOT NULL DEFAULT '', echeance TEXT NOT NULL DEFAULT '', data TEXT NOT NULL, cree TEXT NOT NULL, maj TEXT NOT NULL, UNIQUE (type, numero));
-    CREATE TABLE IF NOT EXISTS plannings (mois TEXT PRIMARY KEY, data TEXT NOT NULL, maj TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS clients (id INTEGER PRIMARY KEY, nom TEXT NOT NULL, adresse TEXT NOT NULL DEFAULT '', tel TEXT NOT NULL DEFAULT '', email TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS agents (id INTEGER PRIMARY KEY, nom TEXT NOT NULL, poste TEXT NOT NULL DEFAULT 'ADS', tel TEXT NOT NULL DEFAULT '', carte TEXT NOT NULL DEFAULT '', validite TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', actif INTEGER NOT NULL DEFAULT 1, cree TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS demandes (id INTEGER PRIMARY KEY, recu TEXT NOT NULL, statut TEXT NOT NULL DEFAULT 'nouvelle', data TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS candidatures (id INTEGER PRIMARY KEY, recu TEXT NOT NULL, statut TEXT NOT NULL DEFAULT 'nouvelle', data TEXT NOT NULL);
-    CREATE TABLE IF NOT EXISTS avis (id INTEGER PRIMARY KEY, recu TEXT NOT NULL, nom TEXT NOT NULL, note INTEGER NOT NULL, prestation TEXT NOT NULL DEFAULT '', texte TEXT NOT NULL, email TEXT NOT NULL DEFAULT '', statut TEXT NOT NULL DEFAULT 'attente');
-    CREATE TABLE IF NOT EXISTS visites (jour TEXT NOT NULL, page TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (jour, page));
-    PRAGMA user_version = 1;
-  SQL);
+  $version = (int)$db->query('PRAGMA user_version')->fetchColumn();
+  if ($version < 1) {
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS utilisateurs (id INTEGER PRIMARY KEY, login TEXT NOT NULL UNIQUE COLLATE NOCASE, hash TEXT NOT NULL, cree TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS tentatives (k TEXT NOT NULL, t INTEGER NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_tentatives ON tentatives (k, t);
+      CREATE TABLE IF NOT EXISTS reglages (k TEXT PRIMARY KEY, v TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS documents (id INTEGER PRIMARY KEY, type TEXT NOT NULL, numero TEXT NOT NULL, statut TEXT NOT NULL, client TEXT NOT NULL DEFAULT '', total REAL NOT NULL DEFAULT 0, date TEXT NOT NULL DEFAULT '', echeance TEXT NOT NULL DEFAULT '', data TEXT NOT NULL, cree TEXT NOT NULL, maj TEXT NOT NULL, UNIQUE (type, numero));
+      CREATE TABLE IF NOT EXISTS plannings (mois TEXT PRIMARY KEY, data TEXT NOT NULL, maj TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS clients (id INTEGER PRIMARY KEY, nom TEXT NOT NULL, adresse TEXT NOT NULL DEFAULT '', tel TEXT NOT NULL DEFAULT '', email TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS agents (id INTEGER PRIMARY KEY, nom TEXT NOT NULL, poste TEXT NOT NULL DEFAULT 'ADS', tel TEXT NOT NULL DEFAULT '', carte TEXT NOT NULL DEFAULT '', validite TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', actif INTEGER NOT NULL DEFAULT 1, cree TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS demandes (id INTEGER PRIMARY KEY, recu TEXT NOT NULL, statut TEXT NOT NULL DEFAULT 'nouvelle', data TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS candidatures (id INTEGER PRIMARY KEY, recu TEXT NOT NULL, statut TEXT NOT NULL DEFAULT 'nouvelle', data TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS avis (id INTEGER PRIMARY KEY, recu TEXT NOT NULL, nom TEXT NOT NULL, note INTEGER NOT NULL, prestation TEXT NOT NULL DEFAULT '', texte TEXT NOT NULL, email TEXT NOT NULL DEFAULT '', statut TEXT NOT NULL DEFAULT 'attente');
+      CREATE TABLE IF NOT EXISTS visites (jour TEXT NOT NULL, page TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (jour, page));
+      PRAGMA user_version = 1;
+    SQL);
+  }
+  if ($version < 2) {
+    // Créations graphiques : cartes professionnelles des agents et flyers
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS creations (id INTEGER PRIMARY KEY, type TEXT NOT NULL, titre TEXT NOT NULL DEFAULT '', data TEXT NOT NULL, cree TEXT NOT NULL, maj TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_creations ON creations (type, maj);
+      PRAGMA user_version = 2;
+    SQL);
+  }
 }
 
 /* ---------- Outils ---------- */

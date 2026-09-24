@@ -1,24 +1,32 @@
 /* =========================================================
    ESPACE ADMIN BDA — démarrage, connexion, menu et navigation
    ========================================================= */
-import { api, quandDeconnecte, h, $, $$, icone, blason, toast, erreur, champ, saisie } from './outils.js';
+import { api, quandDeconnecte, h, $, $$, icone, ecusson, toast, erreur, champ, saisie } from './outils.js';
 import { PAGES } from './pages.js';
 
 const racine = document.getElementById('app');
 const etat = { session: null, compteurs: {} };
 
 const MENU = [
-  { route: '', libelle: 'Tableau de bord', icone: 'tableau' },
-  { route: 'demandes', libelle: 'Demandes', icone: 'demande', badge: 'demandes' },
+  { route: '', libelle: 'Accueil', icone: 'accueil' },
+  { groupe: 'Gestion' },
   { route: 'devis', libelle: 'Devis', icone: 'devis' },
   { route: 'factures', libelle: 'Factures', icone: 'facture', badge: 'retards', alerte: true },
   { route: 'planning', libelle: 'Planning', icone: 'planning' },
   { route: 'clients', libelle: 'Clients', icone: 'clients' },
+  { groupe: 'Équipe' },
   { route: 'agents', libelle: 'Agents', icone: 'agents' },
-  { route: 'avis', libelle: 'Avis clients', icone: 'avis', badge: 'avis' },
+  { route: 'cartes', libelle: 'Cartes agents', icone: 'badge' },
   { route: 'candidatures', libelle: 'Candidatures', icone: 'candidature', badge: 'candidatures' },
-  { route: 'parametres', libelle: 'Paramètres', icone: 'reglages' },
+  { groupe: 'Site & communication' },
+  { route: 'demandes', libelle: 'Demandes', icone: 'demande', badge: 'demandes' },
+  { route: 'avis', libelle: 'Avis clients', icone: 'avis', badge: 'avis' },
+  { route: 'flyers', libelle: 'Flyers', icone: 'flyer' },
 ];
+// Rubrique affichée au-dessus du titre de chaque page
+const GROUPE = {};
+MENU.reduce((g, m) => { if (m.groupe) return m.groupe; GROUPE[m.route] = g; return g; }, 'Espace admin');
+GROUPE.parametres = 'Compte';
 
 /* ---------- Démarrage ---------- */
 async function demarrer() {
@@ -39,9 +47,8 @@ async function demarrer() {
 /* ---------- Écrans de connexion ---------- */
 function ecranAccueil(titre, ...contenu) {
   return h('main', { class: 'auth' },
-    h('div', { class: 'auth__aurora', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')),
     h('section', { class: 'auth__carte' },
-      h('div', { class: 'auth__marque' }, blason('auth__blason'), h('div', null, h('b', null, 'BDA'), h('small', null, 'Sécurité & VTC Premium'))),
+      h('div', { class: 'auth__marque' }, ecusson(), h('div', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Espace administrateur'))),
       h('h1', null, titre),
       contenu));
 }
@@ -126,31 +133,34 @@ function ecranSecours() {
 }
 
 /* ---------- Application ---------- */
-let zonePage, titrePage, actionsPage, menuEl;
+let zonePage, titrePage, kickerPage, actionsPage, menuEl;
 
 function lancerApplication() {
-  menuEl = h('nav', { class: 'nav', 'aria-label': 'Menu principal' }, MENU.map((m) => h('a', {
-    href: `#/${m.route}`, class: 'nav__item', dataset: { route: m.route },
-    onclick: () => document.body.classList.remove('menu-ouvert'),
-  }, icone(m.icone), h('span', null, m.libelle), m.badge ? h('b', { class: `nav__badge ${m.alerte ? 'nav__badge--alerte' : ''}`, dataset: { badge: m.badge }, hidden: true }) : null)));
+  const fermerMenu = () => document.body.classList.remove('menu-ouvert');
+  const lien = (m) => h('a', { href: `#/${m.route}`, class: 'nav__item', dataset: { route: m.route }, onclick: fermerMenu },
+    icone(m.icone), h('span', null, m.libelle), m.badge ? h('b', { class: `nav__badge ${m.alerte ? 'nav__badge--alerte' : ''}`, dataset: { badge: m.badge }, hidden: true }) : null);
+  menuEl = h('nav', { class: 'nav', 'aria-label': 'Menu principal' }, MENU.map((m) => (m.groupe ? h('p', { class: 'nav__groupe' }, m.groupe) : lien(m))));
 
+  const utilisateur = String(etat.session.utilisateur || '');
   const cote = h('aside', { class: 'cote' },
-    h('a', { href: '#/', class: 'cote__marque' }, blason('cote__blason'), h('div', null, h('b', null, 'BDA'), h('small', null, 'Espace admin'))),
+    h('a', { href: '#/', class: 'cote__marque', onclick: fermerMenu }, ecusson(), h('div', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Espace admin'))),
     menuEl,
     h('div', { class: 'cote__bas' },
+      lien({ route: 'parametres', libelle: 'Paramètres', icone: 'reglages' }),
       h('a', { class: 'nav__item', href: '/', target: '_blank', rel: 'noopener' }, icone('site'), h('span', null, 'Voir le site')),
-      h('button', { class: 'nav__item', type: 'button', onclick: deconnexion }, icone('sortie'), h('span', null, 'Déconnexion')),
-      h('p', { class: 'cote__user' }, 'Connecté : ', h('b', null, etat.session.utilisateur))));
+      h('div', { class: 'profil' }, h('span', { class: 'profil__avatar', 'aria-hidden': 'true' }, utilisateur.charAt(0) || 'A'),
+        h('div', null, h('b', null, utilisateur), h('small', null, 'Administrateur')),
+        h('button', { class: 'icon-btn', type: 'button', title: 'Se déconnecter', 'aria-label': 'Se déconnecter', onclick: deconnexion }, icone('sortie')))));
 
+  kickerPage = h('span', { class: 'haut__kicker' });
   titrePage = h('h1', { class: 'haut__titre' });
   actionsPage = h('div', { class: 'haut__actions' });
   zonePage = h('div', { class: 'page', id: 'page' });
   const haut = h('header', { class: 'haut' },
     h('button', { class: 'icon-btn haut__menu', type: 'button', 'aria-label': 'Ouvrir le menu', onclick: () => document.body.classList.toggle('menu-ouvert') }, icone('menu')),
-    titrePage, actionsPage);
+    h('div', { class: 'haut__textes' }, kickerPage, titrePage), actionsPage);
 
   racine.replaceChildren(h('div', { class: 'appli' },
-    h('div', { class: 'appli__fond', 'aria-hidden': 'true' }),
     cote,
     h('div', { class: 'voile', onclick: () => document.body.classList.remove('menu-ouvert') }),
     h('div', { class: 'principal' }, haut, zonePage)));
@@ -185,11 +195,12 @@ let jetonNavigation = 0;
 async function router() {
   const [route = '', ...params] = location.hash.replace(/^#\/?/, '').split('/').map(decodeURIComponent);
   const page = PAGES[route] || PAGES[''];
-  $$('.nav__item[data-route]', menuEl).forEach((a) => a.classList.toggle('is-actif', a.dataset.route === (PAGES[route] ? route : '')));
+  $$('.cote .nav__item[data-route]').forEach((a) => a.classList.toggle('is-actif', a.dataset.route === (PAGES[route] ? route : '')));
   const jeton = ++jetonNavigation;
   zonePage.replaceChildren(h('div', { class: 'chargement' }, h('span'), h('span'), h('span')));
   actionsPage.replaceChildren();
   titrePage.textContent = '';
+  kickerPage.textContent = GROUPE[PAGES[route] ? route : ''] || '';
   zonePage.scrollTop = 0;
   window.scrollTo(0, 0);
   const ctx = {

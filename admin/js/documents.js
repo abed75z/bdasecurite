@@ -30,7 +30,6 @@ export async function listeDocuments(ctx, type) {
 
   let filtre = 'tous', recherche = '';
   const corps = h('tbody');
-  const resume = h('div', { class: 'resume' });
   const chips = h('div', { class: 'chips' });
 
   function dessiner() {
@@ -53,32 +52,13 @@ export async function listeDocuments(ctx, type) {
   chips.replaceChildren(...filtres.map((f) => h('button', { type: 'button', class: `chip ${f === filtre ? 'is-actif' : ''}`, onclick: (e) => { filtre = f; $$('.chip', chips).forEach((c) => c.classList.remove('is-actif')); e.currentTarget.classList.add('is-actif'); dessiner(); } },
     f === 'tous' ? 'Tous' : f === 'retard' ? 'En retard' : LIBELLE_STATUT[f], h('span', null, comptes[f] || 0))));
 
-  if (type === 'facture') {
-    const somme = (l) => l.reduce((s, d) => s + d.total, 0);
-    const annee = String(new Date().getFullYear());
-    resume.replaceChildren(
-      tuile('À encaisser', euro.format(somme(documents.filter((d) => d.statut === 'envoyee'))), `${comptes.envoyee} facture${comptes.envoyee > 1 ? 's' : ''} envoyée${comptes.envoyee > 1 ? 's' : ''}`),
-      tuile('En retard', euro.format(somme(documents.filter(enRetard))), `${comptes.retard} facture${comptes.retard > 1 ? 's' : ''}`, comptes.retard ? 'alerte' : ''),
-      tuile(`Encaissé en ${annee}`, euro.format(somme(documents.filter((d) => d.statut === 'payee' && d.date.startsWith(annee)))), 'factures payées'));
-  } else {
-    const somme = (l) => l.reduce((s, d) => s + d.total, 0);
-    const signes = documents.filter((d) => d.statut === 'accepte' || d.statut === 'refuse');
-    resume.replaceChildren(
-      tuile('En attente de réponse', euro.format(somme(documents.filter((d) => d.statut === 'envoye'))), `${comptes.envoye} devis envoyé${comptes.envoye > 1 ? 's' : ''}`),
-      tuile('Acceptés', euro.format(somme(documents.filter((d) => d.statut === 'accepte'))), `${comptes.accepte} devis`),
-      tuile('Taux de signature', signes.length ? `${Math.round((comptes.accepte / signes.length) * 100)} %` : '—', 'sur les devis ayant reçu une réponse'));
-  }
-
   const rech = saisie({ type: 'search', placeholder: 'Numéro ou client…', class: 'input input--recherche', oninput: (e) => { recherche = e.target.value; dessiner(); } });
-  ctx.afficher(resume, h('section', { class: 'carte' },
+  ctx.afficher(h('section', { class: 'carte' },
     h('div', { class: 'carte__outils' }, chips, h('div', { class: 'recherche' }, icone('recherche'), rech)),
     h('div', { class: 'tableau-defil' }, h('table', { class: 'tableau' },
       h('thead', null, h('tr', null, h('th', null, 'N°'), h('th', null, 'Client'), h('th', null, 'Date'), type === 'facture' ? h('th', null, 'Échéance') : null, h('th', { class: 'num' }, 'Montant'), h('th', null, 'Statut'))),
       corps))));
   dessiner();
-}
-function tuile(label, valeur, sous, cls = '') {
-  return h('div', { class: `tuile ${cls}` }, h('span', { class: 'tuile__label' }, label), h('b', { class: 'tuile__valeur' }, valeur), h('small', null, sous));
 }
 
 /* =========================================================

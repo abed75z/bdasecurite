@@ -2,15 +2,15 @@
 <!-- Plan du site pour Google : à envoyer dans Google Search Console (Sitemaps > sitemap.xml) -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://bdasecurite.com/</loc><lastmod>2026-09-24</lastmod></url>
-  <url><loc>https://bdasecurite.com/securite-privee-paris.html</loc><lastmod>2026-09-24</lastmod></url>
-  <url><loc>https://bdasecurite.com/protection-rapprochee-paris.html</loc><lastmod>2026-09-24</lastmod></url>
-  <url><loc>https://bdasecurite.com/securite-evenementielle-paris.html</loc><lastmod>2026-09-24</lastmod></url>
-  <url><loc>https://bdasecurite.com/chauffeur-securite-vip-paris.html</loc><lastmod>2026-09-24</lastmod></url>
-  <url><loc>https://bdasecurite.com/chauffeur-prive-vtc-paris.html</loc><lastmod>2026-09-24</lastmod></url>
-  <url><loc>https://bdasecurite.com/transfert-aeroport-paris.html</loc><lastmod>2026-09-24</lastmod></url>
-  <url><loc>https://bdasecurite.com/chauffeur-mariage-paris.html</loc><lastmod>2026-09-24</lastmod></url>
-  <url><loc>https://bdasecurite.com/devis.html</loc><lastmod>2026-09-24</lastmod></url>
-  <url><loc>https://bdasecurite.com/avis.html</loc><lastmod>2026-09-24</lastmod></url>
-  <url><loc>https://bdasecurite.com/recrutement.html</loc><lastmod>2026-09-24</lastmod></url>
-  <url><loc>https://bdasecurite.com/mentions-legales.html</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://bdasecurite.com/securite-privee-paris</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://bdasecurite.com/protection-rapprochee-paris</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://bdasecurite.com/securite-evenementielle-paris</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://bdasecurite.com/chauffeur-securite-vip-paris</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://bdasecurite.com/chauffeur-prive-vtc-paris</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://bdasecurite.com/transfert-aeroport-paris</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://bdasecurite.com/chauffeur-mariage-paris</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://bdasecurite.com/devis</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://bdasecurite.com/avis</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://bdasecurite.com/recrutement</loc><lastmod>2026-09-24</lastmod></url>
+  <url><loc>https://bdasecurite.com/mentions-legales</loc><lastmod>2026-09-24</lastmod></url>
 </urlset>

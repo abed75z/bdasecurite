@@ -29,7 +29,9 @@ Les demandes de devis **et** les candidatures arrivent sur bdasecurite@gmail.com
 
 Téléphone : le **06 11 67 86 25** est le numéro principal (tous les boutons « Appeler »). Le 07 84 73 90 70 est affiché en second dans les coordonnées. Le bouton WhatsApp ouvre une conversation avec le 07 84 73 90 70.
 
-Pour voir le site : double-cliquez sur `index.html`.
+**Adresses sans « .html » :** chaque fichier `nom.html` s'affiche à l'adresse `https://bdasecurite.com/nom` (exemple : `https://bdasecurite.com/devis`). C'est le fichier `.htaccess` qui s'en charge. Les anciennes adresses en `.html` redirigent automatiquement vers les nouvelles. Dans les liens entre pages, écrivez toujours l'adresse sans `.html` (`href="devis"`, `href="/"` pour l'accueil).
+
+Pour voir le site : ouvrez <https://bdasecurite.com>. En double-cliquant sur un fichier, les pages s'ouvrent mais les liens entre pages ne fonctionnent pas : il faut passer par un serveur, comme le site en ligne.
 
 ## Informations de l'entreprise
 
@@ -117,8 +119,8 @@ Tant que l'étape 6 n'est pas faite, les avis déposés arrivent par email mais 
 
 ## Liens directs vers le questionnaire
 
-- `devis.html` : questionnaire vierge.
-- `devis.html?service=protection` : prestation pré-cochée. Valeurs possibles : `gardiennage`, `protection`, `evenementiel`, `transfert`, `disposition`, `evenement`, `duo`, `autre`.
+- `https://bdasecurite.com/devis` : questionnaire vierge.
+- `https://bdasecurite.com/devis?service=protection` : prestation pré-cochée. Valeurs possibles : `gardiennage`, `protection`, `evenementiel`, `transfert`, `disposition`, `evenement`, `duo`, `autre`.
 
 ## Structure
 

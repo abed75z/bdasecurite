@@ -19,7 +19,7 @@
 const DEVIS_CONFIG = {
   endpoint: 'https://formsubmit.co/ajax/bdasecurite@gmail.com',
   extraFields: { _template: 'table', _captcha: 'false' },
-  redirectTo: 'merci.html',
+  redirectTo: 'merci',
 };
 
 (() => {
@@ -166,7 +166,7 @@ const DEVIS_CONFIG = {
     if (current < steps.length - 1) next(); else form.requestSubmit();
   });
 
-  /* ---------- Prestation pré-sélectionnée : devis.html?service=transfert ---------- */
+  /* ---------- Prestation pré-sélectionnée : devis?service=transfert ---------- */
   const service = new URLSearchParams(location.search).get('service');
   const pre = service && form.querySelector(`input[name="prestation"][data-id="${CSS.escape(service)}"]`);
   if (pre) pre.checked = true;

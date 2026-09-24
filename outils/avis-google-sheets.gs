@@ -14,7 +14,7 @@
 const ONGLET = 'Avis';
 const EMAIL_NOTIFICATION = 'bdasecurite@gmail.com';
 
-/* Lecture des avis publiés (appelée par la page avis.html) */
+/* Lecture des avis publiés (appelée par la page Avis du site) */
 function doGet() {
   const lignes = feuille_().getDataRange().getValues().slice(1);
   const avis = lignes

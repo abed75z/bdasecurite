@@ -25,6 +25,8 @@ const STATUTS = [
   'candidature' => ['nouvelle', 'en_cours', 'retenue', 'refusee'],
   'avis' => ['attente', 'publie', 'refuse'],
 ];
+// Documents d'un agent (les 5 premiers sont obligatoires)
+const DOC_TYPES = ['identite', 'carte_pro', 'diplome_aps', 'secu', 'rib', 'certif', 'attestation', 'cv', 'dossier', 'autre'];
 
 /* ---------- Réponses JSON ---------- */
 function repondre(array $data, int $code = 200): void
@@ -120,6 +122,15 @@ function schema(PDO $db): void
       CREATE TABLE IF NOT EXISTS creations (id INTEGER PRIMARY KEY, type TEXT NOT NULL, titre TEXT NOT NULL DEFAULT '', data TEXT NOT NULL, cree TEXT NOT NULL, maj TEXT NOT NULL);
       CREATE INDEX IF NOT EXISTS i_creations ON creations (type, maj);
       PRAGMA user_version = 2;
+    SQL);
+  }
+  if ($version < 3) {
+    // Agents « primaires » (équipe) / « secondaires » (renfort) et leurs documents (fichiers hors du site)
+    $db->exec(<<<'SQL'
+      ALTER TABLE agents ADD COLUMN categorie TEXT NOT NULL DEFAULT 'primaire';
+      CREATE TABLE IF NOT EXISTS agent_docs (id INTEGER PRIMARY KEY, agent_id INTEGER NOT NULL, type TEXT NOT NULL, nom TEXT NOT NULL, fichier TEXT NOT NULL, mime TEXT NOT NULL, taille INTEGER NOT NULL, ajoute TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_agent_docs ON agent_docs (agent_id);
+      PRAGMA user_version = 3;
     SQL);
   }
 }

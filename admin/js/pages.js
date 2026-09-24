@@ -11,6 +11,7 @@ import { pagePlanning } from './planning.js';
 import { pageCartes } from './cartes.js';
 import { pageFlyers } from './flyers.js';
 import { pageVisites } from './visites.js';
+import { pageAgents } from './agents.js';
 
 export const PAGES = {
   '': pageAccueil,
@@ -79,7 +80,7 @@ async function pageAccueil(ctx) {
     c.avis && { n: c.avis, href: '#/avis', titre: pluriel(c.avis, 'avis à valider', 'avis à valider'), sous: 'Publiez-les ou refusez-les' },
     c.candidatures && { n: c.candidatures, href: '#/candidatures', titre: pluriel(c.candidatures, 'nouvelle candidature', 'nouvelles candidatures'), sous: 'Page Recrutement' },
     c.retards && { n: c.retards, href: '#/factures', titre: pluriel(c.retards, 'facture à relancer', 'factures à relancer'), sous: 'Échéance dépassée', alerte: true },
-    ...a.agentsAlerte.map((ag) => ({ n: '!', href: '#/agents', titre: `Carte pro de ${ag.nom}`, sous: `${ag.validite < a.aujourdhui ? 'Expirée le' : 'Expire le'} ${isoVersFr(ag.validite)}`, alerte: ag.validite < a.aujourdhui })),
+    ...a.agentsAlerte.map((ag) => ({ n: '!', href: `#/agents/${ag.id}`, titre: `Carte pro de ${ag.nom}`, sous: `${ag.validite < a.aujourdhui ? 'Expirée le' : 'Expire le'} ${isoVersFr(ag.validite)}`, alerte: ag.validite < a.aujourdhui })),
   ].filter(Boolean);
   const aFaire = taches.length ? h('ul', { class: 'todo' }, taches.map((t) => h('li', null, h('a', { href: t.href },
     h('span', { class: `todo__n ${t.alerte ? 'todo__n--alerte' : ''}` }, t.n), h('span', { class: 'todo__txt' }, h('b', null, t.titre), h('small', null, t.sous)), icone('suivant')))))
@@ -229,7 +230,7 @@ async function pageCandidatures(ctx) {
       if (choix === 'statut' || choix === 'agent') {
         if (sel.value !== c.statut) { await api('candidature.statut', { id: c.id, statut: sel.value }); c.statut = sel.value; }
         if (choix === 'agent') {
-          await api('agent.enregistrer', { nom: v['Nom et prénom'] || '', poste: /vtc|chauffeur/i.test(v.Poste || '') ? 'Chauffeur VTC' : 'ADS', tel, carte: v['N° de carte'] && v['N° de carte'] !== 'Non précisé' ? v['N° de carte'] : '', actif: 1 });
+          await api('agent.enregistrer', { categorie: 'secondaire', nom: v['Nom et prénom'] || '', poste: /vtc|chauffeur/i.test(v.Poste || '') ? 'Chauffeur VTC' : 'ADS', tel, carte: v['N° de carte'] && v['N° de carte'] !== 'Non précisé' ? v['N° de carte'] : '', actif: 1 });
           toast('Ajouté à vos agents.');
         }
       } else if (choix === 'supprimer') {
@@ -328,58 +329,6 @@ async function pageClients(ctx) {
 }
 
 /* =========================================================
-   AGENTS
-   ========================================================= */
-async function pageAgents(ctx) {
-  ctx.titre('Agents');
-  let { agents } = await api('agents');
-  ctx.actions(h('button', { class: 'btn btn--gold', type: 'button', onclick: () => editer() }, icone('plus'), h('span', null, 'Nouvel agent')));
-  const auj = iso(new Date());
-  const dans90 = iso(new Date(Date.now() + 90 * 864e5));
-  const etatCarte = (v) => (!v ? null : v < auj ? statutPastille('retard', 'Expirée') : v <= dans90 ? statutPastille('nouvelle', 'Expire bientôt') : statutPastille('publie', 'Valide'));
-  const corps = h('tbody');
-  const dessiner = () => corps.replaceChildren(...(agents.length ? agents.map((a) => h('tr', { class: `ligne-clic ${+a.actif ? '' : 'inactif'}`, tabindex: 0, onclick: () => editer(a), onkeydown: (e) => { if (e.key === 'Enter') editer(a); } },
-    h('td', null, h('b', null, a.nom), +a.actif ? null : h('span', { class: 'muet' }, ' (inactif)')), h('td', null, a.poste), h('td', null, a.tel),
-    h('td', { class: 'mono' }, a.carte || '—'), h('td', null, a.validite ? isoVersFr(a.validite) : '—', ' ', etatCarte(a.validite)),
-    h('td', { class: 'td-actions' }, h('a', { class: 'btn btn--ghost btn--petit', href: `#/cartes/agent/${a.id}`, onclick: (e) => e.stopPropagation() }, icone('badge'), 'Carte')))) : [h('tr', null, h('td', { colspan: 6, class: 'vide-ligne' }, 'Aucun agent. Ajoutez vos agents pour les retrouver dans le planning et suivre la validité de leur carte professionnelle.'))]));
-  async function editer(a = { nom: '', poste: 'ADS', tel: '', carte: '', validite: '', notes: '', actif: 1 }) {
-    const f = {
-      nom: saisie({ value: a.nom, required: true }),
-      poste: h('select', { class: 'input' }, ['ADS', 'Agent de protection rapprochée', 'Agent événementiel', 'Chef d\'équipe', 'Chauffeur VTC', 'SSIAP'].map((p) => h('option', { value: p, selected: p === a.poste }, p)), !['ADS', 'Agent de protection rapprochée', 'Agent événementiel', 'Chef d\'équipe', 'Chauffeur VTC', 'SSIAP'].includes(a.poste) ? h('option', { value: a.poste, selected: true }, a.poste) : null),
-      tel: saisie({ value: a.tel, type: 'tel' }),
-      carte: saisie({ value: a.carte, placeholder: 'ex. CAR-075-2029-…' }),
-      validite: saisie({ value: a.validite, type: 'date' }),
-      notes: zoneTexte({ value: a.notes, rows: 3 }),
-      actif: h('input', { type: 'checkbox', checked: !!+a.actif }),
-    };
-    const choix = await modale({
-      titre: a.id ? a.nom : 'Nouvel agent',
-      contenu: h('div', { class: 'form-grille' }, champ('Nom et prénom', f.nom), champ('Poste', f.poste), champ('Téléphone', f.tel),
-        champ('N° de carte professionnelle', f.carte), champ('Carte valable jusqu\'au', f.validite, 'Vous serez prévenu 3 mois avant l\'expiration.'), champ('Notes (privées)', f.notes),
-        h('label', { class: 'case' }, f.actif, h('span', null, 'Agent actif (proposé dans le planning)'))),
-      actions: [
-        a.id ? { libelle: 'Supprimer', classe: 'btn--danger-ghost', valeur: 'supprimer' } : null,
-        { libelle: 'Enregistrer', classe: 'btn--gold', submit: true, action: async () => {
-          if (!f.nom.value.trim()) { f.nom.focus(); return false; }
-          try { await api('agent.enregistrer', { id: a.id, nom: f.nom.value, poste: f.poste.value, tel: f.tel.value, carte: f.carte.value, validite: f.validite.value, notes: f.notes.value, actif: f.actif.checked ? 1 : 0 }); return 'ok'; } catch (e) { erreur(e); return false; }
-        } },
-      ].filter(Boolean),
-    });
-    try {
-      if (choix === 'supprimer') {
-        if (!(await confirmer(`Supprimer ${a.nom} ? Les plannings déjà faits ne changent pas.`, { ok: 'Supprimer', danger: true }))) return;
-        await api('agent.supprimer', { id: a.id });
-      }
-      if (choix) { ({ agents } = await api('agents')); dessiner(); toast(choix === 'supprimer' ? 'Agent supprimé.' : 'Agent enregistré.'); }
-    } catch (e) { erreur(e); }
-  }
-  ctx.afficher(carte(null, h('div', { class: 'tableau-defil' }, h('table', { class: 'tableau' },
-    h('thead', null, h('tr', null, h('th', null, 'Nom'), h('th', null, 'Poste'), h('th', null, 'Téléphone'), h('th', null, 'Carte professionnelle'), h('th', null, 'Validité'), h('th', null, ''))), corps))),
-    h('p', { class: 'astuce' }, "Les cartes pro qui expirent dans moins de 3 mois apparaissent sur l'accueil. Le bouton « Carte » crée la carte agent BDA à imprimer."));
-  dessiner();
-}
-
-/* =========================================================
    PARAMÈTRES
    ========================================================= */
 async function pageParametres(ctx) {
@@ -419,7 +368,7 @@ async function pageParametres(ctx) {
   } }, champ('Mot de passe actuel', mdp.actuel), champ('Nouveau mot de passe', mdp.nouveau, '10 caractères minimum'), champ('Confirmez', mdp.confirme), h('div', null, h('button', { class: 'btn btn--ghost', type: 'submit' }, icone('cadenas'), 'Changer le mot de passe')));
 
   const sauvegarde = h('div', { class: 'sauvegarde' },
-    h('p', null, 'Téléchargez une copie complète de vos données (devis, factures, plannings, clients, agents, avis…). Conseil : faites-le une fois par mois et gardez le fichier en lieu sûr.'),
+    h('p', null, 'Téléchargez une copie de vos données (devis, factures, plannings, clients, agents, avis…). Les documents des agents (pièces d'identité, cartes pro…) restent uniquement sur le serveur privé. Conseil : faites-le une fois par mois et gardez le fichier en lieu sûr.'),
     h('div', { class: 'sauvegarde__actions' },
       h('button', { class: 'btn btn--gold', type: 'button', onclick: async () => { try { const d = await api('export'); telecharger(`bda-sauvegarde-${iso(new Date())}.json`, JSON.stringify(d, null, 2)); } catch (e) { erreur(e); } } }, icone('telecharger'), 'Télécharger une sauvegarde'),
       boutonImport(() => ctx.aller('#/'))));

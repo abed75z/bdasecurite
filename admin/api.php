@@ -23,7 +23,7 @@ if ($methode === 'POST') {
 $libres = ['session', 'connexion', 'activation', 'secours'];
 if (!in_array($action, $libres, true) && !connecte()) echec('Connexion requise.', 401);
 
-$lecture = ['session', 'accueil', 'compteurs', 'creations', 'creation', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
+$lecture = ['session', 'accueil', 'compteurs', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -260,17 +260,83 @@ try {
       supprimer_ligne('clients', (int)(corps()['id'] ?? 0));
 
     case 'agents':
-      repondre(['ok' => true, 'agents' => db()->query('SELECT * FROM agents ORDER BY actif DESC, nom COLLATE NOCASE')->fetchAll()]);
+      $agents = db()->query('SELECT * FROM agents ORDER BY actif DESC, nom COLLATE NOCASE')->fetchAll();
+      $docs = [];
+      foreach (db()->query('SELECT agent_id, type, COUNT(*) n FROM agent_docs GROUP BY agent_id, type') as $l) $docs[(int)$l['agent_id']][$l['type']] = (int)$l['n'];
+      foreach ($agents as &$a) $a['docs'] = (object)($docs[(int)$a['id']] ?? []);
+      repondre(['ok' => true, 'agents' => $agents]);
 
     case 'agent.enregistrer':
       $b = corps();
-      $v = [texte($b['nom'] ?? '', 120), texte($b['poste'] ?? 'ADS', 60), texte($b['tel'] ?? '', 60), texte($b['carte'] ?? '', 80), texte($b['validite'] ?? '', 10), texte($b['notes'] ?? '', 2000), empty($b['actif']) ? 0 : 1];
+      $v = [texte($b['nom'] ?? '', 120), texte($b['poste'] ?? 'ADS', 60), texte($b['tel'] ?? '', 60), texte($b['carte'] ?? '', 80), texte($b['validite'] ?? '', 10), texte($b['notes'] ?? '', 2000), empty($b['actif']) ? 0 : 1, ($b['categorie'] ?? '') === 'secondaire' ? 'secondaire' : 'primaire'];
       if ($v[0] === '') echec("Le nom de l'agent est obligatoire.");
       if ($v[4] !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $v[4])) echec('Date de validité invalide.');
-      repondre(['ok' => true, 'id' => enregistrer_ligne('agents', ['nom', 'poste', 'tel', 'carte', 'validite', 'notes', 'actif'], $v, (int)($b['id'] ?? 0))]);
+      repondre(['ok' => true, 'id' => enregistrer_ligne('agents', ['nom', 'poste', 'tel', 'carte', 'validite', 'notes', 'actif', 'categorie'], $v, (int)($b['id'] ?? 0))]);
 
     case 'agent.supprimer':
-      supprimer_ligne('agents', (int)(corps()['id'] ?? 0));
+      $id = (int)(corps()['id'] ?? 0);
+      $st = db()->prepare('SELECT fichier FROM agent_docs WHERE agent_id = ?');
+      $st->execute([$id]);
+      foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $f) @unlink(dossier_docs() . '/' . basename((string)$f));
+      db()->prepare('DELETE FROM agent_docs WHERE agent_id = ?')->execute([$id]);
+      supprimer_ligne('agents', $id);
+
+    /* ----- Documents des agents (pièces d'identité, cartes pro…) : fichiers privés, hors du site ----- */
+    case 'agent.docs':
+      $st = db()->prepare('SELECT id, type, nom, mime, taille, ajoute FROM agent_docs WHERE agent_id = ? ORDER BY type, nom');
+      $st->execute([(int)($_GET['agent'] ?? 0)]);
+      repondre(['ok' => true, 'docs' => $st->fetchAll(), 'limite' => limite_envoi()]);
+
+    case 'agent.doc':
+      $st = db()->prepare('SELECT * FROM agent_docs WHERE id = ?');
+      $st->execute([(int)($_GET['id'] ?? 0)]);
+      $doc = $st->fetch();
+      $chemin = $doc ? dossier_docs() . '/' . basename((string)$doc['fichier']) : '';
+      if (!$doc || !is_file($chemin)) echec('Document introuvable.', 404);
+      header('Content-Type: ' . $doc['mime']);
+      header('Content-Length: ' . filesize($chemin));
+      header('Content-Disposition: inline; filename="' . preg_replace('/[^\w .()-]+/u', '_', (string)$doc['nom']) . '"');
+      header('Cache-Control: private, no-store');
+      header("Content-Security-Policy: default-src 'none'; img-src 'self'; style-src 'unsafe-inline'");
+      readfile($chemin);
+      exit;
+
+    case 'agent.doc.ajouter':
+      $agent = (int)($_POST['agent'] ?? 0);
+      $st = db()->prepare('SELECT COUNT(*) FROM agents WHERE id = ?');
+      $st->execute([$agent]);
+      if (!(int)$st->fetchColumn()) echec('Agent introuvable.', 404);
+      $f = $_FILES['fichier'] ?? null;
+      if (!is_array($f) || ($f['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file((string)$f['tmp_name'])) {
+        $code = is_array($f) ? (int)$f['error'] : 0;
+        echec(in_array($code, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true) ? "Fichier trop lourd pour l'hébergement." : "Le fichier n'a pas été reçu.", 400);
+      }
+      if ((int)$f['size'] > 15 * 1024 * 1024) echec('Fichier trop lourd (15 Mo maximum).');
+      $mime = type_fichier((string)$f['tmp_name']);
+      if ($mime === '') echec('Format non accepté : PDF, JPG, PNG ou WEBP uniquement.');
+      $type = in_array($_POST['type'] ?? '', DOC_TYPES, true) ? (string)$_POST['type'] : 'autre';
+      $nom = texte($_POST['nom'] ?? $f['name'] ?? 'document', 160);
+      $existe = db()->prepare('SELECT COUNT(*) FROM agent_docs WHERE agent_id = ? AND nom = ?');
+      $existe->execute([$agent, $nom]);
+      if ((int)$existe->fetchColumn()) repondre(['ok' => true, 'doublon' => true]);
+      $fichier = bin2hex(random_bytes(16)) . '.bin';
+      if (!move_uploaded_file((string)$f['tmp_name'], dossier_docs() . '/' . $fichier)) echec("Enregistrement du fichier impossible.", 500);
+      db()->prepare('INSERT INTO agent_docs (agent_id, type, nom, fichier, mime, taille, ajoute) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$agent, $type, $nom, $fichier, $mime, (int)$f['size'], maintenant()]);
+      repondre(['ok' => true, 'id' => (int)db()->lastInsertId()]);
+
+    case 'agent.doc.modifier':
+      $b = corps();
+      if (!in_array($b['type'] ?? '', DOC_TYPES, true)) echec('Type de document inconnu.');
+      db()->prepare('UPDATE agent_docs SET type = ? WHERE id = ?')->execute([$b['type'], (int)($b['id'] ?? 0)]);
+      repondre(['ok' => true]);
+
+    case 'agent.doc.supprimer':
+      $id = (int)(corps()['id'] ?? 0);
+      $st = db()->prepare('SELECT fichier FROM agent_docs WHERE id = ?');
+      $st->execute([$id]);
+      $f = (string)$st->fetchColumn();
+      if ($f !== '') @unlink(dossier_docs() . '/' . basename($f));
+      supprimer_ligne('agent_docs', $id);
 
     /* ================= Demandes, candidatures, avis ================= */
     case 'demandes':
@@ -313,7 +379,7 @@ try {
 
     case 'export':
       $export = ['format' => 'bda-admin-sauvegarde', 'version' => 1, 'date' => maintenant(), 'reglages' => reglages()];
-      foreach (['documents', 'plannings', 'clients', 'agents', 'creations', 'demandes', 'candidatures', 'avis'] as $t) {
+      foreach (['documents', 'plannings', 'clients', 'agents', 'agent_docs', 'creations', 'demandes', 'candidatures', 'avis'] as $t) {
         $export[$t] = db()->query("SELECT * FROM $t")->fetchAll();
       }
       header('Content-Disposition: attachment; filename="bda-sauvegarde-' . date('Y-m-d') . '.json"');
@@ -463,4 +529,31 @@ function importer_fichier(array $f): array
     }
   }
   return $res;
+}
+// Dossier privé des documents des agents (dans le stockage hors du site)
+function dossier_docs(): string
+{
+  $dir = dossier_donnees() . '/agents';
+  if (!is_dir($dir) && !@mkdir($dir, 0700, true)) echec('Espace de stockage indisponible.', 500);
+  return $dir;
+}
+// Vrai format du fichier, lu dans son contenu (pas dans son nom)
+function type_fichier(string $chemin): string
+{
+  $debut = (string)file_get_contents($chemin, false, null, 0, 16);
+  if (strncmp($debut, '%PDF', 4) === 0) return 'application/pdf';
+  if (strncmp($debut, "\x89PNG", 4) === 0) return 'image/png';
+  if (strncmp($debut, "\xFF\xD8\xFF", 3) === 0) return 'image/jpeg';
+  if (strncmp($debut, 'RIFF', 4) === 0 && substr($debut, 8, 4) === 'WEBP') return 'image/webp';
+  return '';
+}
+// Taille maximale d'un envoi acceptée par l'hébergement (en octets)
+function limite_envoi(): int
+{
+  $octets = function (string $v): int {
+    $n = (int)$v;
+    $u = strtolower(substr(trim($v), -1));
+    return $u === 'g' ? $n * 1073741824 : ($u === 'm' ? $n * 1048576 : ($u === 'k' ? $n * 1024 : $n));
+  };
+  return min($octets((string)ini_get('upload_max_filesize')), $octets((string)ini_get('post_max_size'))) ?: 2097152;
 }

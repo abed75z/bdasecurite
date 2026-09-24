@@ -32,6 +32,17 @@ export async function api(action, donnees, params = {}) {
   return json;
 }
 
+// Envoi d'un fichier (formulaire multipart), même protection que api()
+export async function apiFichier(action, formulaire) {
+  let res;
+  try { res = await fetch(`api.php?a=${encodeURIComponent(action)}`, { method: 'POST', credentials: 'same-origin', headers: { Accept: 'application/json', 'X-CSRF': jeton }, body: formulaire }); }
+  catch (e) { throw new ErreurApi('Connexion impossible. Vérifiez votre accès à internet.', 0); }
+  const json = await res.json().catch(() => ({}));
+  if (res.status === 401) surDeconnexion();
+  if (!res.ok || json.ok === false) throw new ErreurApi(json.erreur || (res.status === 413 ? 'Fichier trop lourd pour l\'hébergement.' : `Erreur ${res.status}`), res.status);
+  return json;
+}
+
 /* ---------- Création d'éléments (sans risque d'injection) ---------- */
 export function h(tag, attrs, ...enfants) {
   const el = document.createElement(tag);

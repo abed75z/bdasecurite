@@ -81,6 +81,27 @@ Déjà en place sur le site :
 
 Pour modifier le numéro de téléphone un jour : il apparaît dans toutes les pages (`tel:+33611678625`), ainsi que dans la fiche JSON-LD de chaque page.
 
+## Espace admin (bdasecurite.com/admin)
+
+Un espace privé, protégé par identifiant et mot de passe, pour gérer l'entreprise et le site :
+
+- **Tableau de bord** : chiffre d'affaires, factures à encaisser ou en retard, devis en attente, visites du site, cartes pro à renouveler.
+- **Devis / Factures** : feuilles A4 à nos couleurs, modifiables directement, enregistrées automatiquement, impression ou PDF en un clic. Un devis accepté se transforme en facture ; une facture peut reprendre les heures du planning.
+- **Planning** : planning mensuel des agents (heures, nuit, dimanche, fériés), impression paysage, création de la facture du mois.
+- **Demandes / Candidatures** : chaque formulaire du site y arrive, en plus de l'email FormSubmit. Une demande devient un devis en un clic.
+- **Avis clients** : les nouveaux avis attendent votre validation avant d'être publiés sur le site.
+- **Clients, Agents, Paramètres** : fiches, coordonnées de l'entreprise, IBAN, mentions, numérotation, sauvegarde complète.
+
+Première connexion : ouvrez `https://bdasecurite.com/admin`, saisissez le **code d'activation** remis par le développeur, puis choisissez votre identifiant et votre mot de passe. Le même code sert ensuite de code de secours en cas de mot de passe oublié : gardez-le en lieu sûr.
+
+Technique :
+
+- `admin/` : l'application (PHP + JavaScript, sans dépendance).
+- `api/` : réception des formulaires, avis et visites.
+- `app/` : code serveur commun, inaccessible depuis le web.
+- Les données (base SQLite) sont stockées **hors du dossier public**, dans `bda-admin-data/`, à côté de `www/` sur l'hébergement OVH. Elles ne sont ni sur GitHub ni accessibles depuis le web. Pensez à télécharger régulièrement une sauvegarde (Paramètres → Sauvegarde).
+- L'IBAN et les données clients ne sont jamais dans le code : ils se saisissent dans l'admin (ou via le fichier d'import gardé sur l'ordinateur).
+
 ## Réception des demandes de devis par email
 
 Les demandes sont envoyées à **bdasecurite@gmail.com** via FormSubmit.co (gratuit, sans inscription). Le réglage se trouve en haut de `assets/js/devis.js`.
@@ -100,7 +121,9 @@ Bon à savoir :
 - Tant que le formulaire n'est pas activé, le site affiche un message invitant à l'activer.
 - Anti-spam : après l'activation, FormSubmit fournit un alias (une suite de caractères). Remplacez l'adresse email par cet alias dans `endpoint`, pour qu'elle n'apparaisse plus dans le code du site.
 
-## Activer les avis clients (Google Sheets, gratuit, environ 5 minutes)
+## Ancien système d'avis (Google Sheets)
+
+> Depuis la mise en place de l'espace admin, les avis sont enregistrés et validés dans **bdasecurite.com/admin** (menu Avis clients). Les avis déjà publiés dans Google Sheets y ont été repris automatiquement. Les étapes ci-dessous ne servent plus que pour mémoire.
 
 Les avis sont enregistrés dans un tableau Google Sheets. Vous les validez avant qu'ils s'affichent sur le site.
 

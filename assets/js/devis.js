@@ -20,7 +20,20 @@ const DEVIS_CONFIG = {
   endpoint: 'https://formsubmit.co/ajax/bdasecurite@gmail.com',
   extraFields: { _template: 'table', _captcha: 'false' },
   redirectTo: 'merci',
+  admin: '/api/demande.php', // copie de chaque demande dans l'espace admin (bdasecurite.com/admin)
 };
+
+// Envoi d'une copie à l'espace admin du site
+function envoyerAdmin(url, payload) {
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(payload),
+  }).then(async (res) => {
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.ok) throw new Error(json.erreur || `HTTP ${res.status}`);
+  });
+}
 
 (() => {
   const form = document.getElementById('devis-form');
@@ -220,13 +233,18 @@ const DEVIS_CONFIG = {
     stepError(3, '');
     try {
       if (DEVIS_CONFIG.endpoint) {
-        const res = await fetch(DEVIS_CONFIG.endpoint, {
+        // Envoi en parallèle : email (FormSubmit) + espace admin. Un seul des deux suffit.
+        const email = fetch(DEVIS_CONFIG.endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify(payload),
+        }).then(async (res) => {
+          const json = await res.json().catch(() => ({}));
+          if (!res.ok || json.success === false || json.success === 'false') throw new Error(json.message || `HTTP ${res.status}`);
         });
-        const json = await res.json().catch(() => ({}));
-        if (!res.ok || json.success === false || json.success === 'false') throw new Error(json.message || `HTTP ${res.status}`);
+        const admin = DEVIS_CONFIG.admin ? envoyerAdmin(DEVIS_CONFIG.admin, payload) : Promise.reject(new Error('admin désactivé'));
+        const [rEmail, rAdmin] = await Promise.allSettled([email, admin]);
+        if (rEmail.status === 'rejected' && rAdmin.status === 'rejected') throw rEmail.reason;
       } else {
         console.info('[Devis] MODE DÉMO — aucune demande envoyée. Renseignez DEVIS_CONFIG.endpoint dans assets/js/devis.js.', payload);
         await wait(700);

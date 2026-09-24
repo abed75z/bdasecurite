@@ -67,7 +67,7 @@
   async function charger() {
     if (!list) return;
     if (!AVIS_CONFIG.endpoint) return afficher([]);
-    // 1) Affichage immédiat des derniers avis connus, 2) mise à jour dès que Google répond
+    // 1) Affichage immédiat des derniers avis connus, 2) mise à jour dès que le serveur répond
     const connus = AvisData.memoire();
     if (connus) afficher(connus);
     else list.innerHTML = '<div class="rv-skeleton"></div><div class="rv-skeleton"></div><div class="rv-skeleton"></div>';
@@ -145,7 +145,7 @@
     try {
       let ok = false;
       if (AVIS_CONFIG.endpoint) {
-        // Envoi « simple » (text/plain) : accepté directement par Google Apps Script
+        // Avis enregistré « en attente » : il apparaît sur le site une fois validé dans l'espace admin
         const res = await fetch(AVIS_CONFIG.endpoint, { method: 'POST', body: JSON.stringify(payload) });
         const json = await res.json().catch(() => ({}));
         ok = res.ok && json.ok !== false;

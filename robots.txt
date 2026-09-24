@@ -1,5 +1,8 @@
-# Tout le site peut être exploré par les moteurs de recherche
+# Tout le site peut être exploré par les moteurs de recherche,
+# sauf l'espace de gestion privé et ses services internes
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
 
 Sitemap: https://bdasecurite.com/sitemap.xml

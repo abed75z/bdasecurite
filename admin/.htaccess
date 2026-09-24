@@ -1,0 +1,8 @@
+# Espace admin : page d'entrée et fichiers toujours à jour (pas de vieille version en cache)
+DirectoryIndex index.php
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|webmanifest)$">
+    Header set Cache-Control "no-cache"
+    Header set X-Robots-Tag "noindex, nofollow"
+  </FilesMatch>
+</IfModule>

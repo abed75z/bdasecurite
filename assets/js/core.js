@@ -329,4 +329,9 @@
   tilt();
   magnetic();
   misc();
+
+  /* ---------- Mesure d'audience anonyme (sans cookie) : visible dans l'espace admin ---------- */
+  if (/^https?:$/.test(location.protocol) && navigator.sendBeacon) {
+    try { navigator.sendBeacon('/api/visite.php', location.pathname); } catch (_) { /* ignoré */ }
+  }
 })();

@@ -7,7 +7,17 @@ const RECRUT_CONFIG = {
   endpoint: 'https://formsubmit.co/ajax/bdasecurite@gmail.com',
   extraFields: { _template: 'table', _captcha: 'false' },
   cvEmail: 'bdasecurite@gmail.com',
+  admin: '/api/candidature.php', // copie de chaque candidature dans l'espace admin
 };
+
+const envoyerJson = (url, payload, estOk) => fetch(url, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+  body: JSON.stringify(payload),
+}).then(async (res) => {
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || !estOk(json)) throw new Error(json.message || json.erreur || `HTTP ${res.status}`);
+});
 
 (() => {
   const card = document.querySelector('.apply-card');
@@ -86,13 +96,12 @@ const RECRUT_CONFIG = {
     setLoading(true);
     showError('');
     try {
-      const res = await fetch(RECRUT_CONFIG.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || json.success === false || json.success === 'false') throw new Error(json.message || `HTTP ${res.status}`);
+      // Envoi en parallèle : email (FormSubmit) + espace admin. Un seul des deux suffit.
+      const [rEmail, rAdmin] = await Promise.allSettled([
+        envoyerJson(RECRUT_CONFIG.endpoint, payload, (j) => j.success !== false && j.success !== 'false'),
+        RECRUT_CONFIG.admin ? envoyerJson(RECRUT_CONFIG.admin, payload, (j) => j.ok) : Promise.reject(new Error('admin désactivé')),
+      ]);
+      if (rEmail.status === 'rejected' && rAdmin.status === 'rejected') throw rEmail.reason;
 
       // Écran de confirmation
       card.querySelector('[data-done-name]').textContent = nom.split(' ')[0];

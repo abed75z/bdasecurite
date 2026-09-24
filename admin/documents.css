@@ -1,0 +1,153 @@
+/* =========================================================
+   ESPACE ADMIN BDA — feuilles A4 (devis, factures, planning)
+   Même présentation que les PDF envoyés aux clients.
+   ========================================================= */
+.feuille {
+  --or: #c39a45; --or-clair: #e6cc86; --or-fonce: #94702b;
+  --or-grad: linear-gradient(135deg, #ecd490 0%, #c39a45 50%, #9a742b 100%);
+  --encre: #17171c; --encre-2: #44444f; --gris: #7a7a86; --trait: #e6dfcf; --creme: #fbf8f1;
+  position: relative; display: flex; flex-direction: column; width: 210mm; min-height: 297mm; margin: 0 auto;
+  padding: 11mm 15mm 9mm; background: #fff; color: var(--encre); border-radius: 4px;
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.85);
+  font: 9.5pt/1.45 "Inter", "Segoe UI", Arial, sans-serif;
+}
+.feuille--paysage { width: 297mm; min-height: 210mm; padding: 9mm 10mm 7mm; }
+.feuille [contenteditable] { outline: none; border-radius: 3px; white-space: pre-wrap; transition: background-color 0.2s, box-shadow 0.2s; min-width: 2ch; }
+.feuille [contenteditable]:hover { background: rgba(195, 154, 69, 0.08); box-shadow: 0 0 0 1px rgba(195, 154, 69, 0.35); }
+.feuille [contenteditable]:focus { background: rgba(195, 154, 69, 0.1); box-shadow: 0 0 0 2px var(--or); }
+.feuille [contenteditable]:empty::before { content: attr(data-ph); color: #b9b4a7; }
+.feuille h2, .feuille h3 { color: var(--encre); }
+
+.f-logo { display: block; height: 31mm; width: auto; margin: 0 auto; }
+.f-logo--petit { height: 28mm; margin: 0; }
+.f-logo--mini { height: 19mm; margin: 0; }
+.f-regle { flex: none; height: 2px; margin: 5mm 0; background: linear-gradient(90deg, transparent, var(--or) 18%, var(--or) 82%, transparent); }
+.f-label { display: block; margin-bottom: 1mm; font: 600 6.8pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.2em; text-transform: uppercase; color: var(--or-fonce); }
+.f-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 12mm; align-items: start; }
+.f-nom { font: 700 11pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.06em; }
+.f-lignes { color: var(--encre-2); line-height: 1.4; }
+.f-partie--client { padding: 4mm 5mm; background: var(--creme); border-left: 3px solid var(--or); border-radius: 0 6px 6px 0; }
+
+.f-titre { display: flex; align-items: flex-end; justify-content: space-between; gap: 8mm; margin: 6mm 0 3.5mm; }
+.f-titre h2 { margin: 0; font: 700 24pt/1 "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.22em; text-transform: uppercase; }
+.f-titre h2::after { content: ""; display: block; width: 18mm; height: 3px; margin-top: 3mm; background: var(--or-grad); }
+.f-titre--droite { flex-direction: column; align-items: flex-end; margin: 0; gap: 3mm; }
+.f-titre--droite h2::after { margin-left: auto; }
+.f-num { text-align: right; }
+.f-num__val { font: 700 13pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.06em; }
+.f-dates { display: flex; gap: 5mm; font-size: 8.5pt; color: var(--encre-2); }
+.f-inline { display: inline-block; color: var(--encre); font-weight: 600; }
+.f-entete { display: flex; align-items: center; justify-content: space-between; gap: 10mm; }
+.f-meta { display: grid; grid-auto-columns: 1fr; grid-auto-flow: column; margin-bottom: 4mm; border: 1px solid var(--trait); border-radius: 6px; overflow: hidden; }
+.f-meta > div { padding: 2.2mm 4mm; border-left: 1px solid var(--trait); }
+.f-meta > div:first-child { border-left: 0; }
+.f-meta__val { font-weight: 600; font-size: 10pt; }
+
+.f-objet { margin-top: 5mm; }
+.f-objet__titre { font: 700 11.5pt "Montserrat", "Segoe UI", sans-serif; margin: 0.8mm 0 1.2mm; }
+.f-objet__texte { color: var(--encre-2); }
+.f-mission { display: grid; grid-template-columns: 1.1fr 1.7fr 1fr 1.6fr; margin: 4mm 0; border: 1px solid var(--trait); border-radius: 6px; overflow: hidden; }
+.f-mission > div { padding: 2.2mm 3.5mm; border-left: 1px solid var(--trait); }
+.f-mission > div:first-child { border-left: 0; }
+.f-mission__val { font-weight: 600; }
+
+.f-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.f-table col.c-q { width: 25mm; }
+.f-table col.c-pu { width: 33mm; }
+.f-table col.c-t { width: 30mm; }
+.f-table th { padding: 2.8mm 3mm; background: #15151a; color: var(--or-clair); text-align: left; font: 600 7.2pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; }
+.f-table th:first-child { border-radius: 6px 0 0 0; }
+.f-table th:last-child { border-radius: 0 6px 0 0; }
+.f-table .r { text-align: right; }
+.f-table td { position: relative; padding: 2mm 3mm; border-bottom: 1px solid var(--trait); vertical-align: middle; }
+.f-table tbody tr:nth-child(even) td { background: var(--creme); }
+.f-table tr { break-inside: avoid; }
+.f-desc { font-weight: 500; }
+.f-detail { color: var(--gris); font-size: 8.4pt; }
+.f-total { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.f-in { width: 100%; min-width: 0; border: 0; background: transparent; padding: 1px 3px; border-radius: 3px; text-align: right; outline: none; color: var(--encre); font-variant-numeric: tabular-nums; }
+.f-in:hover { background: rgba(195, 154, 69, 0.08); box-shadow: 0 0 0 1px rgba(195, 154, 69, 0.35); }
+.f-in:focus { background: rgba(195, 154, 69, 0.1); box-shadow: 0 0 0 2px var(--or); }
+.f-in.is-bad { box-shadow: 0 0 0 2px #e5484d; }
+.f-outils { position: absolute; right: -19mm; top: 50%; transform: translateY(-50%); display: flex; gap: 4px; }
+.f-outils button, .f-outil-agent { width: 26px; height: 22px; border: 1px solid #d8cfb9; border-radius: 5px; background: #fff; color: var(--encre-2); font-size: 11px; font-weight: 600; line-height: 1; cursor: pointer; }
+.f-outils button:hover { border-color: var(--or); color: var(--or-fonce); }
+.f-outils .del:hover, .f-outil-agent:hover { border-color: #e5484d; color: #e5484d; }
+.f-ajout { align-self: flex-start; margin-top: 2.5mm; border: 1px dashed var(--or); background: transparent; color: var(--or-fonce); border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.f-ajout:hover { background: rgba(195, 154, 69, 0.1); }
+
+.f-totaux { width: 84mm; margin: 4mm 0 0 auto; break-inside: avoid; }
+.f-totaux > div { display: flex; justify-content: space-between; align-items: center; gap: 4mm; padding: 1.9mm 3mm; border-bottom: 1px solid var(--trait); }
+.f-totaux b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.f-totaux .grand { margin-top: 1.5mm; border: 0; border-radius: 6px; background: var(--or-grad); color: #111; padding: 3mm; font: 700 11pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.03em; }
+.f-totaux .sub { font-size: 8.8pt; color: var(--encre-2); }
+.f-pct { width: 34px; border: 0; border-bottom: 1px dashed var(--or); background: transparent; text-align: center; padding: 0; outline: none; color: var(--encre); }
+.f-print { display: none; }
+.f-bas { display: grid; grid-template-columns: 1fr 84mm; gap: 8mm; align-items: start; margin-top: 4mm; break-inside: avoid; }
+.f-bas .f-totaux { width: auto; margin: 0; }
+.f-conditions .f-petit { margin-top: 1mm; }
+.f-petit { font-size: 8pt; color: var(--encre-2); }
+.f-paiement { margin-top: 6mm; padding: 4mm 5mm; border: 1px solid rgba(195, 154, 69, 0.55); border-radius: 8px; background: linear-gradient(180deg, #fffcf5, #fff); break-inside: avoid; }
+.f-paiement h3 { margin: 0 0 2mm; font: 600 7.5pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.18em; text-transform: uppercase; color: var(--or-fonce); }
+.f-paiement__main { font-size: 10.5pt; font-weight: 600; letter-spacing: 0.02em; margin-bottom: 2.5mm; }
+.f-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; margin-top: 5mm; break-inside: avoid; }
+.f-signe { min-height: 23mm; padding: 3mm 4mm; border: 1px dashed rgba(195, 154, 69, 0.8); border-radius: 8px; }
+.f-signe p { margin: 1mm 0 0; font-size: 8pt; color: var(--encre-2); }
+.f-espace { flex: 1 0 4mm; }
+.f-pied { padding-top: 3mm; border-top: 1px solid var(--trait); font-size: 6.6pt; line-height: 1.45; color: var(--gris); text-align: center; white-space: pre-wrap; }
+
+/* ---------- Planning (paysage) ---------- */
+.plan-entete { display: flex; flex-wrap: wrap; align-items: center; gap: 4mm 7mm; margin-bottom: 5mm; }
+.plan-titre { margin: 0; font: 700 17pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.16em; text-transform: uppercase; }
+.plan-mois { margin-top: 1.5mm; font: 600 12pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.06em; color: var(--or-fonce); }
+.plan-info { margin-left: auto; display: grid; grid-template-columns: repeat(3, auto); border: 1px solid var(--trait); border-radius: 6px; overflow: hidden; }
+.plan-info > div { padding: 2mm 4mm; border-left: 1px solid var(--trait); min-width: 38mm; }
+.plan-info > div:first-child { border-left: 0; }
+.plan-info__val { font-weight: 600; }
+.plan { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8.5pt; }
+.plan col.c-agent { width: 36mm; }
+.plan col.c-tot { width: 13mm; }
+.plan th { padding: 1.4mm 0; background: #15151a; color: var(--or-clair); font: 600 7.5pt "Montserrat", "Segoe UI", sans-serif; border: 1px solid #15151a; }
+.plan th.wd { background: #2a2a31; color: #d6d6de; font-size: 6.5pt; border-color: #2a2a31; }
+.plan th.we { color: #fff; background: #3a3322; border-color: #3a3322; }
+.plan th.ho { color: #111; background: var(--or); border-color: var(--or); }
+.plan th.th-agent { text-align: left; padding-left: 3mm; }
+.plan td { height: 10.5mm; padding: 0; border: 1px solid var(--trait); text-align: center; vertical-align: middle; }
+.plan td.we { background: #f7f2e6; }
+.plan td.ho { background: #f1e1bf; }
+.plan .agent { position: relative; text-align: left; padding: 1mm 2.5mm; }
+.agent__nom { font-weight: 600; }
+.agent__poste { font-size: 7.3pt; color: var(--gris); }
+.f-outil-agent { position: absolute; left: -32px; top: 50%; transform: translateY(-50%); }
+.plan .cell { position: relative; cursor: text; }
+.plan .cell input { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; color: transparent; text-align: center; font: 600 9pt "Inter", sans-serif; padding: 0 4px; outline: none; cursor: text; caret-color: var(--encre); }
+.plan .cell input:focus { left: 50%; width: 104px; transform: translateX(-50%); z-index: 5; color: var(--encre); background: #fff; border-radius: 6px; box-shadow: 0 0 0 2px var(--or), 0 8px 20px -8px rgba(0, 0, 0, 0.45); }
+.plan .cell .pv { display: block; font-size: 7.2pt; font-weight: 600; line-height: 1.15; pointer-events: none; }
+.plan .cell.has { background-image: linear-gradient(rgba(195, 154, 69, 0.2), rgba(195, 154, 69, 0.2)); }
+.plan .cell.code .pv { color: var(--gris); font-weight: 500; }
+.plan .cell.bad .pv { color: #e5484d; }
+.plan .tot { background: var(--creme); font-weight: 600; font-size: 8pt; font-variant-numeric: tabular-nums; }
+.plan .t-total { background: #f3ead4; }
+.plan tfoot td { background: #15151a; color: var(--or-clair); font-size: 7.2pt; font-weight: 600; border-color: #15151a; height: 7mm; }
+.plan tfoot .agent { color: #fff; }
+.plan-vide { height: 16mm !important; color: var(--gris); font-style: italic; }
+.plan-legende { display: flex; flex-wrap: wrap; gap: 2mm 7mm; margin-top: 4mm; font-size: 7.8pt; color: var(--encre-2); }
+.plan-legende i { display: inline-block; width: 3.4mm; height: 3.4mm; margin-right: 1.5mm; border-radius: 1mm; vertical-align: -0.5mm; border: 1px solid var(--trait); }
+.plan-legende .lg-we { background: #f7f2e6; }
+.plan-legende .lg-ho { background: #f1e1bf; }
+.plan-legende .lg-has { background: #f3e8cf; }
+
+/* ---------- Impression ---------- */
+@media print {
+  .feuille { box-shadow: none; border-radius: 0; margin: 0; min-height: 296mm; zoom: 1 !important; }
+  .feuille--paysage { min-height: 209mm; }
+  .feuille [contenteditable], .f-in { box-shadow: none !important; background: transparent !important; }
+  .feuille [contenteditable]:empty::before { content: ""; }
+  .f-outils, .f-ajout, .f-outil-agent, .f-pct { display: none !important; }
+  .f-print { display: inline; }
+  .plan .cell input { display: none; }
+  .plan .cell .pv { font-size: 6.4pt; }
+  .plan { font-size: 7pt; }
+  .plan td { height: 9mm; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

@@ -1,15 +1,14 @@
 /* =========================================================
-   AVIS CLIENTS — accès aux données (Google Sheets via Apps Script)
+   AVIS CLIENTS — accès aux données (espace admin du site, /api/avis.php)
    + mémoire locale pour un affichage instantané
    ========================================================= */
 
 /* ====== CONFIGURATION =======================================
-   endpoint : adresse de votre application Google Apps Script
-   (Déployer > Application Web). Vide = avis envoyés par email
-   uniquement (bdasecurite@gmail.com), sans affichage sur le site.
+   endpoint : adresse des avis publiés (validés dans bdasecurite.com/admin).
+   Vide = avis envoyés par email uniquement, sans affichage sur le site.
    ============================================================ */
 const AVIS_CONFIG = {
-  endpoint: 'https://script.google.com/macros/s/AKfycby8EgzFHBFd_1HG8vhYJjtOCbHOyBJHvhL3UrpFTPKV2sXHQfq9J2VaA1SCRCXkdy5cjA/exec',
+  endpoint: '/api/avis.php',
   emailFallback: 'https://formsubmit.co/ajax/bdasecurite@gmail.com',
   parPage: 6,
 };
@@ -19,7 +18,7 @@ const AvisData = (() => {
   const valide = (a) => a && a.nom && a.texte && a.note >= 1 && a.note <= 5;
   let enCours = null;
 
-  // Derniers avis connus (affichage immédiat, même si Google met du temps à répondre)
+  // Derniers avis connus (affichage immédiat, même si le serveur met du temps à répondre)
   function memoire() {
     try {
       const c = JSON.parse(localStorage.getItem(CLE) || 'null');
@@ -27,7 +26,7 @@ const AvisData = (() => {
     } catch (_) { return null; }
   }
 
-  // Avis à jour depuis Google Sheets (une seule requête à la fois)
+  // Avis à jour depuis le serveur (une seule requête à la fois)
   function frais() {
     if (!AVIS_CONFIG.endpoint) return Promise.resolve([]);
     if (!enCours) {

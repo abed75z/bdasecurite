@@ -1,0 +1,5 @@
+# Tout le site peut être exploré par les moteurs de recherche
+User-agent: *
+Allow: /
+
+Sitemap: https://bdasecurite.com/sitemap.xml

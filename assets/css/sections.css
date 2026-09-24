@@ -57,6 +57,13 @@
 .feature--duo .feature__list li .icon { color: var(--gold); }
 .feature__list li:hover { padding-left: 14px; color: var(--gold-light); background: linear-gradient(90deg, rgba(var(--accent), 0.12), transparent 70%); }
 .feature__list li:hover .icon { transform: scale(1.2) rotate(-8deg); }
+/* Lignes cliquables vers les pages détaillées (toute la ligne est cliquable) */
+.feature__list li:has(a) { position: relative; }
+.feature__list li a::before { content: ""; position: absolute; inset: 0; }
+.feature__list li:has(a)::after { content: "›"; margin-left: auto; padding-right: 6px; font-size: 22px; line-height: 1; color: rgb(var(--accent)); opacity: 0.55; transition: transform 0.4s var(--ease-out), opacity 0.3s; }
+.feature--duo .feature__list li:has(a)::after { color: var(--gold); }
+.feature__list li:has(a):hover::after { opacity: 1; transform: translateX(4px); }
+.feature__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; }
 
 .feature__visual { position: relative; display: grid; place-items: center; min-height: 440px; }
 .feature__visual::before { content: ""; position: absolute; width: 75%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(var(--accent), 0.3), transparent 65%); animation: breathe 7s ease-in-out infinite; }

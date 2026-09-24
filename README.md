@@ -13,6 +13,18 @@ Site vitrine statique (HTML / CSS / JavaScript, sans installation). Il fonctionn
 | `avis.html` | Avis clients : note moyenne, liste des avis, formulaire avec étoiles |
 | `mentions-legales.html` | Mentions légales et politique de confidentialité |
 
+Pages services, pensées pour Google : chacune vise une recherche précise.
+
+| Fichier | Recherches visées |
+|---|---|
+| `securite-privee-paris.html` | société / entreprise de sécurité privée à Paris, agent de sécurité, gardiennage |
+| `protection-rapprochee-paris.html` | garde du corps, protection rapprochée à Paris |
+| `securite-evenementielle-paris.html` | sécurité événementielle, agent de sécurité pour soirée, gala, mariage |
+| `chauffeur-prive-vtc-paris.html` | chauffeur privé, VTC premium à Paris, mise à disposition |
+| `transfert-aeroport-paris.html` | VTC aéroport CDG, Orly, Beauvais, Le Bourget, gares |
+| `chauffeur-mariage-paris.html` | chauffeur mariage, voiture de mariage avec chauffeur |
+| `chauffeur-securite-vip-paris.html` | chauffeur et garde du corps, transport VIP sécurisé |
+
 Les demandes de devis **et** les candidatures arrivent sur bdasecurite@gmail.com.
 
 Téléphone : le **06 11 67 86 25** est le numéro principal (tous les boutons « Appeler »). Le 07 84 73 90 70 est affiché en second dans les coordonnées. Le bouton WhatsApp ouvre une conversation avec le 07 84 73 90 70.
@@ -48,6 +60,24 @@ Le dossier est relié au dépôt GitHub **abed75z/bdasecurite** (branche `main`)
 - en secours, dans l'espace OVH : Mes sites, puis ⋮ et « Déployer Git ».
 
 Le certificat https (Let's Encrypt) est géré par OVH, dans l'onglet « Certificats SSL ».
+
+## Référencement Google (SEO)
+
+Déjà en place sur le site :
+
+- une page par service (voir le tableau plus haut), avec un titre, une description et un contenu uniques ;
+- `sitemap.xml` (plan du site) et `robots.txt` ;
+- l'adresse officielle de chaque page (`canonical`), l'aperçu de partage (`assets/img/og-image.jpg`) et le logo pour Google (`assets/img/logo.png`) ;
+- la fiche entreprise lisible par Google (JSON-LD) : nom, adresse, téléphone, horaires, services.
+
+À faire par le gérant (c'est ce qui compte le plus) :
+
+1. **Google Search Console** (<https://search.google.com/search-console>) : ajouter `https://bdasecurite.com/` (« Préfixe de l'URL »), choisir la vérification « Balise HTML » et envoyer la balise au développeur, qui l'ajoute dans `index.html`. Ensuite, menu **Sitemaps** : saisir `sitemap.xml` et cliquer sur **Envoyer**.
+2. **Fiche d'établissement Google** (<https://business.google.com>) : c'est elle qui fait apparaître l'entreprise sur Google Maps et dans les recherches « près de chez moi ». Nom : BDA Sécurité & VTC Premium ; téléphone : 06 11 67 86 25 ; site : https://bdasecurite.com.
+3. **Avis Google** : demander à chaque client satisfait de laisser un avis sur la fiche Google. Jamais de faux avis : c'est interdit et sanctionné.
+4. **Annuaires** : PagesJaunes, Bing Places, Apple Plans… avec exactement le même nom, la même adresse et le même téléphone partout.
+
+Pour modifier le numéro de téléphone un jour : il apparaît dans toutes les pages (`tel:+33611678625`), ainsi que dans la fiche JSON-LD de chaque page.
 
 ## Réception des demandes de devis par email
 
@@ -98,6 +128,7 @@ assets/css/hero.css      haut de page : route de nuit, blason, chiffres, bandeau
 assets/css/sections.css  services, processus, engagements, FAQ, appel à l'action
 assets/css/devis.css     page du questionnaire
 assets/css/merci.css     page de remerciement
+assets/css/page.css      pages services (photo en haut, article, colonne devis)
 assets/js/core.js        animations communes (apparitions au scroll, parallaxe, menu…)
 assets/js/home.js        animations de l'accueil (bandeau, processus, compteurs, FAQ)
 assets/js/devis.js       questionnaire : étapes, vérifications, envoi

@@ -368,7 +368,7 @@ async function pageParametres(ctx) {
   } }, champ('Mot de passe actuel', mdp.actuel), champ('Nouveau mot de passe', mdp.nouveau, '10 caractères minimum'), champ('Confirmez', mdp.confirme), h('div', null, h('button', { class: 'btn btn--ghost', type: 'submit' }, icone('cadenas'), 'Changer le mot de passe')));
 
   const sauvegarde = h('div', { class: 'sauvegarde' },
-    h('p', null, 'Téléchargez une copie de vos données (devis, factures, plannings, clients, agents, avis…). Les documents des agents (pièces d'identité, cartes pro…) restent uniquement sur le serveur privé. Conseil : faites-le une fois par mois et gardez le fichier en lieu sûr.'),
+    h('p', null, "Téléchargez une copie de vos données (devis, factures, plannings, clients, agents, avis…). Les documents des agents (pièces d'identité, cartes pro…) restent uniquement sur le serveur privé. Conseil : faites-le une fois par mois et gardez le fichier en lieu sûr."),
     h('div', { class: 'sauvegarde__actions' },
       h('button', { class: 'btn btn--gold', type: 'button', onclick: async () => { try { const d = await api('export'); telecharger(`bda-sauvegarde-${iso(new Date())}.json`, JSON.stringify(d, null, 2)); } catch (e) { erreur(e); } } }, icone('telecharger'), 'Télécharger une sauvegarde'),
       boutonImport(() => ctx.aller('#/'))));

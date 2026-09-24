@@ -5,6 +5,7 @@
    ========================================================= */
 import { api, h, icone, ecusson, toast, erreur, confirmer, champ, saisie, zoneTexte } from './outils.js';
 import { enregistreurAuto, ajusterEchelle, imprimerPages } from './creations.js';
+import { telechargerPages } from './pdf.js';
 
 const FONCTIONS = ['Agent de sécurité privée', 'Agent de sécurité (ADS)', "Chef d'équipe sécurité", 'Agent de protection rapprochée', 'Agent événementiel', 'Agent SSIAP', 'Chauffeur VTC'];
 const estVtc = (f) => /vtc|chauffeur/i.test(f || '');
@@ -71,12 +72,13 @@ function planchesA4(cartes) {
   }
   return pages;
 }
-export function imprimerCartes(cartes, mode, titre) {
+// enPdf : fichier PDF téléchargé directement au lieu de la fenêtre d'impression
+export function imprimerCartes(cartes, mode, titre, enPdf = false) {
   if (mode === 'carte') {
     const pages = cartes.flatMap((d) => [h('div', { class: 'page-carte' }, recto(d)), d.verso ? h('div', { class: 'page-carte' }, verso(d)) : null]).filter(Boolean);
-    return imprimerPages(pages, '85.6mm 54mm', titre);
+    return enPdf ? telechargerPages(pages, titre, { l: 85.6, h: 54 }, 6) : imprimerPages(pages, '85.6mm 54mm', titre);
   }
-  return imprimerPages(planchesA4(cartes), 'A4 portrait', titre);
+  return enPdf ? telechargerPages(planchesA4(cartes), titre, { l: 210, h: 297 }) : imprimerPages(planchesA4(cartes), 'A4 portrait', titre);
 }
 
 /* =========================================================
@@ -95,6 +97,7 @@ async function listeCartes(ctx) {
   const { creations } = await api('creations', undefined, { type: 'carte' });
   const cartes = creations.map((c) => ({ ...c, data: { ...CARTE_DEFAUT, ...c.data } }));
   ctx.actions(
+    cartes.length ? h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => imprimerCartes(cartes.map((c) => c.data), 'a4', 'Cartes agents BDA', true) }, icone('telecharger'), h('span', null, 'Tout en PDF')) : null,
     cartes.length ? h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => imprimerCartes(cartes.map((c) => c.data), 'a4', 'Cartes agents BDA') }, icone('imprimer'), h('span', null, 'Tout imprimer')) : null,
     h('a', { class: 'btn btn--gold', href: '#/cartes/nouvelle' }, icone('plus'), h('span', null, 'Nouvelle carte')));
 
@@ -217,8 +220,9 @@ async function editeurCarte(ctx, id, agentId) {
       champ('N° de carte professionnelle', numero)),
     h('div', { class: 'panneau__bloc' }, h('h3', null, 'Photo'), fichier, btnPhoto, reglagesPhoto, retirer),
     h('div', { class: 'panneau__bloc' }, h('h3', null, 'Imprimer'),
-      h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerCartes([d], 'a4', titreImpression()); } }, icone('imprimer'), 'Imprimer / PDF (feuille A4)'),
-      h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerCartes([d], 'carte', titreImpression()); } }, icone('badge'), 'Format carte (imprimante à badges)'),
+      h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerCartes([d], 'a4', titreImpression(), true); } }, icone('telecharger'), 'Télécharger en PDF (feuille A4)'),
+      h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerCartes([d], 'a4', titreImpression()); } }, icone('imprimer'), 'Imprimer (feuille A4)'),
+      h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerCartes([d], 'carte', titreImpression(), true); } }, icone('badge'), 'PDF format carte (imprimante à badges)'),
       h('p', { class: 'panneau__astuce' }, 'Sur A4 : recto et verso côte à côte, à découper puis plier au milieu (ou à plastifier).')),
     h('details', { class: 'panneau__bloc panneau__plus' }, h('summary', null, 'Plus d\'options'),
       champ('Titre de la carte', options.type), champ('Libellé du numéro', options.labelNumero), champ('Site (en bas à droite)', options.site),

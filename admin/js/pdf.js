@@ -20,36 +20,73 @@ function html2canvas() {
 
 const A4 = { l: 595.28, h: 841.89 }; // en points PDF
 
-export async function telechargerPdf(feuille, nomFichier, { paysage = false } = {}) {
-  const attente = toast('Préparation du PDF…', 'ok');
-  const zoom = feuille.style.zoom;
+// Photo d'un élément, avec le même rendu qu'à l'impression (sans boutons ni cadres de saisie)
+async function capturer(el, scale) {
+  const h2c = await html2canvas();
+  await document.fonts.ready;
+  const zoom = el.style.zoom;
+  el.style.zoom = '';
   try {
-    const h2c = await html2canvas();
-    await document.fonts.ready;
-    feuille.style.zoom = '';
-    const canvas = await h2c(feuille, {
-      scale: 2.5, backgroundColor: '#ffffff', useCORS: true, logging: false, windowWidth: 1600,
+    return await h2c(el, {
+      scale, backgroundColor: '#ffffff', useCORS: true, logging: false, windowWidth: 1600,
       onclone: (doc, clone) => {
-        // Même rendu qu'à l'impression : sans boutons, sans cadres de saisie
         doc.body.classList.add('capture-pdf');
         clone.style.zoom = '';
-        clone.querySelectorAll('[data-ph]').forEach((el) => { if (!el.textContent.trim()) el.setAttribute('data-ph', ''); });
+        clone.querySelectorAll('[data-ph]').forEach((e) => { if (!e.textContent.trim()) e.setAttribute('data-ph', ''); });
+        // Photos recadrées (object-fit) : converties en fond d'image, que html2canvas sait dessiner
+        clone.querySelectorAll('img').forEach((img) => {
+          const cs = doc.defaultView.getComputedStyle(img);
+          if (cs.objectFit !== 'cover') return;
+          const div = doc.createElement('div');
+          div.style.cssText = `width:100%;height:100%;background:url("${img.src}") ${cs.objectPosition}/cover no-repeat;transform:${cs.transform};transform-origin:${cs.transformOrigin}`;
+          img.replaceWith(div);
+        });
         doc.body.replaceChildren(clone);
       },
     });
+  } finally { el.style.zoom = zoom; }
+}
+function enregistrer(blob, nomFichier) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${nomFichier.replace(/[\\/:*?"<>|]+/g, '-').trim()}.pdf`;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+// Feuille A4 (devis, facture, planning) : coupée en plusieurs pages si elle dépasse
+export async function telechargerPdf(feuille, nomFichier, { paysage = false } = {}) {
+  const attente = toast('Préparation du PDF…', 'ok');
+  try {
+    const canvas = await capturer(feuille, 2.5);
     const W = paysage ? A4.h : A4.l, H = paysage ? A4.l : A4.h;
-    const pages = decouper(canvas, H / W);
-    const blob = fabriquerPdf(await Promise.all(pages.map(enJpeg)), W, H);
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `${nomFichier.replace(/[\\/:*?"<>|]+/g, '-').trim()}.pdf`;
-    document.body.append(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    enregistrer(fabriquerPdf(await Promise.all(decouper(canvas, H / W).map(enJpeg)), W, H), nomFichier);
     toast('PDF téléchargé.');
   } catch (e) {
     erreur(e);
   } finally {
-    feuille.style.zoom = zoom;
+    attente?.remove?.();
+  }
+}
+
+// Pages déjà mises en forme (planches de cartes, flyer…) : une page PDF par élément
+// taille en millimètres, ex. { l: 210, h: 297 }
+export async function telechargerPages(pages, nomFichier, tailleMm, scale = 2.5) {
+  const attente = toast('Préparation du PDF…', 'ok');
+  const scene = document.createElement('div');
+  scene.style.cssText = 'position:fixed;left:-20000px;top:0;pointer-events:none';
+  scene.append(...pages);
+  document.body.append(scene);
+  try {
+    const images = [];
+    for (const p of pages) images.push(await enJpeg(await capturer(p, scale)));
+    const pt = (mm) => (mm * 72) / 25.4;
+    enregistrer(fabriquerPdf(images, pt(tailleMm.l), pt(tailleMm.h)), nomFichier);
+    toast('PDF téléchargé.');
+  } catch (e) {
+    erreur(e);
+  } finally {
+    scene.remove();
     attente?.remove?.();
   }
 }

@@ -6,6 +6,7 @@
 import { api, h, icone, ecusson, toast, erreur, confirmer, champ, saisie } from './outils.js';
 import { enregistreurAuto, ajusterEchelle, imprimerPages } from './creations.js';
 import { qrSvg } from './qr.js';
+import { telechargerPages } from './pdf.js';
 
 export const VISITE_DEFAUT = {
   nom: 'Abdelouahab BOUIDIA', fonction: 'Gérant',
@@ -41,12 +42,16 @@ export function versoVisite(d) {
     h('div', { class: 'cv__bande' }, ecusson('cv__mini'), h('span', null, 'BDA Sécurité')));
 }
 
-function imprimerVisites(d, mode) {
+function imprimerVisites(d, mode, enPdf = false) {
   const titre = `Carte de visite - ${d.nom || 'BDA'}`;
-  if (mode === 'carte') return imprimerPages([h('div', { class: 'page-visite' }, rectoVisite(d)), h('div', { class: 'page-visite' }, versoVisite(d))], '85mm 55mm', titre);
+  if (mode === 'carte') {
+    const pages = [h('div', { class: 'page-visite' }, rectoVisite(d)), h('div', { class: 'page-visite' }, versoVisite(d))];
+    return enPdf ? telechargerPages(pages, titre, { l: 85, h: 55 }, 6) : imprimerPages(pages, '85mm 55mm', titre);
+  }
   // Planche A4 : 10 rectos, puis 10 versos au même emplacement (impression recto-verso)
   const planche = (fn) => h('div', { class: 'planche-visites' }, Array.from({ length: 10 }, () => fn(d)));
-  return imprimerPages([planche(rectoVisite), planche(versoVisite)], 'A4 portrait', titre);
+  const pages = [planche(rectoVisite), planche(versoVisite)];
+  return enPdf ? telechargerPages(pages, titre, { l: 210, h: 297 }) : imprimerPages(pages, 'A4 portrait', titre);
 }
 
 /* =========================================================
@@ -101,8 +106,9 @@ async function editeurVisite(ctx, id) {
       h('div', { class: 'form-grille form-grille--2 grille-tel' }, champ('Libellé', lier('tel2Label')), champ('Téléphone 2', lier('tel2', { type: 'tel' }))),
       champ('Email', lier('email', { type: 'email' })), champ('Site', lier('site'))),
     h('div', { class: 'panneau__bloc' }, h('h3', null, 'Imprimer'),
-      h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerVisites(d, 'a4'); } }, icone('imprimer'), 'Planche A4 (10 cartes) / PDF'),
-      h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerVisites(d, 'carte'); } }, icone('badge'), 'Format carte (pour un imprimeur)'),
+      h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerVisites(d, 'a4', true); } }, icone('telecharger'), 'Télécharger en PDF (planche de 10)'),
+      h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerVisites(d, 'a4'); } }, icone('imprimer'), 'Imprimer la planche A4'),
+      h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerVisites(d, 'carte', true); } }, icone('badge'), 'PDF format carte (pour un imprimeur)'),
       h('p', { class: 'panneau__astuce' }, 'Planche A4 : imprimez en recto-verso (bord long), puis découpez le long des pointillés.')),
     h('details', { class: 'panneau__bloc panneau__plus' }, h('summary', null, 'Plus d\'options'),
       champ('Texte sous le logo (recto)', lier('zone')),

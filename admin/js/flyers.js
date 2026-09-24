@@ -6,6 +6,7 @@
 import { api, h, icone, ecusson, toast, erreur, confirmer, champ, saisie, dateLisible } from './outils.js';
 import { enregistreurAuto, editable, ajusterEchelle, imprimerPages } from './creations.js';
 import { qrSvg } from './qr.js';
+import { telechargerPages } from './pdf.js';
 
 const ICONES = ['bouclier', 'voiture', 'etoile', 'couronne', 'cle', 'camera', 'oeilv', 'horloge'];
 
@@ -86,10 +87,13 @@ export function flyer(d, surChange = null) {
     t('footer', 'fl__pied', d, 'pied', 'Mentions légales'));
 }
 
-function imprimerFlyer(d) {
+function imprimerFlyer(d, enPdf = false) {
   const f = flyer(d);
+  const titre = `Flyer - ${d.nom || 'BDA'}`;
+  // A5 = le même flyer réduit (mêmes proportions que l'A4)
+  if (enPdf) return telechargerPages([f], titre, d.format === 'A5' ? { l: 148, h: 210 } : { l: 210, h: 297 });
   if (d.format === 'A5') f.classList.add('fl--a5');
-  return imprimerPages([f], `${d.format === 'A5' ? 'A5' : 'A4'} portrait`, `Flyer - ${d.nom || 'BDA'}`);
+  return imprimerPages([f], `${d.format === 'A5' ? 'A5' : 'A4'} portrait`, titre);
 }
 
 /* =========================================================
@@ -141,7 +145,8 @@ async function editeurFlyer(ctx, id) {
     h('div', { class: 'panneau__bloc panneau__bloc--astuce' }, icone('crayon'), h('p', null, 'Cliquez sur n\'importe quel texte du flyer pour le modifier. Cliquez sur une icône pour la changer.')),
     h('div', { class: 'panneau__bloc' }, h('h3', null, 'Imprimer'),
       champ('Format', format),
-      h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerFlyer(d); } }, icone('imprimer'), 'Imprimer / PDF')),
+      h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerFlyer(d, true); } }, icone('telecharger'), 'Télécharger en PDF'),
+      h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: async () => { await save.maintenant(); imprimerFlyer(d); } }, icone('imprimer'), 'Imprimer')),
     h('div', { class: 'panneau__bloc' }, h('h3', null, 'Afficher'),
       bascule('secteurs', 'Secteurs (Commerces, Hôtels…)'), bascule('chiffres', 'Chiffres clés'), bascule('reference', 'Référence client'), bascule('qr', 'QR code')),
     h('details', { class: 'panneau__bloc panneau__plus' }, h('summary', null, 'Plus d\'options'),

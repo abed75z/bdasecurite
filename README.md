@@ -13,13 +13,15 @@ Site vitrine statique (HTML / CSS / JavaScript, sans installation). Il fonctionn
 | `avis.html` | Avis clients : note moyenne, liste des avis, formulaire avec étoiles |
 | `mentions-legales.html` | Mentions légales et politique de confidentialité |
 
-Les demandes de devis **et** les candidatures arrivent sur bdasecurite@gmail.com. Le bouton WhatsApp ouvre une conversation avec le 07 84 73 90 70.
+Les demandes de devis **et** les candidatures arrivent sur bdasecurite@gmail.com.
+
+Téléphone : le **06 11 67 86 25** est le numéro principal (tous les boutons « Appeler »). Le 07 84 73 90 70 est affiché en second dans les coordonnées. Le bouton WhatsApp ouvre une conversation avec le 07 84 73 90 70.
 
 Pour voir le site : double-cliquez sur `index.html`.
 
 ## Informations de l'entreprise
 
-Déjà en place : téléphone +33 7 84 73 90 70, email bdasecurite@gmail.com, Paris, et les informations légales des deux structures :
+Déjà en place : téléphone +33 6 11 67 86 25 (principal) et +33 7 84 73 90 70, email bdasecurite@gmail.com, Paris, et les informations légales des deux structures :
 
 - BDASECURITE, EURL, SIRET 109 076 463 00016 ;
 - Abdelouahab Bouidia EI (BDA SECURITE), SIRET 977 933 316 00019.

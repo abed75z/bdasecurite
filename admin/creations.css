@@ -150,6 +150,48 @@
 .fl--modifiable .est-vide::before { content: attr(data-ph); color: #a59f93; font-style: italic; }
 .fl:not(.fl--modifiable) .est-vide { display: none; }
 
+
+/* =========================================================
+   CARTE DE VISITE — 85 × 55 mm
+   ========================================================= */
+.cv { position: relative; width: 85mm; height: 55mm; overflow: hidden; border-radius: 1.5mm; font-family: "Poppins", Arial, sans-serif; line-height: 1.25; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.cv--recto { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6mm; color: #fff; background: radial-gradient(60mm 40mm at 50% 0%, rgba(201, 165, 92, 0.22), transparent 65%), #0b0b0d; }
+.cv--recto::after { content: ""; position: absolute; inset: 2.2mm; border: 0.25mm solid rgba(201, 165, 92, 0.45); border-radius: 1mm; pointer-events: none; }
+.cv__logo { width: 12.5mm; height: 13.8mm; margin-bottom: 1mm; }
+.cv__marque { font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 5.4mm; letter-spacing: 0.05em; }
+.cv__filet { width: 14mm; height: 0.35mm; background: linear-gradient(90deg, transparent, #c9a55c, transparent); }
+.cv__slogan { font-size: 1.7mm; font-weight: 600; letter-spacing: 0.34em; text-transform: uppercase; color: #c9a55c; }
+.cv__zone { position: absolute; bottom: 4.2mm; font-size: 1.6mm; letter-spacing: 0.14em; color: #8f8b82; }
+.cv--verso { display: flex; background: #fff; color: #16161a; }
+.cv__infos { flex: 1; min-width: 0; padding: 5.5mm 0 8mm 6mm; }
+.cv__nom { display: block; font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 4.3mm; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cv__fonction { display: block; margin-top: 0.8mm; font-size: 1.65mm; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: #b8934a; }
+.cv__trait { display: block; width: 10mm; height: 0.4mm; margin: 2.4mm 0 2.6mm; background: #c9a55c; }
+.cv__contacts { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.2mm; }
+.cv__contacts li { display: flex; align-items: center; gap: 1.6mm; font-size: 2.2mm; font-weight: 500; color: #1d1d22; white-space: nowrap; }
+.cv__contacts em { font-style: normal; font-size: 1.6mm; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #8a8478; }
+.cv__ic { display: grid; place-items: center; width: 3.4mm; height: 3.4mm; flex: none; border-radius: 50%; background: #0b0b0d; color: #c9a55c; }
+.cv__ic .ic { width: 1.9mm; height: 1.9mm; stroke-width: 2; }
+.cv__qr { display: grid; justify-items: center; align-content: start; gap: 0.6mm; padding: 5.5mm 5mm 0 2mm; }
+.cv__qr svg { width: 17mm; height: 17mm; display: block; }
+.cv__qr small { font-size: 1.45mm; font-weight: 600; letter-spacing: 0.08em; color: #b8934a; text-align: center; }
+.cv__bande { position: absolute; left: 0; right: 0; bottom: 0; height: 5.2mm; display: flex; align-items: center; gap: 1.6mm; padding: 0 6mm; background: #0b0b0d; border-top: 0.5mm solid #c9a55c; }
+.cv__mini { width: 2.9mm; height: 3.2mm; }
+.cv__bande span { font-family: "Playfair Display", Georgia, serif; font-size: 2.1mm; letter-spacing: 0.06em; color: #fff; }
+
+.galerie__visuel--visite, .vide-grand__visuel--visite { display: flex; justify-content: center; }
+.galerie__visuel--visite .cv { zoom: 0.62; box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.9); }
+.galerie__visuel--visite .cv + .cv { margin-left: -24mm; margin-top: 10mm; }
+.vide-grand__visuel--visite .cv { zoom: 0.85; box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.9); }
+.vide-grand__visuel--visite .cv + .cv { margin-left: -30mm; margin-top: 14mm; }
+.apercu-carte .cv { box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.06); }
+
+/* Planche A4 : 2 × 5 cartes, pointillés de découpe */
+.planche-visites { width: 210mm; height: 297mm; display: grid; grid-template-columns: repeat(2, 85mm); grid-auto-rows: 55mm; justify-content: center; align-content: center; }
+.planche-visites + .planche-visites, .page-visite + .page-visite { break-before: page; }
+.planche-visites .cv { border-radius: 0; outline: 0.2mm dashed #b5b5b5; }
+.page-visite { width: 85mm; height: 55mm; overflow: hidden; }
+.page-visite .cv { border-radius: 0; }
 /* ---------- Planches d'impression ---------- */
 .impression { display: none; }
 .planche { width: 210mm; height: 297mm; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9mm; }
@@ -173,5 +215,5 @@
   body.impression-dediee > *:not(.impression) { display: none !important; }
   body.impression-dediee .impression { display: block; }
   .impression .fl--a5 { zoom: 0.70711; }
-  .impression .cp, .impression .fl { box-shadow: none !important; transform: none !important; }
+  .impression .cp, .impression .fl, .impression .cv { box-shadow: none !important; transform: none !important; }
 }

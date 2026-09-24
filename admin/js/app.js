@@ -22,6 +22,7 @@ const MENU = [
   { route: 'demandes', libelle: 'Demandes', icone: 'demande', badge: 'demandes' },
   { route: 'avis', libelle: 'Avis clients', icone: 'avis', badge: 'avis' },
   { route: 'flyers', libelle: 'Flyers', icone: 'flyer' },
+  { route: 'visites', libelle: 'Cartes de visite', icone: 'visite' },
 ];
 // Rubrique affichée au-dessus du titre de chaque page
 const GROUPE = {};

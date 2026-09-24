@@ -337,7 +337,7 @@ function type_document(string $t): string
 }
 function type_creation(string $t): string
 {
-  if (!in_array($t, ['carte', 'flyer'], true)) echec('Type inconnu.');
+  if (!in_array($t, ['carte', 'flyer', 'visite'], true)) echec('Type inconnu.');
   return $t;
 }
 function mois_valide(string $m): string

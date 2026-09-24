@@ -63,6 +63,7 @@ export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 /* ---------- Icônes ---------- */
 const TRACES = {
   personne: '<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/>',
+  visite: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h7M6 13.5h4"/><path d="M16.5 9.5l1.5 1 1.5-1v3.5h-3z"/>',
   accueil: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   badge: '<rect x="2" y="5" width="20" height="14" rx="2.5"/><circle cx="8" cy="11" r="2.2"/><path d="M4.8 16.2c.6-1.6 1.8-2.4 3.2-2.4s2.6.8 3.2 2.4M14 10h5M14 13.5h3.5"/>',
   flyer: '<path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v6h6"/><rect x="7.5" y="12" width="9" height="6" rx="1"/>',

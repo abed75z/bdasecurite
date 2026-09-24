@@ -10,6 +10,7 @@ import { listeDocuments, editeurDocument } from './documents.js';
 import { pagePlanning } from './planning.js';
 import { pageCartes } from './cartes.js';
 import { pageFlyers } from './flyers.js';
+import { pageVisites } from './visites.js';
 
 export const PAGES = {
   '': pageAccueil,
@@ -21,6 +22,7 @@ export const PAGES = {
   agents: pageAgents,
   cartes: pageCartes,
   flyers: pageFlyers,
+  visites: pageVisites,
   avis: pageAvis,
   candidatures: pageCandidatures,
   parametres: pageParametres,
@@ -63,7 +65,8 @@ async function pageAccueil(ctx) {
     action('#/factures/nouveau', 'facture', 'Facture', 'Nouvelle facture'),
     action(`#/planning/${moisCourant}`, 'planning', 'Planning', `${cap(MOIS[auj.getMonth()])} ${auj.getFullYear()}`),
     action('#/cartes/nouvelle', 'badge', 'Carte agent', 'Carte pro à imprimer'),
-    action('#/flyers/nouveau', 'flyer', 'Flyer', 'Flyer A4 ou A5'));
+    action('#/flyers/nouveau', 'flyer', 'Flyer', 'Flyer A4 ou A5'),
+    action('#/visites/nouvelle', 'visite', 'Carte de visite', 'À laisser aux clients'));
 
   const installation = a.installation ? h('section', { class: 'carte installation' },
     h('div', null, h('span', { class: 'kicker' }, 'Dernière étape'), h('h3', null, 'Terminez l\'installation de votre espace'),
@@ -84,7 +87,7 @@ async function pageAccueil(ctx) {
 
   const TYPES = {
     devis: { ic: 'devis', lien: 'devis', nom: 'Devis' }, facture: { ic: 'facture', lien: 'factures', nom: 'Facture' },
-    carte: { ic: 'badge', lien: 'cartes', nom: 'Carte agent' }, flyer: { ic: 'flyer', lien: 'flyers', nom: 'Flyer' },
+    carte: { ic: 'badge', lien: 'cartes', nom: 'Carte agent' }, flyer: { ic: 'flyer', lien: 'flyers', nom: 'Flyer' }, visite: { ic: 'visite', lien: 'visites', nom: 'Carte de visite' },
   };
   const recents = a.recents.length ? h('ul', { class: 'recents' }, a.recents.map((r) => {
     const T = TYPES[r.type] || TYPES.devis;

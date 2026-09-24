@@ -91,6 +91,7 @@ Un espace privé, protégé par identifiant et mot de passe, pour gérer l'entre
 - **Demandes / Candidatures** : chaque formulaire du site y arrive, en plus de l'email FormSubmit. Une demande devient un devis en un clic.
 - **Avis clients** : les nouveaux avis attendent votre validation avant d'être publiés sur le site.
 - **Cartes agents** : carte BDA au format carte bancaire (recto + verso, photo recadrable), remplie depuis la liste des agents, imprimée sur A4 à découper ou en format carte, ou enregistrée en PDF.
+- **Cartes de visite** : format 85 × 55 mm (recto noir avec le logo, verso avec nom, téléphones, email, site et QR code), planche A4 de 10 cartes à découper ou format carte pour un imprimeur.
 - **Flyers** : flyer A4 ou A5 à nos couleurs, chaque texte se modifie au clic, sections masquables, QR code généré automatiquement.
 - **Clients, Agents, Paramètres** : fiches, coordonnées de l'entreprise, IBAN, sauvegarde complète (réglages avancés repliés).
 

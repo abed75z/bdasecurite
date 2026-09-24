@@ -16,9 +16,9 @@ RewriteRule ^ https://bdasecurite.com/ [R=301,L]
 # 2. /page.html -> /page (anciens liens et Google redirigés définitivement)
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\s/+([^\s?]+?)\.html[\s?] [NC]
 RewriteRule ^ https://bdasecurite.com/%1 [R=301,L]
-# 3. /page/ -> /page
+# 3. /page/ -> /page (d'après l'adresse tapée : OVH retrouve déjà seul page.html)
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_URI} ^/(.+)/$
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\s/+([^\s?]+?)/+[\s?]
 RewriteRule ^ https://bdasecurite.com/%1 [R=301,L]
 # 4. /page -> affiche le fichier page.html, sans le montrer dans l'adresse
 RewriteCond %{REQUEST_FILENAME} !-d

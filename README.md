@@ -72,7 +72,7 @@ Déjà en place sur le site :
 
 À faire par le gérant (c'est ce qui compte le plus) :
 
-1. **Google Search Console** (<https://search.google.com/search-console>) : ajouter `https://bdasecurite.com/` (« Préfixe de l'URL »), choisir la vérification « Balise HTML » et envoyer la balise au développeur, qui l'ajoute dans `index.html`. Ensuite, menu **Sitemaps** : saisir `sitemap.xml` et cliquer sur **Envoyer**.
+1. **Google Search Console** (<https://search.google.com/search-console>) : ajouter `https://bdasecurite.com/` (« Préfixe de l'URL »), choisir la vérification « Balise HTML » et envoyer la balise au développeur, qui l'ajoute dans `index.html`. Ensuite, menu **Sitemaps** : saisir `sitemap.xml` et cliquer sur **Envoyer**. ✅ La balise de vérification est en place dans `index.html` depuis le 24/09/2026 : ne pas la supprimer, sinon Google retire l'accès.
 2. **Fiche d'établissement Google** (<https://business.google.com>) : c'est elle qui fait apparaître l'entreprise sur Google Maps et dans les recherches « près de chez moi ». Nom : BDA Sécurité & VTC Premium ; téléphone : 06 11 67 86 25 ; site : https://bdasecurite.com.
 3. **Avis Google** : demander à chaque client satisfait de laisser un avis sur la fiche Google. Jamais de faux avis : c'est interdit et sanctionné.
 4. **Annuaires** : PagesJaunes, Bing Places, Apple Plans… avec exactement le même nom, la même adresse et le même téléphone partout.

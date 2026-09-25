@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BDA Sécurité &amp; VTC Premium — Carte de visite</title>
+  <meta name="description" content="Sécurité privée et chauffeurs VTC premium à Paris et en Île-de-France, 24/7. Appelez, écrivez sur WhatsApp ou demandez un devis gratuit.">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#09090b">
+  <link rel="canonical" href="https://bdasecurite.com/carte">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://bdasecurite.com/carte">
+  <meta property="og:title" content="BDA Sécurité & VTC Premium">
+  <meta property="og:description" content="Sécurité privée · VTC Premium · Paris & Île-de-France, 24/7. Devis gratuit, réponse rapide.">
+  <meta property="og:image" content="https://bdasecurite.com/assets/img/og-image.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #09090b; --surface: #141417; --line: rgba(255, 255, 255, .09); --gold: #c9a55c; --gold-light: #e8cf95; --gold-grad: linear-gradient(135deg, #ecd79f 0%, #c9a55c 52%, #a2803d 100%); --text: #f4f2ed; --text-2: #c6c3bb; --muted: #86837c; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; min-height: 100vh; min-height: 100svh; color: var(--text-2); font: 15px/1.5 "Poppins", system-ui, sans-serif; background: radial-gradient(90vmax 60vmax at 50% -18%, rgba(201, 165, 92, .2), transparent 62%), var(--bg); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+    .ic { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .carte { width: min(440px, 100%); margin: 0 auto; padding: max(28px, env(safe-area-inset-top)) 18px max(28px, env(safe-area-inset-bottom)); display: grid; gap: 18px; animation: entre .7s cubic-bezier(.16, 1, .3, 1) both; }
+    @keyframes entre { from { opacity: 0; transform: translateY(14px); } }
+
+    .tete { display: grid; justify-items: center; text-align: center; gap: 6px; padding: 26px 20px 22px; border-radius: 22px; border: 1px solid rgba(201, 165, 92, .28); background: linear-gradient(180deg, #17171b, #0f0f12); position: relative; overflow: hidden; }
+    .tete::before { content: ""; position: absolute; left: 24px; right: 24px; top: 0; height: 2px; background: var(--gold-grad); }
+    .logo { width: 62px; height: 74px; margin-bottom: 6px; }
+    .marque { margin: 0; font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 30px; letter-spacing: .03em; color: var(--text); line-height: 1.1; }
+    .slogan { margin: 0; font-size: 10.5px; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); }
+    .personne { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); width: 100%; }
+    .personne b { display: block; color: var(--text); font-size: 17px; font-weight: 600; }
+    .personne span { font-size: 13px; color: var(--muted); }
+    .accroche { margin: 10px 0 0; font-size: 14px; color: var(--text-2); }
+    .accroche em { font-family: "Playfair Display", Georgia, serif; color: var(--gold-light); }
+
+    .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .action { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font-weight: 500; font-size: 14px; transition: border-color .2s, transform .2s; }
+    .action:active { transform: scale(.98); }
+    .action:hover { border-color: rgba(201, 165, 92, .55); }
+    .action__ic { display: grid; place-items: center; width: 40px; height: 40px; flex: none; border-radius: 12px; background: #0b0b0d; border: 1px solid rgba(201, 165, 92, .35); color: var(--gold-light); }
+    .action small { display: block; color: var(--muted); font-size: 11.5px; font-weight: 400; }
+    .action--wa .action__ic { color: #7ee2a0; border-color: rgba(126, 226, 160, .35); }
+    .devis { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 17px; border-radius: 16px; background: var(--gold-grad); color: #17130a; font-weight: 700; font-size: 15.5px; box-shadow: 0 14px 34px -16px rgba(201, 165, 92, .9); }
+    .devis:active { transform: scale(.98); }
+    .contact { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; border-radius: 16px; border: 1px dashed rgba(201, 165, 92, .5); color: var(--gold-light); font-weight: 500; }
+
+    .bloc { padding: 18px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); }
+    .bloc h2 { margin: 0 0 12px; font-size: 10.5px; font-weight: 600; letter-spacing: .26em; text-transform: uppercase; color: var(--gold); }
+    .services { list-style: none; margin: 0; padding: 0; display: grid; }
+    .services li + li { border-top: 1px solid var(--line); }
+    .services a { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 2px; color: var(--text); font-size: 14px; }
+    .services a span { color: var(--muted); font-size: 12px; }
+    .services .ic { width: 16px; height: 16px; color: var(--muted); }
+
+    .partage { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .partage button { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; border-radius: 14px; border: 1px solid var(--line); background: transparent; color: var(--text-2); font-size: 13.5px; font-weight: 500; }
+    .qr { display: none; justify-items: center; gap: 10px; text-align: center; }
+    .qr.is-ouvert { display: grid; }
+    .qr__code { width: 220px; padding: 14px; border-radius: 16px; background: #fff; }
+    .qr__code svg { display: block; width: 100%; height: auto; }
+    .qr p { margin: 0; font-size: 12.5px; color: var(--muted); }
+    .pied { text-align: center; font-size: 11px; line-height: 1.6; color: #6b6861; }
+    .pied a { color: var(--text-2); }
+    .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); padding: 10px 16px; border-radius: 12px; background: #1b1b20; border: 1px solid rgba(201, 165, 92, .4); color: var(--text); font-size: 13px; opacity: 0; transition: opacity .25s, transform .3s; pointer-events: none; }
+    .toast.is-in { opacity: 1; transform: translate(-50%, 0); }
+    @media (prefers-reduced-motion: reduce) { .carte { animation: none; } }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs><linearGradient id="or" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc9c"/><stop offset=".45" stop-color="#c9a14a"/><stop offset="1" stop-color="#9c7424"/></linearGradient></defs>
+    <symbol id="i-tel" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+    <symbol id="i-wa" viewBox="0 0 24 24"><path d="M3 21l1.6-4.8A8.5 8.5 0 1 1 8 19.6z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1.2-1.4-2-1-1 .8a4 4 0 0 1-2-2l.8-1-1-2z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></symbol>
+    <symbol id="i-site" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+    <symbol id="i-devis" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+    <symbol id="i-contact" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6M19 3v6M16 6h6"/></symbol>
+    <symbol id="i-suivant" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-partage" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 17h4v4h-4"/></symbol>
+  </svg>
+
+  <main class="carte">
+    <header class="tete">
+      <svg class="logo" viewBox="0 0 200 240" aria-hidden="true">
+        <path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" fill="none" stroke="url(#or)" stroke-width="10" stroke-linejoin="round"/>
+        <path d="M100 30 164 54s2 70-11 97c-14 30-42 47-53 55-11-8-39-25-53-55-13-27-11-97-11-97Z" fill="none" stroke="url(#or)" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M62 128 100 84l38 44" fill="none" stroke="#f3f0ea" stroke-width="12"/>
+        <path d="M93 104h14l-2 52-5 24-5-24Z" fill="#f3f0ea"/>
+      </svg>
+      <h1 class="marque">BDA Sécurité</h1>
+      <p class="slogan">Sécurité privée · VTC Premium</p>
+      <div class="personne">
+        <b>Abdelouahab Bouidia</b>
+        <span>Gérant · Paris &amp; Île-de-France · 24/7</span>
+        <p class="accroche">Gardiennage, sécurité d'événements et chauffeurs privés. <em>Devis gratuit, réponse rapide.</em></p>
+      </div>
+    </header>
+
+    <nav class="actions" aria-label="Nous contacter">
+      <a class="action" href="tel:+33611678625"><span class="action__ic"><svg class="ic"><use href="#i-tel"/></svg></span><span>Appeler<small>06 11 67 86 25</small></span></a>
+      <a class="action action--wa" href="https://wa.me/33784739070?text=Bonjour%20BDA%20S%C3%A9curit%C3%A9%2C%20je%20souhaite%20un%20renseignement." target="_blank" rel="noopener"><span class="action__ic"><svg class="ic"><use href="#i-wa"/></svg></span><span>WhatsApp<small>07 84 73 90 70</small></span></a>
+      <a class="action" href="mailto:bdasecurite@gmail.com?subject=Demande%20de%20renseignement"><span class="action__ic"><svg class="ic"><use href="#i-mail"/></svg></span><span>Email<small>Nous écrire</small></span></a>
+      <a class="action" href="/"><span class="action__ic"><svg class="ic"><use href="#i-site"/></svg></span><span>Le site<small>bdasecurite.com</small></span></a>
+    </nav>
+
+    <a class="devis" href="/devis"><svg class="ic"><use href="#i-devis"/></svg>Demander un devis gratuit</a>
+    <a class="contact" href="/assets/bda-securite.vcf" download="BDA Sécurité.vcf"><svg class="ic"><use href="#i-contact"/></svg>Enregistrer le contact</a>
+
+    <section class="bloc">
+      <h2>Nos services</h2>
+      <ul class="services">
+        <li><a href="/securite-privee-paris">Sécurité privée &amp; gardiennage <svg class="ic"><use href="#i-suivant"/></svg></a></li>
+        <li><a href="/securite-evenementielle-paris">Sécurité d'événements <svg class="ic"><use href="#i-suivant"/></svg></a></li>
+        <li><a href="/protection-rapprochee-paris">Protection rapprochée <svg class="ic"><use href="#i-suivant"/></svg></a></li>
+        <li><a href="/chauffeur-prive-vtc-paris">Chauffeur privé VTC <svg class="ic"><use href="#i-suivant"/></svg></a></li>
+        <li><a href="/chauffeur-securite-vip-paris">Offre VIP : chauffeur + sécurité <svg class="ic"><use href="#i-suivant"/></svg></a></li>
+        <li><a href="/avis">Avis de nos clients <svg class="ic"><use href="#i-suivant"/></svg></a></li>
+      </ul>
+    </section>
+
+    <div class="partage">
+      <button type="button" id="partager"><svg class="ic"><use href="#i-partage"/></svg>Partager</button>
+      <button type="button" id="montrer-qr" aria-expanded="false" aria-controls="qr"><svg class="ic"><use href="#i-qr"/></svg>QR code</button>
+    </div>
+    <div class="qr" id="qr">
+      <div class="qr__code" id="qr-code"></div>
+      <p>À scanner avec l'appareil photo pour ouvrir cette carte.</p>
+    </div>
+
+    <footer class="pied">
+      <a href="/">bdasecurite.com</a> · bdasecurite@gmail.com<br>
+      Autorisation d'exercice CNAPS n° AUT-075-2124-07-01-20250906336
+    </footer>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module">
+    const URL_CARTE = 'https://bdasecurite.com/carte';
+    const toast = (txt) => { const t = document.getElementById('toast'); t.textContent = txt; t.classList.add('is-in'); setTimeout(() => t.classList.remove('is-in'), 2200); };
+
+    // Partager : menu du téléphone (WhatsApp, SMS…) ou copie du lien
+    document.getElementById('partager').addEventListener('click', async () => {
+      const donnees = { title: 'BDA Sécurité & VTC Premium', text: 'Sécurité privée et chauffeurs VTC premium à Paris, 24/7. Voici notre carte :', url: URL_CARTE };
+      try {
+        if (navigator.share) await navigator.share(donnees);
+        else { await navigator.clipboard.writeText(URL_CARTE); toast('Lien copié !'); }
+      } catch (e) { /* partage annulé */ }
+    });
+
+    // QR code : généré sur place (même générateur que l'espace admin)
+    const bouton = document.getElementById('montrer-qr'), zone = document.getElementById('qr');
+    bouton.addEventListener('click', async () => {
+      const ouvert = zone.classList.toggle('is-ouvert');
+      bouton.setAttribute('aria-expanded', String(ouvert));
+      const cible = document.getElementById('qr-code');
+      if (ouvert && !cible.firstChild) {
+        try { const { qrSvg } = await import('/admin/js/qr.js'); cible.append(qrSvg(URL_CARTE)); } catch (e) { cible.textContent = URL_CARTE; }
+      }
+      if (ouvert) zone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  </script>
+</body>
+</html>

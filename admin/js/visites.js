@@ -69,17 +69,40 @@ async function listeVisites(ctx) {
   ctx.actions(h('a', { class: 'btn btn--gold', href: '#/visites/nouvelle' }, icone('plus'), h('span', null, 'Nouvelle carte')));
   const { creations } = await api('creations', undefined, { type: 'visite' });
   if (!creations.length) {
-    return ctx.afficher(h('section', { class: 'carte vide-grand' },
+    return ctx.afficher(blocDigital(), h('section', { class: 'carte vide-grand' },
       h('div', { class: 'vide-grand__visuel vide-grand__visuel--visite' }, rectoVisite(VISITE_DEFAUT), versoVisite(VISITE_DEFAUT)),
       h('div', null, h('h2', null, 'Vos cartes de visite'), h('p', null, 'Votre nom, vos numéros, votre email : la carte est prête. Imprimez une planche de 10 cartes sur une feuille A4, ou enregistrez-la en PDF pour un imprimeur.'),
         h('a', { class: 'btn btn--gold', href: '#/visites/nouvelle' }, icone('plus'), 'Créer ma carte'))));
   }
-  ctx.afficher(h('div', { class: 'galerie' }, creations.map((c) => {
+  ctx.afficher(blocDigital(), h('div', { class: 'galerie' }, creations.map((c) => {
     const d = { ...VISITE_DEFAUT, ...c.data };
     return h('a', { class: 'galerie__item', href: `#/visites/${c.id}` },
       h('div', { class: 'galerie__visuel galerie__visuel--visite' }, rectoVisite(d), versoVisite(d)),
       h('div', { class: 'galerie__txt' }, h('b', null, d.nom || 'Sans nom'), h('small', null, d.fonction)));
   })));
+}
+
+/* ---------- Carte digitale : la page bdasecurite.com/carte, à envoyer depuis le téléphone ---------- */
+const URL_CARTE = 'https://bdasecurite.com/carte';
+const MESSAGE = 'Bonjour, voici la carte de BDA Sécurité & VTC Premium (sécurité privée et chauffeurs VTC à Paris, 24/7) :';
+function blocDigital() {
+  let qr = null;
+  try { qr = qrSvg(URL_CARTE); } catch (e) { /* lien affiché seul */ }
+  const copier = async () => {
+    try { await navigator.clipboard.writeText(URL_CARTE); toast('Lien copié : collez-le dans un message.'); } catch (e) { toast(URL_CARTE); }
+  };
+  return h('section', { class: 'carte digitale' },
+    h('div', { class: 'digitale__txt' },
+      h('span', { class: 'kicker' }, 'Carte de visite digitale'),
+      h('h2', null, 'Envoyez votre carte en un message'),
+      h('p', null, 'Une page à vos couleurs pour le téléphone : vos clients vous appellent, vous écrivent sur WhatsApp, demandent un devis, ouvrent le site ou enregistrent votre contact en un clic.'),
+      h('a', { class: 'digitale__lien', href: URL_CARTE, target: '_blank', rel: 'noopener' }, 'bdasecurite.com/carte'),
+      h('div', { class: 'digitale__actions' },
+        h('a', { class: 'btn btn--gold', href: `https://wa.me/?text=${encodeURIComponent(`${MESSAGE} ${URL_CARTE}`)}`, target: '_blank', rel: 'noopener' }, icone('envoyer'), 'Envoyer par WhatsApp'),
+        h('a', { class: 'btn btn--ghost', href: `sms:?&body=${encodeURIComponent(`${MESSAGE} ${URL_CARTE}`)}` }, icone('mail'), 'Par SMS'),
+        h('button', { class: 'btn btn--ghost', type: 'button', onclick: copier }, icone('copier'), 'Copier le lien'),
+        h('a', { class: 'btn btn--ghost', href: URL_CARTE, target: '_blank', rel: 'noopener' }, icone('site'), 'Voir la carte'))),
+    qr ? h('div', { class: 'digitale__qr' }, qr, h('small', null, 'À faire scanner')) : null);
 }
 
 async function editeurVisite(ctx, id) {

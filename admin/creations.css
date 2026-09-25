@@ -221,3 +221,15 @@
 /* Téléchargement PDF : repères de découpe dessinés en trait (les contours « outline » ne sont pas capturés) */
 .capture-pdf .planche__ligne, .capture-pdf .planche-visites .cv { outline: 0; box-shadow: 0 0 0 0.25mm #b5b5b5; }
 .capture-pdf .cp, .capture-pdf .fl, .capture-pdf .cv { transform: none; }
+
+/* Carte de visite digitale (lien à envoyer) */
+.digitale { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 24px; border-color: rgba(201, 165, 92, 0.35); background: linear-gradient(120deg, rgba(201, 165, 92, 0.08), var(--surface) 60%); }
+.digitale h2 { font-family: var(--serif); font-weight: 500; font-size: 22px; margin: 4px 0 6px; }
+.digitale p { margin: 0 0 10px; max-width: 620px; color: var(--text-2); font-size: 13px; }
+.digitale__lien { display: inline-block; margin-bottom: 14px; color: var(--gold-light); font-weight: 600; font-size: 15px; }
+.digitale__lien:hover { text-decoration: underline; }
+.digitale__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.digitale__qr { display: grid; justify-items: center; gap: 6px; }
+.digitale__qr svg { width: 128px; height: 128px; padding: 8px; border-radius: 12px; background: #fff; }
+.digitale__qr small { color: var(--muted); font-size: 11.5px; }
+@media (max-width: 760px) { .digitale { grid-template-columns: 1fr; } .digitale__qr { justify-self: start; } }

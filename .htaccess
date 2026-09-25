@@ -3,6 +3,12 @@
 # Encodage des pages
 AddDefaultCharset UTF-8
 
+# Fiche contact (carte de visite digitale) : ouverte directement par le téléphone
+<IfModule mod_mime.c>
+  AddType text/vcard .vcf
+  AddCharset UTF-8 .vcf
+</IfModule>
+
 # Adresse unique et sécurisée : tout est redirigé vers https://bdasecurite.com
 RewriteEngine On
 RewriteCond %{HTTP_HOST} !^bdasecurite\.com$ [NC,OR]

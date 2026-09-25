@@ -85,3 +85,6 @@
   .lp-aside { position: static; }
 }
 @media (max-width: 640px) { .lp-cards { grid-template-columns: 1fr; } .lp-cta .btn { width: 100%; } }
+
+/* Pages services : la FAQ s'aligne sur le texte */
+.lp-main .faq { margin-inline: 0; }

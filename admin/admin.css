@@ -764,3 +764,71 @@ code { font-family: var(--mono); font-size: 0.92em; color: var(--gold-light); ba
 @media (prefers-reduced-motion: reduce) {
   .acces__ligne i, .poste__badge i, .poste__invite, .voyant__led { animation: none !important; }
 }
+
+/* =========================================================
+   RAFFINEMENTS 2026-09 — console « onyx & or », plus de profondeur
+   ========================================================= */
+/* Fond : halo doré discret en haut + trame fine (plus de noir « plat ») */
+.principal { position: relative; background: radial-gradient(1100px 520px at 78% -140px, rgba(201, 165, 92, 0.085), transparent 62%), radial-gradient(900px 480px at 0% 110%, rgba(124, 156, 255, 0.04), transparent 60%), var(--bg); }
+.principal::before { content: ""; position: absolute; inset: 0 0 auto; height: 420px; pointer-events: none; background-image: linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px); background-size: 44px 44px; mask-image: linear-gradient(180deg, #000, transparent); -webkit-mask-image: linear-gradient(180deg, #000, transparent); }
+.page { position: relative; }
+
+/* Barre latérale : dégradé, filet or sur le bord, élément actif lumineux */
+.cote { background: linear-gradient(180deg, #111114 0%, #0c0c0f 55%, #0a0a0c 100%); border-right: 0; box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.05), 1px 0 0 rgba(201, 165, 92, 0.08); }
+.nav__item { transition: background-color 0.2s, color 0.2s, transform 0.25s var(--ease); }
+.nav__item:hover { transform: translateX(2px); }
+.nav__item .ic { transition: color 0.2s; }
+.nav__item:hover .ic { color: var(--gold-light); }
+.nav__item.is-actif { background: linear-gradient(90deg, rgba(201, 165, 92, 0.18), rgba(201, 165, 92, 0.03)); box-shadow: inset 0 0 0 1px rgba(201, 165, 92, 0.18); color: #f6e6bd; }
+.nav__item.is-actif .ic { color: var(--gold-light); filter: drop-shadow(0 0 6px rgba(201, 165, 92, 0.5)); }
+.nav__groupe { color: #6a665e; }
+.nav__groupe::after { content: ""; display: inline-block; width: 18px; height: 1px; margin-left: 8px; vertical-align: middle; background: linear-gradient(90deg, rgba(201, 165, 92, 0.4), transparent); }
+.profil { background: linear-gradient(135deg, rgba(201, 165, 92, 0.08), var(--surface) 60%); border-color: rgba(201, 165, 92, 0.18); }
+
+/* Barre du haut : verre fumé + filet or dégradé */
+.haut { background: rgba(10, 10, 12, 0.72); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); border-bottom: 0; }
+.haut::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, rgba(201, 165, 92, 0.35), rgba(255, 255, 255, 0.06) 40%, rgba(255, 255, 255, 0.04)); }
+.haut__titre { font-size: 21px; letter-spacing: -0.015em; }
+
+/* Cartes : dégradé, reflet en haut, ombre profonde, titre marqué d'or */
+.carte { background: linear-gradient(180deg, #16161a 0%, #121215 100%); border-color: rgba(255, 255, 255, 0.07); border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 24px 48px -32px rgba(0, 0, 0, 0.9); }
+.carte__tete h2 { position: relative; padding-left: 12px; }
+.carte__tete h2::before { content: ""; position: absolute; left: 0; top: 0.2em; bottom: 0.2em; width: 3px; border-radius: 3px; background: var(--gold-grad); }
+.carte__tete small { font-size: 11.5px; }
+
+/* Tableaux : en-tête teinté, lignes qui s'éclairent au survol */
+.tableau th { background: rgba(255, 255, 255, 0.018); color: #8f8b83; }
+.tableau tbody tr { transition: background-color 0.18s; }
+.tableau tbody tr:hover td { background: rgba(201, 165, 92, 0.045); }
+.tableau tbody tr:hover td:first-child { box-shadow: inset 2px 0 0 var(--gold); }
+.tableau .mono, .tableau td b.mono { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.01em; }
+
+/* Champs : fond plus profond, focus doré */
+.input { background: #0e0e11; border-color: rgba(255, 255, 255, 0.1); }
+.input:hover { border-color: rgba(255, 255, 255, 0.16); }
+
+/* Boutons : relief doré fin, contour plus net */
+.btn--gold { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -1px 0 rgba(0, 0, 0, 0.2), 0 10px 26px -14px rgba(201, 165, 92, 0.85); }
+.btn--gold:hover { transform: translateY(-1px); }
+.btn--ghost { background: rgba(255, 255, 255, 0.025); }
+.chip { background: rgba(255, 255, 255, 0.02); }
+.chip.is-actif { background: linear-gradient(135deg, rgba(201, 165, 92, 0.22), rgba(201, 165, 92, 0.08)); box-shadow: 0 0 0 3px rgba(201, 165, 92, 0.06); }
+
+/* Tuiles « Créer » et listes : même finition */
+.action { background: linear-gradient(160deg, #19191e, #121215); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04); }
+.action__ic { box-shadow: 0 8px 22px -10px rgba(201, 165, 92, 0.55); }
+.todo a, .recents a { transition: border-color 0.2s, background-color 0.2s, transform 0.25s var(--ease); }
+.todo a:hover, .recents a:hover { transform: translateX(3px); }
+
+/* Fenêtres : bord doré subtil */
+.modale { border-color: rgba(201, 165, 92, 0.28); box-shadow: 0 40px 120px -30px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
+
+/* Défilement : barre fine et dorée */
+* { scrollbar-width: thin; scrollbar-color: rgba(201, 165, 92, 0.35) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(201, 165, 92, 0.28); border-radius: 10px; border: 3px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background-color: rgba(201, 165, 92, 0.5); }
+
+@media print {
+  .principal, .principal::before { background: none !important; }
+}

@@ -408,6 +408,42 @@ button.fiche:hover { border-color: rgba(201, 165, 92, 0.5); transform: translate
 .import__progression small { color: var(--gold-light); font-size: 12px; }
 @media (max-width: 1100px) { .editeur--agent { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .fichier { flex-wrap: wrap; } .onglets { width: 100%; } .onglet { flex: 1; justify-content: center; padding: 8px 6px; } }
+
+/* ---------- VTC : réservations ---------- */
+.courses-admin { display: grid; gap: 18px; }
+.jour { display: grid; gap: 8px; }
+.jour h3 { display: flex; align-items: baseline; gap: 10px; margin: 0 0 2px; font-size: 13px; font-weight: 600; color: var(--text); }
+.jour h3 span { font-size: 11.5px; font-weight: 400; color: var(--muted); }
+.course { display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; align-items: center; gap: 16px; width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); text-align: left; transition: border-color 0.2s, transform 0.3s var(--ease); }
+.course:hover { border-color: rgba(201, 165, 92, 0.5); transform: translateY(-1px); }
+.course--attente { border-color: rgba(201, 165, 92, 0.45); box-shadow: inset 3px 0 0 var(--gold); }
+.course--annulee, .course--terminee { opacity: 0.6; }
+.course__heure { display: grid; justify-items: center; gap: 2px; padding-right: 14px; border-right: 1px solid var(--line); }
+.course__heure b { font-size: 20px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.course__heure small { font-size: 11px; color: var(--gold-light); }
+.course__trajet { display: grid; gap: 4px; min-width: 0; }
+.course__trajet span { display: flex; align-items: center; gap: 9px; min-width: 0; color: var(--text); font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.course__trajet .ic { width: 14px; height: 14px; color: var(--gold); }
+.course__trajet small { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.point-depart, .point-arrivee { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--gold); }
+.point-arrivee { border-radius: 2px; background: #fff; }
+.course__droite { display: grid; justify-items: end; gap: 6px; }
+.course__droite b { font-size: 16px; color: var(--text); font-variant-numeric: tabular-nums; }
+.detail-course { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.detail-course__trajet { display: grid; gap: 6px; min-width: 0; }
+.detail-course__trajet span { display: flex; align-items: center; gap: 9px; color: var(--text); font-size: 14px; }
+.detail-course__trajet .ic { width: 14px; height: 14px; color: var(--gold); }
+.detail-course__trajet small { color: var(--muted); font-size: 12px; }
+.sous-titre { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
+.tableau--form td { padding: 8px 20px; }
+.tableau--form .input { max-width: 180px; }
+.tableau--form td:first-child .input { max-width: none; min-width: 260px; }
+.onglets + .carte, .onglets + .astuce { margin-top: -4px; }
+a.onglet { text-decoration: none; }
+@media (max-width: 700px) {
+  .course { grid-template-columns: 60px minmax(0, 1fr); }
+  .course__droite { grid-column: 2; justify-items: start; grid-auto-flow: column; align-items: center; }
+}
 /* ---------- Adaptation écrans ---------- */
 @media (max-width: 1280px) {
   .creer { grid-template-columns: repeat(3, minmax(0, 1fr)); }

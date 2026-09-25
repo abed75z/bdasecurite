@@ -140,8 +140,9 @@
       <a href="#services">Services</a>
       <a href="#securite">Sécurité</a>
       <a href="#vtc">VTC Premium</a>
+      <a href="reserver" class="nav__hot">Réserver un VTC</a>
       <a href="avis">Avis</a>
-      <a href="recrutement" class="nav__hot">Recrutement</a>
+      <a href="recrutement">Recrutement</a>
     </nav>
     <div class="nav__actions">
       <!-- À PERSONNALISER : votre numéro -->
@@ -157,12 +158,14 @@
   <a class="mobile-menu__link" href="#services" style="--i:1">Services</a>
   <a class="mobile-menu__link" href="#securite" style="--i:2">Sécurité</a>
   <a class="mobile-menu__link" href="#vtc" style="--i:3">VTC Premium</a>
+  <a class="mobile-menu__link" href="reserver" style="--i:3">Réserver un VTC</a>
   <a class="mobile-menu__link" href="#engagements" style="--i:4">Engagements</a>
   <a class="mobile-menu__link" href="#faq" style="--i:5">FAQ</a>
   <a class="mobile-menu__link" href="avis" style="--i:6">Avis clients</a>
   <a class="mobile-menu__link" href="recrutement" style="--i:7">Recrutement</a>
   <div class="mobile-menu__foot">
     <a class="btn btn--gold btn--block" href="devis">Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    <a class="btn btn--outline btn--block" href="reserver"><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg> Réserver un VTC</a>
     <a class="btn btn--outline btn--block" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Appeler</a>
   </div>
 </div>
@@ -184,7 +187,7 @@
         <p class="lead hero__lead" data-reveal style="--d:300ms">Agents de sécurité qualifiés et chauffeurs VTC haut de gamme à Paris, réunis sous une même exigence : vous protéger et vous conduire avec discrétion, ponctualité et élégance, de jour comme de nuit.</p>
         <div class="hero__ctas" data-reveal style="--d:450ms">
           <a class="btn btn--gold" href="devis" data-magnetic>Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <a class="btn btn--outline" href="#services">Découvrir nos services</a>
+          <a class="btn btn--outline" href="reserver"><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg> Réserver un VTC</a>
         </div>
         <ul class="hero__trust" data-reveal="fade" style="--d:650ms">
           <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Agents titulaires de la carte CNAPS</li>
@@ -357,8 +360,15 @@
                 <li><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg><a href="chauffeur-mariage-paris">Mariages &amp; événements</a></li>
                 <li><svg class="icon" aria-hidden="true"><use href="#i-route"/></svg>Longues distances</li>
               </ul>
+              <form class="resa-rapide" action="reserver" method="get" aria-label="Réserver un chauffeur VTC">
+                <p class="resa-rapide__titre"><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg>Réservez en 1 minute · prix affiché</p>
+                <div class="resa-rapide__champs">
+                  <label><span class="resa-rapide__point" aria-hidden="true"></span><span class="sr-only">Adresse de départ</span><input name="depart" type="text" autocomplete="street-address" placeholder="Adresse de départ" required></label>
+                  <label><span class="resa-rapide__point resa-rapide__point--fin" aria-hidden="true"></span><span class="sr-only">Destination</span><input name="arrivee" type="text" placeholder="Destination (ex. Orly, CDG, gare de Lyon)"></label>
+                </div>
+                <button class="btn btn--gold" type="submit">Voir le prix <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+              </form>
               <div class="feature__actions">
-                <a class="btn btn--gold" href="devis?service=transfert" data-magnetic="0.2">Devis VTC <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
                 <a class="link-arrow" href="chauffeur-prive-vtc-paris"><span>En savoir plus</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
               </div>
             </div>

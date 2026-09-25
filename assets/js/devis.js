@@ -35,6 +35,9 @@ function envoyerAdmin(url, payload) {
   });
 }
 
+// Anciens liens « devis VTC » : la réservation se fait maintenant sur la page dédiée
+if (['transfert', 'disposition', 'evenement'].includes(new URLSearchParams(location.search).get('service'))) location.replace(new URLSearchParams(location.search).get('service') === 'disposition' ? 'reserver?mode=dispo' : 'reserver');
+
 (() => {
   const form = document.getElementById('devis-form');
   if (!form) return;

@@ -367,3 +367,17 @@
   .cta__actions .btn { width: 100%; }
   .faq__a p { padding-right: 4px; }
 }
+
+/* ---------- VTC : réservation rapide (mène à la page /reserver) ---------- */
+.resa-rapide { display: grid; gap: 12px; width: 100%; max-width: 480px; padding: 18px; border-radius: 20px; border: 1px solid rgba(201, 161, 74, 0.35); background: linear-gradient(160deg, rgba(20, 20, 30, 0.85), rgba(10, 10, 16, 0.85)); box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.9); }
+.resa-rapide__titre { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 13px; font-weight: 600; letter-spacing: 0.04em; color: var(--gold-light); }
+.resa-rapide__titre .icon { width: 18px; height: 18px; color: var(--gold); }
+.resa-rapide__champs { position: relative; display: grid; gap: 8px; }
+.resa-rapide__champs::before { content: ""; position: absolute; left: 19px; top: 26px; bottom: 26px; width: 2px; background: repeating-linear-gradient(180deg, var(--gold) 0 4px, transparent 4px 8px); }
+.resa-rapide label { display: flex; align-items: center; gap: 12px; padding: 0 14px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.04); transition: border-color 0.2s; }
+.resa-rapide label:focus-within { border-color: var(--gold); }
+.resa-rapide input { flex: 1; min-width: 0; height: 50px; border: 0; background: transparent; outline: none; color: var(--text); font: inherit; font-size: 15px; }
+.resa-rapide input::placeholder { color: rgba(255, 255, 255, 0.4); }
+.resa-rapide__point { width: 12px; height: 12px; flex: none; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgba(201, 161, 74, 0.18); }
+.resa-rapide__point--fin { border-radius: 3px; background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1); }
+.resa-rapide .btn { justify-self: stretch; justify-content: center; }

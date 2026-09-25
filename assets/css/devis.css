@@ -134,3 +134,11 @@ textarea.input { min-height: 150px; resize: vertical; line-height: 1.55; }
 @media (max-width: 400px) { .opts, .opts--2 { grid-template-columns: 1fr; } .opt__card { flex-direction: row; align-items: center; } }
 
 @media (prefers-reduced-motion: reduce) { .step-panel.is-active { animation: none; } }
+
+/* Lien vers la réservation VTC (page dédiée /reserver) */
+.opt-lien { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(201, 161, 74, 0.45); background: linear-gradient(135deg, rgba(201, 161, 74, 0.12), rgba(255, 255, 255, 0.02)); color: var(--text, #f4f2ee); text-decoration: none; transition: border-color 0.25s, transform 0.3s; }
+.opt-lien:hover { border-color: var(--gold, #c9a14a); transform: translateY(-2px); }
+.opt-lien b { display: block; font-weight: 600; }
+.opt-lien small { display: block; color: var(--muted, #9a9aae); font-size: 12.5px; }
+.opt-lien .opt__icon { flex: none; }
+.opt-lien__fleche { margin-left: auto; flex: none; color: var(--gold, #c9a14a); }

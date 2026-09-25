@@ -24,6 +24,7 @@ const STATUTS = [
   'demande' => ['nouvelle', 'traitee', 'archivee'],
   'candidature' => ['nouvelle', 'en_cours', 'retenue', 'refusee'],
   'avis' => ['attente', 'publie', 'refuse'],
+  'reservation' => ['attente', 'confirmee', 'terminee', 'annulee'],
 ];
 // Documents d'un agent (les 5 premiers sont obligatoires)
 const DOC_TYPES = ['identite', 'carte_pro', 'diplome_aps', 'secu', 'rib', 'certif', 'attestation', 'cv', 'dossier', 'autre'];
@@ -133,6 +134,14 @@ function schema(PDO $db): void
       PRAGMA user_version = 3;
     SQL);
   }
+  if ($version < 4) {
+    // Réservations VTC faites depuis le site (page /reserver)
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS reservations (id INTEGER PRIMARY KEY, ref TEXT NOT NULL UNIQUE, jeton TEXT NOT NULL UNIQUE, recu TEXT NOT NULL, statut TEXT NOT NULL DEFAULT 'attente', date_course TEXT NOT NULL, prix REAL NOT NULL DEFAULT 0, data TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_reservations ON reservations (date_course);
+      PRAGMA user_version = 4;
+    SQL);
+  }
 }
 
 /* ---------- Outils ---------- */
@@ -201,13 +210,13 @@ function fr_vers_iso(string $s): string
 {
   return preg_match('~^(\d{1,2})/(\d{1,2})/(\d{4})$~', trim($s), $m) ? sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1]) : '';
 }
-function envoyer_mail(string $sujet, string $message, string $repondreA = ''): bool
+function envoyer_mail(string $sujet, string $message, string $repondreA = '', string $destinataire = BDA_EMAIL): bool
 {
   if (getenv('BDA_NO_MAIL')) return true; // tests sur ordinateur
   $sujet = str_replace(["\r", "\n"], ' ', $sujet);
   $entetes = ['From: BDA Securite <noreply@bdasecurite.com>', 'MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: 8bit'];
   if ($repondreA !== '' && filter_var($repondreA, FILTER_VALIDATE_EMAIL)) $entetes[] = 'Reply-To: ' . $repondreA;
-  return @mail(BDA_EMAIL, mb_encode_mimeheader($sujet, 'UTF-8'), $message, implode("\r\n", $entetes));
+  return @mail($destinataire, mb_encode_mimeheader($sujet, 'UTF-8'), $message, implode("\r\n", $entetes));
 }
 
 /* ---------- Réglages de l'entreprise (valeurs publiques par défaut) ---------- */
@@ -269,4 +278,58 @@ function avis_google_une_fois(): void
   if ($etat === 'ok' || ($etat !== '' && time() - (int)$etat < 3600)) return;
   $n = importer_avis_google();
   file_put_contents($marque, $n >= 0 ? 'ok' : (string)time());
+}
+
+/* ---------- VTC : tarifs et calcul du prix (même calcul que la page /reserver) ---------- */
+function tarifs_vtc_defaut(): array
+{
+  return [
+    'afficherPrix' => true,
+    'berline' => ['nom' => 'Berline', 'places' => 3, 'bagages' => 3, 'prise' => 10, 'km' => 1.9, 'min' => 0.55, 'minimum' => 40, 'heure' => 65],
+    'van' => ['nom' => 'Van', 'places' => 7, 'bagages' => 7, 'prise' => 15, 'km' => 2.4, 'min' => 0.7, 'minimum' => 60, 'heure' => 85],
+    'nuit' => 20,
+    'minHeures' => 2,
+    'delai' => 2,
+    'forfaits' => [
+      ['code' => 'CDG', 'nom' => 'Paris ⇄ Aéroport Charles-de-Gaulle', 'berline' => 85, 'van' => 115],
+      ['code' => 'ORY', 'nom' => 'Paris ⇄ Aéroport d\'Orly', 'berline' => 65, 'van' => 90],
+      ['code' => 'BVA', 'nom' => 'Paris ⇄ Aéroport de Beauvais', 'berline' => 150, 'van' => 200],
+    ],
+    'siege' => 10,
+    'pancarte' => 0,
+  ];
+}
+function tarifs_vtc(): array
+{
+  $st = db()->prepare('SELECT v FROM reglages WHERE k = ?');
+  $st->execute(['vtc']);
+  $v = json_decode((string)$st->fetchColumn(), true);
+  $t = tarifs_vtc_defaut();
+  if (!is_array($v)) return $t;
+  foreach (['berline', 'van'] as $k) if (is_array($v[$k] ?? null)) $t[$k] = array_merge($t[$k], $v[$k]);
+  foreach (['afficherPrix', 'nuit', 'minHeures', 'delai', 'siege', 'pancarte'] as $k) if (array_key_exists($k, $v)) $t[$k] = $v[$k];
+  if (is_array($v['forfaits'] ?? null)) $t['forfaits'] = $v['forfaits'];
+  return $t;
+}
+// $r : vehicule, mode (trajet|dispo), km, min, heures, departCode, arriveeCode, departParis, arriveeParis, heure (HH:MM), sieges, pancarte
+function prix_vtc(array $t, array $r): float
+{
+  $v = $t[$r['vehicule'] === 'van' ? 'van' : 'berline'];
+  $veh = $r['vehicule'] === 'van' ? 'van' : 'berline';
+  if (($r['mode'] ?? 'trajet') === 'dispo') {
+    $base = max((float)$t['minHeures'], (float)$r['heures']) * (float)$v['heure'];
+  } else {
+    $base = null;
+    foreach ($t['forfaits'] as $f) {
+      if ((($r['departCode'] ?? '') === $f['code'] && !empty($r['arriveeParis'])) || (($r['arriveeCode'] ?? '') === $f['code'] && !empty($r['departParis']))) {
+        $base = (float)$f[$veh];
+        break;
+      }
+    }
+    if ($base === null) $base = max((float)$v['minimum'], (float)$v['prise'] + (float)$r['km'] * (float)$v['km'] + (float)$r['min'] * (float)$v['min']);
+  }
+  $h = (int)substr((string)($r['heure'] ?? '12:00'), 0, 2);
+  if ($h >= 22 || $h < 6) $base *= 1 + (float)$t['nuit'] / 100;
+  $base += (int)($r['sieges'] ?? 0) * (float)$t['siege'] + (!empty($r['pancarte']) ? (float)$t['pancarte'] : 0);
+  return round($base);
 }

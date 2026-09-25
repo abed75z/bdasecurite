@@ -1,0 +1,13 @@
+{
+  "name": "BDA VTC Premium — Réserver un chauffeur",
+  "short_name": "BDA VTC",
+  "start_url": "/reserver",
+  "scope": "/reserver",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    { "src": "/assets/img/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/assets/img/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

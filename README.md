@@ -4,6 +4,8 @@ Site vitrine statique (HTML / CSS / JavaScript, sans installation). Il fonctionn
 
 ## Pages
 
+- `reserver.html` (/reserver) : réservation VTC façon appli (carte, adresses et itinéraires IGN Géoplateforme gratuits, prix estimé, suivi et annulation par lien personnel, « Mes courses », installable sur le téléphone). Les réservations arrivent dans l'admin (VTC).
+
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Page d'accueil (services, engagements, FAQ…) |
@@ -85,6 +87,7 @@ Pour modifier le numéro de téléphone un jour : il apparaît dans toutes les p
 
 Un espace privé, protégé par identifiant et mot de passe, pour gérer l'entreprise et le site :
 
+- **VTC → Réservations** : les courses réservées sur bdasecurite.com/reserver (à confirmer, à venir, terminées). Confirmer en un clic (le client est prévenu par email), choisir le chauffeur, WhatsApp de confirmation, itinéraire, créer la facture. Onglet **Tarifs** : prix au km / minute, forfaits aéroports, nuit, options.
 - **Accueil** : créer en un clic (devis, facture, planning, carte agent, flyer) et la liste de ce qui attend une action (demandes, avis, candidatures, factures à relancer, cartes pro à renouveler). Aucun graphique ni chiffre d'affaires.
 - **Devis / Factures** : feuilles A4 à nos couleurs, modifiables directement, enregistrées automatiquement, bouton « Télécharger en PDF » (fichier direct) ou impression. Un devis accepté se transforme en facture ; une facture peut reprendre les heures du planning.
 - **Planning** : planning mensuel des agents (heures, nuit, dimanche, fériés), impression paysage, création de la facture du mois.

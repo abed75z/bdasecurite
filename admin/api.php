@@ -23,7 +23,7 @@ if ($methode === 'POST') {
 $libres = ['session', 'connexion', 'activation', 'secours'];
 if (!in_array($action, $libres, true) && !connecte()) echec('Connexion requise.', 401);
 
-$lecture = ['session', 'accueil', 'compteurs', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
+$lecture = ['session', 'accueil', 'compteurs', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -246,6 +246,64 @@ try {
     case 'creation.supprimer':
       supprimer_ligne('creations', (int)(corps()['id'] ?? 0));
 
+    /* ================= VTC : réservations et tarifs ================= */
+    case 'reservations':
+      $lignes = db()->query('SELECT id, ref, recu, statut, date_course, prix, data FROM reservations ORDER BY date_course DESC LIMIT 1000')->fetchAll();
+      foreach ($lignes as &$l) $l['data'] = json_decode((string)$l['data'], true) ?: [];
+      repondre(['ok' => true, 'reservations' => $lignes]);
+
+    case 'reservation.modifier':
+      $b = corps();
+      $st = db()->prepare('SELECT * FROM reservations WHERE id = ?');
+      $st->execute([(int)($b['id'] ?? 0)]);
+      $r = $st->fetch();
+      if (!$r) echec('Réservation introuvable.', 404);
+      $d = json_decode((string)$r['data'], true) ?: [];
+      $statut = (string)$r['statut'];
+      if (isset($b['statut'])) {
+        if (!in_array($b['statut'], STATUTS['reservation'], true)) echec('Statut inconnu.');
+        $statut = (string)$b['statut'];
+      }
+      $prix = isset($b['prix']) ? max(0, min(100000, round((float)$b['prix'], 2))) : (float)$r['prix'];
+      if (array_key_exists('chauffeur', $b)) $d['chauffeur'] = texte($b['chauffeur'], 80);
+      if (array_key_exists('note', $b)) $d['note'] = texte($b['note'], 1000);
+      db()->prepare('UPDATE reservations SET statut = ?, prix = ?, data = ? WHERE id = ?')->execute([$statut, $prix, json_encode($d, JSON_UNESCAPED_UNICODE), (int)$r['id']]);
+      // Le client est prévenu par email quand la course est confirmée ou annulée
+      if ($statut !== $r['statut'] && in_array($statut, ['confirmee', 'annulee'], true) && !empty($d['email'])) {
+        $quand = date('d/m/Y', strtotime($d['date'])) . ' à ' . $d['heure'];
+        $txt = $statut === 'confirmee'
+          ? "Bonjour {$d['nom']},\n\nVotre course du $quand est confirmée" . (!empty($d['chauffeur']) ? " : votre chauffeur sera {$d['chauffeur']}" : '') . ".\nPrix : " . number_format($prix, 2, ',', ' ') . " €\n\nSuivre votre réservation : https://bdasecurite.com/reserver#suivi={$r['jeton']}\n\nBDA Sécurité & VTC Premium — 06 11 67 86 25"
+          : "Bonjour {$d['nom']},\n\nVotre réservation du $quand a été annulée. Pour toute question : 06 11 67 86 25.\n\nBDA Sécurité & VTC Premium";
+        envoyer_mail(($statut === 'confirmee' ? 'Course confirmée' : 'Réservation annulée') . " — {$r['ref']}", $txt, BDA_EMAIL, $d['email']);
+      }
+      repondre(['ok' => true]);
+
+    case 'reservation.supprimer':
+      supprimer_ligne('reservations', (int)(corps()['id'] ?? 0));
+
+    case 'vtc.tarifs':
+      repondre(['ok' => true, 'tarifs' => tarifs_vtc()]);
+
+    case 'vtc.tarifs.enregistrer':
+      $b = corps();
+      $n = fn($v, float $max = 10000) => max(0, min($max, round((float)$v, 2)));
+      $t = tarifs_vtc();
+      foreach (['berline', 'van'] as $k) {
+        foreach (['prise', 'km', 'min', 'minimum', 'heure'] as $c) if (isset($b[$k][$c])) $t[$k][$c] = $n($b[$k][$c]);
+        foreach (['places', 'bagages'] as $c) if (isset($b[$k][$c])) $t[$k][$c] = max(1, min(8, (int)$b[$k][$c]));
+      }
+      foreach (['nuit' => 200, 'minHeures' => 24, 'delai' => 72, 'siege' => 500, 'pancarte' => 500] as $k => $max) if (isset($b[$k])) $t[$k] = $n($b[$k], $max);
+      if (isset($b['afficherPrix'])) $t['afficherPrix'] = !empty($b['afficherPrix']);
+      if (is_array($b['forfaits'] ?? null)) {
+        $t['forfaits'] = [];
+        foreach (array_slice($b['forfaits'], 0, 10) as $f) {
+          if (!is_array($f) || !in_array($f['code'] ?? '', ['CDG', 'ORY', 'BVA'], true)) continue;
+          $t['forfaits'][] = ['code' => $f['code'], 'nom' => texte($f['nom'] ?? '', 80), 'berline' => $n($f['berline'] ?? 0), 'van' => $n($f['van'] ?? 0)];
+        }
+      }
+      db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['vtc', json_encode($t, JSON_UNESCAPED_UNICODE)]);
+      repondre(['ok' => true, 'tarifs' => $t]);
+
     /* ================= Clients et agents ================= */
     case 'clients':
       repondre(['ok' => true, 'clients' => db()->query('SELECT * FROM clients ORDER BY nom COLLATE NOCASE')->fetchAll()]);
@@ -379,7 +437,7 @@ try {
 
     case 'export':
       $export = ['format' => 'bda-admin-sauvegarde', 'version' => 1, 'date' => maintenant(), 'reglages' => reglages()];
-      foreach (['documents', 'plannings', 'clients', 'agents', 'agent_docs', 'creations', 'demandes', 'candidatures', 'avis'] as $t) {
+      foreach (['documents', 'plannings', 'clients', 'agents', 'agent_docs', 'reservations', 'creations', 'demandes', 'candidatures', 'avis'] as $t) {
         $export[$t] = db()->query("SELECT * FROM $t")->fetchAll();
       }
       header('Content-Disposition: attachment; filename="bda-sauvegarde-' . date('Y-m-d') . '.json"');
@@ -457,6 +515,7 @@ function compteurs(): array
   $retards->execute([date('Y-m-d')]);
   return [
     'demandes' => $q("SELECT COUNT(*) FROM demandes WHERE statut = 'nouvelle'"),
+    'reservations' => $q("SELECT COUNT(*) FROM reservations WHERE statut = 'attente'"),
     'candidatures' => $q("SELECT COUNT(*) FROM candidatures WHERE statut = 'nouvelle'"),
     'avis' => $q("SELECT COUNT(*) FROM avis WHERE statut = 'attente'"),
     'retards' => (int)$retards->fetchColumn(),

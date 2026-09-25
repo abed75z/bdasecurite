@@ -102,6 +102,7 @@ export function installerPalette({ menu, aller, deconnexion, compteurs }) {
     { ic: 'visite', titre: 'Nouvelle carte de visite', mots: 'visite', run: () => aller('#/visites/nouvelle') },
     { ic: 'cadenas', titre: 'Mettre le site hors ligne', mots: 'site off maintenance couper fermer', danger: true, run: () => horsLigne(true) },
     { ic: 'coche', titre: 'Remettre le site en ligne', mots: 'site on ouvrir', run: () => horsLigne(false) },
+    { ic: 'couronne', titre: 'Mon accès chef (ma carte pro)', mots: 'carte pro moi chef gerant', run: () => { location.href = '/admin/moi'; } },
     { ic: 'bouclier', titre: 'Accès & sécurité', mots: 'appareils connexions journal historique securite', run: () => aller('#/securite') },
     { ic: 'site', titre: 'Voir le site public', mots: 'ouvrir bdasecurite', run: () => window.open('/', '_blank', 'noopener') },
     { ic: 'telecharger', titre: 'Télécharger une sauvegarde', mots: 'export backup', run: () => aller('#/parametres') },

@@ -169,6 +169,7 @@ function lancerApplication() {
     menuEl,
     h('div', { class: 'cote__bas' },
       lien({ route: 'parametres', libelle: 'Paramètres', icone: 'reglages' }),
+      h('a', { class: 'nav__item nav__item--chef', href: '/admin/moi' }, icone('couronne'), h('span', null, 'Mon accès chef')),
       h('a', { class: 'nav__item', href: '/', target: '_blank', rel: 'noopener' }, icone('site'), h('span', null, 'Voir le site')),
       h('div', { class: 'profil' }, h('span', { class: 'profil__avatar', 'aria-hidden': 'true' }, utilisateur.charAt(0) || 'A'),
         h('div', null, h('b', null, utilisateur), h('small', null, 'Administrateur · accès total')),

@@ -1,0 +1,98 @@
+/* =========================================================
+   MON ACCÈS — page personnelle du gérant (carte pro en 3D)
+   ========================================================= */
+body.moi { min-height: 100svh; overflow-x: hidden; background: radial-gradient(120% 60% at 50% -10%, rgba(201, 165, 92, 0.2), transparent 60%), radial-gradient(80% 50% at 50% 110%, rgba(201, 165, 92, 0.08), transparent 60%), #08080a; }
+body.moi::before { content: ""; position: fixed; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(255, 255, 255, 0.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px); background-size: 40px 40px; mask-image: radial-gradient(circle at 50% 30%, #000, transparent 75%); -webkit-mask-image: radial-gradient(circle at 50% 30%, #000, transparent 75%); }
+
+.moi-page { position: relative; width: min(560px, 100%); margin: 0 auto; padding: max(16px, env(safe-area-inset-top)) 18px max(26px, env(safe-area-inset-bottom)); display: grid; gap: 22px; justify-items: center; text-align: center; }
+
+/* Badge « accès » */
+.moi-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 99px; border: 1px solid rgba(201, 165, 92, 0.4); background: rgba(201, 165, 92, 0.1); color: var(--gold-light); font: 500 10px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; }
+.moi-badge i { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 10px var(--gold); animation: led-or 2.2s ease-in-out infinite; }
+@keyframes led-or { 50% { opacity: 0.35; } }
+
+.moi-haut { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.moi-sortie { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 12px; border: 1px solid var(--line-2); color: var(--muted); }
+.moi-sortie:hover { color: var(--text); border-color: var(--gold); }
+
+/* Le chef */
+.moi-chef { display: grid; gap: 6px; justify-items: center; margin-top: 4px; }
+.moi-chef__couronne { width: 58px; height: 52px; filter: drop-shadow(0 6px 18px rgba(201, 165, 92, 0.55)); animation: couronne 4s ease-in-out infinite; }
+@keyframes couronne { 50% { transform: translateY(-4px); filter: drop-shadow(0 12px 26px rgba(201, 165, 92, 0.75)); } }
+.moi-chef__salut { margin: 6px 0 0; color: var(--gold); font: 600 11px/1 var(--mono); letter-spacing: 0.3em; text-transform: uppercase; }
+.moi-chef h1 { font: 500 clamp(30px, 8.5vw, 44px)/1.1 var(--serif); letter-spacing: 0; color: var(--text); }
+.moi-chef h1 em { display: block; font-style: normal; font-family: var(--font); font-weight: 700; font-size: 0.62em; letter-spacing: 0.24em; background: linear-gradient(100deg, #b8913f 0%, #f6e2a8 40%, #c9a55c 60%, #f6e2a8 80%, #b8913f 100%); background-size: 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: reflet-or 5s linear infinite; }
+@keyframes reflet-or { to { background-position: -220% 0; } }
+.moi-chef__titre { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.moi-chef__titre span { color: var(--gold-light); font-weight: 600; }
+
+/* ---------- La carte en 3D ---------- */
+.moi-scene { --k: 1; --sx: 50%; --sy: 50%; --ox: 0px; position: relative; display: grid; place-items: center; width: 100%; padding: 26px 0 30px; perspective: 1100px; }
+.moi-scene__halo { position: absolute; left: 50%; top: 50%; width: 130%; aspect-ratio: 1; transform: translate(-50%, -50%); background: conic-gradient(from 0deg, transparent, rgba(201, 165, 92, 0.16), transparent 30%, rgba(201, 165, 92, 0.1), transparent 60%); border-radius: 50%; filter: blur(30px); animation: halo 18s linear infinite; pointer-events: none; }
+@keyframes halo { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.carte3d { position: relative; width: calc(85.6mm * var(--k)); height: calc(54mm * var(--k)); padding: 0; border: 0; background: none; cursor: pointer; transform-style: preserve-3d; -webkit-tap-highlight-color: transparent; will-change: transform; }
+.carte3d:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 8px; border-radius: 14px; }
+.carte3d__tourne { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 0.8s cubic-bezier(0.45, 0.05, 0.55, 0.95); }
+.carte3d__tourne.is-retournee { transform: rotateY(180deg); }
+.carte3d__face { position: absolute; inset: 0; border-radius: calc(3.2mm * var(--k)); overflow: hidden; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(201, 165, 92, 0.35), 0 0 40px -10px rgba(201, 165, 92, 0.35); }
+.carte3d__face--dos { transform: rotateY(180deg); }
+/* Chaque face se masque pile à mi-retournement (0,4 s sur 0,8 s, courbe symétrique) : fiable sur tous les téléphones */
+.carte3d__face { transition-property: visibility; transition-duration: 0s; transition-delay: 0.4s; }
+.carte3d__face--dos { visibility: hidden; }
+.carte3d__tourne.is-retournee > .carte3d__face { visibility: hidden; }
+.carte3d__tourne.is-retournee > .carte3d__face--dos { visibility: visible; }
+.carte3d__echelle { position: absolute; left: 0; top: 0; transform: scale(var(--k)); transform-origin: 0 0; }
+.carte3d__echelle .cp { box-shadow: none; }
+/* Reflet holographique qui glisse avec l'inclinaison */
+.carte3d__reflet { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light; opacity: 0.85; background: radial-gradient(70% 90% at var(--sx) var(--sy), rgba(255, 255, 255, 0.55), transparent 55%), linear-gradient(115deg, transparent 30%, rgba(246, 226, 168, 0.35) calc(var(--sx) - 8%), rgba(255, 255, 255, 0.5) var(--sx), rgba(201, 165, 92, 0.3) calc(var(--sx) + 8%), transparent 75%); }
+.carte3d__eclat { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.35) 50%, transparent 60%); background-size: 250% 100%; animation: eclat 6s ease-in-out infinite; mix-blend-mode: overlay; }
+@keyframes eclat { 0%, 60% { background-position: 150% 0; } 100% { background-position: -150% 0; } }
+.carte3d__ombre { width: calc(85.6mm * var(--k) * 0.8); height: 22px; margin-top: 22px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, 0.75), transparent); transform: translateX(var(--ox)); filter: blur(4px); }
+
+.moi-aide { margin: -14px 0 0; color: var(--muted); font: 400 11.5px/1.4 var(--mono); letter-spacing: 0.04em; }
+.moi-gyro { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px; border: 1px dashed rgba(201, 165, 92, 0.5); background: rgba(201, 165, 92, 0.06); color: var(--gold-light); font-size: 12.5px; font-weight: 500; }
+.moi-gyro .ic { width: 16px; height: 16px; }
+
+/* Niveau d'accès */
+.moi-niveau { width: 100%; display: grid; gap: 8px; padding: 16px 18px; border-radius: 16px; border: 1px solid rgba(201, 165, 92, 0.3); background: linear-gradient(160deg, rgba(201, 165, 92, 0.12), rgba(20, 20, 24, 0.8) 60%); text-align: left; }
+.moi-niveau__tete { display: flex; justify-content: space-between; align-items: baseline; }
+.moi-niveau__tete small { color: var(--muted); font: 500 10px/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; }
+.moi-niveau__tete b { color: var(--gold-light); font: 600 15px/1 var(--mono); }
+.moi-niveau__barres { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.moi-niveau__barres i { height: 7px; border-radius: 4px; background: var(--gold-grad); box-shadow: 0 0 12px rgba(201, 165, 92, 0.45); transform-origin: left; animation: barre 0.7s var(--ease) both; animation-delay: calc(var(--i) * 0.12s + 0.3s); }
+@keyframes barre { from { transform: scaleX(0); opacity: 0; } }
+.moi-niveau > span { color: var(--text-2); font-size: 12.5px; }
+
+.moi-infos { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; gap: 8px; text-align: left; }
+.moi-infos li { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: rgba(22, 22, 26, 0.8); color: var(--text-2); font-size: 13px; }
+.moi-infos li .ic { width: 18px; height: 18px; color: var(--gold); flex: none; }
+.moi-infos b { color: var(--gold-light); }
+.moi-infos span { min-width: 0; overflow-wrap: anywhere; }
+
+.moi-liens { width: 100%; display: flex; flex-wrap: wrap; gap: 10px; }
+.moi-liens .btn { flex: 1 1 40%; padding: 12px 10px; }
+.moi-liens .btn--gold { flex-basis: 100%; }
+.moi-pied { margin: 0; color: #5f5c56; font: 400 10.5px/1.4 var(--mono); letter-spacing: 0.06em; }
+
+/* ---------- Écran verrouillé / choix de la carte ---------- */
+.moi-verrou, .moi-choix { position: relative; min-height: 100svh; display: grid; place-items: center; padding: 24px 18px; }
+.moi-verrou__carte { width: min(400px, 100%); display: grid; gap: 14px; justify-items: center; text-align: center; padding: 30px 24px; border-radius: 22px; border: 1px solid rgba(201, 165, 92, 0.3); background: linear-gradient(180deg, #151518, #0e0e11); box-shadow: 0 40px 100px -40px rgba(0, 0, 0, 0.95); }
+.moi-verrou__couronne { width: 64px; height: 58px; filter: drop-shadow(0 8px 22px rgba(201, 165, 92, 0.6)); }
+.moi-verrou h1, .moi-choix h1 { font: 500 30px/1.15 var(--serif); letter-spacing: 0; }
+.moi-verrou h1 em, .moi-choix h1 em { color: var(--gold-light); }
+.moi-verrou__texte { margin: 0; color: var(--muted); font-size: 13.5px; }
+.moi-verrou__form { width: 100%; display: grid; gap: 12px; text-align: left; margin-top: 6px; }
+.moi-choix { align-content: start; justify-items: center; gap: 14px; text-align: center; padding-top: max(40px, env(safe-area-inset-top)); }
+.moi-choix__liste { width: min(460px, 100%); display: grid; gap: 14px; margin-top: 8px; }
+.moi-choix__item { display: grid; gap: 10px; justify-items: center; padding: 14px; border-radius: 16px; border: 1px solid var(--line-2); background: var(--surface); color: var(--text); font-weight: 600; font-size: 14px; }
+.moi-choix__item:hover { border-color: var(--gold); }
+.moi-choix__item small { display: block; color: var(--muted); font-weight: 400; font-size: 12px; }
+.moi-choix__visuel { width: 256px; height: 162px; overflow: hidden; border-radius: 10px; }
+.moi-choix__visuel .cp { transform: scale(0.79); transform-origin: 0 0; }
+
+@media (min-width: 760px) {
+  .moi-page { padding-top: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .moi-scene__halo, .carte3d__eclat, .moi-chef__couronne, .moi-chef h1 em, .moi-badge i { animation: none; }
+}

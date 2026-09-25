@@ -20,12 +20,12 @@ if ($methode === 'POST') {
 } elseif ($methode !== 'GET') {
   echec('Méthode non autorisée.', 405);
 }
-$libres = ['session', 'connexion', 'activation', 'secours'];
+$libres = ['session', 'connexion', 'activation', 'secours', 'chef.carte', 'chef.oublier'];
 if (!in_array($action, $libres, true) && !connecte()) echec('Connexion requise.', 401);
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
+$lecture = ['session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -92,6 +92,7 @@ try {
       if (!$u) echec("Aucun compte : utilisez l'activation.", 409);
       db()->prepare('UPDATE utilisateurs SET hash = ? WHERE id = ?')->execute([password_hash($mdp, PASSWORD_DEFAULT), $u['id']]);
       db()->exec("UPDATE connexions SET fin = 'mot de passe réinitialisé' WHERE fin = ''");
+      chef_enregistrer([]); // les accès directs à la carte sont aussi retirés
       ouvrir_session_utilisateur($u);
       journal('securite', 'Mot de passe réinitialisé avec le code de secours : tous les autres appareils ont été déconnectés');
       repondre(['ok' => true] + etat_session());
@@ -115,6 +116,7 @@ try {
       verifier_nouveau_mdp($mdp);
       db()->prepare('UPDATE utilisateurs SET hash = ? WHERE id = ?')->execute([password_hash($mdp, PASSWORD_DEFAULT), $u['id']]);
       db()->prepare("UPDATE connexions SET fin = 'mot de passe changé' WHERE fin = '' AND jeton <> ?")->execute([(string)($_SESSION['cx'] ?? '')]);
+      chef_enregistrer([]); // les accès directs à la carte sont aussi retirés
       journal('securite', 'Mot de passe changé : les autres appareils ont été déconnectés');
       repondre(['ok' => true]);
 
@@ -559,6 +561,61 @@ try {
       }
       repondre(['ok' => true]);
 
+    /* ================= Mon accès chef : ouverture directe de la carte ================= */
+    // Sur un appareil de confiance (cookie BDA_CHEF), la carte s'ouvre sans mot de passe.
+    // Ce cookie ne donne accès qu'à cette carte, jamais au reste de l'espace admin.
+    case 'chef.carte':
+      $app = chef_appareil_valide();
+      if (!$app && !connecte()) echec('Accès direct non activé sur cet appareil.', 403);
+      $id = $app ? (int)$app['carte'] : (int)($_GET['id'] ?? 0);
+      $st = db()->prepare("SELECT id, data FROM creations WHERE id = ? AND type = 'carte'");
+      $st->execute([$id]);
+      $c = $st->fetch();
+      if (!$c) echec('Carte introuvable : ouvrez la page avec votre mot de passe pour la choisir à nouveau.', 404);
+      if ($app) chef_modifier($app['id'], ['vu' => maintenant()]);
+      repondre(['ok' => true, 'carte' => ['id' => (int)$c['id'], 'data' => json_decode((string)$c['data'], true) ?: []],
+        'agents' => (int)db()->query('SELECT COUNT(*) FROM agents WHERE actif = 1')->fetchColumn(), 'appareil' => appareil(), 'direct' => (bool)$app]);
+
+    case 'chef.memoriser':
+      $carte = (int)(corps()['carte'] ?? 0);
+      $st = db()->prepare("SELECT COUNT(*) FROM creations WHERE id = ? AND type = 'carte'");
+      $st->execute([$carte]);
+      if (!(int)$st->fetchColumn()) echec('Carte introuvable.', 404);
+      $app = chef_appareil_valide();
+      if ($app) {
+        chef_modifier($app['id'], ['carte' => $carte, 'vu' => maintenant()]);
+      } else {
+        $jeton = bin2hex(random_bytes(32));
+        $liste = chef_appareils();
+        $liste[] = ['id' => bin2hex(random_bytes(6)), 'hash' => hash('sha256', $jeton), 'carte' => $carte, 'appareil' => appareil(), 'ip' => ip_masquee(), 'cree' => maintenant(), 'vu' => maintenant()];
+        chef_enregistrer(array_slice($liste, -10));
+        setcookie('BDA_CHEF', $jeton, ['expires' => time() + 365 * 86400, 'path' => '/admin/', 'secure' => est_https(), 'httponly' => true, 'samesite' => 'Lax']);
+        journal('securite', 'Accès direct à la carte pro activé sur : ' . appareil());
+      }
+      repondre(['ok' => true]);
+
+    case 'chef.oublier':
+      $app = chef_appareil_valide();
+      if ($app) {
+        chef_enregistrer(array_values(array_filter(chef_appareils(), fn($a) => $a['id'] !== $app['id'])));
+        journal('securite', 'Accès direct à la carte pro retiré sur : ' . ($app['appareil'] ?? appareil()));
+      }
+      setcookie('BDA_CHEF', '', ['expires' => time() - 3600, 'path' => '/admin/', 'secure' => est_https(), 'httponly' => true, 'samesite' => 'Lax']);
+      repondre(['ok' => true]);
+
+    case 'chef.appareils':
+      $app = chef_appareil_valide();
+      repondre(['ok' => true, 'appareils' => array_map(fn($a) => ['id' => $a['id'], 'appareil' => $a['appareil'] ?? '', 'ip' => $a['ip'] ?? '', 'cree' => $a['cree'] ?? '', 'vu' => $a['vu'] ?? '', 'actuel' => $app && $app['id'] === $a['id']], array_reverse(chef_appareils()))]);
+
+    case 'chef.revoquer':
+      $id = (string)(corps()['id'] ?? '');
+      $liste = chef_appareils();
+      $retire = array_values(array_filter($liste, fn($a) => $a['id'] === $id));
+      if (!$retire) echec('Appareil introuvable.', 404);
+      chef_enregistrer(array_values(array_filter($liste, fn($a) => $a['id'] !== $id)));
+      journal('securite', 'Accès direct à la carte pro retiré à distance : ' . ($retire[0]['appareil'] ?? ''));
+      repondre(['ok' => true]);
+
     /* ================= Notes ================= */
     case 'notes':
       repondre(['ok' => true, 'notes' => db()->query('SELECT * FROM notes ORDER BY epingle DESC, maj DESC LIMIT 500')->fetchAll()]);
@@ -661,6 +718,30 @@ function supprimer_ligne(string $table, int $id): void
 {
   db()->prepare("DELETE FROM $table WHERE id = ?")->execute([$id]);
   repondre(['ok' => true]);
+}
+/* ---------- Appareils de confiance pour « Mon accès chef » (jetons stockés hachés) ---------- */
+function chef_appareils(): array
+{
+  $st = db()->prepare('SELECT v FROM reglages WHERE k = ?');
+  $st->execute(['chef_appareils']);
+  $v = json_decode((string)$st->fetchColumn(), true);
+  return is_array($v) ? $v : [];
+}
+function chef_enregistrer(array $liste): void
+{
+  db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['chef_appareils', json_encode(array_values($liste), JSON_UNESCAPED_UNICODE)]);
+}
+function chef_modifier(string $id, array $champs): void
+{
+  chef_enregistrer(array_map(fn($a) => $a['id'] === $id ? array_merge($a, $champs) : $a, chef_appareils()));
+}
+function chef_appareil_valide(): ?array
+{
+  $jeton = (string)($_COOKIE['BDA_CHEF'] ?? '');
+  if (!preg_match('/^[a-f0-9]{64}$/', $jeton)) return null;
+  $h = hash('sha256', $jeton);
+  foreach (chef_appareils() as $a) if (hash_equals((string)($a['hash'] ?? ''), $h)) return $a;
+  return null;
 }
 function libelle_statut(string $s): string
 {

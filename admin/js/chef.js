@@ -33,8 +33,44 @@ async function demarrer() {
   quandDeconnecte(() => ecranConnexion('Votre session a expiré : déverrouillez à nouveau.'));
   let s;
   try { s = await api('session'); } catch (e) { return racine.replaceChildren(h('main', { class: 'moi-verrou' }, h('p', null, e.message))); }
-  if (!s.connecte) return ecranConnexion();
-  ouvrir(s);
+  if (s.connecte) return ouvrir(s);
+  // Appareil de confiance : la carte s'ouvre directement, sans mot de passe
+  try {
+    const r = await api('chef.carte');
+    if (r.direct) return afficher({ appareil: r.appareil, direct: true, connecte: false }, { id: r.carte.id, data: { ...CARTE_DEFAUT, ...r.carte.data } }, [], r.agents);
+  } catch (e) { /* appareil pas encore mémorisé */ }
+  ecranConnexion();
+}
+
+/* ---------- Installation sur l'écran d'accueil ---------- */
+let invitationInstall = null;
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); invitationInstall = e; document.dispatchEvent(new Event('bda:installable')); });
+const estInstallee = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+const estIphone = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function blocInstallation() {
+  if (estInstallee()) return null;
+  const bouton = h('button', { class: 'btn btn--gold btn--bloc', type: 'button', hidden: !invitationInstall, onclick: async () => {
+    if (!invitationInstall) return;
+    invitationInstall.prompt();
+    const { outcome } = await invitationInstall.userChoice;
+    invitationInstall = null;
+    if (outcome === 'accepted') { bloc.remove(); toast('C’est fait : l’icône « BDA · Chef » est sur votre écran d’accueil.'); }
+  } }, icone('telecharger'), 'Ajouter à l’écran d’accueil');
+  document.addEventListener('bda:installable', () => { bouton.hidden = false; });
+  const etapes = estIphone()
+    ? h('ol', { class: 'moi-install__etapes' },
+      h('li', null, 'Ouvrez cette page dans ', h('b', null, 'Safari')),
+      h('li', null, 'Touchez ', h('b', null, 'Partager'), ' (le carré avec une flèche ↑)'),
+      h('li', null, 'Choisissez ', h('b', null, '« Sur l’écran d’accueil »'), ' puis ', h('b', null, 'Ajouter')))
+    : h('ol', { class: 'moi-install__etapes' },
+      h('li', null, 'Touchez le menu ', h('b', null, '⋮'), ' en haut à droite de Chrome'),
+      h('li', null, 'Choisissez ', h('b', null, '« Ajouter à l’écran d’accueil »'), ' (ou « Installer l’application »)'),
+      h('li', null, 'Confirmez avec ', h('b', null, 'Ajouter')));
+  const bloc = h('section', { class: 'moi-install' },
+    h('div', { class: 'moi-install__tete' }, h('img', { src: '/admin/icone-moi-180.png', alt: '', width: 44, height: 44 }),
+      h('div', null, h('b', null, 'Votre carte en un toucher'), h('small', null, 'Ajoutez l’icône « BDA · Chef » : elle ouvre directement cette page.'))),
+    bouton, etapes);
+  return bloc;
 }
 
 /* ---------- Écran verrouillé ---------- */
@@ -76,7 +112,12 @@ async function ouvrir(session) {
     if (chefs.length === 1) carte = chefs[0];
   }
   if (!carte) return choisirCarte(session, cartes);
-  afficher(session, carte, cartes, agents);
+  // Mémorise cet appareil : la prochaine fois, l'icône ouvre la carte directement (sauf si on l'a retiré)
+  let direct = false;
+  if (lire('bda-chef-direct') !== 'non') {
+    try { await api('chef.memoriser', { carte: carte.id }); direct = true; } catch (e) { /* on garde la connexion classique */ }
+  }
+  afficher({ appareil: session.appareil, direct, connecte: true }, carte, cartes, agents.filter((a) => +a.actif).length);
 }
 
 function choisirCarte(session, cartes) {
@@ -96,12 +137,12 @@ function choisirCarte(session, cartes) {
       h('span', null, [c.data.prenom, (c.data.nom || '').toUpperCase()].filter(Boolean).join(' ') || 'Sans nom', h('small', null, c.data.fonction)))))));
 }
 
-function afficher(session, carte, cartes, agents) {
+// acces = { appareil, direct (appareil de confiance), connecte (session admin ouverte) }
+function afficher(acces, carte, cartes, nbAgents) {
   const d = carte.data;
-  const prenom = d.prenom || String(session.utilisateur || '');
+  const prenom = d.prenom || 'Chef';
   const heure = new Date().getHours();
   const salut = heure < 5 || heure >= 18 ? 'Bonsoir' : 'Bonjour';
-  const nbAgents = agents.filter((a) => +a.actif).length;
 
   /* ----- La carte en 3D ----- */
   const face = (contenu, dos) => h('div', { class: `carte3d__face ${dos ? 'carte3d__face--dos' : ''}` },
@@ -177,15 +218,34 @@ function afficher(session, carte, cartes, agents) {
     h('span', null, 'Direction générale · contrôle total'));
   const infos = h('ul', { class: 'moi-infos' },
     h('li', null, icone('agents'), h('span', null, h('b', null, String(nbAgents)), nbAgents > 1 ? ' agents sous votre direction' : ' agent sous votre direction')),
-    h('li', null, icone('cadenas'), h('span', null, 'Session sécurisée · ', session.appareil || 'cet appareil')),
+    h('li', null, icone('cadenas'), h('span', null, acces.direct ? 'Appareil de confiance · ' : 'Session sécurisée · ', acces.appareil || 'cet appareil')),
     h('li', null, icone('bouclier'), h('span', null, d.numero ? `Carte pro ${d.numero}` : 'BDA Sécurité · Sécurité privée & VTC')));
 
-  const deconnexion = async () => { try { await api('deconnexion', {}); } catch (e) { /* déjà sorti */ } ecranConnexion('Vous êtes déconnecté.'); };
+  // Ouverture directe (sans mot de passe) sur cet appareil : activée / retirée
+  const direct = h('div', { class: `moi-direct ${acces.direct ? 'is-on' : ''}` },
+    h('span', { class: 'moi-direct__txt' }, icone(acces.direct ? 'coche' : 'cadenas'),
+      h('span', null, acces.direct ? 'Ouverture directe activée sur ce téléphone' : 'Ouverture directe désactivée : mot de passe demandé')),
+    acces.direct
+      ? h('button', { type: 'button', class: 'moi-direct__btn', onclick: async () => {
+        try { await api('chef.oublier', {}); ecrire('bda-chef-direct', 'non'); toast('Ce téléphone demandera de nouveau le mot de passe.'); } catch (e) { return erreur(e); }
+        if (acces.connecte) afficher({ ...acces, direct: false }, carte, cartes, nbAgents); else ecranConnexion('Accès direct retiré sur ce téléphone.');
+      } }, 'Retirer')
+      : acces.connecte ? h('button', { type: 'button', class: 'moi-direct__btn', onclick: async () => {
+        try { await api('chef.memoriser', { carte: carte.id }); ecrire('bda-chef-direct', 'oui'); toast('Activé : l’icône ouvrira votre carte directement.'); afficher({ ...acces, direct: true }, carte, cartes, nbAgents); } catch (e) { erreur(e); }
+      } }, 'Activer') : null);
+
+  // Verrouiller : ferme la session et retire l'ouverture directe sur ce téléphone
+  const verrouiller = async () => {
+    try { await api('chef.oublier', {}); } catch (e) { /* déjà retiré */ }
+    try { if (acces.connecte) await api('deconnexion', {}); } catch (e) { /* déjà sorti */ }
+    ecrire('bda-chef-direct', 'non');
+    ecranConnexion('Page verrouillée sur ce téléphone.');
+  };
 
   racine.replaceChildren(h('main', { class: 'moi-page' },
     h('header', { class: 'moi-haut' },
       h('span', { class: 'moi-badge' }, h('i'), 'Accès personnel · Direction'),
-      h('button', { class: 'moi-sortie', type: 'button', onclick: deconnexion, 'aria-label': 'Se déconnecter' }, icone('sortie'))),
+      h('button', { class: 'moi-sortie', type: 'button', onclick: verrouiller, 'aria-label': 'Verrouiller la page sur ce téléphone', title: 'Verrouiller' }, icone('cadenas'))),
     h('section', { class: 'moi-chef' },
       couronne('moi-chef__couronne'),
       h('p', { class: 'moi-chef__salut' }, `${salut}, chef.`),
@@ -194,13 +254,15 @@ function afficher(session, carte, cartes, agents) {
     scene,
     aide,
     permissionIos ? boutonGyro : null,
+    blocInstallation(),
     niveau,
     infos,
+    direct,
     h('nav', { class: 'moi-liens' },
       h('a', { class: 'btn btn--gold', href: '/admin/' }, icone('commande'), 'Console admin'),
       h('a', { class: 'btn btn--ghost', href: '/', target: '_blank', rel: 'noopener' }, icone('site'), 'Voir le site'),
-      cartes.length > 1 ? h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => { ecrire(CLE_CARTE, ''); choisirCarte(session, cartes); } }, icone('badge'), 'Changer de carte') : null),
-    h('p', { class: 'moi-pied' }, 'Page personnelle · visible uniquement après connexion')));
+      cartes.length > 1 ? h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => { ecrire(CLE_CARTE, ''); choisirCarte({ appareil: acces.appareil }, cartes); } }, icone('badge'), 'Changer de carte') : null),
+    h('p', { class: 'moi-pied' }, 'Page personnelle · protégée par votre mot de passe')));
 }
 
 demarrer();

@@ -96,3 +96,20 @@ body.moi::before { content: ""; position: fixed; inset: 0; pointer-events: none;
 @media (prefers-reduced-motion: reduce) {
   .moi-scene__halo, .carte3d__eclat, .moi-chef__couronne, .moi-chef h1 em, .moi-badge i { animation: none; }
 }
+
+/* ---------- Ouverture directe & installation sur l'écran d'accueil ---------- */
+.moi-direct { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: rgba(22, 22, 26, 0.8); text-align: left; }
+.moi-direct.is-on { border-color: rgba(76, 195, 138, 0.35); background: linear-gradient(120deg, rgba(76, 195, 138, 0.1), rgba(22, 22, 26, 0.8) 60%); }
+.moi-direct__txt { display: flex; align-items: center; gap: 10px; color: var(--text-2); font-size: 12.5px; }
+.moi-direct__txt .ic { width: 18px; height: 18px; flex: none; color: var(--muted); }
+.moi-direct.is-on .moi-direct__txt .ic { color: var(--green); }
+.moi-direct__btn { flex: none; padding: 7px 12px; border-radius: 10px; border: 1px solid var(--line-2); color: var(--text-2); font-size: 12px; font-weight: 600; }
+.moi-direct__btn:hover { border-color: var(--gold); color: var(--gold-light); }
+
+.moi-install { width: 100%; display: grid; gap: 12px; padding: 16px; border-radius: 16px; border: 1px solid rgba(201, 165, 92, 0.45); background: linear-gradient(160deg, rgba(201, 165, 92, 0.14), rgba(20, 20, 24, 0.85) 65%); text-align: left; }
+.moi-install__tete { display: flex; align-items: center; gap: 12px; }
+.moi-install__tete img { width: 44px; height: 44px; border-radius: 11px; box-shadow: 0 6px 18px -6px rgba(201, 165, 92, 0.6); flex: none; }
+.moi-install__tete b { display: block; color: var(--text); font-size: 14px; }
+.moi-install__tete small { display: block; color: var(--muted); font-size: 12px; line-height: 1.45; }
+.moi-install__etapes { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--text-2); font-size: 12.5px; line-height: 1.45; }
+.moi-install__etapes b { color: var(--gold-light); font-weight: 600; }

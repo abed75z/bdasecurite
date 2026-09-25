@@ -27,7 +27,7 @@ export function ligneJournal(j, complet) {
 
 export async function pageSecurite(ctx) {
   ctx.titre('Accès & sécurité');
-  const [{ actifs, historique, alertes30j }, { journal }] = await Promise.all([api('connexions'), api('journal')]);
+  const [{ actifs, historique, alertes30j }, { journal }, { appareils: telephonesChef }] = await Promise.all([api('connexions'), api('journal'), api('chef.appareils').catch(() => ({ appareils: [] }))]);
   const moi = actifs.find((c) => c.actuel);
 
   /* ----- Indicateurs ----- */
@@ -83,7 +83,20 @@ export async function pageSecurite(ctx) {
     chips, h('div', { class: 'console-cadre' }, h('div', { class: 'console-cadre__barre', 'aria-hidden': 'true' }, h('i'), h('i'), h('i'), h('span', null, 'bda-admin — journal')), console_), h('div', null, plus),
     h('p', { class: 'astuce' }, 'Les adresses IP sont enregistrées sans leur dernier bloc. Le journal garde un an d’historique.'));
 
-  ctx.afficher(tuiles, h('div', { class: 'grille-2' }, appareils, journalCarte), histo);
+  /* ----- Téléphones qui ouvrent « Mon accès chef » sans mot de passe ----- */
+  const chef = h('section', { class: 'carte' },
+    h('header', { class: 'carte__tete' }, h('h2', null, 'Ouverture directe de ma carte'), h('small', null, 'Mon accès chef, sans mot de passe')),
+    telephonesChef.length ? h('ul', { class: 'appareils' }, telephonesChef.map((c) => h('li', { class: 'appareil' },
+      h('span', { class: 'appareil__ic' }, icone(mobile(c.appareil) ? 'mobile' : 'appareil')),
+      h('div', { class: 'appareil__txt' }, h('b', null, c.appareil || 'Appareil'), h('small', null, `activé le ${dateHeure(c.cree)} · dernière ouverture ${ilYa(c.vu)}`)),
+      h('button', { class: 'btn btn--danger-ghost btn--petit', type: 'button', onclick: async () => {
+        if (!(await confirmer(`Retirer l’ouverture directe sur « ${c.appareil} » ? Ce téléphone demandera de nouveau le mot de passe.`, { ok: 'Retirer', danger: true }))) return;
+        try { await api('chef.revoquer', { id: c.id }); toast('Ouverture directe retirée.'); pageSecurite(ctx); } catch (e) { erreur(e); }
+      } }, icone('croix'), 'Retirer'))))
+      : h('p', { class: 'astuce' }, 'Aucun téléphone. Ouvrez « Mon accès chef » sur votre téléphone : il sera mémorisé pour ouvrir votre carte directement.'),
+    h('p', { class: 'astuce' }, 'Ces téléphones voient uniquement votre carte pro, jamais le reste de l’espace admin. Changer de mot de passe les retire tous.'));
+
+  ctx.afficher(tuiles, h('div', { class: 'grille-2' }, appareils, journalCarte), h('div', { class: 'grille-2' }, histo, chef));
   dessinerChips();
   dessinerJournal(journal.length < 60);
 }

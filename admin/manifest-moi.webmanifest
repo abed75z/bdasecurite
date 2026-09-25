@@ -1,7 +1,9 @@
 {
+  "id": "/admin/moi",
   "name": "BDA Sécurité — Mon accès",
   "short_name": "BDA · Chef",
   "description": "Accès personnel du gérant : carte professionnelle BDA Sécurité.",
+  "lang": "fr",
   "start_url": "/admin/moi",
   "scope": "/admin/",
   "display": "standalone",
@@ -10,6 +12,7 @@
   "theme_color": "#08080a",
   "icons": [
     { "src": "/admin/icone-moi-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/admin/icone-moi-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/admin/icone-moi-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }

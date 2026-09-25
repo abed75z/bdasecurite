@@ -134,10 +134,14 @@ async function pageReservations(ctx) {
       } else if (choix === 'facture') {
         const f = lireForm();
         await api('reservation.modifier', { id: r.id, ...f });
+        // Transport de personnes : TVA à 10 % (si la TVA est activée dans les Paramètres) ; le prix de la course est TTC
+        const { reglages: rg } = await api('reglages');
+        const tva = +rg.tauxTva > 0 ? 10 : 0;
         sessionStorage.setItem('bda-prefill-facture', JSON.stringify({
           client: { nom: d.nom, adresse: [d.tel ? `TÉL : ${d.tel}` : '', d.email].filter(Boolean).join('\n') },
           periode: dateFr(d.date),
-          lignes: [{ designation: `Course VTC du ${quandTxt} — ${d.depart?.label}${d.mode === 'dispo' ? ` (mise à disposition ${d.heures} h)` : ` → ${d.arrivee?.label}`}`, qte: 1, unite: 'u', pu: f.prix }],
+          tva,
+          lignes: [{ designation: `Course VTC du ${quandTxt} — ${d.depart?.label}${d.mode === 'dispo' ? ` (mise à disposition ${d.heures} h)` : ` → ${d.arrivee?.label}`}`, qte: 1, unite: 'u', pu: tva ? Math.round((f.prix / (1 + tva / 100)) * 100) / 100 : f.prix }],
         }));
         return ctx.aller('#/factures/nouveau');
       } else {

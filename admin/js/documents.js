@@ -18,6 +18,29 @@ const LIBELLE_STATUT = { brouillon: 'Brouillon', envoye: 'Envoyé', envoyee: 'En
 export const ROLES = { base: 'Prestations Agent A.D.S', nuit: 'Majoration des heures de nuit', dimanche: 'Majoration des heures du dimanche', ferie: 'Majoration des heures fériées' };
 
 export const totalLignes = (lignes) => arrondi((lignes || []).reduce((s, l) => s + arrondi((+l.qte || 0) * (+l.pu || 0)), 0));
+// Totaux d'un devis ou d'une facture : taux « tva » du document en % (absent ou 0 = TVA non applicable)
+export function totauxDocument(data) {
+  const ht = totalLignes(data.lignes);
+  const taux = Math.min(100, Math.max(0, +data.tva || 0));
+  const tva = arrondi((ht * taux) / 100);
+  return { ht, taux, tva, ttc: arrondi(ht + tva) };
+}
+// Mention légale « TVA non applicable » : retirée quand une TVA est appliquée, remise sinon
+const MENTION_293B = 'TVA non applicable, art. 293 B du CGI.';
+export function ajusterMentionTva(conditions, taux) {
+  const texte = String(conditions || '');
+  const mention = /TVA non applicable,? art\.? ?293 ?B du CGI\.?/i;
+  if (!(taux > 0)) return mention.test(texte) ? texte : `${texte.trim()}${texte.trim() ? '\n' : ''}${MENTION_293B}`;
+  return texte
+    .replace(/^[ \t]*TVA non applicable,? art\.? ?293 ?B du CGI\.?[ \t]*(\r?\n|$)/gim, '') // ligne à part entière
+    .replace(/[ \t]*TVA non applicable,? art\.? ?293 ?B du CGI\.?/gi, '') // au milieu d'une phrase
+    .trim();
+}
+// N° de TVA intracommunautaire ajouté aux coordonnées de l'émetteur quand une TVA est appliquée
+function ajouterNumeroTva(emetteur, r, taux) {
+  if (!(taux > 0) || !r.numeroTva || /TVA/i.test(emetteur || '')) return emetteur;
+  return `${emetteur}\nN° TVA : ${r.numeroTva}`;
+}
 const enRetard = (d) => d.statut === 'envoyee' && d.echeance && d.echeance < iso(new Date());
 
 /* =========================================================
@@ -68,25 +91,27 @@ export async function listeDocuments(ctx, type) {
 function paiementTexte(r) {
   return `Bénéficiaire : ${r.beneficiaire || ''}\nIBAN : ${r.iban || '(à compléter dans Paramètres)'}`;
 }
-export function nouveauDocument(type, r, numero) {
+// taux : TVA du document en % (par défaut celle des Paramètres)
+export function nouveauDocument(type, r, numero, taux = +r.tauxTva || 0) {
   const auj = new Date();
-  const commun = { numero, date: fr(auj), emetteurNom: r.nom, emetteur: r.emetteur, client: { nom: '', adresse: '' }, pied: r.pied };
+  const avecTva = (conditions) => (taux > 0 ? ajusterMentionTva(conditions, taux) : conditions);
+  const commun = { numero, date: fr(auj), emetteurNom: r.nom, emetteur: ajouterNumeroTva(r.emetteur, r, taux), client: { nom: '', adresse: '' }, pied: r.pied, tva: taux };
   if (type === 'facture') {
     const ech = new Date(auj.getFullYear(), auj.getMonth(), auj.getDate() + (+r.echeanceJours || 0));
     return {
       ...commun, echeance: fr(ech), periode: `${cap(MOIS[auj.getMonth()])} ${auj.getFullYear()}`,
       lignes: Object.entries(ROLES).map(([role, designation]) => ({ designation, qte: 0, unite: 'h', pu: role === 'base' ? +r.tauxHoraire || 0 : 0, role })),
-      paiement: paiementTexte(r), conditions: r.conditionsFacture,
+      paiement: paiementTexte(r), conditions: avecTva(r.conditionsFacture),
     };
   }
   return {
-    ...commun, validite: r.validiteDevis, emetteur: r.emetteur.replace(/(TÉL : [^\n]+)/, `$1 · ${r.email}`),
+    ...commun, validite: r.validiteDevis, emetteur: commun.emetteur.replace(/(TÉL : [^\n]+)/, `$1 · ${r.email}`),
     objet: "Mission de sécurisation — surveillance et contrôle d'accès",
     description: "Suite à votre demande, nous avons le plaisir de vous proposer un dispositif de sécurité adapté à votre site. Nos agents, titulaires de la carte professionnelle délivrée par le CNAPS, interviennent en tenue, sous la supervision d'un responsable joignable à tout moment.",
     lieu: '', periode: '', horaires: '', effectif: '',
     lignes: [{ designation: 'Agents de sécurité (ADS)', detail: '', qte: 0, unite: 'h', pu: +r.tauxHoraire || 0 }],
     acompte: +r.acompte || 0,
-    conditions: `${r.conditionsDevis}\nRèglement par virement — Bénéficiaire : ${r.beneficiaire} — IBAN : ${r.iban || '(à compléter)'}.`,
+    conditions: avecTva(`${r.conditionsDevis}\nRèglement par virement — Bénéficiaire : ${r.beneficiaire} — IBAN : ${r.iban || '(à compléter)'}.`),
   };
 }
 
@@ -138,7 +163,7 @@ export async function editeurDocument(ctx, type, param) {
   const change = () => { marquer('Modifications…'); plusTard(); majTotaux(); };
 
   /* ----- Feuille ----- */
-  const feuille = construireFeuille(type, data, change);
+  const feuille = construireFeuille(type, data, change, r);
   const { majTotaux } = feuille;
 
   /* ----- Panneau latéral ----- */
@@ -217,7 +242,7 @@ export async function editeurDocument(ctx, type, param) {
   async function versFacture() {
     await enregistrer();
     const { numero } = await api('numero', undefined, { type: 'facture' });
-    const f = nouveauDocument('facture', r, numero);
+    const f = nouveauDocument('facture', r, numero, +data.tva || 0);
     f.client = { ...data.client };
     f.periode = data.periode || f.periode;
     f.lignes = data.lignes.map((l) => ({ designation: l.detail ? `${l.designation} — ${l.detail}` : l.designation, qte: l.qte, unite: l.unite, pu: l.pu }));
@@ -289,7 +314,7 @@ function lire(obj, chemin) { return chemin.split('.').reduce((o, k) => (o == nul
 function ecrire(obj, chemin, v) { const ks = chemin.split('.'); const fin = ks.pop(); ks.reduce((o, k) => (o[k] ??= {}), obj)[fin] = v; }
 const texteDe = (el) => el.innerText.replace(/ /g, ' ').replace(/\n+$/, '');
 
-function construireFeuille(type, data, change) {
+function construireFeuille(type, data, change, r = {}) {
   const champs = [];
   const T = (chemin, cls, ph, uneLigne) => {
     const el = h('div', { class: cls, contenteditable: 'plaintext-only', spellcheck: 'false', 'data-ph': ph || '' });
@@ -385,27 +410,44 @@ function construireFeuille(type, data, change) {
     change();
     $$('.f-desc', corps).pop()?.focus();
   }
-  // Totaux construits une seule fois, puis mis à jour (le champ d'acompte garde le focus pendant la saisie)
+  // Totaux construits une seule fois, puis mis à jour (les champs % gardent le focus pendant la saisie)
   const v = {};
-  const ligneTotal = (k, label, cls = '') => h('div', { class: cls }, h('span', null, label), (v[k] = h('b')));
+  const ligneTotal = (k, label, cls = '') => h('div', { class: cls }, (v[`${k}Lib`] = h('span', null, label)), (v[k] = h('b')));
+  // Taux de TVA modifiable sur la feuille (0 = TVA non applicable)
+  const champTva = h('input', { class: 'f-pct', inputmode: 'decimal', value: nombre.format(+data.tva || 0), 'aria-label': 'Taux de TVA en %', oninput: (e) => {
+    const n = lireNombre(e.target.value);
+    if (!Number.isFinite(n) || n < 0 || n > 100) return;
+    data.tva = n;
+    data.conditions = ajusterMentionTva(data.conditions, n);
+    data.emetteur = ajouterNumeroTva(data.emetteur, r, n);
+    champs.forEach(({ el: c, chemin }) => { if (['conditions', 'emetteur'].includes(chemin)) c.textContent = lire(data, chemin) ?? ''; });
+    change();
+  } });
+  champTva.addEventListener('focus', () => champTva.select());
+  v.tauxPrint = h('span', { class: 'f-print' });
+  const ligneTva = h('div', { class: 'f-ligne-tva' }, h('span', null, 'TVA', h('span', { class: 'f-taux' }, ' (', champTva, v.tauxPrint, ' %)')), (v.tva = h('b')));
   if (type === 'facture') {
-    totaux.replaceChildren(ligneTotal('ht', 'Total HT'), h('div', null, h('span', null, 'TVA'), h('b', null, 'Non applicable')), ligneTotal('net', 'Net à payer', 'grand'));
+    totaux.replaceChildren(ligneTotal('ht', 'Total HT'), ligneTva, ligneTotal('net', 'Net à payer', 'grand'));
   } else {
     v.pct = h('span', { class: 'f-print' });
-    totaux.replaceChildren(ligneTotal('ht', 'Total HT'), h('div', null, h('span', null, 'TVA'), h('b', null, 'Non applicable')), ligneTotal('net', 'Total à payer', 'grand'),
+    totaux.replaceChildren(ligneTotal('ht', 'Total HT'), ligneTva, ligneTotal('net', 'Total à payer', 'grand'),
       h('div', { class: 'sub' }, h('span', null, 'Acompte à la commande (', el.acompte, v.pct, ' %)'), (v.ac = h('b'))),
       ligneTotal('solde', 'Solde en fin de mission', 'sub'));
   }
   function majTotaux() {
     data.lignes.forEach((l, i) => { const c = $(`.f-total__val[data-i="${i}"]`, corps); if (c) c.textContent = euro.format(arrondi((+l.qte || 0) * (+l.pu || 0))); });
-    const ht = totalLignes(data.lignes);
-    v.ht.textContent = euro.format(ht);
-    v.net.textContent = euro.format(ht);
+    const t = totauxDocument(data);
+    v.ht.textContent = euro.format(t.ht);
+    v.tauxPrint.textContent = nombre.format(t.taux);
+    v.tva.textContent = t.taux > 0 ? euro.format(t.tva) : 'Non applicable';
+    ligneTva.classList.toggle('f-ligne-tva--zero', !(t.taux > 0));
+    v.netLib.textContent = type === 'facture' ? (t.taux > 0 ? 'Net à payer TTC' : 'Net à payer') : (t.taux > 0 ? 'Total TTC' : 'Total à payer');
+    v.net.textContent = euro.format(t.ttc);
     if (type === 'devis') {
-      const ac = arrondi((ht * (+data.acompte || 0)) / 100);
+      const ac = arrondi((t.ttc * (+data.acompte || 0)) / 100);
       v.pct.textContent = nombre.format(+data.acompte || 0);
       v.ac.textContent = euro.format(ac);
-      v.solde.textContent = euro.format(arrondi(ht - ac));
+      v.solde.textContent = euro.format(arrondi(t.ttc - ac));
     }
   }
 

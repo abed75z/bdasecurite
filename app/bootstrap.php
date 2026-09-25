@@ -237,6 +237,8 @@ function reglages_defaut(): array
     'validiteDevis' => '30 jours',
     'acompte' => 30,
     'tauxHoraire' => 22,
+    'tauxTva' => 20.0,
+    'numeroTva' => '',
   ];
 }
 function reglages(): array

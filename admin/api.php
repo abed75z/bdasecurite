@@ -125,7 +125,7 @@ try {
       $actuels = reglages();
       foreach (reglages_defaut() as $k => $defaut) {
         if (!array_key_exists($k, $b)) continue;
-        $actuels[$k] = is_int($defaut) ? max(0, min(1000, (int)$b[$k])) : texte($b[$k], 2000);
+        $actuels[$k] = is_float($defaut) ? max(0.0, min(100.0, round((float)str_replace(',', '.', (string)$b[$k]), 2))) : (is_int($defaut) ? max(0, min(1000, (int)$b[$k])) : texte($b[$k], 2000));
       }
       db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['entreprise', json_encode($actuels, JSON_UNESCAPED_UNICODE)]);
       repondre(['ok' => true, 'reglages' => $actuels]);
@@ -508,14 +508,17 @@ function mois_valide(string $m): string
   if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $m)) echec('Mois invalide.');
   return $m;
 }
+// Montant du document, TVA comprise (taux « tva » du document, en % ; absent ou 0 = TVA non applicable)
 function total_document(array $data): float
 {
-  $total = 0.0;
+  $ht = 0.0;
   foreach (($data['lignes'] ?? []) as $l) {
     if (!is_array($l)) continue;
-    $total += round((float)($l['qte'] ?? 0) * (float)($l['pu'] ?? 0), 2);
+    $ht += round((float)($l['qte'] ?? 0) * (float)($l['pu'] ?? 0), 2);
   }
-  return round($total, 2);
+  $ht = round($ht, 2);
+  $taux = max(0.0, min(100.0, (float)($data['tva'] ?? 0)));
+  return round($ht + round($ht * $taux / 100, 2), 2);
 }
 function numero_suivant(string $type): string
 {
@@ -597,7 +600,7 @@ function importer_fichier(array $f): array
     $r = reglages();
     foreach (reglages_defaut() as $k => $defaut) {
       if (array_key_exists($k, $f['reglages'])) {
-        $r[$k] = is_int($defaut) ? (int)$f['reglages'][$k] : texte($f['reglages'][$k], 2000);
+        $r[$k] = is_float($defaut) ? max(0.0, min(100.0, (float)$f['reglages'][$k])) : (is_int($defaut) ? (int)$f['reglages'][$k] : texte($f['reglages'][$k], 2000));
         $res['reglages']++;
       }
     }

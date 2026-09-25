@@ -347,15 +347,20 @@ async function pageParametres(ctx) {
     prefixeFacture: saisie({ value: r.prefixeFacture }), prefixeDevis: saisie({ value: r.prefixeDevis }),
     tauxHoraire: saisie({ value: r.tauxHoraire, inputmode: 'decimal' }), echeanceJours: saisie({ value: r.echeanceJours, inputmode: 'numeric' }),
     acompte: saisie({ value: r.acompte, inputmode: 'numeric' }), validiteDevis: saisie({ value: r.validiteDevis }),
+    tauxTva: saisie({ value: String(r.tauxTva ?? 20).replace('.', ','), inputmode: 'decimal' }), numeroTva: saisie({ value: r.numeroTva || '', placeholder: 'FR 00 123456789', autocomplete: 'off', spellcheck: 'false' }),
   };
   const enregistrer = h('button', { class: 'btn btn--gold', type: 'submit' }, icone('coche'), 'Enregistrer les paramètres');
   const form = h('form', { class: 'parametres', onsubmit: async (e) => {
     e.preventDefault();
     const donnees = Object.fromEntries(Object.entries(c).map(([k, el]) => [k, el.value]));
     ['tauxHoraire', 'echeanceJours', 'acompte'].forEach((k) => { donnees[k] = Math.round(parseFloat(String(donnees[k]).replace(',', '.')) || 0); });
+    donnees.tauxTva = Math.min(100, Math.max(0, parseFloat(String(donnees.tauxTva).replace(',', '.')) || 0));
     try { await api('reglages.enregistrer', donnees); toast('Paramètres enregistrés. Ils s\'appliquent aux nouveaux documents.'); } catch (err) { erreur(err); }
   } },
   carte([h('h2', null, 'Votre entreprise'), h('small', null, 'Apparaît en haut de vos devis et factures')], h('div', { class: 'form-grille' }, champ('Nom affiché', c.nom), champ('Coordonnées (une info par ligne)', c.emetteur, 'Gardez la mention « EI » après votre nom : elle est obligatoire.'), champ('Email (sur les devis)', c.email))),
+  carte([h('h2', null, 'TVA'), h('small', null, 'Appliquée aux nouveaux devis et factures')], h('div', { class: 'form-grille form-grille--2' },
+    champ('Taux de TVA par défaut (%)', c.tauxTva, 'Ex. 20 (sécurité) ou 10 (transport VTC). 0 = « TVA non applicable ». Modifiable ensuite sur chaque devis ou facture.'),
+    champ('N° de TVA intracommunautaire', c.numeroTva, 'Obligatoire sur les factures avec TVA. Ajouté automatiquement sous vos coordonnées.'))),
   carte([h('h2', null, 'Paiement'), h('small', null, 'Imprimé sur vos factures — reste privé, jamais publié sur le site')], h('div', { class: 'form-grille' }, champ('Bénéficiaire', c.beneficiaire), champ('IBAN', c.iban))),
   h('details', { class: 'avance' }, h('summary', null, icone('reglages'), 'Réglages avancés', h('small', null, 'mentions légales, numérotation, valeurs par défaut')),
   carte([h('h2', null, 'Mentions et conditions')], h('div', { class: 'form-grille' }, champ('Conditions des factures', c.conditionsFacture), champ('Conditions des devis', c.conditionsDevis), champ('Pied de page (CNAPS, SIRET…)', c.pied, 'La mention de l\'autorisation CNAPS est obligatoire sur tous vos documents.'))),

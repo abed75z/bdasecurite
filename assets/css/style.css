@@ -299,3 +299,34 @@ strong { color: var(--text); font-weight: 600; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; transition-delay: 0s !important; }
 }
+
+/* ---------- Réservation VTC pas encore ouverte ---------- */
+[data-vtc][hidden], [data-vtc-off][hidden] { display: none !important; }
+.vtc-indispo {
+  position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 16px;
+  background: rgba(4, 5, 14, 0.72); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  animation: vtcIndispoFond 0.25s ease both;
+}
+.vtc-indispo__boite {
+  position: relative; width: min(420px, 100%); padding: 34px 28px 28px; text-align: center;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface)); border: 1px solid rgba(212, 169, 79, 0.35);
+  border-radius: var(--radius-panel); box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+  animation: vtcIndispoBoite 0.4s var(--ease-out) both;
+}
+.vtc-indispo__badge {
+  display: inline-block; margin-bottom: 14px; padding: 5px 12px; border-radius: 99px;
+  background: var(--gold-soft); color: var(--gold-light); border: 1px solid rgba(212, 169, 79, 0.35);
+  font: 600 0.72rem/1 var(--font-display); letter-spacing: 0.14em; text-transform: uppercase;
+}
+.vtc-indispo h2 { margin: 0 0 10px; font: 600 1.35rem/1.25 var(--font-serif); color: var(--text); }
+.vtc-indispo p { margin: 0 0 22px; color: var(--muted); font-size: 0.95rem; line-height: 1.55; }
+.vtc-indispo__actions { display: grid; gap: 10px; }
+.vtc-indispo__actions .btn { justify-content: center; }
+.vtc-indispo__x {
+  position: absolute; top: 10px; right: 12px; width: 36px; height: 36px; border: 0; border-radius: 50%;
+  background: transparent; color: var(--muted); font-size: 1.6rem; line-height: 1; cursor: pointer;
+}
+.vtc-indispo__x:hover, .vtc-indispo__x:focus-visible { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+@keyframes vtcIndispoFond { from { opacity: 0; } }
+@keyframes vtcIndispoBoite { from { opacity: 0; transform: translateY(14px) scale(0.97); } }
+@media (prefers-reduced-motion: reduce) { .vtc-indispo, .vtc-indispo__boite { animation: none; } }

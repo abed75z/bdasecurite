@@ -318,6 +318,44 @@
     document.querySelectorAll('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
   }
 
+  /* ---------- Réservation VTC : fermée tant qu'elle n'est pas ouverte dans l'admin (Tarifs VTC) ----------
+     [data-vtc] = visible seulement si ouverte · [data-vtc-off] = visible seulement si fermée */
+  function vtc() {
+    if (!document.querySelector('a[href^="reserver"], form[action="reserver"], [data-vtc], [data-vtc-off]')) return;
+    let ouvert = false;
+    let fenetre = null;
+    const basculer = () => {
+      document.querySelectorAll('[data-vtc]').forEach((el) => { el.hidden = !ouvert; });
+      document.querySelectorAll('[data-vtc-off]').forEach((el) => { el.hidden = ouvert; });
+    };
+    const fermer = () => { if (fenetre) { fenetre.remove(); fenetre = null; } };
+    const indisponible = () => {
+      fermer();
+      fenetre = document.createElement('div');
+      fenetre.className = 'vtc-indispo';
+      fenetre.innerHTML = `<div class="vtc-indispo__boite" role="alertdialog" aria-modal="true" aria-labelledby="vtc-indispo-titre" aria-describedby="vtc-indispo-texte">
+        <button class="vtc-indispo__x" type="button" aria-label="Fermer">&times;</button>
+        <span class="vtc-indispo__badge">Bientôt</span>
+        <h2 id="vtc-indispo-titre">Cette option n’est pas encore disponible</h2>
+        <p id="vtc-indispo-texte">La réservation de VTC en ligne arrive très bientôt. En attendant, notre équipe vous répond directement.</p>
+        <div class="vtc-indispo__actions">
+          <a class="btn btn--gold" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
+          <a class="btn btn--outline" href="devis?service=transfert">Demander un devis</a>
+        </div>
+      </div>`;
+      fenetre.addEventListener('click', (e) => { if (e.target === fenetre || e.target.closest('.vtc-indispo__x')) fermer(); });
+      document.body.append(fenetre);
+      fenetre.querySelector('.vtc-indispo__x').focus();
+    };
+    const bloquer = (e) => { if (!ouvert) { e.preventDefault(); indisponible(); } };
+    document.addEventListener('click', (e) => { if (e.target.closest('a[href^="reserver"]')) bloquer(e); });
+    document.addEventListener('submit', (e) => { if (e.target.matches('form[action="reserver"]')) bloquer(e); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fermer(); });
+    basculer();
+    fetch('/api/reservation.php?tarifs=1').then((r) => r.json()).then((j) => { ouvert = !!(j && j.tarifs && j.tarifs.ouvert); basculer(); }).catch(() => {});
+  }
+
+  vtc();
   sky();
   roads();
   animScopes();

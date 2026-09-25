@@ -35,8 +35,14 @@ function envoyerAdmin(url, payload) {
   });
 }
 
-// Anciens liens « devis VTC » : la réservation se fait maintenant sur la page dédiée
-if (['transfert', 'disposition', 'evenement'].includes(new URLSearchParams(location.search).get('service'))) location.replace(new URLSearchParams(location.search).get('service') === 'disposition' ? 'reserver?mode=dispo' : 'reserver');
+// Liens « devis VTC » : renvoyés vers la réservation en ligne seulement quand elle est ouverte (admin > Tarifs VTC)
+(() => {
+  const service = new URLSearchParams(location.search).get('service');
+  if (!['transfert', 'disposition', 'evenement'].includes(service)) return;
+  fetch('/api/reservation.php?tarifs=1').then((r) => r.json()).then((j) => {
+    if (j && j.tarifs && j.tarifs.ouvert) location.replace(service === 'disposition' ? 'reserver?mode=dispo' : 'reserver');
+  }).catch(() => {});
+})();
 
 (() => {
   const form = document.getElementById('devis-form');

@@ -170,6 +170,7 @@ async function pageTarifs(ctx) {
   const veh = (k) => ({ prise: num(t[k].prise), km: num(t[k].km), min: num(t[k].min), minimum: num(t[k].minimum), heure: num(t[k].heure), places: num(t[k].places), bagages: num(t[k].bagages) });
   const f = { berline: veh('berline'), van: veh('van'), nuit: num(t.nuit), minHeures: num(t.minHeures), delai: num(t.delai), siege: num(t.siege), pancarte: num(t.pancarte) };
   const afficher = h('input', { type: 'checkbox', checked: !!t.afficherPrix });
+  const ouvert = h('input', { type: 'checkbox', checked: !!t.ouvert });
   const forfaits = t.forfaits.map((x) => ({ code: x.code, nom: saisie({ value: x.nom }), berline: num(x.berline), van: num(x.van) }));
   const bloc = (titre, sous, ...enfants) => h('section', { class: 'carte' }, h('header', { class: 'carte__tete' }, h('h2', null, titre), sous ? h('small', null, sous) : null), enfants);
   const colonneVeh = (k, nom) => h('div', { class: 'form-grille' }, h('h3', { class: 'sous-titre' }, nom),
@@ -179,6 +180,7 @@ async function pageTarifs(ctx) {
   const form = h('form', { class: 'parametres', onsubmit: async (e) => {
     e.preventDefault();
     const donnees = {
+      ouvert: ouvert.checked,
       afficherPrix: afficher.checked,
       berline: Object.fromEntries(Object.entries(f.berline).map(([k, el]) => [k, lire(el)])),
       van: Object.fromEntries(Object.entries(f.van).map(([k, el]) => [k, lire(el)])),
@@ -187,6 +189,8 @@ async function pageTarifs(ctx) {
     };
     try { await api('vtc.tarifs.enregistrer', donnees); toast('Tarifs enregistrés : la page de réservation les utilise tout de suite.'); } catch (err) { erreur(err); }
   } },
+  bloc('Réservation en ligne', null, h('label', { class: 'case' }, ouvert, h('span', null, 'Ouvrir la réservation VTC au public sur le site')),
+    h('p', { class: 'astuce' }, "Décoché, les boutons « Réserver un VTC » sont masqués et les visiteurs voient « Cette option n'est pas encore disponible ». Rien n'est supprimé : cochez pour tout remettre en ligne.")),
   bloc('Affichage', null, h('label', { class: 'case' }, afficher, h('span', null, 'Afficher le prix estimé aux clients sur la page de réservation')),
     h('p', { class: 'astuce' }, 'Décoché, la page indique « Prix confirmé par téléphone » : vous donnez le prix vous-même en confirmant la course.')),
   bloc('Véhicules', 'Trajet = prise en charge + km + minutes (jamais moins que la course minimum)',

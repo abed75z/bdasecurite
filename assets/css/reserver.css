@@ -284,3 +284,17 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
   .raccourcis { flex-wrap: wrap; margin: 14px 0 6px; padding: 0; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .trace-route { stroke-dashoffset: 0; } }
+
+/* ---------- Réservation pas encore ouverte au public ---------- */
+.ferme { position: fixed; inset: 0; z-index: 5000; display: grid; place-items: center; padding: 16px; background: radial-gradient(120% 80% at 50% 0%, rgba(201, 165, 92, .10), transparent 60%), var(--bg); }
+.ferme__boite { width: min(400px, 100%); text-align: center; animation: fermeEntree .5s var(--ease) both; }
+.ferme__logo { width: 54px; height: 64px; margin: 0 auto 18px; display: block; }
+.ferme__badge { display: inline-block; margin-bottom: 14px; padding: 5px 12px; border-radius: 99px; background: var(--gold-soft); color: var(--gold-light); border: 1px solid rgba(201, 165, 92, .35); font: 600 11px/1 "Poppins", sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+.ferme h1 { margin: 0 0 12px; font: 500 26px/1.2 "Playfair Display", Georgia, serif; color: var(--text); }
+.ferme p { margin: 0 0 26px; color: var(--text-2); font-size: 14.5px; line-height: 1.6; }
+.ferme .cta { position: static; width: 100%; justify-content: center; gap: 10px; text-decoration: none; }
+.ferme .cta .ic { width: 18px; height: 18px; }
+.ferme__lien { display: block; margin-top: 12px; padding: 12px; border-radius: 14px; border: 1px solid var(--line-2); color: var(--text); text-decoration: none; font-size: 14.5px; }
+.ferme__lien + .ferme__lien { border-color: transparent; color: var(--muted); margin-top: 4px; }
+.ferme__lien:hover { border-color: var(--gold); }
+@keyframes fermeEntree { from { opacity: 0; transform: translateY(12px); } }

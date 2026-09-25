@@ -284,6 +284,7 @@ function avis_google_une_fois(): void
 function tarifs_vtc_defaut(): array
 {
   return [
+    'ouvert' => false, // réservation en ligne visible par le public
     'afficherPrix' => true,
     'berline' => ['nom' => 'Berline', 'places' => 3, 'bagages' => 3, 'prise' => 10, 'km' => 1.9, 'min' => 0.55, 'minimum' => 40, 'heure' => 65],
     'van' => ['nom' => 'Van', 'places' => 7, 'bagages' => 7, 'prise' => 15, 'km' => 2.4, 'min' => 0.7, 'minimum' => 60, 'heure' => 85],
@@ -307,7 +308,7 @@ function tarifs_vtc(): array
   $t = tarifs_vtc_defaut();
   if (!is_array($v)) return $t;
   foreach (['berline', 'van'] as $k) if (is_array($v[$k] ?? null)) $t[$k] = array_merge($t[$k], $v[$k]);
-  foreach (['afficherPrix', 'nuit', 'minHeures', 'delai', 'siege', 'pancarte'] as $k) if (array_key_exists($k, $v)) $t[$k] = $v[$k];
+  foreach (['ouvert', 'afficherPrix', 'nuit', 'minHeures', 'delai', 'siege', 'pancarte'] as $k) if (array_key_exists($k, $v)) $t[$k] = $v[$k];
   if (is_array($v['forfaits'] ?? null)) $t['forfaits'] = $v['forfaits'];
   return $t;
 }

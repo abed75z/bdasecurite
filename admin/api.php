@@ -294,6 +294,7 @@ try {
       }
       foreach (['nuit' => 200, 'minHeures' => 24, 'delai' => 72, 'siege' => 500, 'pancarte' => 500] as $k => $max) if (isset($b[$k])) $t[$k] = $n($b[$k], $max);
       if (isset($b['afficherPrix'])) $t['afficherPrix'] = !empty($b['afficherPrix']);
+      if (isset($b['ouvert'])) $t['ouvert'] = !empty($b['ouvert']);
       if (is_array($b['forfaits'] ?? null)) {
         $t['forfaits'] = [];
         foreach (array_slice($b['forfaits'], 0, 10) as $f) {

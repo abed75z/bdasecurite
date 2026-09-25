@@ -116,7 +116,12 @@
               </div>
               <div class="opt-group">
                 <h3>VTC Premium</h3>
-                <a class="opt-lien" href="reserver">
+                <div class="opts" data-vtc-off>
+                  <label class="opt"><input type="radio" name="prestation" value="Transfert aéroport / gare" data-id="transfert" data-group="vtc"><span class="opt__card"><span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-plane"/></svg></span><span><b>Transfert aéroport / gare</b><small>Accueil personnalisé</small></span><span class="opt__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></span></label>
+                  <label class="opt"><input type="radio" name="prestation" value="Chauffeur à disposition" data-id="disposition" data-group="vtc"><span class="opt__card"><span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span><span><b>Chauffeur à disposition</b><small>À l'heure ou à la journée</small></span><span class="opt__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></span></label>
+                  <label class="opt"><input type="radio" name="prestation" value="Mariage &amp; événement (VTC)" data-id="evenement" data-group="vtc"><span class="opt__card"><span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg></span><span><b>Mariage &amp; événement</b><small>Véhicule de prestige</small></span><span class="opt__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></span></label>
+                </div>
+                <a class="opt-lien" href="reserver" data-vtc hidden>
                   <span class="opt__icon"><svg class="icon" aria-hidden="true"><use href="#i-plane"/></svg></span>
                   <span><b>Réservez votre chauffeur en ligne</b><small>Aéroports, gares, mise à disposition : prix affiché en 1 minute, confirmation rapide</small></span>
                   <svg class="icon opt-lien__fleche" aria-hidden="true"><use href="#i-arrow"/></svg>

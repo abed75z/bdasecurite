@@ -16,7 +16,7 @@ try {
   if ($methode === 'GET') {
     if (isset($_GET['tarifs'])) {
       $t = tarifs_vtc();
-      header('Cache-Control: public, max-age=300');
+      header('Cache-Control: public, max-age=60');
       repondre(['ok' => true, 'tarifs' => $t]);
     }
     $r = reservation_par_jeton((string)($_GET['suivi'] ?? ''));
@@ -42,6 +42,7 @@ try {
   if (!empty($b['site_web']) || !empty($b['_honey'])) repondre(['ok' => true, 'ref' => 'VTC-0', 'jeton' => '']);
   if (!limiter('reservation', 6, 3600)) echec('Trop de réservations envoyées. Appelez-nous au 06 11 67 86 25.', 429);
   $t = tarifs_vtc();
+  if (empty($t['ouvert'])) echec("La réservation en ligne n'est pas encore disponible. Appelez-nous au 06 11 67 86 25.", 403);
   $mode = ($b['mode'] ?? '') === 'dispo' ? 'dispo' : 'trajet';
   $vehicule = ($b['vehicule'] ?? '') === 'van' ? 'van' : 'berline';
   $lieu = function ($p, bool $obligatoire): ?array {

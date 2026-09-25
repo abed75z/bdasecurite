@@ -608,7 +608,10 @@
     if (etat.depart && (etat.mode === 'dispo' || etat.arrivee)) versChoix();
     else if (qd || qa) { majAccueil(); ouvrirRecherche(etat.depart ? 'arrivee' : 'depart'); }
   }
+  // Écran « pas encore disponible » tant que la réservation n'est pas ouverte dans l'admin (le suivi d'une course reste accessible)
+  const majFerme = () => { $('ferme').hidden = !!tarifs?.ouvert || /suivi=[a-f0-9]{32}/.test(location.hash); };
   function routeHash() {
+    majFerme();
     const m = location.hash.match(/suivi=([a-f0-9]{32})/);
     if (m) afficherSuivi(m[1]);
     else if (vueCourante === 'suivi') allerVue('accueil');
@@ -618,7 +621,7 @@
   initCarte();
   majBadge();
   majAccueil();
-  fetch(`${API}?tarifs=1`).then((r) => r.json()).then((j) => { if (j.ok) { tarifs = j.tarifs; if (vueCourante === 'choix') majChoix(); } }).catch(() => {});
+  fetch(`${API}?tarifs=1`).then((r) => r.json()).then((j) => { if (j.ok) { tarifs = j.tarifs; majFerme(); if (vueCourante === 'choix') majChoix(); } }).catch(() => {});
   window.addEventListener('hashchange', routeHash);
   let delaiResize = 0;
   window.addEventListener('resize', () => { clearTimeout(delaiResize); delaiResize = setTimeout(dessinerCarte, 200); });

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <title>Réserver un chauffeur VTC à Paris — prix immédiat | BDA Sécurité &amp; VTC Premium</title>
   <meta name="description" content="Réservez votre chauffeur VTC premium à Paris et en Île-de-France en 1 minute : transferts aéroports (CDG, Orly, Beauvais) et gares, mise à disposition. Prix affiché avant de réserver, 24/7.">
+  <meta name="robots" content="noindex"><!-- à retirer (et remettre /reserver dans sitemap.xml) quand la réservation sera ouverte -->
   <meta name="theme-color" content="#09090b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -80,6 +81,18 @@
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-voiture" viewBox="0 0 24 24"><path d="M5 17h14M5 17a2 2 0 1 1-4 0v-4l2.5-5.5A2 2 0 0 1 5.3 6h13.4a2 2 0 0 1 1.8 1.5L23 13v4a2 2 0 1 1-4 0"/><path d="M3.5 12h17"/></symbol>
   </svg>
+  <!-- Réservation fermée au public (admin > Tarifs VTC > « Ouvrir la réservation ») : reserver.js masque cet écran quand elle est ouverte -->
+  <div class="ferme" id="ferme" role="dialog" aria-modal="true" aria-labelledby="ferme-titre">
+    <div class="ferme__boite">
+      <svg class="ferme__logo" aria-hidden="true"><use href="#logo"/></svg>
+      <span class="ferme__badge">Bientôt</span>
+      <h1 id="ferme-titre">Cette option n’est pas encore disponible</h1>
+      <p>La réservation de VTC en ligne arrive très bientôt. En attendant, notre équipe vous répond directement, 24 h/24.</p>
+      <a class="cta" href="tel:+33611678625"><svg class="ic"><use href="#i-tel"/></svg>Appeler le 06 11 67 86 25</a>
+      <a class="ferme__lien" href="devis?service=transfert">Demander un devis</a>
+      <a class="ferme__lien" href="./">Retour au site</a>
+    </div>
+  </div>
 
   <!-- Carte plein écran -->
   <div id="carte" class="carte" role="img" aria-label="Carte du trajet"></div>

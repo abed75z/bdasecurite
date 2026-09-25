@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <title>Réserver un chauffeur VTC à Paris — prix immédiat | BDA Sécurité &amp; VTC Premium</title>
   <meta name="description" content="Réservez votre chauffeur VTC premium à Paris et en Île-de-France en 1 minute : transferts aéroports (CDG, Orly, Beauvais) et gares, mise à disposition. Prix affiché avant de réserver, 24/7.">
   <meta name="theme-color" content="#09090b">
@@ -30,148 +30,209 @@
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <defs><linearGradient id="or" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc9c"/><stop offset=".45" stop-color="#c9a14a"/><stop offset="1" stop-color="#9c7424"/></linearGradient></defs>
+    <defs>
+      <linearGradient id="or" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc9c"/><stop offset=".45" stop-color="#c9a14a"/><stop offset="1" stop-color="#9c7424"/></linearGradient>
+      <linearGradient id="carrosserie" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a42"/><stop offset=".55" stop-color="#16161a"/><stop offset="1" stop-color="#0b0b0d"/></linearGradient>
+      <linearGradient id="vitre" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8cf95" stop-opacity=".55"/><stop offset="1" stop-color="#2a2a30" stop-opacity=".9"/></linearGradient>
+    </defs>
     <symbol id="logo" viewBox="0 0 200 240"><path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" fill="none" stroke="url(#or)" stroke-width="12" stroke-linejoin="round"/><path d="M62 128 100 84l38 44" fill="none" stroke="#f3f0ea" stroke-width="13"/><path d="M93 104h14l-2 52-5 24-5-24Z" fill="#f3f0ea"/></symbol>
+    <!-- Véhicules (illustrations) -->
+    <symbol id="v-berline" viewBox="0 0 124 50">
+      <ellipse cx="62" cy="45" rx="54" ry="3.5" fill="#000" opacity=".45"/>
+      <path d="M6 33c0-5 4-7.5 10-8.5l17-3.2C39 13.5 47 10.5 59 10.5h17c8 0 14 3.6 20 10.6l12 2.4c5.2 1 8.5 3.8 8.5 8.8v4.2c0 1.9-1.4 3-3.2 3H9.2C7.4 39.5 6 38.4 6 36.5Z" fill="url(#carrosserie)" stroke="#c9a55c" stroke-width=".9"/>
+      <path d="M38.5 22c5-6.6 10.6-8.3 18-8.3h5v8.3Z M65.5 13.7h9.5c6 0 11 2.7 15.3 8.3H65.5Z" fill="url(#vitre)"/>
+      <path d="M12 29h100" stroke="#c9a55c" stroke-width=".7" opacity=".7"/>
+      <circle cx="30" cy="39.5" r="7.4" fill="#0b0b0d" stroke="#3a3a42" stroke-width="1.6"/><circle cx="30" cy="39.5" r="3.2" fill="#c9a55c"/>
+      <circle cx="94" cy="39.5" r="7.4" fill="#0b0b0d" stroke="#3a3a42" stroke-width="1.6"/><circle cx="94" cy="39.5" r="3.2" fill="#c9a55c"/>
+      <path d="M111 28.5h4" stroke="#f3e2b0" stroke-width="2.2" stroke-linecap="round"/><path d="M7 30h3" stroke="#ef6b6b" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="v-van" viewBox="0 0 124 52">
+      <ellipse cx="62" cy="47" rx="54" ry="3.5" fill="#000" opacity=".45"/>
+      <path d="M6 37.5V18c0-5 3.8-9 9-9h66c5.4 0 9 1.8 12.8 6.4l10.4 10.8c6 1 10.3 4.2 10.3 9.4v4.6c0 1.9-1.4 3-3.2 3H9.2C7.4 43.2 6 42.1 6 40.2Z" fill="url(#carrosserie)" stroke="#c9a55c" stroke-width=".9"/>
+      <path d="M13 13.5h21v10H13Z M38 13.5h21v10H38Z M63 13.5h15.5c4 0 6.8 1.6 9 4.5l4.3 5.5H63Z" fill="url(#vitre)"/>
+      <path d="M12 31h100" stroke="#c9a55c" stroke-width=".7" opacity=".7"/>
+      <circle cx="28" cy="43.2" r="7.4" fill="#0b0b0d" stroke="#3a3a42" stroke-width="1.6"/><circle cx="28" cy="43.2" r="3.2" fill="#c9a55c"/>
+      <circle cx="94" cy="43.2" r="7.4" fill="#0b0b0d" stroke="#3a3a42" stroke-width="1.6"/><circle cx="94" cy="43.2" r="3.2" fill="#c9a55c"/>
+      <path d="M109 30.5h4" stroke="#f3e2b0" stroke-width="2.2" stroke-linecap="round"/><path d="M7 32h3" stroke="#ef6b6b" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <!-- Icônes -->
+    <symbol id="i-recherche" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
     <symbol id="i-cible" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7"/></symbol>
     <symbol id="i-avion" viewBox="0 0 24 24"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></symbol>
-    <symbol id="i-train" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M9 21l1.5-4M15 21l-1.5-4"/><circle cx="9" cy="14" r=".6"/><circle cx="15" cy="14" r=".6"/></symbol>
+    <symbol id="i-train" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="14" rx="3"/><path d="M5 11h14M9 21l1.5-4M15 21l-1.5-4"/></symbol>
     <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7-6.3 7-12a7 7 0 1 0-14 0c0 5.7 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-horloge" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-historique" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></symbol>
     <symbol id="i-inverser" viewBox="0 0 24 24"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></symbol>
     <symbol id="i-retour" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-bas" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
     <symbol id="i-croix" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
     <symbol id="i-coche" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
     <symbol id="i-perso" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></symbol>
-    <symbol id="i-valise" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M9 7V4h6v3M9 20v1M15 20v1"/></symbol>
-    <symbol id="i-horloge" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-valise" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="13" rx="2"/><path d="M9 7V4h6v3"/></symbol>
     <symbol id="i-tel" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
     <symbol id="i-wa" viewBox="0 0 24 24"><path d="M3 21l1.6-4.8A8.5 8.5 0 1 1 8 19.6z"/><path d="M9 9.5c0 3 2.5 5.5 5.5 5.5l1.2-1.4-2-1-1 .8a4 4 0 0 1-2-2l.8-1-1-2z"/></symbol>
     <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
     <symbol id="i-liste" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+    <symbol id="i-bouclier" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-etiquette" viewBox="0 0 24 24"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol>
+    <symbol id="i-lune" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-voiture" viewBox="0 0 24 24"><path d="M5 17h14M5 17a2 2 0 1 1-4 0v-4l2.5-5.5A2 2 0 0 1 5.3 6h13.4a2 2 0 0 1 1.8 1.5L23 13v4a2 2 0 1 1-4 0"/><path d="M3.5 12h17"/></symbol>
-    <symbol id="i-van" viewBox="0 0 24 24"><path d="M2 7a2 2 0 0 1 2-2h11l5 5h1a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-1M2 7v9a1 1 0 0 0 1 1h1M8 17h8"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="17" r="2"/><path d="M2 10h18"/></symbol>
   </svg>
 
-  <div class="app" id="app">
-    <!-- Carte -->
-    <div class="carte-zone">
-      <div id="carte" class="carte" role="img" aria-label="Carte du trajet"></div>
-      <header class="barre-haut">
-        <a class="marque" href="/" aria-label="Retour au site BDA Sécurité"><svg class="marque__logo"><use href="#logo"/></svg><span><b>BDA VTC</b><small>Premium · 24/7</small></span></a>
-        <button class="bouton-rond" type="button" id="btn-courses" aria-label="Mes courses"><svg class="ic"><use href="#i-liste"/></svg><i class="bouton-rond__badge" id="nb-courses" hidden></i></button>
-      </header>
-      <div class="trajet-info" id="trajet-info" hidden></div>
+  <!-- Carte plein écran -->
+  <div id="carte" class="carte" role="img" aria-label="Carte du trajet"></div>
+
+  <header class="haut">
+    <a class="marque" href="/" aria-label="Retour au site BDA Sécurité"><svg class="marque__logo"><use href="#logo"/></svg><span><b>BDA VTC</b><small>Premium · 24/7</small></span></a>
+    <div class="haut__actions">
+      <a class="rond" href="tel:+33611678625" aria-label="Appeler BDA"><svg class="ic"><use href="#i-tel"/></svg></a>
+      <button class="rond" type="button" id="btn-courses" aria-label="Mes courses"><svg class="ic"><use href="#i-liste"/></svg><i class="rond__badge" id="nb-courses" hidden></i></button>
     </div>
+  </header>
 
-    <!-- Panneau de réservation -->
-    <main class="panneau" id="panneau">
-      <div class="poignee" aria-hidden="true"></div>
-      <ol class="etapes" aria-label="Étapes">
-        <li class="is-actif">Trajet</li><li>Véhicule</li><li>Coordonnées</li>
-      </ol>
+  <!-- Panneau (glisse vers le haut / le bas sur téléphone) -->
+  <section class="feuille" id="feuille" aria-label="Réservation">
+    <button class="feuille__poignee" type="button" id="poignee" aria-label="Agrandir ou réduire le panneau"><span></span></button>
+    <div class="feuille__defile" id="defile">
 
-      <!-- Étape 1 : trajet -->
-      <section class="etape is-active" data-etape="1" aria-labelledby="t1">
-        <h1 id="t1" class="titre">Où allez-vous&nbsp;?</h1>
-        <div class="bascule" role="radiogroup" aria-label="Type de course">
-          <button type="button" role="radio" aria-checked="true" data-mode="trajet" class="is-actif">Trajet</button>
-          <button type="button" role="radio" aria-checked="false" data-mode="dispo">Mise à disposition</button>
+      <!-- 1. Où allez-vous ? -->
+      <div class="vue is-active" data-vue="accueil">
+        <p class="salut" id="salut">Bonjour</p>
+        <h1 class="titre" id="titre-accueil">Où allez-vous&nbsp;?</h1>
+        <div class="modes" role="radiogroup" aria-label="Type de course">
+          <button type="button" role="radio" aria-checked="true" data-mode="trajet" class="is-actif"><svg class="ic"><use href="#i-voiture"/></svg>Trajet</button>
+          <button type="button" role="radio" aria-checked="false" data-mode="dispo"><svg class="ic"><use href="#i-horloge"/></svg>À l'heure</button>
         </div>
-
-        <div class="lieux">
-          <div class="lieu" data-lieu="depart">
-            <span class="lieu__point lieu__point--depart" aria-hidden="true"></span>
-            <input id="depart" type="text" inputmode="search" autocomplete="off" placeholder="Adresse de départ" aria-label="Adresse de départ" aria-autocomplete="list" aria-controls="sugg-depart" aria-expanded="false">
-            <button type="button" class="lieu__action" id="ma-position" title="Ma position" aria-label="Utiliser ma position"><svg class="ic"><use href="#i-cible"/></svg></button>
-            <ul class="suggestions" id="sugg-depart" role="listbox" hidden></ul>
-          </div>
-          <div class="lieu" data-lieu="arrivee" id="bloc-arrivee">
-            <span class="lieu__point lieu__point--arrivee" aria-hidden="true"></span>
-            <input id="arrivee" type="text" inputmode="search" autocomplete="off" placeholder="Destination" aria-label="Destination" aria-autocomplete="list" aria-controls="sugg-arrivee" aria-expanded="false">
-            <button type="button" class="lieu__action" id="inverser" title="Inverser" aria-label="Inverser départ et destination"><svg class="ic"><use href="#i-inverser"/></svg></button>
-            <ul class="suggestions" id="sugg-arrivee" role="listbox" hidden></ul>
-          </div>
-          <span class="lieux__trait" aria-hidden="true"></span>
-        </div>
+        <button class="barre-recherche" type="button" id="ouvrir-recherche">
+          <svg class="ic"><use href="#i-recherche"/></svg>
+          <span id="barre-texte">Rechercher une destination</span>
+          <span class="barre-recherche__quand" id="quand-accueil"><svg class="ic"><use href="#i-horloge"/></svg><b></b></span>
+        </button>
         <div class="raccourcis" id="raccourcis" aria-label="Aéroports et gares"></div>
+        <ul class="lieux-liste" id="recents" aria-label="Adresses récentes"></ul>
+        <ul class="atouts">
+          <li><svg class="ic"><use href="#i-etiquette"/></svg><span><b>Prix annoncé</b>avant de réserver</span></li>
+          <li><svg class="ic"><use href="#i-bouclier"/></svg><span><b>Chauffeurs pros</b>discrets et ponctuels</span></li>
+          <li><svg class="ic"><use href="#i-horloge"/></svg><span><b>24/7</b>Paris &amp; Île-de-France</span></li>
+        </ul>
+      </div>
 
-        <div class="grille-2">
-          <label class="champ"><span>Date</span><input type="date" id="date" required></label>
-          <label class="champ"><span>Heure de prise en charge</span><input type="time" id="heure" step="300" required></label>
+      <!-- 2. Choix du véhicule -->
+      <div class="vue" data-vue="choix">
+        <div class="trajet-carte">
+          <button class="rond rond--plat" type="button" data-aller="accueil" aria-label="Retour"><svg class="ic"><use href="#i-retour"/></svg></button>
+          <button class="trajet-carte__lieux" type="button" id="modifier-trajet" aria-label="Modifier le trajet">
+            <span><i class="pt-depart"></i><em id="resume-depart"></em></span>
+            <span id="ligne-arrivee"><i class="pt-arrivee"></i><em id="resume-arrivee"></em></span>
+          </button>
         </div>
-        <div class="compteurs">
-          <div class="compteur" data-compteur="passagers"><svg class="ic"><use href="#i-perso"/></svg><span>Passagers</span><button type="button" data-pas="-1" aria-label="Moins de passagers">−</button><b>1</b><button type="button" data-pas="1" aria-label="Plus de passagers">+</button></div>
-          <div class="compteur" data-compteur="bagages"><svg class="ic"><use href="#i-valise"/></svg><span>Bagages</span><button type="button" data-pas="-1" aria-label="Moins de bagages">−</button><b>1</b><button type="button" data-pas="1" aria-label="Plus de bagages">+</button></div>
-          <div class="compteur" data-compteur="heures" hidden><svg class="ic"><use href="#i-horloge"/></svg><span>Durée (heures)</span><button type="button" data-pas="-1" aria-label="Moins d'heures">−</button><b>3</b><button type="button" data-pas="1" aria-label="Plus d'heures">+</button></div>
+        <div class="pastilles">
+          <button type="button" class="pastille-btn" id="pastille-quand"><svg class="ic"><use href="#i-horloge"/></svg><span></span><svg class="ic ic--mini"><use href="#i-bas"/></svg></button>
+          <button type="button" class="pastille-btn" id="pastille-voyageurs"><svg class="ic"><use href="#i-perso"/></svg><span></span><svg class="ic ic--mini"><use href="#i-bas"/></svg></button>
         </div>
-        <p class="erreur" id="erreur-1" role="alert"></p>
-        <div class="suite"><button class="cta" type="button" id="vers-2">Voir les véhicules et le prix</button></div>
-      </section>
-
-      <!-- Étape 2 : véhicule -->
-      <section class="etape" data-etape="2" aria-labelledby="t2">
-        <button class="retour" type="button" data-retour="1"><svg class="ic"><use href="#i-retour"/></svg>Trajet</button>
-        <h2 id="t2" class="titre">Choisissez votre véhicule</h2>
-        <div class="resume-trajet" id="resume-trajet"></div>
         <div class="vehicules" id="vehicules" role="radiogroup" aria-label="Véhicule"></div>
-        <div class="options">
-          <div class="compteur" data-compteur="sieges"><svg class="ic"><use href="#i-perso"/></svg><span>Siège enfant</span><button type="button" data-pas="-1" aria-label="Moins de sièges">−</button><b>0</b><button type="button" data-pas="1" aria-label="Plus de sièges">+</button></div>
-          <label class="interrupteur"><input type="checkbox" id="pancarte"><span class="interrupteur__rail"></span><span>Accueil avec pancarte à votre nom<small id="prix-pancarte"></small></span></label>
-          <label class="champ"><span>N° de vol ou de train <small>(facultatif)</small></span><input type="text" id="vol" maxlength="20" placeholder="ex. AF1234" autocapitalize="characters"></label>
-        </div>
-        <p class="note-nuit" id="note-nuit" hidden></p>
-        <div class="suite"><button class="cta" type="button" id="vers-3">Continuer</button></div>
-      </section>
+        <p class="nuit" id="nuit" hidden><svg class="ic"><use href="#i-lune"/></svg><span></span></p>
+        <details class="options" id="options">
+          <summary><svg class="ic"><use href="#i-plus"/></svg>Options <small id="resume-options">siège enfant, pancarte, n° de vol</small></summary>
+          <div class="options__corps">
+            <div class="compteur" data-compteur="sieges"><span>Siège enfant <small id="prix-siege"></small></span><button type="button" data-pas="-1" aria-label="Moins">−</button><b>0</b><button type="button" data-pas="1" aria-label="Plus">+</button></div>
+            <label class="interrupteur"><span>Accueil avec pancarte à votre nom <small id="prix-pancarte"></small></span><input type="checkbox" id="pancarte"><i></i></label>
+            <label class="champ"><span>N° de vol ou de train <small>(facultatif)</small></span><input type="text" id="vol" maxlength="20" placeholder="ex. AF1234" autocapitalize="characters"></label>
+          </div>
+        </details>
+        <button class="lien-detail" type="button" id="btn-detail" aria-expanded="false">Détail du prix</button>
+        <dl class="detail-prix" id="detail-prix" hidden></dl>
+        <div class="bas-fixe"><button class="cta" type="button" id="vers-infos"><span id="cta-choix">Réserver</span><b id="cta-prix"></b></button></div>
+      </div>
 
-      <!-- Étape 3 : coordonnées -->
-      <section class="etape" data-etape="3" aria-labelledby="t3">
-        <button class="retour" type="button" data-retour="2"><svg class="ic"><use href="#i-retour"/></svg>Véhicule</button>
-        <h2 id="t3" class="titre">Vos coordonnées</h2>
+      <!-- 3. Coordonnées -->
+      <div class="vue" data-vue="infos">
+        <div class="entete-vue"><button class="rond rond--plat" type="button" data-aller="choix" aria-label="Retour"><svg class="ic"><use href="#i-retour"/></svg></button><h2 class="titre titre--petit">Vos coordonnées</h2></div>
         <form id="form-resa" novalidate>
           <label class="champ"><span>Nom et prénom</span><input type="text" id="nom" autocomplete="name" required maxlength="80"></label>
           <label class="champ"><span>Téléphone</span><input type="tel" id="tel" autocomplete="tel" required maxlength="30" placeholder="06 12 34 56 78"></label>
           <label class="champ"><span>Email <small>(pour recevoir la confirmation)</small></span><input type="email" id="email" autocomplete="email" maxlength="160"></label>
-          <label class="champ"><span>Message au chauffeur <small>(facultatif)</small></span><textarea id="message" rows="2" maxlength="500" placeholder="Code d'accès, nombre d'arrêts…"></textarea></label>
-          <label class="hp" aria-hidden="true">Site web <input type="text" name="site_web" id="site_web" tabindex="-1" autocomplete="off"></label>
+          <label class="champ"><span>Message au chauffeur <small>(facultatif)</small></span><textarea id="message" rows="2" maxlength="500" placeholder="Code d'accès, arrêt en route…"></textarea></label>
+          <label class="hp" aria-hidden="true">Site web <input type="text" id="site_web" tabindex="-1" autocomplete="off"></label>
           <div class="recap" id="recap"></div>
-          <label class="accord"><input type="checkbox" id="accord" required><span>J'accepte que ces informations servent à organiser ma course et à me recontacter. <a href="/mentions-legales#donnees" target="_blank" rel="noopener">En savoir plus</a></span></label>
-          <p class="erreur" id="erreur-3" role="alert"></p>
-          <div class="suite"><button class="cta cta--prix" type="submit" id="reserver"><span>Réserver</span><b id="prix-cta"></b></button></div>
-          <p class="mention">Aucun paiement en ligne. Le prix affiché est une estimation : BDA vous confirme la course et le prix par téléphone ou WhatsApp avant le départ.</p>
+          <label class="accord"><input type="checkbox" id="accord"><span>J'accepte que ces informations servent à organiser ma course et à me recontacter. <a href="/mentions-legales#donnees" target="_blank" rel="noopener">En savoir plus</a></span></label>
+          <p class="erreur" id="erreur" role="alert"></p>
+          <div class="bas-fixe"><button class="cta" type="submit" id="reserver"><span>Confirmer la réservation</span><b id="cta-prix-2"></b></button></div>
+          <p class="mention">Aucun paiement maintenant. BDA vous confirme la course et le prix par téléphone ou WhatsApp avant le départ.</p>
         </form>
-      </section>
+      </div>
 
-      <!-- Étape 4 : confirmation -->
-      <section class="etape" data-etape="4" aria-labelledby="t4">
-        <div class="bravo"><span class="bravo__cercle"><svg class="ic"><use href="#i-coche"/></svg></span></div>
-        <h2 id="t4" class="titre titre--centre">Réservation envoyée&nbsp;!</h2>
-        <p class="texte-centre">Référence <b id="ref"></b>. Nous vous confirmons la course très vite par téléphone ou WhatsApp.</p>
+      <!-- 4. Confirmation -->
+      <div class="vue" data-vue="fin">
+        <div class="bravo"><span class="bravo__onde"></span><span class="bravo__cercle"><svg class="ic"><use href="#i-coche"/></svg></span></div>
+        <h2 class="titre titre--centre">Demande envoyée&nbsp;!</h2>
+        <p class="texte-centre">Référence <b id="ref"></b><br>BDA vous confirme la course très vite par téléphone ou WhatsApp.</p>
+        <div class="course-carte" id="course-carte"></div>
         <div class="actions-fin">
           <a class="cta" id="wa-confirmer" target="_blank" rel="noopener"><svg class="ic"><use href="#i-wa"/></svg>Confirmer plus vite sur WhatsApp</a>
-          <a class="bouton" id="lien-suivi"><svg class="ic"><use href="#i-liste"/></svg>Suivre ma réservation</a>
-          <button class="bouton" type="button" id="calendrier"><svg class="ic"><use href="#i-cal"/></svg>Ajouter à mon calendrier</button>
-          <a class="bouton bouton--discret" href="/">Retour au site</a>
+          <div class="actions-fin__duo">
+            <a class="bouton" id="lien-suivi"><svg class="ic"><use href="#i-liste"/></svg>Suivre</a>
+            <button class="bouton" type="button" id="calendrier"><svg class="ic"><use href="#i-cal"/></svg>Calendrier</button>
+          </div>
+          <button class="bouton bouton--discret" type="button" data-aller="accueil" data-nouvelle>Nouvelle course</button>
         </div>
-      </section>
+      </div>
 
       <!-- Suivi d'une réservation -->
-      <section class="etape" data-etape="suivi" aria-labelledby="ts">
-        <button class="retour" type="button" data-retour="1"><svg class="ic"><use href="#i-retour"/></svg>Nouvelle course</button>
-        <h2 id="ts" class="titre">Ma réservation</h2>
+      <div class="vue" data-vue="suivi">
+        <div class="entete-vue"><button class="rond rond--plat" type="button" data-aller="accueil" data-nouvelle aria-label="Nouvelle course"><svg class="ic"><use href="#i-retour"/></svg></button><h2 class="titre titre--petit">Ma réservation</h2></div>
         <div id="suivi"></div>
-      </section>
+      </div>
 
-      <footer class="pied-app">
-        <a href="tel:+33611678625"><svg class="ic"><use href="#i-tel"/></svg>06 11 67 86 25</a>
-        <span>BDA Sécurité &amp; VTC Premium · <a href="/mentions-legales">Mentions légales</a></span>
-      </footer>
-    </main>
+      <footer class="pied">BDA Sécurité &amp; VTC Premium · <a href="tel:+33611678625">06 11 67 86 25</a> · <a href="/mentions-legales">Mentions légales</a></footer>
+    </div>
+  </section>
+
+  <!-- Recherche d'adresses (plein écran sur téléphone) -->
+  <div class="recherche" id="recherche" hidden role="dialog" aria-modal="true" aria-label="Adresses">
+    <div class="recherche__tete">
+      <button class="rond rond--plat" type="button" id="fermer-recherche" aria-label="Fermer"><svg class="ic"><use href="#i-retour"/></svg></button>
+      <div class="recherche__champs">
+        <label class="champ-lieu" data-lieu="depart"><i class="pt-depart"></i><input id="depart" type="text" inputmode="search" autocomplete="off" placeholder="Adresse de prise en charge" aria-label="Adresse de prise en charge"></label>
+        <label class="champ-lieu" data-lieu="arrivee" id="champ-arrivee"><i class="pt-arrivee"></i><input id="arrivee" type="text" inputmode="search" autocomplete="off" placeholder="Où allez-vous ?" aria-label="Destination"></label>
+        <span class="recherche__trait" aria-hidden="true"></span>
+      </div>
+      <button class="rond rond--plat" type="button" id="inverser" aria-label="Inverser départ et destination"><svg class="ic"><use href="#i-inverser"/></svg></button>
+    </div>
+    <button class="ma-position" type="button" id="ma-position"><span><svg class="ic"><use href="#i-cible"/></svg></span>Utiliser ma position actuelle</button>
+    <ul class="lieux-liste lieux-liste--resultats" id="resultats" role="listbox" aria-label="Suggestions"></ul>
   </div>
 
-  <!-- Mes courses (enregistrées sur ce téléphone) -->
-  <div class="feuille" id="feuille-courses" hidden role="dialog" aria-modal="true" aria-labelledby="tc">
-    <div class="feuille__fond" data-fermer></div>
-    <div class="feuille__corps">
-      <div class="feuille__tete"><h2 id="tc" class="titre">Mes courses</h2><button class="bouton-rond" type="button" data-fermer aria-label="Fermer"><svg class="ic"><use href="#i-croix"/></svg></button></div>
+  <!-- Petites fenêtres -->
+  <div class="fenetre" id="fenetre-quand" hidden role="dialog" aria-modal="true" aria-labelledby="t-quand">
+    <div class="fenetre__fond" data-fermer></div>
+    <div class="fenetre__corps">
+      <h2 class="titre titre--petit" id="t-quand">Quand&nbsp;?</h2>
+      <div class="choix-rapides" id="choix-rapides"></div>
+      <div class="grille-2">
+        <label class="champ"><span>Date</span><input type="date" id="date"></label>
+        <label class="champ"><span>Heure de prise en charge</span><input type="time" id="heure" step="300"></label>
+      </div>
+      <p class="erreur" id="erreur-quand"></p>
+      <button class="cta" type="button" id="valider-quand">Valider</button>
+    </div>
+  </div>
+  <div class="fenetre" id="fenetre-voyageurs" hidden role="dialog" aria-modal="true" aria-labelledby="t-voy">
+    <div class="fenetre__fond" data-fermer></div>
+    <div class="fenetre__corps">
+      <h2 class="titre titre--petit" id="t-voy">Voyageurs</h2>
+      <div class="compteur" data-compteur="passagers"><span><svg class="ic"><use href="#i-perso"/></svg>Passagers</span><button type="button" data-pas="-1" aria-label="Moins">−</button><b>1</b><button type="button" data-pas="1" aria-label="Plus">+</button></div>
+      <div class="compteur" data-compteur="bagages"><span><svg class="ic"><use href="#i-valise"/></svg>Bagages</span><button type="button" data-pas="-1" aria-label="Moins">−</button><b>1</b><button type="button" data-pas="1" aria-label="Plus">+</button></div>
+      <div class="compteur" data-compteur="heures" hidden><span><svg class="ic"><use href="#i-horloge"/></svg>Durée (heures)</span><button type="button" data-pas="-1" aria-label="Moins">−</button><b>3</b><button type="button" data-pas="1" aria-label="Plus">+</button></div>
+      <button class="cta" type="button" data-fermer>Valider</button>
+    </div>
+  </div>
+  <div class="fenetre" id="fenetre-courses" hidden role="dialog" aria-modal="true" aria-labelledby="t-courses">
+    <div class="fenetre__fond" data-fermer></div>
+    <div class="fenetre__corps">
+      <div class="entete-vue"><h2 class="titre titre--petit" id="t-courses">Mes courses</h2><button class="rond rond--plat" type="button" data-fermer aria-label="Fermer"><svg class="ic"><use href="#i-croix"/></svg></button></div>
       <ul class="courses" id="liste-courses"></ul>
     </div>
   </div>

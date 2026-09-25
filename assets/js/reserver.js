@@ -10,8 +10,9 @@
   const ITINERAIRE = 'https://data.geopf.fr/navigation/itineraire';
   const TUILES = 'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&STYLE=normal&TILEMATRIXSET=PM&FORMAT=image/png&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}';
   const CLE_COURSES = 'bda-vtc-courses';
+  const CLE_LIEUX = 'bda-vtc-lieux';
 
-  // Aéroports et gares : proposés en un geste
+  // Aéroports et gares, proposés en un geste
   const LIEUX = [
     { court: 'CDG T2', label: 'Aéroport Charles-de-Gaulle — Terminal 2', lat: 49.0040, lon: 2.5711, cp: '95700', code: 'CDG', type: 'avion', mots: 'aeroport cdg roissy charles de gaulle terminal 2 t2' },
     { court: 'CDG T1', label: 'Aéroport Charles-de-Gaulle — Terminal 1', lat: 49.0097, lon: 2.5479, cp: '95700', code: 'CDG', type: 'avion', mots: 'aeroport cdg roissy charles de gaulle terminal 1 t1' },
@@ -23,55 +24,115 @@
     { court: 'Gare de l\'Est', label: 'Gare de l\'Est, Paris 10e', lat: 48.8768, lon: 2.3592, cp: '75010', type: 'train', mots: 'gare de l est' },
     { court: 'Saint-Lazare', label: 'Gare Saint-Lazare, Paris 8e', lat: 48.8763, lon: 2.3253, cp: '75008', type: 'train', mots: 'gare saint lazare st lazare' },
   ];
+  const VEHICULES = {
+    berline: { img: 'v-berline', texte: 'Confort et discrétion, idéale jusqu\'à 3 personnes' },
+    van: { img: 'v-van', texte: 'Familles, groupes et bagages volumineux' },
+  };
 
+  /* ---------- Outils ---------- */
   const $ = (id) => document.getElementById(id);
-  const el = (tag, cls, ...enfants) => { const e = document.createElement(tag); if (cls) e.className = cls; enfants.flat().forEach((c) => c != null && e.append(c)); return e; };
-  const icone = (nom) => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('class', 'ic'); const u = document.createElementNS(s.namespaceURI, 'use'); u.setAttribute('href', `#i-${nom}`); s.append(u); return s; };
+  const el = (tag, cls, ...enfants) => { const e = document.createElement(tag); if (cls) e.className = cls; enfants.flat().forEach((c) => c != null && c !== false && e.append(c)); return e; };
+  const svgUse = (id, cls = 'ic') => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('class', cls); const u = document.createElementNS(s.namespaceURI, 'use'); u.setAttribute('href', `#${id}`); s.append(u); return s; };
+  const icone = (nom) => svgUse(`i-${nom}`);
   const normaliser = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
   const pad = (n) => String(n).padStart(2, '0');
-  const remplir = (noeud, ...enfants) => noeud.replaceChildren(...enfants.filter((c) => c != null && c !== false));
   const euros = (n) => `${Math.round(n)} €`;
-  const lireCourses = () => { try { return JSON.parse(localStorage.getItem(CLE_COURSES) || '[]'); } catch (e) { return []; } };
-  const toast = (txt) => { const t = $('toast'); t.textContent = txt; t.classList.add('is-in'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('is-in'), 2600); };
+  const lire = (cle) => { try { return JSON.parse(localStorage.getItem(cle) || '[]'); } catch (e) { return []; } };
+  const ecrire = (cle, v) => { try { localStorage.setItem(cle, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } };
+  const toast = (txt) => { const t = $('toast'); t.textContent = txt; t.classList.add('is-in'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('is-in'), 2800); };
+  const ordinateur = () => window.matchMedia('(min-width: 980px)').matches;
+  const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dureeTexte = (min) => (min >= 60 ? `${Math.floor(min / 60)} h ${pad(Math.round(min % 60))}` : `${Math.max(1, Math.round(min))} min`);
+  const kmTexte = (km) => `${km.toFixed(1).replace('.', ',')} km`;
 
-  const etat = { mode: 'trajet', depart: null, arrivee: null, passagers: 1, bagages: 1, heures: 3, sieges: 0, vehicule: 'berline', route: null };
+  const etat = { mode: 'trajet', depart: null, arrivee: null, route: null, passagers: 1, bagages: 1, heures: 3, sieges: 0, vehicule: 'berline', date: '', heure: '' };
   let tarifs = null;
 
+  /* ---------- Date et heure ---------- */
+  const delai = () => (tarifs ? +tarifs.delai : 2);
+  const quandDate = () => new Date(`${etat.date}T${etat.heure}`);
+  function heureParDefaut() {
+    const d = new Date(Date.now() + (delai() + 0.5) * 3600e3);
+    d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15, 0, 0);
+    etat.date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    etat.heure = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function quandTexte() {
+    const d = quandDate();
+    const auj = new Date(); auj.setHours(0, 0, 0, 0);
+    const j = new Date(d); j.setHours(0, 0, 0, 0);
+    const ecart = Math.round((j - auj) / 864e5);
+    const jour = ecart === 0 ? 'Aujourd\'hui' : ecart === 1 ? 'Demain' : new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }).format(d);
+    return `${jour} · ${etat.heure}`;
+  }
+  const estNuit = () => { const h = +etat.heure.slice(0, 2); return h >= 22 || h < 6; };
+  function majQuand() {
+    $('quand-accueil').querySelector('b').textContent = quandTexte();
+    $('pastille-quand').querySelector('span').textContent = quandTexte();
+  }
+
   /* ---------- Carte ---------- */
-  let carte = null, calque = null;
+  let carte = null, calque = null, animVoiture = 0;
   function initCarte() {
     if (!window.L) return;
-    carte = L.map('carte', { zoomControl: false, attributionControl: true }).setView([48.8566, 2.3522], 11);
+    carte = L.map('carte', { zoomControl: false }).setView([48.8566, 2.3522], 12);
     L.tileLayer(TUILES, { maxZoom: 18, attribution: '© <a href="https://www.ign.fr" target="_blank" rel="noopener">IGN</a> Géoplateforme' }).addTo(carte);
     calque = L.layerGroup().addTo(carte);
   }
+  // Marges pour que le trajet reste visible à côté du panneau (ordinateur) ou au-dessus (téléphone)
+  function marges() {
+    if (ordinateur()) return { tl: [500, 110], br: [60, 60] };
+    const f = $('feuille').getBoundingClientRect();
+    const visible = Math.max(0, window.innerHeight - f.top);
+    return { tl: [30, 90], br: [30, Math.min(window.innerHeight * 0.75, visible + 30)] };
+  }
   function dessinerCarte() {
     if (!carte) return;
+    cancelAnimationFrame(animVoiture);
     carte.invalidateSize();
+    carte.stop();
     calque.clearLayers();
     const points = [];
-    const repere = (p, cls) => { L.marker([p.lat, p.lon], { icon: L.divIcon({ className: '', html: `<div class="repere ${cls}"></div>`, iconSize: [18, 18], iconAnchor: [9, 9] }), keyboard: false }).addTo(calque); points.push([p.lat, p.lon]); };
+    const repere = (p, cls) => { L.marker([p.lat, p.lon], { icon: L.divIcon({ className: '', html: `<div class="repere ${cls}"></div>`, iconSize: [20, 20], iconAnchor: [10, 10] }), keyboard: false, interactive: false }).addTo(calque); points.push([p.lat, p.lon]); };
     if (etat.depart) repere(etat.depart, '');
     if (etat.mode === 'trajet' && etat.arrivee) repere(etat.arrivee, 'repere--arrivee');
-    if (etat.mode === 'trajet' && etat.route?.geo?.length) {
-      const ligne = etat.route.geo.map(([lon, lat]) => [lat, lon]);
-      L.polyline(ligne, { color: '#000', weight: 8, opacity: 0.35 }).addTo(calque);
-      L.polyline(ligne, { color: '#e3c27e', weight: 4, opacity: 1 }).addTo(calque);
+    let ligne = null;
+    if (etat.mode === 'trajet' && etat.route?.geo?.length > 1) {
+      ligne = etat.route.geo.map(([lon, lat]) => [lat, lon]);
+      L.polyline(ligne, { color: '#000', weight: 9, opacity: 0.4, interactive: false }).addTo(calque);
+      L.polyline(ligne, { color: '#e8cf95', weight: 4.5, opacity: 1, className: 'trace-route', interactive: false }).addTo(calque);
       ligne.forEach((p) => points.push(p));
+      // Durée affichée sur la carte, près de l'arrivée
+      L.marker(ligne[ligne.length - 1], { icon: L.divIcon({ className: '', html: `<div class="etiquette-carte">${dureeTexte(etat.route.min)}<small>${kmTexte(etat.route.km)}</small></div>`, iconSize: null, iconAnchor: [-14, 34] }), interactive: false, keyboard: false }).addTo(calque);
     }
-    const bas = window.matchMedia('(min-width: 980px)').matches ? 60 : 70;
-    carte.stop();
-    if (points.length > 1) carte.fitBounds(points, { paddingTopLeft: [40, 80], paddingBottomRight: [40, bas], maxZoom: 15, animate: false });
+    const m = marges();
+    if (points.length > 1) carte.fitBounds(points, { paddingTopLeft: m.tl, paddingBottomRight: m.br, maxZoom: 15, animate: false });
     else if (points.length === 1) carte.setView(points[0], 14, { animate: false });
-    const info = $('trajet-info');
-    if (etat.mode === 'trajet' && etat.route) {
-      info.replaceChildren(icone('voiture'), `${etat.route.km.toFixed(1).replace('.', ',')} km · ${dureeTexte(etat.route.min)}`);
-      info.hidden = false;
-    } else info.hidden = true;
+    if (ligne && !reduit) animerVoiture(ligne);
   }
-  const dureeTexte = (min) => (min >= 60 ? `${Math.floor(min / 60)} h ${pad(Math.round(min % 60))}` : `${Math.max(1, Math.round(min))} min`);
+  // Une petite voiture parcourt le trajet en boucle
+  function animerVoiture(ligne) {
+    const cumul = [0];
+    for (let i = 1; i < ligne.length; i++) cumul.push(cumul[i - 1] + carte.distance(ligne[i - 1], ligne[i]));
+    const total = cumul[cumul.length - 1];
+    if (!total) return;
+    const icon = L.divIcon({ className: '', html: '<div class="voiture-repere"><svg viewBox="0 0 24 24"><path d="M5 17h14M5 17a2 2 0 1 1-4 0v-4l2.5-5.5A2 2 0 0 1 5.3 6h13.4a2 2 0 0 1 1.8 1.5L23 13v4a2 2 0 1 1-4 0"/><path d="M3.5 12h17"/></svg></div>', iconSize: [30, 30], iconAnchor: [15, 15] });
+    const voiture = L.marker(ligne[0], { icon, interactive: false, keyboard: false }).addTo(calque);
+    const duree = Math.min(9000, Math.max(4000, total / 6));
+    const debut = performance.now() + 1100;
+    const pas = (t) => {
+      const p = Math.max(0, ((t - debut) % (duree + 1200)) / duree);
+      const d = Math.min(1, p) * total;
+      let i = 1;
+      while (i < cumul.length - 1 && cumul[i] < d) i++;
+      const r = (d - cumul[i - 1]) / ((cumul[i] - cumul[i - 1]) || 1);
+      voiture.setLatLng([ligne[i - 1][0] + (ligne[i][0] - ligne[i - 1][0]) * r, ligne[i - 1][1] + (ligne[i][1] - ligne[i - 1][1]) * r]);
+      animVoiture = requestAnimationFrame(pas);
+    };
+    animVoiture = requestAnimationFrame(pas);
+  }
 
-  /* ---------- Adresses (recherche au fil de la frappe) ---------- */
+  /* ---------- Adresses ---------- */
   function codeAeroport(label) {
     const n = normaliser(label);
     if (!/aeroport|airport/.test(n)) return '';
@@ -81,7 +142,7 @@
     return '';
   }
   async function chercherAdresses(q, signal) {
-    const r = await fetch(`${GEO}/search?q=${encodeURIComponent(q)}&limit=5&autocomplete=1&index=address&lat=48.8566&lon=2.3522`, { signal });
+    const r = await fetch(`${GEO}/search?q=${encodeURIComponent(q)}&limit=6&autocomplete=1&index=address&lat=48.8566&lon=2.3522`, { signal });
     const j = await r.json();
     return (j.features || []).map((f) => ({ label: f.properties.label, lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0], cp: String(f.properties.postcode || ''), code: codeAeroport(f.properties.label), type: 'adresse', detail: f.properties.context || '' }));
   }
@@ -91,180 +152,332 @@
     const mots = n.split(' ');
     return LIEUX.filter((l) => mots.every((m) => l.mots.includes(m)));
   }
-  function champLieu(cle) {
-    const input = $(cle), liste = $(`sugg-${cle}`), bloc = input.closest('.lieu');
-    let delai, ctrl, resultats = [], actif = -1;
-    const fermer = () => { liste.hidden = true; input.setAttribute('aria-expanded', 'false'); actif = -1; };
-    const afficher = () => {
-      liste.replaceChildren(...(resultats.length ? resultats.map((r, i) => {
-        const li = el('li', '', icone(r.type === 'avion' ? 'avion' : r.type === 'train' ? 'train' : 'pin'), el('span', '', el('b', '', r.label), r.detail ? el('small', '', r.detail) : null));
-        li.setAttribute('role', 'option'); li.id = `${cle}-opt-${i}`;
-        if (i === actif) li.setAttribute('aria-selected', 'true');
-        li.addEventListener('pointerdown', (e) => { e.preventDefault(); choisir(r); });
-        return li;
-      }) : [el('li', 'vide', 'Aucune adresse trouvée')]));
-      liste.hidden = false; input.setAttribute('aria-expanded', 'true');
-      input.setAttribute('aria-activedescendant', actif >= 0 ? `${cle}-opt-${actif}` : '');
-    };
-    const choisir = (r) => { input.value = r.label; fermer(); definirLieu(cle, r); };
-    input.addEventListener('input', () => {
-      if (etat[cle]) definirLieu(cle, null, true);
-      clearTimeout(delai);
-      const q = input.value.trim();
-      if (q.length < 2) { fermer(); return; }
-      delai = setTimeout(async () => {
-        const connus = lieuxConnus(q);
-        let adresses = [];
-        if (q.length >= 3) {
-          ctrl?.abort(); ctrl = new AbortController();
-          try { adresses = await chercherAdresses(q, ctrl.signal); } catch (e) { if (e.name === 'AbortError') return; }
-        }
-        resultats = [...connus.slice(0, 3), ...adresses]; actif = -1;
-        afficher();
-      }, 220);
-    });
-    input.addEventListener('keydown', (e) => {
-      if (liste.hidden || !resultats.length) return;
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); actif = (actif + (e.key === 'ArrowDown' ? 1 : -1) + resultats.length) % resultats.length; afficher(); }
-      else if (e.key === 'Enter') { e.preventDefault(); choisir(resultats[Math.max(0, actif)]); }
-      else if (e.key === 'Escape') fermer();
-    });
-    input.addEventListener('blur', () => setTimeout(fermer, 150));
-    return { input, bloc };
+  const pictoLieu = (l) => (l.type === 'avion' ? 'avion' : l.type === 'train' ? 'train' : l.recent ? 'historique' : 'pin');
+  function memoriserLieu(l) {
+    const liste = lire(CLE_LIEUX).filter((x) => x.label !== l.label);
+    liste.unshift({ label: l.label, lat: l.lat, lon: l.lon, cp: l.cp || '', code: l.code || '', type: l.type || 'adresse', detail: l.detail || '' });
+    ecrire(CLE_LIEUX, liste.slice(0, 5));
   }
-  const champs = {};
-  async function definirLieu(cle, lieu, silencieux) {
-    etat[cle] = lieu ? { label: lieu.label, lat: lieu.lat, lon: lieu.lon, cp: lieu.cp || '', code: lieu.code || '' } : null;
-    champs[cle].bloc.classList.toggle('is-ok', !!lieu);
-    if (lieu) champs[cle].input.value = lieu.label;
-    if (!silencieux) { await calculerTrajet(); if (cle === 'depart' && lieu && etat.mode === 'trajet' && !etat.arrivee) champs.arrivee.input.focus(); }
-    else { etat.route = null; dessinerCarte(); }
+  function ligneLieu(l, surChoix) {
+    const b = el('button', '', el('span', `pictos ${l.type === 'avion' || l.type === 'train' ? 'pictos--or' : ''}`, icone(pictoLieu(l))), el('span', '', el('b', '', l.label), l.detail ? el('small', '', l.detail) : null));
+    b.type = 'button';
+    b.addEventListener('pointerdown', (e) => e.preventDefault());
+    b.addEventListener('click', () => surChoix(l));
+    return el('li', '', b);
   }
 
   /* ---------- Itinéraire ---------- */
   const distanceVol = (a, b) => { const R = 6371, r = Math.PI / 180, x = (b.lat - a.lat) * r, y = (b.lon - a.lon) * r; const h = Math.sin(x / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(y / 2) ** 2; return 2 * R * Math.asin(Math.min(1, Math.sqrt(h))); };
+  let jetonRoute = 0;
   async function calculerTrajet() {
     etat.route = null;
+    const j = ++jetonRoute;
     if (etat.mode === 'trajet' && etat.depart && etat.arrivee) {
       const d = etat.depart, a = etat.arrivee;
       try {
         const url = `${ITINERAIRE}?resource=bdtopo-osrm&start=${d.lon},${d.lat}&end=${a.lon},${a.lat}&profile=car&optimization=fastest&distanceUnit=kilometer&timeUnit=minute&geometryFormat=geojson&getSteps=false`;
-        const j = await (await fetch(url)).json();
-        if (!(j.distance > 0)) throw new Error('itinéraire');
-        etat.route = { km: j.distance, min: j.duration, geo: j.geometry?.coordinates || [] };
+        const r = await (await fetch(url)).json();
+        if (!(r.distance > 0)) throw new Error('itinéraire');
+        if (j !== jetonRoute) return;
+        etat.route = { km: r.distance, min: r.duration, geo: r.geometry?.coordinates || [] };
       } catch (e) {
+        if (j !== jetonRoute) return;
         const km = distanceVol(d, a) * 1.3;
         etat.route = { km, min: km * 2, geo: [[d.lon, d.lat], [a.lon, a.lat]] };
       }
     }
     dessinerCarte();
-    majBouton1();
   }
 
   /* ---------- Prix (même calcul que le serveur) ---------- */
   const estParis = (p) => !!p && String(p.cp).startsWith('75');
-  function prix(veh) {
+  function calculPrix(veh) {
     if (!tarifs) return null;
     const v = tarifs[veh];
+    const lignes = [];
     let base;
-    if (etat.mode === 'dispo') base = Math.max(+tarifs.minHeures, etat.heures) * v.heure;
-    else {
+    if (etat.mode === 'dispo') {
+      const h = Math.max(+tarifs.minHeures, etat.heures);
+      base = h * v.heure;
+      lignes.push([`Mise à disposition ${h} h × ${euros(v.heure)}`, base]);
+    } else {
       if (!etat.route) return null;
       const f = (tarifs.forfaits || []).find((x) => (etat.depart?.code === x.code && estParis(etat.arrivee)) || (etat.arrivee?.code === x.code && estParis(etat.depart)));
-      base = f ? +f[veh] : Math.max(+v.minimum, +v.prise + etat.route.km * v.km + etat.route.min * v.min);
+      if (f) { base = +f[veh]; lignes.push([`Forfait ${f.nom}`, base]); }
+      else {
+        const calc = +v.prise + etat.route.km * v.km + etat.route.min * v.min;
+        lignes.push(['Prise en charge', +v.prise], [`${kmTexte(etat.route.km)} × ${String(v.km).replace('.', ',')} €`, etat.route.km * v.km], [`${Math.round(etat.route.min)} min × ${String(v.min).replace('.', ',')} €`, etat.route.min * v.min]);
+        if (calc < +v.minimum) lignes.push([`Course minimum (${euros(v.minimum)})`, +v.minimum - calc]);
+        base = Math.max(+v.minimum, calc);
+      }
     }
-    if (estNuit()) base *= 1 + tarifs.nuit / 100;
-    base += etat.sieges * tarifs.siege + ($('pancarte').checked ? +tarifs.pancarte : 0);
-    return Math.round(base);
+    if (estNuit() && +tarifs.nuit) { lignes.push([`Nuit 22 h – 6 h (+${tarifs.nuit} %)`, base * tarifs.nuit / 100]); base *= 1 + tarifs.nuit / 100; }
+    if (etat.sieges) { lignes.push([`Siège enfant × ${etat.sieges}`, etat.sieges * tarifs.siege]); base += etat.sieges * tarifs.siege; }
+    if ($('pancarte').checked && +tarifs.pancarte) { lignes.push(['Accueil pancarte', +tarifs.pancarte]); base += +tarifs.pancarte; }
+    return { total: Math.round(base), lignes };
   }
-  const estNuit = () => { const h = +($('heure').value || '12').slice(0, 2); return h >= 22 || h < 6; };
+  const prixVisible = () => !!tarifs?.afficherPrix;
 
-  /* ---------- Étapes ---------- */
-  let etapeCourante = '1';
-  function allerA(n) {
-    etapeCourante = String(n);
-    document.querySelectorAll('.etape').forEach((s) => s.classList.toggle('is-active', s.dataset.etape === etapeCourante));
-    const num = +n;
-    const barre = document.querySelector('.etapes');
-    barre.classList.toggle('is-cache', !(num >= 1 && num <= 3));
-    [...barre.children].forEach((li, i) => { li.classList.toggle('is-actif', i + 1 === num); li.classList.toggle('is-fait', i + 1 < num); });
-    if (window.matchMedia('(min-width: 980px)').matches) $('panneau').scrollTo({ top: 0, behavior: 'smooth' });
-    else $('panneau').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  /* ---------- Vues ---------- */
+  let vueCourante = 'accueil';
+  function allerVue(nom) {
+    vueCourante = nom;
+    document.querySelectorAll('.vue').forEach((v) => v.classList.toggle('is-active', v.dataset.vue === nom));
+    $('defile').scrollTop = 0;
+    ouvrirFeuille();
+    if (nom === 'accueil') majAccueil();
+    if (nom === 'choix') majChoix();
+    setTimeout(dessinerCarte, 60);
   }
-  document.querySelectorAll('[data-retour]').forEach((b) => b.addEventListener('click', () => { if (b.dataset.retour === '1' && location.hash) history.replaceState(null, '', location.pathname); allerA(b.dataset.retour); }));
+  document.querySelectorAll('[data-aller]').forEach((b) => b.addEventListener('click', () => {
+    if (b.hasAttribute('data-nouvelle')) {
+      etat.arrivee = null; etat.route = null; etat.sieges = 0; $('pancarte').checked = false; $('vol').value = '';
+      if (location.hash) history.replaceState(null, '', location.pathname);
+    }
+    allerVue(b.dataset.aller);
+  }));
 
-  function erreurEtape1() {
-    if (!etat.depart) return 'Choisissez l\'adresse de départ dans la liste.';
-    if (etat.mode === 'trajet' && !etat.arrivee) return 'Choisissez la destination dans la liste.';
-    if (etat.mode === 'trajet' && !etat.route) return 'Calcul du trajet en cours…';
-    const d = $('date').value, h = $('heure').value;
-    if (!d || !h) return 'Indiquez la date et l\'heure de prise en charge.';
-    const quand = new Date(`${d}T${h}`);
-    const delai = tarifs ? +tarifs.delai : 2;
-    if (quand.getTime() < Date.now() + delai * 3600e3) return `Réservez au moins ${delai} h à l'avance. Pour une course immédiate, appelez le 06 11 67 86 25.`;
-    return '';
+  /* ---------- Accueil ---------- */
+  function majAccueil() {
+    const h = new Date().getHours();
+    $('salut').textContent = h < 6 ? 'Bonne nuit' : h < 18 ? 'Bonjour' : 'Bonsoir';
+    $('titre-accueil').textContent = etat.mode === 'dispo' ? 'Où venons-nous vous chercher ?' : 'Où allez-vous ?';
+    const lieu = etat.mode === 'dispo' ? etat.depart : etat.arrivee;
+    $('barre-texte').textContent = lieu ? lieu.label : etat.mode === 'dispo' ? 'Adresse de prise en charge' : 'Rechercher une destination';
+    majQuand();
+    const recents = lire(CLE_LIEUX);
+    $('recents').replaceChildren(...recents.slice(0, 3).map((l) => ligneLieu({ ...l, recent: true }, choisirRapide)));
   }
-  function majBouton1() { $('erreur-1').textContent = ''; }
-  $('vers-2').addEventListener('click', () => {
-    const e = erreurEtape1();
-    $('erreur-1').textContent = e;
-    if (e) return;
-    dessinerVehicules();
-    allerA(2);
+  function choisirRapide(l) {
+    memoriserLieu(l);
+    if (etat.mode === 'dispo') { etat.depart = l; return versChoix(); }
+    etat.arrivee = l;
+    if (!etat.depart) return ouvrirRecherche('depart');
+    versChoix();
+  }
+  $('raccourcis').replaceChildren(...LIEUX.map((l) => {
+    const b = el('button', 'raccourci', icone(l.type), l.court);
+    b.type = 'button';
+    b.addEventListener('click', () => choisirRapide(l));
+    return b;
+  }));
+  $('ouvrir-recherche').addEventListener('click', (e) => {
+    if (e.target.closest('.barre-recherche__quand')) return ouvrirQuand();
+    ouvrirRecherche(etat.mode === 'dispo' ? 'depart' : etat.depart ? 'arrivee' : 'depart');
+  });
+  document.querySelectorAll('.modes button').forEach((b) => b.addEventListener('click', () => {
+    etat.mode = b.dataset.mode;
+    document.querySelectorAll('.modes button').forEach((x) => { x.classList.toggle('is-actif', x === b); x.setAttribute('aria-checked', String(x === b)); });
+    document.querySelector('[data-compteur="heures"]').hidden = etat.mode !== 'dispo';
+    calculerTrajet();
+    majAccueil();
+  }));
+
+  /* ---------- Recherche d'adresses ---------- */
+  let champActif = 'arrivee', ctrl = null, delaiFrappe = 0;
+  function ouvrirRecherche(cle) {
+    champActif = cle;
+    $('champ-arrivee').hidden = etat.mode === 'dispo';
+    $('depart').value = etat.depart?.label || '';
+    $('arrivee').value = etat.arrivee?.label || '';
+    $('recherche').hidden = false;
+    setTimeout(() => $(cle).focus(), 60);
+    afficherResultats('');
+  }
+  const fermerRecherche = () => { $('recherche').hidden = true; };
+  $('fermer-recherche').addEventListener('click', fermerRecherche);
+  function afficherResultats(q, adresses = []) {
+    const zone = $('resultats');
+    const titre = (t) => el('li', 'titre-liste', t);
+    if (!q) {
+      const recents = lire(CLE_LIEUX);
+      zone.replaceChildren(...[recents.length ? titre('Récents') : null, ...recents.map((l) => ligneLieu({ ...l, recent: true }, choisirLieu)),
+        titre('Aéroports et gares'), ...LIEUX.map((l) => ligneLieu(l, choisirLieu))].filter(Boolean));
+      return;
+    }
+    const tous = [...lieuxConnus(q).slice(0, 3), ...adresses];
+    zone.replaceChildren(...(tous.length ? tous.map((l) => ligneLieu(l, choisirLieu)) : [el('li', 'vide', q.length < 3 ? 'Continuez à taper…' : 'Aucune adresse trouvée')]));
+  }
+  ['depart', 'arrivee'].forEach((cle) => {
+    const input = $(cle);
+    input.addEventListener('focus', () => { champActif = cle; afficherResultats(input.value === (etat[cle]?.label || '') ? '' : input.value.trim()); input.select(); });
+    input.addEventListener('input', () => {
+      champActif = cle;
+      clearTimeout(delaiFrappe);
+      const q = input.value.trim();
+      if (q.length < 3) { afficherResultats(q); return; }
+      delaiFrappe = setTimeout(async () => {
+        ctrl?.abort(); ctrl = new AbortController();
+        try { afficherResultats(q, await chercherAdresses(q, ctrl.signal)); } catch (e) { if (e.name !== 'AbortError') afficherResultats(q); }
+      }, 220);
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); $('resultats').querySelector('li button')?.click(); }
+      if (e.key === 'Escape') fermerRecherche();
+    });
+  });
+  function choisirLieu(l) {
+    etat[champActif] = { label: l.label, lat: l.lat, lon: l.lon, cp: l.cp || '', code: l.code || '' };
+    memoriserLieu(l);
+    $(champActif).value = l.label;
+    if (etat.mode === 'dispo' || (etat.depart && etat.arrivee)) { fermerRecherche(); return versChoix(); }
+    const autre = champActif === 'depart' ? 'arrivee' : 'depart';
+    champActif = autre;
+    $(autre).focus();
+  }
+  $('inverser').addEventListener('click', () => {
+    [etat.depart, etat.arrivee] = [etat.arrivee, etat.depart];
+    $('depart').value = etat.depart?.label || ''; $('arrivee').value = etat.arrivee?.label || '';
+  });
+  $('ma-position').addEventListener('click', () => {
+    if (!navigator.geolocation) return toast('Position indisponible sur cet appareil.');
+    toast('Recherche de votre position…');
+    navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+      let label = 'Ma position', cp = '';
+      try {
+        const j = await (await fetch(`${GEO}/reverse?lon=${coords.longitude}&lat=${coords.latitude}&limit=1`)).json();
+        const f = j.features?.[0];
+        if (f) { label = f.properties.label; cp = String(f.properties.postcode || ''); }
+      } catch (e) { /* adresse approximative */ }
+      champActif = 'depart';
+      choisirLieu({ label, lat: coords.latitude, lon: coords.longitude, cp, code: '' });
+    }, () => toast('Autorisez la localisation, ou tapez votre adresse.'), { enableHighAccuracy: true, timeout: 10000 });
   });
 
-  function dessinerVehicules() {
-    const r = $('resume-trajet');
-    const quand = new Date(`${$('date').value}T${$('heure').value}`);
-    const jour = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(quand);
-    r.replaceChildren(
-      el('span', '', el('i'), el('em', '', etat.depart.label)),
-      etat.mode === 'trajet' ? el('span', '', el('i', 'fin'), el('em', '', etat.arrivee.label)) : el('span', '', icone('horloge'), el('em', '', `Mise à disposition · ${etat.heures} h`)),
-      el('small', '', `${jour} à ${$('heure').value}${etat.route ? ` · ${etat.route.km.toFixed(1).replace('.', ',')} km · ${dureeTexte(etat.route.min)}` : ''}`));
-    const zone = $('vehicules');
-    const cartes = ['berline', 'van'].map((veh) => {
-      const v = tarifs ? tarifs[veh] : { nom: veh === 'van' ? 'Van' : 'Berline', places: veh === 'van' ? 7 : 3, bagages: veh === 'van' ? 7 : 3 };
-      const trop = etat.passagers > v.places;
-      const p = prix(veh);
+  /* ---------- Choix du véhicule ---------- */
+  async function versChoix() {
+    allerVue('choix');
+    await calculerTrajet();
+    majChoix();
+  }
+  $('modifier-trajet').addEventListener('click', () => ouvrirRecherche(etat.mode === 'dispo' ? 'depart' : 'arrivee'));
+  function majChoix() {
+    $('resume-depart').textContent = etat.depart?.label || '—';
+    $('ligne-arrivee').hidden = etat.mode === 'dispo';
+    $('resume-arrivee').textContent = etat.arrivee?.label || '—';
+    majQuand();
+    $('pastille-voyageurs').querySelector('span').textContent = etat.mode === 'dispo'
+      ? `${etat.heures} h · ${etat.passagers} pers.` : `${etat.passagers} pers. · ${etat.bagages} bagage${etat.bagages > 1 ? 's' : ''}`;
+    const places = (veh) => (tarifs ? +tarifs[veh].places : veh === 'van' ? 7 : 3);
+    if (etat.passagers > places('berline') && etat.vehicule === 'berline') etat.vehicule = 'van';
+    const conseille = etat.passagers > places('berline') || etat.bagages > 3 ? 'van' : 'berline';
+    $('vehicules').replaceChildren(...['berline', 'van'].map((veh) => {
+      const t = tarifs?.[veh] || { nom: veh === 'van' ? 'Van' : 'Berline', places: places(veh), bagages: veh === 'van' ? 7 : 3 };
+      const p = calculPrix(veh);
+      const arrivee = etat.mode === 'trajet' && etat.route ? new Date(quandDate().getTime() + etat.route.min * 60e3) : null;
       const b = el('button', `vehicule ${etat.vehicule === veh ? 'is-actif' : ''}`,
-        el('span', 'vehicule__ic', icone(veh === 'van' ? 'van' : 'voiture')),
-        el('span', 'vehicule__txt', el('b', '', `${v.nom} premium`), el('small', '', veh === 'van' ? 'Groupes, familles, bagages volumineux' : 'Confort et discrétion, idéale pour 1 à 3 personnes'),
-          el('span', '', el('span', '', `👤 ${v.places}`), el('span', '', `🧳 ${v.bagages}`))),
-        el('span', 'vehicule__prix', tarifs?.afficherPrix && p != null ? [el('b', '', euros(p)), el('small', '', 'estimé')] : el('small', '', 'Prix confirmé par téléphone')));
-      b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(etat.vehicule === veh));
-      b.disabled = trop;
-      if (trop) b.title = `${v.places} passagers maximum`;
-      b.addEventListener('click', () => { etat.vehicule = veh; dessinerVehicules(); });
+        veh === conseille ? el('span', 'badge-top', 'Conseillé') : null,
+        svgUse(VEHICULES[veh].img, 'vehicule__img'),
+        el('span', 'vehicule__txt',
+          el('b', '', `${t.nom}`, el('i', '', icone('perso'), String(t.places)), el('i', '', icone('valise'), String(t.bagages))),
+          el('small', 'arrivee', arrivee ? `Arrivée vers ${pad(arrivee.getHours())}:${pad(arrivee.getMinutes())}` : etat.mode === 'dispo' ? `Chauffeur à disposition ${Math.max(etat.heures, tarifs ? +tarifs.minHeures : 1)} h` : 'Calcul du trajet…'),
+          el('small', '', VEHICULES[veh].texte)),
+        el('span', 'vehicule__prix', prixVisible() && p ? [el('b', '', euros(p.total)), el('small', '', 'prix estimé')] : el('small', '', tarifs && !prixVisible() ? 'Prix confirmé par BDA' : '…')));
+      b.type = 'button';
+      b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', String(etat.vehicule === veh));
+      b.disabled = etat.passagers > t.places;
+      b.addEventListener('click', () => { etat.vehicule = veh; majChoix(); });
       return b;
-    });
-    if (etat.passagers > (tarifs?.berline.places || 3) && etat.vehicule === 'berline') { etat.vehicule = 'van'; return dessinerVehicules(); }
-    zone.replaceChildren(...cartes);
-    $('note-nuit').hidden = !(estNuit() && tarifs?.nuit > 0);
-    $('note-nuit').textContent = tarifs ? `Course de nuit (22 h – 6 h) : majoration de ${tarifs.nuit} % incluse.` : '';
-    $('prix-pancarte').textContent = tarifs && +tarifs.pancarte ? `+ ${euros(tarifs.pancarte)}` : 'Offert';
+    }));
+    const nuit = estNuit() && tarifs && +tarifs.nuit;
+    $('nuit').hidden = !nuit;
+    if (nuit) $('nuit').querySelector('span').textContent = `Course de nuit : majoration de ${tarifs.nuit} % incluse.`;
+    $('prix-siege').textContent = tarifs ? `+ ${euros(tarifs.siege)}` : '';
+    $('prix-pancarte').textContent = tarifs && +tarifs.pancarte ? `+ ${euros(tarifs.pancarte)}` : 'offert';
+    const opts = [etat.sieges ? `${etat.sieges} siège${etat.sieges > 1 ? 's' : ''} enfant` : '', $('pancarte').checked ? 'pancarte' : '', $('vol').value.trim() ? `vol ${$('vol').value.trim()}` : ''].filter(Boolean);
+    $('resume-options').textContent = opts.length ? opts.join(', ') : 'siège enfant, pancarte, n° de vol';
+    // Détail du prix
+    const p = calculPrix(etat.vehicule);
+    $('btn-detail').hidden = !(prixVisible() && p);
+    if (prixVisible() && p) {
+      $('detail-prix').replaceChildren(...p.lignes.map(([a, v]) => el('div', '', el('dt', '', a), el('dd', '', `${v.toFixed(2).replace('.', ',')} €`))),
+        el('div', 'total', el('dt', '', 'Total estimé (arrondi)'), el('dd', '', euros(p.total))),
+        el('p', '', 'Estimation d\'après l\'itinéraire le plus rapide. BDA vous confirme le prix final avant la course.'));
+    }
+    $('cta-choix').textContent = `Réserver · ${tarifs?.[etat.vehicule]?.nom || (etat.vehicule === 'van' ? 'Van' : 'Berline')}`;
+    $('cta-prix').textContent = prixVisible() && p ? euros(p.total) : '';
+    $('vers-infos').disabled = etat.mode === 'trajet' && !etat.route;
   }
-  $('pancarte').addEventListener('change', dessinerVehicules);
-  $('vers-3').addEventListener('click', () => { dessinerRecap(); allerA(3); setTimeout(() => $('nom').focus({ preventScroll: true }), 400); });
+  $('btn-detail').addEventListener('click', () => {
+    const d = $('detail-prix');
+    d.hidden = !d.hidden;
+    $('btn-detail').setAttribute('aria-expanded', String(!d.hidden));
+    $('btn-detail').textContent = d.hidden ? 'Détail du prix' : 'Masquer le détail';
+  });
+  $('pancarte').addEventListener('change', majChoix);
+  let delaiVol = 0;
+  $('vol').addEventListener('input', () => { clearTimeout(delaiVol); delaiVol = setTimeout(majChoix, 300); });
+  $('vers-infos').addEventListener('click', () => {
+    if (quandDate().getTime() < Date.now() + delai() * 3600e3) { ouvrirQuand(`Réservez au moins ${delai()} h à l'avance, ou appelez le 06 11 67 86 25.`); return; }
+    dessinerRecap();
+    allerVue('infos');
+  });
 
+  /* ---------- Fenêtres : quand, voyageurs, mes courses ---------- */
+  const ouvrirFenetre = (id) => { $(id).hidden = false; };
+  document.querySelectorAll('.fenetre [data-fermer]').forEach((b) => b.addEventListener('click', () => {
+    b.closest('.fenetre').hidden = true;
+    if (vueCourante === 'choix') majChoix();
+    if (vueCourante === 'accueil') majAccueil();
+  }));
+  function ouvrirQuand(message) {
+    $('date').value = etat.date; $('heure').value = etat.heure;
+    const auj = new Date();
+    $('date').min = `${auj.getFullYear()}-${pad(auj.getMonth() + 1)}-${pad(auj.getDate())}`;
+    $('erreur-quand').textContent = message || '';
+    const choix = (txt, f) => { const b = el('button', '', txt); b.type = 'button'; b.addEventListener('click', () => { const d = f(); $('date').value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; $('heure').value = `${pad(d.getHours())}:${pad(d.getMinutes())}`; $('erreur-quand').textContent = ''; }); return b; };
+    const aDemain = (h) => { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(h, 0, 0, 0); return d; };
+    const auPlusTot = () => { const d = new Date(Date.now() + (delai() + 0.25) * 3600e3); d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15, 0, 0); return d; };
+    const ceSoir = () => { const d = new Date(); d.setHours(20, 0, 0, 0); return d.getTime() < Date.now() + delai() * 3600e3 ? aDemain(20) : d; };
+    $('choix-rapides').replaceChildren(choix('Au plus tôt', auPlusTot), choix('Ce soir 20:00', ceSoir), choix('Demain 07:00', () => aDemain(7)), choix('Demain 18:00', () => aDemain(18)));
+    ouvrirFenetre('fenetre-quand');
+  }
+  $('valider-quand').addEventListener('click', () => {
+    const d = $('date').value, h = $('heure').value;
+    if (!d || !h) { $('erreur-quand').textContent = 'Choisissez une date et une heure.'; return; }
+    if (new Date(`${d}T${h}`).getTime() < Date.now() + delai() * 3600e3) { $('erreur-quand').textContent = `Au moins ${delai()} h à l'avance. Pour une course immédiate : 06 11 67 86 25.`; return; }
+    etat.date = d; etat.heure = h;
+    $('fenetre-quand').hidden = true;
+    majQuand();
+    if (vueCourante === 'choix') majChoix();
+  });
+  $('pastille-quand').addEventListener('click', () => ouvrirQuand());
+  $('pastille-voyageurs').addEventListener('click', () => ouvrirFenetre('fenetre-voyageurs'));
+  const BORNES = { passagers: [1, 7], bagages: [0, 10], heures: [1, 12], sieges: [0, 3] };
+  document.querySelectorAll('.compteur').forEach((c) => {
+    const cle = c.dataset.compteur, [mini, maxi] = BORNES[cle], val = c.querySelector('b');
+    const maj = () => { val.textContent = etat[cle]; c.querySelector('[data-pas="-1"]').disabled = etat[cle] <= mini; c.querySelector('[data-pas="1"]').disabled = etat[cle] >= maxi; };
+    c.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { etat[cle] = Math.min(maxi, Math.max(mini, etat[cle] + +b.dataset.pas)); maj(); if (cle === 'sieges') majChoix(); }));
+    maj();
+  });
+  function majBadge() { const n = lire(CLE_COURSES).length; $('nb-courses').textContent = n; $('nb-courses').hidden = !n; }
+  $('btn-courses').addEventListener('click', () => {
+    const liste = lire(CLE_COURSES);
+    $('liste-courses').replaceChildren(...(liste.length ? liste.map((c) => {
+      const a = el('a', '', el('b', '', `${c.date.split('-').reverse().join('/')} à ${c.heure} · ${c.ref}`), el('small', '', c.mode === 'dispo' ? `${c.depart} · mise à disposition` : `${c.depart} → ${c.arrivee}`));
+      a.href = `#suivi=${c.jeton}`;
+      a.addEventListener('click', () => { $('fenetre-courses').hidden = true; });
+      return el('li', '', a);
+    }) : [el('li', 'vide', 'Vos réservations faites sur ce téléphone apparaîtront ici.')]));
+    ouvrirFenetre('fenetre-courses');
+  });
+
+  /* ---------- Coordonnées et envoi ---------- */
   function dessinerRecap() {
-    const p = prix(etat.vehicule);
-    const ligne = (a, b, cls) => { const d = el('div', cls || '', el('span', '', a), el('span', '', b)); return d; };
-    const quand = new Date(`${$('date').value}T${$('heure').value}`);
-    remplir($('recap'),
-      ligne('Date', `${new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }).format(quand)} à ${$('heure').value}`),
-      ligne('Véhicule', `${tarifs ? tarifs[etat.vehicule].nom : ''} premium · ${etat.passagers} pers.`),
-      etat.mode === 'dispo' ? ligne('Durée', `${Math.max(etat.heures, tarifs ? +tarifs.minHeures : 1)} h`) : ligne('Trajet', `${etat.route.km.toFixed(1).replace('.', ',')} km · ${dureeTexte(etat.route.min)}`),
-      etat.sieges ? ligne('Siège(s) enfant', String(etat.sieges)) : null,
-      $('pancarte').checked ? ligne('Accueil pancarte', 'Oui') : null,
-      ligne('Prix estimé', tarifs?.afficherPrix && p != null ? euros(p) : 'confirmé par téléphone', 'total'));
-    $('prix-cta').textContent = tarifs?.afficherPrix && p != null ? euros(p) : '';
-    $('prix-cta').hidden = !(tarifs?.afficherPrix && p != null);
+    const p = calculPrix(etat.vehicule);
+    const ligne = (a, b, cls) => el('div', cls || '', el('span', '', a), el('span', '', b));
+    $('recap').replaceChildren(
+      ligne('Quand', quandTexte()),
+      ligne('Départ', etat.depart.label),
+      etat.mode === 'trajet' ? ligne('Arrivée', etat.arrivee.label) : ligne('Durée', `${Math.max(etat.heures, tarifs ? +tarifs.minHeures : 1)} h`),
+      ligne('Véhicule', `${tarifs?.[etat.vehicule]?.nom || ''} · ${etat.passagers} pers.`),
+      ligne('Prix', prixVisible() && p ? euros(p.total) : 'confirmé par BDA', 'total'));
+    $('cta-prix-2').textContent = prixVisible() && p ? euros(p.total) : '';
   }
-
-  /* ---------- Envoi ---------- */
   $('form-resa').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const err = $('erreur-3');
+    const err = $('erreur');
     err.textContent = '';
     const nom = $('nom').value.trim(), tel = $('tel').value.trim(), email = $('email').value.trim();
     if (nom.length < 2) { err.textContent = 'Indiquez votre nom.'; $('nom').focus(); return; }
@@ -275,7 +488,7 @@
     btn.disabled = true; btn.classList.add('is-loading');
     const donnees = {
       mode: etat.mode, vehicule: etat.vehicule, depart: etat.depart, arrivee: etat.mode === 'trajet' ? etat.arrivee : null,
-      date: $('date').value, heure: $('heure').value, passagers: etat.passagers, bagages: etat.bagages, heures: etat.heures,
+      date: etat.date, heure: etat.heure, passagers: etat.passagers, bagages: etat.bagages, heures: etat.heures,
       km: etat.route?.km || 0, min: etat.route?.min || 0, sieges: etat.sieges, pancarte: $('pancarte').checked,
       vol: $('vol').value.trim(), message: $('message').value.trim(), nom, tel, email, site_web: $('site_web').value,
     };
@@ -283,8 +496,8 @@
       const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(donnees) });
       const j = await r.json().catch(() => ({}));
       if (!r.ok || !j.ok) throw new Error(j.erreur || 'L\'envoi a échoué. Réessayez ou appelez-nous au 06 11 67 86 25.');
-      const course = { ref: j.ref, jeton: j.jeton, date: donnees.date, heure: donnees.heure, depart: etat.depart.label, arrivee: etat.arrivee?.label || '', mode: etat.mode, prix: j.prix };
-      if (j.jeton) { const liste = [course, ...lireCourses().filter((c) => c.ref !== j.ref)].slice(0, 20); try { localStorage.setItem(CLE_COURSES, JSON.stringify(liste)); } catch (x) { /* stockage indisponible */ } }
+      const course = { ref: j.ref, jeton: j.jeton, date: etat.date, heure: etat.heure, depart: etat.depart.label, arrivee: etat.arrivee?.label || '', mode: etat.mode, vehicule: etat.vehicule, prix: j.prix, min: etat.route?.min || 60 };
+      if (j.jeton) ecrire(CLE_COURSES, [course, ...lire(CLE_COURSES).filter((c) => c.ref !== j.ref)].slice(0, 20));
       majBadge();
       afficherConfirmation(course);
     } catch (x) {
@@ -297,16 +510,15 @@
   function afficherConfirmation(c) {
     $('ref').textContent = c.ref;
     const quand = `${c.date.split('-').reverse().join('/')} à ${c.heure}`;
+    $('course-carte').replaceChildren(svgUse(VEHICULES[c.vehicule].img, ''), el('div', '', el('b', '', `${tarifs?.[c.vehicule]?.nom || 'Berline'} · ${quand}`), el('small', '', c.depart), c.arrivee ? el('small', '', `→ ${c.arrivee}`) : el('small', '', 'Mise à disposition'), prixVisible() && c.prix ? el('small', '', `Prix estimé : ${euros(c.prix)}`) : null));
     $('wa-confirmer').href = `https://wa.me/33784739070?text=${encodeURIComponent(`Bonjour BDA, je viens de réserver une course (réf. ${c.ref}) pour le ${quand}. Pouvez-vous me la confirmer ?`)}`;
     $('lien-suivi').href = `#suivi=${c.jeton}`;
     $('calendrier').onclick = () => telechargerIcs(c);
-    allerA(4);
+    allerVue('fin');
   }
-
-  // Événement pour le calendrier du téléphone (.ics)
   function telechargerIcs(c) {
     const debut = `${c.date.replace(/-/g, '')}T${c.heure.replace(':', '')}00`;
-    const fin = new Date(`${c.date}T${c.heure}`); fin.setMinutes(fin.getMinutes() + Math.max(30, Math.round(etat.route?.min || 60)));
+    const fin = new Date(`${c.date}T${c.heure}`); fin.setMinutes(fin.getMinutes() + Math.max(30, Math.round(c.min || 60)));
     const f = `${fin.getFullYear()}${pad(fin.getMonth() + 1)}${pad(fin.getDate())}T${pad(fin.getHours())}${pad(fin.getMinutes())}00`;
     const esc = (s) => String(s).replace(/[\\;,]/g, (m) => `\\${m}`).replace(/\n/g, '\\n');
     const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//BDA VTC//FR', 'BEGIN:VEVENT', `UID:${c.ref}@bdasecurite.com`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
@@ -318,22 +530,19 @@
     document.body.append(a); a.click(); a.remove();
   }
 
-  /* ---------- Suivi d'une réservation (#suivi=jeton) ---------- */
+  /* ---------- Suivi (#suivi=jeton) ---------- */
   async function afficherSuivi(jeton) {
-    const zone = $('suivi');
-    zone.replaceChildren(el('p', '', 'Chargement…'));
-    allerA('suivi');
+    $('suivi').replaceChildren(el('p', '', 'Chargement…'));
+    allerVue('suivi');
     try {
       const j = await (await fetch(`${API}?suivi=${encodeURIComponent(jeton)}`)).json();
       if (!j.ok) throw new Error(j.erreur || 'Réservation introuvable.');
       dessinerSuivi(j.reservation, jeton);
-    } catch (e) { zone.replaceChildren(el('p', 'erreur', e.message)); }
+    } catch (e) { $('suivi').replaceChildren(el('p', 'erreur', e.message)); }
   }
   function dessinerSuivi(r, jeton) {
-    const zone = $('suivi');
-    const ordre = ['attente', 'confirmee', 'terminee'];
-    const rang = ordre.indexOf(r.statut);
-    const etapeS = (txt, i) => el('div', i <= rang ? 'is-fait' : '', el('i', '', i <= rang ? icone('coche') : String(i + 1)), txt);
+    const rang = ['attente', 'confirmee', 'terminee'].indexOf(r.statut);
+    const etape = (txt, i) => el('div', i <= rang ? 'is-fait' : '', el('i', '', i <= rang ? icone('coche') : String(i + 1)), txt);
     const quand = new Date(`${r.date}T${r.heure}`);
     const annulable = ['attente', 'confirmee'].includes(r.statut) && quand.getTime() - Date.now() > 2 * 3600e3;
     const annuler = el('button', 'bouton bouton--danger', 'Annuler la réservation');
@@ -348,120 +557,71 @@
         dessinerSuivi(j.reservation, jeton);
       } catch (e) { toast(e.message || 'Annulation impossible : appelez-nous.'); }
     });
-    remplir(zone,
-      r.statut === 'annulee' ? el('p', 'statut--annulee', 'Cette réservation est annulée.') : el('div', 'statut', etapeS('Reçue', 0), etapeS('Confirmée', 1), etapeS('Terminée', 2)),
-      el('div', 'resume-trajet',
-        el('b', '', `Réservation ${r.ref}`),
-        el('span', '', el('i'), el('em', '', r.depart)),
-        r.mode === 'trajet' ? el('span', '', el('i', 'fin'), el('em', '', r.arrivee)) : el('span', '', icone('horloge'), el('em', '', `Mise à disposition · ${r.heures} h`)),
-        el('small', '', `${new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(quand)} à ${r.heure} · ${r.vehicule === 'van' ? 'Van' : 'Berline'} · ${r.passagers} pers.`),
-        r.chauffeur ? el('small', '', `Votre chauffeur : ${r.chauffeur}`) : null,
-        r.prix ? el('small', '', `Prix : ${euros(r.prix)}${r.statut === 'attente' ? ' (estimé)' : ''}`) : null),
+    $('suivi').replaceChildren(...[
+      r.statut === 'annulee' ? el('p', 'statut--annulee', 'Cette réservation est annulée.') : el('div', 'statut', etape('Reçue', 0), etape('Confirmée', 1), etape('Terminée', 2)),
+      el('div', 'course-carte', svgUse(VEHICULES[r.vehicule === 'van' ? 'van' : 'berline'].img, ''),
+        el('div', '', el('b', '', `${r.ref} · ${new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }).format(quand)} à ${r.heure}`),
+          el('small', '', r.depart), r.mode === 'trajet' ? el('small', '', `→ ${r.arrivee}`) : el('small', '', `Mise à disposition · ${r.heures} h`),
+          r.chauffeur ? el('small', '', `Votre chauffeur : ${r.chauffeur}`) : null,
+          r.prix ? el('small', '', `Prix : ${euros(r.prix)}${r.statut === 'attente' ? ' (estimé)' : ''}`) : null)),
       el('div', 'suivi-actions',
         Object.assign(el('a', 'bouton', icone('tel'), 'Appeler'), { href: 'tel:+33611678625' }),
         Object.assign(el('a', 'bouton', icone('wa'), 'WhatsApp'), { href: `https://wa.me/33784739070?text=${encodeURIComponent(`Bonjour BDA, au sujet de ma réservation ${r.ref}.`)}`, target: '_blank', rel: 'noopener' })),
-      annulable ? annuler : null);
+      annulable ? annuler : null,
+    ].filter(Boolean));
   }
 
-  /* ---------- Mes courses (sur ce téléphone) ---------- */
-  function majBadge() { const n = lireCourses().length; $('nb-courses').textContent = n; $('nb-courses').hidden = !n; }
-  $('btn-courses').addEventListener('click', () => {
-    const liste = lireCourses();
-    $('liste-courses').replaceChildren(...(liste.length ? liste.map((c) => {
-      const a = el('a', '', el('b', '', `${c.date.split('-').reverse().join('/')} à ${c.heure} · ${c.ref}`), el('small', '', c.mode === 'dispo' ? `${c.depart} · mise à disposition` : `${c.depart} → ${c.arrivee}`));
-      a.href = `#suivi=${c.jeton}`;
-      a.addEventListener('click', () => { $('feuille-courses').hidden = true; });
-      return el('li', '', a);
-    }) : [el('li', 'vide', 'Vos réservations faites sur ce téléphone apparaîtront ici.')]));
-    $('feuille-courses').hidden = false;
+  /* ---------- Panneau qui glisse (téléphone) ---------- */
+  const feuille = $('feuille');
+  const ouvrirFeuille = () => feuille.classList.remove('is-reduite');
+  let departY = null, dernierY = 0, glisse = false;
+  $('poignee').addEventListener('pointerdown', (e) => { departY = e.clientY; dernierY = 0; glisse = false; feuille.classList.add('is-glisse'); $('poignee').setPointerCapture(e.pointerId); });
+  $('poignee').addEventListener('pointermove', (e) => {
+    if (departY == null) return;
+    const dy = e.clientY - departY;
+    if (Math.abs(dy) > 6) glisse = true;
+    dernierY = dy;
+    const base = feuille.classList.contains('is-reduite') ? feuille.offsetHeight - 118 : 0;
+    feuille.style.transform = `translateY(${Math.max(0, base + dy)}px)`;
   });
-  document.querySelectorAll('[data-fermer]').forEach((b) => b.addEventListener('click', () => { $('feuille-courses').hidden = true; }));
-
-  /* ---------- Réglages de l'étape 1 ---------- */
-  document.querySelectorAll('.bascule button').forEach((b) => b.addEventListener('click', () => {
-    etat.mode = b.dataset.mode;
-    document.querySelectorAll('.bascule button').forEach((x) => { x.classList.toggle('is-actif', x === b); x.setAttribute('aria-checked', String(x === b)); });
-    $('bloc-arrivee').hidden = etat.mode === 'dispo';
-    document.querySelector('[data-compteur="heures"]').hidden = etat.mode !== 'dispo';
-    $('t1').textContent = etat.mode === 'dispo' ? 'Où venons-nous vous chercher ?' : 'Où allez-vous ?';
-    calculerTrajet();
-  }));
-  const BORNES = { passagers: [1, 7], bagages: [0, 10], heures: [1, 12], sieges: [0, 3] };
-  document.querySelectorAll('.compteur').forEach((c) => {
-    const cle = c.dataset.compteur, [mini, maxi] = BORNES[cle], val = c.querySelector('b');
-    const maj = () => { val.textContent = etat[cle]; c.querySelector('[data-pas="-1"]').disabled = etat[cle] <= mini; c.querySelector('[data-pas="1"]').disabled = etat[cle] >= maxi; };
-    c.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { etat[cle] = Math.min(maxi, Math.max(mini, etat[cle] + +b.dataset.pas)); maj(); if (cle === 'sieges') dessinerVehicules(); }));
-    maj();
-  });
-  $('inverser').addEventListener('click', () => {
-    const d = etat.depart, a = etat.arrivee;
-    etat.depart = a; etat.arrivee = d;
-    champs.depart.input.value = a?.label || ''; champs.arrivee.input.value = d?.label || '';
-    champs.depart.bloc.classList.toggle('is-ok', !!a); champs.arrivee.bloc.classList.toggle('is-ok', !!d);
-    calculerTrajet();
-  });
-  $('ma-position').addEventListener('click', () => {
-    if (!navigator.geolocation) return toast('Position indisponible sur cet appareil.');
-    toast('Recherche de votre position…');
-    navigator.geolocation.getCurrentPosition(async ({ coords }) => {
-      try {
-        const j = await (await fetch(`${GEO}/reverse?lon=${coords.longitude}&lat=${coords.latitude}&limit=1`)).json();
-        const f = j.features?.[0];
-        definirLieu('depart', { label: f ? f.properties.label : 'Ma position', lat: coords.latitude, lon: coords.longitude, cp: String(f?.properties.postcode || ''), code: '' });
-      } catch (e) { definirLieu('depart', { label: 'Ma position', lat: coords.latitude, lon: coords.longitude, cp: '', code: '' }); }
-    }, () => toast('Autorisez la localisation, ou tapez votre adresse.'), { enableHighAccuracy: true, timeout: 10000 });
-  });
-  function dessinerRaccourcis() {
-    $('raccourcis').replaceChildren(...LIEUX.map((l) => {
-      const b = el('button', 'raccourci', icone(l.type), l.court);
-      b.type = 'button';
-      b.addEventListener('click', () => {
-        const cible = etat.mode === 'trajet' && etat.depart && !etat.arrivee ? 'arrivee' : etat.mode === 'dispo' || !etat.depart ? 'depart' : 'arrivee';
-        definirLieu(cible, l);
-      });
-      return b;
-    }));
-  }
+  const finGlisse = () => {
+    if (departY == null) return;
+    feuille.classList.remove('is-glisse');
+    feuille.style.transform = '';
+    if (!glisse) feuille.classList.toggle('is-reduite');
+    else if (dernierY > 60) feuille.classList.add('is-reduite');
+    else if (dernierY < -40) feuille.classList.remove('is-reduite');
+    departY = null;
+    setTimeout(dessinerCarte, 460);
+  };
+  $('poignee').addEventListener('pointerup', finGlisse);
+  $('poignee').addEventListener('pointercancel', finGlisse);
 
   /* ---------- Démarrage ---------- */
-  let dateChoisie = false;
-  function heureParDefaut() {
-    if (dateChoisie) return;
-    const d = new Date(Date.now() + ((tarifs ? +tarifs.delai : 2) + 1) * 3600e3);
-    d.setMinutes(Math.ceil(d.getMinutes() / 15) * 15, 0, 0);
-    $('date').value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    $('heure').value = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-    const auj = new Date();
-    $('date').min = `${auj.getFullYear()}-${pad(auj.getMonth() + 1)}-${pad(auj.getDate())}`;
-  }
-  // Pré-remplissage depuis l'accueil du site : /reserver?depart=…&arrivee=…
   async function preRemplir() {
     const p = new URLSearchParams(location.search);
-    for (const cle of ['depart', 'arrivee']) {
-      const q = (p.get(cle) || '').trim();
-      if (!q) continue;
-      const connu = lieuxConnus(q)[0];
-      if (connu) { await definirLieu(cle, connu, cle === 'depart' && p.get('arrivee')); continue; }
-      try { const [r] = await chercherAdresses(q); if (r) await definirLieu(cle, r, cle === 'depart' && p.get('arrivee')); else champs[cle].input.value = q; } catch (e) { champs[cle].input.value = q; }
-    }
     if (p.get('mode') === 'dispo') document.querySelector('[data-mode="dispo"]').click();
+    const trouver = async (q) => { const connu = lieuxConnus(q)[0]; if (connu) return connu; try { return (await chercherAdresses(q))[0] || null; } catch (e) { return null; } };
+    const qd = (p.get('depart') || '').trim(), qa = (p.get('arrivee') || '').trim();
+    if (qd) etat.depart = await trouver(qd);
+    if (qa && etat.mode === 'trajet') etat.arrivee = await trouver(qa);
+    if (etat.depart && (etat.mode === 'dispo' || etat.arrivee)) versChoix();
+    else if (qd || qa) { majAccueil(); ouvrirRecherche(etat.depart ? 'arrivee' : 'depart'); }
   }
   function routeHash() {
     const m = location.hash.match(/suivi=([a-f0-9]{32})/);
     if (m) afficherSuivi(m[1]);
-    else if (etapeCourante === 'suivi') allerA(1);
+    else if (vueCourante === 'suivi') allerVue('accueil');
   }
 
-  champs.depart = champLieu('depart');
-  champs.arrivee = champLieu('arrivee');
-  dessinerRaccourcis();
-  majBadge();
   heureParDefaut();
   initCarte();
-  $('heure').addEventListener('change', () => { dateChoisie = true; if (etapeCourante === '2') dessinerVehicules(); });
-  $('date').addEventListener('change', () => { dateChoisie = true; });
-  fetch(`${API}?tarifs=1`).then((r) => r.json()).then((j) => { if (j.ok) { tarifs = j.tarifs; heureParDefaut(); } }).catch(() => {});
-  preRemplir();
+  majBadge();
+  majAccueil();
+  fetch(`${API}?tarifs=1`).then((r) => r.json()).then((j) => { if (j.ok) { tarifs = j.tarifs; if (vueCourante === 'choix') majChoix(); } }).catch(() => {});
   window.addEventListener('hashchange', routeHash);
+  let delaiResize = 0;
+  window.addEventListener('resize', () => { clearTimeout(delaiResize); delaiResize = setTimeout(dessinerCarte, 200); });
   routeHash();
+  if (!location.hash) preRemplir();
 })();

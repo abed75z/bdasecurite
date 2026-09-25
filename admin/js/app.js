@@ -3,12 +3,17 @@
    ========================================================= */
 import { api, quandDeconnecte, h, $, $$, icone, ecusson, toast, erreur, champ, saisie } from './outils.js';
 import { PAGES } from './pages.js';
+import { installerPalette } from './commandes.js';
 
 const racine = document.getElementById('app');
 const etat = { session: null, compteurs: {} };
 
 const MENU = [
-  { route: '', libelle: 'Accueil', icone: 'accueil' },
+  { route: '', libelle: 'Centre de contrôle', icone: 'accueil' },
+  { groupe: 'Administration' },
+  { route: 'site', libelle: 'Contrôle du site', icone: 'site' },
+  { route: 'securite', libelle: 'Accès & sécurité', icone: 'bouclier' },
+  { route: 'notes', libelle: 'Notes', icone: 'crayon' },
   { groupe: 'Gestion' },
   { route: 'devis', libelle: 'Devis', icone: 'devis' },
   { route: 'factures', libelle: 'Factures', icone: 'facture', badge: 'retards', alerte: true },
@@ -21,7 +26,6 @@ const MENU = [
   { route: 'cartes', libelle: 'Cartes agents', icone: 'badge' },
   { route: 'candidatures', libelle: 'Candidatures', icone: 'candidature', badge: 'candidatures' },
   { groupe: 'Site & communication' },
-  { route: 'site', libelle: 'Contrôle du site', icone: 'site' },
   { route: 'demandes', libelle: 'Demandes', icone: 'demande', badge: 'demandes' },
   { route: 'avis', libelle: 'Avis clients', icone: 'avis', badge: 'avis' },
   { route: 'flyers', libelle: 'Flyers', icone: 'flyer' },
@@ -29,7 +33,7 @@ const MENU = [
 ];
 // Rubrique affichée au-dessus du titre de chaque page
 const GROUPE = {};
-MENU.reduce((g, m) => { if (m.groupe) return m.groupe; GROUPE[m.route] = g; return g; }, 'Espace admin');
+MENU.reduce((g, m) => { if (m.groupe) return m.groupe; GROUPE[m.route] = g; return g; }, 'Console admin');
 GROUPE.parametres = 'Compte';
 
 /* ---------- Démarrage ---------- */
@@ -52,9 +56,12 @@ async function demarrer() {
 function ecranAccueil(titre, ...contenu) {
   return h('main', { class: 'auth' },
     h('section', { class: 'auth__carte' },
-      h('div', { class: 'auth__marque' }, ecusson(), h('div', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Espace administrateur'))),
+      h('span', { class: 'auth__zone' }, icone('cadenas'), 'Zone sécurisée · accès administrateur'),
+      h('div', { class: 'auth__marque' }, ecusson(), h('div', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Console d’administration'))),
       h('h1', null, titre),
-      contenu));
+      contenu,
+      h('ul', { class: 'auth__garanties' },
+        h('li', null, icone('cadenas'), 'Connexion chiffrée'), h('li', null, icone('bouclier'), 'Tentatives limitées'), h('li', null, icone('activite'), 'Accès journalisés'))));
 }
 function formulaire(champs, bouton, envoyer) {
   const msg = h('p', { class: 'auth__erreur', role: 'alert' });
@@ -138,6 +145,8 @@ function ecranSecours() {
 
 /* ---------- Application ---------- */
 let zonePage, titrePage, kickerPage, actionsPage, menuEl;
+let palette = null;
+export const ouvrirPalette = (texte) => palette?.ouvrir(texte);
 
 function lancerApplication() {
   const fermerMenu = () => document.body.classList.remove('menu-ouvert');
@@ -146,14 +155,23 @@ function lancerApplication() {
   menuEl = h('nav', { class: 'nav', 'aria-label': 'Menu principal' }, MENU.map((m) => (m.groupe ? h('p', { class: 'nav__groupe' }, m.groupe) : lien(m))));
 
   const utilisateur = String(etat.session.utilisateur || '');
+  const duree = h('span', { class: 'acces__duree' });
+  const majDuree = () => {
+    const min = Math.max(0, Math.round((Date.now() - new Date(String(etat.session.depuis || '').replace(' ', 'T')).getTime()) / 60000));
+    duree.textContent = Number.isFinite(min) ? `Session ouverte depuis ${min < 60 ? `${min} min` : `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')}`}` : '';
+  };
+  majDuree();
+  clearInterval(lancerApplication.minuteurSession);
+  lancerApplication.minuteurSession = setInterval(majDuree, 30000);
   const cote = h('aside', { class: 'cote' },
-    h('a', { href: '#/', class: 'cote__marque', onclick: fermerMenu }, ecusson(), h('div', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Espace admin'))),
+    h('a', { href: '#/', class: 'cote__marque', onclick: fermerMenu }, ecusson(), h('div', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Console', h('span', { class: 'tag-admin' }, 'Admin')))),
+    h('a', { class: 'acces', href: '#/securite', onclick: fermerMenu, title: 'Accès & sécurité' }, h('span', { class: 'acces__ligne' }, h('i', { 'aria-hidden': 'true' }), 'Accès total · session sécurisée'), duree),
     menuEl,
     h('div', { class: 'cote__bas' },
       lien({ route: 'parametres', libelle: 'Paramètres', icone: 'reglages' }),
       h('a', { class: 'nav__item', href: '/', target: '_blank', rel: 'noopener' }, icone('site'), h('span', null, 'Voir le site')),
       h('div', { class: 'profil' }, h('span', { class: 'profil__avatar', 'aria-hidden': 'true' }, utilisateur.charAt(0) || 'A'),
-        h('div', null, h('b', null, utilisateur), h('small', null, 'Administrateur')),
+        h('div', null, h('b', null, utilisateur), h('small', null, 'Administrateur · accès total')),
         h('button', { class: 'icon-btn', type: 'button', title: 'Se déconnecter', 'aria-label': 'Se déconnecter', onclick: deconnexion }, icone('sortie')))));
 
   kickerPage = h('span', { class: 'haut__kicker' });
@@ -163,6 +181,8 @@ function lancerApplication() {
   const haut = h('header', { class: 'haut' },
     h('button', { class: 'icon-btn haut__menu', type: 'button', 'aria-label': 'Ouvrir le menu', onclick: () => document.body.classList.toggle('menu-ouvert') }, icone('menu')),
     h('div', { class: 'haut__textes' }, kickerPage, titrePage),
+    h('button', { class: 'cmd-btn', type: 'button', 'aria-label': 'Rechercher ou lancer une commande (Ctrl + K)', onclick: () => palette.ouvrir() },
+      icone('recherche'), h('span', null, 'Rechercher, lancer une commande…'), h('kbd', null, 'Ctrl K')),
     h('a', { class: 'hors-ligne', href: '#/site', id: 'hors-ligne', hidden: true, title: 'Les visiteurs voient la page Maintenance' }, h('i', { 'aria-hidden': 'true' }), 'Site hors ligne'),
     actionsPage);
 
@@ -171,6 +191,7 @@ function lancerApplication() {
     h('div', { class: 'voile', onclick: () => document.body.classList.remove('menu-ouvert') }),
     h('div', { class: 'principal' }, haut, zonePage)));
 
+  palette ??= installerPalette({ menu: MENU, aller: (hash) => { location.hash = hash; }, deconnexion, compteurs: majCompteurs });
   window.addEventListener('hashchange', router);
   router();
   majCompteurs();

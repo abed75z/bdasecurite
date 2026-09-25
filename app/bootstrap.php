@@ -142,6 +142,16 @@ function schema(PDO $db): void
       PRAGMA user_version = 4;
     SQL);
   }
+  if ($version < 5) {
+    // Centre de contrôle : notes, journal d'activité et appareils connectés à l'espace admin
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY, texte TEXT NOT NULL DEFAULT '', couleur TEXT NOT NULL DEFAULT '', epingle INTEGER NOT NULL DEFAULT 0, cree TEXT NOT NULL, maj TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS journal (id INTEGER PRIMARY KEY, quand TEXT NOT NULL, type TEXT NOT NULL, message TEXT NOT NULL, appareil TEXT NOT NULL DEFAULT '', ip TEXT NOT NULL DEFAULT '');
+      CREATE INDEX IF NOT EXISTS i_journal ON journal (quand);
+      CREATE TABLE IF NOT EXISTS connexions (id INTEGER PRIMARY KEY, jeton TEXT NOT NULL UNIQUE, uid INTEGER NOT NULL, appareil TEXT NOT NULL DEFAULT '', ip TEXT NOT NULL DEFAULT '', debut TEXT NOT NULL, vu TEXT NOT NULL, fin TEXT NOT NULL DEFAULT '');
+      PRAGMA user_version = 5;
+    SQL);
+  }
 }
 
 /* ---------- Outils ---------- */
@@ -388,4 +398,39 @@ function poser_apercu(bool $actif = true): void
 {
   $expire = $actif ? time() + 12 * 3600 : time() - 3600;
   setcookie('BDA_APERCU', $actif ? jeton_apercu($expire) : '', ['expires' => $expire, 'path' => '/', 'secure' => est_https(), 'httponly' => true, 'samesite' => 'Lax']);
+}
+
+/* ---------- Journal d'activité et appareils (Accès & sécurité) ---------- */
+// « Chrome · Windows », « Safari · iPhone »… (jamais l'empreinte complète du navigateur)
+function appareil(): string
+{
+  $ua = (string)($_SERVER['HTTP_USER_AGENT'] ?? '');
+  $os = match (true) {
+    str_contains($ua, 'iPhone') => 'iPhone', str_contains($ua, 'iPad') => 'iPad', str_contains($ua, 'Android') => 'Android',
+    str_contains($ua, 'Windows') => 'Windows', str_contains($ua, 'Mac OS') => 'Mac', str_contains($ua, 'Linux') => 'Linux', default => 'Appareil inconnu',
+  };
+  $nav = match (true) {
+    str_contains($ua, 'Edg/') => 'Edge', str_contains($ua, 'OPR/') => 'Opera', str_contains($ua, 'SamsungBrowser') => 'Samsung Internet',
+    str_contains($ua, 'Firefox/') => 'Firefox', str_contains($ua, 'Chrome/') || str_contains($ua, 'CriOS/') => 'Chrome',
+    str_contains($ua, 'Safari/') => 'Safari', $ua === '' => 'Navigateur inconnu', default => 'Autre navigateur',
+  };
+  return "$nav · $os";
+}
+// Adresse IP masquée (le dernier bloc n'est jamais enregistré)
+function ip_masquee(): string
+{
+  $ip = (string)($_SERVER['REMOTE_ADDR'] ?? '');
+  if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) return preg_replace('/\.\d+$/', '.x', $ip);
+  if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) return implode(':', array_slice(explode(':', $ip), 0, 3)) . ':…';
+  return '';
+}
+// Types : acces, alerte, securite, site, document, equipe, vtc, systeme
+function journal(string $type, string $message): void
+{
+  try {
+    db()->prepare('INSERT INTO journal (quand, type, message, appareil, ip) VALUES (?, ?, ?, ?, ?)')->execute([maintenant(), $type, mb_substr($message, 0, 300), appareil(), ip_masquee()]);
+    if (random_int(1, 50) === 1) db()->exec("DELETE FROM journal WHERE quand < datetime('now', '-365 days') OR id <= (SELECT MAX(id) - 5000 FROM journal)");
+  } catch (Throwable $e) {
+    error_log('[BDA journal] ' . $e->getMessage());
+  }
 }

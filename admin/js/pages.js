@@ -14,6 +14,8 @@ import { pageVisites } from './visites.js';
 import { pageAgents } from './agents.js';
 import { pageVtc } from './vtc.js';
 import { pageSite } from './site.js';
+import { pageNotes } from './notes.js';
+import { pageSecurite, ligneJournal } from './securite.js';
 
 export const PAGES = {
   '': pageAccueil,
@@ -25,6 +27,8 @@ export const PAGES = {
   agents: pageAgents,
   vtc: pageVtc,
   site: pageSite,
+  notes: pageNotes,
+  securite: pageSecurite,
   cartes: pageCartes,
   flyers: pageFlyers,
   visites: pageVisites,
@@ -53,17 +57,59 @@ function filtres(options, actif, surChoix) {
    ACCUEIL : créer en un clic, ce qui attend une action, derniers éléments
    ========================================================= */
 async function pageAccueil(ctx) {
-  ctx.titre('Accueil');
+  ctx.titre('Centre de contrôle');
   const auj = new Date();
   const moisCourant = `${auj.getFullYear()}-${pad(auj.getMonth() + 1)}`;
-  const { accueil: a } = await api('accueil');
+  const [{ accueil: a }, session] = await Promise.all([api('accueil'), api('session')]);
   const c = a.compteurs;
+  const s = a.site || {};
+  const pluriel = (n, un, plusieurs) => `${n} ${n > 1 ? plusieurs : un}`;
+  const hm = (d) => { const x = new Date(String(d || '').replace(' ', 'T')); return Number.isNaN(x.getTime()) ? '' : `${pad(x.getHours())}:${pad(x.getMinutes())}`; };
 
+  /* ----- Bandeau « poste de commande » ----- */
   const salut = auj.getHours() < 18 ? 'Bonjour' : 'Bonsoir';
-  const entete = h('div', { class: 'bienvenue' },
-    h('div', null, h('p', { class: 'bienvenue__date' }, cap(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(auj))),
-      h('h2', null, `${salut}, `, h('em', null, 'que fait-on aujourd\'hui ?'))));
+  const utilisateur = cap(String(session.utilisateur || ''));
+  const horloge = h('b', { class: 'poste__heure' });
+  const dateJour = h('span', { class: 'poste__date' });
+  let minuteur = 0;
+  const tic = () => {
+    if (horloge.dataset.pret && !horloge.isConnected) { clearInterval(minuteur); return; }
+    const d = new Date();
+    horloge.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    dateJour.textContent = cap(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(d));
+  };
+  tic();
+  minuteur = setInterval(tic, 1000);
+  const sessionTxt = a.session ? `Session ouverte à ${hm(a.session.debut)} · ${a.session.appareil}` : 'Session sécurisée';
+  const precedente = a.precedente ? `Connexion précédente : ${dateLisible(a.precedente.debut, true)} · ${a.precedente.appareil}` : '';
+  const poste = h('section', { class: 'poste' },
+    h('div', { class: 'poste__grille', 'aria-hidden': 'true' }),
+    h('div', { class: 'poste__gauche' },
+      h('span', { class: 'poste__badge' }, h('i'), 'Accès administrateur · contrôle total'),
+      h('h2', null, `${salut}${utilisateur ? `, ${utilisateur}` : ''}.`, h('em', null, ' Tout est sous contrôle.')),
+      h('p', { class: 'poste__session' }, icone('cle'), h('span', null, sessionTxt, precedente ? ` · ${precedente}` : '')),
+      h('button', { class: 'poste__cmd', type: 'button', onclick: () => document.dispatchEvent(new CustomEvent('bda:palette')) },
+        h('span', { class: 'poste__invite', 'aria-hidden': 'true' }, '›'), h('span', null, 'Tapez une commande : note…, devis…, site off, bandeau…'), h('kbd', null, 'Ctrl K'))),
+    h('div', { class: 'poste__droite' }, horloge, dateJour));
+  horloge.dataset.pret = '1';
 
+  /* ----- Voyants ----- */
+  const servicesOuverts = ['devis', 'vtc', 'recrutement', 'avis'].filter((k) => s[k]).length;
+  const aTraiter = (c.reservations || 0) + (c.demandes || 0) + (c.avis || 0) + (c.candidatures || 0) + (c.retards || 0);
+  const voyant = (href, etatCls, ic, titre, valeur, sous) => h('a', { class: `voyant voyant--${etatCls}`, href },
+    h('span', { class: 'voyant__tete' }, h('span', { class: 'voyant__ic' }, icone(ic)), h('span', { class: 'voyant__led', 'aria-hidden': 'true' })),
+    h('small', null, titre), h('b', null, valeur), h('span', { class: 'voyant__sous' }, sous));
+  const voyants = h('div', { class: 'voyants' },
+    s.horsLigne
+      ? voyant('#/site', 'rouge', 'site', 'Site public', 'Hors ligne', 'Maintenance affichée aux visiteurs')
+      : voyant('#/site', 'vert', 'site', 'Site public', 'En ligne', 'bdasecurite.com accessible'),
+    voyant('#/site', servicesOuverts === 4 ? 'vert' : 'or', 'eclair', 'Services', `${servicesOuverts} / 4 ouverts`,
+      [['devis', 'Devis'], ['vtc', 'VTC'], ['recrutement', 'Recrutement'], ['avis', 'Avis']].map(([k, l]) => `${s[k] ? '●' : '○'} ${l}`).join('   ')),
+    voyant(aTraiter ? '#/demandes' : '#/', aTraiter ? 'or' : 'vert', 'demande', 'À traiter', aTraiter ? pluriel(aTraiter, 'élément', 'éléments') : 'Rien', aTraiter ? 'Voir la liste ci-dessous' : 'Tout est à jour'),
+    voyant('#/securite', a.alertes ? 'rouge' : 'vert', 'bouclier', 'Sécurité', pluriel(a.appareils || 1, 'appareil connecté', 'appareils connectés'),
+      a.alertes ? `${pluriel(a.alertes, 'tentative refusée', 'tentatives refusées')} (7 j)` : 'Aucune tentative suspecte'));
+
+  /* ----- Créer ----- */
   const action = (href, ic, titre, sous) => h('a', { class: 'action', href }, h('span', { class: 'action__ic' }, icone(ic)), icone('plus', 'action__plus'), h('span', null, h('b', null, titre), h('small', null, sous)));
   const creer = h('div', { class: 'creer' },
     action('#/devis/nouveau', 'devis', 'Devis', 'Nouveau devis client'),
@@ -78,7 +124,7 @@ async function pageAccueil(ctx) {
       h('p', null, 'Importez le fichier « BDA-import-admin.json » (dossier « BDA Gestion » sur votre Bureau) : vos informations de paiement et la facture du Consulat seront ajoutées automatiquement.')),
     h('div', { class: 'installation__actions' }, boutonImport(() => ctx.aller('#/factures')), h('a', { class: 'btn btn--ghost', href: '#/parametres' }, 'Saisir mon IBAN'))) : null;
 
-  const pluriel = (n, un, plusieurs) => `${n} ${n > 1 ? plusieurs : un}`;
+  /* ----- À traiter ----- */
   const taches = [
     c.horsLigne && { n: '!', href: '#/site', titre: 'Votre site est hors ligne', sous: 'Les visiteurs voient la page Maintenance · remettez-le en ligne en un clic', alerte: true },
     c.reservations && { n: c.reservations, href: '#/vtc', titre: pluriel(c.reservations, 'réservation VTC à confirmer', 'réservations VTC à confirmer'), sous: 'Page de réservation du site' },
@@ -86,12 +132,33 @@ async function pageAccueil(ctx) {
     c.avis && { n: c.avis, href: '#/avis', titre: pluriel(c.avis, 'avis à valider', 'avis à valider'), sous: 'Publiez-les ou refusez-les' },
     c.candidatures && { n: c.candidatures, href: '#/candidatures', titre: pluriel(c.candidatures, 'nouvelle candidature', 'nouvelles candidatures'), sous: 'Page Recrutement' },
     c.retards && { n: c.retards, href: '#/factures', titre: pluriel(c.retards, 'facture à relancer', 'factures à relancer'), sous: 'Échéance dépassée', alerte: true },
+    a.alertes && { n: a.alertes, href: '#/securite', titre: pluriel(a.alertes, 'tentative de connexion refusée', 'tentatives de connexion refusées'), sous: 'Ces 7 derniers jours · vérifiez le journal', alerte: true },
     ...a.agentsAlerte.map((ag) => ({ n: '!', href: `#/agents/${ag.id}`, titre: `Carte pro de ${ag.nom}`, sous: `${ag.validite < a.aujourdhui ? 'Expirée le' : 'Expire le'} ${isoVersFr(ag.validite)}`, alerte: ag.validite < a.aujourdhui })),
   ].filter(Boolean);
   const aFaire = taches.length ? h('ul', { class: 'todo' }, taches.map((t) => h('li', null, h('a', { href: t.href },
     h('span', { class: `todo__n ${t.alerte ? 'todo__n--alerte' : ''}` }, t.n), h('span', { class: 'todo__txt' }, h('b', null, t.titre), h('small', null, t.sous)), icone('suivant')))))
     : h('div', { class: 'a-jour' }, icone('coche'), h('span', null, 'Tout est à jour. Rien ne vous attend.'));
 
+  /* ----- Activité (journal) ----- */
+  const activite = a.journal.length
+    ? h('div', { class: 'console-cadre console-cadre--compact' }, h('ol', { class: 'console' }, a.journal.map((j) => ligneJournal(j))))
+    : vide('L’activité de l’espace admin s’affichera ici (connexions, documents, site…).', 'activite');
+
+  /* ----- Notes épinglées + prise de note rapide ----- */
+  const rapide = h('textarea', { class: 'input note-rapide', rows: 2, placeholder: 'Note rapide… (Ctrl + Entrée pour l’épingler ici)' });
+  const notesListe = h('div', { class: 'notes-mini' });
+  const dessinerNotes = (notes) => notesListe.replaceChildren(...notes.map((n) => h('a', { class: `note-mini note--${n.couleur || 'aucune'}`, href: `#/notes/${n.id}` }, h('p', null, n.texte.slice(0, 220)), h('small', null, ilYa(n.maj)))));
+  dessinerNotes(a.notes);
+  const enregistrerRapide = async () => {
+    const texte = rapide.value.trim();
+    if (!texte) return rapide.focus();
+    try { await api('note.enregistrer', { texte, epingle: true }); rapide.value = ''; toast('Note épinglée sur l’accueil.'); const { accueil: b } = await api('accueil'); dessinerNotes(b.notes); } catch (e) { erreur(e); }
+  };
+  rapide.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); enregistrerRapide(); } });
+  const blocNotes = carte([h('h2', null, 'Notes épinglées'), h('a', { class: 'lien-carte', href: '#/notes' }, `Toutes les notes (${a.nbNotes})`)],
+    h('div', { class: 'note-rapide__zone' }, rapide, h('button', { class: 'btn btn--gold btn--petit', type: 'button', onclick: enregistrerRapide }, icone('epingle'), 'Épingler')), notesListe);
+
+  /* ----- Derniers éléments ----- */
   const TYPES = {
     devis: { ic: 'devis', lien: 'devis', nom: 'Devis' }, facture: { ic: 'facture', lien: 'factures', nom: 'Facture' },
     carte: { ic: 'badge', lien: 'cartes', nom: 'Carte agent' }, flyer: { ic: 'flyer', lien: 'flyers', nom: 'Flyer' }, visite: { ic: 'visite', lien: 'visites', nom: 'Carte de visite' },
@@ -103,9 +170,12 @@ async function pageAccueil(ctx) {
       r.statut ? statutPastille(r.statut) : null));
   })) : vide('Vos devis, factures, cartes et flyers apparaîtront ici.', 'horloge');
 
-  ctx.afficher(entete, installation, creer,
+  ctx.afficher(poste, voyants, installation, creer,
     h('div', { class: 'grille-2' },
       carte([h('h2', null, 'À traiter'), h('small', null, taches.length ? pluriel(taches.length, 'élément', 'éléments') : '')], aFaire),
+      carte([h('h2', null, 'Activité en direct'), h('a', { class: 'lien-carte', href: '#/securite' }, 'Journal complet')], activite)),
+    h('div', { class: 'grille-2' },
+      blocNotes,
       carte([h('h2', null, 'Derniers éléments modifiés')], recents)));
 }
 

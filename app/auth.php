@@ -26,10 +26,12 @@ function demarrer_session(): void
     $inactif = $t - (int)($_SESSION['vu'] ?? 0) > 6 * 3600;
     $tropLong = $t - (int)($_SESSION['depuis'] ?? 0) > 24 * 3600;
     if ($inactif || $tropLong) {
+      fermer_connexion('expiree');
       $_SESSION = [];
       session_regenerate_id(true);
     } else {
       $_SESSION['vu'] = $t;
+      suivre_connexion();
     }
   }
   if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
@@ -48,6 +50,8 @@ function etat_session(): array
     'connecte' => connecte(),
     'activation' => nb_utilisateurs() === 0,
     'utilisateur' => connecte() ? (string)$_SESSION['login'] : '',
+    'depuis' => connecte() ? date('Y-m-d H:i:s', (int)($_SESSION['depuis'] ?? time())) : '',
+    'appareil' => connecte() ? appareil() : '',
     'csrf' => (string)$_SESSION['csrf'],
   ];
 }
@@ -58,6 +62,7 @@ function ouvrir_session_utilisateur(array $u): void
   $_SESSION['login'] = (string)$u['login'];
   $_SESSION['depuis'] = $_SESSION['vu'] = time();
   $_SESSION['csrf'] = bin2hex(random_bytes(32));
+  enregistrer_connexion();
 }
 function code_valide(string $code): bool
 {
@@ -68,4 +73,33 @@ function verifier_nouveau_mdp(string $mdp): void
 {
   if (mb_strlen($mdp) < 10) echec('Le mot de passe doit contenir au moins 10 caractères.');
   if (mb_strlen($mdp) > 200) echec('Mot de passe trop long.');
+}
+
+/* ---------- Appareils connectés (page Accès & sécurité) ---------- */
+function enregistrer_connexion(): void
+{
+  $jeton = bin2hex(random_bytes(16));
+  db()->prepare('INSERT INTO connexions (jeton, uid, appareil, ip, debut, vu) VALUES (?, ?, ?, ?, ?, ?)')
+    ->execute([$jeton, (int)$_SESSION['uid'], appareil(), ip_masquee(), maintenant(), maintenant()]);
+  $_SESSION['cx'] = $jeton;
+}
+// Vérifie que cet appareil n'a pas été déconnecté à distance, et note sa dernière activité
+function suivre_connexion(): void
+{
+  $jeton = (string)($_SESSION['cx'] ?? '');
+  if ($jeton === '') { enregistrer_connexion(); return; } // session ouverte avant le suivi des appareils
+  $st = db()->prepare('SELECT fin, vu FROM connexions WHERE jeton = ?');
+  $st->execute([$jeton]);
+  $c = $st->fetch();
+  if (!$c || $c['fin'] !== '') {
+    $_SESSION = [];
+    session_regenerate_id(true);
+    return;
+  }
+  if (strtotime((string)$c['vu']) < time() - 60) db()->prepare('UPDATE connexions SET vu = ?, ip = ? WHERE jeton = ?')->execute([maintenant(), ip_masquee(), $jeton]);
+}
+function fermer_connexion(string $raison): void
+{
+  $jeton = (string)($_SESSION['cx'] ?? '');
+  if ($jeton !== '') db()->prepare("UPDATE connexions SET fin = ? WHERE jeton = ? AND fin = ''")->execute([$raison, $jeton]);
 }

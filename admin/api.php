@@ -25,7 +25,7 @@ if (!in_array($action, $libres, true) && !connecte()) echec('Connexion requise.'
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['session', 'accueil', 'compteurs', 'site', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
+$lecture = ['session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -41,10 +41,11 @@ try {
       $st = db()->prepare('SELECT * FROM utilisateurs WHERE login = ?');
       $st->execute([texte($b['login'] ?? '', 60)]);
       $u = $st->fetch();
-      $hash = $u ? (string)$u['hash'] : password_hash(random_bytes(8), PASSWORD_DEFAULT);
+      $hash = $u ? (string)$u['hash'] : password_hash(bin2hex(random_bytes(8)), PASSWORD_DEFAULT); // même durée de calcul si l'identifiant n'existe pas
       if (!password_verify(chaine($b['motdepasse'] ?? ''), $hash) || !$u) {
         noter_tentative($cle);
         noter_tentative('connexion:*');
+        journal('alerte', 'Connexion refusée : mauvais identifiant ou mot de passe (identifiant saisi « ' . texte($b['login'] ?? '', 40) . ' »)');
         usleep(700000);
         echec('Identifiant ou mot de passe incorrect.', 401);
       }
@@ -53,6 +54,7 @@ try {
       }
       db()->prepare('DELETE FROM tentatives WHERE k = ?')->execute([$cle]);
       ouvrir_session_utilisateur($u);
+      journal('acces', "Connexion de {$u['login']}");
       repondre(['ok' => true] + etat_session());
 
     case 'activation':
@@ -72,6 +74,7 @@ try {
       $st = db()->prepare('SELECT * FROM utilisateurs WHERE login = ?');
       $st->execute([$login]);
       ouvrir_session_utilisateur($st->fetch());
+      journal('securite', "Espace admin activé : compte « $login » créé");
       importer_avis_google(); // reprend les avis déjà publiés (si Google répond)
       repondre(['ok' => true] + etat_session());
 
@@ -88,10 +91,14 @@ try {
       $u = db()->query('SELECT * FROM utilisateurs ORDER BY id LIMIT 1')->fetch();
       if (!$u) echec("Aucun compte : utilisez l'activation.", 409);
       db()->prepare('UPDATE utilisateurs SET hash = ? WHERE id = ?')->execute([password_hash($mdp, PASSWORD_DEFAULT), $u['id']]);
+      db()->exec("UPDATE connexions SET fin = 'mot de passe réinitialisé' WHERE fin = ''");
       ouvrir_session_utilisateur($u);
+      journal('securite', 'Mot de passe réinitialisé avec le code de secours : tous les autres appareils ont été déconnectés');
       repondre(['ok' => true] + etat_session());
 
     case 'deconnexion':
+      if (connecte()) journal('acces', 'Déconnexion');
+      fermer_connexion('deconnexion');
       poser_apercu(false);
       $_SESSION = [];
       session_regenerate_id(true);
@@ -107,6 +114,8 @@ try {
       $mdp = chaine($b['nouveau'] ?? '');
       verifier_nouveau_mdp($mdp);
       db()->prepare('UPDATE utilisateurs SET hash = ? WHERE id = ?')->execute([password_hash($mdp, PASSWORD_DEFAULT), $u['id']]);
+      db()->prepare("UPDATE connexions SET fin = 'mot de passe changé' WHERE fin = '' AND jeton <> ?")->execute([(string)($_SESSION['cx'] ?? '')]);
+      journal('securite', 'Mot de passe changé : les autres appareils ont été déconnectés');
       repondre(['ok' => true]);
 
     /* ================= Tableau de bord ================= */
@@ -128,6 +137,7 @@ try {
         $actuels[$k] = is_float($defaut) ? max(0.0, min(100.0, round((float)str_replace(',', '.', (string)$b[$k]), 2))) : (is_int($defaut) ? max(0, min(1000, (int)$b[$k])) : texte($b[$k], 2000));
       }
       db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['entreprise', json_encode($actuels, JSON_UNESCAPED_UNICODE)]);
+      journal('systeme', 'Paramètres de l’entreprise modifiés');
       repondre(['ok' => true, 'reglages' => $actuels]);
 
     /* ================= Devis et factures ================= */
@@ -161,14 +171,21 @@ try {
       $json = json_encode($data, JSON_UNESCAPED_UNICODE);
       if ($json === false || strlen($json) > 400000) echec('Document trop volumineux.');
       $valeurs = [$numero, $statut, texte($data['client']['nom'] ?? '', 160), total_document($data), fr_vers_iso((string)($data['date'] ?? '')), fr_vers_iso((string)($data['echeance'] ?? '')), $json, maintenant()];
+      $nomType = $type === 'facture' ? 'Facture' : 'Devis';
+      $client = texte($data['client']['nom'] ?? '', 160);
       try {
         if ($id > 0) {
+          $avant = db()->prepare('SELECT statut FROM documents WHERE id = ? AND type = ?');
+          $avant->execute([$id, $type]);
+          $ancienStatut = (string)$avant->fetchColumn();
           $st = db()->prepare('UPDATE documents SET numero = ?, statut = ?, client = ?, total = ?, date = ?, echeance = ?, data = ?, maj = ? WHERE id = ? AND type = ?');
           $st->execute(array_merge($valeurs, [$id, $type]));
           if ($st->rowCount() === 0) echec('Document introuvable.', 404);
+          if ($ancienStatut !== '' && $ancienStatut !== $statut) journal('document', "$nomType $numero" . ($client !== '' ? " ($client)" : '') . ' : ' . libelle_statut($statut));
         } else {
           db()->prepare('INSERT INTO documents (numero, statut, client, total, date, echeance, data, maj, type, cree) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute(array_merge($valeurs, [$type, maintenant()]));
           $id = (int)db()->lastInsertId();
+          journal('document', "$nomType $numero créé" . ($type === 'facture' ? 'e' : '') . ($client !== '' ? " pour $client" : ''));
         }
       } catch (PDOException $e) {
         if (strpos($e->getMessage(), 'UNIQUE') !== false) echec("Le numéro $numero existe déjà.", 409);
@@ -188,12 +205,13 @@ try {
 
     case 'document.supprimer':
       $b = corps();
-      $st = db()->prepare('SELECT type, statut FROM documents WHERE id = ?');
+      $st = db()->prepare('SELECT type, statut, numero FROM documents WHERE id = ?');
       $st->execute([(int)($b['id'] ?? 0)]);
       $d = $st->fetch();
       if (!$d) echec('Document introuvable.', 404);
       if ($d['type'] === 'facture' && $d['statut'] !== 'brouillon') echec('Une facture envoyée ne se supprime pas (obligation légale) : passez-la plutôt en « Annulée ».', 409);
       db()->prepare('DELETE FROM documents WHERE id = ?')->execute([(int)$b['id']]);
+      journal('document', ($d['type'] === 'facture' ? 'Facture ' : 'Devis ') . $d['numero'] . ' supprimé' . ($d['type'] === 'facture' ? 'e' : ''));
       repondre(['ok' => true]);
 
     /* ================= Planning ================= */
@@ -243,6 +261,7 @@ try {
       } else {
         db()->prepare('INSERT INTO creations (type, titre, data, cree, maj) VALUES (?, ?, ?, ?, ?)')->execute([$type, $titre, $json, maintenant(), maintenant()]);
         $id = (int)db()->lastInsertId();
+        journal('document', (['carte' => 'Carte agent', 'flyer' => 'Flyer', 'visite' => 'Carte de visite'][$type] ?? 'Création') . ' créé' . ($type === 'carte' || $type === 'visite' ? 'e' : '') . ($titre !== '' ? " : $titre" : ''));
       }
       repondre(['ok' => true, 'id' => $id]);
 
@@ -271,6 +290,7 @@ try {
       if (array_key_exists('chauffeur', $b)) $d['chauffeur'] = texte($b['chauffeur'], 80);
       if (array_key_exists('note', $b)) $d['note'] = texte($b['note'], 1000);
       db()->prepare('UPDATE reservations SET statut = ?, prix = ?, data = ? WHERE id = ?')->execute([$statut, $prix, json_encode($d, JSON_UNESCAPED_UNICODE), (int)$r['id']]);
+      if ($statut !== $r['statut']) journal('vtc', "Réservation {$r['ref']} ({$d['nom']}) : " . libelle_statut($statut));
       // Le client est prévenu par email quand la course est confirmée ou annulée
       if ($statut !== $r['statut'] && in_array($statut, ['confirmee', 'annulee'], true) && !empty($d['email'])) {
         $quand = date('d/m/Y', strtotime($d['date'])) . ' à ' . $d['heure'];
@@ -306,6 +326,7 @@ try {
         }
       }
       db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['vtc', json_encode($t, JSON_UNESCAPED_UNICODE)]);
+      journal('vtc', 'Tarifs VTC enregistrés' . (isset($b['ouvert']) ? ' · réservation en ligne ' . ($t['ouvert'] ? 'ouverte' : 'fermée') : ''));
       repondre(['ok' => true, 'tarifs' => $t]);
 
     /* ================= Contrôle du site ================= */
@@ -315,6 +336,9 @@ try {
     case 'site.enregistrer':
       $b = corps();
       $s = site_reglages();
+      $noms = ['devis' => 'Demandes de devis', 'recrutement' => 'Candidatures', 'avis' => 'Dépôt d’avis', 'vtc' => 'Réservation VTC en ligne'];
+      foreach ($noms as $k => $nom) if (isset($b[$k])) journal('site', "$nom : " . (!empty($b[$k]) ? 'ouvert' : 'fermé') . ' sur le site');
+      if (is_array($b['bandeau'] ?? null)) journal('site', !empty($b['bandeau']['actif']) ? 'Bandeau d’annonce publié : « ' . texte($b['bandeau']['texte'] ?? '', 160) . ' »' : 'Bandeau d’annonce masqué');
       foreach (['devis', 'recrutement', 'avis'] as $k) if (isset($b[$k])) $s[$k] = !empty($b[$k]);
       if (is_array($b['bandeau'] ?? null)) {
         $lien = texte($b['bandeau']['lien'] ?? '', 300);
@@ -338,8 +362,10 @@ try {
         $etat = ['depuis' => maintenant(), 'message' => texte($b['message'] ?? '', 500), 'retour' => texte($b['retour'] ?? '', 80)];
         if (@file_put_contents(fichier_hors_ligne(), json_encode($etat, JSON_UNESCAPED_UNICODE), LOCK_EX) === false) echec("Impossible de mettre le site hors ligne (écriture refusée).", 500);
         poser_apercu();
-      } elseif (is_file(fichier_hors_ligne()) && !@unlink(fichier_hors_ligne())) {
-        echec('Impossible de remettre le site en ligne : réessayez.', 500);
+        journal('site', 'SITE MIS HORS LIGNE (page de maintenance pour les visiteurs)');
+      } elseif (is_file(fichier_hors_ligne())) {
+        if (!@unlink(fichier_hors_ligne())) echec('Impossible de remettre le site en ligne : réessayez.', 500);
+        journal('site', 'Site remis en ligne');
       }
       repondre(['ok' => true, 'site' => etat_site_admin()]);
 
@@ -368,10 +394,14 @@ try {
       $v = [texte($b['nom'] ?? '', 120), texte($b['poste'] ?? 'ADS', 60), texte($b['tel'] ?? '', 60), texte($b['carte'] ?? '', 80), texte($b['validite'] ?? '', 10), texte($b['notes'] ?? '', 2000), empty($b['actif']) ? 0 : 1, ($b['categorie'] ?? '') === 'secondaire' ? 'secondaire' : 'primaire'];
       if ($v[0] === '') echec("Le nom de l'agent est obligatoire.");
       if ($v[4] !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $v[4])) echec('Date de validité invalide.');
+      if (empty($b['id'])) journal('equipe', "Agent ajouté : {$v[0]}");
       repondre(['ok' => true, 'id' => enregistrer_ligne('agents', ['nom', 'poste', 'tel', 'carte', 'validite', 'notes', 'actif', 'categorie'], $v, (int)($b['id'] ?? 0))]);
 
     case 'agent.supprimer':
       $id = (int)(corps()['id'] ?? 0);
+      $st = db()->prepare('SELECT nom FROM agents WHERE id = ?');
+      $st->execute([$id]);
+      journal('equipe', 'Agent supprimé : ' . (string)$st->fetchColumn());
       $st = db()->prepare('SELECT fichier FROM agent_docs WHERE agent_id = ?');
       $st->execute([$id]);
       foreach ($st->fetchAll(PDO::FETCH_COLUMN) as $f) @unlink(dossier_docs() . '/' . basename((string)$f));
@@ -451,6 +481,11 @@ try {
       $table = ['demande' => 'demandes', 'candidature' => 'candidatures', 'avis' => 'avis'][$type];
       if (!in_array($b['statut'] ?? '', STATUTS[$type], true)) echec('Statut inconnu.');
       db()->prepare("UPDATE $table SET statut = ? WHERE id = ?")->execute([$b['statut'], (int)($b['id'] ?? 0)]);
+      if ($type === 'avis') {
+        $st = db()->prepare('SELECT nom FROM avis WHERE id = ?');
+        $st->execute([(int)($b['id'] ?? 0)]);
+        journal('site', 'Avis de ' . (string)$st->fetchColumn() . ' : ' . libelle_statut((string)$b['statut']));
+      }
       repondre(['ok' => true]);
 
     case 'demande.supprimer':
@@ -472,15 +507,92 @@ try {
 
     /* ================= Import / sauvegarde ================= */
     case 'import':
-      repondre(['ok' => true, 'resultat' => importer_fichier(corps())]);
+      $res = importer_fichier(corps());
+      journal('systeme', 'Fichier de données importé');
+      repondre(['ok' => true, 'resultat' => $res]);
 
     case 'export':
+      journal('securite', 'Sauvegarde complète des données téléchargée');
       $export = ['format' => 'bda-admin-sauvegarde', 'version' => 1, 'date' => maintenant(), 'reglages' => reglages()];
-      foreach (['documents', 'plannings', 'clients', 'agents', 'agent_docs', 'reservations', 'creations', 'demandes', 'candidatures', 'avis'] as $t) {
+      foreach (['documents', 'plannings', 'clients', 'agents', 'agent_docs', 'reservations', 'creations', 'demandes', 'candidatures', 'avis', 'notes'] as $t) {
         $export[$t] = db()->query("SELECT * FROM $t")->fetchAll();
       }
       header('Content-Disposition: attachment; filename="bda-sauvegarde-' . date('Y-m-d') . '.json"');
       repondre($export);
+
+    /* ================= Accès & sécurité ================= */
+    case 'journal':
+      $type = (string)($_GET['type'] ?? '');
+      $avant = (int)($_GET['avant'] ?? 0);
+      $sql = 'SELECT * FROM journal WHERE 1';
+      $p = [];
+      if ($type !== '' && preg_match('/^[a-z]+$/', $type)) { $sql .= ' AND type = ?'; $p[] = $type; }
+      if ($avant > 0) { $sql .= ' AND id < ?'; $p[] = $avant; }
+      $st = db()->prepare($sql . ' ORDER BY id DESC LIMIT 60');
+      $st->execute($p);
+      repondre(['ok' => true, 'journal' => $st->fetchAll()]);
+
+    case 'connexions':
+      $actifs = db()->prepare("SELECT id, jeton, appareil, ip, debut, vu FROM connexions WHERE fin = '' AND vu > ? ORDER BY vu DESC");
+      $actifs->execute([date('Y-m-d H:i:s', time() - 6 * 3600)]);
+      $liste = array_map(fn($c) => ['id' => (int)$c['id'], 'appareil' => $c['appareil'], 'ip' => $c['ip'], 'debut' => $c['debut'], 'vu' => $c['vu'], 'actuel' => hash_equals((string)$c['jeton'], (string)($_SESSION['cx'] ?? ''))], $actifs->fetchAll());
+      $historique = db()->query('SELECT id, appareil, ip, debut, vu, fin FROM connexions ORDER BY id DESC LIMIT 30')->fetchAll();
+      $al = db()->prepare("SELECT COUNT(*) FROM journal WHERE type = 'alerte' AND quand > ?");
+      $al->execute([date('Y-m-d H:i:s', time() - 30 * 86400)]);
+      $alertes = (int)$al->fetchColumn();
+      repondre(['ok' => true, 'actifs' => $liste, 'historique' => $historique, 'alertes30j' => $alertes]);
+
+    case 'connexion.revoquer':
+      $b = corps();
+      $moi = (string)($_SESSION['cx'] ?? '');
+      if (($b['id'] ?? '') === 'autres') {
+        $st = db()->prepare("UPDATE connexions SET fin = 'déconnecté à distance' WHERE fin = '' AND jeton <> ?");
+        $st->execute([$moi]);
+        journal('securite', 'Tous les autres appareils ont été déconnectés (' . $st->rowCount() . ')');
+      } else {
+        $st = db()->prepare("SELECT appareil FROM connexions WHERE id = ? AND jeton <> ? AND fin = ''");
+        $st->execute([(int)($b['id'] ?? 0), $moi]);
+        $app = $st->fetchColumn();
+        if ($app === false) echec('Appareil introuvable ou déjà déconnecté.', 404);
+        db()->prepare("UPDATE connexions SET fin = 'déconnecté à distance' WHERE id = ?")->execute([(int)$b['id']]);
+        journal('securite', "Appareil déconnecté à distance : $app");
+      }
+      repondre(['ok' => true]);
+
+    /* ================= Notes ================= */
+    case 'notes':
+      repondre(['ok' => true, 'notes' => db()->query('SELECT * FROM notes ORDER BY epingle DESC, maj DESC LIMIT 500')->fetchAll()]);
+
+    case 'note.enregistrer':
+      $b = corps();
+      $texte = texte($b['texte'] ?? '', 20000);
+      $couleur = (string)($b['couleur'] ?? '');
+      if (!in_array($couleur, ['', 'or', 'bleu', 'vert', 'rouge', 'violet'], true)) $couleur = '';
+      $id = (int)($b['id'] ?? 0);
+      if ($id > 0) {
+        $st = db()->prepare('UPDATE notes SET texte = ?, couleur = ?, epingle = ?, maj = ? WHERE id = ?');
+        $st->execute([$texte, $couleur, empty($b['epingle']) ? 0 : 1, maintenant(), $id]);
+        if ($st->rowCount() === 0) echec('Note introuvable.', 404);
+      } else {
+        db()->prepare('INSERT INTO notes (texte, couleur, epingle, cree, maj) VALUES (?, ?, ?, ?, ?)')->execute([$texte, $couleur, empty($b['epingle']) ? 0 : 1, maintenant(), maintenant()]);
+        $id = (int)db()->lastInsertId();
+      }
+      $st = db()->prepare('SELECT * FROM notes WHERE id = ?');
+      $st->execute([$id]);
+      repondre(['ok' => true, 'note' => $st->fetch()]);
+
+    case 'note.supprimer':
+      supprimer_ligne('notes', (int)(corps()['id'] ?? 0));
+
+    /* ================= Barre de commande : index de recherche ================= */
+    case 'recherche':
+      repondre(['ok' => true, 'index' => [
+        'documents' => db()->query('SELECT id, type, numero, client, statut, total FROM documents ORDER BY maj DESC LIMIT 400')->fetchAll(),
+        'clients' => db()->query('SELECT id, nom, tel FROM clients ORDER BY nom COLLATE NOCASE LIMIT 400')->fetchAll(),
+        'agents' => db()->query('SELECT id, nom, poste, categorie FROM agents ORDER BY nom COLLATE NOCASE LIMIT 400')->fetchAll(),
+        'notes' => db()->query("SELECT id, substr(texte, 1, 140) AS texte FROM notes WHERE texte <> '' ORDER BY maj DESC LIMIT 200")->fetchAll(),
+        'reservations' => db()->query('SELECT id, ref, statut, date_course, data FROM reservations ORDER BY date_course DESC LIMIT 100')->fetchAll(),
+      ]]);
 
     default:
       echec('Action inconnue.', 404);
@@ -550,6 +662,13 @@ function supprimer_ligne(string $table, int $id): void
   db()->prepare("DELETE FROM $table WHERE id = ?")->execute([$id]);
   repondre(['ok' => true]);
 }
+function libelle_statut(string $s): string
+{
+  return [
+    'brouillon' => 'brouillon', 'envoye' => 'envoyé', 'envoyee' => 'envoyée', 'accepte' => 'accepté', 'refuse' => 'refusé', 'payee' => 'payée', 'annulee' => 'annulée',
+    'attente' => 'en attente', 'confirmee' => 'confirmée', 'terminee' => 'terminée', 'publie' => 'publié', 'refusee' => 'refusée',
+  ][$s] ?? $s;
+}
 // État complet du site pour la page « Contrôle du site »
 function etat_site_admin(): array
 {
@@ -589,6 +708,15 @@ function accueil(): array
     'recents' => array_slice($recents, 0, 7),
     'installation' => reglages()['iban'] === '',
     'aujourdhui' => date('Y-m-d'),
+    // Centre de contrôle
+    'site' => etat_site_admin(),
+    'journal' => $tous('SELECT id, quand, type, message FROM journal ORDER BY id DESC LIMIT 8'),
+    'notes' => $tous("SELECT id, texte, couleur, maj FROM notes WHERE epingle = 1 AND texte <> '' ORDER BY maj DESC LIMIT 4"),
+    'nbNotes' => (int)$db->query('SELECT COUNT(*) FROM notes')->fetchColumn(),
+    'session' => $tous('SELECT debut, appareil, ip FROM connexions WHERE jeton = ?', [(string)($_SESSION['cx'] ?? '')])[0] ?? null,
+    'precedente' => $tous('SELECT debut, appareil, ip FROM connexions WHERE jeton <> ? ORDER BY id DESC LIMIT 1', [(string)($_SESSION['cx'] ?? '')])[0] ?? null,
+    'appareils' => (int)$tous("SELECT COUNT(*) AS n FROM connexions WHERE fin = '' AND vu > ?", [date('Y-m-d H:i:s', time() - 6 * 3600)])[0]['n'],
+    'alertes' => (int)$tous("SELECT COUNT(*) AS n FROM journal WHERE type = 'alerte' AND quand > ?", [date('Y-m-d H:i:s', time() - 7 * 86400)])[0]['n'],
   ];
 }
 // Fichier de démarrage préparé sur l'ordinateur (réglages privés, clients, documents)

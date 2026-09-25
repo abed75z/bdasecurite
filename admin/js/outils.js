@@ -122,6 +122,12 @@ const TRACES = {
   recherche: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>',
   crayon: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
   graphique: '<path d="M3 3v18h18"/><path d="m7 14 4-4 4 4 5-6"/>',
+  appareil: '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  mobile: '<rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/>',
+  epingle: '<path d="M12 17v5"/><path d="M9 10.8V4h6v6.8l2.5 2.7a1 1 0 0 1-.7 1.7H7.2a1 1 0 0 1-.7-1.7z"/><path d="M8 4h8"/>',
+  commande: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m6 9 3 3-3 3M11 15h6"/>',
+  activite: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  eclair: '<path d="M13 2 3 14h9l-1 8 10-12h-9z"/>',
 };
 export function icone(nom, cls = '') {
   const ns = 'http://www.w3.org/2000/svg';

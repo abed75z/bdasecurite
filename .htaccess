@@ -7,6 +7,7 @@ AddDefaultCharset UTF-8
 <IfModule mod_mime.c>
   AddType text/vcard .vcf
   AddCharset UTF-8 .vcf
+  AddType application/manifest+json .webmanifest
 </IfModule>
 
 # Adresse unique et sécurisée : tout est redirigé vers https://bdasecurite.com

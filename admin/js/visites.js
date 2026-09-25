@@ -84,25 +84,39 @@ async function listeVisites(ctx) {
 
 /* ---------- Carte digitale : la page bdasecurite.com/carte, à envoyer depuis le téléphone ---------- */
 const URL_CARTE = 'https://bdasecurite.com/carte';
-const MESSAGE = 'Bonjour, voici la carte de BDA Sécurité & VTC Premium (sécurité privée et chauffeurs VTC à Paris, 24/7) :';
 function blocDigital() {
-  let qr = null;
-  try { qr = qrSvg(URL_CARTE); } catch (e) { /* lien affiché seul */ }
-  const copier = async () => {
-    try { await navigator.clipboard.writeText(URL_CARTE); toast('Lien copié : collez-le dans un message.'); } catch (e) { toast(URL_CARTE); }
+  // Lien personnalisé : la carte s'ouvre sur « Carte préparée pour … »
+  const pour = saisie({ placeholder: 'Nom du prospect (facultatif), ex. Hôtel Lutetia', maxlength: 60 });
+  const lien = () => (pour.value.trim() ? `${URL_CARTE}?pour=${encodeURIComponent(pour.value.trim())}` : URL_CARTE);
+  const message = () => `${pour.value.trim() ? `Bonjour ${pour.value.trim()}, voici` : 'Bonjour, voici'} la carte de BDA Sécurité & VTC Premium (sécurité privée et chauffeurs VTC à Paris, 24/7) :`;
+  const affiche = h('a', { class: 'digitale__lien', target: '_blank', rel: 'noopener' });
+  const btnWa = h('a', { class: 'btn btn--gold', target: '_blank', rel: 'noopener' }, icone('envoyer'), 'Envoyer par WhatsApp');
+  const btnSms = h('a', { class: 'btn btn--ghost' }, icone('mail'), 'Par SMS');
+  const btnVoir = h('a', { class: 'btn btn--ghost', target: '_blank', rel: 'noopener' }, icone('site'), 'Voir la carte');
+  const zoneQr = h('div', { class: 'digitale__qr' });
+  const maj = () => {
+    const l = lien();
+    affiche.href = l; btnVoir.href = l;
+    affiche.textContent = l.replace('https://', '');
+    btnWa.href = `https://wa.me/?text=${encodeURIComponent(`${message()} ${l}`)}`;
+    btnSms.href = `sms:?&body=${encodeURIComponent(`${message()} ${l}`)}`;
+    try { zoneQr.replaceChildren(qrSvg(l), h('small', null, 'À faire scanner')); } catch (e) { zoneQr.replaceChildren(); }
   };
+  pour.addEventListener('input', maj);
+  const copier = async () => {
+    try { await navigator.clipboard.writeText(lien()); toast('Lien copié : collez-le dans un message.'); } catch (e) { toast(lien()); }
+  };
+  maj();
   return h('section', { class: 'carte digitale' },
     h('div', { class: 'digitale__txt' },
       h('span', { class: 'kicker' }, 'Carte de visite digitale'),
       h('h2', null, 'Envoyez votre carte en un message'),
-      h('p', null, 'Une page à vos couleurs pour le téléphone : vos clients vous appellent, vous écrivent sur WhatsApp, demandent un devis, ouvrent le site ou enregistrent votre contact en un clic.'),
-      h('a', { class: 'digitale__lien', href: URL_CARTE, target: '_blank', rel: 'noopener' }, 'bdasecurite.com/carte'),
-      h('div', { class: 'digitale__actions' },
-        h('a', { class: 'btn btn--gold', href: `https://wa.me/?text=${encodeURIComponent(`${MESSAGE} ${URL_CARTE}`)}`, target: '_blank', rel: 'noopener' }, icone('envoyer'), 'Envoyer par WhatsApp'),
-        h('a', { class: 'btn btn--ghost', href: `sms:?&body=${encodeURIComponent(`${MESSAGE} ${URL_CARTE}`)}` }, icone('mail'), 'Par SMS'),
-        h('button', { class: 'btn btn--ghost', type: 'button', onclick: copier }, icone('copier'), 'Copier le lien'),
-        h('a', { class: 'btn btn--ghost', href: URL_CARTE, target: '_blank', rel: 'noopener' }, icone('site'), 'Voir la carte'))),
-    qr ? h('div', { class: 'digitale__qr' }, qr, h('small', null, 'À faire scanner')) : null);
+      h('p', null, 'Une carte 3D à vos couleurs, pensée pour le téléphone : vos prospects vous appellent, vous écrivent sur WhatsApp, demandent un devis ou enregistrent votre contact en un clic.'),
+      h('label', { class: 'digitale__pour' }, icone('personne'), pour),
+      affiche,
+      h('div', { class: 'digitale__actions' }, btnWa, btnSms,
+        h('button', { class: 'btn btn--ghost', type: 'button', onclick: copier }, icone('copier'), 'Copier le lien'), btnVoir)),
+    zoneQr);
 }
 
 async function editeurVisite(ctx, id) {

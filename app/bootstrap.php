@@ -334,3 +334,56 @@ function prix_vtc(array $t, array $r): float
   $base += (int)($r['sieges'] ?? 0) * (float)$t['siege'] + (!empty($r['pancarte']) ? (float)$t['pancarte'] : 0);
   return round($base);
 }
+
+/* ---------- Contrôle du site (admin > Contrôle du site) ----------
+   Services ouverts ou fermés, bandeau d'annonce, et mode maintenance.
+   Le mode maintenance est un simple fichier dans le dossier de données :
+   le .htaccess le détecte et envoie alors les visiteurs vers maintenance.php. */
+function site_reglages_defaut(): array
+{
+  return ['devis' => true, 'recrutement' => true, 'avis' => true, 'bandeau' => ['actif' => false, 'texte' => '', 'lien' => '', 'libelleLien' => '']];
+}
+function site_reglages(): array
+{
+  $st = db()->prepare('SELECT v FROM reglages WHERE k = ?');
+  $st->execute(['site']);
+  $v = json_decode((string)$st->fetchColumn(), true);
+  $s = site_reglages_defaut();
+  if (is_array($v)) {
+    foreach (['devis', 'recrutement', 'avis'] as $k) if (array_key_exists($k, $v)) $s[$k] = (bool)$v[$k];
+    if (is_array($v['bandeau'] ?? null)) $s['bandeau'] = array_merge($s['bandeau'], $v['bandeau']);
+  }
+  return $s;
+}
+function service_ouvert(string $service): bool
+{
+  return !empty(site_reglages()[$service]);
+}
+function fichier_hors_ligne(): string
+{
+  return dossier_donnees() . '/site-hors-ligne.json';
+}
+// null = site en ligne ; sinon ['depuis', 'message', 'retour']
+function site_hors_ligne(): ?array
+{
+  $f = fichier_hors_ligne();
+  if (!is_file($f)) return null;
+  $v = json_decode((string)@file_get_contents($f), true);
+  return is_array($v) ? $v : ['depuis' => '', 'message' => '', 'retour' => ''];
+}
+// Pendant la maintenance, l'administrateur connecté continue de voir le site (cookie signé, 12 h)
+function jeton_apercu(int $expire): string
+{
+  return $expire . '.' . hash_hmac('sha256', 'apercu|' . $expire, secret());
+}
+function apercu_valide(): bool
+{
+  $c = (string)($_COOKIE['BDA_APERCU'] ?? '');
+  if (!preg_match('/^(\d{9,11})\.[a-f0-9]{64}$/', $c, $m) || (int)$m[1] < time()) return false;
+  return hash_equals(jeton_apercu((int)$m[1]), $c);
+}
+function poser_apercu(bool $actif = true): void
+{
+  $expire = $actif ? time() + 12 * 3600 : time() - 3600;
+  setcookie('BDA_APERCU', $actif ? jeton_apercu($expire) : '', ['expires' => $expire, 'path' => '/', 'secure' => est_https(), 'httponly' => true, 'samesite' => 'Lax']);
+}

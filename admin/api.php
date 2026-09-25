@@ -22,8 +22,10 @@ if ($methode === 'POST') {
 }
 $libres = ['session', 'connexion', 'activation', 'secours'];
 if (!in_array($action, $libres, true) && !connecte()) echec('Connexion requise.', 401);
+// L'administrateur connecté garde l'accès au site pendant la maintenance
+if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['session', 'accueil', 'compteurs', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
+$lecture = ['session', 'accueil', 'compteurs', 'site', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -90,6 +92,7 @@ try {
       repondre(['ok' => true] + etat_session());
 
     case 'deconnexion':
+      poser_apercu(false);
       $_SESSION = [];
       session_regenerate_id(true);
       $_SESSION['csrf'] = bin2hex(random_bytes(32));
@@ -305,6 +308,41 @@ try {
       db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['vtc', json_encode($t, JSON_UNESCAPED_UNICODE)]);
       repondre(['ok' => true, 'tarifs' => $t]);
 
+    /* ================= Contrôle du site ================= */
+    case 'site':
+      repondre(['ok' => true, 'site' => etat_site_admin()]);
+
+    case 'site.enregistrer':
+      $b = corps();
+      $s = site_reglages();
+      foreach (['devis', 'recrutement', 'avis'] as $k) if (isset($b[$k])) $s[$k] = !empty($b[$k]);
+      if (is_array($b['bandeau'] ?? null)) {
+        $lien = texte($b['bandeau']['lien'] ?? '', 300);
+        if ($lien !== '' && !preg_match('#^(https://|/|tel:|mailto:)#', $lien)) $lien = 'https://' . ltrim($lien, '/');
+        $s['bandeau'] = [
+          'actif' => !empty($b['bandeau']['actif']), 'texte' => texte($b['bandeau']['texte'] ?? '', 160),
+          'lien' => $lien, 'libelleLien' => texte($b['bandeau']['libelleLien'] ?? '', 40),
+        ];
+      }
+      db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['site', json_encode($s, JSON_UNESCAPED_UNICODE)]);
+      if (isset($b['vtc'])) {
+        $t = tarifs_vtc();
+        $t['ouvert'] = !empty($b['vtc']);
+        db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['vtc', json_encode($t, JSON_UNESCAPED_UNICODE)]);
+      }
+      repondre(['ok' => true, 'site' => etat_site_admin()]);
+
+    case 'site.horsligne':
+      $b = corps();
+      if (!empty($b['actif'])) {
+        $etat = ['depuis' => maintenant(), 'message' => texte($b['message'] ?? '', 500), 'retour' => texte($b['retour'] ?? '', 80)];
+        if (@file_put_contents(fichier_hors_ligne(), json_encode($etat, JSON_UNESCAPED_UNICODE), LOCK_EX) === false) echec("Impossible de mettre le site hors ligne (écriture refusée).", 500);
+        poser_apercu();
+      } elseif (is_file(fichier_hors_ligne()) && !@unlink(fichier_hors_ligne())) {
+        echec('Impossible de remettre le site en ligne : réessayez.', 500);
+      }
+      repondre(['ok' => true, 'site' => etat_site_admin()]);
+
     /* ================= Clients et agents ================= */
     case 'clients':
       repondre(['ok' => true, 'clients' => db()->query('SELECT * FROM clients ORDER BY nom COLLATE NOCASE')->fetchAll()]);
@@ -509,6 +547,11 @@ function supprimer_ligne(string $table, int $id): void
   db()->prepare("DELETE FROM $table WHERE id = ?")->execute([$id]);
   repondre(['ok' => true]);
 }
+// État complet du site pour la page « Contrôle du site »
+function etat_site_admin(): array
+{
+  return site_reglages() + ['vtc' => !empty(tarifs_vtc()['ouvert']), 'horsLigne' => site_hors_ligne()];
+}
 function compteurs(): array
 {
   $q = fn(string $sql) => (int)db()->query($sql)->fetchColumn();
@@ -520,6 +563,7 @@ function compteurs(): array
     'candidatures' => $q("SELECT COUNT(*) FROM candidatures WHERE statut = 'nouvelle'"),
     'avis' => $q("SELECT COUNT(*) FROM avis WHERE statut = 'attente'"),
     'retards' => (int)$retards->fetchColumn(),
+    'horsLigne' => site_hors_ligne() ? 1 : 0,
   ];
 }
 // Page d'accueil : ce qui attend une action, et les derniers éléments modifiés (aucun montant)

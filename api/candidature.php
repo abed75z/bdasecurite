@@ -10,6 +10,7 @@ if (!origine_ok()) echec('Origine refusée.', 403);
 try {
   $b = corps();
   if (!empty($b['_honey']) || !empty($b['site_web'])) repondre(['ok' => true]); // robot : ignoré sans le lui dire
+  if (!service_ouvert('recrutement')) echec('Les candidatures sont momentanément fermées. Merci de votre intérêt !', 403);
   if (!limiter('candidature', 5, 3600)) echec('Trop de candidatures envoyées. Réessayez plus tard.', 429);
   $data = champs_formulaire($b);
   if (count($data) < 3) echec('Candidature incomplète.');

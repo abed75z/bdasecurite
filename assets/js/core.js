@@ -318,15 +318,20 @@
     document.querySelectorAll('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
   }
 
-  /* ---------- Réservation VTC : fermée tant qu'elle n'est pas ouverte dans l'admin (Tarifs VTC) ----------
-     [data-vtc] = visible seulement si ouverte · [data-vtc-off] = visible seulement si fermée */
-  function vtc() {
-    if (!document.querySelector('a[href^="reserver"], form[action="reserver"], [data-vtc], [data-vtc-off]')) return;
-    let ouvert = false;
+  /* ---------- Réglages du site (admin > Contrôle du site) ----------
+     - réservation VTC : [data-vtc] visible seulement si ouverte, [data-vtc-off] seulement si fermée,
+       et un clic sur un lien « reserver » affiche « pas encore disponible » tant qu'elle est fermée
+     - [data-service="devis|recrutement|avis"] : remplacé par un message quand le service est fermé
+     - bandeau d'annonce en haut des pages */
+  function reglagesSite() {
+    let s = { vtc: false, devis: true, recrutement: true, avis: true, bandeau: null };
     let fenetre = null;
-    const basculer = () => {
-      document.querySelectorAll('[data-vtc]').forEach((el) => { el.hidden = !ouvert; });
-      document.querySelectorAll('[data-vtc-off]').forEach((el) => { el.hidden = ouvert; });
+    const tel = '<a class="btn btn--gold" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>';
+    const wa = '<a class="btn btn--outline" href="https://wa.me/33784739070" target="_blank" rel="noopener">WhatsApp</a>';
+
+    const basculerVtc = () => {
+      document.querySelectorAll('[data-vtc]').forEach((el) => { el.hidden = !s.vtc; });
+      document.querySelectorAll('[data-vtc-off]').forEach((el) => { el.hidden = s.vtc; });
     };
     const fermer = () => { if (fenetre) { fenetre.remove(); fenetre = null; } };
     const indisponible = () => {
@@ -338,24 +343,86 @@
         <span class="vtc-indispo__badge">Bientôt</span>
         <h2 id="vtc-indispo-titre">Cette option n’est pas encore disponible</h2>
         <p id="vtc-indispo-texte">La réservation de VTC en ligne arrive très bientôt. En attendant, notre équipe vous répond directement.</p>
-        <div class="vtc-indispo__actions">
-          <a class="btn btn--gold" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
-          <a class="btn btn--outline" href="devis?service=transfert">Demander un devis</a>
-        </div>
+        <div class="vtc-indispo__actions">${tel}${s.devis ? '<a class="btn btn--outline" href="devis?service=transfert">Demander un devis</a>' : wa}</div>
       </div>`;
       fenetre.addEventListener('click', (e) => { if (e.target === fenetre || e.target.closest('.vtc-indispo__x')) fermer(); });
       document.body.append(fenetre);
       fenetre.querySelector('.vtc-indispo__x').focus();
     };
-    const bloquer = (e) => { if (!ouvert) { e.preventDefault(); indisponible(); } };
+    const bloquer = (e) => { if (!s.vtc) { e.preventDefault(); indisponible(); } };
     document.addEventListener('click', (e) => { if (e.target.closest('a[href^="reserver"]')) bloquer(e); });
     document.addEventListener('submit', (e) => { if (e.target.matches('form[action="reserver"]')) bloquer(e); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fermer(); });
-    basculer();
-    fetch('/api/reservation.php?tarifs=1').then((r) => r.json()).then((j) => { ouvert = !!(j && j.tarifs && j.tarifs.ouvert); basculer(); }).catch(() => {});
+
+    const FERMES = {
+      devis: ['Demandes en ligne momentanément fermées', 'Pour un devis, appelez-nous ou écrivez-nous sur WhatsApp : nous vous répondons rapidement.', tel + wa],
+      recrutement: ['Les candidatures sont fermées pour le moment', 'Merci de votre intérêt pour BDA Sécurité. Revenez bientôt : nos prochains postes seront publiés ici.', ''],
+      avis: ['Le dépôt d’avis est momentanément fermé', 'Merci de votre confiance ! Vous pouvez toujours lire les avis de nos clients sur cette page.', ''],
+    };
+    const services = () => {
+      document.querySelectorAll('[data-service]').forEach((el) => {
+        const k = el.dataset.service;
+        const ferme = FERMES[k] && s[k] === false;
+        el.hidden = ferme;
+        let msg = el.nextElementSibling && el.nextElementSibling.classList.contains('service-ferme') ? el.nextElementSibling : null;
+        if (ferme && !msg) {
+          msg = document.createElement('div');
+          msg.className = 'service-ferme';
+          msg.innerHTML = `<span class="service-ferme__badge">Fermé</span><h3>${FERMES[k][0]}</h3><p>${FERMES[k][1]}</p>${FERMES[k][2] ? `<div class="service-ferme__actions">${FERMES[k][2]}</div>` : ''}`;
+          el.after(msg);
+        }
+        if (msg) msg.hidden = !ferme;
+      });
+    };
+    const bandeau = () => {
+      const b = s.bandeau;
+      const cle = b ? 'bda-annonce:' + b.texte : '';
+      let masque = false;
+      try { masque = !!cle && sessionStorage.getItem('bda-annonce-fermee') === cle; } catch (e) { /* stockage indisponible */ }
+      if (!b || masque) return;
+      const el = document.createElement('div');
+      el.className = 'annonce';
+      el.setAttribute('role', 'region');
+      el.setAttribute('aria-label', 'Annonce');
+      const txt = document.createElement('span');
+      txt.textContent = b.texte;
+      el.append(txt);
+      if (b.lien && /^(https:\/\/|\/|tel:|mailto:)/.test(b.lien)) {
+        const a = document.createElement('a');
+        a.href = b.lien;
+        a.textContent = b.libelleLien || 'En savoir plus';
+        if (b.lien.startsWith('https://')) { a.target = '_blank'; a.rel = 'noopener'; }
+        el.append(a);
+      }
+      const x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'annonce__x';
+      x.setAttribute('aria-label', 'Fermer l’annonce');
+      x.innerHTML = '&times;';
+      x.addEventListener('click', () => {
+        el.remove();
+        root.classList.remove('a-annonce');
+        try { sessionStorage.setItem('bda-annonce-fermee', cle); } catch (e) { /* stockage indisponible */ }
+      });
+      el.append(x);
+      document.body.prepend(el);
+      const hauteur = () => root.style.setProperty('--annonce-h', `${el.offsetHeight}px`);
+      hauteur();
+      window.addEventListener('resize', hauteur);
+      root.classList.add('a-annonce');
+    };
+
+    basculerVtc();
+    fetch('/api/site.php').then((r) => r.json()).then((j) => {
+      if (!j || !j.ok) return;
+      s = j;
+      basculerVtc();
+      services();
+      bandeau();
+    }).catch(() => {});
   }
 
-  vtc();
+  reglagesSite();
   sky();
   roads();
   animScopes();

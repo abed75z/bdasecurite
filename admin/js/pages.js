@@ -13,6 +13,7 @@ import { pageFlyers } from './flyers.js';
 import { pageVisites } from './visites.js';
 import { pageAgents } from './agents.js';
 import { pageVtc } from './vtc.js';
+import { pageSite } from './site.js';
 
 export const PAGES = {
   '': pageAccueil,
@@ -23,6 +24,7 @@ export const PAGES = {
   clients: pageClients,
   agents: pageAgents,
   vtc: pageVtc,
+  site: pageSite,
   cartes: pageCartes,
   flyers: pageFlyers,
   visites: pageVisites,
@@ -78,6 +80,7 @@ async function pageAccueil(ctx) {
 
   const pluriel = (n, un, plusieurs) => `${n} ${n > 1 ? plusieurs : un}`;
   const taches = [
+    c.horsLigne && { n: '!', href: '#/site', titre: 'Votre site est hors ligne', sous: 'Les visiteurs voient la page Maintenance · remettez-le en ligne en un clic', alerte: true },
     c.reservations && { n: c.reservations, href: '#/vtc', titre: pluriel(c.reservations, 'réservation VTC à confirmer', 'réservations VTC à confirmer'), sous: 'Page de réservation du site' },
     c.demandes && { n: c.demandes, href: '#/demandes', titre: pluriel(c.demandes, 'nouvelle demande de devis', 'nouvelles demandes de devis'), sous: 'Reçues depuis le site' },
     c.avis && { n: c.avis, href: '#/avis', titre: pluriel(c.avis, 'avis à valider', 'avis à valider'), sous: 'Publiez-les ou refusez-les' },

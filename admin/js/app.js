@@ -21,6 +21,7 @@ const MENU = [
   { route: 'cartes', libelle: 'Cartes agents', icone: 'badge' },
   { route: 'candidatures', libelle: 'Candidatures', icone: 'candidature', badge: 'candidatures' },
   { groupe: 'Site & communication' },
+  { route: 'site', libelle: 'Contrôle du site', icone: 'site' },
   { route: 'demandes', libelle: 'Demandes', icone: 'demande', badge: 'demandes' },
   { route: 'avis', libelle: 'Avis clients', icone: 'avis', badge: 'avis' },
   { route: 'flyers', libelle: 'Flyers', icone: 'flyer' },
@@ -161,7 +162,9 @@ function lancerApplication() {
   zonePage = h('div', { class: 'page', id: 'page' });
   const haut = h('header', { class: 'haut' },
     h('button', { class: 'icon-btn haut__menu', type: 'button', 'aria-label': 'Ouvrir le menu', onclick: () => document.body.classList.toggle('menu-ouvert') }, icone('menu')),
-    h('div', { class: 'haut__textes' }, kickerPage, titrePage), actionsPage);
+    h('div', { class: 'haut__textes' }, kickerPage, titrePage),
+    h('a', { class: 'hors-ligne', href: '#/site', id: 'hors-ligne', hidden: true, title: 'Les visiteurs voient la page Maintenance' }, h('i', { 'aria-hidden': 'true' }), 'Site hors ligne'),
+    actionsPage);
 
   racine.replaceChildren(h('div', { class: 'appli' },
     cote,
@@ -186,6 +189,8 @@ export async function majCompteurs() {
   try {
     const { compteurs } = await api('compteurs');
     etat.compteurs = compteurs;
+    const pastille = document.getElementById('hors-ligne');
+    if (pastille) pastille.hidden = !compteurs.horsLigne;
     $$('[data-badge]').forEach((b) => {
       const n = compteurs[b.dataset.badge] || 0;
       b.textContent = n > 99 ? '99+' : n;

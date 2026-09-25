@@ -28,6 +28,7 @@ try {
 
   $b = corps();
   if (!empty($b['site_web']) || !empty($b['_honey'])) repondre(['ok' => true]); // robot : ignoré sans le lui dire
+  if (!service_ouvert('avis')) echec('Le dépôt d’avis est momentanément fermé. Merci !', 403);
   $nom = texte($b['nom'] ?? '', 60);
   $note = (int)($b['note'] ?? 0);
   $texte = texte($b['texte'] ?? '', 1500);

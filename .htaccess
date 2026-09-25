@@ -27,6 +27,13 @@ RewriteRule ^ https://bdasecurite.com/%1 [R=301,L]
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\s/+([^\s?]+?)/+[\s?]
 RewriteRule ^ https://bdasecurite.com/%1 [R=301,L]
+# Site hors ligne (admin > Contrôle du site) : les pages passent par maintenance.php,
+# qui affiche la page de maintenance aux visiteurs et le site normal à l'administrateur.
+# (l'espace admin, les services et les images restent accessibles)
+RewriteCond %{DOCUMENT_ROOT}/../bda-admin-data/site-hors-ligne.json -f
+RewriteCond %{REQUEST_URI} !^/(admin|api|assets|app)/
+RewriteCond %{REQUEST_URI} !^/(maintenance\.php|robots\.txt)$
+RewriteRule ^ maintenance.php [END]
 # 4. /page -> affiche le fichier page.html, sans le montrer dans l'adresse
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}.html -f

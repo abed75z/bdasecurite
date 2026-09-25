@@ -10,6 +10,7 @@ if (!origine_ok()) echec('Origine refusée.', 403);
 try {
   $b = corps();
   if (!empty($b['_honey']) || !empty($b['site_web'])) repondre(['ok' => true]); // robot : ignoré sans le lui dire
+  if (!service_ouvert('devis')) echec('Les demandes de devis en ligne sont momentanément fermées. Appelez-nous au 06 11 67 86 25.', 403);
   if (!limiter('demande', 8, 3600)) echec('Trop de demandes envoyées. Réessayez plus tard ou appelez-nous.', 429);
   $data = champs_formulaire($b);
   if (count($data) < 3) echec('Demande incomplète.');

@@ -877,3 +877,21 @@ code { font-family: var(--mono); font-size: 0.92em; color: var(--gold-light); ba
 .fil__envoi { display: flex; gap: 10px; align-items: flex-end; padding: 12px; border-top: 1px solid var(--line); }
 .fil__saisie { flex: 1; resize: vertical; min-height: 52px; }
 @media (max-width: 900px) { .messagerie { grid-template-columns: 1fr; } }
+
+/* ---------- Accueil simplifié ---------- */
+.raccourcis-admin { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.raccourci-admin { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: linear-gradient(160deg, #19191e, #121215); color: var(--text); font-size: 14px; transition: border-color 0.2s, transform 0.25s var(--ease); }
+.raccourci-admin:hover { border-color: rgba(201, 165, 92, 0.55); transform: translateY(-2px); }
+.raccourci-admin b { flex: 1; font-weight: 600; }
+.raccourci-admin__ic { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: 10px; background: #0b0b0d; border: 1px solid rgba(201, 165, 92, 0.35); color: var(--gold-light); }
+.raccourci-admin__plus { width: 16px; height: 16px; color: var(--muted); }
+
+/* ---------- Cartes & flyers (outils de création) ---------- */
+.outils { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.outil { display: grid; gap: 10px; align-content: start; padding: 22px; border-radius: 16px; border: 1px solid var(--line); background: linear-gradient(180deg, #16161a, #121215); }
+.outil__ic { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; background: var(--gold-soft); color: var(--gold-light); }
+.outil__ic .ic { width: 22px; height: 22px; }
+.outil h2 { font-size: 17px; }
+.outil p { margin: 0; color: var(--muted); font-size: 13px; }
+.outil__actions { display: flex; gap: 8px; margin-top: 6px; }
+@media (max-width: 1000px) { .raccourcis-admin { grid-template-columns: repeat(2, minmax(0, 1fr)); } .outils { grid-template-columns: 1fr; } }

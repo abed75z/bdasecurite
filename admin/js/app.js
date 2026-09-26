@@ -9,33 +9,31 @@ const racine = document.getElementById('app');
 const etat = { session: null, compteurs: {} };
 
 const MENU = [
-  { route: '', libelle: 'Centre de contrôle', icone: 'accueil' },
-  { groupe: 'Administration' },
-  { route: 'site', libelle: 'Contrôle du site', icone: 'site' },
-  { route: 'securite', libelle: 'Accès & sécurité', icone: 'bouclier' },
-  { route: 'notes', libelle: 'Notes', icone: 'crayon' },
-  { groupe: 'Gestion' },
+  { route: '', libelle: 'Accueil', icone: 'accueil' },
+  { groupe: 'Clients' },
+  { route: 'demandes', libelle: 'Demandes reçues', icone: 'demande', badge: 'demandes' },
+  { route: 'messages', libelle: 'Messages', icone: 'mail', badge: 'messages' },
   { route: 'devis', libelle: 'Devis', icone: 'devis' },
   { route: 'factures', libelle: 'Factures', icone: 'facture', badge: 'retards', alerte: true },
-  { route: 'planning', libelle: 'Planning', icone: 'planning' },
-  { route: 'clients', libelle: 'Clients', icone: 'clients' },
-  { route: 'messages', libelle: 'Messages clients', icone: 'mail', badge: 'messages' },
-  { groupe: 'VTC' },
-  { route: 'vtc', libelle: 'Réservations', icone: 'voiture', badge: 'reservations' },
+  { route: 'clients', libelle: 'Fiches clients', icone: 'clients' },
   { groupe: 'Équipe' },
   { route: 'agents', libelle: 'Agents', icone: 'agents' },
-  { route: 'cartes', libelle: 'Cartes agents', icone: 'badge' },
+  { route: 'planning', libelle: 'Planning', icone: 'planning' },
   { route: 'candidatures', libelle: 'Candidatures', icone: 'candidature', badge: 'candidatures' },
-  { groupe: 'Site & communication' },
-  { route: 'demandes', libelle: 'Demandes', icone: 'demande', badge: 'demandes' },
+  { groupe: 'Site internet' },
+  { route: 'site', libelle: 'Contrôle du site', icone: 'site' },
   { route: 'avis', libelle: 'Avis clients', icone: 'avis', badge: 'avis' },
-  { route: 'flyers', libelle: 'Flyers', icone: 'flyer' },
-  { route: 'visites', libelle: 'Cartes de visite', icone: 'visite' },
+  { route: 'vtc', libelle: 'Réservations VTC', icone: 'voiture', badge: 'reservations' },
+  { groupe: 'Outils' },
+  { route: 'creations', libelle: 'Cartes & flyers', icone: 'badge' },
+  { route: 'notes', libelle: 'Notes', icone: 'crayon' },
 ];
+// Pages rangées dans une rubrique du menu sans y figurer elles-mêmes
+const PARENT = { cartes: 'creations', visites: 'creations', flyers: 'creations' };
 // Rubrique affichée au-dessus du titre de chaque page
 const GROUPE = {};
-MENU.reduce((g, m) => { if (m.groupe) return m.groupe; GROUPE[m.route] = g; return g; }, 'Console admin');
-GROUPE.parametres = 'Compte';
+MENU.reduce((g, m) => { if (m.groupe) return m.groupe; GROUPE[m.route] = g; return g; }, 'Tableau de bord');
+Object.assign(GROUPE, { parametres: 'Compte', securite: 'Compte', cartes: 'Outils', visites: 'Outils', flyers: 'Outils' });
 
 /* ---------- Démarrage ---------- */
 async function demarrer() {
@@ -156,24 +154,16 @@ function lancerApplication() {
   menuEl = h('nav', { class: 'nav', 'aria-label': 'Menu principal' }, MENU.map((m) => (m.groupe ? h('p', { class: 'nav__groupe' }, m.groupe) : lien(m))));
 
   const utilisateur = String(etat.session.utilisateur || '');
-  const duree = h('span', { class: 'acces__duree' });
-  const majDuree = () => {
-    const min = Math.max(0, Math.round((Date.now() - new Date(String(etat.session.depuis || '').replace(' ', 'T')).getTime()) / 60000));
-    duree.textContent = Number.isFinite(min) ? `Session ouverte depuis ${min < 60 ? `${min} min` : `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')}`}` : '';
-  };
-  majDuree();
-  clearInterval(lancerApplication.minuteurSession);
-  lancerApplication.minuteurSession = setInterval(majDuree, 30000);
   const cote = h('aside', { class: 'cote' },
     h('a', { href: '#/', class: 'cote__marque', onclick: fermerMenu }, ecusson(), h('div', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Console', h('span', { class: 'tag-admin' }, 'Admin')))),
-    h('a', { class: 'acces', href: '#/securite', onclick: fermerMenu, title: 'Accès & sécurité' }, h('span', { class: 'acces__ligne' }, h('i', { 'aria-hidden': 'true' }), 'Accès total · session sécurisée'), duree),
     menuEl,
     h('div', { class: 'cote__bas' },
       lien({ route: 'parametres', libelle: 'Paramètres', icone: 'reglages' }),
+      lien({ route: 'securite', libelle: 'Accès & sécurité', icone: 'bouclier' }),
       h('a', { class: 'nav__item nav__item--chef', href: '/admin/moi' }, icone('couronne'), h('span', null, 'Mon accès chef')),
       h('a', { class: 'nav__item', href: '/', target: '_blank', rel: 'noopener' }, icone('site'), h('span', null, 'Voir le site')),
       h('div', { class: 'profil' }, h('span', { class: 'profil__avatar', 'aria-hidden': 'true' }, utilisateur.charAt(0) || 'A'),
-        h('div', null, h('b', null, utilisateur), h('small', null, 'Administrateur · accès total')),
+        h('div', null, h('b', null, utilisateur), h('small', null, 'Administrateur')),
         h('button', { class: 'icon-btn', type: 'button', title: 'Se déconnecter', 'aria-label': 'Se déconnecter', onclick: deconnexion }, icone('sortie')))));
 
   kickerPage = h('span', { class: 'haut__kicker' });
@@ -226,7 +216,8 @@ let jetonNavigation = 0;
 async function router() {
   const [route = '', ...params] = location.hash.replace(/^#\/?/, '').split('/').map(decodeURIComponent);
   const page = PAGES[route] || PAGES[''];
-  $$('.cote .nav__item[data-route]').forEach((a) => a.classList.toggle('is-actif', a.dataset.route === (PAGES[route] ? route : '')));
+  const actif = PAGES[route] ? (PARENT[route] || route) : '';
+  $$('.cote .nav__item[data-route]').forEach((a) => a.classList.toggle('is-actif', a.dataset.route === actif));
   const jeton = ++jetonNavigation;
   zonePage.replaceChildren(h('div', { class: 'chargement' }, h('span'), h('span'), h('span')));
   actionsPage.replaceChildren();

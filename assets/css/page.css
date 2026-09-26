@@ -88,3 +88,16 @@
 
 /* Pages services : la FAQ s'aligne sur le texte */
 .lp-main .faq { margin-inline: 0; }
+
+/* Liens dans le texte des pages services */
+.lp-article p a { color: var(--gold-light); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Page Références : galerie photo */
+.ref-galerie { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.ref-galerie figure { position: relative; margin: 0; border-radius: 16px; overflow: hidden; aspect-ratio: 3 / 4; border: 1px solid rgba(255, 255, 255, 0.08); }
+.ref-galerie figure:first-child { border-color: rgba(212, 169, 79, 0.5); }
+.ref-galerie img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--ease-out); }
+.ref-galerie figure:hover img { transform: scale(1.05); }
+.ref-galerie figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 14px 12px; background: linear-gradient(transparent, rgba(5, 6, 16, 0.9)); color: var(--text); font: 600 13px/1.3 var(--font-display); }
+.ref-galerie__note { margin-top: 12px; font-size: 12px; color: var(--muted-2); }
+@media (max-width: 900px) { .ref-galerie { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

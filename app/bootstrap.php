@@ -152,6 +152,14 @@ function schema(PDO $db): void
       PRAGMA user_version = 5;
     SQL);
   }
+  if ($version < 6) {
+    // Espace client : un compte par client (connexion par email, mot de passe choisi via un lien d'invitation)
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS comptes_clients (id INTEGER PRIMARY KEY, client_id INTEGER NOT NULL, email TEXT NOT NULL UNIQUE COLLATE NOCASE, hash TEXT NOT NULL DEFAULT '', invitation TEXT NOT NULL DEFAULT '', invitation_expire TEXT NOT NULL DEFAULT '', actif INTEGER NOT NULL DEFAULT 1, cree TEXT NOT NULL, derniere TEXT NOT NULL DEFAULT '');
+      CREATE INDEX IF NOT EXISTS i_comptes_clients ON comptes_clients (client_id);
+      PRAGMA user_version = 6;
+    SQL);
+  }
 }
 
 /* ---------- Outils ---------- */

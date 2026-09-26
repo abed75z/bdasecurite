@@ -25,7 +25,7 @@ if (!in_array($action, $libres, true) && !connecte()) echec('Connexion requise.'
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
+$lecture = ['session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -614,6 +614,48 @@ try {
       if (!$retire) echec('Appareil introuvable.', 404);
       chef_enregistrer(array_values(array_filter($liste, fn($a) => $a['id'] !== $id)));
       journal('securite', 'Accès direct à la carte pro retiré à distance : ' . ($retire[0]['appareil'] ?? ''));
+      repondre(['ok' => true]);
+
+    /* ================= Espace client : accès des clients ================= */
+    case 'client.acces':
+      $st = db()->prepare('SELECT id, email, actif, cree, derniere, hash <> \'\' AS active, invitation <> \'\' AS invite, invitation_expire FROM comptes_clients WHERE client_id = ?');
+      $st->execute([(int)($_GET['client'] ?? 0)]);
+      repondre(['ok' => true, 'acces' => $st->fetch() ?: null]);
+
+    case 'client.acces.creer':
+      $b = corps();
+      $client = (int)($b['client'] ?? 0);
+      $email = texte($b['email'] ?? '', 160);
+      if (!filter_var($email, FILTER_VALIDATE_EMAIL)) echec('Indiquez l’email du client : ce sera son identifiant.');
+      $st = db()->prepare('SELECT nom, email FROM clients WHERE id = ?');
+      $st->execute([$client]);
+      $c = $st->fetch();
+      if (!$c) echec('Client introuvable.', 404);
+      $autre = db()->prepare('SELECT client_id FROM comptes_clients WHERE email = ? AND client_id <> ?');
+      $autre->execute([$email, $client]);
+      if ($autre->fetchColumn()) echec('Cet email est déjà utilisé pour un autre client.', 409);
+      $jeton = bin2hex(random_bytes(24));
+      $expire = date('Y-m-d H:i:s', time() + 7 * 86400);
+      $existe = db()->prepare('SELECT id FROM comptes_clients WHERE client_id = ?');
+      $existe->execute([$client]);
+      if ($existe->fetchColumn()) {
+        db()->prepare('UPDATE comptes_clients SET email = ?, invitation = ?, invitation_expire = ?, actif = 1 WHERE client_id = ?')->execute([$email, hash('sha256', $jeton), $expire, $client]);
+      } else {
+        db()->prepare('INSERT INTO comptes_clients (client_id, email, invitation, invitation_expire, cree) VALUES (?, ?, ?, ?, ?)')->execute([$client, $email, hash('sha256', $jeton), $expire, maintenant()]);
+      }
+      if ($c['email'] === '') db()->prepare('UPDATE clients SET email = ? WHERE id = ?')->execute([$email, $client]);
+      $lien = (est_https() ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'bdasecurite.com') . '/espace-client#invitation=' . $jeton;
+      $envoye = false;
+      if (!empty($b['envoyer'])) {
+        $envoye = envoyer_mail('Votre espace client BDA Sécurité', "Bonjour,\n\nVotre espace client BDA Sécurité est prêt. Vous y retrouverez vos devis, vos factures et le planning de vos agents.\n\nPour l'activer, choisissez votre mot de passe avec ce lien (valable 7 jours) :\n$lien\n\nVotre identifiant : $email\n\nÀ très bientôt,\nBDA Sécurité & VTC Premium — 06 11 67 86 25", BDA_EMAIL, $email);
+      }
+      journal('securite', "Espace client : lien d'invitation créé pour {$c['nom']} ($email)" . ($envoye ? ', envoyé par email' : ''));
+      repondre(['ok' => true, 'lien' => $lien, 'expire' => $expire, 'envoye' => $envoye]);
+
+    case 'client.acces.activer':
+      $b = corps();
+      db()->prepare('UPDATE comptes_clients SET actif = ? WHERE client_id = ?')->execute([empty($b['actif']) ? 0 : 1, (int)($b['client'] ?? 0)]);
+      journal('securite', 'Espace client ' . (empty($b['actif']) ? 'désactivé' : 'réactivé') . ' pour le client n° ' . (int)($b['client'] ?? 0));
       repondre(['ok' => true]);
 
     /* ================= Notes ================= */

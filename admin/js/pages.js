@@ -380,6 +380,7 @@ async function pageClients(ctx) {
       contenu: h('div', { class: 'form-grille' }, champ('Nom ou société', f.nom), champ('Adresse', f.adresse), champ('Téléphone', f.tel), champ('Email', f.email), champ('Notes (privées)', f.notes)),
       actions: [
         c.id ? { libelle: 'Supprimer', classe: 'btn--danger-ghost', valeur: 'supprimer' } : null,
+        c.id ? { libelle: 'Espace client', classe: 'btn--ghost', valeur: 'acces' } : null,
         c.id ? { libelle: 'Créer un devis', classe: 'btn--ghost', valeur: 'devis' } : null,
         { libelle: 'Enregistrer', classe: 'btn--gold', submit: true, action: async () => {
           if (!f.nom.value.trim()) { f.nom.focus(); return false; }
@@ -391,6 +392,8 @@ async function pageClients(ctx) {
       if (choix === 'supprimer') {
         if (!(await confirmer(`Supprimer ${c.nom} de vos clients ? Ses devis et factures sont conservés.`, { ok: 'Supprimer', danger: true }))) return;
         await api('client.supprimer', { id: c.id });
+      } else if (choix === 'acces') {
+        return accesClient(c);
       } else if (choix === 'devis') {
         sessionStorage.setItem('bda-prefill-devis', JSON.stringify({ client: { nom: c.nom, adresse: [c.adresse, c.tel ? `TÉL : ${c.tel}` : '', c.email].filter(Boolean).join('\n') } }));
         return ctx.aller('#/devis/nouveau');
@@ -404,6 +407,52 @@ async function pageClients(ctx) {
   dessiner();
 }
 
+
+/* ---------- Espace client : créer l'accès, envoyer le lien d'invitation ---------- */
+async function accesClient(c) {
+  let acces;
+  try { ({ acces } = await api('client.acces', undefined, { client: c.id })); } catch (e) { return erreur(e); }
+  const email = saisie({ type: 'email', value: acces?.email || c.email || '', placeholder: 'email@client.fr' });
+  const statut = !acces ? ['Pas encore d’accès', 'brouillon']
+    : +acces.actif === 0 ? ['Accès désactivé', 'refuse']
+    : +acces.active ? [`Actif · dernière connexion : ${acces.derniere ? dateLisible(acces.derniere, true) : 'jamais'}`, 'payee']
+    : ['Invitation créée, en attente d’activation', 'attente'];
+  const zoneLien = h('div');
+  const montrerLien = (lien) => {
+    const texte = `Bonjour, voici votre accès à l’espace client BDA Sécurité (devis, factures, planning). Choisissez votre mot de passe ici : ${lien}`;
+    zoneLien.replaceChildren(h('div', { class: 'lien-acces' },
+      h('small', null, 'Lien d’activation (valable 7 jours) — à envoyer au client :'),
+      h('input', { class: 'input', readonly: true, value: lien, onfocus: (e) => e.target.select() }),
+      h('div', { class: 'lien-acces__boutons' },
+        h('button', { class: 'btn btn--gold btn--petit', type: 'button', onclick: async () => { try { await navigator.clipboard.writeText(lien); toast('Lien copié.'); } catch (e) { erreur(e); } } }, icone('copier'), 'Copier'),
+        h('a', { class: 'btn btn--ghost btn--petit', href: `https://wa.me/?text=${encodeURIComponent(texte)}`, target: '_blank', rel: 'noopener' }, 'WhatsApp'),
+        h('a', { class: 'btn btn--ghost btn--petit', href: `mailto:${encodeURIComponent(email.value.trim())}?subject=${encodeURIComponent('Votre espace client BDA Sécurité')}&body=${encodeURIComponent(texte)}` }, icone('mail'), 'Email'))));
+  };
+  const creer = async (envoyer) => {
+    try {
+      const r = await api('client.acces.creer', { client: c.id, email: email.value.trim(), envoyer });
+      montrerLien(r.lien);
+      toast(envoyer ? (r.envoye ? 'Invitation envoyée par email au client.' : 'Lien créé, mais l’email n’a pas pu partir : copiez le lien.') : 'Lien créé : envoyez-le au client.');
+    } catch (e) { erreur(e); }
+    return false; // la fenêtre reste ouverte pour copier le lien
+  };
+  await modale({
+    titre: `Espace client — ${c.nom}`,
+    contenu: [
+      h('p', { class: 'astuce' }, 'Le client se connecte sur bdasecurite.com/espace-client et voit ses devis et factures envoyés (jamais les brouillons) et ses plannings. Il peut accepter un devis en ligne.'),
+      h('p', null, statutPastille(statut[1], statut[0])),
+      champ('Email du client (son identifiant)', email),
+      zoneLien,
+    ],
+    actions: [
+      acces ? { libelle: +acces.actif === 0 ? 'Réactiver l’accès' : 'Désactiver l’accès', classe: +acces.actif === 0 ? 'btn--ghost' : 'btn--danger-ghost', action: async () => {
+        try { await api('client.acces.activer', { client: c.id, actif: +acces.actif === 0 }); toast(+acces.actif === 0 ? 'Accès réactivé.' : 'Accès désactivé : le client ne peut plus se connecter.'); return true; } catch (e) { erreur(e); return false; }
+      } } : null,
+      { libelle: 'Créer et envoyer par email', classe: 'btn--ghost', action: () => creer(true) },
+      { libelle: acces ? 'Nouveau lien' : 'Créer l’accès', classe: 'btn--gold', submit: true, action: () => creer(false) },
+    ].filter(Boolean),
+  });
+}
 /* =========================================================
    PARAMÈTRES
    ========================================================= */

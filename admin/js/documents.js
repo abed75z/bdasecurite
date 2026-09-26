@@ -124,10 +124,13 @@ export async function editeurDocument(ctx, type, param) {
   let id = /^\d+$/.test(param) ? +param : 0;
   let statut = 'brouillon';
   let data, prerempli = false;
+  let partage = '', vuClient = '';
   if (id) {
     const { document: d } = await api('document', undefined, { id });
     data = d.data || {};
     statut = d.statut;
+    partage = d.partage || '';
+    vuClient = d.vu_client || '';
   } else {
     const { numero } = await api('numero', undefined, { type });
     data = nouveauDocument(type, r, numero);
@@ -193,7 +196,37 @@ export async function editeurDocument(ctx, type, param) {
     h('button', { class: 'btn btn--danger-ghost btn--bloc', type: 'button', onclick: () => supprimer() }, icone('poubelle'), 'Supprimer'),
   ];
 
+  /* ----- Espace client : envoyer le document au client ----- */
+  const blocEspace = h('section', { class: 'panneau__bloc panneau__bloc--espace' });
+  const dessinerEspace = () => {
+    const quand = (s) => `${s.slice(8, 10)}/${s.slice(5, 7)} à ${s.slice(11, 16)}`;
+    blocEspace.replaceChildren(h('h3', null, 'Espace client'),
+      partage
+        ? h('p', { class: 'espace-etat is-on' }, icone('coche'), h('span', null, `Envoyé le ${quand(partage)}`, h('br'), vuClient ? `Ouvert par le client le ${quand(vuClient)}` : 'Pas encore ouvert par le client'))
+        : h('p', { class: 'espace-etat' }, icone('envoyer'), h('span', null, `Le client ne voit pas encore ce ${type === 'facture' ? 'document' : 'devis'}.`)),
+      partage
+        ? h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => partager(false) }, icone('croix'), 'Retirer de l’espace client')
+        : h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: () => partager(true) }, icone('envoyer'), 'Envoyer dans l’espace client'));
+  };
+  async function partager(oui) {
+    if (!data.client?.nom?.trim()) return toast('Indiquez d’abord le client sur la feuille.', 'erreur');
+    if (oui && !(await confirmer(`Envoyer ${type === 'facture' ? 'la facture' : 'le devis'} ${data.numero} dans l’espace client de « ${data.client.nom} » ? Le client sera prévenu par email.`, { titre: 'Espace client', ok: 'Envoyer' }))) return;
+    try {
+      plusTard.annuler();
+      await enregistrer();
+      const r = await api('document.partager', { id, partager: oui });
+      partage = r.partage || '';
+      if (oui) {
+        if (r.statut && r.statut !== statut) { statut = r.statut; $$('.statut-btn', choixStatut).forEach((b) => b.classList.toggle('is-actif', b.textContent === LIBELLE_STATUT[statut])); }
+        toast(r.actif ? (r.email ? 'Envoyé : le client est prévenu par email.' : 'Envoyé dans l’espace client (email non parti).') : 'Déposé, mais l’accès du client est désactivé.');
+      } else toast('Retiré de l’espace client.');
+      dessinerEspace();
+    } catch (e) { erreur(e); }
+  }
+  dessinerEspace();
+
   const panneau = h('aside', { class: 'panneau' },
+    blocEspace,
     h('section', { class: 'panneau__bloc' }, h('h3', null, 'Statut'), choixStatut),
     h('section', { class: 'panneau__bloc' }, h('h3', null, 'Client'), selClient,
       h('button', { type: 'button', class: 'lien-btn', onclick: () => enregistrerClient() }, icone('plus'), 'Ajouter ce client à mes clients')),

@@ -19,6 +19,7 @@ const MENU = [
   { route: 'factures', libelle: 'Factures', icone: 'facture', badge: 'retards', alerte: true },
   { route: 'planning', libelle: 'Planning', icone: 'planning' },
   { route: 'clients', libelle: 'Clients', icone: 'clients' },
+  { route: 'messages', libelle: 'Messages clients', icone: 'mail', badge: 'messages' },
   { groupe: 'VTC' },
   { route: 'vtc', libelle: 'Réservations', icone: 'voiture', badge: 'reservations' },
   { groupe: 'Équipe' },

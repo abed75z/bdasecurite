@@ -25,7 +25,7 @@ if (!in_array($action, $libres, true) && !connecte()) echec('Connexion requise.'
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
+$lecture = ['session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -658,6 +658,65 @@ try {
       journal('securite', 'Espace client ' . (empty($b['actif']) ? 'désactivé' : 'réactivé') . ' pour le client n° ' . (int)($b['client'] ?? 0));
       repondre(['ok' => true]);
 
+    /* ================= Espace client : envoi des documents et messagerie ================= */
+    case 'document.partager':
+      $b = corps();
+      $st = db()->prepare('SELECT id, type, numero, statut, client FROM documents WHERE id = ?');
+      $st->execute([(int)($b['id'] ?? 0)]);
+      $d = $st->fetch();
+      if (!$d) echec('Document introuvable : enregistrez-le d’abord.', 404);
+      $nom = $d['type'] === 'facture' ? 'Facture' : 'Devis';
+      if (empty($b['partager'])) {
+        db()->prepare("UPDATE documents SET partage = '' WHERE id = ?")->execute([$d['id']]);
+        journal('document', "$nom {$d['numero']} retiré de l’espace client de {$d['client']}");
+        repondre(['ok' => true, 'partage' => '']);
+      }
+      $cpt = db()->prepare('SELECT cc.email, cc.actif, c.nom FROM comptes_clients cc JOIN clients c ON c.id = cc.client_id WHERE lower(trim(c.nom)) = ?');
+      $cpt->execute([mb_strtolower(trim((string)$d['client']))]);
+      $compte = $cpt->fetch();
+      if (!$compte) echec("« {$d['client']} » n’a pas encore d’espace client. Créez-le dans Clients > fiche du client > Espace client (le nom doit être identique à celui du document).", 409);
+      $statut = $d['statut'] === 'brouillon' ? ($d['type'] === 'facture' ? 'envoyee' : 'envoye') : $d['statut'];
+      $quand = maintenant();
+      db()->prepare('UPDATE documents SET partage = ?, statut = ?, maj = ? WHERE id = ?')->execute([$quand, $statut, $quand, $d['id']]);
+      $mail = false;
+      if ((int)$compte['actif'] === 1) {
+        $mail = envoyer_mail("$nom {$d['numero']} disponible dans votre espace client", "Bonjour,\n\nBDA Sécurité vient de déposer " . ($d['type'] === 'facture' ? 'une nouvelle facture' : 'un nouveau devis') . " ({$d['numero']}) dans votre espace client.\n\nConsultez-" . ($d['type'] === 'facture' ? 'la' : 'le') . " ici : https://bdasecurite.com/espace-client\n\nBDA Sécurité & VTC Premium — 06 11 67 86 25", BDA_EMAIL, $compte['email']);
+      }
+      journal('document', "$nom {$d['numero']} envoyé dans l’espace client de {$d['client']}" . ($mail ? ' (client prévenu par email)' : ''));
+      repondre(['ok' => true, 'partage' => $quand, 'statut' => $statut, 'email' => $mail, 'actif' => (int)$compte['actif'] === 1]);
+
+    case 'messages.clients':
+      $lignes = db()->query("SELECT c.id, c.nom, m.texte, m.auteur, m.cree,
+          (SELECT COUNT(*) FROM messages_clients x WHERE x.client_id = c.id AND x.auteur = 'client' AND x.lu = 0) AS non_lus
+        FROM clients c JOIN messages_clients m ON m.id = (SELECT MAX(id) FROM messages_clients WHERE client_id = c.id)
+        ORDER BY m.id DESC")->fetchAll();
+      $avecCompte = db()->query('SELECT c.id, c.nom FROM clients c JOIN comptes_clients cc ON cc.client_id = c.id WHERE cc.actif = 1 ORDER BY c.nom COLLATE NOCASE')->fetchAll();
+      repondre(['ok' => true, 'conversations' => $lignes, 'clients' => $avecCompte]);
+
+    case 'messages.client':
+      $id = (int)($_GET['client'] ?? 0);
+      $st = db()->prepare('SELECT id, auteur, texte, cree, lu FROM messages_clients WHERE client_id = ? ORDER BY id');
+      $st->execute([$id]);
+      $liste = $st->fetchAll();
+      db()->prepare("UPDATE messages_clients SET lu = 1 WHERE client_id = ? AND auteur = 'client' AND lu = 0")->execute([$id]);
+      $c = db()->prepare('SELECT c.nom, c.tel, cc.email, cc.derniere FROM clients c LEFT JOIN comptes_clients cc ON cc.client_id = c.id WHERE c.id = ?');
+      $c->execute([$id]);
+      repondre(['ok' => true, 'client' => $c->fetch() ?: null, 'messages' => $liste]);
+
+    case 'message.repondre':
+      $b = corps();
+      $id = (int)($b['client'] ?? 0);
+      $texte = texte($b['texte'] ?? '', 4000);
+      if (mb_strlen($texte) < 1) echec('Écrivez votre réponse.');
+      $st = db()->prepare('SELECT c.nom, cc.email, cc.actif FROM clients c JOIN comptes_clients cc ON cc.client_id = c.id WHERE c.id = ?');
+      $st->execute([$id]);
+      $c = $st->fetch();
+      if (!$c) echec('Ce client n’a pas d’espace client.', 404);
+      db()->prepare("INSERT INTO messages_clients (client_id, auteur, texte, cree, lu) VALUES (?, 'admin', ?, ?, 0)")->execute([$id, $texte, maintenant()]);
+      if ((int)$c['actif'] === 1) envoyer_mail('Nouveau message de BDA Sécurité', "Bonjour,\n\nBDA Sécurité vous a répondu dans votre espace client :\n\n« $texte »\n\nRépondre : https://bdasecurite.com/espace-client#/messages\n\nBDA Sécurité & VTC Premium — 06 11 67 86 25", BDA_EMAIL, $c['email']);
+      journal('site', "Réponse envoyée à {$c['nom']} (espace client)");
+      repondre(['ok' => true]);
+
     /* ================= Notes ================= */
     case 'notes':
       repondre(['ok' => true, 'notes' => db()->query('SELECT * FROM notes ORDER BY epingle DESC, maj DESC LIMIT 500')->fetchAll()]);
@@ -809,6 +868,7 @@ function compteurs(): array
     'avis' => $q("SELECT COUNT(*) FROM avis WHERE statut = 'attente'"),
     'retards' => (int)$retards->fetchColumn(),
     'horsLigne' => site_hors_ligne() ? 1 : 0,
+    'messages' => $q("SELECT COUNT(*) FROM messages_clients WHERE auteur = 'client' AND lu = 0"),
   ];
 }
 // Page d'accueil : ce qui attend une action, et les derniers éléments modifiés (aucun montant)

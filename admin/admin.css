@@ -842,3 +842,38 @@ code { font-family: var(--mono); font-size: 0.92em; color: var(--gold-light); ba
 .lien-acces small { color: var(--text-2); font-size: 12px; }
 .lien-acces .input { font-family: var(--mono); font-size: 11.5px; }
 .lien-acces__boutons { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Éditeur de devis/facture : envoi dans l'espace client */
+.panneau__bloc--espace { border-color: rgba(201, 165, 92, 0.35) !important; background: linear-gradient(160deg, rgba(201, 165, 92, 0.1), transparent 70%); }
+.espace-etat { display: flex; gap: 8px; align-items: flex-start; margin: 0 0 10px; color: var(--muted); font-size: 12.5px; line-height: 1.45; }
+.espace-etat .ic { width: 16px; height: 16px; flex: none; margin-top: 1px; }
+.espace-etat.is-on { color: var(--text-2); }
+.espace-etat.is-on .ic { color: var(--green); }
+
+/* ---------- Messages clients ---------- */
+.messagerie { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px; align-items: start; }
+.conv-col { display: grid; gap: 12px; }
+.conv-liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.conv { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); transition: border-color 0.2s; }
+.conv:hover { border-color: rgba(201, 165, 92, 0.4); }
+.conv.is-actif { border-color: var(--gold); background: linear-gradient(90deg, rgba(201, 165, 92, 0.14), var(--surface)); }
+.conv__avatar { display: grid; place-items: center; width: 38px; height: 38px; flex: none; border-radius: 50%; background: var(--gold-grad); color: #17130a; font-weight: 700; text-transform: uppercase; }
+.conv__txt { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.conv__txt b { font-size: 13.5px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conv__txt small { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.conv__meta { display: grid; justify-items: end; gap: 4px; flex: none; }
+.conv__meta small { color: var(--muted); font-size: 10.5px; }
+.conv__badge { min-width: 20px; padding: 0 6px; border-radius: 99px; background: var(--gold); color: #17130a; font-style: normal; font-size: 11px; font-weight: 700; line-height: 19px; text-align: center; }
+.fil { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 520px; border-radius: 16px; border: 1px solid var(--line); background: linear-gradient(180deg, #16161a, #121215); overflow: hidden; }
+.fil__tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.fil__tete b { display: block; color: var(--text); }
+.fil__tete small { color: var(--muted); font-size: 12px; }
+.fil__messages { display: flex; flex-direction: column; gap: 10px; padding: 18px; max-height: 60vh; overflow-y: auto; }
+.bulle { max-width: 78%; padding: 10px 14px; border-radius: 16px; }
+.bulle p { margin: 0 0 4px; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.5; }
+.bulle small { color: var(--muted); font-size: 11px; }
+.bulle--client { align-self: flex-start; background: var(--surface-3); border-bottom-left-radius: 4px; }
+.bulle--admin { align-self: flex-end; background: linear-gradient(135deg, rgba(201, 165, 92, 0.3), rgba(201, 165, 92, 0.14)); border: 1px solid rgba(201, 165, 92, 0.35); border-bottom-right-radius: 4px; }
+.fil__envoi { display: flex; gap: 10px; align-items: flex-end; padding: 12px; border-top: 1px solid var(--line); }
+.fil__saisie { flex: 1; resize: vertical; min-height: 52px; }
+@media (max-width: 900px) { .messagerie { grid-template-columns: 1fr; } }

@@ -14,6 +14,7 @@ import { pageVisites } from './visites.js';
 import { pageAgents } from './agents.js';
 import { pageVtc } from './vtc.js';
 import { pageSite } from './site.js';
+import { pageMessages } from './messages.js';
 import { pageNotes } from './notes.js';
 import { pageSecurite, ligneJournal } from './securite.js';
 
@@ -27,6 +28,7 @@ export const PAGES = {
   agents: pageAgents,
   vtc: pageVtc,
   site: pageSite,
+  messages: pageMessages,
   notes: pageNotes,
   securite: pageSecurite,
   cartes: pageCartes,
@@ -127,6 +129,7 @@ async function pageAccueil(ctx) {
   /* ----- À traiter ----- */
   const taches = [
     c.horsLigne && { n: '!', href: '#/site', titre: 'Votre site est hors ligne', sous: 'Les visiteurs voient la page Maintenance · remettez-le en ligne en un clic', alerte: true },
+    c.messages && { n: c.messages, href: '#/messages', titre: pluriel(c.messages, 'nouveau message client', 'nouveaux messages clients'), sous: 'Depuis l’espace client · répondez depuis l’admin' },
     c.reservations && { n: c.reservations, href: '#/vtc', titre: pluriel(c.reservations, 'réservation VTC à confirmer', 'réservations VTC à confirmer'), sous: 'Page de réservation du site' },
     c.demandes && { n: c.demandes, href: '#/demandes', titre: pluriel(c.demandes, 'nouvelle demande de devis', 'nouvelles demandes de devis'), sous: 'Reçues depuis le site' },
     c.avis && { n: c.avis, href: '#/avis', titre: pluriel(c.avis, 'avis à valider', 'avis à valider'), sous: 'Publiez-les ou refusez-les' },

@@ -160,6 +160,16 @@ function schema(PDO $db): void
       PRAGMA user_version = 6;
     SQL);
   }
+  if ($version < 7) {
+    // Espace client : documents envoyés explicitement depuis l'admin, lecture par le client, messagerie
+    $db->exec(<<<'SQL'
+      ALTER TABLE documents ADD COLUMN partage TEXT NOT NULL DEFAULT '';
+      ALTER TABLE documents ADD COLUMN vu_client TEXT NOT NULL DEFAULT '';
+      CREATE TABLE IF NOT EXISTS messages_clients (id INTEGER PRIMARY KEY, client_id INTEGER NOT NULL, auteur TEXT NOT NULL, texte TEXT NOT NULL, cree TEXT NOT NULL, lu INTEGER NOT NULL DEFAULT 0);
+      CREATE INDEX IF NOT EXISTS i_messages_clients ON messages_clients (client_id, id);
+      PRAGMA user_version = 7;
+    SQL);
+  }
 }
 
 /* ---------- Outils ---------- */

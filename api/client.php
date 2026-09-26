@@ -2,10 +2,10 @@
 /* =========================================================
    ESPACE CLIENT — API réservée aux clients (bdasecurite.com/espace-client)
    Session séparée de l'espace admin (cookie BDA_CLIENT).
-   Un client ne voit que SES documents envoyés (jamais les brouillons)
-   et SES plannings, reconnus au nom du client.
-   GET  ?a=session | tableau | document&id= | planning&mois= | invitation&jeton=
-   POST ?a=connexion | invitation | deconnexion | motdepasse | devis.accepter
+   Un client ne voit que les documents que BDA lui a envoyés depuis l'admin
+   (reconnus au nom du client), et sa messagerie avec BDA.
+   GET  ?a=session | tableau | document&id= | messages | invitation.verifier&jeton=
+   POST ?a=connexion | invitation | deconnexion | motdepasse | devis.accepter | message.envoyer
    ========================================================= */
 declare(strict_types=1);
 require __DIR__ . '/../app/bootstrap.php';
@@ -27,7 +27,7 @@ if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
 
 $action = (string)($_GET['a'] ?? '');
 $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$lectures = ['session', 'tableau', 'document', 'planning', 'invitation.verifier'];
+$lectures = ['session', 'tableau', 'document', 'messages', 'invitation.verifier'];
 if (in_array($action, $lectures, true) !== ($methode === 'GET')) echec('Méthode non autorisée.', 405);
 if ($methode === 'POST') {
   if (!origine_ok()) echec('Origine refusée.', 403);
@@ -135,44 +135,53 @@ try {
 
     case 'tableau':
       $c = exiger_compte();
-      $st = db()->prepare("SELECT id, type, numero, statut, total, date, echeance FROM documents WHERE lower(trim(client)) = ? AND statut <> 'brouillon' ORDER BY date DESC, id DESC");
+      // Seuls les documents envoyés depuis l'admin (« Envoyer dans l'espace client ») sont visibles
+      $st = db()->prepare("SELECT id, type, numero, statut, total, date, echeance, partage, vu_client FROM documents WHERE lower(trim(client)) = ? AND partage <> '' ORDER BY partage DESC, id DESC");
       $st->execute([cle_client($c['nom'])]);
       $docs = $st->fetchAll();
-      $mois = [];
-      foreach (db()->query('SELECT mois, data FROM plannings ORDER BY mois DESC') as $p) {
-        $d = json_decode((string)$p['data'], true) ?: [];
-        if (cle_client((string)($d['client'] ?? '')) === cle_client($c['nom']) && !empty($d['agents'])) $mois[] = ['mois' => $p['mois'], 'site' => (string)($d['site'] ?? ''), 'mission' => (string)($d['mission'] ?? '')];
-      }
+      $nl = db()->prepare("SELECT COUNT(*) FROM messages_clients WHERE client_id = ? AND auteur = 'admin' AND lu = 0");
+      $nl->execute([$c['client_id']]);
       repondre(['ok' => true, 'client' => ['nom' => $c['nom'], 'adresse' => $c['adresse'], 'tel' => $c['tel'], 'email' => $c['email']],
         'devis' => array_values(array_filter($docs, fn($d) => $d['type'] === 'devis')),
         'factures' => array_values(array_filter($docs, fn($d) => $d['type'] === 'facture')),
-        'plannings' => $mois]);
+        'messagesNonLus' => (int)$nl->fetchColumn()]);
 
     case 'document':
       $c = exiger_compte();
-      $st = db()->prepare("SELECT id, type, numero, statut, total, date, echeance, data FROM documents WHERE id = ? AND lower(trim(client)) = ? AND statut <> 'brouillon'");
+      $st = db()->prepare("SELECT id, type, numero, statut, total, date, echeance, partage, vu_client, data FROM documents WHERE id = ? AND lower(trim(client)) = ? AND partage <> ''");
       $st->execute([(int)($_GET['id'] ?? 0), cle_client($c['nom'])]);
       $d = $st->fetch();
       if (!$d) echec('Document introuvable.', 404);
+      if ($d['vu_client'] === '') {
+        db()->prepare('UPDATE documents SET vu_client = ? WHERE id = ?')->execute([maintenant(), $d['id']]);
+        journal('document', ($d['type'] === 'facture' ? 'Facture ' : 'Devis ') . "{$d['numero']} ouvert par {$c['nom']} dans son espace client");
+      }
       $d['data'] = json_decode((string)$d['data'], true) ?: [];
       repondre(['ok' => true, 'document' => $d]);
 
-    case 'planning':
+    /* ----- Messagerie avec BDA Sécurité ----- */
+    case 'messages':
       $c = exiger_compte();
-      $mois = (string)($_GET['mois'] ?? '');
-      if (!preg_match('/^\d{4}-\d{2}$/', $mois)) echec('Mois invalide.');
-      $st = db()->prepare('SELECT data FROM plannings WHERE mois = ?');
-      $st->execute([$mois]);
-      $d = json_decode((string)$st->fetchColumn(), true) ?: [];
-      if (cle_client((string)($d['client'] ?? '')) !== cle_client($c['nom'])) echec('Planning introuvable.', 404);
-      // Le client voit les créneaux et les noms des agents, pas les notes internes
-      repondre(['ok' => true, 'planning' => ['client' => $d['client'] ?? '', 'site' => $d['site'] ?? '', 'mission' => $d['mission'] ?? '', 'nuitDebut' => $d['nuitDebut'] ?? '21:00', 'nuitFin' => $d['nuitFin'] ?? '06:00',
-        'agents' => array_map(fn($a) => ['nom' => (string)($a['nom'] ?? ''), 'poste' => (string)($a['poste'] ?? ''), 'jours' => $a['jours'] ?? (object)[]], $d['agents'] ?? [])]]);
+      $st = db()->prepare('SELECT id, auteur, texte, cree FROM messages_clients WHERE client_id = ? ORDER BY id DESC LIMIT 200');
+      $st->execute([$c['client_id']]);
+      $liste = array_reverse($st->fetchAll());
+      db()->prepare("UPDATE messages_clients SET lu = 1 WHERE client_id = ? AND auteur = 'admin' AND lu = 0")->execute([$c['client_id']]);
+      repondre(['ok' => true, 'messages' => $liste]);
+
+    case 'message.envoyer':
+      $c = exiger_compte();
+      $texte = texte(corps()['texte'] ?? '', 4000);
+      if (mb_strlen($texte) < 2) echec('Écrivez votre message.');
+      if (!limiter('client-message:' . $c['client_id'], 20, 3600)) echec('Trop de messages envoyés. Réessayez dans un moment ou appelez-nous au 06 11 67 86 25.', 429);
+      db()->prepare("INSERT INTO messages_clients (client_id, auteur, texte, cree) VALUES (?, 'client', ?, ?)")->execute([$c['client_id'], $texte, maintenant()]);
+      journal('site', "Nouveau message de {$c['nom']} (espace client)");
+      envoyer_mail("Message de {$c['nom']} — espace client", "{$c['nom']} vous a écrit depuis son espace client :\n\n$texte\n\n—\nRépondre depuis l'admin : https://bdasecurite.com/admin/#/messages\nOu répondez directement à cet email ({$c['email']}).", $c['email']);
+      repondre(['ok' => true]);
 
     case 'devis.accepter':
       $c = exiger_compte();
       $id = (int)(corps()['id'] ?? 0);
-      $st = db()->prepare("SELECT id, numero, statut FROM documents WHERE id = ? AND type = 'devis' AND lower(trim(client)) = ?");
+      $st = db()->prepare("SELECT id, numero, statut FROM documents WHERE id = ? AND type = 'devis' AND lower(trim(client)) = ? AND partage <> ''");
       $st->execute([$id, cle_client($c['nom'])]);
       $d = $st->fetch();
       if (!$d) echec('Devis introuvable.', 404);

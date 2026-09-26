@@ -220,7 +220,7 @@ strong { color: var(--text); font-weight: 600; }
 .mobile-menu__link:hover { color: var(--gold-light); }
 .mobile-menu__foot { margin-top: auto; display: grid; gap: 12px; }
 
-@media (max-width: 1260px) {
+@media (max-width: 1440px) {
   .nav__links { display: none; }
   .nav__actions { margin-left: auto; }
   .burger { display: block; }
@@ -385,3 +385,10 @@ html.a-annonce .mobile-menu { padding-top: calc(var(--nav-h) + var(--annonce-h, 
 .footer::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(212, 169, 79, 0.55), transparent); }
 .footer h4 { color: var(--gold-light); }
 .footer__legal { border-top-color: rgba(255, 255, 255, 0.06); }
+
+/* Bouton « Espace client » (barre du haut) : icône dorée ; sur écran moyen, « Appeler » passe en icône */
+.nav__client .icon { color: var(--gold); }
+@media (max-width: 1500px) and (min-width: 641px) {
+  .nav__actions .btn--outline[href^="tel"] { width: 46px; height: 46px; padding: 0; }
+  .nav__actions .btn--outline[href^="tel"] span { display: none; }
+}

@@ -171,7 +171,7 @@ $anglais = [
   '>Chauffeur privé VTC</a>' => '>Private chauffeur</a>', '>Transfert aéroport</a>' => '>Airport transfers</a>', '>Avis clients</a>' => '>Reviews</a>',
   '<h4>Sécurité privée</h4>' => '<h4>Private security</h4>', '<h4>VTC Premium</h4>' => '<h4>Chauffeur</h4>', '>Agents de sécurité</a>' => '>Security guards</a>',
   '>Chauffeur + sécurité VIP</a>' => '>Chauffeur + VIP security</a>', '>Transferts aéroports</a>' => '>Airport transfers</a>', '>Chauffeur mariage</a>' => '>Wedding chauffeur</a>',
-  '>Nous rejoindre</a>' => '>Careers</a>', '>Nos références</a>' => '>References</a>', '>Espace client</a>' => '>Client area</a>', '>English version</a>' => '>Version française</a>',
+  '>Nous rejoindre</a>' => '>Careers</a>', '<span>Espace client</span>' => '<span>Client area</span>', '</svg> Espace client</a>' => '</svg> Client area</a>', 'aria-label="Espace client"' => 'aria-label="Client area"', '>Nos références</a>' => '>References</a>', '>Espace client</a>' => '>Client area</a>', '>English version</a>' => '>Version française</a>',
   'Sécurité privée et transport haut de gamme à Paris : protection, ponctualité et sérénité, 24h/24 et 7j/7.' => 'Private security and premium transport in Paris: protection, punctuality and peace of mind, 24/7.',
   '24h/24 · 7j/7' => '24/7', '<span>Écrivez-nous</span>' => '<span>Message us</span>', 'href="en" hreflang="en"' => 'href="/" hreflang="fr"',
 ];

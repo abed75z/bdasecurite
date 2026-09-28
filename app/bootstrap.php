@@ -170,6 +170,14 @@ function schema(PDO $db): void
       PRAGMA user_version = 7;
     SQL);
   }
+  if ($version < 8) {
+    // Comptes de l'équipe : rôle « admin » (accès total) ou « manager » (gestion courante)
+    $db->exec(<<<'SQL'
+      ALTER TABLE utilisateurs ADD COLUMN role TEXT NOT NULL DEFAULT 'admin';
+      ALTER TABLE utilisateurs ADD COLUMN nom TEXT NOT NULL DEFAULT '';
+      PRAGMA user_version = 8;
+    SQL);
+  }
 }
 
 /* ---------- Outils ---------- */

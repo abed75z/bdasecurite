@@ -40,6 +40,36 @@ function connecte(): bool
 {
   return !empty($_SESSION['uid']);
 }
+
+/* ---------- Comptes de l'équipe et rôles ----------
+   admin   : accès total (le premier compte créé, celui du gérant, reste toujours admin)
+   manager : gestion courante (demandes, devis, factures, planning, agents, clients, VTC…),
+             sans les comptes, les réglages sensibles (IBAN), la sauvegarde complète,
+             la mise hors ligne du site ni les suppressions définitives. */
+const ROLES = ['admin', 'manager'];
+const ACTIONS_ADMIN = [
+  'utilisateurs', 'utilisateur.creer', 'utilisateur.modifier', 'utilisateur.supprimer',
+  'reglages.enregistrer', 'export', 'import', 'site.horsligne', 'connexions', 'connexion.revoquer', 'vtc.tarifs.enregistrer',
+  'chef.memoriser', 'chef.oublier', 'chef.appareils', 'chef.revoquer',
+  'agent.supprimer', 'client.supprimer', 'document.supprimer',
+];
+function utilisateur_courant(): ?array
+{
+  if (!connecte()) return null;
+  $st = db()->prepare('SELECT id, login, role, nom FROM utilisateurs WHERE id = ?');
+  $st->execute([(int)$_SESSION['uid']]);
+  return $st->fetch() ?: null;
+}
+function role_courant(): string
+{
+  $u = utilisateur_courant();
+  return $u ? (string)$u['role'] : '';
+}
+// Le compte du gérant : le premier créé (activation)
+function id_proprietaire(): int
+{
+  return (int)db()->query('SELECT MIN(id) FROM utilisateurs')->fetchColumn();
+}
 function nb_utilisateurs(): int
 {
   return (int)db()->query('SELECT COUNT(*) FROM utilisateurs')->fetchColumn();
@@ -50,6 +80,7 @@ function etat_session(): array
     'connecte' => connecte(),
     'activation' => nb_utilisateurs() === 0,
     'utilisateur' => connecte() ? (string)$_SESSION['login'] : '',
+    'role' => connecte() ? role_courant() : '',
     'depuis' => connecte() ? date('Y-m-d H:i:s', (int)($_SESSION['depuis'] ?? time())) : '',
     'appareil' => connecte() ? appareil() : '',
     'csrf' => (string)$_SESSION['csrf'],

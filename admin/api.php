@@ -22,10 +22,20 @@ if ($methode === 'POST') {
 }
 $libres = ['session', 'connexion', 'activation', 'secours', 'chef.carte', 'chef.oublier'];
 if (!in_array($action, $libres, true) && !connecte()) echec('Connexion requise.', 401);
+// Compte supprimé pendant sa session : il est déconnecté
+if (connecte() && !utilisateur_courant()) {
+  fermer_connexion('compte supprimé');
+  $_SESSION = [];
+  session_regenerate_id(true);
+  $_SESSION['csrf'] = bin2hex(random_bytes(32));
+  if (!in_array($action, $libres, true)) echec('Connexion requise.', 401);
+}
+// Actions réservées aux administrateurs (un manager gère le quotidien)
+if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== 'admin') echec('Action réservée à un administrateur.', 403);
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -115,9 +125,73 @@ try {
       $mdp = chaine($b['nouveau'] ?? '');
       verifier_nouveau_mdp($mdp);
       db()->prepare('UPDATE utilisateurs SET hash = ? WHERE id = ?')->execute([password_hash($mdp, PASSWORD_DEFAULT), $u['id']]);
-      db()->prepare("UPDATE connexions SET fin = 'mot de passe changé' WHERE fin = '' AND jeton <> ?")->execute([(string)($_SESSION['cx'] ?? '')]);
-      chef_enregistrer([]); // les accès directs à la carte sont aussi retirés
-      journal('securite', 'Mot de passe changé : les autres appareils ont été déconnectés');
+      db()->prepare("UPDATE connexions SET fin = 'mot de passe changé' WHERE fin = '' AND uid = ? AND jeton <> ?")->execute([(int)$u['id'], (string)($_SESSION['cx'] ?? '')]);
+      if ((int)$u['id'] === id_proprietaire()) chef_enregistrer([]); // les accès directs à la carte du gérant sont aussi retirés
+      journal('securite', "Mot de passe de « {$u['login']} » changé : ses autres appareils ont été déconnectés");
+      repondre(['ok' => true]);
+
+    /* ================= Comptes de l'équipe (réservé aux administrateurs) ================= */
+    case 'utilisateurs':
+      $l = db()->query('SELECT id, login, nom, role, cree FROM utilisateurs ORDER BY id')->fetchAll();
+      $vu = db()->prepare('SELECT MAX(vu) FROM connexions WHERE uid = ?');
+      foreach ($l as &$u) {
+        $vu->execute([$u['id']]);
+        $u['derniere'] = (string)$vu->fetchColumn();
+        $u['gerant'] = (int)$u['id'] === id_proprietaire();
+        $u['moi'] = (int)$u['id'] === (int)$_SESSION['uid'];
+      }
+      repondre(['ok' => true, 'utilisateurs' => $l]);
+
+    case 'utilisateur.creer':
+      $b = corps();
+      $login = texte($b['login'] ?? '', 40);
+      if (!preg_match('/^[\p{L}\p{N}._@-]{3,40}$/u', $login)) echec('Identifiant : 3 à 40 caractères (lettres, chiffres, point, tiret, @).');
+      $role = in_array($b['role'] ?? '', ROLES, true) ? (string)$b['role'] : 'manager';
+      $mdp = chaine($b['motdepasse'] ?? '');
+      verifier_nouveau_mdp($mdp);
+      $st = db()->prepare('SELECT COUNT(*) FROM utilisateurs WHERE login = ?');
+      $st->execute([$login]);
+      if ((int)$st->fetchColumn()) echec('Cet identifiant existe déjà.', 409);
+      db()->prepare('INSERT INTO utilisateurs (login, hash, cree, role, nom) VALUES (?, ?, ?, ?, ?)')->execute([$login, password_hash($mdp, PASSWORD_DEFAULT), maintenant(), $role, texte($b['nom'] ?? '', 80)]);
+      journal('securite', "Compte créé : « $login » ($role)");
+      repondre(['ok' => true, 'id' => (int)db()->lastInsertId()]);
+
+    case 'utilisateur.modifier':
+      $b = corps();
+      $id = (int)($b['id'] ?? 0);
+      $st = db()->prepare('SELECT * FROM utilisateurs WHERE id = ?');
+      $st->execute([$id]);
+      $u = $st->fetch();
+      if (!$u) echec('Compte introuvable.', 404);
+      if (isset($b['role'])) {
+        if (!in_array($b['role'], ROLES, true)) echec('Rôle inconnu.');
+        if ($id === id_proprietaire() && $b['role'] !== 'admin') echec('Le compte du gérant reste administrateur.', 409);
+        db()->prepare('UPDATE utilisateurs SET role = ? WHERE id = ?')->execute([$b['role'], $id]);
+        journal('securite', "Rôle du compte « {$u['login']} » : {$b['role']}");
+      }
+      if (isset($b['nom'])) db()->prepare('UPDATE utilisateurs SET nom = ? WHERE id = ?')->execute([texte($b['nom'], 80), $id]);
+      if (isset($b['motdepasse'])) {
+        if ($id === (int)$_SESSION['uid']) echec('Pour ton propre mot de passe, utilise « changer le mot de passe ».', 409);
+        if ($id === id_proprietaire()) echec('Le mot de passe du gérant ne se change que par lui-même (ou avec le code de secours).', 403);
+        $mdp = chaine($b['motdepasse']);
+        verifier_nouveau_mdp($mdp);
+        db()->prepare('UPDATE utilisateurs SET hash = ? WHERE id = ?')->execute([password_hash($mdp, PASSWORD_DEFAULT), $id]);
+        db()->prepare("UPDATE connexions SET fin = 'mot de passe réinitialisé' WHERE uid = ? AND fin = ''")->execute([$id]);
+        journal('securite', "Mot de passe du compte « {$u['login']} » réinitialisé par un administrateur");
+      }
+      repondre(['ok' => true]);
+
+    case 'utilisateur.supprimer':
+      $id = (int)(corps()['id'] ?? 0);
+      if ($id === (int)$_SESSION['uid']) echec('Tu ne peux pas supprimer ton propre compte.', 409);
+      if ($id === id_proprietaire()) echec('Le compte du gérant ne peut pas être supprimé.', 409);
+      $st = db()->prepare('SELECT login FROM utilisateurs WHERE id = ?');
+      $st->execute([$id]);
+      $login = $st->fetchColumn();
+      if ($login === false) echec('Compte introuvable.', 404);
+      db()->prepare('DELETE FROM utilisateurs WHERE id = ?')->execute([$id]);
+      db()->prepare("UPDATE connexions SET fin = 'compte supprimé' WHERE uid = ? AND fin = ''")->execute([$id]);
+      journal('securite', "Compte supprimé : « $login »");
       repondre(['ok' => true]);
 
     /* ================= Tableau de bord ================= */
@@ -535,9 +609,9 @@ try {
       repondre(['ok' => true, 'journal' => $st->fetchAll()]);
 
     case 'connexions':
-      $actifs = db()->prepare("SELECT id, jeton, appareil, ip, debut, vu FROM connexions WHERE fin = '' AND vu > ? ORDER BY vu DESC");
+      $actifs = db()->prepare("SELECT c.id, c.jeton, c.appareil, c.ip, c.debut, c.vu, COALESCE(u.login, '') AS login FROM connexions c LEFT JOIN utilisateurs u ON u.id = c.uid WHERE c.fin = '' AND c.vu > ? ORDER BY c.vu DESC");
       $actifs->execute([date('Y-m-d H:i:s', time() - 6 * 3600)]);
-      $liste = array_map(fn($c) => ['id' => (int)$c['id'], 'appareil' => $c['appareil'], 'ip' => $c['ip'], 'debut' => $c['debut'], 'vu' => $c['vu'], 'actuel' => hash_equals((string)$c['jeton'], (string)($_SESSION['cx'] ?? ''))], $actifs->fetchAll());
+      $liste = array_map(fn($c) => ['id' => (int)$c['id'], 'appareil' => $c['appareil'], 'ip' => $c['ip'], 'debut' => $c['debut'], 'vu' => $c['vu'], 'login' => $c['login'], 'actuel' => hash_equals((string)$c['jeton'], (string)($_SESSION['cx'] ?? ''))], $actifs->fetchAll());
       $historique = db()->query('SELECT id, appareil, ip, debut, vu, fin FROM connexions ORDER BY id DESC LIMIT 30')->fetchAll();
       $al = db()->prepare("SELECT COUNT(*) FROM journal WHERE type = 'alerte' AND quand > ?");
       $al->execute([date('Y-m-d H:i:s', time() - 30 * 86400)]);

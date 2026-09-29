@@ -165,3 +165,28 @@
 .capture-pdf .plan .cell .pv { font-size: 6.4pt; }
 .capture-pdf .plan { font-size: 7pt; }
 .capture-pdf .plan td { height: 9mm; }
+
+/* ---------- Planning : heures bien lisibles à l'écran ----------
+   Uniquement dans l'admin : l'impression et le PDF téléchargé (.capture-pdf) gardent le format A4. */
+@media screen {
+  body:not(.capture-pdf) .feuille--paysage:has(.plan) { width: max-content; min-width: 297mm; }
+  body:not(.capture-pdf) .plan { width: auto; table-layout: auto; font-size: 10pt; }
+  body:not(.capture-pdf) .plan col:not(.c-agent) { width: 54px; }
+  body:not(.capture-pdf) .plan th { min-width: 54px; font-size: 9.5pt; padding: 7px 0; }
+  body:not(.capture-pdf) .plan th.wd { font-size: 8pt; padding: 4px 0; }
+  body:not(.capture-pdf) .plan th.th-agent { min-width: 150px; }
+  body:not(.capture-pdf) .plan td { height: 54px; }
+  body:not(.capture-pdf) .plan td.cell { min-width: 54px; }
+  body:not(.capture-pdf) .plan .cell .pv { font-size: 13px; font-weight: 700; line-height: 1.35; color: #111; font-variant-numeric: tabular-nums; }
+  body:not(.capture-pdf) .plan .cell.code .pv { color: var(--gris); font-weight: 600; }
+  body:not(.capture-pdf) .plan .cell.bad .pv { color: #e5484d; }
+  body:not(.capture-pdf) .plan .cell.has { background: #f3e3b8; }
+  body:not(.capture-pdf) .plan .cell.code { background: #efece4; }
+  body:not(.capture-pdf) .plan .tot { font-size: 11pt; padding: 0 6px; }
+  body:not(.capture-pdf) .plan tfoot td { font-size: 9.5pt; height: 34px; }
+  /* Colonne des agents fixe : on voit toujours à qui sont les heures en faisant défiler */
+  body:not(.capture-pdf) .plan td.agent,
+  body:not(.capture-pdf) .plan th.th-agent { position: sticky; left: 0; z-index: 3; min-width: 150px; background: #fff; box-shadow: 1px 0 0 var(--trait); }
+  body:not(.capture-pdf) .plan th.th-agent { background: #15151a; }
+  body:not(.capture-pdf) .plan tfoot td.agent { background: #15151a; }
+}

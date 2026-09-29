@@ -29,7 +29,7 @@ export const TAUX_DEFAUT = {
   dialogue: { sal: 0, pat: 0.016 },
   formation: { sal: 0, pat: 0.55 },
   formation11: { sal: 0, pat: 1 },
-  apprentissage: { sal: 0, pat: 0.68 },
+  apprentissage: { sal: 0, pat: 0.59 },
   csgDed: { sal: 6.8, pat: 0 },
   csgNonDed: { sal: 2.4, pat: 0 },
   crds: { sal: 0.5, pat: 0 },
@@ -55,7 +55,7 @@ export const LIBELLES_TAUX = [
   ['dialogue', 'Contribution au dialogue social', false, true],
   ['formation', 'Formation professionnelle (moins de 11)', false, true],
   ['formation11', 'Formation professionnelle (11 et plus)', false, true],
-  ['apprentissage', "Taxe d'apprentissage", false, true],
+  ['apprentissage', "Taxe d'apprentissage (part principale)", false, true],
   ['csgDed', 'CSG déductible', true, false],
   ['csgNonDed', 'CSG non déductible', true, false],
   ['crds', 'CRDS', true, false],
@@ -66,7 +66,7 @@ export const PARAMS_DEFAUT = {
   smicHoraire: 12.02,
   pmss: 4005,
   effectif: 'moins11', // moins11 | 11a19 | 20a49 | 50plus
-  employeur: { nom: '', adresse: '', siret: '', ape: '8010Z', urssaf: '', convention: 'Convention collective nationale des entreprises de prévention et de sécurité (IDCC 1351)' },
+  employeur: { nom: '', adresse: '', siret: '', ape: '8010Z', urssaf: '', signataire: 'Abdelouahab BOUIDIA', qualite: 'Gérant', ville: 'Paris', convention: 'Convention collective nationale des entreprises de prévention et de sécurité (IDCC 1351)' },
   majorations: { nuit: 10, dimanche: 10, ferie: 100 },
   panier: 0,
   tauxAT: 0,
@@ -77,7 +77,7 @@ export const PARAMS_DEFAUT = {
   seuilFamille: 3.3,
   reductionHSMax: 11.31,
   deductionHS: 1.5,
-  reduction: { active: true, tmin: 0.02, tdelta: 0.3781, tdelta50: 0.3821, p: 1.75 },
+  reduction: { active: true, formule: 'fillon', t: 0.32015, t50: 0.32415, tmin: 0.02, tdelta: 0.3781, tdelta50: 0.3821, p: 1.75 },
   taux: TAUX_DEFAUT,
 };
 // Fusion des paramètres enregistrés avec les valeurs par défaut (niveau par niveau)
@@ -94,10 +94,20 @@ export function completerParams(p) {
 }
 
 export const PROFIL_DEFAUT = {
-  adresse: '', nir: '', matricule: '', emploi: 'Agent de sécurité (ADS)', qualification: '', statut: 'Non cadre',
-  contrat: 'CDI', dateEntree: '', mode: 'mensuel', heuresContrat: HEURES_MENSUELLES, tauxHoraire: 0, heuresJour: 7,
-  tauxPas: '', navigo: 0, mutuelle: true, soldeCP: 0,
+  // Identité (registre unique du personnel)
+  sexe: '', dateNaissance: '', lieuNaissance: '', nationalite: 'Française', ue: true, titreSejour: '', titreSejourNumero: '', titreSejourFin: '',
+  adresse: '', nir: '', matricule: '',
+  // Contrat
+  emploi: 'Agent de sécurité (ADS)', qualification: '', statut: 'Non cadre', contrat: 'CDI', dateEntree: '', dateFin: '',
+  mode: 'mensuel', heuresContrat: HEURES_MENSUELLES, tauxHoraire: 0, heuresJour: 7,
+  // Impôt, mutuelle, frais, congés
+  tauxPas: '', navigo: 0, mutuelle: true, dispenseMutuelle: '', soldeCP: 0, modePaiement: 'Virement',
+  // Départ
+  dateSortie: '', motifSortie: '',
 };
+// Organisme qui encaisse chaque cotisation (récapitulatif pour la DSN)
+const ORGANISME = { retraiteT1: 'retraite', cegT1: 'retraite', retraiteT2: 'retraite', cegT2: 'retraite', cet: 'retraite', prevoyance: 'prevoyance', mutuelle: 'mutuelle' };
+export const ORGANISMES = { urssaf: 'URSSAF', retraite: 'Retraite complémentaire (Agirc-Arrco)', prevoyance: 'Prévoyance', mutuelle: 'Mutuelle' };
 
 // Grille du taux neutre du prélèvement à la source (métropole), par tranche de net imposable mensuel
 export const GRILLE_NEUTRE = [
@@ -108,7 +118,7 @@ export const tauxNeutre = (base) => (GRILLE_NEUTRE.find(([plafond]) => base < pl
 
 export const VARIABLES_DEFAUT = {
   heuresTravaillees: 0, heuresNuit: 0, heuresDimanche: 0, heuresFerie: 0, hs25: 0, hs50: 0,
-  joursCP: 0, joursMaladie: 0, joursAbsence: 0, paniers: 0, cpAcquis: 2.5, acompte: 0, primes: [],
+  joursCP: 0, joursMaladie: 0, joursAbsence: 0, paniers: 0, cpAcquis: 2.5, acompte: 0, primes: [], modePaiement: '',
 };
 
 const n = (v) => (Number.isFinite(+v) ? +v : 0);
@@ -164,44 +174,42 @@ export function calculerBulletin(v0, profil0, P0, cumuls = {}) {
   /* ----- Cotisations ----- */
   const lignes = [];
   const cot = (rubrique, libelle, base, taux, cle) => {
-    const tS = n(taux?.sal), tP = n(taux?.pat);
-    const sal = r2((base * tS) / 100), pat = r2((base * tP) / 100);
+    // taux : { sal, pat } ou une liste de taux (chaque part arrondie à part, comme TESE pour la retraite)
+    const liste = Array.isArray(taux) ? taux : [taux];
+    const tS = r2(liste.reduce((s, t) => s + n(t?.sal), 0) * 1000) / 1000, tP = r2(liste.reduce((s, t) => s + n(t?.pat), 0) * 1000) / 1000;
+    const sal = r2(liste.reduce((s, t) => s + r2((base * n(t?.sal)) / 100), 0)), pat = r2(liste.reduce((s, t) => s + r2((base * n(t?.pat)) / 100), 0));
     if (!sal && !pat) return { sal: 0, pat: 0 };
     const l = { rubrique, libelle, base: r2(base), tauxSal: tS, sal, tauxPat: tP, pat, cle };
     lignes.push(l);
     return l;
   };
-  // Santé
-  cot('sante', 'Sécurité sociale — Maladie, maternité, invalidité, décès', brut, smicRef && brut <= n(P.seuilMaladie) * smicRef ? T.maladieReduit : T.maladie, 'maladie');
-  const prev = cot('sante', 'Complémentaire incapacité, invalidité, décès (prévoyance)', T1, P.prevoyance, 'prevoyance');
+  // Lignes regroupées comme sur les bulletins TESE (un seul arrondi par ligne)
+  const somme = (...ts) => ({ sal: r2(ts.reduce((s, t) => s + n(t?.sal), 0) * 10000) / 10000, pat: r2(ts.reduce((s, t) => s + n(t?.pat), 0) * 10000) / 10000 });
+  if (!n(P.tauxAT)) alertes.push('Taux accidents du travail (AT/MP) à renseigner dans les paramètres.');
+  // Sécurité sociale : maladie, vieillesse déplafonnée, famille, accidents du travail, solidarité autonomie
+  cot('secu', 'Cotisations sur la totalité du salaire', brut, somme(
+    smicRef && brut <= n(P.seuilMaladie) * smicRef ? T.maladieReduit : T.maladie, T.vieillesseDeplaf,
+    smicRef && brut <= n(P.seuilFamille) * smicRef ? T.familleReduit : T.famille, { pat: P.tauxAT }, T.csa), 'totalite');
+  cot('secu', 'Cotisations plafonnées', T1, T.vieillessePlaf, 'plafonnees');
+  // Complémentaire santé et prévoyance (selon le contrat de l'entreprise)
+  const prev = cot('sante', 'Prévoyance (incapacité, invalidité, décès)', T1, P.prevoyance, 'prevoyance');
   let mutPat = 0;
   if (pr.mutuelle !== false && (n(P.mutuelle.sal) || n(P.mutuelle.pat))) {
     mutPat = r2(n(P.mutuelle.pat));
     lignes.push({ rubrique: 'sante', libelle: 'Complémentaire santé (mutuelle)', base: '', tauxSal: '', sal: r2(n(P.mutuelle.sal)), tauxPat: '', pat: mutPat, cle: 'mutuelle' });
   }
-  // Accidents du travail
-  if (!n(P.tauxAT)) alertes.push('Taux accidents du travail (AT/MP) à renseigner dans les paramètres.');
-  cot('at', 'Accidents du travail — maladies professionnelles', brut, { pat: P.tauxAT }, 'at');
-  // Retraite
-  cot('retraite', 'Sécurité sociale plafonnée', T1, T.vieillessePlaf, 'vieillessePlaf');
-  cot('retraite', 'Sécurité sociale déplafonnée', brut, T.vieillesseDeplaf, 'vieillesseDeplaf');
-  cot('retraite', 'Complémentaire tranche 1', T1, T.retraiteT1, 'retraiteT1');
-  cot('retraite', 'Contribution d’équilibre général tranche 1', T1, T.cegT1, 'cegT1');
+  // Assurance chômage
+  cot('chomage', 'Chômage + AGS', b4, [T.chomage, T.ags], 'chomage');
+  // Retraite complémentaire obligatoire (Agirc-Arrco)
+  cot('retraite', 'Retraite complémentaire + CEG T1', T1, [T.retraiteT1, T.cegT1], 'retraiteT1');
   if (T2 > 0) {
-    cot('retraite', 'Complémentaire tranche 2', T2, T.retraiteT2, 'retraiteT2');
-    cot('retraite', 'Contribution d’équilibre général tranche 2', T2, T.cegT2, 'cegT2');
+    cot('retraite', 'Retraite complémentaire + CEG T2', T2, [T.retraiteT2, T.cegT2], 'retraiteT2');
     cot('retraite', 'Contribution d’équilibre technique', Math.min(brut, 8 * pmss), T.cet, 'cet');
   }
-  // Famille, chômage
-  cot('famille', 'Famille', brut, smicRef && brut <= n(P.seuilFamille) * smicRef ? T.familleReduit : T.famille, 'famille');
-  cot('chomage', 'Assurance chômage', b4, T.chomage, 'chomage');
-  // Autres contributions dues par l'employeur (regroupées sur le bulletin)
-  cot('autres', 'Garantie des salaires (AGS)', b4, T.ags, 'ags');
-  cot('autres', 'Contribution solidarité autonomie', brut, T.csa, 'csa');
-  if (moins50) cot('autres', 'FNAL', T1, T.fnal, 'fnal'); else cot('autres', 'FNAL', brut, T.fnal50, 'fnal');
-  cot('autres', 'Contribution au dialogue social', brut, T.dialogue, 'dialogue');
-  cot('autres', 'Formation professionnelle', brut, moins11 ? T.formation : T.formation11, 'formation');
-  cot('autres', "Taxe d'apprentissage", brut, T.apprentissage, 'apprentissage');
+  // Autres cotisations (employeur)
+  if (moins50) cot('autres', 'FNAL plafonné', T1, T.fnal, 'fnal'); else cot('autres', 'FNAL déplafonné', brut, T.fnal50, 'fnal');
+  cot('autres', 'Contribution formation professionnelle', brut, moins11 ? T.formation : T.formation11, 'formation');
+  cot('autres', 'Taxe d’apprentissage - Part principale', brut, T.apprentissage, 'apprentissage');
   if (!moins11) cot('autres', 'Versement mobilité', brut, { pat: P.tauxMobilite }, 'mobilite');
   // CSG / CRDS : 98,25 % du brut (jusqu'à 4 plafonds) + part patronale prévoyance et mutuelle
   const baseCsg = r2(0.9825 * b4 + (brut - b4) + n(prev.pat) + mutPat);
@@ -216,14 +224,24 @@ export function calculerBulletin(v0, profil0, P0, cumuls = {}) {
   if (reducHS) lignes.push({ rubrique: 'exo', libelle: 'Réduction de cotisations salariales (heures supplémentaires)', base: montantHS, tauxSal: -tauxReducHS, sal: -reducHS, tauxPat: '', pat: 0, cle: 'reducHS' });
   let reducGen = 0;
   const R = P.reduction;
-  if (R.active && brut > 0 && smicRef > 0 && brut < 3 * smicRef) {
-    const tdelta = moins50 ? n(R.tdelta) : n(R.tdelta50);
-    const c = Math.min(n(R.tmin) + tdelta, n(R.tmin) + tdelta * Math.pow(0.5 * ((3 * smicRef) / brut - 1), n(R.p)));
-    const coef = Math.round(c * 10000) / 10000;
+  // Formule « fillon » (celle de TESE en 2026) : C = T / 0,6 × (1,6 × SMIC / brut − 1), jusqu'à 1,6 SMIC.
+  // Formule « degressive » : C = Tmin + Tdelta × [½ × (3 × SMIC / brut − 1)]^P, jusqu'à 3 SMIC.
+  const fillon = R.formule !== 'degressive';
+  if (R.active && brut > 0 && smicRef > 0 && brut < (fillon ? 1.6 : 3) * smicRef) {
+    let c;
+    if (fillon) {
+      const t = moins50 ? n(R.t) : n(R.t50);
+      c = Math.min(t, (t / 0.6) * ((1.6 * smicRef) / brut - 1));
+    } else {
+      const tdelta = moins50 ? n(R.tdelta) : n(R.tdelta50);
+      c = Math.min(n(R.tmin) + tdelta, n(R.tmin) + tdelta * Math.pow(0.5 * ((3 * smicRef) / brut - 1), n(R.p)));
+    }
+    const coef = Math.round(c * 1000000) / 1000000; // coefficient non arrondi à 4 décimales, comme TESE
     const patEligibles = lignes.filter((l) => !['prevoyance', 'mutuelle', 'formation', 'apprentissage', 'mobilite', 'dialogue', 'cet', 'retraiteT2', 'cegT2'].includes(l.cle) && l.pat > 0).reduce((s, l) => s + l.pat, 0);
     reducGen = r2(Math.min(coef * brut, patEligibles));
-    if (reducGen) lignes.push({ rubrique: 'exo', libelle: 'Réduction générale des cotisations patronales', base: brut, tauxSal: '', sal: 0, tauxPat: -r2(coef * 100), pat: -reducGen, cle: 'reducGen' });
+    if (reducGen) lignes.push({ rubrique: 'autres', libelle: 'Réduction générale des cotisations', base: brut, tauxSal: '', sal: 0, tauxPat: -r2(coef * 100), pat: -reducGen, cle: 'reducGen' });
   }
+  cot('autres', 'Contribution au dialogue social', brut, T.dialogue, 'dialogue');
   const dedHS = moins20 ? r2(n(P.deductionHS) * (hs25 + hs50)) : 0;
   if (dedHS) lignes.push({ rubrique: 'exo', libelle: 'Déduction forfaitaire patronale (heures supplémentaires)', base: hs25 + hs50, tauxSal: '', sal: 0, tauxPat: '', pat: -dedHS, cle: 'dedHS' });
 
@@ -247,6 +265,8 @@ export function calculerBulletin(v0, profil0, P0, cumuls = {}) {
   const acompte = r2(n(v.acompte));
   const netPaye = r2(netAvantImpot - pas + totalNonSoumis - acompte);
   const netSocial = r2(netAvantImpot + mutPat + n(prev.pat));
+  // Mention obligatoire : gain lié à la suppression des cotisations salariales chômage (2,40 %) et maladie (0,75 %), moins la hausse de CSG (1,7 %)
+  const evolution = r2((brut * 3.15) / 100 - (baseCsg * 1.7) / 100);
   const allegements = r2(reducGen + dedHS);
   const coutEmployeur = r2(brut + totalPat + totalNonSoumis);
 
@@ -266,7 +286,17 @@ export function calculerBulletin(v0, profil0, P0, cumuls = {}) {
   if (!persoPas) alertes.push('Prélèvement à la source au taux neutre : indiquez le taux personnalisé transmis par les impôts (retour DSN).');
   if (netPaye < 0) alertes.push('Le net à payer est négatif : vérifiez les absences et l’acompte.');
 
+  // Ventilation par organisme (les allègements sont imputés sur l'URSSAF)
+  const organismes = {};
+  lignes.forEach((l) => {
+    const o = ORGANISME[l.cle] || 'urssaf';
+    organismes[o] ??= { sal: 0, pat: 0 };
+    organismes[o].sal = r2(organismes[o].sal + n(l.sal));
+    organismes[o].pat = r2(organismes[o].pat + n(l.pat));
+  });
+
   return {
+    organismes, evolution, modePaiement: v.modePaiement || pr.modePaiement || 'Virement',
     gains, brut, lignes, totalSal, totalPat, netAvantImpot, netImposable, tauxPas, pasPerso: persoPas, pas,
     nonSoumis, totalNonSoumis, acompte, netPaye, netSocial, allegements, coutEmployeur,
     heuresMois, smicRef: r2(smicRef), cp: { acquis: cpAcquis, pris: cpPris, solde: cpSolde }, annee, alertes,

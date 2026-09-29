@@ -845,10 +845,24 @@ try {
       repondre(['ok' => true]);
 
     case 'paie.bulletins':
-      $mois = mois_valide((string)($_GET['mois'] ?? ''));
-      $st = db()->prepare('SELECT b.id, b.agent_id, b.statut, b.brut, b.net, b.maj, a.nom, a.poste FROM bulletins b LEFT JOIN agents a ON a.id = b.agent_id WHERE b.mois = ? ORDER BY a.nom COLLATE NOCASE');
-      $st->execute([$mois]);
-      repondre(['ok' => true, 'mois' => $mois, 'bulletins' => $st->fetchAll()]);
+      // Par mois (?mois=AAAA-MM), par année (?annee=AAAA) ou par salarié (?agent=ID) ; ?complet=1 ajoute le détail
+      $cols = 'b.id, b.agent_id, b.mois, b.statut, b.brut, b.net, b.maj, a.nom, a.poste' . (empty($_GET['complet']) ? '' : ', b.data');
+      $base = "SELECT $cols FROM bulletins b LEFT JOIN agents a ON a.id = b.agent_id";
+      if (isset($_GET['agent'])) {
+        $st = db()->prepare("$base WHERE b.agent_id = ? ORDER BY b.mois DESC");
+        $st->execute([(int)$_GET['agent']]);
+      } elseif (isset($_GET['annee'])) {
+        $annee = (string)$_GET['annee'];
+        if (!preg_match('/^\d{4}$/', $annee)) echec('Année invalide.');
+        $st = db()->prepare("$base WHERE b.mois LIKE ? ORDER BY b.mois, a.nom COLLATE NOCASE");
+        $st->execute([$annee . '-%']);
+      } else {
+        $st = db()->prepare("$base WHERE b.mois = ? ORDER BY a.nom COLLATE NOCASE");
+        $st->execute([mois_valide((string)($_GET['mois'] ?? ''))]);
+      }
+      $lignes = $st->fetchAll();
+      if (!empty($_GET['complet'])) foreach ($lignes as &$l) $l['data'] = json_decode((string)$l['data'], true) ?: [];
+      repondre(['ok' => true, 'bulletins' => $lignes]);
 
     case 'paie.bulletin':
       $st = db()->prepare('SELECT * FROM bulletins WHERE id = ?');

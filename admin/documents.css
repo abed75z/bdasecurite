@@ -240,3 +240,76 @@
 @media print {
   .feuille.bp { min-height: 296mm; }
 }
+
+/* ---------- Documents de paie (registre, cotisations, journal, virements, certificat) ---------- */
+.feuille.doc-paie { padding: 10mm 12mm 9mm; font-size: 8.2pt; line-height: 1.4; }
+.feuille.doc-paie--paysage { padding: 8mm 10mm 7mm; font-size: 7.4pt; }
+.doc-tete { display: grid; grid-template-columns: auto 1fr auto; gap: 5mm; align-items: start; padding-bottom: 4mm; margin-bottom: 5mm; border-bottom: 2px solid var(--or); color: var(--encre-2); }
+.doc-tete .bp-logo { width: 16mm; }
+.doc-tete__titre { text-align: right; display: grid; gap: 1.2mm; }
+.doc-tete__titre h2 { margin: 0; font: 700 14pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; }
+.doc-table { margin-bottom: 4mm; }
+.doc-table td { padding: 1.2mm 1.6mm; }
+.doc-vide { padding: 6mm !important; text-align: center; color: var(--gris); font-style: italic; }
+.doc-chiffres { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3mm; margin-bottom: 5mm; }
+.doc-chiffres > div { display: grid; gap: 0.6mm; padding: 2.6mm 3mm; border: 1px solid var(--trait); border-radius: 5px; background: var(--creme); }
+.doc-chiffres span { font: 600 5.8pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gris); }
+.doc-chiffres b { font-size: 10.5pt; font-variant-numeric: tabular-nums; }
+.doc-sous { margin: 3mm 0 2mm; font: 700 7pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.16em; text-transform: uppercase; color: var(--or-fonce); }
+.doc-note { margin: 2mm 0 0; font-size: 7pt; color: var(--gris); line-height: 1.5; }
+.doc-texte { display: grid; gap: 4mm; margin-top: 10mm; font-size: 10.5pt; line-height: 1.7; }
+.doc-texte p { margin: 0; }
+.doc-texte__qui { padding: 4mm 5mm; background: var(--creme); border-left: 3px solid var(--or); border-radius: 0 5px 5px 0; }
+.doc-signature { margin: 14mm 0 0 auto; width: 75mm; display: grid; gap: 3mm; font-size: 9.5pt; }
+.doc-signature p { margin: 0; }
+.doc-signature__zone { height: 26mm; border: 1px dashed var(--trait); border-radius: 5px; display: grid; place-items: end center; padding-bottom: 2mm; font-size: 7pt; color: var(--gris); }
+@media print { .doc-note--ecran { display: none; } }
+.capture-pdf .doc-note--ecran { display: none; }
+
+/* ---------- Bulletin de paie v2 : présentation TESE (employeur/salarié à gauche, tableaux à droite) ---------- */
+.feuille.bp { padding: 9mm 10mm 7mm; font: 7.3pt/1.3 Arial, "Helvetica Neue", sans-serif; color: #111; }
+.bt-haut { display: grid; grid-template-columns: 1fr 88mm; gap: 6mm; align-items: start; margin-bottom: 5mm; }
+.bt-marque { display: flex; align-items: center; gap: 3.5mm; }
+.bt-logo { width: 17mm; height: auto; }
+.bt-marque b { display: block; font: 700 13pt Arial, sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
+.bt-marque span { display: block; font-size: 9pt; color: var(--or-fonce); font-weight: 700; }
+.bt-adresse { padding-top: 1mm; font-size: 9pt; line-height: 1.45; text-transform: uppercase; }
+.bt-adresse > div:first-child { font-weight: 400; }
+.bt-date { margin-top: 3mm; text-align: right; font-size: 7.4pt; font-weight: 700; text-transform: none; }
+.bt-grille { display: grid; grid-template-columns: 52mm minmax(0, 1fr); gap: 5mm; align-items: start; }
+.bt-gauche { display: grid; gap: 2.4mm; }
+.bt-bloc h4 { margin: 0 0 1mm; padding: 0.8mm 2mm; background: #8c8c8c; color: #fff; font: 700 7.4pt Arial, sans-serif; letter-spacing: 0.06em; text-transform: uppercase; text-align: center; }
+.bt-bloc__corps { display: grid; gap: 0.5mm; padding: 0 0.5mm; }
+.bt-kv { font-size: 6.9pt; line-height: 1.35; }
+.bt-kv span { color: #333; }
+.bt-kv b { font-weight: 400; }
+.bt-mini { display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; border: 1px solid #555; }
+.bt-mini > div { display: grid; padding: 0.8mm; border-right: 1px solid #555; }
+.bt-mini > div:last-child { border-right: 0; }
+.bt-mini span { font-size: 6pt; color: #444; }
+.bt-mini b { font-size: 8pt; }
+.bt-droite { display: grid; gap: 3mm; min-width: 0; }
+.bt-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-variant-numeric: tabular-nums; }
+.bt-table col.bt-c-base { width: 15mm; }
+.bt-table col.bt-c-taux { width: 11mm; }
+.bt-table col.bt-c-mt { width: 14mm; }
+.bt-table col.bt-c-pas { width: 26mm; }
+.bt-table th { padding: 0.9mm 1.2mm; border: 1px solid #222; font: 700 6.8pt Arial, sans-serif; text-align: center; vertical-align: middle; background: #fff; color: #111; }
+.bt-table thead tr:first-child th:first-child { text-align: left; }
+.bt-table td { padding: 0.55mm 1.2mm; border-left: 1px solid #222; border-right: 1px solid #222; border-bottom: 1px solid #c9c9c9; vertical-align: top; }
+.bt-table td.r { text-align: right; white-space: nowrap; }
+.bt-table tbody tr:last-child td { border-bottom: 1px solid #222; }
+.bt-table tfoot td { padding: 1mm 1.2mm; border: 1px solid #222; font-weight: 700; }
+.bt-sect td { padding-top: 1.4mm; border-bottom-color: transparent; font-weight: 700; font-size: 7.4pt; }
+.bt-table--simple td { border: 1px solid #222; }
+.bt-boite { display: flex; justify-content: space-between; align-items: center; padding: 1.2mm 1.6mm; border: 1px solid #222; font-weight: 700; }
+.bt-boite b { min-width: 16mm; text-align: right; }
+.bt-net { border: 1px solid #222; }
+.bt-net__ligne { display: flex; justify-content: space-between; padding: 1.3mm 1.6mm; font: 700 8.6pt Arial, sans-serif; text-transform: uppercase; border-bottom: 1px solid #222; }
+.bt-net__dont { display: flex; justify-content: space-between; gap: 4mm; padding: 0.8mm 1.6mm; font-size: 6.4pt; font-weight: 700; }
+.bt-net__ligne b, .bt-net__dont b { white-space: nowrap; }
+.bt-paye { justify-self: end; display: grid; min-width: 36mm; border: 1px solid #222; text-align: center; }
+.bt-paye span { padding: 0.8mm 2mm; font-weight: 700; border-bottom: 1px solid #222; }
+.bt-paye b { padding: 1.2mm 2mm; font-size: 11pt; background: #f3ead4; }
+.bt-cout { display: flex; justify-content: space-between; gap: 4mm; font-size: 6.4pt; color: #555; }
+.bt-mention { margin: 3mm 0 0; padding-top: 1.6mm; border-top: 1px solid #bbb; font-size: 6.2pt; color: #555; text-align: center; }

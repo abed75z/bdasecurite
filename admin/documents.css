@@ -190,3 +190,53 @@
   body:not(.capture-pdf) .plan th.th-agent { background: #15151a; }
   body:not(.capture-pdf) .plan tfoot td.agent { background: #15151a; }
 }
+
+/* ---------- Bulletin de paie (A4 portrait, présentation « clarifiée ») ---------- */
+.feuille.bp { padding: 7mm 10mm 6mm; font-size: 7.2pt; line-height: 1.3; }
+.bp-tete { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; align-items: start; }
+.bp-employeur { display: flex; gap: 3.5mm; align-items: flex-start; color: var(--encre-2); }
+.bp-logo { width: 14mm; height: auto; flex: none; }
+.bp-nom { display: block; font: 700 9pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.04em; color: var(--encre); margin-bottom: 0.6mm; }
+.bp-titre { display: grid; gap: 1.6mm; justify-items: end; text-align: right; }
+.bp-titre h2 { margin: 0; font: 700 13pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; }
+.bp-periode { font-weight: 600; color: var(--or-fonce); }
+.bp-salarie { width: 100%; margin-top: 1mm; padding: 1.8mm 3mm; text-align: left; background: var(--creme); border-left: 3px solid var(--or); border-radius: 0 5px 5px 0; color: var(--encre-2); }
+.bp-infos { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 3mm 0 2.6mm; border: 1px solid var(--trait); border-radius: 5px; overflow: hidden; }
+.bp-infos > div { display: grid; gap: 0.3mm; padding: 1.1mm 2mm; border-right: 1px solid var(--trait); border-bottom: 1px solid var(--trait); min-width: 0; }
+.bp-infos > div:nth-child(5n) { border-right: 0; }
+.bp-infos span, .bp-annexes span { font: 600 5.6pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gris); }
+.bp-infos b { font-weight: 600; overflow-wrap: anywhere; }
+.bp-infos__large { grid-column: 1 / -1; border-bottom: 0 !important; }
+.bp-table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-bottom: 2.4mm; font-variant-numeric: tabular-nums; }
+.bp-table col.bp-c1 { width: 19mm; }
+.bp-table col.bp-c2 { width: 21mm; }
+.bp-table col.bp-c3 { width: 15mm; }
+.bp-table th { padding: 1mm 1.6mm; background: #15151a; color: var(--or-clair); font: 600 6pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; text-align: left; border: 1px solid #15151a; }
+.bp-table th.r, .bp-table td.r { text-align: right; }
+.bp-table th.c { text-align: center; }
+.bp-table td { padding: 0.45mm 1.6mm; border-bottom: 1px solid #efe9dc; vertical-align: top; }
+.bp-table td.r { white-space: nowrap; }
+.bp-table tfoot td { padding: 1mm 1.6mm; background: #f3ead4; font-weight: 700; border-bottom: 0; }
+.bp-sect td { padding-top: 1.1mm; font: 700 6.2pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--or-fonce); border-bottom-color: var(--trait); }
+.bp-nets { display: grid; grid-template-columns: minmax(0, 1fr) 58mm; gap: 5mm; align-items: stretch; margin-top: 1mm; }
+.bp-nets__col { display: grid; gap: 1.2mm; align-content: start; }
+.bp-ligne { display: flex; justify-content: space-between; gap: 4mm; padding: 0.7mm 2mm; border-bottom: 1px solid #efe9dc; }
+.bp-ligne b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bp-ligne--fort { background: var(--creme); font-size: 8.4pt; font-weight: 600; border-bottom: 0; border-radius: 4px; padding: 1.2mm 2mm; }
+.bp-impot { display: grid; grid-template-columns: repeat(3, auto); gap: 0.6mm 4mm; margin-top: 0.8mm; padding: 1.8mm 2mm; border: 1px solid var(--trait); border-radius: 5px; }
+.bp-impot .f-label { grid-column: 1 / -1; margin-bottom: 0.4mm; }
+.bp-impot div { display: grid; gap: 0.2mm; }
+.bp-impot div span { font-size: 6.4pt; color: var(--gris); }
+.bp-paye { display: grid; align-content: center; justify-items: center; gap: 1.2mm; padding: 3mm 3mm; border-radius: 6px; background: var(--or-grad); color: #17130a; text-align: center; }
+.bp-paye .f-label { color: #3b2c0c; margin: 0; }
+.bp-paye b { font: 700 15pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
+.bp-paye small { font-size: 6.8pt; font-weight: 600; }
+.bp-annexes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2mm 4mm; margin-top: 3mm; padding: 1.8mm 3mm; border: 1px solid var(--trait); border-radius: 5px; background: #fdfbf6; }
+.bp-annexes > div { display: grid; gap: 0.4mm; }
+.bp-annexes b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.bp-cp { grid-column: span 1; }
+.bp-cumuls { grid-column: span 2; }
+.bp-mention { margin: 2.4mm 0 0; padding-top: 1.6mm; border-top: 1px solid var(--trait); font-size: 6.2pt; color: var(--gris); text-align: center; }
+@media print {
+  .feuille.bp { min-height: 296mm; }
+}

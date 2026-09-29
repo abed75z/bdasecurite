@@ -178,6 +178,15 @@ function schema(PDO $db): void
       PRAGMA user_version = 8;
     SQL);
   }
+  if ($version < 9) {
+    // Fiches de paie : dossier de paie de chaque agent (données privées) et bulletins mensuels
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS salaries (agent_id INTEGER PRIMARY KEY, data TEXT NOT NULL, maj TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS bulletins (id INTEGER PRIMARY KEY, agent_id INTEGER NOT NULL, mois TEXT NOT NULL, statut TEXT NOT NULL DEFAULT 'brouillon', brut REAL NOT NULL DEFAULT 0, net REAL NOT NULL DEFAULT 0, data TEXT NOT NULL, cree TEXT NOT NULL, maj TEXT NOT NULL, UNIQUE (agent_id, mois));
+      CREATE INDEX IF NOT EXISTS i_bulletins ON bulletins (mois);
+      PRAGMA user_version = 9;
+    SQL);
+  }
 }
 
 /* ---------- Outils ---------- */

@@ -19,6 +19,7 @@ const MENU = [
   { groupe: 'Équipe' },
   { route: 'agents', libelle: 'Agents', icone: 'agents' },
   { route: 'planning', libelle: 'Planning', icone: 'planning' },
+  { route: 'paie', libelle: 'Fiches de paie', icone: 'paie', admin: true },
   { route: 'candidatures', libelle: 'Candidatures', icone: 'candidature', badge: 'candidatures' },
   { groupe: 'Site internet' },
   { route: 'site', libelle: 'Contrôle du site', icone: 'site' },
@@ -151,7 +152,9 @@ function lancerApplication() {
   const fermerMenu = () => document.body.classList.remove('menu-ouvert');
   const lien = (m) => h('a', { href: `#/${m.route}`, class: 'nav__item', dataset: { route: m.route }, onclick: fermerMenu },
     icone(m.icone), h('span', null, m.libelle), m.badge ? h('b', { class: `nav__badge ${m.alerte ? 'nav__badge--alerte' : ''}`, dataset: { badge: m.badge }, hidden: true }) : null);
-  menuEl = h('nav', { class: 'nav', 'aria-label': 'Menu principal' }, MENU.map((m) => (m.groupe ? h('p', { class: 'nav__groupe' }, m.groupe) : lien(m))));
+  // Les rubriques « admin » (fiches de paie) n'apparaissent pas pour un compte manager
+  const menu = MENU.filter((m) => !m.admin || etat.session.role === 'admin');
+  menuEl = h('nav', { class: 'nav', 'aria-label': 'Menu principal' }, menu.map((m) => (m.groupe ? h('p', { class: 'nav__groupe' }, m.groupe) : lien(m))));
 
   const utilisateur = String(etat.session.utilisateur || '');
   const cote = h('aside', { class: 'cote' },
@@ -183,7 +186,7 @@ function lancerApplication() {
     h('div', { class: 'voile', onclick: () => document.body.classList.remove('menu-ouvert') }),
     h('div', { class: 'principal' }, haut, zonePage)));
 
-  palette ??= installerPalette({ menu: MENU, aller: (hash) => { location.hash = hash; }, deconnexion, compteurs: majCompteurs });
+  palette ??= installerPalette({ menu, aller: (hash) => { location.hash = hash; }, deconnexion, compteurs: majCompteurs });
   window.addEventListener('hashchange', router);
   router();
   majCompteurs();

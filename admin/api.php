@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -590,7 +590,7 @@ try {
     case 'export':
       journal('securite', 'Sauvegarde complète des données téléchargée');
       $export = ['format' => 'bda-admin-sauvegarde', 'version' => 1, 'date' => maintenant(), 'reglages' => reglages()];
-      foreach (['documents', 'plannings', 'clients', 'agents', 'agent_docs', 'reservations', 'creations', 'demandes', 'candidatures', 'avis', 'notes'] as $t) {
+      foreach (['documents', 'plannings', 'clients', 'agents', 'agent_docs', 'reservations', 'creations', 'demandes', 'candidatures', 'avis', 'notes', 'salaries', 'bulletins'] as $t) {
         $export[$t] = db()->query("SELECT * FROM $t")->fetchAll();
       }
       header('Content-Disposition: attachment; filename="bda-sauvegarde-' . date('Y-m-d') . '.json"');
@@ -816,6 +816,89 @@ try {
     case 'note.supprimer':
       supprimer_ligne('notes', (int)(corps()['id'] ?? 0));
 
+    /* ================= Fiches de paie (administrateur uniquement) ================= */
+    case 'paie.parametres':
+      repondre(['ok' => true, 'parametres' => reglage_json('paie'), 'entreprise' => reglages()]);
+
+    case 'paie.parametres.enregistrer':
+      $b = corps();
+      $json = json_encode($b['parametres'] ?? null, JSON_UNESCAPED_UNICODE);
+      if (!is_array($b['parametres'] ?? null) || $json === false || strlen($json) > 60000) echec('Paramètres invalides.');
+      db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['paie', $json]);
+      journal('equipe', 'Paramètres de paie modifiés');
+      repondre(['ok' => true]);
+
+    case 'paie.salaries':
+      $agents = db()->query('SELECT id, nom, poste, actif, categorie FROM agents ORDER BY actif DESC, nom COLLATE NOCASE')->fetchAll();
+      $profils = [];
+      foreach (db()->query('SELECT agent_id, data FROM salaries') as $l) $profils[(int)$l['agent_id']] = json_decode((string)$l['data'], true) ?: [];
+      foreach ($agents as &$a) $a['profil'] = (object)($profils[(int)$a['id']] ?? []);
+      repondre(['ok' => true, 'agents' => $agents]);
+
+    case 'paie.salarie.enregistrer':
+      $b = corps();
+      $agent = agent_paie((int)($b['agent_id'] ?? 0));
+      $json = json_encode($b['profil'] ?? null, JSON_UNESCAPED_UNICODE);
+      if (!is_array($b['profil'] ?? null) || $json === false || strlen($json) > 20000) echec('Dossier invalide.');
+      db()->prepare('INSERT INTO salaries (agent_id, data, maj) VALUES (?, ?, ?) ON CONFLICT(agent_id) DO UPDATE SET data = excluded.data, maj = excluded.maj')->execute([$agent['id'], $json, maintenant()]);
+      journal('equipe', "Dossier de paie mis à jour : {$agent['nom']}");
+      repondre(['ok' => true]);
+
+    case 'paie.bulletins':
+      $mois = mois_valide((string)($_GET['mois'] ?? ''));
+      $st = db()->prepare('SELECT b.id, b.agent_id, b.statut, b.brut, b.net, b.maj, a.nom, a.poste FROM bulletins b LEFT JOIN agents a ON a.id = b.agent_id WHERE b.mois = ? ORDER BY a.nom COLLATE NOCASE');
+      $st->execute([$mois]);
+      repondre(['ok' => true, 'mois' => $mois, 'bulletins' => $st->fetchAll()]);
+
+    case 'paie.bulletin':
+      $st = db()->prepare('SELECT * FROM bulletins WHERE id = ?');
+      $st->execute([(int)($_GET['id'] ?? 0)]);
+      $bul = $st->fetch();
+      if (!$bul) echec('Bulletin introuvable.', 404);
+      $bul['data'] = json_decode((string)$bul['data'], true) ?: [];
+      $st = db()->prepare('SELECT id, nom, poste FROM agents WHERE id = ?');
+      $st->execute([(int)$bul['agent_id']]);
+      $agent = $st->fetch() ?: null;
+      $st = db()->prepare('SELECT data FROM salaries WHERE agent_id = ?');
+      $st->execute([(int)$bul['agent_id']]);
+      $profil = json_decode((string)$st->fetchColumn(), true);
+      repondre(['ok' => true, 'bulletin' => $bul, 'agent' => $agent, 'profil' => (object)(is_array($profil) ? $profil : []),
+        'parametres' => reglage_json('paie'), 'entreprise' => reglages(), 'cumuls' => cumuls_paie((int)$bul['agent_id'], (string)$bul['mois'])]);
+
+    case 'paie.bulletin.enregistrer':
+      $b = corps();
+      $mois = mois_valide(chaine($b['mois'] ?? ''));
+      $agent = agent_paie((int)($b['agent_id'] ?? 0));
+      $statut = ($b['statut'] ?? '') === 'valide' ? 'valide' : 'brouillon';
+      $json = json_encode($b['data'] ?? null, JSON_UNESCAPED_UNICODE);
+      if (!is_array($b['data'] ?? null) || $json === false || strlen($json) > 300000) echec('Bulletin invalide.');
+      $brut = round((float)($b['brut'] ?? 0), 2);
+      $net = round((float)($b['net'] ?? 0), 2);
+      $id = (int)($b['id'] ?? 0);
+      if ($id > 0) {
+        $st = db()->prepare('SELECT statut FROM bulletins WHERE id = ? AND agent_id = ? AND mois = ?');
+        $st->execute([$id, $agent['id'], $mois]);
+        $avant = $st->fetchColumn();
+        if ($avant === false) echec('Bulletin introuvable.', 404);
+        db()->prepare('UPDATE bulletins SET statut = ?, brut = ?, net = ?, data = ?, maj = ? WHERE id = ?')->execute([$statut, $brut, $net, $json, maintenant(), $id]);
+        if ($avant !== $statut) journal('equipe', "Bulletin de paie {$agent['nom']} ($mois) : " . ($statut === 'valide' ? 'validé' : 'repassé en brouillon'));
+      } else {
+        $st = db()->prepare('SELECT COUNT(*) FROM bulletins WHERE agent_id = ? AND mois = ?');
+        $st->execute([$agent['id'], $mois]);
+        if ((int)$st->fetchColumn()) echec('Un bulletin existe déjà pour cet agent ce mois-ci.', 409);
+        db()->prepare('INSERT INTO bulletins (agent_id, mois, statut, brut, net, data, cree, maj) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')->execute([$agent['id'], $mois, $statut, $brut, $net, $json, maintenant(), maintenant()]);
+        $id = (int)db()->lastInsertId();
+        journal('equipe', "Bulletin de paie préparé : {$agent['nom']} ($mois)");
+      }
+      repondre(['ok' => true, 'id' => $id]);
+
+    case 'paie.bulletin.supprimer':
+      $id = (int)(corps()['id'] ?? 0);
+      $st = db()->prepare('SELECT statut FROM bulletins WHERE id = ?');
+      $st->execute([$id]);
+      if ((string)$st->fetchColumn() === 'valide') echec('Un bulletin validé ne peut pas être supprimé : repassez-le d’abord en brouillon.');
+      supprimer_ligne('bulletins', $id);
+
     /* ================= Barre de commande : index de recherche ================= */
     case 'recherche':
       repondre(['ok' => true, 'index' => [
@@ -851,6 +934,40 @@ function mois_valide(string $m): string
 {
   if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $m)) echec('Mois invalide.');
   return $m;
+}
+// Réglage enregistré en JSON (vide s'il n'existe pas encore)
+function reglage_json(string $k): array
+{
+  $st = db()->prepare('SELECT v FROM reglages WHERE k = ?');
+  $st->execute([$k]);
+  $v = json_decode((string)$st->fetchColumn(), true);
+  return is_array($v) ? $v : [];
+}
+function agent_paie(int $id): array
+{
+  $st = db()->prepare('SELECT id, nom FROM agents WHERE id = ?');
+  $st->execute([$id]);
+  $a = $st->fetch();
+  if (!$a) echec('Agent introuvable.', 404);
+  return $a;
+}
+// Totaux des bulletins validés avant ce mois : cumuls de l'année civile et solde de congés reporté
+function cumuls_paie(int $agent, string $mois): array
+{
+  $c = ['brut' => 0.0, 'netImposable' => 0.0, 'pas' => 0.0, 'heures' => 0.0, 'cpNet' => 0.0];
+  $st = db()->prepare("SELECT mois, data FROM bulletins WHERE agent_id = ? AND mois < ? AND statut = 'valide'");
+  $st->execute([$agent, $mois]);
+  foreach ($st->fetchAll() as $l) {
+    $r = (json_decode((string)$l['data'], true) ?: [])['resultat'] ?? null;
+    if (!is_array($r)) continue;
+    $c['cpNet'] += (float)($r['cp']['acquis'] ?? 0) - (float)($r['cp']['pris'] ?? 0);
+    if (substr((string)$l['mois'], 0, 4) !== substr($mois, 0, 4)) continue;
+    $c['brut'] += (float)($r['brut'] ?? 0);
+    $c['netImposable'] += (float)($r['netImposable'] ?? 0);
+    $c['pas'] += (float)($r['pas'] ?? 0);
+    $c['heures'] += (float)($r['heuresMois'] ?? 0);
+  }
+  return array_map(fn($x) => round($x, 2), $c);
 }
 // Montant du document, TVA comprise (taux « tva » du document, en % ; absent ou 0 = TVA non applicable)
 function total_document(array $data): float

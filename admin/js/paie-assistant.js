@@ -55,7 +55,8 @@ export async function assistantDeclaration(ctx, id) {
   const enregistrerProfil = attendre(async () => {
     try { await api('paie.salarie.enregistrer', { agent_id: b.agent_id, profil }); } catch (e) { erreur(e); }
   }, 700);
-  const change = () => { calc(); majApercu(); marquer('Modifications…'); plusTard(); };
+  // Répondre aux questions remet le calcul automatique (les lignes tapées sur la feuille sont recalculées)
+  const change = () => { V.gains = null; calc(); majApercu(); marquer('Modifications…'); plusTard(); };
   const changeProfil = () => { enregistrerProfil(); change(); };
 
   /* ----- Champs ----- */

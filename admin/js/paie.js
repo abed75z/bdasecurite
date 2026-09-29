@@ -6,7 +6,7 @@
    ========================================================= */
 import {
   api, h, $$, icone, toast, erreur, confirmer, champ, saisie, zoneTexte, attendre,
-  nombre, fmtHeures, lireHeures, lireNombre, iso, isoVersFr,
+  fmtHeures, lireNombre, iso, isoVersFr, frVersDate,
 } from './outils.js';
 import { telechargerPdf } from './pdf.js';
 import { imprimerFeuille } from './documents.js';
@@ -57,7 +57,7 @@ async function tableauDeBord(ctx, mois) {
   async function declarer(a) {
     try {
       const id = bulletinDe(a)?.id || await creerBulletin(a, mois, planning, P);
-      ctx.aller(`#/paie/declarer/${id}`);
+      ctx.aller(`#/paie/bulletin/${id}`);
     } catch (e) { erreur(e); }
   }
   async function toutPreparer() {
@@ -87,8 +87,8 @@ async function tableauDeBord(ctx, mois) {
 
   const ligne = (a) => {
     const bul = bulletinDe(a);
-    const action = !bul ? h('button', { class: 'btn btn--gold btn--petit', type: 'button', onclick: () => declarer(a) }, 'Déclarer')
-      : bul.statut === 'brouillon' ? h('a', { class: 'btn btn--ghost btn--petit', href: `#/paie/declarer/${bul.id}` }, 'Continuer')
+    const action = !bul ? h('button', { class: 'btn btn--gold btn--petit', type: 'button', onclick: () => declarer(a) }, 'Faire la fiche')
+      : bul.statut === 'brouillon' ? h('a', { class: 'btn btn--ghost btn--petit', href: `#/paie/bulletin/${bul.id}` }, 'Continuer')
         : h('a', { class: 'btn btn--ghost btn--petit', href: `#/paie/bulletin/${bul.id}` }, icone('oeilv'), 'Bulletin');
     return h('tr', null,
       h('td', null, h('a', { class: 'paie-nom', href: `#/paie/salarie/${a.id}` }, h('b', null, a.nom)), h('small', { class: 'muet paie-poste' }, auPlanning(a) ? a.poste : `${a.poste} · hors planning`)),
@@ -103,7 +103,7 @@ async function tableauDeBord(ctx, mois) {
 
   ctx.afficher(onglets('mois'), nav, etapes,
     h('section', { class: 'carte', id: 'paie-liste' },
-      h('header', { class: 'carte__tete' }, h('h2', null, 'Salariés du mois'), h('small', null, 'Un clic sur « Déclarer » : l’assistant vous pose les questions une par une')),
+      h('header', { class: 'carte__tete' }, h('h2', null, 'Salariés du mois'), h('small', null, 'Un clic sur « Faire la fiche » : la fiche s’ouvre, remplie avec le planning, et tout se modifie dessus')),
       h('div', { class: 'tableau-defil' }, h('table', { class: 'tableau' },
         h('thead', null, h('tr', null, h('th', null, 'Salarié'), h('th', null, 'Dossier'), h('th', null, 'Déclaration'), h('th', { class: 'num' }, 'Net payé'), h('th'))),
         h('tbody', null, salaries.length || orphelins.length
@@ -115,139 +115,217 @@ async function tableauDeBord(ctx, mois) {
 }
 
 /* =========================================================
-   BULLETIN EN DÉTAIL (modification libre, PDF, impression)
+   LA FICHE DE PAIE : tout se modifie directement sur la feuille
+   (heures, taux, primes, adresse, taux de cotisation…)
    ========================================================= */
 async function editeurBulletin(ctx, id) {
   const res = await api('paie.bulletin', undefined, { id });
+  if (!res.parametres || Array.isArray(res.parametres)) res.parametres = {};
   const b = res.bulletin;
   const mois = b.mois;
   const data = b.data || {};
-  data.variables = { ...VARIABLES_DEFAUT, ...(data.variables || {}) };
-  if (!Array.isArray(data.variables.primes)) data.variables.primes = [];
-  data.datePaiement = data.datePaiement || finDeMois(mois);
+  const V = (data.variables = { ...VARIABLES_DEFAUT, ...(data.variables || {}) });
+  if (!Array.isArray(V.primes)) V.primes = [];
+  data.datePaiement ||= finDeMois(mois);
+  if (!data.surcharges || Array.isArray(data.surcharges)) data.surcharges = {};
   const agent = res.agent || { nom: data.profil?.nom || 'Agent supprimé', poste: '' };
   let statut = b.statut;
   const fige = () => statut === 'valide';
-  const params = () => (fige() && data.params ? completerParams(data.params) : parametresComplets(res.parametres, res.entreprise));
-  const profil = () => (fige() && data.profil ? { ...PROFIL_DEFAUT, ...data.profil } : { ...PROFIL_DEFAUT, ...(res.profil || {}) });
+  const profilCourant = { ...PROFIL_DEFAUT, ...(res.profil || {}) };
+  const params = () => ({ ...(fige() && data.params ? completerParams(data.params) : parametresComplets(res.parametres, res.entreprise)), surcharges: data.surcharges });
+  const profil = () => (fige() && data.profil ? { ...PROFIL_DEFAUT, ...data.profil } : profilCourant);
 
   const feuille = h('div', { class: 'feuille bp' });
-  const alertes = h('ul', { class: 'bp-alertes' });
-  const blocAlertes = h('section', { class: 'panneau__bloc panneau__bloc--alerte' }, h('h3', null, 'À vérifier'), alertes);
+  const panneau = h('aside', { class: 'panneau' });
   let R;
-  function recalculer() {
-    R = calculerBulletin(data.variables, profil(), params(), res.cumuls || {});
-    dessinerBulletin(feuille, { R, pr: profil(), P: params(), agent, mois, datePaiement: data.datePaiement });
-    alertes.replaceChildren(...R.alertes.map((a) => h('li', null, a)));
-    blocAlertes.hidden = !R.alertes.length || fige();
+  const calc = () => { R = calculerBulletin(V, profil(), params(), res.cumuls || {}); };
+  const figerLignes = () => { calc(); V.gains = R.gains.map(({ libelle, base, taux, montant, cle, coef, signe }) => ({ libelle, base, taux, montant, cle, coef: coef ?? null, signe: signe || 1 })); };
+  const edit = { maj, ajouterLigne, retirerLigne, ajouterIndemnite };
+  function dessiner() {
+    calc();
+    dessinerBulletin(feuille, { R, pr: profil(), P: params(), agent, mois, datePaiement: data.datePaiement, V, edit: fige() ? null : edit });
+    construirePanneau();
+  }
+  // Après un changement : on redessine la feuille et on garde le curseur sur la case suivante
+  function rafraichir() {
+    setTimeout(() => {
+      const suivant = document.activeElement?.dataset?.k;
+      dessiner();
+      if (suivant) feuille.querySelector(`[data-k="${CSS.escape(suivant)}"]`)?.focus();
+    }, 0);
   }
 
+  /* ----- Enregistrement automatique ----- */
   const indicateur = h('span', { class: 'etat-save is-ok' }, '✓ À jour');
   const marquer = (txt, cls) => { indicateur.textContent = txt; indicateur.className = `etat-save ${cls || ''}`; };
   async function enregistrer() {
     marquer('Enregistrement…', 'is-encours');
     try {
-      data.params = params();
+      const { surcharges, ...P } = params();
+      data.params = P;
       data.profil = { ...profil(), nom: agent.nom };
       data.resultat = R;
       await api('paie.bulletin.enregistrer', { id, agent_id: b.agent_id, mois, statut, data, brut: R.brut, net: R.netPaye });
       marquer('✓ Enregistré', 'is-ok');
     } catch (e) { marquer('Non enregistré', 'is-erreur'); erreur(e); }
   }
-  const plusTard = attendre(enregistrer, 900);
-  const change = () => { recalculer(); marquer('Modifications…'); plusTard(); };
+  const plusTard = attendre(enregistrer, 700);
+  const sauverProfil = attendre(async () => { try { await api('paie.salarie.enregistrer', { agent_id: b.agent_id, profil: profilCourant }); } catch (e) { erreur(e); } }, 600);
+  const sauverParams = attendre(async () => { try { await api('paie.parametres.enregistrer', { parametres: res.parametres }); } catch (e) { erreur(e); } }, 600);
+  const modifie = () => { marquer('Modifications…'); plusTard(); };
 
-  const panneau = h('aside', { class: 'panneau' });
-  const V = data.variables;
-  function champNum(label, cle, { heuresFmt } = {}) {
-    const val = +V[cle] || 0;
-    const inp = saisie({ inputmode: 'decimal', value: heuresFmt ? fmtHeures(val, true) : nombre.format(val), disabled: fige() });
-    inp.addEventListener('focus', () => inp.select());
-    inp.addEventListener('input', () => {
-      const n = heuresFmt ? lireHeures(inp.value) : lireNombre(inp.value);
-      const ok = Number.isFinite(n) && n >= 0;
-      inp.classList.toggle('is-bad', !ok);
-      if (ok) { V[cle] = n; change(); }
-    });
-    return champ(label, inp);
+  /* ----- Une case de la feuille a changé ----- */
+  function maj(cle, t) {
+    const num = () => { const v = lireNombre(String(t).replace(/[€%]/g, '')); return Number.isFinite(v) ? v : null; };
+    const dateIso = () => { const d = frVersDate(t); return d ? iso(d) : null; };
+    const refus = (msg) => { toast(msg, 'erreur'); rafraichir(); };
+    const p = cle.split('.');
+    if (p[0] === 'emp') {
+      res.parametres.employeur = { ...params().employeur, [p[1]]: t };
+      sauverParams();
+    } else if (p[0] === 'sal') {
+      if (p[1] === 'tauxHoraire') {
+        const v = num();
+        if (v == null) return refus('Taux horaire : écrivez un nombre, par exemple 12,31.');
+        profilCourant.tauxHoraire = v;
+        // Les lignes liées au taux horaire suivent (salaire de base, congés, heures sup, majorations)
+        (V.gains || []).forEach((g) => { if (g.coef != null && g.taux !== '' && g.taux != null) g.taux = Math.round(v * g.coef * 10000) / 10000; });
+      } else if (p[1] === 'dateEntree') {
+        const d = t ? dateIso() : '';
+        if (d == null) return refus('Date d’entrée : écrivez-la sous la forme JJ/MM/AAAA.');
+        profilCourant.dateEntree = d;
+      } else profilCourant[p[1]] = t;
+      sauverProfil();
+    } else if (cle === 'datePaiement') {
+      const d = dateIso();
+      if (!d) return refus('Date de paiement : écrivez-la sous la forme JJ/MM/AAAA.');
+      data.datePaiement = d;
+    } else if (cle === 'mode') {
+      V.modePaiement = t;
+    } else if (p[0] === 'cp') {
+      const v = num();
+      if (v == null) return refus('Congés : écrivez un nombre de jours.');
+      if (p[1] === 'acquis') V.cpAcquis = v; else V.joursCP = v;
+    } else if (p[0] === 'g') {
+      const g = V.gains[+p[1]];
+      if (!g) return;
+      if (p[2] === 'libelle') g.libelle = t;
+      else {
+        const v = t === '' ? '' : num();
+        if (v == null) return refus('Écrivez un nombre, par exemple 40 ou 12,31.');
+        if (p[2] === 'base') g.base = v;
+        if (p[2] === 'taux') { g.taux = v; g.coef = null; }
+        if (p[2] === 'montant') g.montant = v === '' ? 0 : v;
+      }
+    } else if (p[0] === 'c') {
+      const v = t === '' ? null : num();
+      if (t !== '' && v == null) return refus('Écrivez un taux, par exemple 6,90.');
+      if (p[1] === 'reducGen') data.surcharges.reducGen = v == null ? undefined : { montant: v };
+      else data.surcharges[p[1]] = { ...(data.surcharges[p[1]] || {}), [p[2]]: v == null ? undefined : v };
+    } else if (p[0] === 'ns') {
+      if (p[1] === 'p') {
+        const pr = V.primes[+p[2]];
+        if (!pr) return;
+        if (p[3] === 'libelle') pr.libelle = t;
+        else { const v = num(); if (v == null) return refus('Écrivez un montant.'); pr.montant = v; }
+      } else {
+        const v = num();
+        if (v == null) return refus('Écrivez un nombre.');
+        if (p[1] === 'paniers') V.paniers = v;
+        if (p[1] === 'transport') { profilCourant.navigo = v; sauverProfil(); }
+      }
+    } else if (cle === 'acompte') {
+      const v = num();
+      if (v == null) return refus('Écrivez un montant.');
+      V.acompte = v;
+    } else if (cle === 'pas.taux') {
+      profilCourant.tauxPas = String(t).replace('%', '').replace(',', '.').trim();
+      sauverProfil();
+    }
+    rafraichir();
+    modifie();
   }
-  function blocPrimes() {
-    const liste = h('div', { class: 'paie-primes' });
-    const dessiner = () => liste.replaceChildren(...V.primes.map((p, i) => {
-      const lib = saisie({ value: p.libelle || '', placeholder: 'Libellé', disabled: fige(), oninput: (e) => { p.libelle = e.target.value; change(); } });
-      const mt = saisie({ value: nombre.format(+p.montant || 0), inputmode: 'decimal', disabled: fige(), oninput: (e) => { const n = lireNombre(e.target.value); if (Number.isFinite(n)) { p.montant = n; change(); } } });
-      mt.addEventListener('focus', () => mt.select());
-      const soumis = h('select', { class: 'input', disabled: fige(), onchange: (e) => { p.soumis = e.target.value === 'oui'; change(); } },
-        h('option', { value: 'oui', selected: p.soumis !== false }, 'Soumise à cotisations'), h('option', { value: 'non', selected: p.soumis === false }, 'Non soumise (frais, remboursement)'));
-      return h('div', { class: 'paie-prime' }, lib, h('div', { class: 'paie-prime__ligne' }, mt, fige() ? null : h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Retirer', onclick: () => { V.primes.splice(i, 1); dessiner(); change(); } }, icone('croix'))), soumis);
-    }));
-    dessiner();
-    return h('div', { class: 'form-grille' }, liste,
-      fige() ? null : h('button', { class: 'lien-btn', type: 'button', onclick: () => { V.primes.push({ libelle: '', montant: 0, soumis: true }); dessiner(); $$('.paie-prime input', liste).at(-2)?.focus(); } }, icone('plus'), 'Ajouter une prime ou une indemnité'));
+  function focusCase(cle) { setTimeout(() => feuille.querySelector(`[data-k="${CSS.escape(cle)}"]`)?.focus(), 30); }
+  function ajouterLigne() {
+    V.gains.push({ libelle: 'Prime exceptionnelle', base: '', taux: '', montant: 0, cle: 'prime', coef: null, signe: 1 });
+    dessiner(); modifie(); focusCase(`g.${V.gains.length - 1}.libelle`);
   }
+  function retirerLigne(i) { V.gains.splice(i, 1); dessiner(); modifie(); }
+  function ajouterIndemnite() {
+    V.primes.push({ libelle: 'Remboursement de frais', montant: 0, soumis: false });
+    dessiner(); modifie(); focusCase(`ns.p.${V.primes.length - 1}.libelle`);
+  }
+
+  /* ----- Panneau : juste l'essentiel ----- */
   function construirePanneau() {
     const choixStatut = h('div', { class: 'statuts' },
       h('button', { type: 'button', class: `statut-btn statut-btn--brouillon ${fige() ? '' : 'is-actif'}`, onclick: () => changerStatut('brouillon') }, 'En cours'),
       h('button', { type: 'button', class: `statut-btn statut-btn--payee ${fige() ? 'is-actif' : ''}`, onclick: () => changerStatut('valide') }, 'Validé'));
-    const date = h('input', { class: 'input', type: 'date', value: data.datePaiement, disabled: fige(), onchange: (e) => { data.datePaiement = e.target.value; change(); } });
-    panneau.replaceChildren(
-      h('section', { class: 'panneau__bloc' }, h('h3', null, 'Statut'), choixStatut,
-        h('p', { class: 'panneau__astuce' }, fige() ? 'Bulletin validé : il est figé et compte dans les cumuls de l’année. Repassez-le « En cours » pour le modifier.' : 'Vérifiez les montants, puis validez le bulletin pour le figer.')),
-      blocAlertes,
-      fige() ? null : h('section', { class: 'panneau__bloc panneau__bloc--espace' }, h('h3', null, 'Assistant'),
-        h('p', { class: 'panneau__astuce' }, 'Répondez aux questions une par une : heures, absences, primes, paiement.'),
-        h('a', { class: 'btn btn--gold btn--bloc', href: `#/paie/declarer/${id}` }, icone('eclair'), 'Ouvrir l’assistant')),
-      h('section', { class: 'panneau__bloc' }, h('h3', null, 'Heures du mois'),
-        champNum('Heures travaillées', 'heuresTravaillees', { heuresFmt: true }),
-        h('div', { class: 'form-grille form-grille--2' },
-          champNum('Dont de nuit', 'heuresNuit', { heuresFmt: true }), champNum('Dont dimanche', 'heuresDimanche', { heuresFmt: true }),
-          champNum('Dont jours fériés', 'heuresFerie', { heuresFmt: true }), champNum('Heures sup. à 25 %', 'hs25', { heuresFmt: true }),
-          champNum('Heures sup. à 50 %', 'hs50', { heuresFmt: true }))),
-      h('section', { class: 'panneau__bloc' }, h('h3', null, 'Absences et congés'),
-        h('div', { class: 'form-grille form-grille--2' },
-          champNum('Jours de congés payés', 'joursCP'), champNum('Jours maladie / AT', 'joursMaladie'),
-          champNum('Absences non payées (jours)', 'joursAbsence'), champNum('Congés acquis ce mois', 'cpAcquis'))),
-      h('section', { class: 'panneau__bloc' }, h('h3', null, 'Primes et indemnités'),
-        champNum('Indemnités de panier (nombre)', 'paniers'), blocPrimes(), champNum('Acompte déjà versé (€)', 'acompte')),
-      h('section', { class: 'panneau__bloc' }, h('h3', null, 'Paiement'), champ('Date du paiement', date)),
+    const modifsTaux = Object.values(data.surcharges).some((s) => s && Object.values(s).some((x) => x != null));
+    panneau.replaceChildren(...[
+      h('section', { class: 'panneau__bloc panneau__bloc--espace' }, h('h3', null, 'Net payé'),
+        h('b', { class: 'paie-net' }, fmtE(R.netPaye)),
+        h('p', { class: 'panneau__astuce' }, fige() ? 'Bulletin validé : il est figé. Repassez-le « En cours » pour le modifier.' : 'Cliquez sur n’importe quel chiffre ou texte de la feuille pour le changer : heures, taux, primes, adresse… Tout se recalcule et s’enregistre tout seul.')),
+      h('section', { class: 'panneau__bloc' }, h('h3', null, 'Statut'), choixStatut),
+      !fige() && R.alertes.length ? h('section', { class: 'panneau__bloc panneau__bloc--alerte' }, h('h3', null, 'À vérifier'), h('ul', { class: 'bp-alertes' }, R.alertes.map((a) => h('li', null, a)))) : null,
       h('section', { class: 'panneau__bloc' }, h('h3', null, 'Actions'),
         h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: pdf }, icone('telecharger'), 'Télécharger en PDF'),
         h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: imprimer }, icone('imprimer'), 'Imprimer'),
-        b.agent_id ? h('a', { class: 'btn btn--ghost btn--bloc', href: `#/paie/salarie/${b.agent_id}` }, icone('personne'), 'Dossier du salarié') : null,
-        fige() ? null : h('button', { class: 'btn btn--danger-ghost btn--bloc', type: 'button', onclick: supprimer }, icone('poubelle'), 'Supprimer le bulletin')));
+        fige() ? null : h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: reprendrePlanning }, icone('planning'), 'Reprendre les heures du planning'),
+        !fige() && modifsTaux ? h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => { data.surcharges = {}; dessiner(); modifie(); toast('Taux de cotisation remis comme dans les paramètres.'); } }, 'Annuler mes taux modifiés') : null,
+        fige() ? null : h('a', { class: 'lien-btn', href: `#/paie/declarer/${id}` }, icone('eclair'), 'Plutôt répondre aux questions pas à pas'),
+        b.agent_id ? h('a', { class: 'lien-btn', href: `#/paie/salarie/${b.agent_id}` }, icone('personne'), 'Dossier du salarié') : null,
+        fige() ? null : h('button', { class: 'lien-btn lien-btn--danger', type: 'button', onclick: supprimer }, icone('poubelle'), 'Supprimer cette fiche')),
+    ].filter(Boolean));
   }
 
   const nomFichier = () => `Bulletin de paie ${libelleMois(mois)} - ${agent.nom}`;
   async function pdf() { plusTard.annuler(); await enregistrer(); await telechargerPdf(feuille, nomFichier()); }
   function imprimer() { plusTard.annuler(); enregistrer().then(() => imprimerFeuille(nomFichier())); }
+  async function reprendrePlanning() {
+    try {
+      const { planning } = await api('planning', undefined, { mois });
+      const v = variablesDepuisPlanning(planning, mois, agent.nom, profilCourant);
+      if (!v) return toast(`${agent.nom} n’apparaît pas dans le planning de ${libelleMois(mois)}.`, 'erreur');
+      if (!(await confirmer(`Remplacer les lignes de rémunération par les heures du planning (${fmtHeures(v.heuresTravaillees)}) ? Les primes ajoutées à la main seront retirées.`, { ok: 'Reprendre le planning' }))) return;
+      Object.assign(V, v);
+      V.gains = null;
+      figerLignes();
+      dessiner(); modifie();
+      toast(`Heures reprises : ${fmtHeures(v.heuresTravaillees)}.`);
+    } catch (e) { erreur(e); }
+  }
   async function changerStatut(s) {
     if (s === statut) return;
     const ok = s === 'valide'
-      ? await confirmer('Valider ce bulletin ? Il sera figé : un changement de taux ou du dossier du salarié ne le modifiera plus, et il comptera dans les cumuls de l’année.', { titre: 'Valider le bulletin', ok: 'Valider' })
-      : await confirmer('Repasser ce bulletin « En cours » pour le modifier ? Il reprendra les paramètres et le dossier du salarié actuels.', { titre: 'Modifier le bulletin', ok: 'Modifier' });
+      ? await confirmer('Valider cette fiche de paie ? Elle sera figée et comptera dans les cumuls de l’année.', { titre: 'Valider la fiche', ok: 'Valider' })
+      : await confirmer('Repasser cette fiche « En cours » pour la modifier ?', { titre: 'Modifier la fiche', ok: 'Modifier' });
     if (!ok) return;
     plusTard.annuler();
     if (s === 'valide') {
-      data.params = parametresComplets(res.parametres, res.entreprise);
-      data.profil = { ...PROFIL_DEFAUT, ...(res.profil || {}), nom: agent.nom };
+      const { surcharges, ...P } = params();
+      data.params = P;
+      data.profil = { ...profilCourant, nom: agent.nom };
     }
     statut = s;
-    recalculer(); construirePanneau();
+    dessiner();
     await enregistrer();
+    if (s === 'valide') toast('Fiche validée. Vous pouvez la télécharger en PDF.');
   }
   async function supprimer() {
-    if (!(await confirmer(`Supprimer le bulletin de ${agent.nom} (${libelleMois(mois)}) ?`, { ok: 'Supprimer', danger: true }))) return;
-    try { plusTard.annuler(); await api('paie.bulletin.supprimer', { id }); toast('Bulletin supprimé.'); ctx.aller(`#/paie/${mois}`); } catch (e) { erreur(e); }
+    if (!(await confirmer(`Supprimer la fiche de paie de ${agent.nom} (${libelleMois(mois)}) ?`, { ok: 'Supprimer', danger: true }))) return;
+    try { plusTard.annuler(); await api('paie.bulletin.supprimer', { id }); toast('Fiche supprimée.'); ctx.aller(`#/paie/${mois}`); } catch (e) { erreur(e); }
   }
 
-  ctx.titre(`Bulletin — ${agent.nom}`);
+  ctx.titre(`Fiche de paie — ${agent.nom}`);
   ctx.actions(h('a', { class: 'btn btn--ghost', href: `#/paie/${mois}` }, icone('retour'), h('span', null, libelleMois(mois))), indicateur,
-    h('button', { class: 'btn btn--gold', type: 'button', onclick: pdf }, icone('telecharger'), h('span', null, 'Télécharger PDF')));
-  recalculer();
-  construirePanneau();
-  if (!fige() && (R.brut !== +b.brut || R.netPaye !== +b.net)) enregistrer();
+    h('button', { class: 'btn btn--gold', type: 'button', onclick: pdf }, icone('telecharger'), h('span', null, 'PDF')));
+  const nouvelleFiche = !fige() && !Array.isArray(V.gains);
+  if (nouvelleFiche) figerLignes();
+  dessiner();
+  if (!fige() && (nouvelleFiche || R.brut !== +b.brut || R.netPaye !== +b.net)) enregistrer();
   const zone = h('div', { class: 'feuille-zone' }, feuille);
-  ctx.afficher(h('div', { class: 'editeur' }, zone, panneau));
+  ctx.afficher(h('div', { class: 'editeur editeur--paie' }, zone, panneau));
   ajusterZoom(zone, feuille);
 }
 

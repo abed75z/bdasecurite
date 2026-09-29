@@ -109,51 +109,84 @@ export function ajusterZoom(zone, el) {
   new ResizeObserver(() => requestAnimationFrame(maj)).observe(zone);
 }
 
-/* ---------- La feuille A4 du bulletin (même présentation que les bulletins TESE) ---------- */
-export function dessinerBulletin(el, { R, pr, P, agent, mois, datePaiement }) {
+/* ---------- La feuille A4 du bulletin (même présentation que les bulletins TESE) ----------
+   edit (facultatif) : { maj(cle, texte), ajouterLigne(), retirerLigne(i), ajouterIndemnite() }
+   → chaque chiffre et chaque texte devient modifiable au clic, directement sur la feuille. */
+export function dessinerBulletin(el, { R, pr, P, agent, mois, datePaiement, V = {}, edit = null }) {
   const nb = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const tx = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
   const fmt2 = (v) => (v === '' || v == null ? '' : nb.format(v));
   const [y, m] = mois.split('-').map(Number);
-  const E = P.employeur || {};
+  const Emp = P.employeur || {};
   const fin = `${new Date(y, m, 0).getDate()}/${pad(m)}/${y}`;
-  const lignesTexte = (t) => String(t || '').split('\n').filter(Boolean).map((l) => h('div', null, l));
-  const kv = (k, v) => (v ? h('div', { class: 'bt-kv' }, h('span', null, `${k} : `), h('b', null, v)) : null);
-  const bloc = (titre, ...contenu) => h('section', { class: 'bt-bloc' }, h('h4', null, titre), h('div', { class: 'bt-bloc__corps' }, contenu));
   const mode = R.modePaiement || pr.modePaiement || 'Virement';
   const somme = (ls, k) => Math.round(ls.reduce((s, l) => s + (+l[k] || 0), 0) * 100) / 100;
 
-  /* ----- Colonne de gauche : employeur, salarié, déclaration ----- */
+  // Zone modifiable au clic (texte simple si le bulletin est validé)
+  const E = (texte, cle, { multi, ph } = {}) => {
+    if (!edit || !cle) return texte ?? '';
+    const z = h('span', { class: `bt-ed ${multi ? 'bt-ed--multi' : ''}`, contenteditable: 'plaintext-only', spellcheck: 'false', dataset: { k: cle }, 'data-ph': ph || '…' });
+    const initial = String(texte ?? '');
+    z.textContent = initial;
+    z.addEventListener('focus', () => { const r = document.createRange(); r.selectNodeContents(z); const s = getSelection(); s.removeAllRanges(); s.addRange(r); });
+    z.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !multi) { e.preventDefault(); z.blur(); }
+      if (e.key === 'Escape') { z.textContent = initial; z.blur(); }
+    });
+    z.addEventListener('blur', () => { const t = z.innerText.replace(/ /g, ' ').trim(); if (t !== initial.trim()) edit.maj(cle, t); });
+    return z;
+  };
+  const kv = (k, v, cle) => (v || (edit && cle) ? h('div', { class: 'bt-kv' }, h('span', null, `${k} : `), h('b', null, E(v, cle))) : null);
+  const bloc = (titre, ...contenu) => h('section', { class: 'bt-bloc' }, h('h4', null, titre), h('div', { class: 'bt-bloc__corps' }, contenu));
+  const bouton = (libelle, onclick) => h('button', { type: 'button', class: 'bt-ajout bt-ecran', onclick }, libelle);
+
+  /* ----- Colonne de gauche : employeur, salarié, paiement ----- */
   const gauche = h('aside', { class: 'bt-gauche' },
     bloc('L’employeur',
-      kv('Raison sociale', E.nom), h('div', { class: 'bt-kv' }, h('span', null, 'Adresse : '), h('b', null, String(E.adresse || '').replace(/\n/g, ' - '))),
-      kv('Code NAF', E.ape), kv('N° URSSAF', E.urssaf), kv('SIRET', E.siret)),
+      kv('Raison sociale', Emp.nom, 'emp.nom'), h('div', { class: 'bt-kv' }, h('span', null, 'Adresse : '), h('b', null, edit ? E(Emp.adresse, 'emp.adresse', { multi: true }) : String(Emp.adresse || '').replace(/\n/g, ' - '))),
+      kv('Code NAF', Emp.ape, 'emp.ape'), kv('N° URSSAF', Emp.urssaf, 'emp.urssaf'), kv('SIRET', Emp.siret, 'emp.siret')),
     bloc('Le salarié',
-      kv('Nom', agent.nom), kv('N° Sécurité sociale', pr.nir), kv('Matricule', pr.matricule),
-      kv('Convention collective', E.convention ? E.convention.replace(/^Convention collective nationale des entreprises de /, '').replace(/^./, (c) => c.toUpperCase()) : ''),
-      kv('Emploi occupé', pr.emploi), kv('Qualification', pr.qualification), kv('Statut', pr.statut), kv('Contrat', pr.contrat), kv('Entré(e) le', isoVersFr(pr.dateEntree))),
+      kv('Nom', agent.nom), kv('N° Sécurité sociale', pr.nir, 'sal.nir'), kv('Matricule', pr.matricule, 'sal.matricule'),
+      kv('Convention collective', Emp.convention ? Emp.convention.replace(/^Convention collective nationale des entreprises de /, '').replace(/^./, (c) => c.toUpperCase()) : '', 'emp.convention'),
+      kv('Emploi occupé', pr.emploi, 'sal.emploi'), kv('Qualification', pr.qualification, 'sal.qualification'), kv('Statut', pr.statut, 'sal.statut'),
+      kv('Contrat', pr.contrat, 'sal.contrat'), kv('Entré(e) le', isoVersFr(pr.dateEntree), 'sal.dateEntree')),
     bloc('Période et paiement',
       kv('Période d’emploi', `du 01/${pad(m)}/${String(y).slice(2)} au ${fin.slice(0, 6)}${String(y).slice(2)}`),
-      kv('Salaire versé le', isoVersFr(datePaiement)), kv('Mode de paiement', mode),
-      kv('Heures rémunérées', fmtHeures(R.heuresMois)), kv('Taux horaire', pr.tauxHoraire ? `${tx.format(pr.tauxHoraire)} €` : '')),
+      kv('Salaire versé le', isoVersFr(datePaiement), 'datePaiement'), kv('Mode de paiement', mode, 'mode'),
+      kv('Heures rémunérées', fmtHeures(R.heuresMois)), kv('Taux horaire', pr.tauxHoraire ? `${tx.format(pr.tauxHoraire)} €` : '', 'sal.tauxHoraire')),
     bloc('Congés payés (jours)',
-      h('div', { class: 'bt-mini' }, h('div', null, h('span', null, 'Acquis'), h('b', null, nombre.format(R.cp.acquis))), h('div', null, h('span', null, 'Pris'), h('b', null, nombre.format(R.cp.pris))), h('div', null, h('span', null, 'Solde'), h('b', null, nombre.format(R.cp.solde))))),
+      h('div', { class: 'bt-mini' },
+        h('div', null, h('span', null, 'Acquis'), h('b', null, E(nombre.format(R.cp.acquis), 'cp.acquis'))),
+        h('div', null, h('span', null, 'Pris'), h('b', null, E(nombre.format(R.cp.pris), 'cp.pris'))),
+        h('div', null, h('span', null, 'Solde'), h('b', null, nombre.format(R.cp.solde))))),
     bloc(`Cumuls ${y}`,
       kv('Brut', fmtE(R.annee.brut)), kv('Net imposable', fmtE(R.annee.netImposable)), kv('Impôt prélevé', fmtE(R.annee.pas)), kv('Heures', fmtHeures(R.annee.heures))));
 
-  /* ----- Colonne de droite : rémunération, cotisations, net ----- */
+  /* ----- Éléments de rémunération ----- */
+  const lignesGains = R.gains.map((g, i) => {
+    const calcule = g.base !== '' && g.base != null && g.taux !== '' && g.taux != null;
+    return h('tr', null,
+      h('td', null, E(g.libelle, `g.${i}.libelle`), edit ? h('button', { type: 'button', class: 'bt-suppr bt-ecran', title: 'Retirer la ligne', onclick: () => edit.retirerLigne(i) }, '×') : null),
+      h('td', { class: 'r' }, E(fmt2(g.base), `g.${i}.base`)),
+      h('td', { class: 'r' }, E(g.taux === '' || g.taux == null ? '' : tx.format(g.taux), `g.${i}.taux`)),
+      h('td', { class: 'r' }, calcule || !edit ? nb.format(g.montant) : E(nb.format(g.montant), `g.${i}.montant`)));
+  });
   const gains = h('table', { class: 'bt-table' },
     h('colgroup', null, h('col'), h('col', { class: 'bt-c-base' }), h('col', { class: 'bt-c-taux' }), h('col', { class: 'bt-c-mt' })),
     h('thead', null, h('tr', null, h('th', null, 'Éléments de rémunération'), h('th', null, 'Nombre'), h('th', null, 'Taux'), h('th', null, 'Montant'))),
-    h('tbody', null, R.gains.map((g) => h('tr', null, h('td', null, g.libelle), h('td', { class: 'r' }, fmt2(g.base)), h('td', { class: 'r' }, g.taux === '' ? '' : tx.format(g.taux)), h('td', { class: 'r' }, nb.format(g.montant))))),
+    h('tbody', null, lignesGains, edit ? h('tr', { class: 'bt-ecran' }, h('td', { colspan: 4 }, bouton('+ Ajouter une ligne (prime, heures…)', () => edit.ajouterLigne()))) : null),
     h('tfoot', null, h('tr', null, h('td', { colspan: 3 }, 'Total rémunération brute'), h('td', { class: 'r' }, fmtE(R.brut)))));
 
+  /* ----- Cotisations ----- */
   const corps = h('tbody');
   const sect = (t) => corps.append(h('tr', { class: 'bt-sect' }, h('td', { colspan: 6 }, t)));
-  const nb2 = (v) => (v === '' || v == null ? '' : nb.format(v));
-  const ligne = (l) => corps.append(h('tr', null, h('td', null, l.libelle), h('td', { class: 'r' }, l.cle === 'reducGen' || l.cle === 'mutuelle' ? '' : fmt2(l.base)),
-    h('td', { class: 'r' }, l.sal && l.tauxSal !== '' ? tx.format(l.tauxSal) : ''), h('td', { class: 'r' }, l.sal ? nb2(l.sal) : ''),
-    h('td', { class: 'r' }, l.pat && l.tauxPat !== '' && l.cle !== 'reducGen' ? tx.format(l.tauxPat) : ''), h('td', { class: 'r' }, l.pat ? nb2(l.pat) : '')));
+  const modifiable = (l) => l.cle && !['mutuelle', 'reducGen', 'csgnd'].includes(l.cle) && l.base !== '';
+  const ligne = (l) => corps.append(h('tr', null, h('td', null, l.libelle),
+    h('td', { class: 'r' }, l.cle === 'reducGen' || l.cle === 'mutuelle' ? '' : fmt2(l.base)),
+    h('td', { class: 'r' }, l.sal && l.tauxSal !== '' ? E(tx.format(l.tauxSal), modifiable(l) ? `c.${l.cle}.sal` : null) : ''),
+    h('td', { class: 'r' }, l.sal ? nb.format(l.sal) : ''),
+    h('td', { class: 'r' }, l.pat && l.tauxPat !== '' ? E(tx.format(l.tauxPat), modifiable(l) ? `c.${l.cle}.pat` : null) : ''),
+    h('td', { class: 'r' }, l.cle === 'reducGen' ? E(nb.format(l.pat), 'c.reducGen.montant') : l.pat ? nb.format(l.pat) : '')));
   const G = (rub) => R.lignes.filter((l) => l.rubrique === rub);
   const groupe = (titre, ...rubs) => { const ls = rubs.flatMap(G); if (ls.length) { sect(titre); ls.forEach(ligne); } };
   groupe('Sécurité sociale', 'secu');
@@ -164,7 +197,7 @@ export function dessinerBulletin(el, { R, pr, P, agent, mois, datePaiement }) {
   if (csg.length || nd.length) {
     sect('CSG - CRDS');
     csg.forEach(ligne);
-    if (nd.length) ligne({ libelle: 'CSG CRDS non déductible de l’impôt sur le revenu', base: nd[0].base, tauxSal: somme(nd, 'tauxSal'), sal: somme(nd, 'sal'), pat: 0 });
+    if (nd.length) ligne({ libelle: 'CSG CRDS non déductible de l’impôt sur le revenu', base: nd[0].base, tauxSal: somme(nd, 'tauxSal'), sal: somme(nd, 'sal'), pat: 0, cle: 'csgnd' });
   }
   groupe('Autres cotisations', 'autres');
   groupe('Exonérations et allègements', 'exo');
@@ -176,6 +209,25 @@ export function dessinerBulletin(el, { R, pr, P, agent, mois, datePaiement }) {
     corps,
     h('tfoot', null, h('tr', null, h('td', { colspan: 2 }, 'Montant total des cotisations'), h('td', { colspan: 2, class: 'r' }, nb.format(R.totalSal)), h('td', { colspan: 2, class: 'r' }, nb.format(R.totalPat)))));
 
+  /* ----- Indemnités non soumises et acompte ----- */
+  let hors = null;
+  if (edit) {
+    const primesNS = (V.primes || []).map((p, i) => ({ p, i })).filter(({ p }) => p && p.soumis === false);
+    const ligneNS = (libelle, valeur, cle, vide, montant) => h('tr', { class: vide ? 'bt-vide' : '' }, h('td', null, libelle), h('td', { class: 'r' }, E(valeur, cle)), h('td', { class: 'r' }, montant ?? ''));
+    hors = h('table', { class: 'bt-table bt-table--simple' },
+      h('colgroup', null, h('col'), h('col', { class: 'bt-c-mt' }), h('col', { class: 'bt-c-mt' })),
+      h('tbody', null,
+        ligneNS(`Indemnités de panier (nombre × ${nb.format(+P.panier || 0)} €)`, nombre.format(+V.paniers || 0), 'ns.paniers', !(+V.paniers), `+ ${nb.format((+V.paniers || 0) * (+P.panier || 0))}`),
+        ligneNS('Remboursement frais de transport (50 %)', nb.format(+pr.navigo || 0), 'ns.transport', !(+pr.navigo), `+ ${nb.format(+pr.navigo || 0)}`),
+        primesNS.map(({ p, i }) => h('tr', null, h('td', null, E(p.libelle || 'Indemnité', `ns.p.${i}.libelle`)), h('td', { class: 'r' }, E(nb.format(+p.montant || 0), `ns.p.${i}.montant`)), h('td', { class: 'r' }, `+ ${nb.format(+p.montant || 0)}`))),
+        ligneNS('Acompte déjà versé', nb.format(+V.acompte || 0), 'acompte', !(+V.acompte), `- ${nb.format(+V.acompte || 0)}`),
+        h('tr', { class: 'bt-ecran' }, h('td', { colspan: 3 }, bouton('+ Ajouter une indemnité non soumise (frais…)', () => edit.ajouterIndemnite())))));
+  } else if (R.nonSoumis.length || R.acompte) {
+    hors = h('table', { class: 'bt-table bt-table--simple' },
+      h('tbody', null, R.nonSoumis.map((x) => h('tr', null, h('td', null, x.base ? `${x.libelle} (${nombre.format(x.base)} × ${nb.format(x.taux)} €)` : x.libelle), h('td', { class: 'r' }, `+ ${nb.format(x.montant)}`))),
+        R.acompte ? h('tr', null, h('td', null, 'Acompte déjà versé'), h('td', { class: 'r' }, `- ${nb.format(R.acompte)}`)) : null));
+  }
+
   const boite = (libelle, montant, cls = '') => h('div', { class: `bt-boite ${cls}` }, h('span', null, libelle), h('b', null, nb.format(montant)));
   const droite = h('div', { class: 'bt-droite' },
     gains,
@@ -184,13 +236,12 @@ export function dessinerBulletin(el, { R, pr, P, agent, mois, datePaiement }) {
     h('div', { class: 'bt-net' },
       h('div', { class: 'bt-net__ligne' }, h('span', null, 'Net à payer avant l’impôt sur le revenu'), h('b', null, nb.format(R.netAvantImpot))),
       R.evolution ? h('div', { class: 'bt-net__dont' }, h('span', null, 'dont évolution de la rémunération liée à la suppression des cotisations salariales chômage et maladie'), h('b', null, nb.format(R.evolution))) : null),
-    R.nonSoumis.length || R.acompte ? h('table', { class: 'bt-table bt-table--simple' },
-      h('tbody', null, R.nonSoumis.map((x) => h('tr', null, h('td', null, x.base ? `${x.libelle} (${nombre.format(x.base)} × ${nombre.format(x.taux)} €)` : x.libelle), h('td', { class: 'r' }, `+ ${nb.format(x.montant)}`))),
-        R.acompte ? h('tr', null, h('td', null, 'Acompte déjà versé'), h('td', { class: 'r' }, `- ${nb.format(R.acompte)}`)) : null)) : null,
+    hors,
     h('table', { class: 'bt-table' },
       h('colgroup', null, h('col'), h('col', { class: 'bt-c-mt' }), h('col', { class: 'bt-c-pas' }), h('col', { class: 'bt-c-mt' })),
       h('thead', null, h('tr', null, h('th', null, 'Impôt sur le revenu'), h('th', null, 'Base'), h('th', null, 'Taux personnalisé / non personnalisé'), h('th', null, 'Montant'))),
-      h('tbody', null, h('tr', null, h('td', null, 'Impôt sur le revenu prélevé à la source'), h('td', { class: 'r' }, nb.format(R.netImposable)), h('td', { class: 'r' }, tx.format(R.tauxPas)), h('td', { class: 'r' }, nb.format(R.pas))))),
+      h('tbody', null, h('tr', null, h('td', null, 'Impôt sur le revenu prélevé à la source'), h('td', { class: 'r' }, nb.format(R.netImposable)),
+        h('td', { class: 'r' }, E(tx.format(R.tauxPas), 'pas.taux')), h('td', { class: 'r' }, nb.format(R.pas))))),
     h('div', { class: 'bt-paye' }, h('span', null, 'Net payé en euros'), h('b', null, nb.format(R.netPaye))),
     h('div', { class: 'bt-cout' }, h('span', null, `Allègement de cotisations employeur : ${fmtE(R.allegements)}`), h('span', null, `Total versé par l’employeur : ${fmtE(R.coutEmployeur)}`)));
 
@@ -198,7 +249,8 @@ export function dessinerBulletin(el, { R, pr, P, agent, mois, datePaiement }) {
     h('div', { class: 'bt-haut' },
       h('div', { class: 'bt-marque' }, h('img', { class: 'bt-logo', src: 'logo-document.jpg', alt: '' }),
         h('div', null, h('b', null, 'Bulletin de paie'), h('span', null, `${cap(MOIS[m - 1])} ${y}`))),
-      h('div', { class: 'bt-adresse' }, h('div', null, `${pr.sexe === 'F' ? 'Madame' : pr.sexe === 'H' ? 'Monsieur' : ''} ${agent.nom}`.trim()), lignesTexte(pr.adresse),
+      h('div', { class: 'bt-adresse' }, h('div', null, `${pr.sexe === 'F' ? 'Madame' : pr.sexe === 'H' ? 'Monsieur' : ''} ${agent.nom}`.trim()),
+        edit ? E(pr.adresse, 'sal.adresse', { multi: true, ph: 'Adresse du salarié' }) : String(pr.adresse || '').split('\n').filter(Boolean).map((l) => h('div', null, l)),
         h('div', { class: 'bt-date' }, `le ${isoVersFr(datePaiement) || fin}`))),
     h('div', { class: 'bt-grille' }, gauche, droite),
     h('div', { class: 'f-espace' }),

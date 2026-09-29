@@ -139,8 +139,13 @@ export function calculerBulletin(v0, profil0, P0, cumuls = {}) {
 
   /* ----- Rémunération brute ----- */
   const gains = [];
-  const gain = (libelle, base, taux, montant, cle) => { if (montant) gains.push({ libelle, base, taux, montant: r2(montant), cle }); return r2(montant); };
-  const hs25 = n(v.hs25), hs50 = n(v.hs50);
+  // coef : part du taux horaire (1 = salaire de base, 1,25 = heure sup…) ; signe −1 pour une retenue (absence)
+  const COEF = { base: 1, cp: 1, absence: 1, maladie: 1, hs25: 1.25, hs50: 1.5 };
+  const gain = (libelle, base, taux, montant, cle, coef = COEF[cle]) => {
+    if (montant) gains.push({ libelle, base: base === '' ? '' : r2(base), taux, montant: r2(montant), cle, coef: coef ?? null, signe: montant < 0 ? -1 : 1 });
+    return r2(montant);
+  };
+  let hs25 = n(v.hs25), hs50 = n(v.hs50);
   let heuresPayees;
   if (pr.mode === 'horaire') {
     const hn = Math.max(0, n(v.heuresTravaillees) - hs25 - hs50);
@@ -156,13 +161,24 @@ export function calculerBulletin(v0, profil0, P0, cumuls = {}) {
     gain('Absence maladie', hMal, th, -hMal * th, 'maladie');
     heuresPayees = Math.max(0, hc - hAbs - hMal);
   }
-  const montantHS = gain('Heures supplémentaires à 25 %', hs25, r2(th * 1.25), hs25 * th * 1.25, 'hs25')
+  let montantHS = gain('Heures supplémentaires à 25 %', hs25, r2(th * 1.25), hs25 * th * 1.25, 'hs25')
     + gain('Heures supplémentaires à 50 %', hs50, r2(th * 1.5), hs50 * th * 1.5, 'hs50');
   const M = P.majorations;
-  gain(`Majoration heures de nuit (${n(M.nuit)} %)`, n(v.heuresNuit), r2((th * n(M.nuit)) / 100), (n(v.heuresNuit) * th * n(M.nuit)) / 100, 'nuit');
-  gain(`Majoration heures du dimanche (${n(M.dimanche)} %)`, n(v.heuresDimanche), r2((th * n(M.dimanche)) / 100), (n(v.heuresDimanche) * th * n(M.dimanche)) / 100, 'dimanche');
-  gain(`Majoration jours fériés (${n(M.ferie)} %)`, n(v.heuresFerie), r2((th * n(M.ferie)) / 100), (n(v.heuresFerie) * th * n(M.ferie)) / 100, 'ferie');
+  gain(`Majoration heures de nuit (${n(M.nuit)} %)`, n(v.heuresNuit), r2((th * n(M.nuit)) / 100), (n(v.heuresNuit) * th * n(M.nuit)) / 100, 'nuit', n(M.nuit) / 100);
+  gain(`Majoration heures du dimanche (${n(M.dimanche)} %)`, n(v.heuresDimanche), r2((th * n(M.dimanche)) / 100), (n(v.heuresDimanche) * th * n(M.dimanche)) / 100, 'dimanche', n(M.dimanche) / 100);
+  gain(`Majoration jours fériés (${n(M.ferie)} %)`, n(v.heuresFerie), r2((th * n(M.ferie)) / 100), (n(v.heuresFerie) * th * n(M.ferie)) / 100, 'ferie', n(M.ferie) / 100);
   (v.primes || []).filter((p) => p && p.soumis !== false && n(p.montant)).forEach((p) => gain(p.libelle || 'Prime', '', '', n(p.montant), 'prime'));
+
+  // Lignes saisies directement sur la feuille : elles remplacent le calcul automatique
+  if (Array.isArray(v.gains)) {
+    const estNombre = (x) => x !== '' && x != null && Number.isFinite(+x);
+    gains.length = 0;
+    v.gains.forEach((g) => gains.push({ ...g, montant: r2(estNombre(g.base) && estNombre(g.taux) ? (g.signe || 1) * g.base * g.taux : n(g.montant)) }));
+    const total = (cles, k) => gains.filter((g) => cles.includes(g.cle)).reduce((s, g) => s + n(g[k]), 0);
+    heuresPayees = Math.max(0, total(['base', 'cp'], 'base') - total(['absence', 'maladie'], 'base'));
+    hs25 = total(['hs25'], 'base'); hs50 = total(['hs50'], 'base');
+    montantHS = r2(total(['hs25', 'hs50'], 'montant'));
+  }
   const brut = r2(gains.reduce((s, g) => s + g.montant, 0));
 
   /* ----- Bases ----- */
@@ -175,7 +191,13 @@ export function calculerBulletin(v0, profil0, P0, cumuls = {}) {
   const lignes = [];
   const cot = (rubrique, libelle, base, taux, cle) => {
     // taux : { sal, pat } ou une liste de taux (chaque part arrondie à part, comme TESE pour la retraite)
-    const liste = Array.isArray(taux) ? taux : [taux];
+    let liste = Array.isArray(taux) ? taux : [taux];
+    // Taux modifié à la main sur la feuille (pour ce bulletin seulement)
+    const sc = P.surcharges?.[cle];
+    if (sc && (sc.sal != null || sc.pat != null)) {
+      const s0 = liste.reduce((s, t) => s + n(t?.sal), 0), p0 = liste.reduce((s, t) => s + n(t?.pat), 0);
+      liste = [{ sal: sc.sal ?? s0, pat: sc.pat ?? p0 }];
+    }
     const tS = r2(liste.reduce((s, t) => s + n(t?.sal), 0) * 1000) / 1000, tP = r2(liste.reduce((s, t) => s + n(t?.pat), 0) * 1000) / 1000;
     const sal = r2(liste.reduce((s, t) => s + r2((base * n(t?.sal)) / 100), 0)), pat = r2(liste.reduce((s, t) => s + r2((base * n(t?.pat)) / 100), 0));
     if (!sal && !pat) return { sal: 0, pat: 0 };
@@ -239,8 +261,10 @@ export function calculerBulletin(v0, profil0, P0, cumuls = {}) {
     const coef = Math.round(c * 1000000) / 1000000; // coefficient non arrondi à 4 décimales, comme TESE
     const patEligibles = lignes.filter((l) => !['prevoyance', 'mutuelle', 'formation', 'apprentissage', 'mobilite', 'dialogue', 'cet', 'retraiteT2', 'cegT2'].includes(l.cle) && l.pat > 0).reduce((s, l) => s + l.pat, 0);
     reducGen = r2(Math.min(coef * brut, patEligibles));
-    if (reducGen) lignes.push({ rubrique: 'autres', libelle: 'Réduction générale des cotisations', base: brut, tauxSal: '', sal: 0, tauxPat: -r2(coef * 100), pat: -reducGen, cle: 'reducGen' });
   }
+  // Montant saisi à la main sur la feuille
+  if (P.surcharges?.reducGen?.montant != null) reducGen = r2(Math.abs(n(P.surcharges.reducGen.montant)));
+  if (reducGen) lignes.push({ rubrique: 'autres', libelle: 'Réduction générale des cotisations', base: brut, tauxSal: '', sal: 0, tauxPat: '', pat: -reducGen, cle: 'reducGen' });
   cot('autres', 'Contribution au dialogue social', brut, T.dialogue, 'dialogue');
   const dedHS = moins20 ? r2(n(P.deductionHS) * (hs25 + hs50)) : 0;
   if (dedHS) lignes.push({ rubrique: 'exo', libelle: 'Déduction forfaitaire patronale (heures supplémentaires)', base: hs25 + hs50, tauxSal: '', sal: 0, tauxPat: '', pat: -dedHS, cle: 'dedHS' });
@@ -273,7 +297,7 @@ export function calculerBulletin(v0, profil0, P0, cumuls = {}) {
   /* ----- Congés payés et cumuls de l'année ----- */
   const cpAcquis = n(v.cpAcquis), cpPris = n(v.joursCP);
   const cpSolde = r2(n(pr.soldeCP) + n(cumuls.cpNet) + cpAcquis - cpPris);
-  const heuresMois = r2(pr.mode === 'horaire' ? n(v.heuresTravaillees) : heuresPayees + hs25 + hs50);
+  const heuresMois = r2(Array.isArray(v.gains) || pr.mode !== 'horaire' ? heuresPayees + hs25 + hs50 : n(v.heuresTravaillees));
   const annee = {
     brut: r2(n(cumuls.brut) + brut), netImposable: r2(n(cumuls.netImposable) + netImposable),
     pas: r2(n(cumuls.pas) + pas), heures: r2(n(cumuls.heures) + heuresMois),

@@ -313,3 +313,19 @@
 .bt-paye b { padding: 1.2mm 2mm; font-size: 11pt; background: #f3ead4; }
 .bt-cout { display: flex; justify-content: space-between; gap: 4mm; font-size: 6.4pt; color: #555; }
 .bt-mention { margin: 3mm 0 0; padding-top: 1.6mm; border-top: 1px solid #bbb; font-size: 6.2pt; color: #555; text-align: center; }
+
+/* ---------- Fiche de paie modifiable directement sur la feuille ---------- */
+.bt-ed { display: inline-block; min-width: 1.6em; padding: 0 1px; border-bottom: 1px dashed rgba(195, 154, 69, 0.55); cursor: text; }
+.bt-ed--multi { display: block; white-space: pre-wrap; }
+.bt-ed:hover { background: rgba(195, 154, 69, 0.12) !important; }
+.bt-ed:focus { background: #fff8e6 !important; box-shadow: 0 0 0 2px var(--or) !important; border-bottom-color: transparent; }
+.bt-table td .bt-ed { text-align: inherit; }
+.bt-suppr { float: right; width: 15px; height: 15px; margin-left: 4px; border-radius: 50%; border: 1px solid #d9cfb8; color: #a0998a; font-size: 10px; line-height: 12px; text-align: center; opacity: 0; transition: opacity 0.15s; }
+.bt-table tr:hover .bt-suppr { opacity: 1; }
+.bt-suppr:hover { color: #fff; background: #e5484d; border-color: #e5484d; }
+.bt-ajout { padding: 1mm 2mm; border-radius: 4px; border: 1px dashed var(--or); color: var(--or-fonce); font: 600 7pt Arial, sans-serif; background: #fffaf0; }
+.bt-ajout:hover { background: #f7ecd2; }
+.bt-vide td { color: #b5ae9f; }
+@media print { .bt-ecran, .bt-vide { display: none !important; } .bt-ed { border-bottom: 0; } }
+.capture-pdf .bt-ecran, .capture-pdf .bt-vide { display: none !important; }
+.capture-pdf .bt-ed { border-bottom: 0; }

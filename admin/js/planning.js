@@ -154,7 +154,7 @@ export async function pagePlanning(ctx) {
     h('div', { class: 'plan-legende' },
       h('span', null, h('i', { class: 'lg-has' }), 'Jour travaillé'), h('span', null, h('i', { class: 'lg-we' }), 'Week-end'), h('span', null, h('i', { class: 'lg-ho' }), 'Jour férié'),
       h('span', null, 'Heures de nuit : ', nuitTxt),
-      h('span', null, 'Saisie : 12h-19h · 7h30-19h · 19h-7h (nuit jusqu\'au lendemain) · 8 (heures) · R repos · CP congés · M maladie')),
+      h('span', null, h('b', null, 'R'), ' Repos · ', h('b', null, 'CP'), ' Congés payés · ', h('b', null, 'M'), ' Maladie · ', h('b', null, 'AT'), ' Accident du travail · ', h('b', null, 'F'), ' Formation · ', h('b', null, 'ABS'), ' Absence')),
     h('div', { class: 'f-espace' }),
     h('div', { class: 'f-pied' }, reglages.pied));
 

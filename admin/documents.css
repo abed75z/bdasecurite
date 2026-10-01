@@ -329,3 +329,27 @@
 @media print { .bt-ecran, .bt-vide { display: none !important; } .bt-ed { border-bottom: 0; } }
 .capture-pdf .bt-ecran, .capture-pdf .bt-vide { display: none !important; }
 .capture-pdf .bt-ed { border-bottom: 0; }
+
+/* ---------- Devis / facture avec beaucoup de lignes : tout tient sur une page A4 ---------- */
+.feuille--compacte { padding: 8mm 13mm 7mm; font-size: 8.6pt; }
+.feuille--compacte .f-logo { height: 17mm; }
+.feuille--compacte .f-logo--petit { height: 17mm; }
+.feuille--compacte .f-regle { margin: 2.6mm 0; }
+.feuille--compacte .f-parties { gap: 8mm; }
+.feuille--compacte .f-partie--client { padding: 2.4mm 4mm; }
+.feuille--compacte .f-nom { font-size: 10pt; }
+.feuille--compacte .f-titre { margin: 3mm 0 2.4mm; }
+.feuille--compacte .f-titre h2 { font-size: 17pt; }
+.feuille--compacte .f-titre h2::after { margin-top: 1.6mm; }
+.feuille--compacte .f-meta { margin-bottom: 2.6mm; }
+.feuille--compacte .f-meta > div { padding: 1.4mm 3.5mm; }
+.feuille--compacte .f-meta__val { font-size: 9pt; }
+.feuille--compacte .f-table th { padding: 1.6mm 3mm; font-size: 6.6pt; }
+.feuille--compacte .f-table td { padding: 0.75mm 3mm; font-size: 8pt; }
+.feuille--compacte .f-totaux { margin-top: 2.6mm; }
+.feuille--compacte .f-totaux > div { padding: 1.1mm 3mm; }
+.feuille--compacte .f-totaux .grand { padding: 2.2mm 3mm; font-size: 10pt; }
+.feuille--compacte .f-paiement { margin-top: 3mm; padding: 2.6mm 4mm; }
+.feuille--compacte .f-paiement__main { font-size: 9.5pt; margin-bottom: 1.4mm; }
+.feuille--compacte .f-petit { font-size: 7pt; }
+.feuille--compacte .f-pied { padding-top: 2mm; font-size: 6.2pt; }

@@ -435,6 +435,8 @@ function construireFeuille(type, data, change, r = {}) {
         h('button', { type: 'button', class: 'del', title: 'Supprimer la ligne', onclick: () => { data.lignes.splice(i, 1); lignes(); change(); } }, '×'));
       return h('tr', null, h('td', null, desc, detail), h('td', { class: 'r' }, q), h('td', { class: 'r' }, pu), h('td', { class: 'r f-total' }, h('span', { class: 'f-total__val', dataset: { i } }), outils));
     }));
+    // Beaucoup de lignes (ex. une ligne par jour) : présentation resserrée pour tenir sur une seule page A4
+    el.classList.toggle('feuille--compacte', data.lignes.length > 10);
     majTotaux();
   }
   function ajouterLigne() {

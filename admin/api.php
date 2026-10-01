@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -733,6 +733,50 @@ try {
       repondre(['ok' => true]);
 
     /* ================= Espace client : envoi des documents et messagerie ================= */
+    /* ----- PDF joint à un devis / une facture (visible dans l'espace client) ----- */
+    case 'document.piece.ajouter':
+      $id = (int)($_POST['id'] ?? 0);
+      $st = db()->prepare('SELECT id, type, numero, piece FROM documents WHERE id = ?');
+      $st->execute([$id]);
+      $d = $st->fetch();
+      if (!$d) echec('Document introuvable : enregistrez-le d’abord.', 404);
+      $f = $_FILES['fichier'] ?? null;
+      if (!is_array($f) || ($f['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file((string)$f['tmp_name'])) {
+        $code = is_array($f) ? (int)$f['error'] : 0;
+        echec(in_array($code, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true) ? "Fichier trop lourd pour l'hébergement." : "Le fichier n'a pas été reçu.", 400);
+      }
+      if ((int)$f['size'] > 15 * 1024 * 1024) echec('Fichier trop lourd (15 Mo maximum).');
+      if (type_fichier((string)$f['tmp_name']) !== 'application/pdf') echec('Seuls les fichiers PDF sont acceptés.');
+      $fichier = bin2hex(random_bytes(16)) . '.pdf';
+      if (!move_uploaded_file((string)$f['tmp_name'], dossier_pieces() . '/' . $fichier)) echec('Enregistrement du fichier impossible.', 500);
+      if ($d['piece'] !== '') @unlink(dossier_pieces() . '/' . basename((string)$d['piece']));
+      $nom = texte($f['name'] ?? 'document.pdf', 160);
+      db()->prepare('UPDATE documents SET piece = ?, piece_nom = ? WHERE id = ?')->execute([$fichier, $nom, $d['id']]);
+      journal('document', ($d['type'] === 'facture' ? 'Facture ' : 'Devis ') . "{$d['numero']} : PDF joint ($nom)");
+      repondre(['ok' => true, 'piece_nom' => $nom]);
+
+    case 'document.piece':
+      $st = db()->prepare('SELECT piece, piece_nom FROM documents WHERE id = ?');
+      $st->execute([(int)($_GET['id'] ?? 0)]);
+      $d = $st->fetch();
+      $chemin = $d && $d['piece'] !== '' ? dossier_pieces() . '/' . basename((string)$d['piece']) : '';
+      if (!$chemin || !is_file($chemin)) echec('PDF introuvable.', 404);
+      header('Content-Type: application/pdf');
+      header('Content-Length: ' . filesize($chemin));
+      header('Content-Disposition: inline; filename="' . preg_replace('/[^\w .()-]+/u', '_', (string)$d['piece_nom']) . '"');
+      header('Cache-Control: private, no-store');
+      readfile($chemin);
+      exit;
+
+    case 'document.piece.supprimer':
+      $id = (int)(corps()['id'] ?? 0);
+      $st = db()->prepare('SELECT piece FROM documents WHERE id = ?');
+      $st->execute([$id]);
+      $p = (string)$st->fetchColumn();
+      if ($p !== '') @unlink(dossier_pieces() . '/' . basename($p));
+      db()->prepare("UPDATE documents SET piece = '', piece_nom = '' WHERE id = ?")->execute([$id]);
+      repondre(['ok' => true]);
+
     case 'document.partager':
       $b = corps();
       $st = db()->prepare('SELECT id, type, numero, statut, client FROM documents WHERE id = ?');

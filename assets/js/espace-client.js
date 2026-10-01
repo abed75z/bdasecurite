@@ -235,7 +235,8 @@ async function vueDocument(id) {
   } }, ic('coche'), 'Accepter ce devis') : null;
   const actions = h('div', { class: 'ec-doc__actions' },
     h('a', { class: 'ec-retour', href: estFacture ? '#/factures' : '#/devis' }, '← ', estFacture ? 'Factures' : 'Devis'),
-    h('button', { class: 'btn btn--outline', type: 'button', onclick: () => window.print() }, ic('imprimer'), 'Imprimer / PDF'),
+    doc.piece_nom ? h('a', { class: 'btn btn--gold', href: `/api/client.php?a=piece&id=${doc.id}`, download: '' }, ic(estFacture ? 'factures' : 'devis'), 'Télécharger le PDF') : null,
+    h('button', { class: 'btn btn--outline', type: 'button', onclick: () => window.print() }, ic('imprimer'), 'Imprimer'),
     h('a', { class: 'btn btn--outline', href: '#/messages' }, ic('messages'), 'Une question'),
     accepter);
   const feuille = h('article', { class: 'ec-feuille' },

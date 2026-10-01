@@ -4,7 +4,7 @@
    transformation devis -> facture, report des heures du planning.
    ========================================================= */
 import {
-  api, h, $, $$, icone, toast, erreur, modale, confirmer, champ, saisie, zoneTexte, statutPastille, attendre,
+  api, apiFichier, h, $, $$, icone, toast, erreur, modale, confirmer, champ, saisie, zoneTexte, statutPastille, attendre,
   euro, nombre, arrondi, fmtHeures, lireHeures, lireNombre, fr, frVersDate, isoVersFr, cap, MOIS, pad, iso,
 } from './outils.js';
 import { totauxDuMois } from './planning.js';
@@ -124,13 +124,14 @@ export async function editeurDocument(ctx, type, param) {
   let id = /^\d+$/.test(param) ? +param : 0;
   let statut = 'brouillon';
   let data, prerempli = false;
-  let partage = '', vuClient = '';
+  let partage = '', vuClient = '', pieceNom = '';
   if (id) {
     const { document: d } = await api('document', undefined, { id });
     data = d.data || {};
     statut = d.statut;
     partage = d.partage || '';
     vuClient = d.vu_client || '';
+    pieceNom = d.piece_nom || '';
   } else {
     const { numero } = await api('numero', undefined, { type });
     data = nouveauDocument(type, r, numero);
@@ -225,8 +226,40 @@ export async function editeurDocument(ctx, type, param) {
   }
   dessinerEspace();
 
+  /* ----- PDF joint : le client le télécharge depuis son espace (ex. facture avec le détail des heures) ----- */
+  const blocPiece = h('section', { class: 'panneau__bloc' });
+  const choixPdf = h('input', { type: 'file', accept: 'application/pdf,.pdf', hidden: true, onchange: async () => {
+    const f = choixPdf.files[0];
+    choixPdf.value = '';
+    if (!f) return;
+    try {
+      plusTard.annuler();
+      await enregistrer();
+      const fd = new FormData();
+      fd.append('id', id);
+      fd.append('fichier', f);
+      const r = await apiFichier('document.piece.ajouter', fd);
+      pieceNom = r.piece_nom;
+      dessinerPiece();
+      toast(partage ? 'PDF joint : le client peut le télécharger dans son espace.' : 'PDF joint. Il sera visible quand vous enverrez le document dans l’espace client.');
+    } catch (e) { erreur(e); }
+  } });
+  const dessinerPiece = () => blocPiece.replaceChildren(h('h3', null, 'PDF joint'), choixPdf, ...(
+    pieceNom
+      ? [h('p', { class: 'espace-etat is-on' }, icone('coche'), h('span', null, pieceNom)),
+        h('a', { class: 'btn btn--ghost btn--bloc', href: `api.php?a=document.piece&id=${id}`, target: '_blank', rel: 'noopener' }, icone('oeilv'), 'Voir le PDF'),
+        h('button', { class: 'lien-btn', type: 'button', onclick: () => choixPdf.click() }, 'Remplacer'),
+        h('button', { class: 'lien-btn', type: 'button', onclick: async () => {
+          if (!(await confirmer('Retirer le PDF joint ? Le client ne pourra plus le télécharger.', { ok: 'Retirer', danger: true }))) return;
+          try { await api('document.piece.supprimer', { id }); pieceNom = ''; dessinerPiece(); } catch (e) { erreur(e); }
+        } }, 'Retirer')]
+      : [h('p', { class: 'panneau__astuce' }, 'Ajoutez votre propre PDF (par exemple la facture avec le détail des heures) : le client pourra le télécharger dans son espace.'),
+        h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => choixPdf.click() }, icone('plus'), 'Joindre un PDF')]));
+  dessinerPiece();
+
   const panneau = h('aside', { class: 'panneau' },
     blocEspace,
+    blocPiece,
     h('section', { class: 'panneau__bloc' }, h('h3', null, 'Statut'), choixStatut),
     h('section', { class: 'panneau__bloc' }, h('h3', null, 'Client'), selClient,
       h('button', { type: 'button', class: 'lien-btn', onclick: () => enregistrerClient() }, icone('plus'), 'Ajouter ce client à mes clients')),

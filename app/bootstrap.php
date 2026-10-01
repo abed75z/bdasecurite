@@ -187,6 +187,21 @@ function schema(PDO $db): void
       PRAGMA user_version = 9;
     SQL);
   }
+  if ($version < 10) {
+    // PDF joint à un devis ou une facture (ex. facture avec le détail des heures), téléchargeable dans l'espace client
+    $db->exec(<<<'SQL'
+      ALTER TABLE documents ADD COLUMN piece TEXT NOT NULL DEFAULT '';
+      ALTER TABLE documents ADD COLUMN piece_nom TEXT NOT NULL DEFAULT '';
+      PRAGMA user_version = 10;
+    SQL);
+  }
+}
+// Dossier privé des PDF joints aux devis et factures (hors du site)
+function dossier_pieces(): string
+{
+  $dir = dossier_donnees() . '/pieces';
+  if (!is_dir($dir) && !@mkdir($dir, 0700, true)) echec('Espace de stockage indisponible.', 500);
+  return $dir;
 }
 
 /* ---------- Outils ---------- */

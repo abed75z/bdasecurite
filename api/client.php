@@ -27,7 +27,7 @@ if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
 
 $action = (string)($_GET['a'] ?? '');
 $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$lectures = ['session', 'tableau', 'document', 'messages', 'invitation.verifier'];
+$lectures = ['session', 'tableau', 'document', 'piece', 'messages', 'invitation.verifier'];
 if (in_array($action, $lectures, true) !== ($methode === 'GET')) echec('Méthode non autorisée.', 405);
 if ($methode === 'POST') {
   if (!origine_ok()) echec('Origine refusée.', 403);
@@ -136,7 +136,7 @@ try {
     case 'tableau':
       $c = exiger_compte();
       // Seuls les documents envoyés depuis l'admin (« Envoyer dans l'espace client ») sont visibles
-      $st = db()->prepare("SELECT id, type, numero, statut, total, date, echeance, partage, vu_client FROM documents WHERE lower(trim(client)) = ? AND partage <> '' ORDER BY partage DESC, id DESC");
+      $st = db()->prepare("SELECT id, type, numero, statut, total, date, echeance, partage, vu_client, piece_nom FROM documents WHERE lower(trim(client)) = ? AND partage <> '' ORDER BY partage DESC, id DESC");
       $st->execute([cle_client($c['nom'])]);
       $docs = $st->fetchAll();
       $nl = db()->prepare("SELECT COUNT(*) FROM messages_clients WHERE client_id = ? AND auteur = 'admin' AND lu = 0");
@@ -148,7 +148,7 @@ try {
 
     case 'document':
       $c = exiger_compte();
-      $st = db()->prepare("SELECT id, type, numero, statut, total, date, echeance, partage, vu_client, data FROM documents WHERE id = ? AND lower(trim(client)) = ? AND partage <> ''");
+      $st = db()->prepare("SELECT id, type, numero, statut, total, date, echeance, partage, vu_client, piece_nom, data FROM documents WHERE id = ? AND lower(trim(client)) = ? AND partage <> ''");
       $st->execute([(int)($_GET['id'] ?? 0), cle_client($c['nom'])]);
       $d = $st->fetch();
       if (!$d) echec('Document introuvable.', 404);
@@ -158,6 +158,22 @@ try {
       }
       $d['data'] = json_decode((string)$d['data'], true) ?: [];
       repondre(['ok' => true, 'document' => $d]);
+
+    // PDF joint par BDA à un document envoyé à ce client
+    case 'piece':
+      $c = exiger_compte();
+      $st = db()->prepare("SELECT numero, piece, piece_nom FROM documents WHERE id = ? AND lower(trim(client)) = ? AND partage <> '' AND piece <> ''");
+      $st->execute([(int)($_GET['id'] ?? 0), cle_client($c['nom'])]);
+      $d = $st->fetch();
+      $chemin = $d ? dossier_pieces() . '/' . basename((string)$d['piece']) : '';
+      if (!$chemin || !is_file($chemin)) echec('PDF introuvable.', 404);
+      journal('document', "PDF de {$d['numero']} téléchargé par {$c['nom']} dans son espace client");
+      header('Content-Type: application/pdf');
+      header('Content-Length: ' . filesize($chemin));
+      header('Content-Disposition: attachment; filename="' . preg_replace('/[^\w .()-]+/u', '_', (string)$d['piece_nom']) . '"');
+      header('Cache-Control: private, no-store');
+      readfile($chemin);
+      exit;
 
     /* ----- Messagerie avec BDA Sécurité ----- */
     case 'messages':

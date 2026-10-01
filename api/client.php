@@ -141,7 +141,7 @@ try {
       $docs = $st->fetchAll();
       $nl = db()->prepare("SELECT COUNT(*) FROM messages_clients WHERE client_id = ? AND auteur = 'admin' AND lu = 0");
       $nl->execute([$c['client_id']]);
-      $pl = db()->prepare("SELECT id, titre, periode, taille, cree, vu FROM envois_clients WHERE client_id = ? AND type = 'planning' ORDER BY periode DESC, id DESC");
+      $pl = db()->prepare("SELECT id, titre, periode, taille, cree, vu FROM envois_clients WHERE client_id = ? ORDER BY periode DESC, id DESC");
       $pl->execute([$c['client_id']]);
       repondre(['ok' => true, 'client' => ['nom' => $c['nom'], 'adresse' => $c['adresse'], 'tel' => $c['tel'], 'email' => $c['email']],
         'devis' => array_values(array_filter($docs, fn($d) => $d['type'] === 'devis')),

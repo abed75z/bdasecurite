@@ -304,7 +304,7 @@ export async function pagePlanning(ctx) {
     await modale({
       titre: 'Envoyer dans l’espace client',
       contenu: [
-        h('p', { class: 'modale__texte' }, 'Le client le retrouvera dans son espace, rubrique « Factures > Plannings facturés », en PDF.'),
+        h('p', { class: 'modale__texte' }, 'Le client le retrouvera dans son espace, rubrique « Factures > Détails et documents », en PDF.'),
         champ('Client', sel), champ('Titre', titre),
         h('div', { class: 'form-grille' },
           choix('planning', `Le planning du mois (${libelle})`, 'Le PDF est créé automatiquement à partir de cette page.'),
@@ -332,6 +332,7 @@ export async function pagePlanning(ctx) {
             fd.append('client_id', sel.value);
             fd.append('titre', titre.value.trim() || `Planning ${libelle}`);
             fd.append('periode', mois);
+            fd.append('type', 'planning');
             if (prevenir.checked) fd.append('prevenir', '1');
             fd.append('fichier', pdf, nom);
             const r = await apiFichier('envoi.ajouter', fd);

@@ -1084,3 +1084,13 @@ code { font-family: var(--mono); font-size: 0.92em; color: var(--gold-light); ba
 .envois-liste .envoi { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); }
 .envois-liste .envoi a { flex: 1; color: var(--gold-light); font-weight: 500; }
 .envois-liste .envoi small { font-size: 11.5px; }
+
+/* PDF clients : zone de dépôt du fichier */
+.depot { display: grid; justify-items: center; gap: 4px; width: 100%; padding: 22px 16px; border-radius: 14px; border: 1.5px dashed rgba(201, 165, 92, 0.45); background: rgba(201, 165, 92, 0.04); color: var(--text-2); transition: border-color 0.2s, background-color 0.2s; }
+.depot .ic { width: 26px; height: 26px; color: var(--gold); }
+.depot b { color: var(--text); font-size: 14px; }
+.depot small { color: var(--muted); font-size: 12px; }
+.depot__nom { margin-top: 4px; font-size: 12.5px; color: var(--muted); }
+.depot:hover, .depot.is-survol { border-color: var(--gold); background: rgba(201, 165, 92, 0.09); }
+.depot.is-plein { border-style: solid; border-color: rgba(76, 195, 138, 0.55); }
+.depot.is-plein .depot__nom { color: #86ddb2; font-weight: 600; }

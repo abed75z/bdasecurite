@@ -779,8 +779,10 @@ try {
 
     /* ----- Plannings facturés : PDF envoyés dans l'espace client ----- */
     case 'envois':
-      $st = db()->prepare('SELECT id, client_id, type, titre, periode, nom, taille, cree, vu FROM envois_clients WHERE client_id = ? ORDER BY periode DESC, id DESC');
-      $st->execute([(int)($_GET['client'] ?? 0)]);
+      // Pour un client (?client=ID) ou pour tous (onglet « PDF clients »)
+      $sql = 'SELECT e.id, e.client_id, e.type, e.titre, e.periode, e.nom, e.taille, e.cree, e.vu, c.nom AS client FROM envois_clients e LEFT JOIN clients c ON c.id = e.client_id';
+      $st = isset($_GET['client']) ? db()->prepare("$sql WHERE e.client_id = ? ORDER BY e.periode DESC, e.id DESC") : db()->prepare("$sql ORDER BY e.id DESC LIMIT 500");
+      $st->execute(isset($_GET['client']) ? [(int)$_GET['client']] : []);
       repondre(['ok' => true, 'envois' => $st->fetchAll()]);
 
     case 'envoi.ajouter':
@@ -801,15 +803,15 @@ try {
       $fichier = bin2hex(random_bytes(16)) . '.pdf';
       if (!move_uploaded_file((string)$f['tmp_name'], dossier_pieces() . '/' . $fichier)) echec('Enregistrement du fichier impossible.', 500);
       $nom = texte($f['name'] ?? 'planning.pdf', 160);
-      db()->prepare("INSERT INTO envois_clients (client_id, type, titre, periode, fichier, nom, taille, cree) VALUES (?, 'planning', ?, ?, ?, ?, ?, ?)")
-        ->execute([$client['id'], $titre, $periode, $fichier, $nom, (int)$f['size'], maintenant()]);
+      db()->prepare("INSERT INTO envois_clients (client_id, type, titre, periode, fichier, nom, taille, cree) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+        ->execute([$client['id'], ($_POST['type'] ?? '') === 'planning' ? 'planning' : 'document', $titre, $periode, $fichier, $nom, (int)$f['size'], maintenant()]);
       $nouvelId = (int)db()->lastInsertId();
       $mail = false;
       $cpt = db()->prepare('SELECT email, actif FROM comptes_clients WHERE client_id = ? AND actif = 1');
       $cpt->execute([$client['id']]);
       $compte = $cpt->fetch();
       if ($compte && !empty($_POST['prevenir'])) {
-        $mail = envoyer_mail("$titre disponible dans votre espace client", "Bonjour,\n\nBDA Sécurité vient de déposer « $titre » dans votre espace client (rubrique Factures > Plannings facturés).\n\nConsultez-le ici : https://bdasecurite.com/espace-client#/factures\n\nBDA Sécurité — 06 11 67 86 25", BDA_EMAIL, (string)$compte['email']);
+        $mail = envoyer_mail("$titre disponible dans votre espace client", "Bonjour,\n\nBDA Sécurité vient de déposer « $titre » dans votre espace client (rubrique Factures > Détails et documents).\n\nConsultez-le ici : https://bdasecurite.com/espace-client#/factures\n\nBDA Sécurité — 06 11 67 86 25", BDA_EMAIL, (string)$compte['email']);
       }
       journal('document', "« $titre » envoyé dans l’espace client de {$client['nom']}" . ($mail ? ' (client prévenu par email)' : ''));
       repondre(['ok' => true, 'id' => $nouvelId, 'compte' => (bool)$compte, 'email' => $mail]);

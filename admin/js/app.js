@@ -15,6 +15,7 @@ const MENU = [
   { route: 'messages', libelle: 'Messages', icone: 'mail', badge: 'messages' },
   { route: 'devis', libelle: 'Devis', icone: 'devis' },
   { route: 'factures', libelle: 'Factures', icone: 'facture', badge: 'retards', alerte: true },
+  { route: 'pdf', libelle: 'PDF clients', icone: 'envoyer' },
   { route: 'clients', libelle: 'Fiches clients', icone: 'clients' },
   { groupe: 'Équipe' },
   { route: 'agents', libelle: 'Agents', icone: 'agents' },

@@ -216,13 +216,13 @@ function vueListe(type) {
     type === 'facture' ? sectionPlannings() : null,
   ];
 }
-// Plannings facturés : le détail des heures des agents, en PDF, mois par mois
+// Détails et documents : détail des heures des agents et PDF envoyés par BDA (onglet « PDF clients » de l'admin)
 const MOIS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 const libelleMois = (p) => (/^\d{4}-\d{2}$/.test(p || '') ? `${MOIS_FR[+p.slice(5) - 1].replace(/^./, (c) => c.toUpperCase())} ${p.slice(0, 4)}` : '');
 function sectionPlannings() {
   const liste = donnees.plannings || [];
   return h('section', { class: 'ec-carte' },
-    h('div', { class: 'ec-carte__tete' }, h('h2', null, 'Plannings facturés'), h('small', { class: 'ec-carte__sous' }, 'Le détail des heures de nos agents, mois par mois')),
+    h('div', { class: 'ec-carte__tete' }, h('h2', null, 'Détails et documents'), h('small', { class: 'ec-carte__sous' }, 'Détail des heures de nos agents et documents envoyés par BDA')),
     liste.length ? h('ul', { class: 'ec-liste' }, liste.map((p) => h('li', null, h('a', {
       href: `/api/client.php?a=envoi&id=${p.id}`, download: '', class: p.vu ? '' : 'is-nouveau', onclick: () => setTimeout(recharger, 1500),
     },
@@ -230,7 +230,7 @@ function sectionPlannings() {
     h('span', { class: 'ec-liste__txt' }, h('b', null, p.titre, p.vu ? null : h('i', { class: 'ec-nouveau' }, 'Nouveau')),
       h('small', null, [libelleMois(p.periode), `reçu le ${frDate(p.cree)}`].filter(Boolean).join(' · '))),
     h('span', { class: 'ec-telecharger' }, ic('telecharger'), 'PDF')))))
-      : h('div', { class: 'ec-vide' }, ic('planning'), h('p', null, 'Les plannings détaillés de vos prestations apparaîtront ici.')));
+      : h('div', { class: 'ec-vide' }, ic('planning'), h('p', null, 'Le détail des heures de vos prestations et les documents que nous vous envoyons apparaîtront ici.')));
 }
 
 /* ---------- Document (devis / facture) en lecture ---------- */

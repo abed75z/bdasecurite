@@ -195,6 +195,14 @@ function schema(PDO $db): void
       PRAGMA user_version = 10;
     SQL);
   }
+  if ($version < 11) {
+    // PDF envoyés au client hors devis/factures : plannings facturés (détail des heures des agents)
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS envois_clients (id INTEGER PRIMARY KEY, client_id INTEGER NOT NULL, type TEXT NOT NULL DEFAULT 'planning', titre TEXT NOT NULL, periode TEXT NOT NULL DEFAULT '', fichier TEXT NOT NULL, nom TEXT NOT NULL, taille INTEGER NOT NULL DEFAULT 0, cree TEXT NOT NULL, vu TEXT NOT NULL DEFAULT '');
+      CREATE INDEX IF NOT EXISTS i_envois_clients ON envois_clients (client_id, periode);
+      PRAGMA user_version = 11;
+    SQL);
+  }
 }
 // Dossier privé des PDF joints aux devis et factures (hors du site)
 function dossier_pieces(): string

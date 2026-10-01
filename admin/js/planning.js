@@ -3,8 +3,8 @@
    Saisie : 12h-19h · 7h30-19h · 19h-7h (nuit) · 8 · R / CP / M
    Calcul automatique : heures totales, de nuit, du dimanche, fériées.
    ========================================================= */
-import { api, h, $, $$, icone, toast, erreur, modale, champ, attendre, MOIS, cap, pad, iso, fr, fmtHeures, lireHeures } from './outils.js';
-import { telechargerPdf } from './pdf.js';
+import { api, apiFichier, h, $, $$, icone, toast, erreur, modale, confirmer, champ, saisie, attendre, MOIS, cap, pad, iso, fr, fmtHeures, lireHeures } from './outils.js';
+import { telechargerPdf, pdfFeuille } from './pdf.js';
 
 const JOURS = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
 
@@ -126,6 +126,7 @@ export async function pagePlanning(ctx) {
   ctx.actions(indicateur,
     h('button', { class: 'btn btn--ghost', type: 'button', onclick: async () => { await enregistrer.maintenant(); telechargerPdf(feuille, `Planning ${libelle} - ${p.client || 'BDA'}`, { paysage: true }); } }, icone('telecharger'), h('span', null, 'Télécharger en PDF')),
     h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => imprimer() }, icone('imprimer'), h('span', null, 'Imprimer')),
+    h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => envoyerAuClient() }, icone('envoyer'), h('span', null, 'Envoyer au client')),
     h('button', { class: 'btn btn--gold', type: 'button', onclick: () => creerFacture() }, icone('facture'), h('span', null, 'Créer la facture du mois')));
 
   /* ----- Feuille paysage ----- */
@@ -273,6 +274,73 @@ export async function pagePlanning(ctx) {
     document.title = `Planning ${libelle} - ${p.client || 'BDA'}`;
     window.print();
     document.title = avant;
+  }
+
+  /* ----- Envoyer le planning (ou un autre PDF) dans l'espace client : rubrique « Plannings facturés » ----- */
+  async function envoyerAuClient() {
+    if (!clients.length) return toast('Enregistrez d’abord le client dans « Fiches clients ».', 'erreur');
+    const parDefaut = clients.find((c) => c.nom.trim().toLowerCase() === String(p.client || '').trim().toLowerCase()) || clients[0];
+    const sel = h('select', { class: 'input' }, clients.map((c) => h('option', { value: c.id, selected: c === parDefaut }, c.nom)));
+    const titre = saisie({ value: `Planning ${libelle}` });
+    let source = 'planning';
+    const fichier = h('input', { type: 'file', accept: 'application/pdf,.pdf', class: 'input', hidden: true });
+    const choix = (val, lib, sous) => h('label', { class: 'champ champ--case' }, h('input', { type: 'radio', name: 'source-pdf', checked: val === 'planning', onchange: () => { source = val; fichier.hidden = val !== 'pdf'; } }), h('span', null, h('b', null, lib), h('br'), h('small', { class: 'muet' }, sous)));
+    const prevenir = h('input', { type: 'checkbox', checked: true });
+    const deja = h('div', { class: 'envois-liste' });
+    const dessinerDeja = async () => {
+      try {
+        const { envois } = await api('envois', undefined, { client: sel.value });
+        deja.replaceChildren(...(envois.length ? [h('small', { class: 'champ__label' }, 'Déjà envoyés à ce client'), ...envois.map((e) => h('div', { class: 'envoi' },
+          h('a', { href: `api.php?a=envoi.fichier&id=${e.id}`, target: '_blank', rel: 'noopener' }, e.titre),
+          h('small', { class: 'muet' }, `${e.vu ? 'téléchargé' : 'pas encore ouvert'} · ${fr(new Date(e.cree.replace(' ', 'T')))}`),
+          h('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Retirer', onclick: async () => {
+            if (!(await confirmer(`Retirer « ${e.titre} » de l’espace client ?`, { ok: 'Retirer', danger: true }))) return;
+            try { await api('envoi.supprimer', { id: e.id }); dessinerDeja(); } catch (err) { erreur(err); }
+          } }, icone('poubelle'))))] : []));
+      } catch (err) { erreur(err); }
+    };
+    sel.addEventListener('change', dessinerDeja);
+    dessinerDeja();
+    await modale({
+      titre: 'Envoyer dans l’espace client',
+      contenu: [
+        h('p', { class: 'modale__texte' }, 'Le client le retrouvera dans son espace, rubrique « Factures > Plannings facturés », en PDF.'),
+        champ('Client', sel), champ('Titre', titre),
+        h('div', { class: 'form-grille' },
+          choix('planning', `Le planning du mois (${libelle})`, 'Le PDF est créé automatiquement à partir de cette page.'),
+          choix('pdf', 'Un autre PDF de mon ordinateur', 'Par exemple le détail des heures que vous avez préparé.'), fichier),
+        h('label', { class: 'champ champ--case' }, prevenir, h('span', null, 'Prévenir le client par email')),
+        deja,
+      ],
+      actions: [
+        { libelle: 'Annuler', classe: 'btn--ghost', valeur: false },
+        { libelle: 'Envoyer', classe: 'btn--gold', submit: true, action: async () => {
+          let pdf, nom;
+          const client = clients.find((c) => String(c.id) === sel.value);
+          try {
+            if (source === 'pdf') {
+              pdf = fichier.files[0];
+              if (!pdf) { toast('Choisissez le PDF à envoyer.', 'erreur'); return false; }
+              nom = pdf.name;
+            } else {
+              await enregistrer.maintenant();
+              toast('Préparation du PDF…');
+              pdf = await pdfFeuille(feuille, { paysage: true });
+              nom = `Planning ${libelle} - ${client.nom}.pdf`;
+            }
+            const fd = new FormData();
+            fd.append('client_id', sel.value);
+            fd.append('titre', titre.value.trim() || `Planning ${libelle}`);
+            fd.append('periode', mois);
+            if (prevenir.checked) fd.append('prevenir', '1');
+            fd.append('fichier', pdf, nom);
+            const r = await apiFichier('envoi.ajouter', fd);
+            toast(!r.compte ? `Enregistré, mais ${client.nom} n’a pas encore d’espace client : créez-le dans Fiches clients.` : r.email ? 'Envoyé : le client est prévenu par email.' : 'Envoyé dans l’espace client.');
+            return true;
+          } catch (err) { erreur(err); return false; }
+        } },
+      ],
+    });
   }
 
   async function creerFacture() {

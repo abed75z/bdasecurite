@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -776,6 +776,64 @@ try {
       if ($p !== '') @unlink(dossier_pieces() . '/' . basename($p));
       db()->prepare("UPDATE documents SET piece = '', piece_nom = '' WHERE id = ?")->execute([$id]);
       repondre(['ok' => true]);
+
+    /* ----- Plannings facturés : PDF envoyés dans l'espace client ----- */
+    case 'envois':
+      $st = db()->prepare('SELECT id, client_id, type, titre, periode, nom, taille, cree, vu FROM envois_clients WHERE client_id = ? ORDER BY periode DESC, id DESC');
+      $st->execute([(int)($_GET['client'] ?? 0)]);
+      repondre(['ok' => true, 'envois' => $st->fetchAll()]);
+
+    case 'envoi.ajouter':
+      $clientId = (int)($_POST['client_id'] ?? 0);
+      $cl = db()->prepare('SELECT id, nom FROM clients WHERE id = ?');
+      $cl->execute([$clientId]);
+      $client = $cl->fetch();
+      if (!$client) echec('Client introuvable.', 404);
+      $f = $_FILES['fichier'] ?? null;
+      if (!is_array($f) || ($f['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file((string)$f['tmp_name'])) {
+        $code = is_array($f) ? (int)$f['error'] : 0;
+        echec(in_array($code, [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true) ? "Fichier trop lourd pour l'hébergement." : "Le fichier n'a pas été reçu.", 400);
+      }
+      if ((int)$f['size'] > 15 * 1024 * 1024) echec('Fichier trop lourd (15 Mo maximum).');
+      if (type_fichier((string)$f['tmp_name']) !== 'application/pdf') echec('Seuls les fichiers PDF sont acceptés.');
+      $titre = texte($_POST['titre'] ?? '', 120) ?: 'Planning';
+      $periode = preg_match('/^\d{4}-\d{2}$/', (string)($_POST['periode'] ?? '')) ? (string)$_POST['periode'] : '';
+      $fichier = bin2hex(random_bytes(16)) . '.pdf';
+      if (!move_uploaded_file((string)$f['tmp_name'], dossier_pieces() . '/' . $fichier)) echec('Enregistrement du fichier impossible.', 500);
+      $nom = texte($f['name'] ?? 'planning.pdf', 160);
+      db()->prepare("INSERT INTO envois_clients (client_id, type, titre, periode, fichier, nom, taille, cree) VALUES (?, 'planning', ?, ?, ?, ?, ?, ?)")
+        ->execute([$client['id'], $titre, $periode, $fichier, $nom, (int)$f['size'], maintenant()]);
+      $nouvelId = (int)db()->lastInsertId();
+      $mail = false;
+      $cpt = db()->prepare('SELECT email, actif FROM comptes_clients WHERE client_id = ? AND actif = 1');
+      $cpt->execute([$client['id']]);
+      $compte = $cpt->fetch();
+      if ($compte && !empty($_POST['prevenir'])) {
+        $mail = envoyer_mail("$titre disponible dans votre espace client", "Bonjour,\n\nBDA Sécurité vient de déposer « $titre » dans votre espace client (rubrique Factures > Plannings facturés).\n\nConsultez-le ici : https://bdasecurite.com/espace-client#/factures\n\nBDA Sécurité — 06 11 67 86 25", BDA_EMAIL, (string)$compte['email']);
+      }
+      journal('document', "« $titre » envoyé dans l’espace client de {$client['nom']}" . ($mail ? ' (client prévenu par email)' : ''));
+      repondre(['ok' => true, 'id' => $nouvelId, 'compte' => (bool)$compte, 'email' => $mail]);
+
+    case 'envoi.fichier':
+      $st = db()->prepare('SELECT fichier, nom FROM envois_clients WHERE id = ?');
+      $st->execute([(int)($_GET['id'] ?? 0)]);
+      $e = $st->fetch();
+      $chemin = $e ? dossier_pieces() . '/' . basename((string)$e['fichier']) : '';
+      if (!$chemin || !is_file($chemin)) echec('PDF introuvable.', 404);
+      header('Content-Type: application/pdf');
+      header('Content-Length: ' . filesize($chemin));
+      header('Content-Disposition: inline; filename="' . preg_replace('/[^\w .()-]+/u', '_', (string)$e['nom']) . '"');
+      header('Cache-Control: private, no-store');
+      readfile($chemin);
+      exit;
+
+    case 'envoi.supprimer':
+      $id = (int)(corps()['id'] ?? 0);
+      $st = db()->prepare('SELECT fichier FROM envois_clients WHERE id = ?');
+      $st->execute([$id]);
+      $fi = (string)$st->fetchColumn();
+      if ($fi !== '') @unlink(dossier_pieces() . '/' . basename($fi));
+      supprimer_ligne('envois_clients', $id);
 
     case 'document.partager':
       $b = corps();

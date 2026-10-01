@@ -27,7 +27,7 @@ if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
 
 $action = (string)($_GET['a'] ?? '');
 $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$lectures = ['session', 'tableau', 'document', 'piece', 'messages', 'invitation.verifier'];
+$lectures = ['session', 'tableau', 'document', 'piece', 'envoi', 'messages', 'invitation.verifier'];
 if (in_array($action, $lectures, true) !== ($methode === 'GET')) echec('Méthode non autorisée.', 405);
 if ($methode === 'POST') {
   if (!origine_ok()) echec('Origine refusée.', 403);
@@ -141,10 +141,32 @@ try {
       $docs = $st->fetchAll();
       $nl = db()->prepare("SELECT COUNT(*) FROM messages_clients WHERE client_id = ? AND auteur = 'admin' AND lu = 0");
       $nl->execute([$c['client_id']]);
+      $pl = db()->prepare("SELECT id, titre, periode, taille, cree, vu FROM envois_clients WHERE client_id = ? AND type = 'planning' ORDER BY periode DESC, id DESC");
+      $pl->execute([$c['client_id']]);
       repondre(['ok' => true, 'client' => ['nom' => $c['nom'], 'adresse' => $c['adresse'], 'tel' => $c['tel'], 'email' => $c['email']],
         'devis' => array_values(array_filter($docs, fn($d) => $d['type'] === 'devis')),
         'factures' => array_values(array_filter($docs, fn($d) => $d['type'] === 'facture')),
+        'plannings' => $pl->fetchAll(),
         'messagesNonLus' => (int)$nl->fetchColumn()]);
+
+    // Planning facturé (PDF) déposé par BDA pour ce client
+    case 'envoi':
+      $c = exiger_compte();
+      $st = db()->prepare('SELECT id, titre, fichier, nom, vu FROM envois_clients WHERE id = ? AND client_id = ?');
+      $st->execute([(int)($_GET['id'] ?? 0), (int)$c['client_id']]);
+      $e = $st->fetch();
+      $chemin = $e ? dossier_pieces() . '/' . basename((string)$e['fichier']) : '';
+      if (!$chemin || !is_file($chemin)) echec('PDF introuvable.', 404);
+      if ($e['vu'] === '') {
+        db()->prepare('UPDATE envois_clients SET vu = ? WHERE id = ?')->execute([maintenant(), $e['id']]);
+        journal('document', "« {$e['titre']} » téléchargé par {$c['nom']} dans son espace client");
+      }
+      header('Content-Type: application/pdf');
+      header('Content-Length: ' . filesize($chemin));
+      header('Content-Disposition: attachment; filename="' . preg_replace('/[^\w .()-]+/u', '_', (string)$e['nom']) . '"');
+      header('Cache-Control: private, no-store');
+      readfile($chemin);
+      exit;
 
     case 'document':
       $c = exiger_compte();

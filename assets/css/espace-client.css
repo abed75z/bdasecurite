@@ -193,3 +193,8 @@ body.ec { min-height: 100svh; background: radial-gradient(90% 60% at 80% -10%, r
   .ec-feuille { box-shadow: none; border-radius: 0; padding: 0; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* Plannings facturés (PDF à télécharger) */
+.ec-carte__sous { color: var(--muted); font-size: 12.5px; }
+.ec-telecharger { display: inline-flex; align-items: center; gap: 6px; flex: none; padding: 6px 12px; border-radius: 99px; background: var(--gold-grad); color: #111; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; }
+.ec-telecharger .ec-ic { width: 15px; height: 15px; }

@@ -69,6 +69,13 @@ export async function telechargerPdf(feuille, nomFichier, { paysage = false } = 
   }
 }
 
+// Même PDF que telechargerPdf, mais rendu sous forme de fichier (pour l'envoyer dans l'espace client)
+export async function pdfFeuille(feuille, { paysage = false } = {}) {
+  const canvas = await capturer(feuille, 2.5);
+  const W = paysage ? A4.h : A4.l, H = paysage ? A4.l : A4.h;
+  return fabriquerPdf(await Promise.all(decouper(canvas, H / W).map(enJpeg)), W, H);
+}
+
 // Pages déjà mises en forme (planches de cartes, flyer…) : une page PDF par élément
 // taille en millimètres, ex. { l: 210, h: 297 }
 export async function telechargerPages(pages, nomFichier, tailleMm, scale = 2.5) {

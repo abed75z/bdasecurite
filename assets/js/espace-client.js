@@ -26,6 +26,8 @@ const ICONES = {
   bouclier: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
   imprimer: '<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
   coche: '<path d="M20 6 9 17l-5-5"/>',
+  planning: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h2M14 14h2M8 18h2"/>',
+  telecharger: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
 };
 let csrf = '';
 let donnees = null;
@@ -211,7 +213,24 @@ function vueListe(type) {
       total ? `${euro.format(total)} ${type === 'facture' ? 'à régler' : 'en attente de validation'}` : null),
     h('section', { class: 'ec-carte' },
       liste.length ? h('ul', { class: 'ec-liste' }, liste.map(ligneDoc)) : h('div', { class: 'ec-vide' }, ic(type === 'facture' ? 'factures' : 'devis'), h('p', null, type === 'facture' ? 'Aucune facture pour le moment.' : 'Aucun devis pour le moment.'))),
+    type === 'facture' ? sectionPlannings() : null,
   ];
+}
+// Plannings facturés : le détail des heures des agents, en PDF, mois par mois
+const MOIS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+const libelleMois = (p) => (/^\d{4}-\d{2}$/.test(p || '') ? `${MOIS_FR[+p.slice(5) - 1].replace(/^./, (c) => c.toUpperCase())} ${p.slice(0, 4)}` : '');
+function sectionPlannings() {
+  const liste = donnees.plannings || [];
+  return h('section', { class: 'ec-carte' },
+    h('div', { class: 'ec-carte__tete' }, h('h2', null, 'Plannings facturés'), h('small', { class: 'ec-carte__sous' }, 'Le détail des heures de nos agents, mois par mois')),
+    liste.length ? h('ul', { class: 'ec-liste' }, liste.map((p) => h('li', null, h('a', {
+      href: `/api/client.php?a=envoi&id=${p.id}`, download: '', class: p.vu ? '' : 'is-nouveau', onclick: () => setTimeout(recharger, 1500),
+    },
+    h('span', { class: 'ec-doc-ic ec-doc-ic--factures' }, ic('planning')),
+    h('span', { class: 'ec-liste__txt' }, h('b', null, p.titre, p.vu ? null : h('i', { class: 'ec-nouveau' }, 'Nouveau')),
+      h('small', null, [libelleMois(p.periode), `reçu le ${frDate(p.cree)}`].filter(Boolean).join(' · '))),
+    h('span', { class: 'ec-telecharger' }, ic('telecharger'), 'PDF')))))
+      : h('div', { class: 'ec-vide' }, ic('planning'), h('p', null, 'Les plannings détaillés de vos prestations apparaîtront ici.')));
 }
 
 /* ---------- Document (devis / facture) en lecture ---------- */

@@ -424,6 +424,28 @@ try {
           'lien' => $lien, 'libelleLien' => texte($b['bandeau']['libelleLien'] ?? '', 40),
         ];
       }
+      // Contenu du site : rubriques visibles, prix affichés, textes et image de l'accueil
+      if (is_array($b['visible'] ?? null)) {
+        foreach (SITE_VISIBLES as $k) if (array_key_exists($k, $b['visible'])) $s['visible'][$k] = !empty($b['visible'][$k]);
+        journal('site', 'Rubriques visibles mises à jour');
+      }
+      if (is_array($b['tarifs'] ?? null)) {
+        foreach (SITE_TARIFS as $k => $defaut) {
+          if (!array_key_exists($k, $b['tarifs'])) continue;
+          $n = (float)str_replace(',', '.', (string)$b['tarifs'][$k]);
+          if (!is_finite($n) || $n < 0 || $n > 100000) echec('Prix invalide : ' . $k);
+          $s['tarifs'][$k] = round($n, 2);
+        }
+        journal('site', 'Tarifs du site mis à jour');
+      }
+      if (is_array($b['accueil'] ?? null)) {
+        $a = $b['accueil'];
+        if (isset($a['titre'])) { $t = texte($a['titre'], 160); if ($t === '') echec('Le titre de l’accueil ne peut pas être vide.'); $s['accueil']['titre'] = $t; }
+        if (isset($a['texte'])) $s['accueil']['texte'] = texte($a['texte'], 400);
+        if (isset($a['note'])) $s['accueil']['note'] = texte($a['note'], 160);
+        if (isset($a['visuel'])) $s['accueil']['visuel'] = in_array($a['visuel'], ['photo', 'logo'], true) ? $a['visuel'] : 'photo';
+        journal('site', 'Accueil du site modifié');
+      }
       db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['site', json_encode($s, JSON_UNESCAPED_UNICODE)]);
       if (isset($b['vtc'])) {
         $t = tarifs_vtc();

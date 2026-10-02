@@ -25,6 +25,7 @@ const MENU = [
   { route: 'candidatures', libelle: 'Candidatures', icone: 'candidature', badge: 'candidatures' },
   { groupe: 'Site internet' },
   { route: 'site', libelle: 'Contrôle du site', icone: 'site' },
+  { route: 'contenu', libelle: 'Contenu & tarifs', icone: 'crayon' },
   { route: 'avis', libelle: 'Avis clients', icone: 'avis', badge: 'avis' },
   { route: 'vtc', libelle: 'Réservations VTC', icone: 'voiture', badge: 'reservations' },
   { groupe: 'Outils' },

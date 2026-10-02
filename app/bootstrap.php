@@ -450,9 +450,29 @@ function prix_vtc(array $t, array $r): float
    Services ouverts ou fermés, bandeau d'annonce, et mode maintenance.
    Le mode maintenance est un simple fichier dans le dossier de données :
    le .htaccess le détecte et envoie alors les visiteurs vers maintenance.php. */
+// Rubriques du site qu'on peut afficher ou masquer depuis l'admin (Contenu du site)
+const SITE_VISIBLES = ['tarifs', 'prixAccueil', 'references', 'avisClients', 'recrutement', 'ssiap', 'offreVtc', 'whatsapp'];
+// Prix affichés sur le site (page Tarifs, bandeau de l'accueil, estimation)
+const SITE_TARIFS = [
+  'agent' => 22, 'ssiap1' => 23.5, 'ssiap2' => 26.5, 'ssiap3' => 34, 'evenementiel' => 24, 'protection' => 55, 'protectionJour' => 440,
+  'nuit' => 10, 'dimanche' => 10, 'ferie' => 100,
+  'orly' => 38, 'orlyVan' => 58, 'cdg' => 52, 'cdgVan' => 78, 'beauvais' => 119, 'beauvaisVan' => 149,
+  'heure' => 55, 'heureVan' => 85, 'demi' => 210, 'demiVan' => 320, 'journee' => 399, 'journeeVan' => 599, 'mariage' => 249,
+];
 function site_reglages_defaut(): array
 {
-  return ['devis' => true, 'recrutement' => true, 'avis' => true, 'bandeau' => ['actif' => false, 'texte' => '', 'lien' => '', 'libelleLien' => '']];
+  return [
+    'devis' => true, 'recrutement' => true, 'avis' => true,
+    'bandeau' => ['actif' => false, 'texte' => '', 'lien' => '', 'libelleLien' => ''],
+    'visible' => array_fill_keys(SITE_VISIBLES, true),
+    'tarifs' => SITE_TARIFS,
+    'accueil' => [
+      'titre' => 'Agents de sécurité et chauffeurs privés à Paris, [24h/24.]',
+      'texte' => "Gardiennage, sécurité incendie, sécurité d'événements, protection rapprochée et transport haut de gamme : une seule équipe, autorisée par le CNAPS, et un interlocuteur unique du devis jusqu'à la fin de la mission.",
+      'note' => 'Réponse rapide · Devis gratuit et sans engagement · Interventions en urgence étudiées 24h/24',
+      'visuel' => 'photo',
+    ],
+  ];
 }
 function site_reglages(): array
 {
@@ -463,6 +483,7 @@ function site_reglages(): array
   if (is_array($v)) {
     foreach (['devis', 'recrutement', 'avis'] as $k) if (array_key_exists($k, $v)) $s[$k] = (bool)$v[$k];
     if (is_array($v['bandeau'] ?? null)) $s['bandeau'] = array_merge($s['bandeau'], $v['bandeau']);
+    foreach (['visible', 'tarifs', 'accueil'] as $k) if (is_array($v[$k] ?? null)) $s[$k] = array_merge($s[$k], array_intersect_key($v[$k], $s[$k]));
   }
   return $s;
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 require __DIR__ . '/../app/bootstrap.php';
 
 entetes_securite();
+header('Cache-Control: no-cache');
 try {
   $s = site_reglages();
   $b = $s['bandeau'];
@@ -12,6 +13,7 @@ try {
     'ok' => true,
     'vtc' => !empty(tarifs_vtc()['ouvert']),
     'devis' => $s['devis'], 'recrutement' => $s['recrutement'], 'avis' => $s['avis'],
+    'visible' => $s['visible'], 'tarifs' => $s['tarifs'], 'accueil' => $s['accueil'],
     'bandeau' => !empty($b['actif']) && trim((string)$b['texte']) !== '' ? ['texte' => (string)$b['texte'], 'lien' => (string)$b['lien'], 'libelleLien' => (string)$b['libelleLien']] : null,
   ]);
 } catch (Throwable $e) {

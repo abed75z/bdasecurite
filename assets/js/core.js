@@ -338,6 +338,76 @@
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape') fermerTout(); });
   }
 
+  /* ---------- Effets « premium » (sobres) ----------
+     - onde au clic sur les boutons et les cartes cliquables
+     - apparition en cascade des listes au scroll
+     - fine barre rouge de progression en haut
+     - prix qui défilent jusqu'à leur valeur à l'apparition
+     - léger déplacement de la photo de l'accueil au scroll */
+  function effets() {
+    // Onde au clic
+    document.addEventListener('pointerdown', (e) => {
+      const el = e.target.closest('.btn, .ac-item, .presta__item, .nav__tel, .ac-moyen, .tf-carte, .faq__q');
+      if (!el || reduced) return;
+      const r = el.getBoundingClientRect();
+      const onde = document.createElement('span');
+      const taille = Math.max(r.width, r.height) * 2.2;
+      onde.className = 'onde';
+      onde.style.cssText = `width:${taille}px;height:${taille}px;left:${e.clientX - r.left - taille / 2}px;top:${e.clientY - r.top - taille / 2}px`;
+      if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+      el.classList.add('a-onde');
+      el.append(onde);
+      onde.addEventListener('animationend', () => onde.remove());
+    });
+
+    // Cascade : chaque enfant des listes apparaît un peu après le précédent
+    const listes = '.ac-liste, .ac-points, .ac-etapes, .ac-garanties__liste, .tf-cartes, .lp-cards, .lp-list, .faq, .ac-tarifs ul, .ac-contact__moyens';
+    const enfants = [];
+    document.querySelectorAll(listes).forEach((l) => [...l.children].forEach((c, i) => { c.classList.add('cascade'); c.style.setProperty('--c', i); enfants.push(c); }));
+    if (reduced || !('IntersectionObserver' in window)) enfants.forEach((c) => c.classList.add('is-in'));
+    else {
+      const io = new IntersectionObserver((entrees) => entrees.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); } }), { threshold: 0.15, rootMargin: '0px 0px -5% 0px' });
+      enfants.forEach((c) => io.observe(c));
+    }
+
+    // Barre de progression
+    const barre = document.createElement('div');
+    barre.className = 'progression';
+    barre.setAttribute('aria-hidden', 'true');
+    document.body.append(barre);
+    onScroll((y) => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      barre.style.transform = `scaleX(${max > 0 ? clamp(y / max, 0, 1) : 0})`;
+    });
+
+    // Prix qui défilent (bandeau tarifs de l'accueil et cartes de la page Tarifs)
+    if (!reduced && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entrees) => entrees.forEach((en) => {
+        if (!en.isIntersecting) return;
+        io.unobserve(en.target);
+        const el = en.target;
+        const fin = el.textContent;
+        const n = parseFloat(fin.replace(/\s/g, '').replace(',', '.'));
+        if (!Number.isFinite(n) || n <= 0) return;
+        const dec = (fin.split(',')[1] || '').length;
+        const t0 = performance.now();
+        const pas = (t) => {
+          const p = Math.min(1, (t - t0) / 900);
+          const v = n * (1 - Math.pow(1 - p, 3));
+          el.textContent = p < 1 ? v.toLocaleString('fr-FR', { minimumFractionDigits: dec, maximumFractionDigits: dec }) : el.dataset.final || fin;
+          if (p < 1) requestAnimationFrame(pas);
+        };
+        requestAnimationFrame(pas);
+      }), { threshold: 0.6 });
+      const surveiller = () => document.querySelectorAll('.ac-tarifs [data-prix], .tf-prix [data-prix]').forEach((el) => { el.dataset.final = el.textContent; io.observe(el); });
+      if (window.Site.reglages) window.Site.reglages.then(surveiller); else surveiller();
+    }
+
+    // Photo de l'accueil : léger déplacement vertical au scroll
+    const photo = document.querySelector('.ac-hero__photo img');
+    if (photo && !reduced) onScroll((y) => { if (y < 900) photo.style.transform = `translate3d(0, ${y * 0.08}px, 0) scale(1.08)`; });
+  }
+
   /* ---------- Divers ---------- */
   function misc() {
     document.querySelectorAll('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
@@ -438,19 +508,86 @@
     };
 
     basculerVtc();
-    fetch('/api/site.php').then((r) => r.json()).then((j) => {
-      if (!j || !j.ok) return;
+    // Dernier contenu connu appliqué tout de suite (évite d'apercevoir une rubrique masquée), puis contenu à jour
+    try { const memo = JSON.parse(localStorage.getItem('bda-site') || 'null'); if (memo) contenu(memo); } catch (e) { /* stockage indisponible */ }
+    window.Site.reglages = fetch('/api/site.php', { cache: 'no-cache' }).then((r) => r.json()).then((j) => {
+      if (!j || !j.ok) return null;
       s = j;
       basculerVtc();
       services();
       bandeau();
-    }).catch(() => {});
+      contenu(j);
+      try { localStorage.setItem('bda-site', JSON.stringify({ visible: j.visible, tarifs: j.tarifs, accueil: j.accueil })); } catch (e) { /* stockage indisponible */ }
+      return j;
+    }).catch(() => null);
+  }
+
+  /* ---------- Contenu réglé dans l'admin (Contenu du site) ----------
+     - rubriques masquées : [data-visible="cle"] et liens vers la page concernée
+     - prix : [data-prix="cle"] (data-dec="2" = toujours 2 décimales)
+     - accueil : [data-accueil="titre|texte|note"] et image (photo ou logo) */
+  const PAGES_RUBRIQUE = {
+    tarifs: ['tarifs'], references: ['references'], avisClients: ['avis'], recrutement: ['recrutement'],
+    ssiap: ['securite-incendie-ssiap-paris'],
+    offreVtc: ['chauffeur-prive-vtc-paris', 'transfert-aeroport-paris', 'chauffeur-mariage-paris', 'chauffeur-securite-vip-paris', 'reserver'],
+  };
+  const pageCourante = location.pathname.replace(/^\/|\.html$/g, '');
+  let contenuOriginal = [];
+  function contenu(c) {
+    const vis = c.visible || {};
+    const off = (k) => vis[k] === false;
+    document.querySelectorAll('[data-visible]').forEach((el) => {
+      el.classList.toggle('est-masque', el.dataset.visible.split(' ').some(off));
+    });
+    Object.entries(PAGES_RUBRIQUE).forEach(([k, pages]) => {
+      pages.forEach((p) => document.querySelectorAll(`a[href="${p}"], a[href^="${p}?"], a[href^="${p}#"]`).forEach((a) => {
+        if (a.closest('main') && !a.closest('.ac-liste, .ac-secteurs, .lp-aside, .ac-ref, .tf-carte')) return;
+        const cible = a.parentElement && a.parentElement.tagName === 'LI' ? a.parentElement : a;
+        cible.classList.toggle('est-masque', off(k));
+      }));
+    });
+    document.querySelectorAll('.wa').forEach((el) => el.classList.toggle('est-masque', off('whatsapp')));
+    // Page masquée ouverte directement : message à la place du contenu
+    const rubrique = Object.keys(PAGES_RUBRIQUE).find((k) => PAGES_RUBRIQUE[k].includes(pageCourante));
+    const main = document.querySelector('main');
+    if (main && main.dataset.ferme && !(rubrique && off(rubrique))) {
+      // Page réaffichée entre-temps : on remet son contenu
+      main.replaceChildren(...contenuOriginal);
+      delete main.dataset.ferme;
+    }
+    if (rubrique && off(rubrique) && main && !main.dataset.ferme) {
+      main.dataset.ferme = '1';
+      contenuOriginal = [...main.childNodes];
+      main.innerHTML ='<section class="page-fermee"><div class="container"><p class="kicker">Page indisponible</p><h1 class="h2">Cette page n’est pas disponible pour le moment.</h1><p class="lead">Notre équipe reste joignable 24h/24 pour répondre à votre demande.</p><div class="ac-hero__actions"><a class="btn btn--gold" href="devis">Demander un devis</a><a class="btn btn--outline" href="tel:+33611678625">06 11 67 86 25</a><a class="btn btn--outline" href="/">Retour à l’accueil</a></div></div></section>';
+    }
+    // Prix
+    const t = c.tarifs || {};
+    const fmt2 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
+    document.querySelectorAll('[data-prix]').forEach((el) => {
+      const v = t[el.dataset.prix];
+      if (typeof v !== 'number') return;
+      el.textContent = el.dataset.dec === '2' ? fmt2.format(v) : (Number.isInteger(v) ? fmt.format(v) : fmt2.format(v));
+    });
+    // Accueil : textes (les [crochets] du titre sont mis en valeur) et image
+    const a = c.accueil || {};
+    document.querySelectorAll('[data-accueil]').forEach((el) => {
+      const v = a[el.dataset.accueil];
+      if (typeof v !== 'string' || !v.trim()) return;
+      if (el.dataset.accueil !== 'titre') { el.textContent = v; return; }
+      el.replaceChildren(...v.split(/(\[[^\]]*\])/).filter(Boolean).map((p) => {
+        if (!/^\[.*\]$/.test(p)) return document.createTextNode(p);
+        const em = document.createElement('em'); em.textContent = p.slice(1, -1); return em;
+      }));
+    });
+    document.querySelectorAll('.ac-hero').forEach((el) => el.classList.toggle('ac-hero--logo', a.visuel === 'logo'));
+    document.dispatchEvent(new CustomEvent('bda:contenu', { detail: c }));
   }
 
   reglagesSite();
-  // Effets décoratifs (ciel étoilé, traînées lumineuses, parallaxe, 3D, boutons aimantés) retirés : site plus sobre et plus rapide
   navigation();
   menusDeroulants();
   reveal();
+  effets();
   misc();
 })();

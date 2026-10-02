@@ -5,7 +5,7 @@ require __DIR__ . '/../app/bootstrap.php';
 entetes_securite();
 header('Cache-Control: no-store');
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'");
-$v = '13';
+$v = '14';
 ?><!doctype html>
 <html lang="fr">
 <head>

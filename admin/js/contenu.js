@@ -68,11 +68,11 @@ export async function pageContenu(ctx) {
   const texte = zoneTexte({ rows: 4, value: a.texte || '', maxlength: 400 });
   const note = saisie({ value: a.note || '', maxlength: 160 });
   let visuel = a.visuel === 'logo' ? 'logo' : 'photo';
-  const choixVisuel = h('div', { class: 'choix-visuel' }, [['photo', 'Photo', '/assets/img/og-image.jpg'], ['logo', 'Logo BDA', '/assets/img/embleme-hd.png']].map(([v, lib]) => {
+  const choixVisuel = h('div', { class: 'choix-visuel' }, [['photo', 'Téléphone', ''], ['logo', 'Logo BDA', '/assets/img/embleme-hd.png']].map(([v, lib]) => {
     const b = h('button', { type: 'button', class: `choix-visuel__btn ${visuel === v ? 'is-actif' : ''}`, onclick: () => {
       visuel = v;
       choixVisuel.querySelectorAll('button').forEach((x) => x.classList.toggle('is-actif', x === b));
-    } }, icone(v === 'photo' ? 'photo' : 'bouclier'), h('b', null, lib), h('small', null, v === 'photo' ? 'Chauffeur ouvrant la portière' : 'Logo en grand'));
+    } }, icone(v === 'photo' ? 'mobile' : 'bouclier'), h('b', null, lib), h('small', null, v === 'photo' ? 'Conversation client animée' : 'Logo en grand'));
     return b;
   }));
   const accueil = h('section', { class: 'carte' },

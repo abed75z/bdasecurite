@@ -194,6 +194,46 @@
     if ('requestIdleCallback' in window) requestIdleCallback(charger, { timeout: 4000 }); else setTimeout(charger, 2500);
   }
 
+  /* ---------- Téléphone de l'accueil : la conversation se déroule, puis recommence ---------- */
+  function telephone() {
+    const fil = document.querySelector('.tel__fil');
+    if (!fil || window.Site.reduced) return;
+    const etapes = [...fil.querySelectorAll('[data-etape]')];
+    // Délai avant chaque étape (ms) : lecture, saisie, réponse…
+    const DELAIS = [900, 1500, 2200, 2400, 2600, 1600, 2200];
+    const PAUSE_FIN = 6000;
+    let minuteurs = [];
+    const defiler = () => fil.scrollTo({ top: fil.scrollHeight, behavior: 'smooth' });
+    function jouer() {
+      minuteurs.forEach(clearTimeout);
+      minuteurs = [];
+      fil.classList.remove('is-fin');
+      etapes.forEach((e) => e.classList.remove('is-on', 'is-off'));
+      fil.scrollTop = 0;
+      let t = 0;
+      etapes.forEach((e, i) => {
+        t += DELAIS[i] || 1500;
+        minuteurs.push(setTimeout(() => {
+          // L'indicateur « en train d'écrire » disparaît quand le message arrive
+          const prec = etapes[i - 1];
+          if (prec && prec.classList.contains('msg--saisie')) prec.classList.add('is-off');
+          e.classList.add('is-on');
+          defiler();
+        }, t));
+      });
+      minuteurs.push(setTimeout(() => fil.classList.add('is-fin'), t + PAUSE_FIN));
+      minuteurs.push(setTimeout(jouer, t + PAUSE_FIN + 700));
+    }
+    fil.classList.add('is-anime');
+    // Ne démarre que lorsque le téléphone est visible
+    let lance = false;
+    const lancer = () => { if (!lance) { lance = true; jouer(); } };
+    if ('IntersectionObserver' in window) new IntersectionObserver((en) => { if (en[0].isIntersecting) lancer(); }).observe(fil);
+    // Filet de sécurité : le téléphone est en haut de page, la conversation démarre de toute façon
+    setTimeout(lancer, 1200);
+  }
+
+  telephone();
   marquees();
   reviewsBand();
   checklists();

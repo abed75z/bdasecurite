@@ -4,10 +4,11 @@
   "start_url": "/reserver",
   "scope": "/reserver",
   "display": "standalone",
-  "background_color": "#09090b",
-  "theme_color": "#09090b",
+  "background_color": "#050b1d",
+  "theme_color": "#050b1d",
   "icons": [
     { "src": "/assets/img/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
-    { "src": "/assets/img/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    { "src": "/assets/img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
   ]
 }

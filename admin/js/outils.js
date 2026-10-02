@@ -139,19 +139,15 @@ export function icone(nom, cls = '') {
   svg.innerHTML = TRACES[nom] || '';
   return svg;
 }
-// Écusson « BDA » (même dessin que sur les cartes agents et les flyers)
-let nEcusson = 0;
+// Écusson « BDA » : le logo officiel (même image sur le site, les cartes agents et les flyers)
 export function ecusson(cls = '') {
-  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  const id = `ec${++nEcusson}`;
-  s.setAttribute('viewBox', '0 0 100 110');
-  s.setAttribute('class', `ecusson ${cls}`.trim());
-  s.setAttribute('aria-hidden', 'true');
-  s.innerHTML = `<defs><linearGradient id="${id}o" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#efd9a0"/><stop offset=".5" stop-color="#c9a55c"/><stop offset="1" stop-color="#a2803d"/></linearGradient>`
-    + `<linearGradient id="${id}f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a251b"/><stop offset="1" stop-color="#0f0e0c"/></linearGradient></defs>`
-    + `<path d="M50 5C62 11 76 13 91 13v39c0 28-19 46-41 54C28 98 9 80 9 52V13c15 0 29-2 41-8Z" fill="url(#${id}f)" stroke="url(#${id}o)" stroke-width="5" stroke-linejoin="round"/>`
-    + `<text x="50" y="65" text-anchor="middle" font-family="Playfair Display, Georgia, serif" font-size="25" font-weight="500" fill="#e8cf95">BDA</text>`;
-  return s;
+  const img = document.createElement('img');
+  img.src = '/assets/img/embleme-hd.png';
+  img.alt = '';
+  img.className = `ecusson ${cls}`.trim();
+  img.setAttribute('aria-hidden', 'true');
+  img.decoding = 'async';
+  return img;
 }
 
 /* ---------- Formats français ---------- */

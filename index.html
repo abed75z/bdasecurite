@@ -57,7 +57,7 @@
     ]
   }
   </script>
-  <meta name="theme-color" content="#070816">
+  <meta name="theme-color" content="#050b1d">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="fr_FR">
   <meta property="og:site_name" content="BDA Sécurité & VTC Premium">
@@ -74,16 +74,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/hero.css">
-  <link rel="stylesheet" href="assets/css/sections.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=6">
+  <link rel="stylesheet" href="assets/css/hero.css?v=6">
+  <link rel="stylesheet" href="assets/css/sections.css?v=6">
 </head>
 <body>
 
 <!-- ============ Icônes + blason BDA (réutilisés via <use>) ============ -->
 <svg class="svg-sprite" aria-hidden="true" focusable="false">
   <defs>
-    <linearGradient id="bda-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc9c"/><stop offset=".45" stop-color="#c9a14a"/><stop offset="1" stop-color="#9c7424"/></linearGradient>
+    <linearGradient id="bda-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8d94"/><stop offset=".45" stop-color="#e8222f"/><stop offset="1" stop-color="#a3101b"/></linearGradient>
   </defs>
   <symbol id="bda-mark" viewBox="0 0 200 240">
     <path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" fill="none" stroke="url(#bda-gold)" stroke-width="10" stroke-linejoin="round"/>
@@ -134,7 +134,7 @@
 <header class="nav">
   <div class="nav__inner">
     <a class="brand" href="#top" aria-label="BDA Sécurité &amp; VTC Premium — accueil">
-      <svg class="brand__mark" viewBox="0 0 200 240" aria-hidden="true"><use href="#bda-mark"/></svg>
+      <img class="brand__mark" src="assets/img/embleme.png" alt="" width="128" height="131">
       <span class="brand__text"><span class="brand__name">BDA</span><span class="brand__tag">Sécurité &amp; VTC Premium</span></span>
     </a>
     <nav class="nav__links" aria-label="Navigation principale">
@@ -186,45 +186,31 @@
 
     <div class="container hero__grid">
       <div class="hero__copy">
-        <p class="kicker" data-reveal="fade">Sécurité privée · VTC Premium · Paris</p>
+        <p class="kicker" data-reveal="fade"><span class="live-dot" aria-hidden="true"></span> Disponibles 24h/24 · Paris &amp; Île-de-France</p>
         <h1 class="h1 shimmer" id="hero-title" data-split>Votre sécurité, <em>en première classe.</em></h1>
-        <p class="lead hero__lead" data-reveal style="--d:300ms">Agents de sécurité qualifiés et chauffeurs VTC haut de gamme à Paris, réunis sous une même exigence : vous protéger et vous conduire avec discrétion, ponctualité et élégance, de jour comme de nuit.</p>
+        <p class="lead hero__lead" data-reveal style="--d:300ms">Une seule équipe pour protéger vos sites, vos événements et vos invités, et pour les conduire en berline haut de gamme. Devis gratuit en 2 minutes, et un appel suffit, même en urgence.</p>
         <div class="hero__ctas" data-reveal style="--d:450ms">
-          <a class="btn btn--gold" href="devis" data-magnetic>Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <a class="btn btn--outline" href="reserver" data-vtc hidden><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg> Réserver un VTC</a>
-          <a class="btn btn--outline" href="#services" data-vtc-off>Découvrir nos services</a>
+          <a class="btn btn--gold btn--lg" href="devis" data-magnetic>Devis gratuit en 2 min <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--outline btn--lg" href="reserver" data-vtc hidden><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg> Réserver un VTC</a>
+          <a class="btn btn--outline btn--lg" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
         </div>
         <ul class="hero__trust" data-reveal="fade" style="--d:650ms">
-          <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Agents titulaires de la carte CNAPS</li>
+          <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Autorisation d'exercice CNAPS</li>
           <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Chauffeurs VTC professionnels</li>
-          <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Devis gratuit</li>
+          <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Sans engagement</li>
         </ul>
+        <a class="hero__proof" href="#references" data-reveal="fade" style="--d:800ms">
+          <span class="hero__proof-ico" aria-hidden="true"><svg class="icon"><use href="#i-shield-check"/></svg></span>
+          <span><small>Ils nous font confiance</small><b>Consulat général de Colombie à Paris</b></span>
+          <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
+        </a>
       </div>
 
       <div class="hero__visual" data-scene data-reveal="fade" style="--d:150ms" aria-hidden="true">
         <div class="layer emblem" data-depth="0.35">
           <div class="emblem__glow"></div>
           <div class="emblem__orbit"></div>
-          <svg viewBox="0 0 200 240">
-            <defs>
-              <linearGradient id="hero-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3dc9c"/><stop offset=".45" stop-color="#c9a14a"/><stop offset="1" stop-color="#9c7424"/></linearGradient>
-              <linearGradient id="hero-shine" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-              <clipPath id="hero-clip"><path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z"/></clipPath>
-            </defs>
-            <path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" fill="rgba(201,161,74,.05)"/>
-            <path class="draw" pathLength="1" d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" stroke="url(#hero-gold)" stroke-width="5" stroke-linejoin="round"/>
-            <path class="draw draw--2" pathLength="1" d="M100 22 172 49s2 78-12 108c-16 34-47 53-60 62-13-9-44-28-60-62-14-30-12-108-12-108Z" stroke="url(#hero-gold)" stroke-width="1.6" stroke-linejoin="round"/>
-            <path class="draw draw--3" pathLength="1" d="M100 36 158 58s2 64-10 90c-13 28-39 44-48 51-9-7-35-23-48-51-12-26-10-90-10-90Z" stroke="url(#hero-gold)" stroke-width="1.2" stroke-linejoin="round"/>
-            <g class="mark">
-              <text x="100" y="70" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="600" font-size="12" letter-spacing="5" fill="url(#hero-gold)">BDA</text>
-              <path d="M64 132 100 90l36 42" fill="none" stroke="#f3f0ea" stroke-width="9"/>
-              <path d="M80 132 100 108l20 24" fill="none" stroke="#f3f0ea" stroke-width="2.5"/>
-              <path d="M94 110h12l-2 50-4 24-4-24Z" fill="#f3f0ea"/>
-              <path d="M100 112v62" stroke="#0a0a0c" stroke-width="1.2"/>
-              <path d="M78 206h44M86 211h28" stroke="url(#hero-gold)" stroke-width="1.2"/>
-            </g>
-            <g clip-path="url(#hero-clip)"><g transform="skewX(-18)"><rect class="shine" x="0" y="-20" width="60" height="290" fill="url(#hero-shine)" opacity=".35"/></g></g>
-          </svg>
+          <img class="emblem__logo" src="assets/img/logo-bda.webp" alt="" width="900" height="1066" fetchpriority="high" decoding="async">
         </div>
         <div class="layer glass glass--a" data-depth="0.9">
           <span class="glass__icon"><svg class="icon"><use href="#i-car"/></svg></span>
@@ -340,7 +326,7 @@
                         <circle class="pin-a" cx="22" cy="96" r="5"/>
                         <circle class="pin-ring" cx="222" cy="14" r="6"/>
                         <circle class="pin-b" cx="222" cy="14" r="5"/>
-                        <g><circle r="7" fill="#0b0b0d" stroke="#ecd28f" stroke-width="2"/><circle r="2.5" fill="#ecd28f"/><animateMotion dur="6s" repeatCount="indefinite"><mpath href="#route-vtc"/></animateMotion></g>
+                        <g><circle r="7" fill="#060d24" stroke="#ff5c66" stroke-width="2"/><circle r="2.5" fill="#ff5c66"/><animateMotion dur="6s" repeatCount="indefinite"><mpath href="#route-vtc"/></animateMotion></g>
                       </svg>
                     </div>
                     <div class="booking__car"><span class="mock__ico"><svg class="icon"><use href="#i-car"/></svg></span><div><b>Berline Business</b><small>Noire · 4 places · bagages inclus</small></div></div>
@@ -391,7 +377,7 @@
               <div class="mock" data-speed="0.05">
                 <div class="mock__top">
                   <div class="mock__title"><span class="mock__ico"><svg class="icon"><use href="#i-calendar"/></svg></span><span>Programme de la soirée<small>Chauffeur + agent de protection</small></span></div>
-                  <span class="pill pill--gold"><span class="status-dot" style="background:#ecd28f"></span> En cours</span>
+                  <span class="pill pill--gold"><span class="status-dot" style="background:#ff5c66"></span> En cours</span>
                 </div>
                 <ol class="timeline" data-timeline>
                   <li><time>18:30</time><b>Prise en charge à l'hôtel</b><small>Chauffeur et agent vous attendent dans le hall</small></li>
@@ -418,6 +404,30 @@
           </div>
         </article>
       </div>
+
+      <!-- ---------- Toutes les prestations (accès direct aux pages détaillées) ---------- -->
+      <div class="presta" id="prestations">
+        <div class="presta__head" data-reveal>
+          <h3 class="h3" id="presta-title">Toutes nos prestations, <em>à la carte.</em></h3>
+          <a class="link-arrow" href="devis"><span>Votre besoin n'est pas listé&nbsp;? Décrivez-le</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </div>
+        <div class="presta__grid" data-stagger>
+          <a class="presta__item" href="securite-privee-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg><span><b>Agents de sécurité</b><small>Sites, accueil, rondes</small></span></a>
+          <a class="presta__item" href="protection-rapprochee-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span><b>Protection rapprochée</b><small>Garde du corps</small></span></a>
+          <a class="presta__item" href="securite-evenementielle-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-ticket"/></svg><span><b>Événementiel</b><small>Soirées, salons, galas</small></span></a>
+          <a class="presta__item" href="gardiennage-chantier-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span><b>Gardiennage de chantier</b><small>Jour et nuit</small></span></a>
+          <a class="presta__item" href="securite-hotels-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg><span><b>Hôtels</b><small>Accueil et sûreté</small></span></a>
+          <a class="presta__item" href="securite-commerces-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg><span><b>Commerces</b><small>Prévention des vols</small></span></a>
+          <a class="presta__item" href="securite-bureaux-entreprises-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg><span><b>Bureaux &amp; entreprises</b><small>Contrôle d'accès</small></span></a>
+          <a class="presta__item" href="securite-ambassades-consulats-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><span><b>Ambassades &amp; consulats</b><small>Sites diplomatiques</small></span></a>
+          <a class="presta__item" href="securite-residences-coproprietes-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span><b>Résidences</b><small>Copropriétés</small></span></a>
+          <a class="presta__item presta__item--vtc" href="chauffeur-prive-vtc-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg><span><b>Chauffeur privé VTC</b><small>À l'heure ou au trajet</small></span></a>
+          <a class="presta__item presta__item--vtc" href="transfert-aeroport-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-plane"/></svg><span><b>Transfert aéroport</b><small>CDG, Orly, gares</small></span></a>
+          <a class="presta__item presta__item--vtc" href="chauffeur-mariage-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg><span><b>Chauffeur de mariage</b><small>Votre grand jour</small></span></a>
+        </div>
+        <p class="presta__zones" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span>Nous intervenons notamment à
+          <a href="agent-securite-paris-1">Paris 1<sup>er</sup></a>, <a href="agent-securite-paris-8">Paris 8<sup>e</sup></a>, <a href="agent-securite-paris-9">Paris 9<sup>e</sup></a>, <a href="agent-securite-paris-16">Paris 16<sup>e</sup></a>, <a href="agent-securite-paris-17">Paris 17<sup>e</sup></a>, <a href="agent-securite-paris-20">Paris 20<sup>e</sup></a>, <a href="agent-securite-la-defense">La Défense</a>, <a href="agent-securite-neuilly-sur-seine">Neuilly-sur-Seine</a>, <a href="agent-securite-boulogne-billancourt">Boulogne-Billancourt</a> et <a href="agent-securite-saint-denis">Saint-Denis</a>.</span></p>
+      </div>
     </div>
   </section>
 
@@ -429,22 +439,22 @@
         <h2 class="h2" id="gallery-title" data-split>L'excellence, <em>en images.</em></h2>
       </div>
       <div class="gallery" data-stagger>
-        <figure class="shot shot--tall" data-reveal="shot" style="--accent: 79, 107, 255">
+        <figure class="shot shot--tall" data-reveal="shot" style="--accent: 37, 99, 255">
           <img src="https://images.unsplash.com/photo-1618371690240-e0d46eead4b8?auto=format&amp;fit=crop&amp;w=700&amp;q=72" srcset="https://images.unsplash.com/photo-1618371690240-e0d46eead4b8?auto=format&amp;fit=crop&amp;w=480&amp;q=72 480w, https://images.unsplash.com/photo-1618371690240-e0d46eead4b8?auto=format&amp;fit=crop&amp;w=700&amp;q=72 700w, https://images.unsplash.com/photo-1618371690240-e0d46eead4b8?auto=format&amp;fit=crop&amp;w=1000&amp;q=72 1000w" sizes="(max-width: 900px) 50vw, 25vw" alt="Agent de sécurité en costume noir avec oreillette" width="700" height="1050" loading="lazy" decoding="async">
           <span class="shot__tag">Sécurité</span>
           <figcaption><b>Protection rapprochée</b><span>Discrétion et vigilance</span></figcaption>
         </figure>
-        <figure class="shot shot--wide" data-reveal="shot" style="--accent: 139, 92, 246">
+        <figure class="shot shot--wide" data-reveal="shot" style="--accent: 232, 34, 48">
           <img src="https://images.unsplash.com/photo-1636446704248-87d51e963e60?auto=format&amp;fit=crop&amp;w=1100&amp;q=72" srcset="https://images.unsplash.com/photo-1636446704248-87d51e963e60?auto=format&amp;fit=crop&amp;w=700&amp;q=72 700w, https://images.unsplash.com/photo-1636446704248-87d51e963e60?auto=format&amp;fit=crop&amp;w=1100&amp;q=72 1100w, https://images.unsplash.com/photo-1636446704248-87d51e963e60?auto=format&amp;fit=crop&amp;w=1500&amp;q=72 1500w" sizes="(max-width: 900px) 100vw, 50vw" alt="Berline noire de nuit sous un ciel étoilé" width="1100" height="880" loading="lazy" decoding="async">
           <span class="shot__tag">VTC Premium</span>
           <figcaption><b>Paris by night</b><span>24h/24, 7j/7</span></figcaption>
         </figure>
-        <figure class="shot shot--tall" data-reveal="shot" style="--accent: 212, 169, 79">
+        <figure class="shot shot--tall" data-reveal="shot" style="--accent: 232, 34, 48">
           <img src="https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=700&amp;q=72" srcset="https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=480&amp;q=72 480w, https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=700&amp;q=72 700w, https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=1000&amp;q=72 1000w" sizes="(max-width: 900px) 50vw, 25vw" alt="Chauffeur en costume noir ouvrant la portière d'une berline" width="700" height="961" loading="lazy" decoding="async">
           <span class="shot__tag">Chauffeur</span>
           <figcaption><b>Chauffeur privé</b><span>La portière vous attend</span></figcaption>
         </figure>
-        <figure class="shot" data-reveal="shot" style="--accent: 34, 199, 240">
+        <figure class="shot" data-reveal="shot" style="--accent: 63, 182, 255">
           <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&amp;fit=crop&amp;w=700&amp;q=72" srcset="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&amp;fit=crop&amp;w=480&amp;q=72 480w, https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&amp;fit=crop&amp;w=700&amp;q=72 700w" sizes="(max-width: 900px) 50vw, 25vw" alt="Mains sur le volant et montre, au coucher du soleil" width="700" height="467" loading="lazy" decoding="async">
           <figcaption><b>Ponctualité</b><span>Chaque minute compte</span></figcaption>
         </figure>
@@ -595,6 +605,24 @@
     </div>
   </section>
 
+  <!-- ============ BESOIN URGENT ============ -->
+  <section class="section urgence-sec" aria-labelledby="urgence-title" style="padding-bottom:0">
+    <div class="container">
+      <div class="urgence" data-reveal>
+        <span class="urgence__gyro" aria-hidden="true"><i></i><i></i></span>
+        <div class="urgence__texte">
+          <p class="urgence__kicker"><span class="live-dot" aria-hidden="true"></span> Ligne directe, 24h/24</p>
+          <h2 class="h3" id="urgence-title">Un agent ou un chauffeur <em>dès ce soir&nbsp;?</em></h2>
+          <p>Appelez-nous : on étudie votre demande tout de suite et on vous dit honnêtement ce qui est possible.</p>
+        </div>
+        <div class="urgence__actions">
+          <a class="btn btn--gold btn--lg" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
+          <a class="btn btn--outline" href="https://wa.me/33784739070?text=Bonjour%20BDA%2C%20j%27ai%20un%20besoin%20urgent." target="_blank" rel="noopener">Écrire sur WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ FAQ ============ -->
   <section class="section" id="faq" aria-labelledby="faq-title">
     <div class="container faq-grille">
@@ -664,7 +692,7 @@
     <div class="footer__grid">
       <div class="footer__about">
         <a class="brand" href="#top" aria-label="BDA Sécurité &amp; VTC Premium — haut de page">
-          <svg class="brand__mark" viewBox="0 0 200 240" aria-hidden="true"><use href="#bda-mark"/></svg>
+          <img class="brand__mark" src="assets/img/embleme.png" alt="" width="128" height="131">
           <span class="brand__text"><span class="brand__name">BDA</span><span class="brand__tag">Sécurité &amp; VTC Premium</span></span>
         </a>
         <p>Sécurité privée et transport haut de gamme : protection, ponctualité et sérénité, 24h/24 et 7j/7.</p>
@@ -727,8 +755,8 @@
   <a class="btn btn--gold" href="devis">Demander un devis</a>
 </div>
 
-<script src="assets/js/core.js"></script>
+<script src="assets/js/core.js?v=6"></script>
 <script src="assets/js/avis-data.js"></script>
-<script src="assets/js/home.js"></script>
+<script src="assets/js/home.js?v=6"></script>
 </body>
 </html>

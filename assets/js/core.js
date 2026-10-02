@@ -27,7 +27,7 @@
     const canvas = document.getElementById('sky');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const starColors = ['255,255,255', '214,222,255', '190,205,255', '240,216,152'];
+    const starColors = ['255,255,255', '214,222,255', '190,205,255', '255,92,102'];
     let w = 0, h = 0, stars = [], shooting = [], nextShoot = 2500, last = performance.now(), raf = 0;
 
     function resize() {
@@ -79,8 +79,8 @@
         const x = s.x + s.vx * s.life, y = s.y + s.vy * s.life;
         const ex = x - s.vx * 160, ey = y - s.vy * 160;
         const grad = ctx.createLinearGradient(x, y, ex, ey);
-        grad.addColorStop(0, `rgba(255,248,226,${((1 - p) * 0.9).toFixed(3)})`);
-        grad.addColorStop(1, 'rgba(127,149,255,0)');
+        grad.addColorStop(0, `rgba(234,242,255,${((1 - p) * 0.9).toFixed(3)})`);
+        grad.addColorStop(1, 'rgba(91, 140, 255,0)');
         ctx.strokeStyle = grad;
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(ex, ey); ctx.stroke();
       }

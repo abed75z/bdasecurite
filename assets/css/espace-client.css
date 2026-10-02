@@ -192,6 +192,28 @@ body.ec { min-height: 100svh; background: radial-gradient(90% 60% at 80% -10%, r
   .ec-principal { padding: 0; }
   .ec-feuille { box-shadow: none; border-radius: 0; padding: 0; }
   * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* Feuille A4 pleine page : texte plus grand, pied de page collé en bas */
+  @page { size: A4; margin: 12mm 14mm; }
+  .ec-principal { max-width: none !important; margin: 0 !important; }
+  .ec-feuille { display: flex; flex-direction: column; gap: 7mm; min-height: 271mm; font-size: 11.5pt; line-height: 1.5; }
+  .ec-feuille__logo { width: 36mm; }
+  .ec-feuille__titre h2 { font-size: 26pt; }
+  .ec-feuille__titre b { font-size: 13pt; }
+  .ec-feuille__titre .ec-pastille { display: none; }
+  .ec-feuille small { font-size: 8.5pt; }
+  .ec-feuille__meta { padding: 4mm 5mm; gap: 3mm 12mm; font-size: 12pt; }
+  .ec-feuille table { min-width: 0; font-size: 11.5pt; }
+  .ec-feuille th { font-size: 9pt; padding: 3mm; }
+  .ec-feuille td { padding: 3.5mm 3mm; }
+  .ec-feuille__totaux { align-self: flex-end; width: 92mm; font-size: 12pt; }
+  .ec-feuille__parties { grid-template-columns: 1fr 1fr !important; gap: 10mm; }
+  .ec-feuille__titre { justify-items: end !important; text-align: right !important; }
+  .ec-feuille__tete { flex-wrap: nowrap; }
+  .ec-feuille__totaux div { padding: 2.6mm 3mm; }
+  .ec-feuille__totaux .is-grand { font-size: 14pt; padding: 3.5mm 4mm; }
+  .ec-feuille__bloc { padding: 4mm 5mm; }
+  .ec-feuille .ec-petit { font-size: 10pt; }
+  .ec-feuille__pied { margin-top: auto; font-size: 8.5pt; }
 }
 
 /* Plannings facturés (PDF à télécharger) */

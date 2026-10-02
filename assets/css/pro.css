@@ -307,3 +307,138 @@ body { background: var(--bg); color: var(--muted); }
 /* Recrutement : icônes sobres */
 .board__ico, .job__ico, .steps4 li::before { background: rgba(159, 180, 224, 0.1) !important; color: var(--steel) !important; box-shadow: none !important; border: 1px solid rgba(159, 180, 224, 0.2) !important; }
 .job, .board, .apply-card { --accent: 159, 180, 224; }
+
+/* =========================================================
+   FINITIONS « HAUT DE GAMME »
+   ========================================================= */
+body { font-feature-settings: "ss01", "cv11"; text-rendering: optimizeLegibility; }
+.h1, .h2 { font-weight: 700; }
+.h1 { letter-spacing: -0.025em; }
+.h2 { letter-spacing: -0.02em; }
+::selection { background: var(--rouge); color: #fff; }
+
+/* Trame discrète en fond de l'en-tête de l'accueil */
+.ac-hero { position: relative; overflow: hidden; }
+.ac-hero::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(80% 70% at 70% 40%, #000, transparent 75%); mask-image: radial-gradient(80% 70% at 70% 40%, #000, transparent 75%);
+}
+.ac-hero__grille { position: relative; grid-template-columns: 1.1fr 0.9fr; }
+.ac-hero__visuel { position: relative; padding: 0 0 34px 34px; }
+.ac-hero__photo { position: relative; margin: 0; aspect-ratio: 4 / 4.6; border-radius: 18px; overflow: hidden; border: 1px solid var(--line-strong); box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.9); }
+.ac-hero__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 25%; filter: saturate(0.55) contrast(1.05) brightness(0.88); }
+.ac-hero__photo::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(180deg, transparent 55%, rgba(7, 13, 31, 0.55)); pointer-events: none; }
+.ac-hero__badge {
+  position: absolute; left: 0; bottom: 0; display: flex; align-items: center; gap: 14px; padding: 14px 18px 14px 14px;
+  border-radius: 14px; background: rgba(12, 22, 49, 0.96); border: 1px solid var(--line-strong); box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.9);
+}
+.ac-hero__badge img { width: 44px; height: auto; }
+.ac-hero__badge b { display: block; color: var(--text); font-family: var(--font-display); font-size: 14px; }
+.ac-hero__badge span { display: block; font-size: 11.5px; color: var(--muted-2); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+.ac-hero__dispo { position: absolute; top: 18px; right: 18px; display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 99px; background: rgba(7, 13, 31, 0.82); border: 1px solid var(--line-strong); font-size: 12px; font-weight: 600; color: var(--text); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.ac-hero__dispo i { width: 7px; height: 7px; border-radius: 50%; background: #3ecf8e; }
+.ac-hero .h1 { max-width: 640px; }
+
+/* Bandeau tarifs */
+.ac-tarifs { border-block: 1px solid var(--line); background: linear-gradient(90deg, rgba(215, 31, 44, 0.06), transparent 40%), var(--bg-2); }
+.ac-tarifs__bande { display: flex; align-items: center; gap: 28px; padding-block: 24px; flex-wrap: wrap; }
+.ac-tarifs__titre { font-family: var(--font-display); font-size: 11.5px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--steel); }
+.ac-tarifs ul { display: flex; flex-wrap: wrap; gap: 10px 32px; flex: 1; }
+.ac-tarifs li { display: grid; }
+.ac-tarifs li span { font-size: 12.5px; color: var(--muted-2); }
+.ac-tarifs li b { font-family: var(--font-display); font-size: 19px; color: var(--text); font-variant-numeric: tabular-nums; }
+.ac-tarifs li small { font-size: 11px; font-weight: 600; color: var(--muted-2); }
+
+/* Cartes de services : repère rouge au survol */
+.ac-item::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 2px; background: var(--rouge); transform: scaleY(0); transition: transform 0.2s; }
+.ac-item:hover::before { transform: scaleY(1); }
+
+/* Titres de section : trait fin sous l'en-tête */
+.ac-tete { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+
+/* Pages intérieures : bloc devis latéral plus visible */
+.lp-aside .lp-box:first-child { border-color: rgba(215, 31, 44, 0.35) !important; background: linear-gradient(180deg, rgba(215, 31, 44, 0.07), var(--surface) 60%) !important; }
+
+@media (max-width: 1020px) {
+  .ac-hero__grille { grid-template-columns: 1fr; }
+  .ac-hero__visuel { max-width: 520px; padding: 0 0 30px 20px; }
+  .ac-hero__photo { aspect-ratio: 16 / 11; }
+}
+@media (max-width: 560px) {
+  .ac-hero__visuel { padding: 0 0 26px 0; }
+  .ac-hero__badge { left: 12px; right: 12px; }
+  .ac-tarifs ul { gap: 12px 22px; }
+  .ac-tarifs li b { font-size: 17px; }
+}
+
+/* =========================================================
+   PAGE TARIFS
+   ========================================================= */
+.tf-hero { padding: calc(var(--nav-h) + 48px) 0 48px; border-bottom: 1px solid var(--line); background: radial-gradient(60% 120% at 100% 0%, rgba(37, 99, 255, 0.08), transparent 60%); }
+.tf-hero .container { display: grid; gap: 18px; justify-items: start; }
+.tf-hero .lead { max-width: 640px; }
+.tf-hero__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.tf-cartes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
+.tf-carte { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 24px 22px; border-radius: var(--radius-panel); border: 1px solid var(--line); background: var(--surface); }
+.tf-carte--vedette { border-color: rgba(215, 31, 44, 0.5); background: linear-gradient(180deg, rgba(215, 31, 44, 0.08), var(--surface) 55%); }
+.tf-carte__badge { position: absolute; top: -11px; left: 22px; padding: 3px 10px; border-radius: 99px; background: var(--rouge); color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.tf-carte h3 { font-family: var(--font-display); font-size: 17px; color: var(--text); }
+.tf-carte__desc { font-size: 13.5px; min-height: 40px; }
+.tf-prix { display: grid; gap: 2px; padding: 12px 0; border-block: 1px solid var(--line); }
+.tf-prix small { font-size: 12px; color: var(--muted-2); }
+.tf-prix b { font-family: var(--font-display); font-size: 34px; line-height: 1.05; color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.tf-prix span { font-size: 12.5px; color: var(--muted-2); }
+.tf-carte ul { display: grid; gap: 7px; font-size: 13.5px; }
+.tf-carte ul li { padding-left: 18px; position: relative; }
+.tf-carte ul li::before { content: ""; position: absolute; left: 0; top: 0.6em; width: 8px; height: 2px; background: var(--steel); }
+.tf-carte .btn { margin-top: auto; }
+.tf-lignes { display: grid; border-block: 1px solid var(--line); }
+.tf-lignes p { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.tf-lignes p:last-child { border-bottom: 0; }
+.tf-lignes b { font-family: var(--font-display); font-size: 17px; color: var(--text); font-variant-numeric: tabular-nums; }
+.tf-carte__note { font-size: 12px; color: var(--muted-2); }
+.tf-majorations { margin-top: 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; padding: 18px 22px; border: 1px solid var(--line); border-radius: var(--radius-panel); }
+.tf-majorations h3 { font-family: var(--font-display); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-2); }
+.tf-majorations ul { display: flex; flex-wrap: wrap; gap: 10px 30px; }
+.tf-majorations li { display: flex; align-items: baseline; gap: 8px; font-size: 13.5px; }
+.tf-majorations li b { color: var(--text); }
+.tf-majorations li span { color: var(--muted-2); font-size: 12.5px; }
+.tf-majorations li em { font-style: normal; font-weight: 700; color: var(--steel); }
+.tf-majorations li em.tf-baisse { color: #3ecf8e; }
+.tf-grilles--vtc { padding-top: 0; }
+.tf-tableau { border: 1px solid var(--line); border-radius: var(--radius-panel); overflow: hidden; overflow-x: auto; }
+.tf-tableau table { width: 100%; border-collapse: collapse; min-width: 520px; }
+.tf-tableau th { text-align: left; padding: 14px 20px; font-family: var(--font-display); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted-2); background: var(--bg-2); border-bottom: 1px solid var(--line); }
+.tf-tableau td { padding: 15px 20px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.tf-tableau tr:last-child td { border-bottom: 0; }
+.tf-tableau td:not(:first-child), .tf-tableau th:not(:first-child) { text-align: right; white-space: nowrap; }
+.tf-tableau td:not(:first-child) { font-family: var(--font-display); font-weight: 700; font-size: 16px; color: var(--text); }
+.tf-tableau td b { display: block; color: var(--text); font-size: 15px; }
+.tf-tableau td small { display: block; font-size: 12.5px; color: var(--muted-2); }
+.tf-tableau tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+.tf-mention { margin-top: 12px; font-size: 12.5px; color: var(--muted-2); }
+.tf-mention a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.tf-estimation { padding-top: 0; }
+.tf-estim { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(28px, 5vw, 64px); align-items: center; padding: clamp(24px, 4vw, 44px); border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
+.tf-estim__texte { display: grid; gap: 14px; }
+.tf-calc { display: grid; gap: 14px; padding: 22px; border-radius: 14px; background: var(--bg-2); border: 1px solid var(--line); }
+.tf-champ { display: grid; gap: 6px; }
+.tf-champ span { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.tf-champ select, .tf-champ input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); font-size: 15px; }
+.tf-champ select:focus, .tf-champ input:focus { outline: none; border-color: var(--steel); }
+.tf-champs-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.tf-options { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.tf-options label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+.tf-options input { width: 17px; height: 17px; accent-color: var(--rouge); }
+.tf-resultat { display: flex; justify-content: space-between; align-items: end; gap: 12px; padding: 16px 0 4px; border-top: 1px solid var(--line); }
+.tf-resultat small { display: block; font-size: 12px; color: var(--muted-2); }
+.tf-resultat b { font-family: var(--font-display); font-size: 32px; color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.tf-resultat span { font-size: 16px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tf-resultat div:last-child { text-align: right; }
+.tf-inclus { padding-top: 0; }
+.tf-inclus__liste { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 1100px) { .tf-cartes { grid-template-columns: 1fr 1fr; } .tf-inclus__liste { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 900px) { .tf-estim { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .tf-cartes, .tf-inclus__liste { grid-template-columns: 1fr; } .tf-carte__desc { min-height: 0; } }

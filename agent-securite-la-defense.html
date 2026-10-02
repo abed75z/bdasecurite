@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="assets/css/hero.css?v=6">
   <link rel="stylesheet" href="assets/css/sections.css?v=6">
   <link rel="stylesheet" href="assets/css/page.css?v=6">
+  <link rel="stylesheet" href="assets/css/pro.css?v=1">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@graph":[{"@type":"Service","name":"Agent de sécurité à La Défense","serviceType":"Sécurité privée","description":"Société de sécurité privée à La Défense : agents titulaires de la carte CNAPS pour le gardiennage, le contrôle d’accès, vos événements et la protection rapprochée. Devis gratuit, 24h/24.","url":"https://bdasecurite.com/agent-securite-la-defense","provider":{"@id":"https://bdasecurite.com/#entreprise"},"areaServed":"La Défense, Courbevoie, Puteaux"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://bdasecurite.com/"},{"@type":"ListItem","position":2,"name":"Sécurité privée","item":"https://bdasecurite.com/securite-privee-paris"},{"@type":"ListItem","position":3,"name":"La Défense","item":"https://bdasecurite.com/agent-securite-la-defense"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Intervenez-vous à La Défense ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Nous intervenons à La Défense pour des missions ponctuelles comme pour des prestations régulières, de jour comme de nuit, 7j/7."}},{"@type":"Question","name":"En combien de temps un agent peut-il être sur place à La Défense ?","acceptedAnswer":{"@type":"Answer","text":"Selon nos disponibilités, nous rejoignons La Défense rapidement depuis Paris. Pour une urgence, appelez directement le 06 11 67 86 25."}},{"@type":"Question","name":"Combien coûte un agent de sécurité ?","acceptedAnswer":{"@type":"Answer","text":"Le tarif dépend du poste, des horaires (jour, nuit, dimanche, jour férié) et de la durée. Le devis est gratuit et sans engagement."}}]}]}
   </script>
@@ -58,9 +59,6 @@
 </svg>
 
 <div class="ambient" aria-hidden="true"></div>
-<canvas id="sky" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
-<div class="scroll-progress" aria-hidden="true"></div>
 
 <!-- ============ Navigation ============ -->
 <header class="nav">
@@ -70,35 +68,49 @@
       <span class="brand__text"><span class="brand__name">BDA</span><span class="brand__tag">Sécurité &amp; VTC Premium</span></span>
     </a>
     <nav class="nav__links" aria-label="Navigation principale">
-      <a href="/">Accueil</a>
-      <a href="/#services">Services</a>
-      <a href="securite-privee-paris">Sécurité</a>
-      <a href="chauffeur-prive-vtc-paris">VTC Premium</a>
-      <a href="avis">Avis</a>
-      <a href="recrutement" class="nav__hot">Recrutement</a>
+      <div class="nav__drop is-current">
+        <button class="nav__drop-btn" type="button" aria-expanded="false">Sécurité privée <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav__panel nav__panel--large">
+          <div class="nav__col"><p class="nav__col-titre">Prestations</p><a href="securite-privee-paris"><b>Agents de sécurité</b><small>Gardiennage, accueil, rondes</small></a><a href="securite-incendie-ssiap-paris"><b>Sécurité incendie SSIAP</b><small>Agents SSIAP 1, 2 et 3</small></a><a href="protection-rapprochee-paris"><b>Protection rapprochée</b><small>Garde du corps, escorte</small></a><a href="securite-evenementielle-paris"><b>Sécurité événementielle</b><small>Soirées, salons, galas</small></a><a href="gardiennage-chantier-paris"><b>Gardiennage de chantier</b><small>Jour, nuit et week-end</small></a></div>
+          <div class="nav__col nav__col--simple"><p class="nav__col-titre">Par secteur</p><a href="securite-hotels-paris">Hôtels</a><a href="securite-commerces-paris">Commerces</a><a href="securite-bureaux-entreprises-paris">Bureaux & entreprises</a><a href="securite-ambassades-consulats-paris">Ambassades & consulats</a><a href="securite-residences-coproprietes-paris">Résidences & copropriétés</a></div>
+          <div class="nav__col nav__col--simple"><p class="nav__col-titre">Par zone</p><a href="agent-securite-paris-1">Paris 1<sup>er</sup></a><a href="agent-securite-paris-8">Paris 8<sup>e</sup></a><a href="agent-securite-paris-9">Paris 9<sup>e</sup></a><a href="agent-securite-paris-16">Paris 16<sup>e</sup></a><a href="agent-securite-paris-17">Paris 17<sup>e</sup></a><a href="agent-securite-paris-20">Paris 20<sup>e</sup></a><a href="agent-securite-la-defense" aria-current="page">La Défense</a><a href="agent-securite-neuilly-sur-seine">Neuilly-sur-Seine</a><a href="agent-securite-boulogne-billancourt">Boulogne-Billancourt</a><a href="agent-securite-saint-denis">Saint-Denis</a></div>
+        </div>
+      </div>
+      <div class="nav__drop">
+        <button class="nav__drop-btn" type="button" aria-expanded="false">VTC Premium <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav__panel">
+          <div class="nav__col"><a href="chauffeur-prive-vtc-paris"><b>Chauffeur privé VTC</b><small>À l’heure ou au trajet</small></a><a href="transfert-aeroport-paris"><b>Transfert aéroport</b><small>CDG, Orly, Beauvais, gares</small></a><a href="chauffeur-mariage-paris"><b>Chauffeur de mariage</b><small>Berline pour votre grand jour</small></a><a href="chauffeur-securite-vip-paris"><b>Chauffeur + sécurité VIP</b><small>Conduit et protégé</small></a><a href="reserver" data-vtc hidden><b>Réserver en ligne</b><small>Prix affiché, confirmation immédiate</small></a></div>
+        </div>
+      </div>
+      <a href="references">Références</a>
+      <a href="avis">Avis clients</a>
+      <a href="recrutement">Recrutement</a>
     </nav>
     <div class="nav__actions">
+      <a class="nav__tel" href="tel:+33611678625" aria-label="Appeler le 06 11 67 86 25"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span>06 11 67 86 25</span></a>
       <a class="btn btn--outline nav__client" href="espace-client" aria-label="Espace client"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg><span>Espace client</span></a>
-      <a class="btn btn--outline" href="tel:+33611678625" aria-label="Appeler"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span>Appeler</span></a>
-      <a class="btn btn--gold" href="devis?service=gardiennage">Demander un devis</a>
+      <a class="btn btn--gold" href="devis?service=gardiennage">Devis gratuit</a>
       <button class="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 </header>
 
 <div class="mobile-menu" id="mobile-menu">
-  <a class="mobile-menu__link" href="/" style="--i:0">Accueil</a>
-  <a class="mobile-menu__link" href="securite-privee-paris" style="--i:1">Sécurité privée</a>
-  <a class="mobile-menu__link" href="protection-rapprochee-paris" style="--i:2">Protection rapprochée</a>
-  <a class="mobile-menu__link" href="securite-evenementielle-paris" style="--i:3">Sécurité événementielle</a>
-  <a class="mobile-menu__link" href="chauffeur-prive-vtc-paris" style="--i:4">Chauffeur privé VTC</a>
-  <a class="mobile-menu__link" href="transfert-aeroport-paris" style="--i:5">Transfert aéroport</a>
-  <a class="mobile-menu__link" href="avis" style="--i:6">Avis clients</a>
-  <a class="mobile-menu__link" href="recrutement" style="--i:7">Recrutement</a>
+  <nav class="mm" aria-label="Menu">
+    <a href="/" class="mm__lien">Accueil</a>
+    <details class="mm__groupe" open><summary>Sécurité privée</summary><div><a href="securite-privee-paris">Agents de sécurité</a><a href="securite-incendie-ssiap-paris">Sécurité incendie SSIAP</a><a href="protection-rapprochee-paris">Protection rapprochée</a><a href="securite-evenementielle-paris">Sécurité événementielle</a><a href="gardiennage-chantier-paris">Gardiennage de chantier</a></div></details>
+    <details class="mm__groupe"><summary>Par secteur</summary><div><a href="securite-hotels-paris">Hôtels</a><a href="securite-commerces-paris">Commerces</a><a href="securite-bureaux-entreprises-paris">Bureaux & entreprises</a><a href="securite-ambassades-consulats-paris">Ambassades & consulats</a><a href="securite-residences-coproprietes-paris">Résidences & copropriétés</a></div></details>
+    <details class="mm__groupe"><summary>Par zone</summary><div><a href="agent-securite-paris-1">Paris 1<sup>er</sup></a><a href="agent-securite-paris-8">Paris 8<sup>e</sup></a><a href="agent-securite-paris-9">Paris 9<sup>e</sup></a><a href="agent-securite-paris-16">Paris 16<sup>e</sup></a><a href="agent-securite-paris-17">Paris 17<sup>e</sup></a><a href="agent-securite-paris-20">Paris 20<sup>e</sup></a><a href="agent-securite-la-defense" aria-current="page">La Défense</a><a href="agent-securite-neuilly-sur-seine">Neuilly-sur-Seine</a><a href="agent-securite-boulogne-billancourt">Boulogne-Billancourt</a><a href="agent-securite-saint-denis">Saint-Denis</a></div></details>
+    <details class="mm__groupe"><summary>VTC Premium</summary><div><a href="chauffeur-prive-vtc-paris">Chauffeur privé VTC</a><a href="transfert-aeroport-paris">Transfert aéroport</a><a href="chauffeur-mariage-paris">Chauffeur de mariage</a><a href="chauffeur-securite-vip-paris">Chauffeur + sécurité VIP</a></div></details>
+    <a href="references" class="mm__lien">Références</a>
+    <a href="avis" class="mm__lien">Avis clients</a>
+    <a href="recrutement" class="mm__lien">Recrutement</a>
+    <a href="espace-client" class="mm__lien">Espace client</a>
+  </nav>
   <div class="mobile-menu__foot">
-    <a class="btn btn--outline btn--block" href="espace-client"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg> Espace client</a>
-    <a class="btn btn--gold btn--block" href="devis?service=gardiennage">Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-    <a class="btn btn--outline btn--block" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Appeler</a>
+    <a class="btn btn--gold btn--block" href="devis?service=gardiennage">Demander un devis gratuit</a>
+    <a class="btn btn--outline btn--block" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
+    <a class="btn btn--outline btn--block" href="https://wa.me/33784739070" target="_blank" rel="noopener"><svg class="icon" viewBox="0 0 32 32" aria-hidden="true" style="fill:currentColor;stroke:none"><path d="M16 3.2A12.7 12.7 0 0 0 5.1 22.4L3.4 28.8l6.6-1.7A12.7 12.7 0 1 0 16 3.2Zm0 23.1c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-3.9 1 1-3.8-.3-.4a10.5 10.5 0 1 1 9 4.9Zm5.8-7.9c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.6 8.6 0 0 1-4.3-3.7c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.1.9 2.9 1 3.9.8.6-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5-.1-.2-.3-.3-.7-.4Z"/></svg> WhatsApp</a>
   </div>
 </div>
 
@@ -111,10 +123,10 @@
       <div class="lp-hero__copy">
         <nav class="lp-crumbs" aria-label="Fil d'Ariane" data-reveal="fade"><a href="/">Accueil</a><span aria-hidden="true">›</span><a href="securite-privee-paris">Sécurité privée</a><span aria-hidden="true">›</span><span aria-current="page">La Défense</span></nav>
         <p class="kicker" data-reveal="fade">Sécurité privée · La Défense</p>
-        <h1 class="h1 shimmer" id="page-title" data-split>Agent de sécurité <em>à La Défense.</em></h1>
+        <h1 class="h1" id="page-title" data-split>Agent de sécurité <em>à La Défense.</em></h1>
         <p class="lead" data-reveal style="--d:300ms">Des agents de sécurité qualifiés et discrets à La Défense, pour vos locaux, vos commerces, vos événements et vos proches. Un seul interlocuteur, 24h/24 et 7j/7.</p>
         <div class="hero__ctas" data-reveal style="--d:450ms">
-          <a class="btn btn--gold" href="devis?service=gardiennage" data-magnetic>Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--gold" href="devis?service=gardiennage">Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
           <a class="btn btn--outline" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
         </div>
         <ul class="hero__trust" data-reveal="fade" style="--d:650ms">
@@ -184,7 +196,7 @@
       <div class="lp-cta" data-reveal="scale">
         <h2 class="h3">Sécurisez votre activité <em>à La Défense.</em></h2>
         <div>
-          <a class="btn btn--gold" href="devis?service=gardiennage" data-magnetic>Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--gold" href="devis?service=gardiennage">Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
           <a class="btn btn--outline" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Appeler</a>
         </div>
       </div>
@@ -201,40 +213,56 @@
           <img class="brand__mark" src="assets/img/embleme.png" alt="" width="128" height="131">
           <span class="brand__text"><span class="brand__name">BDA</span><span class="brand__tag">Sécurité &amp; VTC Premium</span></span>
         </a>
-        <p>Sécurité privée et transport haut de gamme à Paris : protection, ponctualité et sérénité, 24h/24 et 7j/7.</p>
+        <p>Société de sécurité privée autorisée par le CNAPS et chauffeurs VTC à Paris et en Île-de-France, 24h/24 et 7j/7.</p>
+        <ul class="footer__contact">
+          <li><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span><a href="tel:+33611678625">06 11 67 86 25</a> · <a href="tel:+33784739070">07 84 73 90 70</a></span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><a href="mailto:bdasecurite@gmail.com">bdasecurite@gmail.com</a></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span>61 rue de la Croix Saint-Simon, 75020 Paris</span></li>
+        </ul>
       </div>
       <div>
         <h4>Sécurité privée</h4>
         <ul>
           <li><a href="securite-privee-paris">Agents de sécurité</a></li>
+          <li><a href="securite-incendie-ssiap-paris">Sécurité incendie SSIAP</a></li>
           <li><a href="protection-rapprochee-paris">Protection rapprochée</a></li>
           <li><a href="securite-evenementielle-paris">Sécurité événementielle</a></li>
-          <li><a href="chauffeur-securite-vip-paris">Chauffeur + sécurité VIP</a></li>
+          <li><a href="gardiennage-chantier-paris">Gardiennage de chantier</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Secteurs</h4>
+        <ul>
+          <li><a href="securite-hotels-paris">Hôtels</a></li>
+          <li><a href="securite-commerces-paris">Commerces</a></li>
+          <li><a href="securite-bureaux-entreprises-paris">Bureaux & entreprises</a></li>
+          <li><a href="securite-ambassades-consulats-paris">Ambassades & consulats</a></li>
+          <li><a href="securite-residences-coproprietes-paris">Résidences & copropriétés</a></li>
         </ul>
       </div>
       <div>
         <h4>VTC Premium</h4>
         <ul>
           <li><a href="chauffeur-prive-vtc-paris">Chauffeur privé VTC</a></li>
-          <li><a href="transfert-aeroport-paris">Transferts aéroports</a></li>
-          <li><a href="chauffeur-mariage-paris">Chauffeur mariage</a></li>
-          <li><a href="avis">Avis clients</a></li>
-          <li><a href="recrutement">Nous rejoindre</a></li>
-          <li><a href="references">Nos références</a></li>
-          <li><a href="espace-client">Espace client</a></li>
-          <li><a href="en" hreflang="en">English version</a></li>
+          <li><a href="transfert-aeroport-paris">Transfert aéroport</a></li>
+          <li><a href="chauffeur-mariage-paris">Chauffeur de mariage</a></li>
+          <li><a href="chauffeur-securite-vip-paris">Chauffeur + sécurité VIP</a></li>
         </ul>
       </div>
       <div>
-        <h4>Contact</h4>
-        <ul class="footer__contact">
-          <li><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span><a href="tel:+33611678625">+33 6 11 67 86 25</a><br><a href="tel:+33784739070">+33 7 84 73 90 70</a></span></li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><a href="mailto:bdasecurite@gmail.com">bdasecurite@gmail.com</a></li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span>Paris, France</span></li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span>24h/24 · 7j/7</span></li>
+        <h4>BDA Sécurité</h4>
+        <ul>
+          <li><a href="references">Nos références</a></li>
+          <li><a href="avis">Avis clients</a></li>
+          <li><a href="recrutement">Recrutement</a></li>
+          <li><a href="devis">Demander un devis</a></li>
+          <li><a href="espace-client">Espace client</a></li>
+          <li><a href="mentions-legales">Mentions légales</a></li>
+          <li><a href="en" hreflang="en">English version</a></li>
         </ul>
       </div>
     </div>
+    <p class="footer__zones">Nous intervenons dans tout Paris et l'Île-de-France, notamment à <a href="agent-securite-paris-1">Paris 1<sup>er</sup></a>, <a href="agent-securite-paris-8">Paris 8<sup>e</sup></a>, <a href="agent-securite-paris-9">Paris 9<sup>e</sup></a>, <a href="agent-securite-paris-16">Paris 16<sup>e</sup></a>, <a href="agent-securite-paris-17">Paris 17<sup>e</sup></a>, <a href="agent-securite-paris-20">Paris 20<sup>e</sup></a>, <a href="agent-securite-la-defense">La Défense</a>, <a href="agent-securite-neuilly-sur-seine">Neuilly-sur-Seine</a>, <a href="agent-securite-boulogne-billancourt">Boulogne-Billancourt</a>, <a href="agent-securite-saint-denis">Saint-Denis</a>.</p>
     <div class="footer__legal">
       <p>© <span data-year>2026</span> BDA Sécurité &amp; VTC Premium — BDASECURITE, EURL au capital de 2 000 €, SIRET 109 076 463 00016 — Abdelouahab Bouidia EI (BDA SECURITE), SIRET 977 933 316 00019 — <a href="mentions-legales">Mentions légales &amp; confidentialité</a></p>
       <p>Autorisation d'exercice CNAPS n° AUT-075-2124-07-01-20250906336. « L'autorisation d'exercice ne confère aucune prérogative de puissance publique à l'entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du Code de la sécurité intérieure)</p>
@@ -252,7 +280,7 @@
   <a class="btn btn--gold" href="devis?service=gardiennage">Demander un devis</a>
 </div>
 
-<script src="assets/js/core.js?v=6"></script>
+<script src="assets/js/core.js?v=7"></script>
 <script src="assets/js/home.js?v=6"></script>
 </body>
 </html>

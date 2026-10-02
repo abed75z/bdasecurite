@@ -152,7 +152,7 @@
     onScroll((y) => {
       nav.classList.toggle('is-scrolled', y > 20);
       const down = y > lastY + 2, up = y < lastY - 2;
-      if (down && y > 500 && !document.body.classList.contains('menu-open')) nav.classList.add('is-hidden');
+      // Barre du haut toujours visible : téléphone et devis à portée de main
       if (up || y < 500) nav.classList.remove('is-hidden');
       lastY = y;
     });
@@ -226,8 +226,9 @@
     document.querySelectorAll('[data-stagger]').forEach((parent) => {
       [...parent.children].forEach((c, i) => c.style.setProperty('--i', i));
     });
-    document.querySelectorAll('[data-split]').forEach(splitWords);
-    const els = document.querySelectorAll('[data-reveal], [data-split]');
+    // Titres affichés directement (plus de découpage mot par mot : rendu plus sobre)
+    document.querySelectorAll('[data-split]').forEach((e) => e.classList.add('is-in'));
+    const els = document.querySelectorAll('[data-reveal]');
     if (reduced || !('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('is-in')); return; }
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
@@ -311,6 +312,30 @@
       });
       el.addEventListener('pointerleave', () => { el.style.translate = ''; });
     });
+  }
+
+  /* ---------- Menus déroulants du haut (Sécurité, VTC) ---------- */
+  function menusDeroulants() {
+    const menus = [...document.querySelectorAll('.nav__drop')];
+    if (!menus.length) return;
+    const fermerTout = (sauf) => menus.forEach((m) => {
+      if (m === sauf) return;
+      m.classList.remove('is-open');
+      m.querySelector('.nav__drop-btn')?.setAttribute('aria-expanded', 'false');
+    });
+    menus.forEach((m) => {
+      const btn = m.querySelector('.nav__drop-btn');
+      btn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const ouvert = !m.classList.contains('is-open');
+        fermerTout(m);
+        m.classList.toggle('is-open', ouvert);
+        btn.setAttribute('aria-expanded', String(ouvert));
+      });
+      m.addEventListener('mouseleave', () => { m.classList.remove('is-open'); btn?.setAttribute('aria-expanded', 'false'); });
+    });
+    document.addEventListener('click', (e) => { if (!e.target.closest('.nav__drop')) fermerTout(); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') fermerTout(); });
   }
 
   /* ---------- Divers ---------- */
@@ -423,15 +448,9 @@
   }
 
   reglagesSite();
-  sky();
-  roads();
-  animScopes();
+  // Effets décoratifs (ciel étoilé, traînées lumineuses, parallaxe, 3D, boutons aimantés) retirés : site plus sobre et plus rapide
   navigation();
-  progress();
+  menusDeroulants();
   reveal();
-  scrollParallax();
-  scenes();
-  tilt();
-  magnetic();
   misc();
 })();

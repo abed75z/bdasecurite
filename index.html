@@ -77,6 +77,7 @@
   <link rel="stylesheet" href="assets/css/style.css?v=6">
   <link rel="stylesheet" href="assets/css/hero.css?v=6">
   <link rel="stylesheet" href="assets/css/sections.css?v=6">
+  <link rel="stylesheet" href="assets/css/pro.css?v=1">
 </head>
 <body>
 
@@ -126,498 +127,189 @@
 </svg>
 
 <div class="ambient" aria-hidden="true"></div>
-<canvas id="sky" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
-<div class="scroll-progress" aria-hidden="true"></div>
 
 <!-- ============ Navigation ============ -->
 <header class="nav">
   <div class="nav__inner">
-    <a class="brand" href="#top" aria-label="BDA Sécurité &amp; VTC Premium — accueil">
+    <a class="brand" href="/" aria-label="BDA Sécurité &amp; VTC Premium — accueil">
       <img class="brand__mark" src="assets/img/embleme.png" alt="" width="128" height="131">
       <span class="brand__text"><span class="brand__name">BDA</span><span class="brand__tag">Sécurité &amp; VTC Premium</span></span>
     </a>
     <nav class="nav__links" aria-label="Navigation principale">
-      <a href="#top">Accueil</a>
-      <a href="#services">Services</a>
-      <a href="#securite">Sécurité</a>
-      <a href="#vtc">VTC Premium</a>
-      <a href="reserver" class="nav__hot" data-vtc hidden>Réserver un VTC</a>
-      <a href="avis">Avis</a>
+      <div class="nav__drop">
+        <button class="nav__drop-btn" type="button" aria-expanded="false">Sécurité privée <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav__panel nav__panel--large">
+          <div class="nav__col"><p class="nav__col-titre">Prestations</p><a href="securite-privee-paris"><b>Agents de sécurité</b><small>Gardiennage, accueil, rondes</small></a><a href="securite-incendie-ssiap-paris"><b>Sécurité incendie SSIAP</b><small>Agents SSIAP 1, 2 et 3</small></a><a href="protection-rapprochee-paris"><b>Protection rapprochée</b><small>Garde du corps, escorte</small></a><a href="securite-evenementielle-paris"><b>Sécurité événementielle</b><small>Soirées, salons, galas</small></a><a href="gardiennage-chantier-paris"><b>Gardiennage de chantier</b><small>Jour, nuit et week-end</small></a></div>
+          <div class="nav__col nav__col--simple"><p class="nav__col-titre">Par secteur</p><a href="securite-hotels-paris">Hôtels</a><a href="securite-commerces-paris">Commerces</a><a href="securite-bureaux-entreprises-paris">Bureaux & entreprises</a><a href="securite-ambassades-consulats-paris">Ambassades & consulats</a><a href="securite-residences-coproprietes-paris">Résidences & copropriétés</a></div>
+          <div class="nav__col nav__col--simple"><p class="nav__col-titre">Par zone</p><a href="agent-securite-paris-1">Paris 1<sup>er</sup></a><a href="agent-securite-paris-8">Paris 8<sup>e</sup></a><a href="agent-securite-paris-9">Paris 9<sup>e</sup></a><a href="agent-securite-paris-16">Paris 16<sup>e</sup></a><a href="agent-securite-paris-17">Paris 17<sup>e</sup></a><a href="agent-securite-paris-20">Paris 20<sup>e</sup></a><a href="agent-securite-la-defense">La Défense</a><a href="agent-securite-neuilly-sur-seine">Neuilly-sur-Seine</a><a href="agent-securite-boulogne-billancourt">Boulogne-Billancourt</a><a href="agent-securite-saint-denis">Saint-Denis</a></div>
+        </div>
+      </div>
+      <div class="nav__drop">
+        <button class="nav__drop-btn" type="button" aria-expanded="false">VTC Premium <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav__panel">
+          <div class="nav__col"><a href="chauffeur-prive-vtc-paris"><b>Chauffeur privé VTC</b><small>À l’heure ou au trajet</small></a><a href="transfert-aeroport-paris"><b>Transfert aéroport</b><small>CDG, Orly, Beauvais, gares</small></a><a href="chauffeur-mariage-paris"><b>Chauffeur de mariage</b><small>Berline pour votre grand jour</small></a><a href="chauffeur-securite-vip-paris"><b>Chauffeur + sécurité VIP</b><small>Conduit et protégé</small></a><a href="reserver" data-vtc hidden><b>Réserver en ligne</b><small>Prix affiché, confirmation immédiate</small></a></div>
+        </div>
+      </div>
+      <a href="references">Références</a>
+      <a href="avis">Avis clients</a>
       <a href="recrutement">Recrutement</a>
     </nav>
     <div class="nav__actions">
+      <a class="nav__tel" href="tel:+33611678625" aria-label="Appeler le 06 11 67 86 25"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span>06 11 67 86 25</span></a>
       <a class="btn btn--outline nav__client" href="espace-client" aria-label="Espace client"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg><span>Espace client</span></a>
-      <!-- À PERSONNALISER : votre numéro -->
-      <a class="btn btn--outline" href="tel:+33611678625" aria-label="Appeler"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span>Appeler</span></a>
-      <a class="btn btn--gold" href="devis">Demander un devis</a>
+      <a class="btn btn--gold" href="devis">Devis gratuit</a>
       <button class="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
     </div>
   </div>
 </header>
 
 <div class="mobile-menu" id="mobile-menu">
-  <a class="mobile-menu__link" href="#top" style="--i:0">Accueil</a>
-  <a class="mobile-menu__link" href="#services" style="--i:1">Services</a>
-  <a class="mobile-menu__link" href="#securite" style="--i:2">Sécurité</a>
-  <a class="mobile-menu__link" href="#vtc" style="--i:3">VTC Premium</a>
-  <a class="mobile-menu__link" href="reserver" style="--i:3" data-vtc hidden>Réserver un VTC</a>
-  <a class="mobile-menu__link" href="#engagements" style="--i:4">Engagements</a>
-  <a class="mobile-menu__link" href="#faq" style="--i:5">FAQ</a>
-  <a class="mobile-menu__link" href="avis" style="--i:6">Avis clients</a>
-  <a class="mobile-menu__link" href="recrutement" style="--i:7">Recrutement</a>
+  <nav class="mm" aria-label="Menu">
+    <a href="/" aria-current="page" class="mm__lien">Accueil</a>
+    <details class="mm__groupe" open><summary>Sécurité privée</summary><div><a href="securite-privee-paris">Agents de sécurité</a><a href="securite-incendie-ssiap-paris">Sécurité incendie SSIAP</a><a href="protection-rapprochee-paris">Protection rapprochée</a><a href="securite-evenementielle-paris">Sécurité événementielle</a><a href="gardiennage-chantier-paris">Gardiennage de chantier</a></div></details>
+    <details class="mm__groupe"><summary>Par secteur</summary><div><a href="securite-hotels-paris">Hôtels</a><a href="securite-commerces-paris">Commerces</a><a href="securite-bureaux-entreprises-paris">Bureaux & entreprises</a><a href="securite-ambassades-consulats-paris">Ambassades & consulats</a><a href="securite-residences-coproprietes-paris">Résidences & copropriétés</a></div></details>
+    <details class="mm__groupe"><summary>Par zone</summary><div><a href="agent-securite-paris-1">Paris 1<sup>er</sup></a><a href="agent-securite-paris-8">Paris 8<sup>e</sup></a><a href="agent-securite-paris-9">Paris 9<sup>e</sup></a><a href="agent-securite-paris-16">Paris 16<sup>e</sup></a><a href="agent-securite-paris-17">Paris 17<sup>e</sup></a><a href="agent-securite-paris-20">Paris 20<sup>e</sup></a><a href="agent-securite-la-defense">La Défense</a><a href="agent-securite-neuilly-sur-seine">Neuilly-sur-Seine</a><a href="agent-securite-boulogne-billancourt">Boulogne-Billancourt</a><a href="agent-securite-saint-denis">Saint-Denis</a></div></details>
+    <details class="mm__groupe"><summary>VTC Premium</summary><div><a href="chauffeur-prive-vtc-paris">Chauffeur privé VTC</a><a href="transfert-aeroport-paris">Transfert aéroport</a><a href="chauffeur-mariage-paris">Chauffeur de mariage</a><a href="chauffeur-securite-vip-paris">Chauffeur + sécurité VIP</a></div></details>
+    <a href="references" class="mm__lien">Références</a>
+    <a href="avis" class="mm__lien">Avis clients</a>
+    <a href="recrutement" class="mm__lien">Recrutement</a>
+    <a href="espace-client" class="mm__lien">Espace client</a>
+  </nav>
   <div class="mobile-menu__foot">
-    <a class="btn btn--outline btn--block" href="espace-client"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg> Espace client</a>
-    <a class="btn btn--gold btn--block" href="devis">Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-    <a class="btn btn--outline btn--block" href="reserver" data-vtc hidden><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg> Réserver un VTC</a>
-    <a class="btn btn--outline btn--block" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Appeler</a>
+    <a class="btn btn--gold btn--block" href="devis">Demander un devis gratuit</a>
+    <a class="btn btn--outline btn--block" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
+    <a class="btn btn--outline btn--block" href="https://wa.me/33784739070" target="_blank" rel="noopener"><svg class="icon" viewBox="0 0 32 32" aria-hidden="true" style="fill:currentColor;stroke:none"><path d="M16 3.2A12.7 12.7 0 0 0 5.1 22.4L3.4 28.8l6.6-1.7A12.7 12.7 0 1 0 16 3.2Zm0 23.1c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-3.9 1 1-3.8-.3-.4a10.5 10.5 0 1 1 9 4.9Zm5.8-7.9c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.6 8.6 0 0 1-4.3-3.7c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.1.9 2.9 1 3.9.8.6-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5-.1-.2-.3-.3-.7-.4Z"/></svg> WhatsApp</a>
   </div>
 </div>
 
 <main id="top">
 
-  <!-- ============ HERO ============ -->
-  <section class="hero" aria-labelledby="hero-title" data-anim>
-    <div class="hero__bg" aria-hidden="true">
-      <div class="aurora"><i></i><i></i><i></i></div>
-      <div class="hero__halo"></div>
-      <svg class="road" data-road viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax slice"></svg>
-    </div>
-
-    <div class="container hero__grid">
-      <div class="hero__copy">
-        <p class="kicker" data-reveal="fade"><span class="live-dot" aria-hidden="true"></span> Disponibles 24h/24 · Paris &amp; Île-de-France</p>
-        <h1 class="h1 shimmer" id="hero-title" data-split>Votre sécurité, <em>en première classe.</em></h1>
-        <p class="lead hero__lead" data-reveal style="--d:300ms">Une seule équipe pour protéger vos sites, vos événements et vos invités, et pour les conduire en berline haut de gamme. Devis gratuit en 2 minutes, et un appel suffit, même en urgence.</p>
-        <div class="hero__ctas" data-reveal style="--d:450ms">
-          <a class="btn btn--gold btn--lg" href="devis" data-magnetic>Devis gratuit en 2 min <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <a class="btn btn--outline btn--lg" href="reserver" data-vtc hidden><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg> Réserver un VTC</a>
-          <a class="btn btn--outline btn--lg" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
+  <!-- ============ EN-TÊTE ============ -->
+  <section class="ac-hero" aria-labelledby="hero-title">
+    <div class="container ac-hero__grille">
+      <div class="ac-hero__texte">
+        <p class="kicker">Sécurité privée &amp; VTC · Paris et Île-de-France</p>
+        <h1 class="h1" id="hero-title">Agents de sécurité et chauffeurs privés à Paris, <em>24h/24.</em></h1>
+        <p class="lead">Gardiennage, sécurité incendie, sécurité d'événements, protection rapprochée et transport haut de gamme : une seule équipe, autorisée par le CNAPS, et un interlocuteur unique du devis jusqu'à la fin de la mission.</p>
+        <div class="ac-hero__actions">
+          <a class="btn btn--gold" href="devis">Demander un devis gratuit <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--outline" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
         </div>
-        <ul class="hero__trust" data-reveal="fade" style="--d:650ms">
-          <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Autorisation d'exercice CNAPS</li>
-          <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Chauffeurs VTC professionnels</li>
-          <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Sans engagement</li>
-        </ul>
-        <a class="hero__proof" href="#references" data-reveal="fade" style="--d:800ms">
-          <span class="hero__proof-ico" aria-hidden="true"><svg class="icon"><use href="#i-shield-check"/></svg></span>
-          <span><small>Ils nous font confiance</small><b>Consulat général de Colombie à Paris</b></span>
-          <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
-        </a>
+        <p class="ac-hero__note">Réponse rapide · Devis gratuit et sans engagement · Interventions en urgence étudiées 24h/24</p>
       </div>
-
-      <div class="hero__visual" data-scene data-reveal="fade" style="--d:150ms" aria-hidden="true">
-        <div class="layer emblem" data-depth="0.35">
-          <div class="emblem__glow"></div>
-          <div class="emblem__orbit"></div>
-          <img class="emblem__logo" src="assets/img/logo-bda.webp" alt="" width="900" height="1066" fetchpriority="high" decoding="async">
-        </div>
-        <div class="layer glass glass--a" data-depth="0.9">
-          <span class="glass__icon"><svg class="icon"><use href="#i-car"/></svg></span>
-          <span><b>Chauffeur confirmé</b><small>Berline Business · 21:00</small></span>
-        </div>
-        <div class="layer glass glass--b" data-depth="1.1">
-          <span class="glass__icon"><svg class="icon"><use href="#i-shield-check"/></svg></span>
-          <span><b>Agent en poste</b><small><span class="status-dot"></span> Zone sécurisée</small></span>
-        </div>
-        <div class="layer glass glass--c" data-depth="0.7">
-          <span class="glass__icon"><svg class="icon"><use href="#i-clock"/></svg></span>
-          <span><b>Disponible 24h/24</b><small>7j/7, jours fériés inclus</small></span>
-        </div>
+      <div class="ac-hero__logo" aria-hidden="true">
+        <img src="assets/img/logo-bda.webp" alt="" width="900" height="1066" fetchpriority="high" decoding="async">
       </div>
     </div>
-
-    <a class="scroll-cue" href="#chiffres"><i aria-hidden="true"></i>Découvrir</a>
   </section>
 
-  <!-- ============ CHIFFRES CLÉS (à ajuster selon votre activité) ============ -->
-  <section class="stats-band" id="chiffres" aria-label="Chiffres clés">
+  <!-- ============ GARANTIES ============ -->
+  <section class="ac-garanties" aria-label="Nos garanties">
     <div class="container">
-      <div class="stats" data-reveal>
-        <div class="stat"><div class="stat__num"><span data-count="24">24</span><em>/7</em></div><p>Disponibilité, week-ends et jours fériés compris</p></div>
-        <div class="stat"><div class="stat__num"><span data-count="2">2</span><em>&nbsp;min</em></div><p>Pour demander votre devis en ligne</p></div>
-        <div class="stat"><div class="stat__num"><span data-count="100">100</span><em>&nbsp;%</em></div><p>De prestations conçues sur-mesure</p></div>
-        <div class="stat"><div class="stat__num"><span data-count="1">1</span></div><p>Interlocuteur unique pour tout organiser</p></div>
-      </div>
+      <ul class="ac-garanties__liste">
+        <li><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg><div><b>Autorisation CNAPS</b><span>n° AUT-075-2124-07-01-20250906336</span></div></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><div><b>Agents qualifiés</b><span>Carte professionnelle · SSIAP 1, 2 et 3</span></div></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><div><b>Disponibles 24h/24</b><span>7j/7, jours fériés compris</span></div></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg><div><b>Référence diplomatique</b><span>Consulat général de Colombie</span></div></li>
+      </ul>
     </div>
   </section>
 
   <!-- ============ SERVICES ============ -->
   <section class="section" id="services" aria-labelledby="services-title">
     <div class="container">
-      <div class="section__head">
-        <p class="kicker kicker--center" data-reveal="fade">Nos expertises</p>
-        <h2 class="h2" id="services-title" data-split>Deux métiers, <em>une seule exigence.</em></h2>
-        <p class="lead" data-reveal>La sécurité et le transport haut de gamme ont un point commun : ils ne tolèrent aucune approximation. Nous les pensons ensemble, pour vous offrir une tranquillité totale.</p>
-      </div>
-
-      <div class="features">
-        <!-- ---------- Sécurité privée ---------- -->
-        <article class="feature" id="securite" data-reveal data-tilt="3" data-anim aria-labelledby="securite-title">
-          <div class="feature__bg" aria-hidden="true"></div>
-          <span class="feature__line" aria-hidden="true"></span>
-          <span class="feature__index" aria-hidden="true">01</span>
-          <div class="feature__grid">
-            <div class="feature__visual" aria-hidden="true">
-              <div class="mock" data-speed="0.05">
-                <div class="mock__top">
-                  <div class="mock__title"><span class="mock__ico"><svg class="icon"><use href="#i-file"/></svg></span><span>Ordre de mission<small>Réf. M-0427</small></span></div>
-                  <span class="pill pill--green"><svg class="icon"><use href="#i-check"/></svg> Confirmée</span>
-                </div>
-                <div class="mock__fields">
-                  <div class="mock__field"><span>Événement</span><b>Soirée de gala</b></div>
-                  <div class="mock__field"><span>Effectif</span><b>3 agents</b></div>
-                  <div class="mock__field"><span>Horaires</span><b>19:00 → 03:00</b></div>
-                  <div class="mock__field"><span>Tenue</span><b>Costume sombre</b></div>
-                </div>
-                <div class="mock__row">
-                  <div class="radar">
-                    <div class="radar__sweep"></div>
-                    <span class="radar__blip" style="left:30%; top:34%"></span>
-                    <span class="radar__blip" style="left:68%; top:56%; animation-delay:1.2s"></span>
-                    <span class="radar__blip" style="left:46%; top:72%; animation-delay:2.4s"></span>
-                    <span class="radar__label">Zone sécurisée</span>
-                  </div>
-                  <ul class="checklist" data-checklist>
-                    <li><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Repérage des lieux</li>
-                    <li><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Brief de l'équipe</li>
-                    <li><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Contrôle d'accès</li>
-                    <li><span class="box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span>Plan d'évacuation</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div class="feature__copy" data-stagger>
-              <p class="kicker">Sécurité privée</p>
-              <h3 class="h2" id="securite-title">Une protection <em>qui ne dort jamais.</em></h3>
-              <p>Des agents formés, discrets et vigilants pour sécuriser vos lieux, vos événements et vos proches. Chaque mission est préparée en amont et adaptée à votre niveau d'exigence.</p>
-              <ul class="feature__list">
-                <li><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg><a href="securite-privee-paris">Gardiennage &amp; surveillance de sites</a></li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><a href="protection-rapprochee-paris">Protection rapprochée</a></li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-ticket"/></svg><a href="securite-evenementielle-paris">Sécurité événementielle</a></li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Contrôle d'accès &amp; filtrage</li>
-              </ul>
-              <div class="feature__actions">
-                <a class="btn btn--gold" href="devis?service=protection" data-magnetic="0.2">Devis sécurité <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-                <a class="link-arrow" href="securite-privee-paris"><span>En savoir plus</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <!-- ---------- VTC Premium ---------- -->
-        <article class="feature feature--vtc feature--reverse" id="vtc" data-reveal data-tilt="3" data-anim aria-labelledby="vtc-title">
-          <div class="feature__bg" aria-hidden="true"></div>
-          <span class="feature__line" aria-hidden="true"></span>
-          <span class="feature__index" aria-hidden="true">02</span>
-          <div class="feature__grid">
-            <div class="feature__visual" aria-hidden="true">
-              <div class="phone" data-speed="0.05">
-                <div class="phone__screen">
-                  <div class="phone__island"></div>
-                  <div class="phone__status"><span>18:12</span><span>5G</span></div>
-                  <div class="booking">
-                    <div class="booking__head"><span>Votre réservation</span><span class="pill pill--green"><svg class="icon"><use href="#i-check"/></svg> Confirmée</span></div>
-                    <div class="minimap">
-                      <svg viewBox="0 0 240 110">
-                        <g class="streets"><path d="M-10 26H250M-10 84H250M50-10v130M178-10v130"/><path class="small" d="M-10 54H250M112-10v130M226-10v130"/></g>
-                        <path class="route-bg" d="M22 96C70 96 60 54 112 54s62-40 110-40"/>
-                        <path class="route" id="route-vtc" d="M22 96C70 96 60 54 112 54s62-40 110-40"/>
-                        <circle class="pin-a" cx="22" cy="96" r="5"/>
-                        <circle class="pin-ring" cx="222" cy="14" r="6"/>
-                        <circle class="pin-b" cx="222" cy="14" r="5"/>
-                        <g><circle r="7" fill="#060d24" stroke="#ff5c66" stroke-width="2"/><circle r="2.5" fill="#ff5c66"/><animateMotion dur="6s" repeatCount="indefinite"><mpath href="#route-vtc"/></animateMotion></g>
-                      </svg>
-                    </div>
-                    <div class="booking__car"><span class="mock__ico"><svg class="icon"><use href="#i-car"/></svg></span><div><b>Berline Business</b><small>Noire · 4 places · bagages inclus</small></div></div>
-                    <ul class="trip">
-                      <li><i></i><span>Domicile</span><span>18:30</span></li>
-                      <li><i></i><span>Aéroport · Terminal 2</span><span>19:15</span></li>
-                    </ul>
-                    <div class="chips"><span>Accueil pancarte</span><span>Eau fraîche</span><span>Wi-Fi</span><span>Chargeurs</span></div>
-                    <div class="driver"><span class="driver__av">BDA</span><div><b>Votre chauffeur</b><small>En route vers vous</small></div><span class="eta">4 min</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="feature__copy" data-stagger>
-              <p class="kicker">VTC Premium</p>
-              <h3 class="h2" id="vtc-title">Votre salon privé, <em>sur quatre roues.</em></h3>
-              <p>Berlines et vans haut de gamme, chauffeurs en tenue, conduite souple : chaque trajet devient un moment de calme. Aéroport, rendez-vous d'affaires ou grande soirée, vous arrivez à l'heure et détendu.</p>
-              <ul class="feature__list">
-                <li><svg class="icon" aria-hidden="true"><use href="#i-plane"/></svg><a href="transfert-aeroport-paris">Transferts aéroports &amp; gares</a></li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><a href="chauffeur-prive-vtc-paris">Chauffeur privé à disposition</a></li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg>Déplacements d'affaires</li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg><a href="chauffeur-mariage-paris">Mariages &amp; événements</a></li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-route"/></svg>Longues distances</li>
-              </ul>
-              <form class="resa-rapide" action="reserver" method="get" aria-label="Réserver un chauffeur VTC" data-vtc hidden>
-                <p class="resa-rapide__titre"><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg>Réservez en 1 minute · prix affiché</p>
-                <div class="resa-rapide__champs">
-                  <label><span class="resa-rapide__point" aria-hidden="true"></span><span class="sr-only">Adresse de départ</span><input name="depart" type="text" autocomplete="street-address" placeholder="Adresse de départ" required></label>
-                  <label><span class="resa-rapide__point resa-rapide__point--fin" aria-hidden="true"></span><span class="sr-only">Destination</span><input name="arrivee" type="text" placeholder="Destination (ex. Orly, CDG, gare de Lyon)"></label>
-                </div>
-                <button class="btn btn--gold" type="submit">Voir le prix <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-              </form>
-              <div class="feature__actions">
-                <a class="btn btn--gold" href="devis?service=transfert" data-magnetic="0.2" data-vtc-off>Devis VTC <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-                <a class="link-arrow" href="chauffeur-prive-vtc-paris"><span>En savoir plus</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <!-- ---------- Chauffeur + sécurité ---------- -->
-        <article class="feature feature--duo" id="duo" data-reveal data-tilt="3" data-anim aria-labelledby="duo-title">
-          <div class="feature__bg" aria-hidden="true"></div>
-          <span class="feature__line" aria-hidden="true"></span>
-          <span class="feature__index" aria-hidden="true">03</span>
-          <div class="feature__grid">
-            <div class="feature__visual" aria-hidden="true">
-              <div class="mock" data-speed="0.05">
-                <div class="mock__top">
-                  <div class="mock__title"><span class="mock__ico"><svg class="icon"><use href="#i-calendar"/></svg></span><span>Programme de la soirée<small>Chauffeur + agent de protection</small></span></div>
-                  <span class="pill pill--gold"><span class="status-dot" style="background:#ff5c66"></span> En cours</span>
-                </div>
-                <ol class="timeline" data-timeline>
-                  <li><time>18:30</time><b>Prise en charge à l'hôtel</b><small>Chauffeur et agent vous attendent dans le hall</small></li>
-                  <li><time>19:00</time><b>Arrivée au gala</b><small>Escorte discrète jusqu'à l'entrée</small></li>
-                  <li><time>23:45</time><b>Sortie en toute discrétion</b><small>Véhicule avancé, accès sécurisé</small></li>
-                  <li><time>00:15</time><b>Retour à domicile</b><small>Mission terminée, en toute sérénité</small></li>
-                </ol>
-              </div>
-            </div>
-            <div class="feature__copy" data-stagger>
-              <p class="kicker">Sur-mesure</p>
-              <h3 class="h2" id="duo-title">Conduit et protégé, <em>en un seul appel.</em></h3>
-              <p>Pour vos soirées, vos déplacements sensibles ou vos invités de marque : un chauffeur et un agent de protection travaillent main dans la main, du départ jusqu'à votre retour. Un seul interlocuteur, aucune coordination à gérer.</p>
-              <ul class="feature__list">
-                <li><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>Accompagnement VIP &amp; personnalités</li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg>Escorte de délégations</li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-diamond"/></svg>Soirées privées &amp; galas</li>
-              </ul>
-              <div class="feature__actions">
-                <a class="btn btn--gold" href="devis?service=duo" data-magnetic="0.2">Devis sur-mesure <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-                <a class="link-arrow" href="chauffeur-securite-vip-paris"><span>En savoir plus</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-              </div>
-            </div>
-          </div>
-        </article>
-      </div>
-
-      <!-- ---------- Toutes les prestations (accès direct aux pages détaillées) ---------- -->
-      <div class="presta" id="prestations">
-        <div class="presta__head" data-reveal>
-          <h3 class="h3" id="presta-title">Toutes nos prestations, <em>à la carte.</em></h3>
-          <a class="link-arrow" href="devis"><span>Votre besoin n'est pas listé&nbsp;? Décrivez-le</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-        </div>
-        <div class="presta__grid" data-stagger>
-          <a class="presta__item" href="securite-privee-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg><span><b>Agents de sécurité</b><small>Sites, accueil, rondes</small></span></a>
-          <a class="presta__item" href="protection-rapprochee-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><span><b>Protection rapprochée</b><small>Garde du corps</small></span></a>
-          <a class="presta__item" href="securite-evenementielle-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-ticket"/></svg><span><b>Événementiel</b><small>Soirées, salons, galas</small></span></a>
-          <a class="presta__item" href="gardiennage-chantier-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span><b>Gardiennage de chantier</b><small>Jour et nuit</small></span></a>
-          <a class="presta__item" href="securite-hotels-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg><span><b>Hôtels</b><small>Accueil et sûreté</small></span></a>
-          <a class="presta__item" href="securite-commerces-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg><span><b>Commerces</b><small>Prévention des vols</small></span></a>
-          <a class="presta__item" href="securite-bureaux-entreprises-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg><span><b>Bureaux &amp; entreprises</b><small>Contrôle d'accès</small></span></a>
-          <a class="presta__item" href="securite-ambassades-consulats-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><span><b>Ambassades &amp; consulats</b><small>Sites diplomatiques</small></span></a>
-          <a class="presta__item" href="securite-residences-coproprietes-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span><b>Résidences</b><small>Copropriétés</small></span></a>
-          <a class="presta__item presta__item--vtc" href="chauffeur-prive-vtc-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg><span><b>Chauffeur privé VTC</b><small>À l'heure ou au trajet</small></span></a>
-          <a class="presta__item presta__item--vtc" href="transfert-aeroport-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-plane"/></svg><span><b>Transfert aéroport</b><small>CDG, Orly, gares</small></span></a>
-          <a class="presta__item presta__item--vtc" href="chauffeur-mariage-paris" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-heart"/></svg><span><b>Chauffeur de mariage</b><small>Votre grand jour</small></span></a>
-        </div>
-        <p class="presta__zones" data-reveal><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span>Nous intervenons notamment à
-          <a href="agent-securite-paris-1">Paris 1<sup>er</sup></a>, <a href="agent-securite-paris-8">Paris 8<sup>e</sup></a>, <a href="agent-securite-paris-9">Paris 9<sup>e</sup></a>, <a href="agent-securite-paris-16">Paris 16<sup>e</sup></a>, <a href="agent-securite-paris-17">Paris 17<sup>e</sup></a>, <a href="agent-securite-paris-20">Paris 20<sup>e</sup></a>, <a href="agent-securite-la-defense">La Défense</a>, <a href="agent-securite-neuilly-sur-seine">Neuilly-sur-Seine</a>, <a href="agent-securite-boulogne-billancourt">Boulogne-Billancourt</a> et <a href="agent-securite-saint-denis">Saint-Denis</a>.</span></p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ GALERIE (photos d'illustration Unsplash, libres de droits) ============ -->
-  <section class="section" id="galerie" aria-labelledby="gallery-title" style="padding-top:0">
-    <div class="container">
-      <div class="section__head">
-        <p class="kicker kicker--center" data-reveal="fade">L'univers BDA</p>
-        <h2 class="h2" id="gallery-title" data-split>L'excellence, <em>en images.</em></h2>
-      </div>
-      <div class="gallery" data-stagger>
-        <figure class="shot shot--tall" data-reveal="shot" style="--accent: 37, 99, 255">
-          <img src="https://images.unsplash.com/photo-1618371690240-e0d46eead4b8?auto=format&amp;fit=crop&amp;w=700&amp;q=72" srcset="https://images.unsplash.com/photo-1618371690240-e0d46eead4b8?auto=format&amp;fit=crop&amp;w=480&amp;q=72 480w, https://images.unsplash.com/photo-1618371690240-e0d46eead4b8?auto=format&amp;fit=crop&amp;w=700&amp;q=72 700w, https://images.unsplash.com/photo-1618371690240-e0d46eead4b8?auto=format&amp;fit=crop&amp;w=1000&amp;q=72 1000w" sizes="(max-width: 900px) 50vw, 25vw" alt="Agent de sécurité en costume noir avec oreillette" width="700" height="1050" loading="lazy" decoding="async">
-          <span class="shot__tag">Sécurité</span>
-          <figcaption><b>Protection rapprochée</b><span>Discrétion et vigilance</span></figcaption>
-        </figure>
-        <figure class="shot shot--wide" data-reveal="shot" style="--accent: 232, 34, 48">
-          <img src="https://images.unsplash.com/photo-1636446704248-87d51e963e60?auto=format&amp;fit=crop&amp;w=1100&amp;q=72" srcset="https://images.unsplash.com/photo-1636446704248-87d51e963e60?auto=format&amp;fit=crop&amp;w=700&amp;q=72 700w, https://images.unsplash.com/photo-1636446704248-87d51e963e60?auto=format&amp;fit=crop&amp;w=1100&amp;q=72 1100w, https://images.unsplash.com/photo-1636446704248-87d51e963e60?auto=format&amp;fit=crop&amp;w=1500&amp;q=72 1500w" sizes="(max-width: 900px) 100vw, 50vw" alt="Berline noire de nuit sous un ciel étoilé" width="1100" height="880" loading="lazy" decoding="async">
-          <span class="shot__tag">VTC Premium</span>
-          <figcaption><b>Paris by night</b><span>24h/24, 7j/7</span></figcaption>
-        </figure>
-        <figure class="shot shot--tall" data-reveal="shot" style="--accent: 232, 34, 48">
-          <img src="https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=700&amp;q=72" srcset="https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=480&amp;q=72 480w, https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=700&amp;q=72 700w, https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=1000&amp;q=72 1000w" sizes="(max-width: 900px) 50vw, 25vw" alt="Chauffeur en costume noir ouvrant la portière d'une berline" width="700" height="961" loading="lazy" decoding="async">
-          <span class="shot__tag">Chauffeur</span>
-          <figcaption><b>Chauffeur privé</b><span>La portière vous attend</span></figcaption>
-        </figure>
-        <figure class="shot" data-reveal="shot" style="--accent: 63, 182, 255">
-          <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&amp;fit=crop&amp;w=700&amp;q=72" srcset="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&amp;fit=crop&amp;w=480&amp;q=72 480w, https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&amp;fit=crop&amp;w=700&amp;q=72 700w" sizes="(max-width: 900px) 50vw, 25vw" alt="Mains sur le volant et montre, au coucher du soleil" width="700" height="467" loading="lazy" decoding="async">
-          <figcaption><b>Ponctualité</b><span>Chaque minute compte</span></figcaption>
-        </figure>
-        <figure class="shot" data-reveal="shot" style="--accent: 62, 207, 142">
-          <img src="https://images.unsplash.com/photo-1596032457104-baa1f5f9372a?auto=format&amp;fit=crop&amp;w=700&amp;q=72" srcset="https://images.unsplash.com/photo-1596032457104-baa1f5f9372a?auto=format&amp;fit=crop&amp;w=480&amp;q=72 480w, https://images.unsplash.com/photo-1596032457104-baa1f5f9372a?auto=format&amp;fit=crop&amp;w=700&amp;q=72 700w" sizes="(max-width: 900px) 50vw, 25vw" alt="Chauffeur en costume au volant, vu depuis la banquette arrière" width="700" height="1244" loading="lazy" decoding="async">
-          <figcaption><b>Votre salon privé</b><span>Détente à bord</span></figcaption>
-        </figure>
-      </div>
-      <p class="gallery__credit">Photos d'illustration : Unsplash</p>
-    </div>
-  </section>
-
-  <!-- ============ BANDEAU ============ -->
-  <section class="marquee" aria-label="Nos prestations en bref" data-anim>
-    <div class="marquee__band" data-marquee="1">
-      <div class="marquee__track">
-        <div class="marquee__group">
-          <span class="marquee__item">Protection rapprochée <i></i></span>
-          <span class="marquee__item">Transfert aéroport <i></i></span>
-          <span class="marquee__item">Gardiennage <i></i></span>
-          <span class="marquee__item">Chauffeur privé <i></i></span>
-          <span class="marquee__item">Sécurité événementielle <i></i></span>
-          <span class="marquee__item">Mariages &amp; galas <i></i></span>
-        </div>
-      </div>
-    </div>
-    <div class="marquee__band marquee__band--alt" data-marquee="-1">
-      <div class="marquee__track">
-        <div class="marquee__group">
-          <span class="marquee__item marquee__item--serif">Discrétion <i></i></span>
-          <span class="marquee__item marquee__item--serif">Ponctualité <i></i></span>
-          <span class="marquee__item marquee__item--serif">Élégance <i></i></span>
-          <span class="marquee__item marquee__item--serif">Vigilance <i></i></span>
-          <span class="marquee__item marquee__item--serif">Sur-mesure <i></i></span>
-          <span class="marquee__item marquee__item--serif">Paris by night <i></i></span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ MANIFESTE ============ -->
-  <section class="section manifesto" aria-label="Notre promesse">
-    <div class="container">
-      <p class="manifesto__text" data-words><em>Discrétion absolue.</em> <em>Ponctualité millimétrée.</em> Des agents formés, des chauffeurs d'exception et une seule <em>promesse</em>&nbsp;: vous n'avez plus qu'à penser à l'essentiel.</p>
-    </div>
-  </section>
-
-  <!-- ============ PROCESSUS ============ -->
-  <section class="process" id="process" aria-labelledby="process-title" data-anim>
-    <div class="process__sticky">
-      <div class="container process__head">
+      <div class="ac-tete">
         <div>
-          <p class="kicker" data-reveal="fade">Comment ça marche</p>
-          <h2 class="h2" id="process-title" data-split>De la demande à la mission, <em>en 4 étapes.</em></h2>
+          <p class="kicker">Nos services</p>
+          <h2 class="h2" id="services-title">Ce que nous faisons <em>pour vous.</em></h2>
         </div>
-        <p class="lead" data-reveal>Un fonctionnement simple, rapide et transparent. Vous gardez la main à chaque étape.</p>
+        <p class="lead">Choisissez votre besoin pour voir le détail de la prestation, ou décrivez-le directement dans le <a href="devis">formulaire de devis</a>.</p>
       </div>
-      <div class="process__track">
-        <article class="step">
-          <span class="step__num">01</span>
-          <span class="step__icon" aria-hidden="true"><svg class="icon"><use href="#i-edit"/></svg></span>
-          <h3 class="h3">Vous demandez un devis</h3>
-          <p>Deux minutes suffisent pour nous décrire votre besoin grâce à notre formulaire en ligne.</p>
-        </article>
-        <article class="step">
-          <span class="step__num">02</span>
-          <span class="step__icon" aria-hidden="true"><svg class="icon"><use href="#i-phone"/></svg></span>
-          <h3 class="h3">Nous vous rappelons</h3>
-          <p>Un conseiller étudie votre demande et vous contacte pour affiner chaque détail avec vous.</p>
-        </article>
-        <article class="step">
-          <span class="step__num">03</span>
-          <span class="step__icon" aria-hidden="true"><svg class="icon"><use href="#i-file"/></svg></span>
-          <h3 class="h3">Proposition sur-mesure</h3>
-          <p>Vous recevez un devis clair et détaillé, sans aucun engagement de votre part.</p>
-        </article>
-        <article class="step">
-          <span class="step__num">04</span>
-          <span class="step__icon" aria-hidden="true"><svg class="icon"><use href="#i-shield-check"/></svg></span>
-          <h3 class="h3">Mission accomplie</h3>
-          <p>Chauffeur, agents, timing : nous orchestrons tout, vous n'avez plus qu'à profiter.</p>
-        </article>
+
+      <div class="ac-services">
+        <div class="ac-bloc" id="securite">
+          <h3 class="ac-bloc__titre"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> Sécurité privée</h3>
+          <div class="ac-liste">
+            <a class="ac-item" href="securite-privee-paris"><b>Agents de sécurité</b><span>Gardiennage de sites, accueil, contrôle d'accès, rondes de jour comme de nuit.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="ac-item" href="securite-incendie-ssiap-paris"><b>Sécurité incendie SSIAP</b><span>Agents SSIAP 1, 2 et 3 pour hôtels, immeubles de grande hauteur et établissements recevant du public.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="ac-item" href="securite-evenementielle-paris"><b>Sécurité événementielle</b><span>Soirées, galas, salons, concerts : filtrage, palpations, gestion des flux.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="ac-item" href="protection-rapprochee-paris"><b>Protection rapprochée</b><span>Accompagnement discret de dirigeants, de personnalités et de familles.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="ac-item" href="gardiennage-chantier-paris"><b>Gardiennage de chantier</b><span>Surveillance des chantiers et du matériel la nuit et le week-end.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          </div>
+        </div>
+        <div class="ac-bloc" id="vtc">
+          <h3 class="ac-bloc__titre"><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg> VTC Premium</h3>
+          <div class="ac-liste">
+            <a class="ac-item" href="chauffeur-prive-vtc-paris"><b>Chauffeur privé</b><span>Berline haut de gamme et chauffeur en tenue, à l'heure ou au trajet.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="ac-item" href="transfert-aeroport-paris"><b>Transfert aéroport et gare</b><span>CDG, Orly, Beauvais et gares parisiennes, accueil personnalisé.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="ac-item" href="chauffeur-mariage-paris"><b>Chauffeur de mariage</b><span>Votre grand jour, sans souci de transport.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="ac-item" href="chauffeur-securite-vip-paris"><b>Chauffeur + sécurité VIP</b><span>Un chauffeur et un agent de protection, organisés ensemble.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          </div>
+        </div>
       </div>
-      <div class="process__bar" aria-hidden="true"><span></span></div>
+
+      <div class="ac-secteurs">
+        <div>
+          <h3 class="ac-secteurs__titre">Par secteur</h3>
+          <p><a href="securite-hotels-paris">Hôtels</a><a href="securite-commerces-paris">Commerces</a><a href="securite-bureaux-entreprises-paris">Bureaux &amp; entreprises</a><a href="securite-ambassades-consulats-paris">Ambassades &amp; consulats</a><a href="securite-residences-coproprietes-paris">Résidences &amp; copropriétés</a></p>
+        </div>
+        <div>
+          <h3 class="ac-secteurs__titre">Par zone</h3>
+          <p><a href="agent-securite-paris-1">Paris 1<sup>er</sup></a><a href="agent-securite-paris-8">Paris 8<sup>e</sup></a><a href="agent-securite-paris-9">Paris 9<sup>e</sup></a><a href="agent-securite-paris-16">Paris 16<sup>e</sup></a><a href="agent-securite-paris-17">Paris 17<sup>e</sup></a><a href="agent-securite-paris-20">Paris 20<sup>e</sup></a><a href="agent-securite-la-defense">La Défense</a><a href="agent-securite-neuilly-sur-seine">Neuilly</a><a href="agent-securite-boulogne-billancourt">Boulogne</a><a href="agent-securite-saint-denis">Saint-Denis</a></p>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- ============ ENGAGEMENTS ============ -->
-  <section class="section" id="engagements" aria-labelledby="eng-title">
+  <!-- ============ POURQUOI BDA ============ -->
+  <section class="section ac-pourquoi" id="engagements" aria-labelledby="eng-title">
+    <div class="container ac-pourquoi__grille">
+      <div>
+        <p class="kicker">Pourquoi BDA Sécurité</p>
+        <h2 class="h2" id="eng-title">Une équipe à taille humaine, <em>des standards exigeants.</em></h2>
+        <p class="lead">Vous échangez directement avec le responsable de votre mission : pas de centre d'appels, pas d'intermédiaire. Nous préparons chaque prestation avec vous et nous restons joignables jusqu'à la fin.</p>
+      </div>
+      <ul class="ac-points">
+        <li><b>Agents certifiés</b><span>Carte professionnelle délivrée par le CNAPS pour chaque agent, diplômes SSIAP pour la sécurité incendie.</span></li>
+        <li><b>Réactivité</b><span>Devis rapide, mise en place en urgence étudiée à toute heure, remplacements assurés.</span></li>
+        <li><b>Discrétion</b><span>Tenue adaptée, présentation soignée et confidentialité sur vos lieux, vos invités et vos déplacements.</span></li>
+        <li><b>Transparence</b><span>Devis écrit et détaillé, heures pointées, factures claires et documents disponibles dans votre espace client.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ MÉTHODE ============ -->
+  <section class="section ac-methode" id="process" aria-labelledby="process-title">
     <div class="container">
-      <div class="section__head">
-        <p class="kicker kicker--center" data-reveal="fade">Nos engagements</p>
-        <h2 class="h2" id="eng-title" data-split>L'exigence, <em>dans chaque détail.</em></h2>
-        <p class="lead" data-reveal>Votre confiance se mérite à chaque mission. Ces engagements sont notre standard, pas une option.</p>
+      <div class="ac-tete">
+        <div>
+          <p class="kicker">Comment ça marche</p>
+          <h2 class="h2" id="process-title">De votre demande à la mission, <em>en 4 étapes.</em></h2>
+        </div>
       </div>
-      <div class="perks" data-stagger>
-        <div data-reveal><article class="perk" data-tilt="4"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-shield-check"/></svg></span><h3 class="h3">Agents certifiés</h3><p>Tous nos agents sont titulaires de la carte professionnelle délivrée par le CNAPS.</p></article></div>
-        <div data-reveal><article class="perk" data-tilt="4"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-wheel"/></svg></span><h3 class="h3">Chauffeurs professionnels</h3><p>Carte VTC, conduite souple et parfaite connaissance du terrain.</p></article></div>
-        <div data-reveal><article class="perk" data-tilt="4"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-clock"/></svg></span><h3 class="h3">24h/24, 7j/7</h3><p>Jour, nuit, week-end et jours fériés : nous répondons présent.</p></article></div>
-        <div data-reveal><article class="perk" data-tilt="4"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-eye-off"/></svg></span><h3 class="h3">Discrétion totale</h3><p>Confidentialité garantie sur vos déplacements, vos lieux et vos invités.</p></article></div>
-        <div data-reveal><article class="perk" data-tilt="4"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-car"/></svg></span><h3 class="h3">Véhicules haut de gamme</h3><p>Berlines et vans premium, entretenus et impeccables à chaque course.</p></article></div>
-        <div data-reveal><article class="perk" data-tilt="4"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-file"/></svg></span><h3 class="h3">Devis gratuit</h3><p>Des tarifs clairs, une réponse rapide et aucun engagement.</p></article></div>
-      </div>
+      <ol class="ac-etapes">
+        <li><span>01</span><b>Vous décrivez votre besoin</b><p>En deux minutes avec le formulaire, ou par téléphone.</p></li>
+        <li><span>02</span><b>Nous vous rappelons</b><p>Pour préciser le lieu, les horaires et les consignes.</p></li>
+        <li><span>03</span><b>Vous recevez le devis</b><p>Clair, détaillé et sans engagement.</p></li>
+        <li><span>04</span><b>Nos agents prennent leur poste</b><p>Briefés, en tenue, avec un responsable joignable à tout moment.</p></li>
+      </ol>
     </div>
   </section>
 
-  <!-- ============ RÉFÉRENCES ============ -->
-  <section class="section" id="references" aria-labelledby="ref-title" style="padding-top:0">
-    <div class="container ref">
-      <figure class="ref__photo" data-reveal="scale" data-tilt="3">
-        <img src="assets/img/consulat-colombie.webp" alt="Façade du Consulat général de Colombie à Paris, avec le drapeau colombien au balcon" width="860" height="919" loading="lazy" decoding="async">
-        <span class="ref__badge"><span class="status-dot" aria-hidden="true"></span> Référence actuelle</span>
-        <figcaption class="ref__caption"><b>Consulat général de Colombie</b><span>Paris</span></figcaption>
+  <!-- ============ RÉFÉRENCE ET AVIS ============ -->
+  <section class="section" id="references" aria-labelledby="ref-title">
+    <div class="container ac-ref">
+      <figure class="ac-ref__photo">
+        <img src="assets/img/consulat-colombie.webp" alt="Façade du Consulat général de Colombie à Paris" width="860" height="919" loading="lazy" decoding="async">
       </figure>
-      <div class="ref__copy" data-stagger>
-        <p class="kicker" data-reveal="fade">Nos références</p>
-        <h2 class="h2" id="ref-title" data-split>Ils nous font <em>confiance.</em></h2>
-        <p class="lead" data-reveal>Depuis nos débuts, nous avons accompagné de nombreuses entreprises à Paris et en Île-de-France. Des clients exigeants, qui attendent rigueur, ponctualité et une discrétion absolue.</p>
-        <div class="ref__card" data-reveal>
-          <small><span class="status-dot" aria-hidden="true"></span> Client actuel · Représentation diplomatique</small>
-          <b>Consulat général de Colombie à Paris</b>
-          <p>Une collaboration toujours en cours, menée avec la discrétion et le professionnalisme qu'exige une institution diplomatique.</p>
-        </div>
-        <ul class="ref__tags" data-reveal>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg>Entreprises</li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg>Institutions</li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg>Paris &amp; Île-de-France</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ AVIS CLIENTS ============ -->
-  <section class="section" aria-label="Avis clients" style="padding-block:0">
-    <div class="container">
-      <div class="reviews-band" data-reveal>
-        <div>
-          <div class="reviews-band__stars" aria-hidden="true"><svg class="icon" style="--i:0"><use href="#i-star"/></svg><svg class="icon" style="--i:1"><use href="#i-star"/></svg><svg class="icon" style="--i:2"><use href="#i-star"/></svg><svg class="icon" style="--i:3"><use href="#i-star"/></svg><svg class="icon" style="--i:4"><use href="#i-star"/></svg></div>
-          <p class="reviews-band__rating" data-rating hidden></p>
-          <h2 class="h3">Votre expérience compte&nbsp;: <em>partagez votre avis.</em></h2>
-          <p>Découvrez les retours de nos clients, ou laissez le vôtre en une minute.</p>
-        </div>
-        <div class="reviews-band__actions">
-          <a class="btn btn--gold" href="avis#laisser-un-avis">Laisser un avis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <a class="btn btn--outline" href="avis">Voir les avis</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ BESOIN URGENT ============ -->
-  <section class="section urgence-sec" aria-labelledby="urgence-title" style="padding-bottom:0">
-    <div class="container">
-      <div class="urgence" data-reveal>
-        <span class="urgence__gyro" aria-hidden="true"><i></i><i></i></span>
-        <div class="urgence__texte">
-          <p class="urgence__kicker"><span class="live-dot" aria-hidden="true"></span> Ligne directe, 24h/24</p>
-          <h2 class="h3" id="urgence-title">Un agent ou un chauffeur <em>dès ce soir&nbsp;?</em></h2>
-          <p>Appelez-nous : on étudie votre demande tout de suite et on vous dit honnêtement ce qui est possible.</p>
-        </div>
-        <div class="urgence__actions">
-          <a class="btn btn--gold btn--lg" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
-          <a class="btn btn--outline" href="https://wa.me/33784739070?text=Bonjour%20BDA%2C%20j%27ai%20un%20besoin%20urgent." target="_blank" rel="noopener">Écrire sur WhatsApp</a>
+      <div class="ac-ref__texte">
+        <p class="kicker">Nos références</p>
+        <h2 class="h2" id="ref-title">Ils nous font <em>confiance.</em></h2>
+        <p class="lead">Nous assurons la sécurité du <strong>Consulat général de Colombie à Paris</strong>, une collaboration toujours en cours, menée avec la rigueur et la discrétion qu'exige une institution diplomatique.</p>
+        <p class="ac-ref__note" data-rating hidden></p>
+        <div class="ac-hero__actions">
+          <a class="btn btn--outline" href="references">Voir nos références</a>
+          <a class="btn btn--outline" href="avis">Lire les avis clients</a>
         </div>
       </div>
     </div>
@@ -627,58 +319,49 @@
   <section class="section" id="faq" aria-labelledby="faq-title">
     <div class="container faq-grille">
       <div class="faq-intro">
-        <p class="kicker" data-reveal="fade">Questions fréquentes</p>
-        <h2 class="h2" id="faq-title" data-split>Vous vous posez <em>la question&nbsp;?</em></h2>
-        <p class="lead" data-reveal>Les réponses aux questions que l’on nous pose le plus souvent. Une autre question&nbsp;? Un appel suffit, 24&nbsp;h/24.</p>
-        <div class="faq-intro__actions" data-reveal>
-          <a class="btn btn--gold" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
-          <a class="btn btn--outline" href="devis">Demander un devis</a>
-        </div>
+        <p class="kicker">Questions fréquentes</p>
+        <h2 class="h2" id="faq-title">Vos questions, <em>nos réponses.</em></h2>
+        <p class="lead">Une autre question&nbsp;? Appelez-nous au <a href="tel:+33611678625">06 11 67 86 25</a>, 24h/24.</p>
       </div>
-      <div class="faq" data-stagger>
-        <div class="faq__item" data-reveal>
+      <div class="faq">
+        <div class="faq__item">
           <button class="faq__q" type="button" id="faq-q1" aria-expanded="false" aria-controls="faq-a1">Le devis est-il gratuit ?<span class="faq__plus" aria-hidden="true"></span></button>
           <div class="faq__a" id="faq-a1" role="region" aria-labelledby="faq-q1"><div><p>Oui. Le devis est gratuit, personnalisé et sans engagement. Remplissez le formulaire en deux minutes : nous revenons vers vous rapidement avec une proposition claire.</p></div></div>
         </div>
-        <div class="faq__item" data-reveal>
-          <button class="faq__q" type="button" id="faq-q2" aria-expanded="false" aria-controls="faq-a2">Combien de temps à l'avance faut-il réserver ?<span class="faq__plus" aria-hidden="true"></span></button>
-          <div class="faq__a" id="faq-a2" role="region" aria-labelledby="faq-q2"><div><p>Idéalement quelques jours avant pour une mission de sécurité, et dès que possible pour un trajet VTC. Pour une demande urgente, appelez-nous directement : nous ferons le maximum pour vous trouver une solution.</p></div></div>
+        <div class="faq__item">
+          <button class="faq__q" type="button" id="faq-q2" aria-expanded="false" aria-controls="faq-a2">Pouvez-vous intervenir en urgence ?<span class="faq__plus" aria-hidden="true"></span></button>
+          <div class="faq__a" id="faq-a2" role="region" aria-labelledby="faq-q2"><div><p>Oui, selon nos disponibilités. Pour une demande urgente, appelez-nous directement au 06 11 67 86 25 : nous étudions votre demande tout de suite.</p></div></div>
         </div>
-        <div class="faq__item" data-reveal>
+        <div class="faq__item">
           <button class="faq__q" type="button" id="faq-q3" aria-expanded="false" aria-controls="faq-a3">Vos agents sont-ils habilités ?<span class="faq__plus" aria-hidden="true"></span></button>
-          <div class="faq__a" id="faq-a3" role="region" aria-labelledby="faq-q3"><div><p>Oui. Chaque agent est titulaire de la carte professionnelle délivrée par le CNAPS et formé aux missions qui lui sont confiées.</p></div></div>
+          <div class="faq__a" id="faq-a3" role="region" aria-labelledby="faq-q3"><div><p>Oui. Chaque agent est titulaire de la carte professionnelle délivrée par le CNAPS, et nos agents de sécurité incendie sont diplômés SSIAP. Notre entreprise dispose de l'autorisation d'exercice n° AUT-075-2124-07-01-20250906336.</p></div></div>
         </div>
-        <div class="faq__item" data-reveal>
+        <div class="faq__item">
           <button class="faq__q" type="button" id="faq-q4" aria-expanded="false" aria-controls="faq-a4">Peut-on combiner chauffeur et sécurité ?<span class="faq__plus" aria-hidden="true"></span></button>
-          <div class="faq__a" id="faq-a4" role="region" aria-labelledby="faq-q4"><div><p>C'est notre spécialité : un seul interlocuteur organise votre trajet et votre protection, pour un dispositif fluide et discret du départ jusqu'au retour.</p></div></div>
+          <div class="faq__a" id="faq-a4" role="region" aria-labelledby="faq-q4"><div><p>Oui, c'est l'une de nos spécialités : un seul interlocuteur organise votre trajet et votre protection, du départ jusqu'au retour.</p></div></div>
         </div>
-        <div class="faq__item" data-reveal>
-          <button class="faq__q" type="button" id="faq-q5" aria-expanded="false" aria-controls="faq-a5">Intervenez-vous la nuit et le week-end ?<span class="faq__plus" aria-hidden="true"></span></button>
-          <div class="faq__a" id="faq-a5" role="region" aria-labelledby="faq-q5"><div><p>Oui, nous intervenons 24h/24 et 7j/7, jours fériés compris.</p></div></div>
+        <div class="faq__item">
+          <button class="faq__q" type="button" id="faq-q5" aria-expanded="false" aria-controls="faq-a5">Proposez-vous des missions régulières ?<span class="faq__plus" aria-hidden="true"></span></button>
+          <div class="faq__a" id="faq-a5" role="region" aria-labelledby="faq-q5"><div><p>Oui : missions ponctuelles (une soirée, un week-end) comme prestations régulières, avec un planning établi avec vous et des agents remplacés en cas d'absence.</p></div></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============ APPEL À L'ACTION ============ -->
-  <section class="section cta" id="contact" aria-labelledby="cta-title" data-anim>
+  <!-- ============ CONTACT ============ -->
+  <section class="section ac-contact" id="contact" aria-labelledby="cta-title">
     <div class="container">
-      <div class="cta__card" data-reveal="scale">
-        <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
-        <svg class="road" data-road viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true"></svg>
-        <p class="kicker kicker--center">Devis gratuit · Réponse rapide</p>
-        <h2 class="h2" id="cta-title" data-split>Prêt à partir&nbsp;? <em>On s'occupe du reste.</em></h2>
-        <p class="lead">Dites-nous ce dont vous avez besoin : nous revenons vers vous rapidement avec une proposition claire et adaptée.</p>
-        <div class="cta__actions">
-          <a class="btn btn--gold" href="devis" data-magnetic>Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <a class="btn btn--outline" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Appeler maintenant</a>
+      <div class="ac-contact__carte">
+        <div>
+          <p class="kicker">Contact</p>
+          <h2 class="h2" id="cta-title">Parlons de votre besoin.</h2>
+          <p class="lead">Devis gratuit, réponse rapide. Pour une urgence, appelez directement.</p>
         </div>
-        <!-- À PERSONNALISER : téléphone, email, zone d'intervention -->
-        <div class="cta__contacts">
-          <a href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> +33 6 11 67 86 25</a>
-          <a href="tel:+33784739070"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> +33 7 84 73 90 70</a>
-          <a href="mailto:bdasecurite@gmail.com"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg> bdasecurite@gmail.com</a>
-          <span><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> Paris et alentours</span>
+        <div class="ac-contact__moyens">
+          <a class="btn btn--gold" href="devis">Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="ac-moyen" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span><b>06 11 67 86 25</b><small>Ligne principale, 24h/24</small></span></a>
+          <a class="ac-moyen" href="https://wa.me/33784739070" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg><span><b>07 84 73 90 70</b><small>WhatsApp et appels</small></span></a>
+          <a class="ac-moyen" href="mailto:bdasecurite@gmail.com"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><span><b>bdasecurite@gmail.com</b><small>Pour vos demandes écrites</small></span></a>
         </div>
       </div>
     </div>
@@ -691,50 +374,60 @@
   <div class="container">
     <div class="footer__grid">
       <div class="footer__about">
-        <a class="brand" href="#top" aria-label="BDA Sécurité &amp; VTC Premium — haut de page">
+        <a class="brand" href="/" aria-label="BDA Sécurité &amp; VTC Premium — accueil">
           <img class="brand__mark" src="assets/img/embleme.png" alt="" width="128" height="131">
           <span class="brand__text"><span class="brand__name">BDA</span><span class="brand__tag">Sécurité &amp; VTC Premium</span></span>
         </a>
-        <p>Sécurité privée et transport haut de gamme : protection, ponctualité et sérénité, 24h/24 et 7j/7.</p>
-        <!-- À PERSONNALISER : liens vers vos réseaux sociaux -->
-        <div class="socials">
-          <a href="#" aria-label="Instagram"><svg class="icon" aria-hidden="true"><use href="#i-instagram"/></svg></a>
-          <a href="#" aria-label="LinkedIn"><svg class="icon" aria-hidden="true"><use href="#i-linkedin"/></svg></a>
-        </div>
+        <p>Société de sécurité privée autorisée par le CNAPS et chauffeurs VTC à Paris et en Île-de-France, 24h/24 et 7j/7.</p>
+        <ul class="footer__contact">
+          <li><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span><a href="tel:+33611678625">06 11 67 86 25</a> · <a href="tel:+33784739070">07 84 73 90 70</a></span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><a href="mailto:bdasecurite@gmail.com">bdasecurite@gmail.com</a></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span>61 rue de la Croix Saint-Simon, 75020 Paris</span></li>
+        </ul>
       </div>
       <div>
         <h4>Sécurité privée</h4>
         <ul>
           <li><a href="securite-privee-paris">Agents de sécurité</a></li>
+          <li><a href="securite-incendie-ssiap-paris">Sécurité incendie SSIAP</a></li>
           <li><a href="protection-rapprochee-paris">Protection rapprochée</a></li>
           <li><a href="securite-evenementielle-paris">Sécurité événementielle</a></li>
-          <li><a href="chauffeur-securite-vip-paris">Chauffeur + sécurité VIP</a></li>
+          <li><a href="gardiennage-chantier-paris">Gardiennage de chantier</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Secteurs</h4>
+        <ul>
+          <li><a href="securite-hotels-paris">Hôtels</a></li>
+          <li><a href="securite-commerces-paris">Commerces</a></li>
+          <li><a href="securite-bureaux-entreprises-paris">Bureaux & entreprises</a></li>
+          <li><a href="securite-ambassades-consulats-paris">Ambassades & consulats</a></li>
+          <li><a href="securite-residences-coproprietes-paris">Résidences & copropriétés</a></li>
         </ul>
       </div>
       <div>
         <h4>VTC Premium</h4>
         <ul>
           <li><a href="chauffeur-prive-vtc-paris">Chauffeur privé VTC</a></li>
-          <li><a href="transfert-aeroport-paris">Transferts aéroports</a></li>
-          <li><a href="chauffeur-mariage-paris">Chauffeur mariage</a></li>
-          <li><a href="avis">Avis clients</a></li>
-          <li><a href="recrutement">Nous rejoindre</a></li>
-          <li><a href="references">Nos références</a></li>
-          <li><a href="espace-client">Espace client</a></li>
-          <li><a href="en" hreflang="en">English version</a></li>
+          <li><a href="transfert-aeroport-paris">Transfert aéroport</a></li>
+          <li><a href="chauffeur-mariage-paris">Chauffeur de mariage</a></li>
+          <li><a href="chauffeur-securite-vip-paris">Chauffeur + sécurité VIP</a></li>
         </ul>
       </div>
       <div>
-        <h4>Contact</h4>
-        <ul class="footer__contact">
-          <li><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span><a href="tel:+33611678625">+33 6 11 67 86 25</a><br><a href="tel:+33784739070">+33 7 84 73 90 70</a></span></li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><a href="mailto:bdasecurite@gmail.com">bdasecurite@gmail.com</a></li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span>Paris, France</span></li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span>24h/24 · 7j/7</span></li>
+        <h4>BDA Sécurité</h4>
+        <ul>
+          <li><a href="references">Nos références</a></li>
+          <li><a href="avis">Avis clients</a></li>
+          <li><a href="recrutement">Recrutement</a></li>
+          <li><a href="devis">Demander un devis</a></li>
+          <li><a href="espace-client">Espace client</a></li>
+          <li><a href="mentions-legales">Mentions légales</a></li>
+          <li><a href="en" hreflang="en">English version</a></li>
         </ul>
       </div>
     </div>
-    <!-- À AJOUTER dès réception : n° d'inscription de l'entreprise au registre des exploitants VTC (EVTC…) -->
+    <p class="footer__zones">Nous intervenons dans tout Paris et l'Île-de-France, notamment à <a href="agent-securite-paris-1">Paris 1<sup>er</sup></a>, <a href="agent-securite-paris-8">Paris 8<sup>e</sup></a>, <a href="agent-securite-paris-9">Paris 9<sup>e</sup></a>, <a href="agent-securite-paris-16">Paris 16<sup>e</sup></a>, <a href="agent-securite-paris-17">Paris 17<sup>e</sup></a>, <a href="agent-securite-paris-20">Paris 20<sup>e</sup></a>, <a href="agent-securite-la-defense">La Défense</a>, <a href="agent-securite-neuilly-sur-seine">Neuilly-sur-Seine</a>, <a href="agent-securite-boulogne-billancourt">Boulogne-Billancourt</a>, <a href="agent-securite-saint-denis">Saint-Denis</a>.</p>
     <div class="footer__legal">
       <p>© <span data-year>2026</span> BDA Sécurité &amp; VTC Premium — BDASECURITE, EURL au capital de 2 000 €, SIRET 109 076 463 00016 — Abdelouahab Bouidia EI (BDA SECURITE), SIRET 977 933 316 00019 — <a href="mentions-legales">Mentions légales &amp; confidentialité</a></p>
       <p>Autorisation d'exercice CNAPS n° AUT-075-2124-07-01-20250906336. « L'autorisation d'exercice ne confère aucune prérogative de puissance publique à l'entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du Code de la sécurité intérieure)</p>
@@ -755,7 +448,7 @@
   <a class="btn btn--gold" href="devis">Demander un devis</a>
 </div>
 
-<script src="assets/js/core.js?v=6"></script>
+<script src="assets/js/core.js?v=7"></script>
 <script src="assets/js/avis-data.js"></script>
 <script src="assets/js/home.js?v=6"></script>
 </body>

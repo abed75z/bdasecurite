@@ -20,6 +20,7 @@ const MENU = [
   { groupe: 'Équipe' },
   { route: 'agents', libelle: 'Agents', icone: 'agents' },
   { route: 'planning', libelle: 'Planning', icone: 'planning' },
+  { route: 'pointage', libelle: 'Pointage', icone: 'horloge' },
   { route: 'paie', libelle: 'Fiches de paie', icone: 'paie', admin: true },
   { route: 'candidatures', libelle: 'Candidatures', icone: 'candidature', badge: 'candidatures' },
   { groupe: 'Site internet' },

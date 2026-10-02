@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -458,11 +458,69 @@ try {
     case 'client.supprimer':
       supprimer_ligne('clients', (int)(corps()['id'] ?? 0));
 
+    /* ================= Pointage des agents ================= */
+    case 'pointages':
+      $du = (string)($_GET['du'] ?? date('Y-m-01'));
+      $au = (string)($_GET['au'] ?? date('Y-m-t'));
+      if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $du) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $au)) echec('Période invalide.');
+      $st = db()->prepare("SELECT p.*, a.nom, a.poste FROM pointages p JOIN agents a ON a.id = p.agent_id WHERE (p.debut >= ? AND p.debut <= ?) OR p.fin = '' ORDER BY p.debut DESC");
+      $st->execute([$du . ' 00:00:00', $au . ' 23:59:59']);
+      $agents = db()->query("SELECT id, nom, poste, actif, (pointage <> '') AS lien FROM agents ORDER BY actif DESC, nom COLLATE NOCASE")->fetchAll();
+      repondre(['ok' => true, 'pointages' => $st->fetchAll(), 'agents' => $agents, 'serveur' => maintenant()]);
+
+    case 'pointage.lien':
+      $b = corps();
+      $st = db()->prepare('SELECT nom FROM agents WHERE id = ?');
+      $st->execute([(int)($b['agent_id'] ?? 0)]);
+      $nom = $st->fetchColumn();
+      if ($nom === false) echec('Agent introuvable.', 404);
+      // Le lien n'est montré qu'une fois : seule son empreinte est enregistrée (un nouveau lien remplace l'ancien)
+      $jeton = bin2hex(random_bytes(24));
+      db()->prepare('UPDATE agents SET pointage = ? WHERE id = ?')->execute([hash('sha256', $jeton), (int)$b['agent_id']]);
+      journal('equipe', "Lien de pointage créé pour $nom");
+      repondre(['ok' => true, 'lien' => 'https://bdasecurite.com/pointage#k=' . $jeton]);
+
+    case 'pointage.lien.retirer':
+      $b = corps();
+      db()->prepare("UPDATE agents SET pointage = '' WHERE id = ?")->execute([(int)($b['agent_id'] ?? 0)]);
+      journal('equipe', 'Lien de pointage désactivé (agent n° ' . (int)($b['agent_id'] ?? 0) . ')');
+      repondre(['ok' => true]);
+
+    case 'pointage.enregistrer':
+      // Ajout ou correction à la main par le responsable (oubli de pointage, erreur d'heure)
+      $b = corps();
+      $debut = str_replace('T', ' ', texte($b['debut'] ?? '', 19));
+      $fin = str_replace('T', ' ', texte($b['fin'] ?? '', 19));
+      $ok = fn ($s) => (bool)preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?$/', $s);
+      if (!$ok($debut)) echec('Heure de prise de service invalide.');
+      if ($fin !== '' && !$ok($fin)) echec('Heure de fin de service invalide.');
+      if (strlen($debut) === 16) $debut .= ':00';
+      if ($fin !== '' && strlen($fin) === 16) $fin .= ':00';
+      if ($fin !== '' && $fin <= $debut) echec('La fin de service doit être après la prise de service.');
+      $site = texte($b['site'] ?? '', 120);
+      $note = texte($b['note'] ?? '', 500);
+      $id = (int)($b['id'] ?? 0);
+      if ($id) {
+        db()->prepare('UPDATE pointages SET debut = ?, fin = ?, site = ?, note = ?, manuel = 1 WHERE id = ?')->execute([$debut, $fin, $site, $note, $id]);
+      } else {
+        $agentId = (int)($b['agent_id'] ?? 0);
+        $st = db()->prepare('SELECT nom FROM agents WHERE id = ?');
+        $st->execute([$agentId]);
+        if ($st->fetchColumn() === false) echec('Choisissez un agent.');
+        db()->prepare('INSERT INTO pointages (agent_id, debut, fin, site, note, manuel, cree) VALUES (?, ?, ?, ?, ?, 1, ?)')->execute([$agentId, $debut, $fin, $site, $note, maintenant()]);
+        $id = (int)db()->lastInsertId();
+      }
+      repondre(['ok' => true, 'id' => $id]);
+
+    case 'pointage.supprimer':
+      db()->prepare('DELETE FROM pointages WHERE id = ?')->execute([(int)(corps()['id'] ?? 0)]);
+      repondre(['ok' => true]);
+
     case 'agents':
       $agents = db()->query('SELECT * FROM agents ORDER BY actif DESC, nom COLLATE NOCASE')->fetchAll();
       $docs = [];
       foreach (db()->query('SELECT agent_id, type, COUNT(*) n FROM agent_docs GROUP BY agent_id, type') as $l) $docs[(int)$l['agent_id']][$l['type']] = (int)$l['n'];
-      foreach ($agents as &$a) $a['docs'] = (object)($docs[(int)$a['id']] ?? []);
+      foreach ($agents as &$a) { $a['docs'] = (object)($docs[(int)$a['id']] ?? []); $a['pointage'] = $a['pointage'] !== ''; }
       repondre(['ok' => true, 'agents' => $agents]);
 
     case 'agent.enregistrer':

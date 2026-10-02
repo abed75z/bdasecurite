@@ -203,6 +203,47 @@ function schema(PDO $db): void
       PRAGMA user_version = 11;
     SQL);
   }
+  if ($version < 12) {
+    // Pointage des agents : lien personnel (seule son empreinte est gardée) et prises / fins de service
+    $db->exec(<<<'SQL'
+      ALTER TABLE agents ADD COLUMN pointage TEXT NOT NULL DEFAULT '';
+      CREATE TABLE IF NOT EXISTS pointages (id INTEGER PRIMARY KEY, agent_id INTEGER NOT NULL, debut TEXT NOT NULL, fin TEXT NOT NULL DEFAULT '', site TEXT NOT NULL DEFAULT '', lat_debut REAL, lng_debut REAL, prec_debut REAL, lat_fin REAL, lng_fin REAL, prec_fin REAL, note TEXT NOT NULL DEFAULT '', manuel INTEGER NOT NULL DEFAULT 0, cree TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_pointages ON pointages (agent_id, debut);
+      CREATE INDEX IF NOT EXISTS i_pointages_debut ON pointages (debut);
+      PRAGMA user_version = 12;
+    SQL);
+  }
+}
+// Pointage : agent reconnu par son lien personnel (null si lien inconnu ou agent inactif)
+function agent_par_lien(string $jeton): ?array
+{
+  if (!preg_match('/^[a-f0-9]{48}$/', $jeton)) return null;
+  $st = db()->prepare("SELECT * FROM agents WHERE pointage = ? AND pointage <> '' AND actif = 1");
+  $st->execute([hash('sha256', $jeton)]);
+  return $st->fetch() ?: null;
+}
+// Ce que le planning prévoit pour un agent un jour donné (ex. « 8h30-13h30 », « R »), et le client du planning
+function planning_du_jour(string $nom, string $jour): array
+{
+  $st = db()->prepare('SELECT data FROM plannings WHERE mois = ?');
+  $st->execute([substr($jour, 0, 7)]);
+  $p = json_decode((string)$st->fetchColumn(), true);
+  if (!is_array($p)) return ['prevu' => '', 'site' => ''];
+  $cle = mb_strtolower(trim($nom));
+  foreach ((array)($p['agents'] ?? []) as $a) {
+    if (mb_strtolower(trim((string)($a['nom'] ?? ''))) !== $cle) continue;
+    return ['prevu' => (string)($a['jours'][$jour] ?? ''), 'site' => trim((string)($p['client'] ?? ''))];
+  }
+  return ['prevu' => '', 'site' => ''];
+}
+// Position GPS envoyée par le téléphone (ignorée si absente ou incohérente)
+function position_gps(array $b): array
+{
+  $lat = is_numeric($b['lat'] ?? null) ? (float)$b['lat'] : null;
+  $lng = is_numeric($b['lng'] ?? null) ? (float)$b['lng'] : null;
+  $prec = is_numeric($b['prec'] ?? null) ? min(100000.0, max(0.0, (float)$b['prec'])) : null;
+  if ($lat === null || $lng === null || abs($lat) > 90 || abs($lng) > 180) return [null, null, null];
+  return [round($lat, 6), round($lng, 6), $prec === null ? null : round($prec)];
 }
 // Dossier privé des PDF joints aux devis et factures (hors du site)
 function dossier_pieces(): string

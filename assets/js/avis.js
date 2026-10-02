@@ -7,7 +7,7 @@
   const $ = (s) => document.querySelector(s);
   const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>';
   const starsHtml = (n) => Array.from({ length: 5 }, (_, i) => STAR.replace('<svg', `<svg class="${i < Math.round(n) ? '' : 'off'}"`)).join('');
-  const colors = ['79, 107, 255', '139, 92, 246', '212, 169, 79', '34, 199, 240', '224, 71, 158', '62, 207, 142'];
+  const colors = ['37, 99, 255', '232, 34, 48', '91, 140, 255', '63, 182, 255', '255, 92, 102', '29, 79, 214'];
 
   /* ---------- Affichage des avis publiés ---------- */
   const list = $('[data-avis-list]');

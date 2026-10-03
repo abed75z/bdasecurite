@@ -222,3 +222,103 @@ body.ec { min-height: 100svh; background: radial-gradient(90% 60% at 80% -10%, r
 .ec-carte__sous { color: var(--muted); font-size: 12.5px; }
 .ec-telecharger { display: inline-flex; align-items: center; gap: 6px; flex: none; padding: 6px 12px; border-radius: 99px; background: var(--gold-grad); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 0.04em; }
 .ec-telecharger .ec-ic { width: 15px; height: 15px; }
+
+/* =========================================================
+   THÈME BLANC 2.0 (blanc, noir, rouge) — la version bleu nuit
+   reste disponible dans le dépôt (tag git v1.0)
+   ========================================================= */
+:root {
+  --bg: #ffffff; --bg-2: #f5f5f7; --surface: #ffffff; --line: rgba(0, 0, 0, 0.08); --line-strong: rgba(0, 0, 0, 0.16);
+  --text: #0b0b0c; --muted: #4a4a4f; --muted-2: #86868b; --rouge: #d71f2c;
+  --gold: #d71f2c; --gold-light: #d71f2c; --gold-grad: #d71f2c;
+  --font-display: "Manrope", "Inter", system-ui, sans-serif; --font-serif: var(--font-display);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+html { color-scheme: light; }
+body.ec { background: var(--bg-2) !important; color: var(--muted); }
+.ambient, .grain, #sky { display: none !important; }
+.btn { border-radius: 999px !important; text-transform: none !important; letter-spacing: 0 !important; font-weight: 600 !important; transition: background-color 0.3s var(--ease), color 0.3s, transform 0.3s var(--ease) !important; }
+.btn::before, .btn::after { display: none !important; }
+.btn--gold { background: var(--rouge) !important; color: #fff !important; box-shadow: none !important; }
+.btn--gold:hover { background: #b51823 !important; transform: translateY(-1px); }
+.btn--outline { background: #fff !important; color: var(--text) !important; border: 1px solid var(--line-strong) !important; }
+.btn--outline:hover { background: var(--text) !important; color: #fff !important; }
+
+/* Connexion */
+.ec-auth { background: #fff; }
+.ec-auth__visuel { background: var(--text) !important; color: #fff; }
+.ec-auth__visuel::after { display: none; }
+.ec-auth__slogan span { color: #ff6b74; letter-spacing: 0.12em; }
+.ec-auth__slogan p { color: #fff; font-weight: 800; letter-spacing: -0.03em; font-size: clamp(26px, 3vw, 44px); line-height: 1.1; }
+.ec-auth__slogan em { font-family: inherit; font-style: normal; color: #a1a1a6; font-weight: 800; }
+.ec-auth__slogan { animation: ec-monte 1s var(--ease) both; }
+.ec-auth__carte > * { animation: ec-monte 0.9s var(--ease) both; }
+.ec-auth__carte > :nth-child(2) { animation-delay: 0.06s; }
+.ec-auth__carte > :nth-child(3) { animation-delay: 0.12s; }
+.ec-auth__carte > :nth-child(n + 4) { animation-delay: 0.18s; }
+@keyframes ec-monte { from { opacity: 0; transform: translateY(22px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+.ec-auth__marque small { color: var(--rouge); }
+.ec-auth h1 { font-weight: 800; letter-spacing: -0.03em; font-size: 34px; }
+.ec-auth__id b, .ec-auth__aide a, .ec-petit a, .ec-centre a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.ec-input { background: #fff !important; border: 1px solid var(--line-strong) !important; color: var(--text) !important; border-radius: 14px !important; }
+.ec-input:focus { border-color: var(--text) !important; box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.06) !important; }
+.ec-erreur { color: #c0141f; }
+
+/* Application */
+.ec-cote { background: #fff !important; box-shadow: inset -1px 0 0 var(--line) !important; }
+.ec-cote__marque small { color: var(--rouge); }
+.ec-cote__client { border: 0 !important; background: var(--bg-2) !important; }
+.ec-avatar { background: var(--text) !important; border-radius: 999px !important; }
+.ec-nav__item { border-radius: 12px !important; color: var(--muted) !important; }
+.ec-nav__item:hover { background: var(--bg-2) !important; color: var(--text) !important; }
+.ec-nav__item.is-actif { background: var(--text) !important; color: #fff !important; box-shadow: none !important; }
+.ec-nav__badge { background: var(--rouge) !important; color: #fff !important; }
+.ec-cote__contact { border-color: var(--line) !important; color: var(--rouge) !important; }
+.ec-vue { animation: ec-monte 0.6s var(--ease) both !important; }
+.ec-entete p { color: var(--rouge) !important; letter-spacing: 0.1em !important; }
+.ec-entete h1 { font-weight: 800; letter-spacing: -0.035em; font-size: clamp(28px, 4vw, 42px) !important; }
+.ec-hero { border: 0 !important; background: var(--text) !important; border-radius: 28px !important; }
+.ec-hero::before { display: none; }
+.ec-hero p { color: #ff6b74 !important; letter-spacing: 0.1em !important; }
+.ec-hero h1 { font-family: var(--font-display) !important; font-style: normal !important; font-weight: 800 !important; letter-spacing: -0.035em; color: #fff !important; }
+.ec-hero > div > span { color: #a1a1a6 !important; }
+.ec-hero__badge { background: rgba(62, 207, 142, 0.14) !important; color: #7fe0b2 !important; }
+.ec-tuile { background: #fff !important; border: 0 !important; border-radius: 22px !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease) !important; }
+.ec-tuile:hover { transform: translateY(-4px) !important; box-shadow: 0 24px 50px -24px rgba(0, 0, 0, 0.25) !important; }
+.ec-tuile.is-alerte { background: #fff !important; box-shadow: inset 0 0 0 1.5px rgba(215, 31, 44, 0.4) !important; }
+.ec-tuile__ic { background: var(--bg-2) !important; color: var(--text) !important; }
+.ec-tuile.is-alerte .ec-tuile__ic { background: rgba(215, 31, 44, 0.1) !important; color: var(--rouge) !important; }
+.ec-tuile b { font-weight: 800; letter-spacing: -0.03em; font-size: 26px !important; }
+.ec-tuiles > *, .ec-vue > .ec-carte { animation: ec-monte 0.7s var(--ease) both; }
+.ec-tuiles > :nth-child(2) { animation-delay: 0.06s; }
+.ec-tuiles > :nth-child(3) { animation-delay: 0.12s; }
+.ec-carte { background: #fff !important; border: 0 !important; border-radius: 22px !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important; }
+.ec-carte h2 { font-weight: 800; letter-spacing: -0.02em; }
+.ec-vide .ec-ic { color: var(--muted-2) !important; }
+.ec-liste a { background: var(--bg-2) !important; border: 0 !important; border-radius: 16px !important; color: var(--text) !important; transition: background-color 0.25s, transform 0.35s var(--ease) !important; }
+.ec-liste a:hover { background: #ebebef !important; transform: translateX(4px) !important; }
+.ec-liste a.is-nouveau { box-shadow: inset 3px 0 0 var(--rouge) !important; }
+.ec-doc-ic { background: #fff !important; color: var(--text) !important; }
+.ec-doc-ic--factures { color: var(--rouge) !important; }
+.ec-nouveau, .ec-telecharger { background: var(--rouge) !important; }
+.ec-pastille--attente { background: #fff1e6 !important; color: #b45a14 !important; }
+.ec-pastille--ok { background: #e6f7ee !important; color: #1f7a4d !important; }
+.ec-pastille--non { background: var(--bg-2) !important; color: var(--muted) !important; }
+.ec-contact { background: #fff !important; }
+.ec-bulle p { color: inherit !important; }
+.ec-bulle--client { background: var(--text) !important; color: #fff !important; border: 0 !important; }
+.ec-bulle--client small { color: #a1a1a6 !important; }
+.ec-bulle--admin { background: var(--bg-2) !important; color: var(--text) !important; border: 0 !important; }
+.ec-fil__envoi { background: #fff !important; border-color: var(--line) !important; }
+.ec-retour:hover { color: var(--text) !important; }
+.ec-feuille { box-shadow: 0 30px 70px -30px rgba(0, 0, 0, 0.25) !important; }
+.ec-toast { background: var(--text) !important; color: #fff !important; border: 0 !important; border-radius: 999px !important; }
+.ec-chargement span { background: var(--text) !important; }
+@media (max-width: 860px) {
+  .ec-auth__visuel { background: var(--text) !important; padding: 34px 24px 30px !important; }
+  .ec-barre { background: rgba(255, 255, 255, 0.92) !important; box-shadow: 0 -1px 0 var(--line) !important; }
+  .ec-barre a { color: var(--muted-2) !important; }
+  .ec-barre a.is-actif { color: var(--text) !important; background: var(--bg-2) !important; }
+}
+@media print { body.ec { background: #fff !important; } }
+@media (prefers-reduced-motion: reduce) { .ec-auth__slogan, .ec-auth__carte > *, .ec-vue, .ec-tuiles > *, .ec-vue > .ec-carte { animation: none !important; } }

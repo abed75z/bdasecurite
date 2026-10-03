@@ -67,7 +67,6 @@ export async function pageContenu(ctx) {
   const a = s.accueil || {};
   const titre = saisie({ value: a.titre || '', maxlength: 160 });
   const texte = zoneTexte({ rows: 4, value: a.texte || '', maxlength: 400 });
-  const note = saisie({ value: a.note || '', maxlength: 160 });
   let visuel = a.visuel === 'logo' ? 'logo' : 'photo';
   const choixVisuel = h('div', { class: 'choix-visuel' }, [['photo', 'Téléphone', ''], ['logo', 'Logo BDA', '/assets/img/embleme-hd.png']].map(([v, lib]) => {
     const b = h('button', { type: 'button', class: `choix-visuel__btn ${visuel === v ? 'is-actif' : ''}`, onclick: () => {
@@ -81,11 +80,10 @@ export async function pageContenu(ctx) {
     h('form', { class: 'form-grille', onsubmit: async (e) => {
       e.preventDefault();
       if (!titre.value.trim()) return toast('Le titre ne peut pas être vide.', 'erreur');
-      await enregistrer({ accueil: { titre: titre.value.trim(), texte: texte.value.trim(), note: note.value.trim(), visuel } }, 'Accueil mis à jour sur le site.');
+      await enregistrer({ accueil: { titre: titre.value.trim(), texte: texte.value.trim(), visuel } }, 'Accueil mis à jour sur le site.');
     } },
-    champ('Grand titre', titre, 'Mettez entre [crochets] la partie à colorer, par exemple : Agents de sécurité à Paris, [24h/24.]'),
-    champ('Texte de présentation', texte),
-    champ('Petite phrase sous les boutons', note),
+    champ('Grand titre', titre, 'Court et direct, par exemple : Agents de sécurité à Paris, 24h/24.'),
+    champ('Texte de présentation', texte, 'Une phrase suffit : les visiteurs lisent peu.'),
     h('div', { class: 'champ' }, h('span', { class: 'champ__label' }, 'Image à droite'), choixVisuel),
     h('div', null, h('button', { class: 'btn btn--gold', type: 'submit' }, icone('coche'), 'Enregistrer l’accueil'))));
 

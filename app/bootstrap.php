@@ -478,12 +478,17 @@ function site_reglages_defaut(): array
     'tarifs' => SITE_TARIFS,
     'accueil' => [
       'titre' => 'Agents de sécurité et chauffeurs privés à Paris, [24h/24.]',
-      'texte' => "Gardiennage, sécurité incendie, sécurité d'événements, protection rapprochée et transport haut de gamme : une seule équipe, autorisée par le CNAPS, et un interlocuteur unique du devis jusqu'à la fin de la mission.",
-      'note' => 'Réponse rapide · Devis gratuit et sans engagement · Interventions en urgence étudiées 24h/24',
+      'texte' => 'Une seule équipe autorisée par le CNAPS, du devis à la fin de la mission.',
+      'note' => '',
       'visuel' => 'photo',
     ],
   ];
 }
+// Anciens textes par défaut de l'accueil (trop longs) : remplacés par les nouveaux s'ils n'ont pas été personnalisés
+const ACCUEIL_ANCIENS = [
+  'texte' => ["Gardiennage, sécurité incendie, sécurité d'événements, protection rapprochée et transport haut de gamme : une seule équipe, autorisée par le CNAPS, et un interlocuteur unique du devis jusqu'à la fin de la mission."],
+  'note' => ['Réponse rapide · Devis gratuit et sans engagement · Interventions en urgence étudiées 24h/24'],
+];
 function site_reglages(): array
 {
   $st = db()->prepare('SELECT v FROM reglages WHERE k = ?');
@@ -494,6 +499,8 @@ function site_reglages(): array
     foreach (['devis', 'recrutement', 'avis'] as $k) if (array_key_exists($k, $v)) $s[$k] = (bool)$v[$k];
     if (is_array($v['bandeau'] ?? null)) $s['bandeau'] = array_merge($s['bandeau'], $v['bandeau']);
     foreach (['visible', 'tarifs', 'accueil'] as $k) if (is_array($v[$k] ?? null)) $s[$k] = array_merge($s[$k], array_intersect_key($v[$k], $s[$k]));
+    $defaut = site_reglages_defaut()['accueil'];
+    foreach (ACCUEIL_ANCIENS as $k => $anciens) if (in_array($s['accueil'][$k], $anciens, true)) $s['accueil'][$k] = $defaut[$k];
   }
   return $s;
 }

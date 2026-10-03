@@ -57,7 +57,7 @@
     ]
   }
   </script>
-  <meta name="theme-color" content="#050b1d">
+  <meta name="theme-color" content="#ffffff">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="fr_FR">
   <meta property="og:site_name" content="BDA Sécurité & VTC Premium">
@@ -78,6 +78,7 @@
   <link rel="stylesheet" href="assets/css/hero.css?v=6">
   <link rel="stylesheet" href="assets/css/sections.css?v=6">
   <link rel="stylesheet" href="assets/css/pro.css?v=6">
+  <link rel="stylesheet" href="assets/css/blanc.css?v=4">
 </head>
 <body>
 
@@ -123,6 +124,7 @@
   <symbol id="i-linkedin" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></symbol>
   <symbol id="i-diamond" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6M2 9h20"/></symbol>
   <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
 </svg>
 
@@ -190,14 +192,13 @@
   <section class="ac-hero" aria-labelledby="hero-title">
     <div class="container ac-hero__grille">
       <div class="ac-hero__texte">
-        <p class="kicker">Sécurité privée &amp; VTC · Paris et Île-de-France</p>
+        <p class="kicker">Sécurité privée &amp; VTC · Paris</p>
         <h1 class="h1" id="hero-title" data-accueil="titre">Agents de sécurité et chauffeurs privés à Paris, <em>24h/24.</em></h1>
-        <p class="lead" data-accueil="texte">Gardiennage, sécurité incendie, sécurité d'événements, protection rapprochée et transport haut de gamme : une seule équipe, autorisée par le CNAPS, et un interlocuteur unique du devis jusqu'à la fin de la mission.</p>
+        <p class="lead" data-accueil="texte">Une seule équipe autorisée par le CNAPS, du devis à la fin de la mission.</p>
         <div class="ac-hero__actions">
           <a class="btn btn--gold" href="devis">Demander un devis gratuit <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
           <a class="btn btn--outline" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
         </div>
-        <p class="ac-hero__note" data-accueil="note">Réponse rapide · Devis gratuit et sans engagement · Interventions en urgence étudiées 24h/24</p>
       </div>
       <div class="ac-hero__visuel">
         <div class="tel" aria-hidden="true">
@@ -229,7 +230,6 @@
           <div><b>Autorisation CNAPS</b><span>AUT-075-2124-07-01-20250906336</span></div>
         </div>
         <div class="ac-hero__logo-alt" aria-hidden="true"><img src="assets/img/logo-bda.webp" alt="" width="900" height="1066" loading="lazy" decoding="async"></div>
-        <div class="ac-hero__dispo"><i aria-hidden="true"></i> Disponibles maintenant · 24h/24</div>
       </div>
     </div>
   </section>
@@ -238,56 +238,78 @@
   <section class="ac-garanties" aria-label="Nos garanties">
     <div class="container">
       <ul class="ac-garanties__liste">
-        <li><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg><div><b>Autorisation CNAPS</b><span>n° AUT-075-2124-07-01-20250906336</span></div></li>
-        <li><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><div><b>Agents qualifiés</b><span>Carte professionnelle · SSIAP 1, 2 et 3</span></div></li>
-        <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><div><b>Disponibles 24h/24</b><span>7j/7, jours fériés compris</span></div></li>
-        <li><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg><div><b>Référence diplomatique</b><span>Consulat général de Colombie</span></div></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg><b>Autorisé CNAPS</b></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><b>Agents SSIAP 1, 2 et 3</b></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><b>24h/24, 7j/7</b></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg><b>Consulat de Colombie</b></li>
       </ul>
     </div>
   </section>
 
   <!-- ============ SERVICES ============ -->
-  <section class="section" id="services" aria-labelledby="services-title">
+  <section class="section ac-offre" id="services" aria-labelledby="services-title">
     <div class="container">
-      <div class="ac-tete">
-        <div>
-          <p class="kicker">Nos services</p>
-          <h2 class="h2" id="services-title">Ce que nous faisons <em>pour vous.</em></h2>
-        </div>
-        <p class="lead">Choisissez votre besoin pour voir le détail de la prestation, ou décrivez-le directement dans le <a href="devis">formulaire de devis</a>.</p>
-      </div>
-
-      <div class="ac-services">
-        <div class="ac-bloc" id="securite">
-          <h3 class="ac-bloc__titre"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg> Sécurité privée</h3>
-          <div class="ac-liste">
-            <a class="ac-item" href="securite-privee-paris"><b>Agents de sécurité</b><span>Gardiennage de sites, accueil, contrôle d'accès, rondes de jour comme de nuit.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-            <a class="ac-item" href="securite-incendie-ssiap-paris"><b>Sécurité incendie SSIAP</b><span>Agents SSIAP 1, 2 et 3 pour hôtels, immeubles de grande hauteur et établissements recevant du public.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-            <a class="ac-item" href="securite-evenementielle-paris"><b>Sécurité événementielle</b><span>Soirées, galas, salons, concerts : filtrage, palpations, gestion des flux.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-            <a class="ac-item" href="protection-rapprochee-paris"><b>Protection rapprochée</b><span>Accompagnement discret de dirigeants, de personnalités et de familles.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-            <a class="ac-item" href="gardiennage-chantier-paris"><b>Gardiennage de chantier</b><span>Surveillance des chantiers et du matériel la nuit et le week-end.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          </div>
-        </div>
-        <div class="ac-bloc" id="vtc" data-visible="offreVtc">
-          <h3 class="ac-bloc__titre"><svg class="icon" aria-hidden="true"><use href="#i-car"/></svg> VTC Premium</h3>
-          <div class="ac-liste">
-            <a class="ac-item" href="chauffeur-prive-vtc-paris"><b>Chauffeur privé</b><span>Berline haut de gamme et chauffeur en tenue, à l'heure ou au trajet.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-            <a class="ac-item" href="transfert-aeroport-paris"><b>Transfert aéroport et gare</b><span>CDG, Orly, Beauvais et gares parisiennes, accueil personnalisé.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-            <a class="ac-item" href="chauffeur-mariage-paris"><b>Chauffeur de mariage</b><span>Votre grand jour, sans souci de transport.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-            <a class="ac-item" href="chauffeur-securite-vip-paris"><b>Chauffeur + sécurité VIP</b><span>Un chauffeur et un agent de protection, organisés ensemble.</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          </div>
+      <div class="ac-centre">
+        <p class="kicker">Nos services</p>
+        <h2 class="h2" id="services-title">Ce que nous faisons.</h2>
+        <div class="segment" role="tablist" aria-label="Choisir un domaine">
+          <span class="segment__fond" aria-hidden="true"></span>
+          <button type="button" role="tab" id="onglet-securite" aria-controls="securite" aria-selected="true" data-onglet="securite">Sécurité privée</button>
+          <button type="button" role="tab" id="onglet-vtc" aria-controls="vtc" aria-selected="false" data-onglet="vtc" data-visible="offreVtc">VTC Premium</button>
         </div>
       </div>
 
-      <div class="ac-secteurs">
-        <div>
-          <h3 class="ac-secteurs__titre">Par secteur</h3>
-          <p><a href="securite-hotels-paris">Hôtels</a><a href="securite-commerces-paris">Commerces</a><a href="securite-bureaux-entreprises-paris">Bureaux &amp; entreprises</a><a href="securite-ambassades-consulats-paris">Ambassades &amp; consulats</a><a href="securite-residences-coproprietes-paris">Résidences &amp; copropriétés</a></p>
-        </div>
-        <div>
-          <h3 class="ac-secteurs__titre">Par zone</h3>
-          <p><a href="agent-securite-paris-1">Paris 1<sup>er</sup></a><a href="agent-securite-paris-8">Paris 8<sup>e</sup></a><a href="agent-securite-paris-9">Paris 9<sup>e</sup></a><a href="agent-securite-paris-16">Paris 16<sup>e</sup></a><a href="agent-securite-paris-17">Paris 17<sup>e</sup></a><a href="agent-securite-paris-20">Paris 20<sup>e</sup></a><a href="agent-securite-la-defense">La Défense</a><a href="agent-securite-neuilly-sur-seine">Neuilly</a><a href="agent-securite-boulogne-billancourt">Boulogne</a><a href="agent-securite-saint-denis">Saint-Denis</a></p>
-        </div>
+      <div class="tuiles is-actif" id="securite" role="tabpanel" aria-labelledby="onglet-securite">
+        <a class="tuile tuile--noire tuile--haute" href="securite-privee-paris">
+          <svg class="tuile__ico" aria-hidden="true"><use href="#i-shield"/></svg>
+          <span class="tuile__txt"><b>Agents de sécurité</b><span>Gardiennage, accueil, contrôle d'accès, rondes.</span></span>
+          <span class="tuile__lien">Découvrir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+          <img class="tuile__embleme" src="assets/img/embleme-hd.png" alt="" loading="lazy" decoding="async">
+        </a>
+        <a class="tuile" href="securite-incendie-ssiap-paris">
+          <svg class="tuile__ico" aria-hidden="true"><use href="#i-flame"/></svg>
+          <span class="tuile__txt"><b>Sécurité incendie</b><span>SSIAP 1, 2 et 3.</span></span>
+          <span class="tuile__lien">Découvrir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </a>
+        <a class="tuile" href="securite-evenementielle-paris">
+          <svg class="tuile__ico" aria-hidden="true"><use href="#i-ticket"/></svg>
+          <span class="tuile__txt"><b>Événementiel</b><span>Galas, salons, soirées.</span></span>
+          <span class="tuile__lien">Découvrir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </a>
+        <a class="tuile" href="protection-rapprochee-paris">
+          <svg class="tuile__ico" aria-hidden="true"><use href="#i-eye-off"/></svg>
+          <span class="tuile__txt"><b>Protection rapprochée</b><span>Discrète et sur mesure.</span></span>
+          <span class="tuile__lien">Découvrir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </a>
+        <a class="tuile" href="gardiennage-chantier-paris">
+          <svg class="tuile__ico" aria-hidden="true"><use href="#i-building"/></svg>
+          <span class="tuile__txt"><b>Chantiers</b><span>Nuits et week-ends.</span></span>
+          <span class="tuile__lien">Découvrir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </a>
+      </div>
+
+      <div class="tuiles" id="vtc" role="tabpanel" aria-labelledby="onglet-vtc" data-visible="offreVtc" hidden>
+        <a class="tuile tuile--noire tuile--haute" href="chauffeur-prive-vtc-paris">
+          <svg class="tuile__ico" aria-hidden="true"><use href="#i-car"/></svg>
+          <span class="tuile__txt"><b>Chauffeur privé</b><span>Berline haut de gamme, chauffeur en tenue.</span></span>
+          <span class="tuile__lien">Découvrir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+          <img class="tuile__embleme" src="assets/img/embleme-hd.png" alt="" loading="lazy" decoding="async">
+        </a>
+        <a class="tuile" href="transfert-aeroport-paris">
+          <svg class="tuile__ico" aria-hidden="true"><use href="#i-plane"/></svg>
+          <span class="tuile__txt"><b>Aéroports et gares</b><span>CDG, Orly, Beauvais.</span></span>
+          <span class="tuile__lien">Découvrir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </a>
+        <a class="tuile" href="chauffeur-mariage-paris">
+          <svg class="tuile__ico" aria-hidden="true"><use href="#i-heart"/></svg>
+          <span class="tuile__txt"><b>Mariages</b><span>Votre grand jour, sans souci.</span></span>
+          <span class="tuile__lien">Découvrir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </a>
+        <a class="tuile tuile--large" href="chauffeur-securite-vip-paris">
+          <svg class="tuile__ico" aria-hidden="true"><use href="#i-shield-check"/></svg>
+          <span class="tuile__txt"><b>Chauffeur + sécurité</b><span>Votre trajet et votre protection, organisés ensemble.</span></span>
+          <span class="tuile__lien">Découvrir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </a>
       </div>
     </div>
   </section>
@@ -299,26 +321,23 @@
       <ul>
         <li><span>Agent de sécurité</span><b>dès <span data-prix="agent" data-dec="1">22</span> € <small>HT/h</small></b></li>
         <li><span>Agent SSIAP 1</span><b>dès <span data-prix="ssiap1" data-dec="1">23,50</span> € <small>HT/h</small></b></li>
-        <li><span>Sécurité événementielle</span><b>dès <span data-prix="evenementiel" data-dec="1">24</span> € <small>HT/h</small></b></li>
+        <li><span>Événementiel</span><b>dès <span data-prix="evenementiel" data-dec="1">24</span> € <small>HT/h</small></b></li>
         <li data-visible="offreVtc"><span>VTC Paris ↔ Orly</span><b><span data-prix="orly" data-dec="1">38</span> € <small>TTC</small></b></li>
       </ul>
-      <a class="btn btn--outline" href="tarifs">Voir tous les tarifs <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="btn btn--outline" href="tarifs">Tous les tarifs <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
     </div>
   </section>
 
   <!-- ============ POURQUOI BDA ============ -->
-  <section class="section ac-pourquoi" id="engagements" aria-labelledby="eng-title">
-    <div class="container ac-pourquoi__grille">
-      <div>
-        <p class="kicker">Pourquoi BDA Sécurité</p>
-        <h2 class="h2" id="eng-title">Une équipe à taille humaine, <em>des standards exigeants.</em></h2>
-        <p class="lead">Vous échangez directement avec le responsable de votre mission : pas de centre d'appels, pas d'intermédiaire. Nous préparons chaque prestation avec vous et nous restons joignables jusqu'à la fin.</p>
-      </div>
-      <ul class="ac-points">
-        <li><b>Agents certifiés</b><span>Carte professionnelle délivrée par le CNAPS pour chaque agent, diplômes SSIAP pour la sécurité incendie.</span></li>
-        <li><b>Réactivité</b><span>Devis rapide, mise en place en urgence étudiée à toute heure, remplacements assurés.</span></li>
-        <li><b>Discrétion</b><span>Tenue adaptée, présentation soignée et confidentialité sur vos lieux, vos invités et vos déplacements.</span></li>
-        <li><b>Transparence</b><span>Devis écrit et détaillé, heures pointées, factures claires et documents disponibles dans votre espace client.</span></li>
+  <section class="section ac-manifeste" id="engagements" aria-labelledby="eng-title">
+    <div class="container">
+      <p class="kicker">Pourquoi BDA</p>
+      <h2 class="manifeste" id="eng-title" data-surligne>Un seul interlocuteur, du devis à la fin de la mission. Des agents certifiés, briefés et en tenue. Une réponse rapide, de jour comme de nuit.</h2>
+      <ul class="chiffres">
+        <li><b><span data-count="24">24</span><small>h/24</small></b><span>Disponibles, 7j/7</span></li>
+        <li><b><span data-count="100">100</span><small>%</small></b><span>Agents carte CNAPS</span></li>
+        <li><b><span data-count="3">3</span></b><span>Niveaux SSIAP</span></li>
+        <li><b><span data-count="1">1</span></b><span>Interlocuteur unique</span></li>
       </ul>
     </div>
   </section>
@@ -326,35 +345,33 @@
   <!-- ============ MÉTHODE ============ -->
   <section class="section ac-methode" id="process" aria-labelledby="process-title">
     <div class="container">
-      <div class="ac-tete">
-        <div>
-          <p class="kicker">Comment ça marche</p>
-          <h2 class="h2" id="process-title">De votre demande à la mission, <em>en 4 étapes.</em></h2>
-        </div>
+      <div class="ac-centre">
+        <p class="kicker">Comment ça marche</p>
+        <h2 class="h2" id="process-title">Quatre étapes, c'est tout.</h2>
       </div>
-      <ol class="ac-etapes">
-        <li><span>01</span><b>Vous décrivez votre besoin</b><p>En deux minutes avec le formulaire, ou par téléphone.</p></li>
-        <li><span>02</span><b>Nous vous rappelons</b><p>Pour préciser le lieu, les horaires et les consignes.</p></li>
-        <li><span>03</span><b>Vous recevez le devis</b><p>Clair, détaillé et sans engagement.</p></li>
-        <li><span>04</span><b>Nos agents prennent leur poste</b><p>Briefés, en tenue, avec un responsable joignable à tout moment.</p></li>
+      <ol class="ac-etapes" data-ligne>
+        <li><span>01</span><b>Votre besoin</b><p>Deux minutes en ligne, ou par téléphone.</p></li>
+        <li><span>02</span><b>Notre appel</b><p>Lieu, horaires, consignes.</p></li>
+        <li><span>03</span><b>Votre devis</b><p>Clair et sans engagement.</p></li>
+        <li><span>04</span><b>La mission</b><p>Agents briefés, responsable joignable.</p></li>
       </ol>
     </div>
   </section>
 
-  <!-- ============ RÉFÉRENCE ET AVIS ============ -->
-  <section class="section" id="references" aria-labelledby="ref-title">
+  <!-- ============ RÉFÉRENCE ============ -->
+  <section class="section ac-reference" id="references" aria-labelledby="ref-title">
     <div class="container ac-ref">
-      <figure class="ac-ref__photo">
+      <figure class="ac-ref__photo" data-zoom>
         <img src="assets/img/consulat-colombie.webp" alt="Façade du Consulat général de Colombie à Paris" width="860" height="919" loading="lazy" decoding="async">
       </figure>
       <div class="ac-ref__texte">
-        <p class="kicker">Nos références</p>
-        <h2 class="h2" id="ref-title">Ils nous font <em>confiance.</em></h2>
-        <p class="lead">Nous assurons la sécurité du <strong>Consulat général de Colombie à Paris</strong>, une collaboration toujours en cours, menée avec la rigueur et la discrétion qu'exige une institution diplomatique.</p>
+        <p class="kicker">Référence</p>
+        <h2 class="h2" id="ref-title">Ils nous font confiance.</h2>
+        <p class="lead">Nous assurons la sécurité du <strong>Consulat général de Colombie à Paris</strong>.</p>
         <p class="ac-ref__note" data-rating data-visible="avisClients" hidden></p>
         <div class="ac-hero__actions">
-          <a class="btn btn--outline" href="references">Voir nos références</a>
-          <a class="btn btn--outline" href="avis">Lire les avis clients</a>
+          <a class="btn btn--outline" href="references">Nos références</a>
+          <a class="btn btn--outline" href="avis">Avis clients</a>
         </div>
       </div>
     </div>
@@ -365,8 +382,8 @@
     <div class="container faq-grille">
       <div class="faq-intro">
         <p class="kicker">Questions fréquentes</p>
-        <h2 class="h2" id="faq-title">Vos questions, <em>nos réponses.</em></h2>
-        <p class="lead">Une autre question&nbsp;? Appelez-nous au <a href="tel:+33611678625">06 11 67 86 25</a>, 24h/24.</p>
+        <h2 class="h2" id="faq-title">Vos questions.</h2>
+        <p class="lead">Une autre question&nbsp;? <a href="tel:+33611678625">06 11 67 86 25</a></p>
       </div>
       <div class="faq">
         <div class="faq__item">
@@ -398,16 +415,15 @@
     <div class="container">
       <div class="ac-contact__carte">
         <div>
-          <p class="kicker">Contact</p>
           <h2 class="h2" id="cta-title">Parlons de votre besoin.</h2>
-          <p class="lead">Devis gratuit, réponse rapide. Pour une urgence, appelez directement.</p>
+          <p class="lead">Devis gratuit, réponse rapide.</p>
         </div>
         <div class="ac-contact__moyens">
           <a class="btn btn--gold" href="devis">Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
           <a class="ac-moyen" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span><b>06 11 67 86 25</b><small>Ligne principale, 24h/24</small></span></a>
           <a class="ac-moyen" href="https://wa.me/33784739070" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg><span><b>07 84 73 90 70</b><small>WhatsApp et appels</small></span></a>
-          <a class="ac-moyen" href="mailto:bdasecurite@gmail.com"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><span><b>bdasecurite@gmail.com</b><small>Pour vos demandes écrites</small></span></a>
-          <a class="ac-moyen" href="#assistant" data-assistant><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg><span><b>Assistant en ligne</b><small>Réponse immédiate, 24h/24</small></span></a>
+          <a class="ac-moyen" href="mailto:bdasecurite@gmail.com"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><span><b>bdasecurite@gmail.com</b><small>Demandes écrites</small></span></a>
+          <a class="ac-moyen" href="#assistant" data-assistant><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg><span><b>Assistant en ligne</b><small>Réponse immédiate</small></span></a>
         </div>
       </div>
     </div>
@@ -495,9 +511,10 @@
   <a class="btn btn--gold" href="devis">Demander un devis</a>
 </div>
 
-<script src="assets/js/core.js?v=10"></script>
+<script src="assets/js/core.js?v=11"></script>
 <script src="assets/js/assistant.js?v=2"></script>
 <script src="assets/js/avis-data.js"></script>
 <script src="assets/js/home.js?v=8"></script>
+<script src="assets/js/anim.js?v=1"></script>
 </body>
 </html>

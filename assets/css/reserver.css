@@ -298,3 +298,34 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .ferme__lien + .ferme__lien { border-color: transparent; color: var(--muted); margin-top: 4px; }
 .ferme__lien:hover { border-color: var(--gold); }
 @keyframes fermeEntree { from { opacity: 0; transform: translateY(12px); } }
+
+/* =========================================================
+   THÈME BLANC 2.0 — couleurs de l'ancien thème éclaircies
+   ========================================================= */
+:root { --bg: #f5f5f7; --sheet: #ffffff; --surface: #f5f5f7; --surface-2: #ebebef; --surface-3: #e2e2e7; --line: rgba(0, 0, 0, 0.08); --line-2: rgba(0, 0, 0, 0.14); --gold: #d71f2c; --gold-light: #d71f2c; --gold-soft: rgba(215, 31, 44, 0.08); --gold-grad: #d71f2c; --text: #0b0b0c; --text-2: #3a3a3f; --muted: #86868b; --red: #d71f2c; --green: #1f9d5c; --ease: cubic-bezier(0.22, 1, 0.36, 1); }
+html { color-scheme: light; }
+.carte { background: #ffffff; }
+.carte .leaflet-control-attribution { background: rgba(255, 255, 255, 0.9); color: #6e6e73; }
+.carte .leaflet-control-attribution a { color: #3a3a3f; }
+.repere { border: 4px solid rgba(0, 0, 0, 0.08); box-shadow: 0 0 0 2px var(--gold), 0 8px 18px rgba(0, 0, 0, 0.18); }
+.repere--arrivee { box-shadow: 0 0 0 2px #ffffff, 0 8px 18px rgba(0, 0, 0, 0.18); }
+.voiture-repere { background: #ffffff; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.21), 0 0 18px rgba(232, 207, 149, .35); }
+.etiquette-carte { background: rgba(255, 255, 255, 0.9); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); }
+.marque { background: rgba(255, 255, 255, 0.9); }
+.rond { background: rgba(255, 255, 255, 0.9); }
+.feuille { box-shadow: 0 -24px 60px -10px rgba(0, 0, 0, 0.22); }
+.lieux-liste li button:hover, .lieux-liste li.option:hover, .lieux-liste li.option[aria-selected="true"] { background: rgba(0, 0, 0, 0.024); }
+.pt-arrivee { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1); }
+.bas-fixe { background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), var(--sheet) 28%); }
+.cta b { background: rgba(255, 255, 255, 0.9); }
+.cta.is-loading::after { border: 3px solid rgba(0, 0, 0, 0.08); border-top-color: rgba(0, 0, 0, 0.14); }
+.bouton--danger { color: #ac0c0c; }
+.erreur { color: #ac0c0c; }
+.statut--annulee { color: #ac0c0c; }
+.fenetre__fond { background: rgba(255, 255, 255, 0.9); }
+.fenetre__corps { background: #ffffff; }
+.toast { background: #ffffff; }
+@media (min-width: 980px) {
+.feuille { box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.22); }
+.recherche { box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.22); }
+}

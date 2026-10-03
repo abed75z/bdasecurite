@@ -7,6 +7,33 @@
   const root = document.documentElement;
   root.classList.add('js');
 
+  /* ---------- Aperçu du thème clair (?theme=clair / ?theme=normal) ---------- */
+  (() => {
+    let clair = false;
+    try {
+      const t = new URLSearchParams(location.search).get('theme');
+      if (t === 'clair') localStorage.setItem('bda-theme', 'clair');
+      if (t === 'normal') localStorage.removeItem('bda-theme');
+      clair = localStorage.getItem('bda-theme') === 'clair';
+    } catch (e) { /* stockage indisponible */ }
+    const pro = document.querySelector('link[href*="pro.css"]');
+    if (!clair || !pro) return;
+    const l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = pro.getAttribute('href').replace(/pro\.css.*$/, 'clair.css?v=4');
+    // pas de fondu sombre → clair pendant le chargement de la feuille
+    const fige = document.createElement('style');
+    fige.textContent = '*,*::before,*::after{transition:none!important}';
+    document.head.appendChild(fige);
+    l.onload = l.onerror = () => setTimeout(() => fige.remove(), 60);
+    document.head.appendChild(l);
+    root.classList.add('theme-clair');
+    const b = document.createElement('div');
+    b.className = 'apercu-theme';
+    b.innerHTML = 'Aperçu thème clair <a href="?theme=normal">Revenir</a>';
+    document.body.appendChild(b);
+  })();
+
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   const lerp = (a, b, t) => a + (b - a) * t;

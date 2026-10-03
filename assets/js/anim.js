@@ -61,6 +61,17 @@
     });
   }
 
+  /* ---------- Rideau d'ouverture : filet de sécurité (jamais bloquant) ---------- */
+  const rideau = document.querySelector('.rideau');
+  if (rideau && document.documentElement.classList.contains('intro')) {
+    const retirer = () => rideau.remove();
+    rideau.style.pointerEvents = 'auto';
+    rideau.addEventListener('click', retirer);
+    rideau.addEventListener('animationend', (e) => { if (e.animationName === 'rideau-monte') retirer(); });
+    const minuter = () => setTimeout(retirer, 3200);
+    if (document.hidden) document.addEventListener('visibilitychange', minuter, { once: true }); else minuter();
+  } else if (rideau) rideau.remove();
+
   /* ---------- Barre du haut plus compacte une fois la page défilée ---------- */
   const nav = document.querySelector('.nav');
   if (nav) auScroll(() => nav.classList.toggle('is-compact', window.scrollY > 80));
@@ -272,6 +283,83 @@
       s.style.setProperty('--ir', `${(40 * (1 - p)).toFixed(1)}px`);
     });
   });
+
+  /* ---------- Pastille de l'accueil : le texte alterne avec l'heure de Paris ---------- */
+  document.querySelectorAll('[data-alterne]').forEach((el) => {
+    if (reduit) return;
+    const base = el.textContent;
+    const heure = () => new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' }).format(new Date()).replace(':', ' h ');
+    const textes = [() => base, () => `Paris, ${heure()} · nous répondons 24h/24`];
+    let i = 0;
+    setInterval(() => {
+      if (document.hidden) return;
+      el.classList.add('sort');
+      setTimeout(() => {
+        i = (i + 1) % textes.length;
+        el.textContent = textes[i]();
+        el.classList.remove('sort'); el.classList.add('entre');
+        void el.offsetWidth;
+        el.classList.remove('entre');
+      }, 380);
+    }, 4200);
+  });
+
+  /* ---------- Étapes en cartes : la carte du dessous recule quand la suivante arrive ---------- */
+  const cartes = [...document.querySelectorAll('.ac-etapes--cartes > li')];
+  if (cartes.length && !reduit) {
+    const ordi = window.matchMedia('(min-width: 1021px)');
+    auScroll(() => {
+      if (!ordi.matches) { cartes.forEach((c) => { c.style.scale = ''; c.style.filter = ''; }); return; }
+      cartes.forEach((c, i) => {
+        const suivante = cartes[i + 1];
+        if (!suivante) { c.style.scale = ''; c.style.filter = ''; return; }
+        const a = c.getBoundingClientRect(), b = suivante.getBoundingClientRect();
+        const p = clamp((a.bottom - b.top) / a.height, 0, 1);
+        c.style.scale = (1 - p * 0.06).toFixed(4);
+        c.style.filter = p > 0.01 ? `brightness(${(1 - p * 0.12).toFixed(3)})` : '';
+      });
+    });
+  }
+
+  /* ---------- Grand nom du pied de page : lettres qui montent ---------- */
+  document.querySelectorAll('.footer .container').forEach((c) => {
+    const footer = c.closest('.footer');
+    const bloc = document.createElement('div');
+    bloc.className = 'pied-marque';
+    bloc.setAttribute('aria-hidden', 'true');
+    let l = 0;
+    'BDA Sécurité'.split('').forEach((ch, i) => {
+      const s = document.createElement('span');
+      if (ch === ' ') { s.className = 'espace'; s.innerHTML = '&nbsp;'; } else s.textContent = ch;
+      if (i > 3) s.classList.add('rouge');
+      s.style.setProperty('--l', l++);
+      bloc.append(s);
+    });
+    c.append(bloc);
+    footer.classList.add('a-marque');
+    if (reduit || !('IntersectionObserver' in window)) { bloc.classList.add('vu'); return; }
+    const o = new IntersectionObserver((en) => { if (en[0].isIntersecting) { bloc.classList.add('vu'); o.disconnect(); } }, { threshold: 0.2 });
+    o.observe(bloc);
+  });
+
+  /* ---------- Bouton « retour en haut » avec anneau de progression ---------- */
+  if (document.querySelector('.footer')) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'haut-page';
+    b.setAttribute('aria-label', 'Revenir en haut de la page');
+    const R = 23, L = 2 * Math.PI * R;
+    b.innerHTML = `<svg viewBox="0 0 52 52" aria-hidden="true"><circle class="haut-page__anneau" cx="26" cy="26" r="${R}" stroke-dasharray="${L.toFixed(2)}" stroke-dashoffset="${L.toFixed(2)}"/></svg><svg class="haut-page__fleche" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>`;
+    document.body.append(b);
+    const anneau = b.querySelector('.haut-page__anneau');
+    b.addEventListener('click', () => window.scrollTo({ top: 0, behavior: reduit ? 'auto' : 'smooth' }));
+    auScroll(() => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? clamp(window.scrollY / max, 0, 1) : 0;
+      anneau.setAttribute('stroke-dashoffset', (L * (1 - p)).toFixed(2));
+      b.classList.toggle('on', window.scrollY > 700);
+    });
+  }
 
   /* ---------- Sélecteur Sécurité / VTC ---------- */
   document.querySelectorAll('.segment').forEach((seg) => {

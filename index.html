@@ -78,9 +78,11 @@
   <link rel="stylesheet" href="assets/css/hero.css?v=6">
   <link rel="stylesheet" href="assets/css/sections.css?v=6">
   <link rel="stylesheet" href="assets/css/pro.css?v=6">
-  <link rel="stylesheet" href="assets/css/blanc.css?v=8">
+  <link rel="stylesheet" href="assets/css/blanc.css?v=10">
+  <script>try{if(!sessionStorage.getItem('bda-intro')&&!matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.classList.add('intro');sessionStorage.setItem('bda-intro','1')}}catch(e){}</script>
 </head>
 <body>
+<div class="rideau" aria-hidden="true"><div class="rideau__centre"><img src="assets/img/ecusson.png" alt="" width="524" height="442"><p><b>BDA <span>Sécurité</span></b><small>&amp; VTC Premium</small></p><i class="rideau__barre"></i></div></div>
 
 <!-- ============ Icônes + blason BDA (réutilisés via <use>) ============ -->
 <svg class="svg-sprite" aria-hidden="true" focusable="false">
@@ -191,7 +193,7 @@
   <section class="ac-hero" aria-labelledby="hero-title">
     <div class="container ac-hero__grille">
       <div class="ac-hero__texte">
-        <a class="ac-pilule" href="#assistant-ia" data-visible="assistant"><i aria-hidden="true"></i><span>Assistant en ligne · réponse immédiate</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a class="ac-pilule" href="#assistant-ia" data-visible="assistant"><i aria-hidden="true"></i><span class="ac-pilule__txt" data-alterne>Assistant en ligne · réponse immédiate</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
         <h1 class="h1" id="hero-title" data-accueil="titre">Agents de sécurité et chauffeurs privés à Paris, <em>24h/24.</em></h1>
         <p class="lead" data-accueil="texte">Une seule équipe autorisée par le CNAPS, du devis à la fin de la mission.</p>
         <div class="ac-hero__actions">
@@ -224,6 +226,8 @@
             </div>
           </div>
         </div>
+        <div class="notif notif--1" aria-hidden="true"><span class="notif__ico notif__ico--ok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><div><b>Devis validé</b><small>Gala · 150 invités</small></div></div>
+        <div class="notif notif--2" aria-hidden="true"><span class="notif__ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><div><b>Agents en poste</b><small>Vendredi · 18 h 45</small></div></div>
         <div class="ac-hero__badge">
           <img src="assets/img/ecusson-petit.png" alt="" width="262" height="221">
           <div><b>Autorisation CNAPS</b><span>AUT-075-2124-07-01-20250906336</span></div>
@@ -391,11 +395,11 @@
         <p class="kicker">Comment ça marche</p>
         <h2 class="h2" id="process-title">Quatre étapes, c'est tout.</h2>
       </div>
-      <ol class="ac-etapes" data-ligne>
-        <li><span>01</span><b>Votre besoin</b><p>Deux minutes en ligne, ou par téléphone.</p></li>
-        <li><span>02</span><b>Notre appel</b><p>Lieu, horaires, consignes.</p></li>
-        <li><span>03</span><b>Votre devis</b><p>Clair et sans engagement.</p></li>
-        <li><span>04</span><b>La mission</b><p>Agents briefés, responsable joignable.</p></li>
+      <ol class="ac-etapes ac-etapes--cartes" data-ligne>
+        <li><span>01</span><div><b>Votre besoin</b><p>Deux minutes en ligne, ou par téléphone.</p></div><svg class="etape__ico" aria-hidden="true"><use href="#i-message"/></svg></li>
+        <li><span>02</span><div><b>Notre appel</b><p>Lieu, horaires, consignes.</p></div><svg class="etape__ico" aria-hidden="true"><use href="#i-phone"/></svg></li>
+        <li><span>03</span><div><b>Votre devis</b><p>Clair et sans engagement.</p></div><svg class="etape__ico" aria-hidden="true"><use href="#i-file"/></svg></li>
+        <li><span>04</span><div><b>La mission</b><p>Agents briefés, responsable joignable.</p></div><svg class="etape__ico" aria-hidden="true"><use href="#i-shield-check"/></svg></li>
       </ol>
     </div>
   </section>
@@ -557,6 +561,6 @@
 <script src="assets/js/assistant.js?v=3"></script>
 <script src="assets/js/avis-data.js"></script>
 <script src="assets/js/home.js?v=8"></script>
-<script src="assets/js/anim.js?v=3"></script>
+<script src="assets/js/anim.js?v=4"></script>
 </body>
 </html>

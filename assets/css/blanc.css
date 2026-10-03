@@ -930,3 +930,137 @@ body::after {
   .defile__ligne { transform: none; }
   .ac-ia { clip-path: none; }
 }
+
+/* =========================================================
+   VERSION 2.3 — effets « haut de gamme »
+   rideau d'ouverture, notifications, cartes empilées,
+   grand nom du pied de page, retour en haut, finitions
+   ========================================================= */
+
+/* ---------- Rideau d'ouverture (1re visite de la session) ---------- */
+.rideau { display: none; }
+html.intro .rideau {
+  position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: var(--noir);
+  animation: rideau-monte 0.9s 1.55s cubic-bezier(0.76, 0, 0.24, 1) forwards; pointer-events: none;
+}
+.rideau__centre { display: grid; justify-items: center; gap: 22px; }
+.rideau__centre img { width: 120px; height: auto; animation: rideau-logo 1s 0.05s var(--ease) both; filter: drop-shadow(0 20px 40px rgba(215, 31, 44, 0.35)); }
+.rideau__centre p { margin: 0; display: grid; justify-items: center; gap: 8px; overflow: hidden; }
+.rideau__centre b { font-family: var(--font-display); font-weight: 800; font-size: 22px; letter-spacing: 0.34em; margin-right: -0.34em; color: #fff; animation: rideau-texte 1s 0.3s var(--ease) both; }
+.rideau__centre b span { color: var(--rouge); }
+.rideau__centre small { font-size: 11px; font-weight: 600; letter-spacing: 0.5em; margin-right: -0.5em; text-transform: uppercase; color: #86868b; animation: rideau-texte 1s 0.45s var(--ease) both; }
+.rideau__barre { width: 160px; height: 2px; border-radius: 2px; background: rgba(255, 255, 255, 0.12); overflow: hidden; position: relative; }
+.rideau__barre::after { content: ""; position: absolute; inset: 0; background: var(--rouge); transform-origin: left; animation: rideau-barre 1.3s 0.2s cubic-bezier(0.65, 0, 0.35, 1) both; }
+@keyframes rideau-logo { from { opacity: 0; transform: scale(0.6) rotate(-10deg); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes rideau-texte { from { opacity: 0; transform: translateY(100%); letter-spacing: 0.8em; } to { opacity: 1; transform: none; } }
+@keyframes rideau-barre { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes rideau-monte { to { transform: translateY(-100%); visibility: hidden; } }
+/* Pendant le rideau, l'arrivée de l'accueil est décalée */
+html.intro .ac-hero__texte > :nth-child(1) { animation-delay: 1.75s !important; }
+html.intro .ac-hero__texte > :nth-child(2) { animation-delay: 1.85s !important; }
+html.intro .ac-hero__texte > :nth-child(3) { animation-delay: 2.1s !important; }
+html.intro .ac-hero__texte > :nth-child(4) { animation-delay: 2.2s !important; }
+html.intro .ac-hero .mot > span { animation-delay: calc(1.85s + var(--m) * 0.055s); }
+html.intro .ac-hero__visuel { animation-delay: 1.9s !important; }
+html.intro .ac-hero__badge { animation-delay: 2.6s, 4s !important; }
+html.intro .ac-hero .h1 em { animation-delay: 2.9s; }
+html.intro .nav__marque, html.intro .nav__marque small { animation-delay: 1.7s; }
+html.intro .notif--1 { animation-delay: 3s, 4s !important; }
+html.intro .notif--2 { animation-delay: 3.6s, 4.6s !important; }
+
+/* ---------- Notifications autour du téléphone ---------- */
+.notif {
+  position: absolute; z-index: 3; display: flex; align-items: center; gap: 12px; padding: 12px 18px 12px 12px; border-radius: 18px;
+  background: rgba(255, 255, 255, 0.86); border: 1px solid rgba(255, 255, 255, 0.7); box-shadow: 0 24px 50px -20px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6); backdrop-filter: blur(16px) saturate(1.6); white-space: nowrap;
+}
+.notif b { display: block; font-size: 14px; color: var(--noir); }
+.notif small { display: block; font-size: 12px; color: #86868b; }
+.notif__ico { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 12px; background: var(--noir); }
+.notif__ico svg { width: 18px; height: 18px; fill: none; stroke: #fff; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.notif__ico--ok { background: #22c55e; }
+.notif--1 { left: -6%; top: 26%; animation: notif-arrive 0.9s 1.4s var(--ease) both, flotte-badge 6s 2.5s ease-in-out infinite; }
+.notif--2 { right: -8%; top: 58%; animation: notif-arrive 0.9s 2s var(--ease) both, flotte-badge 7s 3s ease-in-out infinite; }
+@keyframes notif-arrive { from { opacity: 0; transform: translateY(18px) scale(0.85); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@media (max-width: 1020px) { .notif { display: none; } }
+.ac-hero--logo .notif { display: none; }
+
+/* ---------- Pastille : texte qui change (flip) ---------- */
+.ac-pilule__txt { display: inline-block; transition: transform 0.45s var(--ease), opacity 0.35s; }
+.ac-pilule__txt.sort { transform: translateY(-110%); opacity: 0; }
+.ac-pilule__txt.entre { transform: translateY(110%); opacity: 0; transition: none; }
+.ac-pilule { overflow: hidden; }
+
+/* ---------- Étapes : cartes qui s'empilent au scroll (ordinateur) ---------- */
+.ac-etapes--cartes .etape__ico { display: none; }
+@media (min-width: 1021px) {
+  .ac-etapes.ac-etapes--cartes { display: block !important; max-width: 1100px; margin: 0 auto; }
+  .ac-etapes--cartes::before, .ac-etapes--cartes::after, .ac-etapes--cartes li::before { display: none !important; }
+  .ac-etapes--cartes li {
+    position: sticky !important; top: calc(var(--nav-h) + 36px + var(--k, 0) * 22px); margin: 0 0 34px !important;
+    display: grid !important; grid-template-columns: 220px 1fr auto; align-items: center; gap: 30px !important;
+    min-height: 250px; padding: 40px 54px !important; border-radius: 32px !important; background: #fff !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 -18px 50px -30px rgba(0, 0, 0, 0.25) !important; transform-origin: 50% 0;
+    transition: opacity 0.9s var(--ease), filter 0.9s var(--ease), box-shadow 0.4s !important;
+  }
+  .ac-etapes--cartes li:nth-child(1) { --k: 0; } .ac-etapes--cartes li:nth-child(2) { --k: 1; }
+  .ac-etapes--cartes li:nth-child(3) { --k: 2; } .ac-etapes--cartes li:nth-child(4) { --k: 3; background: var(--noir) !important; }
+  .ac-etapes--cartes li > span { font-family: var(--font-display) !important; font-weight: 800; font-size: 150px !important; line-height: 0.8; letter-spacing: -0.06em !important; color: transparent !important; -webkit-text-stroke: 2px var(--rouge); }
+  .ac-etapes--cartes li b { font-size: clamp(2rem, 1.4rem + 1.6vw, 3rem) !important; letter-spacing: -0.04em !important; line-height: 1.05; }
+  .ac-etapes--cartes li p { font-size: 19px !important; margin-top: 10px; }
+  .ac-etapes--cartes li:nth-child(4) b { color: #fff !important; }
+  .ac-etapes--cartes li:nth-child(4) p { color: #a1a1a6 !important; }
+  .ac-etapes--cartes .etape__ico { display: block; width: 96px; height: 96px; padding: 26px; border-radius: 28px; background: var(--bg-2); fill: none; stroke: var(--noir); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .ac-etapes--cartes li:nth-child(4) .etape__ico { background: var(--rouge); stroke: #fff; }
+  .ac-etapes--cartes li:hover { transform: none !important; }
+  .ac-etapes--cartes li.cascade { transform: none !important; }
+}
+
+/* ---------- Petits titres : le texte se resserre, un trait rouge se dessine ---------- */
+.kicker.rv { letter-spacing: 0.3em !important; transition: opacity 1s var(--ease), transform 1.1s var(--ease), filter 1s var(--ease), letter-spacing 1.2s var(--ease) !important; }
+.kicker.rv.vu { letter-spacing: 0.08em !important; }
+.kicker.rv::before { content: "" !important; display: inline-block !important; width: 0 !important; height: 2px !important; margin-right: 0; vertical-align: middle; background: var(--rouge) !important; transition: width 0.9s 0.3s var(--ease), margin 0.9s 0.3s var(--ease); }
+.kicker.rv.vu::before { width: 22px !important; margin-right: 10px; }
+
+/* ---------- Grand nom du pied de page : lettres qui montent ---------- */
+.footer.a-marque .container::after { display: none !important; }
+.pied-marque { display: flex; justify-content: center; overflow: hidden; margin: clamp(30px, 5vw, 60px) 0 -0.2em; font-family: var(--font-display); font-weight: 800; font-size: clamp(3rem, 12.5vw, 13rem); letter-spacing: -0.06em; line-height: 0.95; white-space: nowrap; user-select: none; }
+.pied-marque span { display: inline-block; background: linear-gradient(180deg, #0b0b0c 0%, rgba(11, 11, 12, 0.85) 45%, rgba(11, 11, 12, 0) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; transform: translateY(100%); transition: transform 1.1s var(--ease); transition-delay: calc(var(--l) * 0.045s); }
+.pied-marque span.rouge { background: linear-gradient(180deg, #d71f2c 0%, rgba(215, 31, 44, 0.8) 45%, rgba(215, 31, 44, 0) 100%); -webkit-background-clip: text; background-clip: text; }
+.pied-marque.vu span { transform: none; }
+.pied-marque .espace { width: 0.28em; }
+
+/* ---------- Bouton « retour en haut » avec anneau de progression ---------- */
+.haut-page { position: fixed; left: 24px; bottom: 24px; z-index: 85; width: 52px; height: 52px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.9); box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.06); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); cursor: pointer; display: grid; place-items: center; opacity: 0; transform: translateY(16px) scale(0.9); pointer-events: none; transition: opacity 0.4s, transform 0.5s var(--ease), background-color 0.3s; }
+.haut-page.on { opacity: 1; transform: none; pointer-events: auto; }
+.haut-page:hover { background: var(--noir); }
+.haut-page:hover .haut-page__fleche { stroke: #fff; }
+.haut-page svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.haut-page__anneau { fill: none; stroke: var(--rouge); stroke-width: 2.5; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 50% 50%; }
+.haut-page__fleche { position: relative !important; inset: auto !important; width: 20px !important; height: 20px !important; fill: none; stroke: var(--noir); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: stroke 0.3s; }
+@media (max-width: 640px) { .haut-page { display: none; } }
+
+/* ---------- Photos des pages intérieures : voile qui se lève + zoom ---------- */
+.lp-photo.rv { opacity: 1 !important; filter: none !important; transform: none !important; clip-path: inset(14% 6% 14% 6% round 28px); transition: clip-path 1.4s var(--ease) !important; }
+.lp-photo.rv.vu { clip-path: inset(0 round 28px); }
+.lp-photo.rv img { transform: scale(1.18); transition: transform 2s var(--ease); }
+.lp-photo.rv.vu img { transform: none; }
+
+/* ---------- Liens du pied de page : trait qui se dessine ---------- */
+.footer ul a { background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px; padding-bottom: 2px; transition: background-size 0.45s var(--ease), color 0.2s !important; }
+.footer ul a:hover { background-size: 100% 1px; }
+
+/* ---------- Tarifs : séparations qui se dessinent, prix qui ressortent ---------- */
+.ac-tarifs li { position: relative; padding-left: 22px; }
+.ac-tarifs li::before { content: ""; position: absolute; left: 0; top: 10%; bottom: 10%; width: 1px; background: rgba(255, 255, 255, 0.18); transform: scaleY(0); transform-origin: top; transition: transform 1s 0.3s var(--ease); }
+.ac-tarifs li.is-in::before { transform: none; }
+.ac-tarifs li b { transition: color 0.3s; }
+.ac-tarifs li:hover b { color: #ff6b74 !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  html.intro .rideau { display: none; }
+  .notif { animation: none !important; }
+  .pied-marque span { transform: none; transition: none; }
+  .lp-photo.rv { clip-path: none; } .lp-photo.rv img { transform: none; }
+}
+.rideau__centre b { text-transform: uppercase; }

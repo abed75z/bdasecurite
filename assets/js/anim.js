@@ -72,6 +72,15 @@
     if (document.hidden) document.addEventListener('visibilitychange', minuter, { once: true }); else minuter();
   } else if (rideau) rideau.remove();
 
+  /* ---------- Accueil : hauteur de la bande des garanties (le 1er écran remplit la fenêtre) ---------- */
+  const garanties = document.querySelector('.ac-garanties');
+  if (garanties) {
+    const mesurer = () => document.documentElement.style.setProperty('--garanties-h', `${garanties.offsetHeight}px`);
+    mesurer();
+    window.addEventListener('resize', mesurer);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(mesurer);
+  }
+
   /* ---------- Barre du haut plus compacte une fois la page défilée ---------- */
   const nav = document.querySelector('.nav');
   if (nav) auScroll(() => nav.classList.toggle('is-compact', window.scrollY > 80));
@@ -180,7 +189,7 @@
       if (y > 1000) return;
       texteHero.style.transform = `translate3d(0, ${(y * 0.18).toFixed(1)}px, 0)`;
       texteHero.style.opacity = String(clamp(1 - y / 750, 0, 1));
-      if (tel) tel.style.transform = `translate3d(0, ${(y * -0.08).toFixed(1)}px, 0) rotate(${(y * 0.006).toFixed(2)}deg)`;
+      if (tel) tel.style.transform = `perspective(1400px) translate3d(0, ${(y * -0.08).toFixed(1)}px, 0) rotateX(${(y * 0.018).toFixed(2)}deg) rotate(${(y * 0.006).toFixed(2)}deg)`;
     });
   }
 

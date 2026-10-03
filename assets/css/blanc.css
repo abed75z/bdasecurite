@@ -1064,3 +1064,83 @@ html.intro .notif--2 { animation-delay: 3.6s, 4.6s !important; }
   .lp-photo.rv { clip-path: none; } .lp-photo.rv img { transform: none; }
 }
 .rideau__centre b { text-transform: uppercase; }
+
+/* =========================================================
+   VERSION 2.4 — premier écran plein, icônes qui se dessinent,
+   reflets et finitions supplémentaires
+   ========================================================= */
+
+/* ---------- Accueil : le premier écran remplit exactement la fenêtre
+   (en-tête + bande des garanties), quel que soit le navigateur ---------- */
+@media (min-width: 1021px) and (min-height: 620px) {
+  .ac-hero { min-height: calc(100svh - var(--garanties-h, 70px)); display: grid; align-content: center; box-sizing: border-box; }
+}
+
+/* ---------- Icônes qui se dessinent à leur apparition ---------- */
+.tuile__ico, .ac-garanties__liste .icon, .etape__ico, .ac-moyen .icon {
+  stroke-dasharray: 140; stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1.6s 0.35s var(--ease), transform 0.5s var(--ease), background-color 0.4s, stroke 0.4s !important;
+}
+.tuile.rv:not(.vu) .tuile__ico, .ac-etapes li.cascade:not(.is-in) .etape__ico, .ac-contact__moyens > .cascade:not(.is-in) .icon { stroke-dashoffset: 140; }
+
+/* ---------- Garanties : survol ---------- */
+.ac-garanties__liste li { transition: background-color 0.35s, opacity 0.9s var(--ease), transform 1s var(--ease), filter 0.9s var(--ease) !important; border-radius: 14px; }
+.ac-garanties__liste li:hover { background: var(--bg-2); }
+.ac-garanties__liste li:hover .icon { transform: scale(1.15) rotate(-6deg); }
+
+/* ---------- Chiffres : trait rouge qui se remplit ---------- */
+.chiffres li { position: relative; overflow: hidden; }
+.chiffres li::after { content: ""; position: absolute; left: 24px; right: 24px; bottom: 18px; height: 3px; border-radius: 3px; background: var(--rouge); transform: scaleX(0); transform-origin: left; transition: transform 1.8s 0.5s var(--ease); }
+.chiffres li.vu::after { transform: scaleX(1); }
+.chiffres li { padding-bottom: 36px !important; }
+
+/* ---------- « SÉCURITÉ » du haut : reflet lumineux de temps en temps ---------- */
+.nav__marque b span {
+  background: linear-gradient(100deg, #d71f2c 0%, #d71f2c 42%, #ff9aa1 50%, #d71f2c 58%, #d71f2c 100%) 100% 0 / 260% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent !important;
+  animation: brille 6s 2.5s ease-in-out infinite;
+}
+@keyframes brille { 0%, 70% { background-position: 100% 0; } 90%, 100% { background-position: 0% 0; } }
+
+/* ---------- Bouton principal de l'accueil : flèche qui invite au clic ---------- */
+.ac-hero .btn--gold .icon--arrow { animation: pousse 3.2s 3s ease-in-out infinite; }
+@keyframes pousse { 0%, 80%, 100% { transform: none; } 88% { transform: translateX(6px); } 94% { transform: translateX(1px); } }
+
+/* ---------- Carte contact : liseré lumineux qui fait le tour ---------- */
+.ac-contact__carte::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: conic-gradient(from var(--angle, 0deg), rgba(215, 31, 44, 0) 0%, rgba(255, 107, 116, 0.95) 8%, rgba(215, 31, 44, 0) 22%, rgba(215, 31, 44, 0) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: anneau 7s linear infinite;
+}
+.ac-contact__carte > * { position: relative; z-index: 1; }
+
+/* ---------- FAQ : la question ouverte s'élargit légèrement ---------- */
+.faq__item { transition: transform 0.5s var(--ease), box-shadow 0.5s var(--ease), opacity 0.9s var(--ease), filter 0.9s var(--ease) !important; }
+.faq__item.is-open { transform: scale(1.015); }
+.faq__item:not(.is-open):hover { transform: translateX(6px); }
+
+/* ---------- Bande des tarifs : les prix s'allument au passage ---------- */
+.ac-tarifs li.is-in b { animation: allume 1.4s 0.6s var(--ease) both; }
+@keyframes allume { 0% { text-shadow: 0 0 0 rgba(255, 107, 116, 0); } 40% { text-shadow: 0 0 22px rgba(255, 107, 116, 0.65); } 100% { text-shadow: 0 0 0 rgba(255, 107, 116, 0); } }
+
+/* ---------- Référence : la photo glisse doucement dans son cadre ---------- */
+.ac-ref__photo img { transition: transform 0.2s linear; }
+
+/* ---------- Pied de page : l'écusson tourne au survol ---------- */
+.footer .brand__mark { transition: transform 0.8s var(--ease) !important; }
+.footer .brand:hover .brand__mark { transform: rotate(-12deg) scale(1.1) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tuile__ico, .ac-garanties__liste .icon, .etape__ico, .ac-moyen .icon { stroke-dashoffset: 0 !important; transition: none !important; }
+  .nav__marque b span, .ac-hero .btn--gold .icon--arrow, .ac-contact__carte::after, .ac-tarifs li.is-in b { animation: none !important; }
+  .chiffres li::after { transform: scaleX(1); transition: none; }
+}
+
+/* Bande des garanties (bas du 1er écran) : apparaît au chargement, sans attendre le scroll */
+.ac-garanties__liste li.cascade { opacity: 1 !important; transform: none !important; filter: none !important; animation: monte-doux 0.9s calc(0.7s + var(--c, 0) * 0.09s) var(--ease) both; }
+.ac-garanties__liste .icon { animation: dessine 1.6s calc(1s + var(--c, 0) * 0.12s) var(--ease) both; }
+.ac-garanties__liste li { --c: 0; }
+.ac-garanties__liste li:nth-child(2) { --c: 1; } .ac-garanties__liste li:nth-child(3) { --c: 2; } .ac-garanties__liste li:nth-child(4) { --c: 3; }
+@keyframes dessine { from { stroke-dashoffset: 140; } to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .ac-garanties__liste li.cascade, .ac-garanties__liste .icon { animation: none !important; } }

@@ -1144,3 +1144,82 @@ html.intro .notif--2 { animation-delay: 3.6s, 4.6s !important; }
 .ac-garanties__liste li:nth-child(2) { --c: 1; } .ac-garanties__liste li:nth-child(3) { --c: 2; } .ac-garanties__liste li:nth-child(4) { --c: 3; }
 @keyframes dessine { from { stroke-dashoffset: 140; } to { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .ac-garanties__liste li.cascade, .ac-garanties__liste .icon { animation: none !important; } }
+
+/* =========================================================
+   VERSION 2.5 — menus déroulants faciles à utiliser,
+   encore plus d'animations
+   ========================================================= */
+
+/* ---------- Menus : on peut descendre dans le panneau sans qu'il se ferme ----------
+   - le bouton occupe toute la hauteur de la barre (plus de « trou » entre bouton et panneau)
+   - fermeture avec un petit délai (si la souris sort une fraction de seconde) */
+@media (min-width: 1181px) {
+  .nav__links { align-self: stretch; }
+  .nav__drop { align-self: stretch; display: flex !important; align-items: center; }
+  .nav__panel, .nav__panel--large {
+    display: grid !important; visibility: hidden; opacity: 0; pointer-events: none;
+    clip-path: inset(0 0 100% 0 round 0 0 32px 32px); animation: none !important;
+    transition: clip-path 0.45s var(--ease) 0.16s, opacity 0.3s 0.16s, visibility 0s 0.62s;
+  }
+  .nav__panel::before { display: none !important; }
+  .nav__drop:hover .nav__panel, .nav__drop.is-open .nav__panel{
+    visibility: visible; opacity: 1; pointer-events: auto; clip-path: inset(0 0 0 0 round 0 0 32px 32px);
+    transition: clip-path 0.55s var(--ease), opacity 0.25s, visibility 0s;
+  }
+  /* Liens du panneau : arrivent un par un à l'ouverture */
+  .nav__col > * { animation: none !important; opacity: 0; transform: translateY(12px); transition: opacity 0.35s, transform 0.5s var(--ease), background-color 0.15s, padding-left 0.2s var(--ease) !important; }
+  .nav__drop:hover .nav__col > *, .nav__drop.is-open .nav__col > *{ opacity: 1; transform: none; }
+  .nav__drop:hover .nav__col > :nth-child(1), .nav__drop.is-open .nav__col > :nth-child(1) { transition-delay: 0.08s, 0.08s, 0s, 0s !important; }
+  .nav__drop:hover .nav__col > :nth-child(2), .nav__drop.is-open .nav__col > :nth-child(2) { transition-delay: 0.12s, 0.12s, 0s, 0s !important; }
+  .nav__drop:hover .nav__col > :nth-child(3), .nav__drop.is-open .nav__col > :nth-child(3) { transition-delay: 0.16s, 0.16s, 0s, 0s !important; }
+  .nav__drop:hover .nav__col > :nth-child(4), .nav__drop.is-open .nav__col > :nth-child(4) { transition-delay: 0.2s, 0.2s, 0s, 0s !important; }
+  .nav__drop:hover .nav__col > :nth-child(5), .nav__drop.is-open .nav__col > :nth-child(5) { transition-delay: 0.24s, 0.24s, 0s, 0s !important; }
+  .nav__drop:hover .nav__col > :nth-child(6), .nav__drop.is-open .nav__col > :nth-child(6) { transition-delay: 0.28s, 0.28s, 0s, 0s !important; }
+  .nav__drop:hover .nav__col > :nth-child(n + 7), .nav__drop.is-open .nav__col > :nth-child(n + 7) { transition-delay: 0.32s, 0.32s, 0s, 0s !important; }
+  .nav__drop:hover .nav__chev, .nav__drop.is-open .nav__chev { transform: rotate(180deg); }
+}
+
+/* ---------- Indicateur « faire défiler » en bas du premier écran ---------- */
+.ac-defiler { display: none; }
+@media (min-width: 1021px) and (min-height: 620px) {
+  .ac-defiler { position: absolute; z-index: 2; left: 50%; bottom: 22px; transform: translateX(-50%); display: grid; justify-items: center; gap: 8px; color: #86868b; font-size: 11px; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; transition: opacity 0.4s, color 0.3s; animation: apparait 1s 2s both; }
+  .ac-defiler span { position: relative; width: 24px; height: 38px; border: 1.5px solid #c7c7cc; border-radius: 14px; }
+  .ac-defiler span::after { content: ""; position: absolute; left: 50%; top: 7px; width: 4px; height: 8px; margin-left: -2px; border-radius: 4px; background: var(--rouge); animation: molette 1.8s ease-in-out infinite; }
+  .ac-defiler:hover { color: var(--noir); }
+  .ac-defiler.cache { opacity: 0; pointer-events: none; }
+}
+@keyframes molette { 0% { transform: translateY(0); opacity: 0; } 25% { opacity: 1; } 70% { transform: translateY(12px); opacity: 0; } 100% { opacity: 0; } }
+
+/* ---------- Téléphone : reflet qui balaie l'écran ---------- */
+.tel__ecran::before { content: ""; position: absolute; z-index: 5; inset: -20% -60%; pointer-events: none; background: linear-gradient(115deg, rgba(255, 255, 255, 0) 42%, rgba(255, 255, 255, 0.14) 50%, rgba(255, 255, 255, 0) 58%); transform: translateX(-60%); animation: reflet-ecran 7s 3s ease-in-out infinite; }
+@keyframes reflet-ecran { 0%, 75% { transform: translateX(-60%); } 100% { transform: translateX(60%); } }
+
+/* ---------- Boutons à contour : le fond noir se remplit depuis la gauche ---------- */
+.btn--outline {
+  background-image: linear-gradient(var(--noir), var(--noir)) !important; background-repeat: no-repeat !important;
+  background-size: 0% 100% !important; background-position: left center !important; background-color: transparent !important;
+  transition: background-size 0.5s var(--ease), color 0.3s, border-color 0.3s, transform 0.3s var(--ease) !important;
+}
+.btn--outline:hover { background-image: linear-gradient(var(--noir), var(--noir)) !important; background-repeat: no-repeat !important; background-position: left center !important; background-size: 100% 100% !important; background-color: transparent !important; }
+.ac-tarifs .btn--outline, .lp-cta .btn--outline, .lp-aside .lp-box:first-child .btn--outline { background-image: linear-gradient(#fff, #fff) !important; }
+.ac-tarifs .btn--outline:hover, .lp-cta .btn--outline:hover { color: var(--noir) !important; }
+
+/* ---------- Bouton de l'assistant : onde qui attire l'œil ---------- */
+.as-lanceur:not(.is-ouvert)::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--rouge); animation: onde-lanceur 3.2s 4s ease-out infinite; }
+@keyframes onde-lanceur { 0% { transform: scale(1); opacity: 0.55; } 60%, 100% { transform: scale(1.35, 1.6); opacity: 0; } }
+.as-lanceur { isolation: isolate; }
+
+/* ---------- Grand nom du pied de page : les lettres ondulent au survol ---------- */
+.pied-marque:hover span { animation: vague 0.9s var(--ease); animation-delay: calc(var(--l) * 0.04s); }
+@keyframes vague { 40% { transform: translateY(-14%); } }
+
+/* ---------- Petits titres : effet « décodage » (géré en JS) ---------- */
+.kicker.decode { font-variant-numeric: tabular-nums; }
+
+/* ---------- Tuiles et photo : profondeur au scroll (translate, sans gêner les autres effets) ---------- */
+.tuile, .ac-ref__photo { will-change: translate; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-defiler span::after, .tel__ecran::before, .as-lanceur::before { animation: none !important; }
+  .pied-marque:hover span { animation: none; }
+}

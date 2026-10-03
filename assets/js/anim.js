@@ -370,6 +370,64 @@
     });
   }
 
+  /* ---------- « Découvrir » en bas du premier écran ---------- */
+  const defiler = document.querySelector('.ac-defiler');
+  if (defiler) {
+    defiler.addEventListener('click', (e) => {
+      e.preventDefault();
+      const g = document.querySelector('.ac-garanties');
+      const cible = g ? g.getBoundingClientRect().bottom + window.scrollY - (nav ? 60 : 0) : window.innerHeight;
+      window.scrollTo({ top: cible, behavior: reduit ? 'auto' : 'smooth' });
+    });
+    auScroll(() => defiler.classList.toggle('cache', window.scrollY > 60));
+  }
+
+  /* ---------- Petits titres rouges : effet « décodage » à leur apparition ---------- */
+  if (!reduit && 'IntersectionObserver' in window) {
+    const SIGNES = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&/';
+    const decoder = (el) => {
+      const final = el.textContent;
+      const lettres = [...final];
+      const t0 = performance.now(), duree = 750;
+      el.classList.add('decode');
+      const pas = (t) => {
+        const p = Math.min(1, (t - t0) / duree);
+        const fixes = Math.floor(p * lettres.length);
+        el.textContent = lettres.map((c, i) => (i < fixes || /[\s·&'’-]/.test(c) ? c : SIGNES[(Math.random() * SIGNES.length) | 0])).join('');
+        if (p < 1) requestAnimationFrame(pas); else { el.textContent = final; el.classList.remove('decode'); }
+      };
+      requestAnimationFrame(pas);
+    };
+    const kickers = [...document.querySelectorAll('.section .kicker, .ac-tarifs__titre')].filter((k) => !k.closest('.ac-hero, .lp-hero, .tf-hero') && k.children.length === 0);
+    const ioK = new IntersectionObserver((en) => en.forEach((e) => { if (e.isIntersecting) { ioK.unobserve(e.target); setTimeout(() => decoder(e.target), 150); } }), { threshold: 0.6 });
+    kickers.forEach((k) => ioK.observe(k));
+  }
+
+  /* ---------- Profondeur au scroll : colonnes de tuiles et photo de référence (ordinateur) ---------- */
+  if (!reduit && window.matchMedia('(min-width: 1021px)').matches) {
+    document.querySelectorAll('.tuiles').forEach((grille) => {
+      const t = [...grille.children];
+      auScroll(() => {
+        if (grille.hidden) return;
+        const r = grille.getBoundingClientRect(), vh = window.innerHeight || 800;
+        if (r.bottom < 0 || r.top > vh) return;
+        const p = clamp((vh - r.top) / (vh + r.height), 0, 1) - 0.5;
+        t.forEach((el, i) => {
+          const col = el.classList.contains('tuile--haute') ? 0 : (i % 2 === 1 ? 1 : 2);
+          el.style.translate = `0 ${(p * col * -36).toFixed(1)}px`;
+        });
+      });
+    });
+    const photo = document.querySelector('.ac-ref__photo');
+    if (photo) auScroll(() => {
+      const r = photo.getBoundingClientRect(), vh = window.innerHeight || 800;
+      if (r.bottom < 0 || r.top > vh) return;
+      const p = clamp((vh - r.top) / (vh + r.height), 0, 1) - 0.5;
+      photo.style.rotate = `${(p * -3).toFixed(2)}deg`;
+      photo.style.translate = `0 ${(p * -30).toFixed(1)}px`;
+    });
+  }
+
   /* ---------- Sélecteur Sécurité / VTC ---------- */
   document.querySelectorAll('.segment').forEach((seg) => {
     const fond = seg.querySelector('.segment__fond');

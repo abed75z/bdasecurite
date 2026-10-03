@@ -18,6 +18,7 @@ import { pageAgents } from './agents.js';
 import { pageVtc } from './vtc.js';
 import { pageSite } from './site.js';
 import { pageContenu } from './contenu.js';
+import { pageAssistance } from './assistance.js';
 import { pageMessages } from './messages.js';
 import { pageNotes } from './notes.js';
 import { pageSecurite, ligneJournal } from './securite.js';
@@ -36,6 +37,7 @@ export const PAGES = {
   vtc: pageVtc,
   site: pageSite,
   contenu: pageContenu,
+  assistance: pageAssistance,
   messages: pageMessages,
   notes: pageNotes,
   creations: pageCreations,

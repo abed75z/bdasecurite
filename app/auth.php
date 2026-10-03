@@ -52,6 +52,8 @@ const ACTIONS_ADMIN = [
   'reglages.enregistrer', 'export', 'import', 'site.horsligne', 'connexions', 'connexion.revoquer', 'vtc.tarifs.enregistrer',
   'chef.memoriser', 'chef.oublier', 'chef.appareils', 'chef.revoquer',
   'agent.supprimer', 'client.supprimer', 'document.supprimer',
+  // Clé API de l'assistant (facturée au gérant)
+  'ia', 'ia.enregistrer', 'ia.tester',
   // Fiches de paie : salaires et n° de sécurité sociale, réservés au gérant
   'paie.parametres', 'paie.parametres.enregistrer', 'paie.salaries', 'paie.salarie.enregistrer',
   'paie.bulletins', 'paie.bulletin', 'paie.bulletin.enregistrer', 'paie.bulletin.supprimer',

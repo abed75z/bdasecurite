@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -479,6 +479,78 @@ try {
 
     case 'client.supprimer':
       supprimer_ligne('clients', (int)(corps()['id'] ?? 0));
+
+    /* ================= Assistant du site ================= */
+    case 'assist.liste':
+      $filtre = (string)($_GET['filtre'] ?? 'tout');
+      $where = ['attente' => "WHERE c.statut = 'attente'", 'equipe' => "WHERE c.statut IN ('attente', 'equipe')", 'tout' => ''][$filtre] ?? '';
+      $convs = db()->query("SELECT c.id, c.statut, c.nom, c.contact, c.page, c.non_lu, c.cree, c.maj,
+        (SELECT texte FROM assist_msg m WHERE m.conv_id = c.id ORDER BY m.id DESC LIMIT 1) AS dernier,
+        (SELECT COUNT(*) FROM assist_msg m WHERE m.conv_id = c.id) AS nb
+        FROM assist_conv c $where ORDER BY CASE c.statut WHEN 'attente' THEN 0 ELSE 1 END, c.maj DESC LIMIT 200")->fetchAll();
+      repondre(['ok' => true, 'conversations' => $convs]);
+
+    case 'assist.conv':
+      $id = (int)($_GET['id'] ?? 0);
+      $st = db()->prepare('SELECT id, statut, nom, contact, page, cree, maj FROM assist_conv WHERE id = ?');
+      $st->execute([$id]);
+      $conv = $st->fetch();
+      if (!$conv) echec('Conversation introuvable.', 404);
+      $m = db()->prepare('SELECT id, auteur, texte, ia, cree FROM assist_msg WHERE conv_id = ? ORDER BY id');
+      $m->execute([$id]);
+      db()->prepare('UPDATE assist_conv SET non_lu = 0 WHERE id = ?')->execute([$id]);
+      repondre(['ok' => true, 'conversation' => $conv, 'messages' => $m->fetchAll()]);
+
+    case 'assist.repondre':
+      $b = corps();
+      $id = (int)($b['id'] ?? 0);
+      $texte = texte($b['texte'] ?? '', 2000);
+      if ($texte === '') echec('Écrivez votre réponse.');
+      $st = db()->prepare('SELECT id FROM assist_conv WHERE id = ?');
+      $st->execute([$id]);
+      if (!$st->fetchColumn()) echec('Conversation introuvable.', 404);
+      db()->prepare('INSERT INTO assist_msg (conv_id, auteur, texte, cree) VALUES (?, ?, ?, ?)')->execute([$id, 'equipe', $texte, maintenant()]);
+      db()->prepare("UPDATE assist_conv SET statut = 'equipe', non_lu = 0, maj = ? WHERE id = ?")->execute([maintenant(), $id]);
+      repondre(['ok' => true]);
+
+    case 'assist.statut':
+      $b = corps();
+      $statut = (string)($b['statut'] ?? '');
+      if (!in_array($statut, ['robot', 'attente', 'equipe', 'close'], true)) echec('Statut invalide.');
+      db()->prepare('UPDATE assist_conv SET statut = ?, non_lu = 0 WHERE id = ?')->execute([$statut, (int)($b['id'] ?? 0)]);
+      repondre(['ok' => true]);
+
+    case 'assist.supprimer':
+      $id = (int)(corps()['id'] ?? 0);
+      db()->prepare('DELETE FROM assist_msg WHERE conv_id = ?')->execute([$id]);
+      db()->prepare('DELETE FROM assist_conv WHERE id = ?')->execute([$id]);
+      repondre(['ok' => true]);
+
+    case 'ia':
+      require_once __DIR__ . '/../app/assistant.php';
+      $ia = assist_ia_reglages();
+      repondre(['ok' => true, 'actif' => $ia['actif'], 'cle' => $ia['cle'] !== '' ? substr($ia['cle'], 0, 10) . '…' . substr($ia['cle'], -4) : '', 'modele' => ASSIST_MODELE, 'curl' => function_exists('curl_init')]);
+
+    case 'ia.enregistrer':
+      require_once __DIR__ . '/../app/assistant.php';
+      $b = corps();
+      $ia = assist_ia_reglages();
+      if (array_key_exists('cle', $b)) {
+        $cle = trim(chaine($b['cle']));
+        if ($cle !== '' && !preg_match('/^sk-ant-[A-Za-z0-9_\-]{20,}$/', $cle)) echec('Cette clé ne ressemble pas à une clé API Claude (elle commence par « sk-ant- »).');
+        $ia['cle'] = $cle;
+      }
+      if (array_key_exists('actif', $b)) $ia['actif'] = !empty($b['actif']);
+      if ($ia['actif'] && $ia['cle'] === '') echec('Ajoutez d’abord la clé API.');
+      db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['ia', json_encode($ia)]);
+      journal('site', 'Assistant : intelligence artificielle ' . ($ia['actif'] ? 'activée' : 'désactivée'));
+      repondre(['ok' => true]);
+
+    case 'ia.tester':
+      require_once __DIR__ . '/../app/assistant.php';
+      $r = assist_ia([['role' => 'user', 'texte' => 'Bonjour, combien coûte un agent de sécurité ?']]);
+      if ($r === null) echec('L’IA ne répond pas : vérifiez la clé API et le crédit de votre compte Anthropic. L’assistant intégré continue de répondre en attendant.');
+      repondre(['ok' => true, 'reponse' => trim(str_replace(ASSIST_CONSEILLER, '', $r))]);
 
     /* ================= Pointage des agents ================= */
     case 'pointages':
@@ -1258,6 +1330,7 @@ function compteurs(): array
     'retards' => (int)$retards->fetchColumn(),
     'horsLigne' => site_hors_ligne() ? 1 : 0,
     'messages' => $q("SELECT COUNT(*) FROM messages_clients WHERE auteur = 'client' AND lu = 0"),
+    'assistance' => $q("SELECT COUNT(*) FROM assist_conv WHERE statut = 'attente' OR (statut = 'equipe' AND non_lu > 0)"),
   ];
 }
 // Page d'accueil : ce qui attend une action, et les derniers éléments modifiés (aucun montant)

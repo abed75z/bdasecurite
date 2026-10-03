@@ -7,6 +7,7 @@
 import { api, h, icone, toast, erreur, champ, saisie, zoneTexte } from './outils.js';
 
 const RUBRIQUES = [
+  ['assistant', 'Assistant du site', 'Fenêtre de discussion en bas à droite (robot + conseillers)'],
   ['tarifs', 'Page Tarifs', 'Page /tarifs, lien « Tarifs » du menu et du pied de page'],
   ['prixAccueil', 'Prix sur l’accueil', 'Bandeau « Tarifs transparents » de la page d’accueil'],
   ['offreVtc', 'Offre VTC Premium', 'Menu VTC, pages chauffeur et transferts, prix VTC'],

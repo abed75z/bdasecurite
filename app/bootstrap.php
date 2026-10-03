@@ -213,6 +213,16 @@ function schema(PDO $db): void
       PRAGMA user_version = 12;
     SQL);
   }
+  if ($version < 13) {
+    // Assistant du site : conversations des visiteurs (robot, puis équipe si besoin)
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS assist_conv (id INTEGER PRIMARY KEY, jeton TEXT NOT NULL UNIQUE, statut TEXT NOT NULL DEFAULT 'robot', nom TEXT NOT NULL DEFAULT '', contact TEXT NOT NULL DEFAULT '', page TEXT NOT NULL DEFAULT '', ratees INTEGER NOT NULL DEFAULT 0, non_lu INTEGER NOT NULL DEFAULT 0, cree TEXT NOT NULL, maj TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS assist_msg (id INTEGER PRIMARY KEY, conv_id INTEGER NOT NULL, auteur TEXT NOT NULL, texte TEXT NOT NULL, ia INTEGER NOT NULL DEFAULT 0, cree TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_assist_msg ON assist_msg (conv_id, id);
+      CREATE INDEX IF NOT EXISTS i_assist_conv ON assist_conv (maj);
+      PRAGMA user_version = 13;
+    SQL);
+  }
 }
 // Pointage : agent reconnu par son lien personnel (null si lien inconnu ou agent inactif)
 function agent_par_lien(string $jeton): ?array
@@ -451,7 +461,7 @@ function prix_vtc(array $t, array $r): float
    Le mode maintenance est un simple fichier dans le dossier de données :
    le .htaccess le détecte et envoie alors les visiteurs vers maintenance.php. */
 // Rubriques du site qu'on peut afficher ou masquer depuis l'admin (Contenu du site)
-const SITE_VISIBLES = ['tarifs', 'prixAccueil', 'references', 'avisClients', 'recrutement', 'ssiap', 'offreVtc', 'whatsapp'];
+const SITE_VISIBLES = ['assistant', 'tarifs', 'prixAccueil', 'references', 'avisClients', 'recrutement', 'ssiap', 'offreVtc', 'whatsapp'];
 // Prix affichés sur le site (page Tarifs, bandeau de l'accueil, estimation)
 const SITE_TARIFS = [
   'agent' => 22, 'ssiap1' => 23.5, 'ssiap2' => 26.5, 'ssiap3' => 34, 'evenementiel' => 24, 'protection' => 55, 'protectionJour' => 440,

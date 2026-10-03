@@ -12,6 +12,7 @@ const MENU = [
   { route: '', libelle: 'Accueil', icone: 'accueil' },
   { groupe: 'Clients' },
   { route: 'demandes', libelle: 'Demandes reçues', icone: 'demande', badge: 'demandes' },
+  { route: 'assistance', libelle: 'Assistance site', icone: 'activite', badge: 'assistance', alerte: true },
   { route: 'messages', libelle: 'Messages', icone: 'mail', badge: 'messages' },
   { route: 'devis', libelle: 'Devis', icone: 'devis' },
   { route: 'factures', libelle: 'Factures', icone: 'facture', badge: 'retards', alerte: true },

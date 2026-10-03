@@ -428,6 +428,26 @@
     });
   }
 
+  /* ---------- Particules lumineuses dans les sections noires ---------- */
+  if (!reduit) {
+    document.querySelectorAll('.ac-ia, .ac-contact__carte').forEach((zone) => {
+      const p = document.createElement('div');
+      p.className = 'poussiere';
+      p.setAttribute('aria-hidden', 'true');
+      const n = window.innerWidth < 700 ? 10 : 22;
+      for (let k = 0; k < n; k++) {
+        const i = document.createElement('i');
+        i.style.left = `${(Math.random() * 100).toFixed(1)}%`;
+        i.style.setProperty('--t', `${(1.5 + Math.random() * 3).toFixed(1)}px`);
+        i.style.setProperty('--d', `${(7 + Math.random() * 9).toFixed(1)}s`);
+        i.style.setProperty('--r', `${(-Math.random() * 14).toFixed(1)}s`);
+        i.style.setProperty('--x', `${(Math.random() * 80 - 40).toFixed(0)}px`);
+        p.append(i);
+      }
+      zone.prepend(p);
+    });
+  }
+
   /* ---------- Sélecteur Sécurité / VTC ---------- */
   document.querySelectorAll('.segment').forEach((seg) => {
     const fond = seg.querySelector('.segment__fond');

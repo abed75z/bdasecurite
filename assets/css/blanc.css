@@ -1223,3 +1223,72 @@ html.intro .notif--2 { animation-delay: 3.6s, 4.6s !important; }
   .ac-defiler span::after, .tel__ecran::before, .as-lanceur::before { animation: none !important; }
   .pied-marque:hover span { animation: none; }
 }
+
+/* =========================================================
+   VERSION 2.6 — radar, trame de points, particules,
+   liserés animés, balayages lumineux
+   ========================================================= */
+
+/* ---------- Premier écran : trame de points discrète autour du téléphone ---------- */
+.ac-hero {
+  background:
+    radial-gradient(ellipse 55% 70% at 74% 46%, rgba(255, 255, 255, 0) 0%, #fff 78%),
+    radial-gradient(rgba(0, 0, 0, 0.085) 1px, transparent 1.6px) 0 0 / 24px 24px,
+    #fff !important;
+}
+
+/* ---------- Radar de sécurité qui tourne derrière le téléphone ---------- */
+.ac-hero__visuel::before {
+  content: "" !important; display: block !important; position: absolute; z-index: -1; left: 50%; top: 47%;
+  right: auto !important; bottom: auto !important; width: min(640px, 120%); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; filter: none !important; opacity: 1 !important;
+  background: repeating-radial-gradient(circle, rgba(0, 0, 0, 0) 0 63px, rgba(0, 0, 0, 0.07) 64px 65px) !important;
+  -webkit-mask: radial-gradient(closest-side, #000 55%, transparent 100%); mask: radial-gradient(closest-side, #000 55%, transparent 100%);
+}
+.ac-hero__visuel::after {
+  content: ""; position: absolute; z-index: -1; left: 50%; top: 47%; width: min(640px, 120%); aspect-ratio: 1; border-radius: 50%; pointer-events: none;
+  translate: -50% -50%; background: conic-gradient(from 0deg, rgba(215, 31, 44, 0.22), rgba(215, 31, 44, 0) 22%, rgba(215, 31, 44, 0) 100%);
+  -webkit-mask: radial-gradient(closest-side, #000 50%, transparent 100%); mask: radial-gradient(closest-side, #000 50%, transparent 100%);
+  animation: radar 6s linear infinite;
+}
+@keyframes radar { to { rotate: 360deg; } }
+.ac-hero--logo .ac-hero__visuel::after, .ac-hero--logo .ac-hero__visuel::before { display: none !important; }
+@media (max-width: 1020px) { .ac-hero__visuel::before, .ac-hero__visuel::after { width: 110%; } }
+
+/* ---------- Particules qui montent dans les sections noires ---------- */
+.poussiere { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.poussiere i { position: absolute; bottom: -10px; width: var(--t, 3px); height: var(--t, 3px); border-radius: 50%; background: rgba(255, 107, 116, 0.7); box-shadow: 0 0 8px rgba(255, 107, 116, 0.6); opacity: 0; animation: monte-particule var(--d, 9s) linear var(--r, 0s) infinite; }
+.poussiere i:nth-child(3n) { background: rgba(255, 255, 255, 0.55); box-shadow: 0 0 6px rgba(255, 255, 255, 0.4); }
+@keyframes monte-particule { 0% { transform: translate(0, 0); opacity: 0; } 12% { opacity: 1; } 85% { opacity: 0.8; } 100% { transform: translate(var(--x, 20px), -620px); opacity: 0; } }
+.ac-ia__grille { position: relative; z-index: 1; }
+.ac-contact__carte > .poussiere { position: absolute; z-index: 0; }
+
+/* ---------- Tuiles : liseré rouge qui tourne au survol ---------- */
+.tuile { border: 1.5px solid transparent !important; }
+.tuile:not(.tuile--noire):hover {
+  background: linear-gradient(#fff, #fff) padding-box, conic-gradient(from var(--angle, 0deg), rgba(215, 31, 44, 0) 0%, #d71f2c 12%, rgba(215, 31, 44, 0) 30%, rgba(215, 31, 44, 0) 100%) border-box !important;
+  animation: anneau 2.6s linear infinite;
+}
+.tuile--noire:hover {
+  background: linear-gradient(#0b0b0c, #0b0b0c) padding-box, conic-gradient(from var(--angle, 0deg), rgba(255, 107, 116, 0) 0%, #ff6b74 12%, rgba(255, 107, 116, 0) 30%, rgba(255, 107, 116, 0) 100%) border-box !important;
+  animation: anneau 2.6s linear infinite;
+}
+
+/* ---------- Bande noire des tarifs : balayage lumineux ---------- */
+.ac-tarifs { position: relative; overflow: hidden; }
+.ac-tarifs::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(100deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.07) 50%, rgba(255, 255, 255, 0) 62%); transform: translateX(-100%); animation: balaye 8s 2s ease-in-out infinite; }
+@keyframes balaye { 0%, 55% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+/* ---------- Étapes : le grand numéro se remplit de rouge au survol ---------- */
+@media (min-width: 1021px) {
+  .ac-etapes--cartes li > span { background: linear-gradient(0deg, var(--rouge) 50%, transparent 50%) 0 0 / 100% 200%; -webkit-background-clip: text; background-clip: text; transition: background-position 0.7s var(--ease); }
+  .ac-etapes--cartes li:hover > span { background-position: 0 100%; }
+}
+
+/* ---------- FAQ : la réponse glisse à l'ouverture ---------- */
+.faq__item.is-open .faq__a p { animation: monte-doux 0.6s 0.1s var(--ease) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-hero__visuel::after, .poussiere, .ac-tarifs::after, .tuile:hover, .faq__item.is-open .faq__a p { animation: none !important; }
+  .poussiere { display: none; }
+}
+.ac-hero__visuel::before { left: 50% !important; top: 47% !important; }

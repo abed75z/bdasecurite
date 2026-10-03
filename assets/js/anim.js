@@ -61,13 +61,43 @@
     });
   }
 
+  /* ---------- Barre du haut plus compacte une fois la page défilée ---------- */
+  const nav = document.querySelector('.nav');
+  if (nav) auScroll(() => nav.classList.toggle('is-compact', window.scrollY > 80));
+
+  /* ---------- Titres de section : mots qui montent un par un ---------- */
+  const titresMots = reduit ? [] : [...document.querySelectorAll('.section .h2:not([data-split]), .ac-contact .h2')].filter((h) => !h.closest('.ac-hero, .lp-hero, .tf-hero'));
+  titresMots.forEach((h) => {
+    let i = 0;
+    const parcourir = (noeud) => [...noeud.childNodes].forEach((n) => {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach((m) => {
+          if (!m) return;
+          if (/^\s+$/.test(m)) { frag.append(' '); return; }
+          const mot = document.createElement('span'); mot.className = 'mot';
+          const s = document.createElement('span'); s.style.setProperty('--m', i++); s.textContent = m;
+          mot.append(s); frag.append(mot);
+        });
+        n.replaceWith(frag);
+      } else if (n.nodeType === 1 && n.tagName !== 'BR') parcourir(n);
+    });
+    parcourir(h);
+    h.classList.add('mots');
+  });
+  if (titresMots.length && 'IntersectionObserver' in window) {
+    const ioT = new IntersectionObserver((en) => en.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('vu'); ioT.unobserve(e.target); } }), { threshold: 0.3 });
+    titresMots.forEach((h) => ioT.observe(h));
+  } else titresMots.forEach((h) => h.classList.add('vu'));
+
   /* ---------- Apparitions au scroll ---------- */
   const cibles = [
     '.section .ac-centre > *', '.section .ac-tete > div > *', '.ac-manifeste .kicker', '.ac-ref__texte > *', '.ac-ref__photo',
     '.faq-intro > *', '.ac-contact__carte', '.lp-article > h2', '.lp-article > p', '.lp-article > .lp-photo',
     '.section__head > *', '.tf-estim', '.tf-tableau', '.tf-majorations', '.chiffres li', '.ac-garanties__liste li'
   ].join(',');
-  const elts = [...document.querySelectorAll(cibles)].filter((el) => !el.closest('.ac-hero, .lp-hero, .tf-hero') && !el.classList.contains('cascade'));
+  const elts = [...document.querySelectorAll(cibles + ', .tuiles .tuile, .ac-ia__texte > :not(.h2), .ac-ia__demo')].filter((el) => !el.closest('.ac-hero, .lp-hero, .tf-hero') && !el.classList.contains('cascade') && !el.classList.contains('mots'));
+  document.querySelectorAll('.tuiles .tuile').forEach((t) => t.classList.add('rv--zoom'));
   if (!reduit && 'IntersectionObserver' in window) {
     // Délai en cascade pour les éléments d'un même parent
     const vus = new Map();
@@ -128,6 +158,76 @@
   document.querySelectorAll('[data-zoom]').forEach((f) => {
     if (reduit) { f.style.setProperty('--z', 1); return; }
     auScroll(() => f.style.setProperty('--z', (1.18 - 0.18 * progression(f, 1, 0.4)).toFixed(4)));
+  });
+
+  /* ---------- En-tête de l'accueil : profondeur au scroll (ordinateur) ---------- */
+  const texteHero = document.querySelector('.ac-hero__texte');
+  const tel = document.querySelector('.ac-hero .tel');
+  if (!reduit && texteHero && window.matchMedia('(min-width: 1021px)').matches) {
+    auScroll(() => {
+      const y = window.scrollY;
+      if (y > 1000) return;
+      texteHero.style.transform = `translate3d(0, ${(y * 0.18).toFixed(1)}px, 0)`;
+      texteHero.style.opacity = String(clamp(1 - y / 750, 0, 1));
+      if (tel) tel.style.transform = `translate3d(0, ${(y * -0.08).toFixed(1)}px, 0) rotate(${(y * 0.006).toFixed(2)}deg)`;
+    });
+  }
+
+  /* ---------- Démonstration de l'assistant : la conversation se joue en boucle ---------- */
+  document.querySelectorAll('[data-demo]').forEach((fil) => {
+    const bulles = [...fil.querySelectorAll('.ia-bulle')];
+    if (reduit) { bulles.forEach((b) => { if (b.dataset.texte) b.textContent = b.dataset.texte; if (b.classList.contains('ia-bulle--saisie')) b.remove(); }); return; }
+    fil.classList.add('is-anime');
+    const pause = (ms) => new Promise((ok) => setTimeout(ok, ms));
+    const attendreVisible = () => new Promise((ok) => { const v = () => (document.hidden ? setTimeout(v, 800) : ok()); v(); });
+    async function jouer() {
+      for (;;) {
+        fil.classList.remove('is-fin');
+        bulles.forEach((b) => { b.classList.remove('on', 'ecrit'); if (b.dataset.texte) b.textContent = ''; });
+        await pause(700);
+        for (const b of bulles) {
+          await attendreVisible();
+          if (b.dataset.texte) {
+            b.classList.add('on', 'ecrit');
+            for (const c of b.dataset.texte) { b.textContent += c; await pause(c === ' ' ? 60 : 34); }
+            b.classList.remove('ecrit');
+            await pause(500);
+          } else if (b.classList.contains('ia-bulle--saisie')) {
+            b.classList.add('on'); await pause(1300); b.classList.remove('on');
+          } else { b.classList.add('on'); await pause(2200); }
+        }
+        await pause(4500);
+        fil.classList.add('is-fin');
+        await pause(700);
+      }
+    }
+    let lance = false;
+    const go = () => { if (!lance) { lance = true; jouer(); } };
+    if ('IntersectionObserver' in window) new IntersectionObserver((en, o) => { if (en[0].isIntersecting) { go(); o.disconnect(); } }, { threshold: 0.3 }).observe(fil);
+    else go();
+  });
+
+  /* ---------- Champ de question : exemples qui s'écrivent tout seuls ---------- */
+  document.querySelectorAll('input[data-exemples]').forEach((champ) => {
+    if (reduit) return;
+    const exemples = champ.dataset.exemples.split('|');
+    const base = champ.placeholder;
+    let i = 0, actif = true;
+    const pause = (ms) => new Promise((ok) => setTimeout(ok, ms));
+    champ.addEventListener('focus', () => { actif = false; champ.placeholder = base; });
+    champ.addEventListener('blur', () => { if (!champ.value) { actif = true; } });
+    (async function boucle() {
+      await pause(1500);
+      for (;;) {
+        if (!actif || document.hidden) { await pause(800); continue; }
+        const t = exemples[i++ % exemples.length];
+        for (let k = 1; k <= t.length && actif; k++) { champ.placeholder = t.slice(0, k); await pause(42); }
+        await pause(1800);
+        for (let k = t.length; k >= 0 && actif; k--) { champ.placeholder = t.slice(0, k) || ' '; await pause(18); }
+        if (!actif) champ.placeholder = base;
+        await pause(350);
+      }
+    })();
   });
 
   /* ---------- Sélecteur Sécurité / VTC ---------- */

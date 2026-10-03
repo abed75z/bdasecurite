@@ -659,3 +659,183 @@ select.input option { background: #fff !important; color: var(--noir); }
 @media (prefers-reduced-motion: reduce) { .jobs-hero [data-reveal], .lp-hero [data-reveal], .rv-hero [data-reveal], .tf-hero [data-reveal], .hero [data-reveal] { animation: none !important; } }
 .board { box-shadow: var(--ombre-forte) !important; border: 0 !important; border-radius: 26px !important; }
 .rv-hero__photo { overflow: hidden; }
+
+/* =========================================================
+   VERSION 2.1 — en-tête centré, menus plein écran, assistant
+   mis en avant, effets supplémentaires
+   ========================================================= */
+html { scroll-behavior: smooth; }
+:root { --nav-h: 72px; }
+
+/* ---------- En-tête : écusson seul, nom au centre ---------- */
+.nav { height: var(--nav-h) !important; transition: height 0.45s var(--ease), background-color 0.3s, border-color 0.3s, box-shadow 0.4s !important; }
+.nav.is-compact { height: 60px !important; box-shadow: 0 10px 30px -22px rgba(0, 0, 0, 0.35); }
+.nav__inner { position: relative; width: min(1360px, 100% - 2 * var(--gutter)) !important; height: 100%; gap: 4px !important; }
+.brand { flex: none; gap: 0 !important; }
+.brand__mark { width: 54px !important; height: auto !important; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.18)); transition: transform 0.7s var(--ease), width 0.45s var(--ease) !important; }
+.nav.is-compact .brand__mark { width: 46px !important; }
+.brand:hover .brand__mark { transform: rotate(-7deg) scale(1.07) !important; }
+.brand__text { display: none !important; }
+.nav__links { margin-left: 18px; }
+.nav__links--d { margin-left: auto; margin-right: 6px; }
+.nav__marque {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 1;
+  font-family: var(--font-display); font-weight: 800; font-size: 16px; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--noir); white-space: nowrap; padding-left: 0.3em; transition: letter-spacing 0.6s var(--ease), color 0.3s;
+  animation: marque-arrive 1.2s 0.1s var(--ease) both;
+}
+.nav__marque span { color: var(--rouge); }
+.nav__marque:hover { letter-spacing: 0.38em; }
+@keyframes marque-arrive { from { opacity: 0; letter-spacing: 0.7em; filter: blur(6px); } to { opacity: 1; filter: none; } }
+.nav__actions { margin-left: 0 !important; }
+.nav__actions .btn--gold { display: none !important; }
+@media (max-width: 1500px) { .nav__tel span { display: none; } .nav__tel { width: 44px; height: 44px; justify-content: center; border: 1px solid var(--line-strong) !important; border-radius: 999px !important; } }
+@media (max-width: 1320px) { .nav__marque { font-size: 14px; letter-spacing: 0.22em; } .nav__links > a, .nav__drop-btn { padding: 10px 10px !important; font-size: 13px !important; } }
+@media (max-width: 1180px) { .nav__marque { font-size: 15px; letter-spacing: 0.26em; } .nav__links--d { display: none !important; } }
+@media (max-width: 640px) { .nav__marque { font-size: 13px; letter-spacing: 0.2em; } .brand__mark { width: 46px !important; } }
+@media (max-width: 380px) { .nav__marque { font-size: 12px; letter-spacing: 0.14em; } }
+/* Pages à en-tête simplifié (devis, merci) : les actions à droite */
+.nav__marque + .nav__actions { margin-left: auto !important; }
+/* Version anglaise : le nom reste à côté du logo (menu plus long) */
+.nav__marque.nav__marque--gauche { position: static; transform: none; margin-left: 14px; font-size: 14px; }
+
+/* ---------- Survol du menu : le reste du site s'assombrit ---------- */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 58; pointer-events: none;
+  background: rgba(10, 10, 12, 0.32); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+  opacity: 0; visibility: hidden; transition: opacity 0.45s var(--ease), visibility 0s 0.45s;
+}
+@media (hover: hover) and (pointer: fine) {
+  body:has(.nav__links:hover)::after, body:has(.nav__drop.is-open)::after { opacity: 1; visibility: visible; transition: opacity 0.45s var(--ease), visibility 0s; }
+  body:has(.nav__links:hover) .nav, body:has(.nav__drop.is-open) .nav { background: #fff !important; border-bottom-color: transparent !important; }
+}
+
+/* ---------- Menus déroulants plein écran (façon grandes marques) ---------- */
+@media (min-width: 1181px) {
+  .nav__drop { position: static !important; }
+  .nav__panel, .nav__panel--large {
+    position: fixed !important; left: 0 !important; right: 0 !important; top: 100% !important; transform: none !important;
+    min-width: 0 !important; margin: 0 !important; border: 0 !important; border-radius: 0 0 32px 32px !important;
+    background: #fff !important; box-shadow: 0 40px 60px -30px rgba(0, 0, 0, 0.3) !important;
+    padding: 34px max(var(--gutter), calc((100vw - 1180px) / 2)) 44px !important;
+    animation: menu-descend 0.55s var(--ease) both !important; backdrop-filter: none !important;
+  }
+  .nav__panel::before { top: -20px !important; height: 20px !important; }
+  .nav__panel--large { grid-template-columns: 1.3fr 1fr 1fr !important; gap: 40px !important; }
+  .nav__panel:not(.nav__panel--large) .nav__col { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 8px 24px; }
+  .nav__col { gap: 4px !important; }
+  .nav__col > * { animation: monte-doux 0.6s var(--ease) both; }
+  .nav__col > :nth-child(2) { animation-delay: 0.03s; } .nav__col > :nth-child(3) { animation-delay: 0.06s; } .nav__col > :nth-child(4) { animation-delay: 0.09s; }
+  .nav__col > :nth-child(5) { animation-delay: 0.12s; } .nav__col > :nth-child(n + 6) { animation-delay: 0.15s; }
+  .nav__col a { border-radius: 14px !important; padding: 10px 14px !important; }
+  .nav__col a b { font-family: var(--font-display) !important; font-size: 19px !important; font-weight: 800 !important; letter-spacing: -0.025em !important; }
+  .nav__col a small { font-size: 13.5px !important; }
+  .nav__col--simple a { font-size: 15px !important; color: var(--muted) !important; padding: 7px 14px !important; }
+  .nav__col--simple a:hover { color: var(--noir) !important; }
+  .nav__col a:hover { padding-left: 20px !important; }
+  .nav__col-titre { padding: 0 14px 8px !important; color: var(--rouge) !important; letter-spacing: 0.12em !important; }
+}
+@keyframes menu-descend { from { opacity: 0; clip-path: inset(0 0 100% 0 round 0 0 32px 32px); } to { opacity: 1; clip-path: inset(0 0 0 0 round 0 0 32px 32px); } }
+
+/* ---------- Pastille « Assistant en ligne » de l'en-tête ---------- */
+.ac-pilule { justify-self: start; display: inline-flex; align-items: center; gap: 10px; padding: 7px 8px 7px 14px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--line); font-size: 14px; font-weight: 600; color: var(--noir); transition: background-color 0.3s, border-color 0.3s, transform 0.4s var(--ease); }
+.ac-pilule i { position: relative; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+.ac-pilule i::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #22c55e; animation: pulsation 2s ease-out infinite; }
+@keyframes pulsation { from { transform: scale(0.6); opacity: 0.9; } to { transform: scale(1.8); opacity: 0; } }
+.ac-pilule .icon { width: 26px; height: 26px; padding: 6px; border-radius: 50%; background: var(--noir); color: #fff; transition: transform 0.4s var(--ease), background-color 0.3s; }
+.ac-pilule:hover { background: #fff; border-color: var(--line-strong); transform: translateY(-1px); }
+.ac-pilule:hover .icon { transform: translateX(3px); background: var(--rouge); }
+
+/* ---------- En-tête de l'accueil : lueurs qui dérivent ---------- */
+.ac-hero::after { animation: derive 18s ease-in-out infinite alternate; }
+.ac-hero::before { content: "" !important; display: block !important; position: absolute; z-index: 0; inset: auto auto -30% -15%; width: 55%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(0, 0, 0, 0.045), rgba(0, 0, 0, 0)) !important; -webkit-mask: none !important; mask: none !important; opacity: 1 !important; animation: derive 22s ease-in-out infinite alternate-reverse; pointer-events: none; }
+@keyframes derive { from { transform: translate(0, 0) scale(1); } to { transform: translate(-8%, 10%) scale(1.15); } }
+.ac-hero__texte, .tel { will-change: transform; }
+
+/* ---------- Section assistant ---------- */
+.ac-ia { position: relative; overflow: hidden; background: var(--noir); color: #a1a1a6; isolation: isolate; }
+.ac-ia::before { content: ""; position: absolute; z-index: -1; right: -15%; top: -40%; width: 70%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(215, 31, 44, 0.32), rgba(215, 31, 44, 0)); animation: derive 14s ease-in-out infinite alternate; }
+.ac-ia::after { content: ""; position: absolute; z-index: -1; left: -10%; bottom: -50%; width: 50%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0)); animation: derive 17s ease-in-out infinite alternate-reverse; }
+.ac-ia__grille { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: clamp(36px, 6vw, 90px); align-items: center; }
+.ac-ia__texte { display: grid; gap: 22px; justify-items: start; }
+.ac-ia .kicker { color: #ff6b74 !important; }
+.ac-ia .h2 { color: #fff !important; }
+.ac-ia .lead { color: #a1a1a6 !important; max-width: 520px; }
+.ia-champ { position: relative; width: 100%; max-width: 560px; display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 20px; border-radius: 999px; background: #fff; isolation: isolate; margin-top: 6px; }
+.ia-champ__anneau { position: absolute; z-index: -2; inset: -2px; border-radius: inherit; background: conic-gradient(from var(--angle, 0deg), rgba(215, 31, 44, 0), #d71f2c, #ff8a92, rgba(215, 31, 44, 0) 40%); animation: anneau 4s linear infinite; filter: blur(0.5px); }
+.ia-champ__anneau::after { content: ""; position: absolute; inset: -6px; border-radius: inherit; background: inherit; filter: blur(14px); opacity: 0.55; }
+@property --angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+@keyframes anneau { to { --angle: 360deg; } }
+.ia-champ::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: #fff; }
+.ia-champ__ico { width: 22px; height: 22px; flex: none; fill: none; stroke: var(--rouge); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.ia-champ input { flex: 1; min-width: 0; height: 48px; border: 0; outline: 0; background: transparent; font: 500 17px var(--font-body); color: var(--noir); }
+.ia-champ input::placeholder { color: #86868b; }
+.ia-champ button { width: 48px; height: 48px; flex: none; display: grid; place-items: center; border: 0; border-radius: 50%; background: var(--noir); color: #fff; cursor: pointer; transition: background-color 0.3s, transform 0.4s var(--ease); }
+.ia-champ button svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ia-champ button:hover { background: var(--rouge); transform: scale(1.06) rotate(-8deg); }
+.ia-champ:focus-within .ia-champ__anneau { animation-duration: 1.6s; }
+.ia-puces { display: flex; flex-wrap: wrap; gap: 8px; }
+.ia-puces button { padding: 9px 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.04); color: #f5f5f7; font: 500 14px var(--font-body); cursor: pointer; transition: background-color 0.3s, border-color 0.3s, transform 0.4s var(--ease), color 0.3s; }
+.ia-puces button:hover { background: #fff; color: var(--noir); border-color: #fff; transform: translateY(-2px); }
+
+/* Fenêtre de démonstration */
+.ac-ia__demo { display: grid; justify-items: center; perspective: 1400px; }
+.ia-fenetre { width: min(420px, 100%); border-radius: 28px; background: #fff; box-shadow: 0 50px 100px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.08); overflow: hidden; transform: rotateY(-10deg) rotateX(4deg); transform-style: preserve-3d; transition: transform 1.2s var(--ease); animation: flotte-doux 8s ease-in-out infinite; }
+.ac-ia__demo:hover .ia-fenetre { transform: none; }
+@keyframes flotte-doux { 50% { translate: 0 -10px; } }
+.ia-fenetre__tete { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+.ia-fenetre__tete img { width: 40px; height: auto; }
+.ia-fenetre__tete b { display: block; color: var(--noir); font-size: 15px; }
+.ia-fenetre__tete small { display: flex; align-items: center; gap: 6px; color: #86868b; font-size: 12.5px; }
+.ia-fenetre__tete small::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; }
+.ia-fenetre__fil { display: flex; flex-direction: column; gap: 8px; height: 330px; padding: 18px 16px; overflow: hidden; justify-content: flex-end; }
+.ia-bulle { max-width: 84%; margin: 0; padding: 10px 14px; border-radius: 20px; font-size: 14.5px; line-height: 1.45; animation: bulle-arrive 0.45s var(--ease) both; }
+.ia-bulle b { color: inherit; }
+.ia-bulle--moi { align-self: flex-end; background: var(--noir); color: #fff; border-bottom-right-radius: 6px; min-height: 1.45em; }
+.ia-bulle--robot { align-self: flex-start; background: var(--bg-2); color: var(--noir); border-bottom-left-radius: 6px; }
+.ia-bulle--saisie { display: flex; gap: 4px; padding: 13px 15px; }
+.ia-bulle--saisie span { width: 7px; height: 7px; border-radius: 50%; background: #a1a1a6; animation: saisie 1.2s ease-in-out infinite; }
+.ia-bulle--saisie span:nth-child(2) { animation-delay: 0.15s; } .ia-bulle--saisie span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bulle-arrive { from { opacity: 0; transform: translateY(10px) scale(0.96); } to { opacity: 1; transform: none; } }
+.ia-fenetre__fil.is-anime .ia-bulle { display: none; }
+.ia-fenetre__fil.is-anime .ia-bulle.on { display: block; }
+.ia-fenetre__fil.is-anime .ia-bulle--saisie.on { display: flex; }
+.ia-fenetre__fil.is-fin .ia-bulle { opacity: 0; transition: opacity 0.6s; }
+.ia-bulle--moi.ecrit::after { content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -2px; background: #fff; animation: curseur 0.9s steps(1) infinite; }
+@keyframes curseur { 50% { opacity: 0; } }
+.ia-fenetre__pied { display: flex; align-items: center; justify-content: space-between; margin: 0 14px 16px; padding: 12px 16px; border-radius: 999px; background: var(--bg-2); color: #86868b; font-size: 14px; }
+.ia-fenetre__pied i { width: 30px; height: 30px; border-radius: 50%; background: var(--noir); }
+@media (max-width: 900px) { .ac-ia__grille { grid-template-columns: 1fr; } .ia-fenetre { transform: none; } .ia-fenetre__fil { height: 290px; } }
+@media (max-width: 560px) { .ia-champ input { font-size: 16px; } .ac-ia__demo { display: none; } }
+
+/* ---------- Titres de section : les mots montent un par un ---------- */
+.h2.mots .mot > span, .manifeste.mots .mot > span { animation: none; transform: translateY(105%); opacity: 0; transition: transform 0.95s var(--ease), opacity 0.95s var(--ease); transition-delay: calc(var(--m) * 0.045s); }
+.h2.mots.vu .mot > span, .manifeste.mots.vu .mot > span { transform: none; opacity: 1; }
+
+/* ---------- Tuiles : arrivée avec léger zoom ---------- */
+.rv.rv--zoom { transform: translateY(40px) scale(0.94); }
+.rv.rv--zoom.vu { transform: none; }
+.tuile.rv.vu:hover { transform: translateY(-6px); transition-delay: 0s !important; }
+.tuile { transition: transform 0.6s var(--ease), box-shadow 0.6s var(--ease), opacity 1s var(--ease), filter 1s var(--ease) !important; }
+
+/* ---------- Photo de référence : voile qui se lève ---------- */
+.ac-ref__photo { clip-path: inset(0 0 0 0 round 32px); }
+.ac-ref__photo.rv { clip-path: inset(18% 8% 18% 8% round 32px); opacity: 1 !important; filter: none !important; transform: none !important; transition: clip-path 1.4s var(--ease) !important; }
+.ac-ref__photo.rv.vu { clip-path: inset(0 0 0 0 round 32px); }
+
+/* ---------- Pied de page : grand nom de marque ---------- */
+.footer { overflow: hidden; }
+.footer .container::after {
+  content: "BDA Sécurité"; display: block; margin: clamp(30px, 5vw, 60px) 0 calc(-0.2em); text-align: center; white-space: nowrap;
+  font-family: var(--font-display); font-weight: 800; font-size: clamp(3rem, 12.5vw, 13rem); letter-spacing: -0.06em; line-height: 0.9;
+  background: linear-gradient(180deg, #0b0b0c 0%, rgba(11, 11, 12, 0.85) 45%, rgba(11, 11, 12, 0) 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* ---------- Divers ---------- */
+.tuile__embleme { width: 66% !important; right: -6% !important; top: 4% !important; opacity: 0.2 !important; filter: grayscale(1) brightness(1.6) !important; }
+@media (prefers-reduced-motion: reduce) {
+  .nav__marque, .ac-hero::after, .ac-hero::before, .ac-ia::before, .ac-ia::after, .ia-champ__anneau, .ia-fenetre, .ac-pilule i::after { animation: none !important; }
+  .h2.mots .mot > span, .manifeste.mots .mot > span { transform: none; opacity: 1; transition: none; }
+  .ac-ref__photo.rv { clip-path: inset(0 0 0 0 round 32px); }
+}
+@media (max-width: 1180px) { .nav__actions { margin-left: auto !important; } }

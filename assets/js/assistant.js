@@ -73,7 +73,7 @@
     const form = h('form', { class: 'as-saisie' }, champ, bouton);
     const panneau = h('section', { class: 'as-panneau', role: 'dialog', 'aria-label': 'Assistant BDA Sécurité', hidden: true },
       h('header', { class: 'as-tete' },
-        h('img', { src: '/assets/img/embleme.png', alt: '', width: 128, height: 131 }),
+        h('img', { src: '/assets/img/ecusson-petit.png', alt: '', width: 262, height: 221 }),
         h('div', null, h('b', null, 'Assistant BDA Sécurité'), statutTxt),
         h('button', { class: 'as-tete__fermer', type: 'button', 'aria-label': 'Fermer', onclick: () => ouvrir(false) }, ic(I.croix))),
       fil, form,
@@ -231,7 +231,21 @@
     lanceur.addEventListener('click', () => ouvrir(!etat.ouvert));
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && etat.ouvert) ouvrir(false); });
     // Liens « parler à l'assistant » ailleurs sur le site
-    document.addEventListener('click', (e) => { const a = e.target.closest('[data-assistant]'); if (a) { e.preventDefault(); ouvrir(true); } });
+    // data-question="…" : la question est posée directement ; [data-assistant-form] : champ de question ailleurs sur la page
+    async function demander(question) {
+      await ouvrir(true);
+      if (question && String(question).trim()) envoyer(question);
+    }
+    document.addEventListener('click', (e) => { const a = e.target.closest('[data-assistant]'); if (a) { e.preventDefault(); demander(a.dataset.question); } });
+    document.addEventListener('submit', (e) => {
+      const f = e.target.closest('[data-assistant-form]');
+      if (!f) return;
+      e.preventDefault();
+      const q = f.querySelector('input, textarea');
+      demander(q && q.value);
+      if (q) { q.value = ''; q.blur(); }
+    });
+    window.Assistant = { ouvrir: () => ouvrir(true), demander };
 
     majStatut();
     suivre();
@@ -247,7 +261,7 @@
         if (etat.ouvert) return;
         const t = h('div', { class: 'as-teaser', role: 'status' },
           h('button', { class: 'as-teaser__x', type: 'button', 'aria-label': 'Fermer', onclick: (e) => { e.stopPropagation(); t.remove(); } }, '×'),
-          h('img', { src: '/assets/img/embleme.png', alt: '', width: 128, height: 131 }),
+          h('img', { src: '/assets/img/ecusson-petit.png', alt: '', width: 262, height: 221 }),
           h('p', null, h('b', null, 'Une question ?'), 'Tarifs, disponibilités, devis… je vous réponds tout de suite.'));
         t.addEventListener('click', () => ouvrir(true));
         document.body.append(t);

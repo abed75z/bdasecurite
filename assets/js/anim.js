@@ -230,6 +230,49 @@
     })();
   });
 
+  /* ---------- Menu du haut : repère qui glisse sous le lien survolé ---------- */
+  const navInner = document.querySelector('.nav__inner');
+  if (navInner && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const repere = document.createElement('span');
+    repere.className = 'nav__survol';
+    repere.setAttribute('aria-hidden', 'true');
+    navInner.prepend(repere);
+    const placer = (el) => {
+      const a = el.getBoundingClientRect(), b = navInner.getBoundingClientRect();
+      repere.style.width = `${a.width}px`;
+      repere.style.transform = `translate(${a.left - b.left}px, ${a.top - b.top + (a.height - 38) / 2}px)`;
+      repere.classList.add('on');
+    };
+    navInner.querySelectorAll('.nav__links > a, .nav__drop-btn').forEach((el) => el.addEventListener('mouseenter', () => placer(el)));
+    navInner.querySelectorAll('.nav__links').forEach((n) => n.addEventListener('mouseleave', () => repere.classList.remove('on')));
+  }
+
+  /* ---------- Bandeau de mots : glisse avec le scroll ---------- */
+  document.querySelectorAll('[data-defile]').forEach((ligne) => {
+    if (reduit) return;
+    const sens = parseFloat(ligne.dataset.defile) || 1;
+    const bloc = ligne.parentElement;
+    auScroll(() => {
+      const r = bloc.getBoundingClientRect(), vh = window.innerHeight || 800;
+      if (r.bottom < -100 || r.top > vh + 100) return;
+      const avance = (vh - r.top) * 0.35;
+      ligne.style.setProperty('--dx', `${(sens > 0 ? -ligne.scrollWidth * 0.25 + avance : -avance).toFixed(1)}px`);
+    });
+  });
+
+  /* ---------- Section assistant : s'élargit jusqu'aux bords en arrivant ---------- */
+  document.querySelectorAll('.ac-ia').forEach((s) => {
+    if (reduit) return;
+    auScroll(() => {
+      const r = s.getBoundingClientRect(), vh = window.innerHeight || 800;
+      if (r.top > vh || r.bottom < 0) return;
+      const p = clamp((vh - r.top) / (vh * 0.75), 0, 1);
+      const marge = Math.min(window.innerWidth * 0.045, 64) * (1 - p);
+      s.style.setProperty('--ix', `${marge.toFixed(1)}px`);
+      s.style.setProperty('--ir', `${(40 * (1 - p)).toFixed(1)}px`);
+    });
+  });
+
   /* ---------- Sélecteur Sécurité / VTC ---------- */
   document.querySelectorAll('.segment').forEach((seg) => {
     const fond = seg.querySelector('.segment__fond');

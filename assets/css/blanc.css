@@ -839,3 +839,94 @@ body::after {
   .ac-ref__photo.rv { clip-path: inset(0 0 0 0 round 32px); }
 }
 @media (max-width: 1180px) { .nav__actions { margin-left: auto !important; } }
+
+/* =========================================================
+   VERSION 2.2 — nom sur deux lignes, accueil resserré,
+   nouveaux effets (soulignement, reflet, bandeau de mots,
+   section qui s'élargit, repère de survol du menu)
+   ========================================================= */
+
+/* ---------- Nom au centre : « BDA SÉCURITÉ » + « & VTC PREMIUM » ---------- */
+.nav__marque { display: grid !important; justify-items: center; gap: 4px; line-height: 1; padding-left: 0 !important; letter-spacing: 0 !important; }
+.nav__marque b { font-family: var(--font-display); font-weight: 800; font-size: 16px; letter-spacing: 0.3em; margin-right: -0.3em; color: var(--noir); transition: letter-spacing 0.6s var(--ease), margin 0.6s var(--ease); }
+.nav__marque b span { color: var(--rouge); }
+.nav__marque small { font-family: var(--font-body); font-weight: 600; font-size: 9.5px; letter-spacing: 0.46em; margin-right: -0.46em; text-transform: uppercase; color: #86868b; animation: marque-sous 1.2s 0.5s var(--ease) both; }
+@keyframes marque-sous { from { opacity: 0; transform: translateY(-6px); letter-spacing: 0.9em; } to { opacity: 1; transform: none; } }
+.nav__marque:hover { letter-spacing: 0 !important; }
+.nav__marque:hover b { letter-spacing: 0.36em; margin-right: -0.36em; }
+.nav.is-compact .nav__marque small { opacity: 0.85; }
+@media (max-width: 1320px) { .nav__marque b { font-size: 14px; letter-spacing: 0.24em; margin-right: -0.24em; } .nav__marque small { font-size: 8.5px; letter-spacing: 0.36em; margin-right: -0.36em; } }
+@media (max-width: 640px) { .nav__marque b { font-size: 13px; letter-spacing: 0.2em; margin-right: -0.2em; } .nav__marque small { font-size: 7.5px; letter-spacing: 0.3em; margin-right: -0.3em; } }
+@media (max-width: 380px) { .nav__marque b { font-size: 11.5px; letter-spacing: 0.14em; } .nav__marque small { letter-spacing: 0.22em; } }
+.nav__marque--gauche { justify-items: start; }
+/* Place libérée à droite : téléphone et espace client en icônes */
+.nav__tel span, .nav__client span { display: none !important; }
+.nav__tel { width: 44px; height: 44px; justify-content: center; padding: 0 !important; border: 1px solid var(--line-strong) !important; border-radius: 999px !important; }
+.nav__client { width: 44px !important; height: 44px !important; padding: 0 !important; justify-content: center; }
+.nav__tel, .nav__client { transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.4s var(--ease) !important; }
+.nav__tel:hover, .nav__client:hover { background: var(--noir) !important; border-color: var(--noir) !important; color: #fff !important; transform: translateY(-1px); text-decoration: none !important; }
+.nav__tel:hover .icon, .nav__client:hover .icon { color: #fff !important; }
+
+/* ---------- Repère qui glisse sous le lien survolé ---------- */
+.nav__survol { position: absolute; z-index: 0; left: 0; top: 0; height: 38px; border-radius: 999px; background: rgba(0, 0, 0, 0.055); opacity: 0; pointer-events: none; transition: transform 0.45s var(--ease), width 0.45s var(--ease), opacity 0.3s; }
+.nav__survol.on { opacity: 1; }
+.nav__links > a, .nav__drop-btn { position: relative; z-index: 1; }
+@media (hover: hover) and (pointer: fine) { .nav__links > a:hover, .nav__drop-btn:hover, .nav__drop.is-open .nav__drop-btn { background: transparent !important; } }
+
+/* ---------- Accueil : en-tête resserré ---------- */
+.ac-hero { padding-top: calc(var(--nav-h) + clamp(18px, 3.2vw, 44px)) !important; padding-bottom: clamp(24px, 3.5vw, 48px) !important; }
+.ac-hero__grille { align-items: center; }
+.ac-hero__texte { gap: 22px !important; }
+.ac-hero .h1 { font-size: clamp(2.5rem, 1.4rem + 3.7vw, 4.6rem); }
+@media (min-width: 1021px) {
+  .tel__cadre { width: 300px !important; height: 612px !important; }
+  .ac-hero__visuel { padding-bottom: 24px !important; }
+}
+@media (min-width: 1700px) { .ac-hero__grille { grid-template-columns: 1.15fr 0.85fr; } }
+
+/* « 24h/24. » : souligné rouge qui se dessine */
+.ac-hero .h1 em {
+  font-style: normal; background: linear-gradient(var(--rouge), var(--rouge)) no-repeat 0 94% / 0% 0.085em;
+  animation: souligne 1.1s 1.15s var(--ease) forwards; padding-bottom: 0.02em;
+}
+@keyframes souligne { to { background-size: 100% 0.085em; } }
+
+/* Badge CNAPS qui flotte doucement */
+.ac-hero__badge { animation: monte-doux 1s 0.9s var(--ease) both, flotte-badge 7s 2s ease-in-out infinite !important; }
+@keyframes flotte-badge { 50% { translate: 0 -8px; } }
+
+/* ---------- Boutons rouges : reflet qui passe de temps en temps ---------- */
+.btn.btn--gold::after {
+  content: "" !important; display: block !important; position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; width: 45%;
+  background: linear-gradient(105deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.38) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: translateX(-160%) skewX(-12deg); animation: reflet 6s 2.5s ease-in-out infinite !important; pointer-events: none;
+}
+@keyframes reflet { 0%, 72% { transform: translateX(-160%) skewX(-12deg); } 88%, 100% { transform: translateX(330%) skewX(-12deg); } }
+
+/* ---------- Bandeau de mots qui défile avec le scroll ---------- */
+.defile { overflow: hidden; padding: clamp(40px, 6vw, 80px) 0; background: #fff; display: grid; gap: 6px; }
+.defile__ligne { display: flex; width: max-content; margin: 0; white-space: nowrap; font-family: var(--font-display); font-weight: 800; font-size: clamp(2.6rem, 1.4rem + 5vw, 7rem); letter-spacing: -0.045em; line-height: 1.05; color: transparent; -webkit-text-stroke: 1.5px #c7c7cc; will-change: transform; transform: translate3d(var(--dx, 0px), 0, 0); }
+.defile__ligne span { padding-right: 0.35em; }
+.defile__ligne--plein { color: var(--noir); -webkit-text-stroke: 0; }
+
+/* ---------- Section assistant : s'élargit en arrivant à l'écran ---------- */
+.ac-ia { clip-path: inset(0 var(--ix, 0px) round var(--ir, 0px)); }
+
+/* ---------- Tuiles de services : reflet au survol ---------- */
+.tuile::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: linear-gradient(115deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.6) 48%, rgba(255, 255, 255, 0) 66%); transform: translateX(-100%); transition: transform 0.9s var(--ease); pointer-events: none; }
+.tuile:not(.tuile--noire)::after { z-index: 0; }
+.tuile--noire::after { background: linear-gradient(115deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.09) 48%, rgba(255, 255, 255, 0) 66%); }
+.tuile:hover::after { transform: translateX(100%); }
+.tuile > * { position: relative; z-index: 1; }
+.tuile > .tuile__embleme { position: absolute; z-index: -1; }
+
+/* ---------- Chiffres : léger rebond à l'arrivée ---------- */
+.chiffres li { transition: transform 0.5s var(--ease), background-color 0.3s !important; }
+.chiffres li:hover { transform: translateY(-4px); background: #ececf0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-hero .h1 em { animation: none; background-size: 100% 0.085em; }
+  .btn.btn--gold::after, .ac-hero__badge, .nav__marque small { animation: none !important; }
+  .defile__ligne { transform: none; }
+  .ac-ia { clip-path: none; }
+}

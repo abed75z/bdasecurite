@@ -433,7 +433,7 @@ function construireFeuille(type, data, change, r = {}) {
       h('button', { class: 'f-ajout', type: 'button', onclick: ajouterLigne }, '+ Ajouter une ligne'),
       h('div', { class: 'f-bas' }, h('div', { class: 'f-conditions' }, h('span', { class: 'f-label' }, 'Conditions'), T('conditions', 'f-petit')), totaux),
       h('div', { class: 'f-signatures' },
-        h('div', { class: 'f-signe' }, h('span', { class: 'f-label' }, `Pour ${data.emetteurNom || 'BDA Security Group'}`), h('p', null, 'Abdelouahab BOUIDIA')),
+        h('div', { class: 'f-signe' }, h('span', { class: 'f-label' }, `Pour ${data.emetteurNom || 'BDA SECURITE'}`), h('p', null, 'Abdelouahab BOUIDIA')),
         h('div', { class: 'f-signe' }, h('span', { class: 'f-label' }, 'Bon pour accord — le client'), h('p', null, 'Date, signature et cachet, précédés de la mention « Bon pour accord »'))),
       h('div', { class: 'f-espace' }),
       T('pied', 'f-pied'));

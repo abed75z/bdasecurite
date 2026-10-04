@@ -263,7 +263,7 @@ async function vueDocument(id) {
       h('img', { src: '/admin/logo-document.jpg?v=3', alt: 'BDA Security Group', class: 'ec-feuille__logo' }),
       h('div', { class: 'ec-feuille__titre' }, h('h2', null, estFacture ? 'Facture' : 'Devis'), h('b', null, `N° ${doc.numero}`), pastille(doc.type, doc.statut))),
     h('div', { class: 'ec-feuille__parties' },
-      h('div', null, h('small', null, 'Émetteur'), h('b', null, d.emetteurNom || 'BDA Security Group'), h('p', null, texte(d.emetteur))),
+      h('div', null, h('small', null, 'Émetteur'), h('b', null, d.emetteurNom || 'BDA SECURITE'), h('p', null, texte(d.emetteur))),
       h('div', null, h('small', null, estFacture ? 'Facturé à' : 'À l’attention de'), h('b', null, d.client?.nom || ''), h('p', null, texte(d.client?.adresse)))),
     h('div', { class: 'ec-feuille__meta' },
       h('span', null, h('small', null, 'Date'), frDate(doc.date)),

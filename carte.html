@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>BDA Security Group — Carte de visite</title>
-  <meta name="description" content="Sécurité privée et chauffeurs VTC premium à Paris et en Île-de-France, 24/7. Appelez, écrivez sur WhatsApp ou demandez un devis gratuit.">
+  <meta name="description" content="Protection rapprochée, chauffeur privé et sécurité privée à Paris et en Île-de-France, 24/7. Appelez, écrivez sur WhatsApp ou demandez un devis gratuit.">
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#13110f">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -250,7 +250,7 @@
       <div class="defile">
         <a class="service" href="/securite-privee-paris"><img loading="lazy" src="https://images.unsplash.com/photo-1618371731836-2b9bff9ac72a?auto=format&amp;fit=crop&amp;w=700&amp;q=65" alt=""><div><b>Sécurité privée</b><small>Gardiennage · commerces · sites</small></div></a>
         <a class="service" href="/securite-evenementielle-paris"><img loading="lazy" src="https://images.unsplash.com/photo-1760228604788-db8a36d5c1a3?auto=format&amp;fit=crop&amp;w=700&amp;q=65" alt=""><div><b>Sécurité d'événements</b><small>Galas · soirées · salons</small></div></a>
-        <a class="service" href="/chauffeur-prive-vtc-paris"><img loading="lazy" src="https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=700&amp;q=65" alt=""><div><b>Chauffeur VTC Premium</b><small>Transferts · mise à disposition</small></div></a>
+        <a class="service" href="/chauffeur-prive-vtc-paris"><img loading="lazy" src="https://images.unsplash.com/photo-1558222209-134191edfe0d?auto=format&amp;fit=crop&amp;w=700&amp;q=65" alt=""><div><b>Chauffeur privé</b><small>Transferts · mise à disposition</small></div></a>
         <a class="service" href="/chauffeur-securite-vip-paris"><img loading="lazy" src="https://images.unsplash.com/photo-1636446704248-87d51e963e60?auto=format&amp;fit=crop&amp;w=700&amp;q=65" alt=""><div><b>Offre VIP</b><small>Chauffeur + agent de sécurité</small></div></a>
         <a class="service" href="/protection-rapprochee-paris"><img loading="lazy" src="https://images.unsplash.com/photo-1553885762-df52cdc82f36?auto=format&amp;fit=crop&amp;w=700&amp;q=65" alt=""><div><b>Protection rapprochée</b><small>Personnalités · délégations</small></div></a>
       </div>
@@ -370,7 +370,7 @@
 
     // Partager (WhatsApp, SMS… via le menu du téléphone) ou copier le lien
     const partager = async () => {
-      const donnees = { title: 'BDA Security Group', text: 'Sécurité privée et chauffeurs VTC premium à Paris, 24/7. Voici notre carte :', url: urlCarte };
+      const donnees = { title: 'BDA Security Group', text: 'Protection rapprochée, chauffeur privé et sécurité privée à Paris, 24/7. Voici notre carte :', url: urlCarte };
       try {
         if (navigator.share) await navigator.share(donnees);
         else { await navigator.clipboard.writeText(urlCarte); toast('Lien copié !'); }

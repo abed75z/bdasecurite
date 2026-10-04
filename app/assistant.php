@@ -27,7 +27,7 @@ function assist_connaissances(): string
   $tarifsVisibles = !empty($s['visible']['tarifs']);
   $resaVtc = !empty(tarifs_vtc()['ouvert']);
   $vtc = $vtcVisible ? <<<TXT
-VTC PREMIUM (chauffeur privé, berline haut de gamme noire, chauffeur en tenue)
+CHAUFFEUR PRIVÉ (berline haut de gamme noire, chauffeur en tenue)
 - Transferts aéroports et gares : Paris ↔ Orly {$p('orly')} € TTC (van 7 places {$p('orlyVan')} €), Paris ↔ Roissy-Charles-de-Gaulle {$p('cdg')} € TTC (van {$p('cdgVan')} €), Paris ↔ Beauvais {$p('beauvais')} € TTC (van {$p('beauvaisVan')} €). Prix fixes depuis/vers Paris intra-muros, péages, bagages et suivi de vol inclus, 60 minutes d'attente offertes à l'aéroport.
 - Chauffeur à disposition : {$p('heure')} € TTC de l'heure (van {$p('heureVan')} €), 2 heures minimum. Demi-journée (4 h, 80 km inclus) : {$p('demi')} € TTC (van {$p('demiVan')} €). Journée (8 h, 150 km inclus) : {$p('journee')} € TTC (van {$p('journeeVan')} €).
 - Chauffeur + agent de sécurité ensemble (VIP, personnalités, délégations) : sur devis.
@@ -86,7 +86,7 @@ CLIENTS ET DOCUMENTS
 - Paiement par virement bancaire, à réception de facture ; acompte possible indiqué sur le devis. Pas de paiement par carte en ligne.
 
 RECRUTEMENT
-- Postes ouverts (H/F, Paris et Île-de-France) : agent de sécurité APS (temps plein ou partiel ; carte CNAPS en cours de validité, SST apprécié, excellente présentation), agent de protection rapprochée (missions ponctuelles ; carte CNAPS « protection physique des personnes », expérience souhaitée, permis B, anglais apprécié), agent de sécurité événementielle (soirs et week-ends ; carte CNAPS, sens du contact, sang-froid), chauffeur VTC Premium (temps plein ou partiel ; carte VTC en cours de validité, permis B depuis 3 ans, bonne connaissance de Paris, anglais apprécié). Candidatures spontanées bienvenues.
+- Postes ouverts (H/F, Paris et Île-de-France) : agent de sécurité APS (temps plein ou partiel ; carte CNAPS en cours de validité, SST apprécié, excellente présentation), agent de protection rapprochée (missions ponctuelles ; carte CNAPS « protection physique des personnes », expérience souhaitée, permis B, anglais apprécié), agent de sécurité événementielle (soirs et week-ends ; carte CNAPS, sens du contact, sang-froid), chauffeur privé VTC (temps plein ou partiel ; carte VTC en cours de validité, permis B depuis 3 ans, bonne connaissance de Paris, anglais apprécié). Candidatures spontanées bienvenues.
 - Candidature en ligne en 3 minutes sur /recrutement, CV non obligatoire (lien LinkedIn ou Drive possible, ou CV par email à bdasecurite@gmail.com). Étapes : candidature, vérification de la carte professionnelle, entretien (téléphone ou rendez-vous), première mission. Les débutants titulaires de la carte peuvent postuler ; une carte en cours d'obtention n'empêche pas de postuler. Horaires selon les missions (jour, nuit, week-end, fériés), plannings construits avec l'agent. Rémunération selon le profil et les missions (ne jamais donner de montant).
 
 INFORMATIONS DÉTAILLÉES — SÉCURITÉ

@@ -342,14 +342,14 @@ function envoyer_mail(string $sujet, string $message, string $repondreA = '', st
 function reglages_defaut(): array
 {
   return [
-    'nom' => 'BDA Security Group',
+    'nom' => 'BDA SECURITE',
     'emetteur' => "Abdelouahab BOUIDIA EI\n61 rue de la Croix Saint-Simon\n75020 PARIS\nSIRET : 977 933 316 00019\nAPE : 8010Z\nTÉL : 07.84.73.90.70",
     'email' => BDA_EMAIL,
     'beneficiaire' => 'ABDELOUAHAB BOUIDIA',
     'iban' => '',
     'conditionsFacture' => "Conditions générales de vente : Aucun escompte accordé en cas de paiement comptant.\nTVA non applicable, art. 293 B du CGI.\nEn cas de retard de paiement : pénalités égales à trois fois le taux d'intérêt légal et indemnité forfaitaire de 40 € pour frais de recouvrement (art. L441-10 du Code de commerce).",
     'conditionsDevis' => "Devis valable 30 jours à compter de sa date d'émission.\nAcompte à la signature du devis, solde à réception de la facture de fin de mission.\nAucun escompte accordé en cas de paiement comptant. TVA non applicable, art. 293 B du CGI.",
-    'pied' => "BDA Security Group — Abdelouahab Bouidia EI — SIRET 977 933 316 00019 — APE 8010Z — Autorisation d'exercice CNAPS n° AUT-075-2124-07-01-20250906336\n« L'autorisation d'exercice ne confère aucune prérogative de puissance publique à l'entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du Code de la sécurité intérieure)",
+    'pied' => "BDA SECURITE — Abdelouahab Bouidia EI — SIRET 977 933 316 00019 — APE 8010Z — Autorisation d'exercice CNAPS n° AUT-075-2124-07-01-20250906336\n« L'autorisation d'exercice ne confère aucune prérogative de puissance publique à l'entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du Code de la sécurité intérieure)",
     'prefixeFacture' => 'FA-{AAAA}-',
     'prefixeDevis' => 'DV-{AAAA}-',
     'echeanceJours' => 7,

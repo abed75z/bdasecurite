@@ -203,8 +203,6 @@
     <a class="ac-defiler" href="#services" aria-label="Faire défiler vers la suite"><span></span>Découvrir</a>
   </section>
 
-
-
   <!-- ============ SERVICES ============ -->
   <section class="section ac-offre" id="services" aria-labelledby="services-title">
     <div class="container">
@@ -255,6 +253,33 @@
     </div>
   </section>
 
+  <!-- ============ BANDEAU DE MOTS (suit le scroll) ============ -->
+  <section class="defile" aria-hidden="true">
+    <p class="defile__ligne" data-defile="-1"><span>Discrétion · Galas · Soirées privées · VIP · Ambassades · Délégations · </span><span>Discrétion · Galas · Soirées privées · VIP · Ambassades · Délégations · </span></p>
+    <p class="defile__ligne defile__ligne--plein" data-defile="1"><span>Protection rapprochée · Chauffeur privé · Événements · Sécurité privée · </span><span>Protection rapprochée · Chauffeur privé · Événements · Sécurité privée · </span></p>
+  </section>
+
+  <!-- ============ TARIFS ============ -->
+  <section class="ac-tarifs" aria-label="Nos tarifs" data-visible="prixAccueil tarifs">
+    <div class="container ac-tarifs__bande">
+      <p class="ac-tarifs__titre">Tarifs transparents</p>
+      <ul>
+        <li><span>Agent de sécurité</span><b>dès <span data-prix="agent" data-dec="1">22</span> € <small>HT/h</small></b></li>
+        <li><span>Agent SSIAP 1</span><b>dès <span data-prix="ssiap1" data-dec="1">23,50</span> € <small>HT/h</small></b></li>
+        <li><span>Événementiel</span><b>dès <span data-prix="evenementiel" data-dec="1">24</span> € <small>HT/h</small></b></li>
+        <li data-visible="offreVtc"><span>Chauffeur Paris ↔ Orly</span><b><span data-prix="orly" data-dec="1">38</span> € <small>TTC</small></b></li>
+      </ul>
+      <a class="btn btn--outline" href="tarifs">Tous les tarifs <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+  </section>
+
+  <!-- ============ ENGAGEMENT ============ -->
+  <section class="section ac-manifeste" id="engagements" aria-labelledby="eng-title">
+    <div class="container">
+      <h2 class="manifeste" id="eng-title" data-surligne>Votre confiance, notre priorité.<br>Votre tranquillité, notre engagement.</h2>
+    </div>
+  </section>
+
   <!-- ============ ASSISTANT EN LIGNE ============ -->
   <section class="section ac-ia" id="assistant-ia" aria-labelledby="ia-title" data-visible="assistant">
     <div class="container ac-ia__grille">
@@ -292,33 +317,6 @@
     </div>
   </section>
 
-  <!-- ============ BANDEAU DE MOTS (suit le scroll) ============ -->
-  <section class="defile" aria-hidden="true">
-    <p class="defile__ligne" data-defile="-1"><span>Discrétion · Galas · Soirées privées · VIP · Ambassades · Délégations · </span><span>Discrétion · Galas · Soirées privées · VIP · Ambassades · Délégations · </span></p>
-    <p class="defile__ligne defile__ligne--plein" data-defile="1"><span>Protection rapprochée · Chauffeur privé · Événements · Sécurité privée · </span><span>Protection rapprochée · Chauffeur privé · Événements · Sécurité privée · </span></p>
-  </section>
-
-  <!-- ============ TARIFS ============ -->
-  <section class="ac-tarifs" aria-label="Nos tarifs" data-visible="prixAccueil tarifs">
-    <div class="container ac-tarifs__bande">
-      <p class="ac-tarifs__titre">Tarifs transparents</p>
-      <ul>
-        <li><span>Agent de sécurité</span><b>dès <span data-prix="agent" data-dec="1">22</span> € <small>HT/h</small></b></li>
-        <li><span>Agent SSIAP 1</span><b>dès <span data-prix="ssiap1" data-dec="1">23,50</span> € <small>HT/h</small></b></li>
-        <li><span>Événementiel</span><b>dès <span data-prix="evenementiel" data-dec="1">24</span> € <small>HT/h</small></b></li>
-        <li data-visible="offreVtc"><span>Chauffeur Paris ↔ Orly</span><b><span data-prix="orly" data-dec="1">38</span> € <small>TTC</small></b></li>
-      </ul>
-      <a class="btn btn--outline" href="tarifs">Tous les tarifs <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-    </div>
-  </section>
-
-  <!-- ============ ENGAGEMENT ============ -->
-  <section class="section ac-manifeste" id="engagements" aria-labelledby="eng-title">
-    <div class="container">
-      <h2 class="manifeste" id="eng-title" data-surligne>Votre confiance, notre priorité.<br>Votre tranquillité, notre engagement.</h2>
-    </div>
-  </section>
-
   <!-- ============ FAQ ============ -->
   <section class="section" id="faq" aria-labelledby="faq-title">
     <div class="container faq-grille">
@@ -347,24 +345,6 @@
         <div class="faq__item">
           <button class="faq__q" type="button" id="faq-q5" aria-expanded="false" aria-controls="faq-a5">Proposez-vous des missions régulières ?<span class="faq__plus" aria-hidden="true"></span></button>
           <div class="faq__a" id="faq-a5" role="region" aria-labelledby="faq-q5"><div><p>Oui : missions ponctuelles (une soirée, un week-end) comme prestations régulières, avec un planning établi avec vous et des agents remplacés en cas d'absence.</p></div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ CONTACT ============ -->
-  <section class="section ac-contact" id="contact" aria-labelledby="cta-title">
-    <div class="container">
-      <div class="ac-contact__carte">
-        <div>
-          <h2 class="h2" id="cta-title">Parlons de votre besoin.</h2>
-          <p class="lead">Devis gratuit, réponse rapide.</p>
-        </div>
-        <div class="ac-contact__moyens">
-          <a class="btn btn--gold" href="devis">Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <a class="ac-moyen" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span><b>06 11 67 86 25</b><small>Ligne principale, 24h/24</small></span></a>
-          <a class="ac-moyen" href="https://wa.me/33784739070" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-message"/></svg><span><b>07 84 73 90 70</b><small>WhatsApp et appels</small></span></a>
-          <a class="ac-moyen" href="mailto:bdasecurite@gmail.com"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><span><b>bdasecurite@gmail.com</b><small>Demandes écrites</small></span></a>
         </div>
       </div>
     </div>

@@ -142,7 +142,7 @@ export function icone(nom, cls = '') {
 // Écusson « BDA » : le logo officiel (même image sur le site, les cartes agents et les flyers)
 export function ecusson(cls = '') {
   const img = document.createElement('img');
-  img.src = '/assets/img/embleme-hd.png';
+  img.src = '/assets/img/embleme-hd.png?v=3';
   img.alt = '';
   img.className = `ecusson ${cls}`.trim();
   img.setAttribute('aria-hidden', 'true');

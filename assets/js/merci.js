@@ -49,7 +49,7 @@
   /* Rayons dorés qui jaillissent autour du badge */
   const badge = $('.ok-badge');
   if (badge && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const colors = ['#ff8d94', '#ff5c66', '#e8222f', '#a3101b', '#f3f0ea'];
+    const colors = ['#ddcbaf', '#ceb58d', '#b69054', '#7d6236', '#f3f0ea'];
     const count = 28;
     for (let i = 0; i < count; i++) {
       const s = document.createElement('span');

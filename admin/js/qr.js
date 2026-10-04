@@ -201,7 +201,7 @@ function penalite(m) {
 }
 
 // QR code en SVG (vectoriel : net à l'impression), marge de 4 modules
-export function qrSvg(texte, couleur = '#060d24') {
+export function qrSvg(texte, couleur = '#181612') {
   const m = qrMatrice(texte);
   const n = m.length, t = n + 8;
   let d = '';

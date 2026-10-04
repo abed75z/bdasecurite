@@ -79,8 +79,8 @@
         const x = s.x + s.vx * s.life, y = s.y + s.vy * s.life;
         const ex = x - s.vx * 160, ey = y - s.vy * 160;
         const grad = ctx.createLinearGradient(x, y, ex, ey);
-        grad.addColorStop(0, `rgba(234,242,255,${((1 - p) * 0.9).toFixed(3)})`);
-        grad.addColorStop(1, 'rgba(91, 140, 255,0)');
+        grad.addColorStop(0, `rgba(248,245,241,${((1 - p) * 0.9).toFixed(3)})`);
+        grad.addColorStop(1, 'rgba(206, 181, 140,0)');
         ctx.strokeStyle = grad;
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(ex, ey); ctx.stroke();
       }

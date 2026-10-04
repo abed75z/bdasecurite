@@ -100,7 +100,7 @@
     if (etat.mode === 'trajet' && etat.route?.geo?.length > 1) {
       ligne = etat.route.geo.map(([lon, lat]) => [lat, lon]);
       L.polyline(ligne, { color: '#000', weight: 9, opacity: 0.4, interactive: false }).addTo(calque);
-      L.polyline(ligne, { color: '#ff5c66', weight: 4.5, opacity: 1, className: 'trace-route', interactive: false }).addTo(calque);
+      L.polyline(ligne, { color: '#ceb58d', weight: 4.5, opacity: 1, className: 'trace-route', interactive: false }).addTo(calque);
       ligne.forEach((p) => points.push(p));
       // Durée affichée sur la carte, près de l'arrivée
       L.marker(ligne[ligne.length - 1], { icon: L.divIcon({ className: '', html: `<div class="etiquette-carte">${dureeTexte(etat.route.min)}<small>${kmTexte(etat.route.km)}</small></div>`, iconSize: null, iconAnchor: [-14, 34] }), interactive: false, keyboard: false }).addTo(calque);

@@ -247,7 +247,7 @@ export function dessinerBulletin(el, { R, pr, P, agent, mois, datePaiement, V = 
 
   el.replaceChildren(
     h('div', { class: 'bt-haut' },
-      h('div', { class: 'bt-marque' }, h('img', { class: 'bt-logo', src: 'logo-document.jpg', alt: '' }),
+      h('div', { class: 'bt-marque' }, h('img', { class: 'bt-logo', src: 'logo-document.jpg?v=3', alt: '' }),
         h('div', null, h('b', null, 'Bulletin de paie'), h('span', null, `${cap(MOIS[m - 1])} ${y}`))),
       h('div', { class: 'bt-adresse' }, h('div', null, `${pr.sexe === 'F' ? 'Madame' : pr.sexe === 'H' ? 'Monsieur' : ''} ${agent.nom}`.trim()),
         edit ? E(pr.adresse, 'sal.adresse', { multi: true, ph: 'Adresse du salarié' }) : String(pr.adresse || '').split('\n').filter(Boolean).map((l) => h('div', null, l)),

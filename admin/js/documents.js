@@ -390,7 +390,7 @@ function construireFeuille(type, data, change, r = {}) {
     champs.push({ el, chemin });
     return el;
   };
-  const logo = h('img', { class: type === 'facture' ? 'f-logo' : 'f-logo f-logo--petit', src: 'logo-document.jpg', alt: 'BDA Sécurité & VTC Premium' });
+  const logo = h('img', { class: type === 'facture' ? 'f-logo' : 'f-logo f-logo--petit', src: 'logo-document.jpg?v=3', alt: 'BDA Sécurité & VTC Premium' });
   const corps = h('tbody');
   const totaux = h('div', { class: 'f-totaux' });
 

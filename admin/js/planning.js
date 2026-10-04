@@ -148,7 +148,7 @@ export async function pagePlanning(ctx) {
   const nuitTxt = h('b');
   const feuille = h('div', { class: 'feuille feuille--paysage' },
     h('div', { class: 'plan-entete' },
-      h('img', { class: 'f-logo f-logo--mini', src: 'logo-document.jpg', alt: '' }),
+      h('img', { class: 'f-logo f-logo--mini', src: 'logo-document.jpg?v=3', alt: '' }),
       h('div', null, h('h2', { class: 'plan-titre' }, 'Planning des agents'), h('div', { class: 'plan-mois' }, libelle)),
       h('div', { class: 'plan-info' }, infos('client', 'Client', 'Client'), infos('site', 'Site', 'Adresse du site'), infos('mission', 'Mission', 'Type de mission'))),
     table,

@@ -6,7 +6,7 @@
   <title>Réserver un chauffeur VTC à Paris — prix immédiat | BDA Sécurité &amp; VTC Premium</title>
   <meta name="description" content="Réservez votre chauffeur VTC premium à Paris et en Île-de-France en 1 minute : transferts aéroports (CDG, Orly, Beauvais) et gares, mise à disposition. Prix affiché avant de réserver, 24/7.">
   <meta name="robots" content="noindex"><!-- à retirer (et remettre /reserver dans sitemap.xml) quand la réservation sera ouverte -->
-  <meta name="theme-color" content="#f5f5f7">
+  <meta name="theme-color" content="#f7f3ec">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="BDA VTC">
@@ -16,15 +16,15 @@
   <meta property="og:url" content="https://bdasecurite.com/reserver">
   <meta property="og:title" content="Réservez votre chauffeur VTC — BDA VTC Premium">
   <meta property="og:description" content="Aéroports, gares, mise à disposition : votre chauffeur privé à Paris, prix affiché en 1 minute.">
-  <meta property="og:image" content="https://bdasecurite.com/assets/img/og-image.jpg">
-  <link rel="icon" href="assets/img/favicon.svg?v=2" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=2">
+  <meta property="og:image" content="https://bdasecurite.com/assets/img/og-image.jpg?v=3">
+  <link rel="icon" href="assets/img/favicon.svg?v=3" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://data.geopf.fr" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="assets/css/reserver.css?v=7">
+  <link rel="stylesheet" href="assets/css/reserver.css?v=8">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"TaxiService","name":"BDA VTC Premium — réservation de chauffeur","provider":{"@id":"https://bdasecurite.com/#entreprise"},"areaServed":"Paris et Île-de-France","url":"https://bdasecurite.com/reserver","availableChannel":{"@type":"ServiceChannel","serviceUrl":"https://bdasecurite.com/reserver","servicePhone":"+33611678625"}}
   </script>
@@ -32,28 +32,28 @@
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
     <defs>
-      <linearGradient id="or" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8d94"/><stop offset=".45" stop-color="#e8222f"/><stop offset="1" stop-color="#a3101b"/></linearGradient>
-      <linearGradient id="carrosserie" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a42"/><stop offset=".55" stop-color="#16161a"/><stop offset="1" stop-color="#060d24"/></linearGradient>
-      <linearGradient id="vitre" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5c66" stop-opacity=".55"/><stop offset="1" stop-color="#2a2a30" stop-opacity=".9"/></linearGradient>
+      <linearGradient id="or" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ddcbaf"/><stop offset=".45" stop-color="#b69054"/><stop offset="1" stop-color="#7d6236"/></linearGradient>
+      <linearGradient id="carrosserie" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3a42"/><stop offset=".55" stop-color="#16161a"/><stop offset="1" stop-color="#181612"/></linearGradient>
+      <linearGradient id="vitre" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ceb58d" stop-opacity=".55"/><stop offset="1" stop-color="#2a2a30" stop-opacity=".9"/></linearGradient>
     </defs>
     <symbol id="logo" viewBox="0 0 200 240"><path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" fill="none" stroke="url(#or)" stroke-width="12" stroke-linejoin="round"/><path d="M62 128 100 84l38 44" fill="none" stroke="#f3f0ea" stroke-width="13"/><path d="M93 104h14l-2 52-5 24-5-24Z" fill="#f3f0ea"/></symbol>
     <!-- Véhicules (illustrations) -->
     <symbol id="v-berline" viewBox="0 0 124 50">
       <ellipse cx="62" cy="45" rx="54" ry="3.5" fill="#000" opacity=".45"/>
-      <path d="M6 33c0-5 4-7.5 10-8.5l17-3.2C39 13.5 47 10.5 59 10.5h17c8 0 14 3.6 20 10.6l12 2.4c5.2 1 8.5 3.8 8.5 8.8v4.2c0 1.9-1.4 3-3.2 3H9.2C7.4 39.5 6 38.4 6 36.5Z" fill="url(#carrosserie)" stroke="#e8222f" stroke-width=".9"/>
+      <path d="M6 33c0-5 4-7.5 10-8.5l17-3.2C39 13.5 47 10.5 59 10.5h17c8 0 14 3.6 20 10.6l12 2.4c5.2 1 8.5 3.8 8.5 8.8v4.2c0 1.9-1.4 3-3.2 3H9.2C7.4 39.5 6 38.4 6 36.5Z" fill="url(#carrosserie)" stroke="#b69054" stroke-width=".9"/>
       <path d="M38.5 22c5-6.6 10.6-8.3 18-8.3h5v8.3Z M65.5 13.7h9.5c6 0 11 2.7 15.3 8.3H65.5Z" fill="url(#vitre)"/>
-      <path d="M12 29h100" stroke="#e8222f" stroke-width=".7" opacity=".7"/>
-      <circle cx="30" cy="39.5" r="7.4" fill="#060d24" stroke="#3a3a42" stroke-width="1.6"/><circle cx="30" cy="39.5" r="3.2" fill="#e8222f"/>
-      <circle cx="94" cy="39.5" r="7.4" fill="#060d24" stroke="#3a3a42" stroke-width="1.6"/><circle cx="94" cy="39.5" r="3.2" fill="#e8222f"/>
+      <path d="M12 29h100" stroke="#b69054" stroke-width=".7" opacity=".7"/>
+      <circle cx="30" cy="39.5" r="7.4" fill="#181612" stroke="#3a3a42" stroke-width="1.6"/><circle cx="30" cy="39.5" r="3.2" fill="#b69054"/>
+      <circle cx="94" cy="39.5" r="7.4" fill="#181612" stroke="#3a3a42" stroke-width="1.6"/><circle cx="94" cy="39.5" r="3.2" fill="#b69054"/>
       <path d="M111 28.5h4" stroke="#f3e2b0" stroke-width="2.2" stroke-linecap="round"/><path d="M7 30h3" stroke="#ef6b6b" stroke-width="2" stroke-linecap="round"/>
     </symbol>
     <symbol id="v-van" viewBox="0 0 124 52">
       <ellipse cx="62" cy="47" rx="54" ry="3.5" fill="#000" opacity=".45"/>
-      <path d="M6 37.5V18c0-5 3.8-9 9-9h66c5.4 0 9 1.8 12.8 6.4l10.4 10.8c6 1 10.3 4.2 10.3 9.4v4.6c0 1.9-1.4 3-3.2 3H9.2C7.4 43.2 6 42.1 6 40.2Z" fill="url(#carrosserie)" stroke="#e8222f" stroke-width=".9"/>
+      <path d="M6 37.5V18c0-5 3.8-9 9-9h66c5.4 0 9 1.8 12.8 6.4l10.4 10.8c6 1 10.3 4.2 10.3 9.4v4.6c0 1.9-1.4 3-3.2 3H9.2C7.4 43.2 6 42.1 6 40.2Z" fill="url(#carrosserie)" stroke="#b69054" stroke-width=".9"/>
       <path d="M13 13.5h21v10H13Z M38 13.5h21v10H38Z M63 13.5h15.5c4 0 6.8 1.6 9 4.5l4.3 5.5H63Z" fill="url(#vitre)"/>
-      <path d="M12 31h100" stroke="#e8222f" stroke-width=".7" opacity=".7"/>
-      <circle cx="28" cy="43.2" r="7.4" fill="#060d24" stroke="#3a3a42" stroke-width="1.6"/><circle cx="28" cy="43.2" r="3.2" fill="#e8222f"/>
-      <circle cx="94" cy="43.2" r="7.4" fill="#060d24" stroke="#3a3a42" stroke-width="1.6"/><circle cx="94" cy="43.2" r="3.2" fill="#e8222f"/>
+      <path d="M12 31h100" stroke="#b69054" stroke-width=".7" opacity=".7"/>
+      <circle cx="28" cy="43.2" r="7.4" fill="#181612" stroke="#3a3a42" stroke-width="1.6"/><circle cx="28" cy="43.2" r="3.2" fill="#b69054"/>
+      <circle cx="94" cy="43.2" r="7.4" fill="#181612" stroke="#3a3a42" stroke-width="1.6"/><circle cx="94" cy="43.2" r="3.2" fill="#b69054"/>
       <path d="M109 30.5h4" stroke="#f3e2b0" stroke-width="2.2" stroke-linecap="round"/><path d="M7 32h3" stroke="#ef6b6b" stroke-width="2" stroke-linecap="round"/>
     </symbol>
     <!-- Icônes -->
@@ -84,7 +84,7 @@
   <!-- Réservation fermée au public (admin > Tarifs VTC > « Ouvrir la réservation ») : reserver.js masque cet écran quand elle est ouverte -->
   <div class="ferme" id="ferme" role="dialog" aria-modal="true" aria-labelledby="ferme-titre">
     <div class="ferme__boite">
-      <img class="ferme__logo" src="/assets/img/embleme.png" alt="" width="128" height="131">
+      <img class="ferme__logo" src="/assets/img/embleme.png?v=3" alt="" width="128" height="130">
       <span class="ferme__badge">Bientôt</span>
       <h1 id="ferme-titre">Cette option n’est pas encore disponible</h1>
       <p>La réservation de VTC en ligne arrive très bientôt. En attendant, notre équipe vous répond directement, 24 h/24.</p>
@@ -98,7 +98,7 @@
   <div id="carte" class="carte" role="img" aria-label="Carte du trajet"></div>
 
   <header class="haut">
-    <a class="marque" href="/" aria-label="Retour au site BDA Sécurité"><img class="marque__logo" src="/assets/img/embleme.png" alt="" width="128" height="131"><span><b>BDA VTC</b><small>Premium · 24/7</small></span></a>
+    <a class="marque" href="/" aria-label="Retour au site BDA Sécurité"><img class="marque__logo" src="/assets/img/embleme.png?v=3" alt="" width="128" height="130"><span><b>BDA VTC</b><small>Premium · 24/7</small></span></a>
     <div class="haut__actions">
       <a class="rond" href="tel:+33611678625" aria-label="Appeler BDA"><svg class="ic"><use href="#i-tel"/></svg></a>
       <button class="rond" type="button" id="btn-courses" aria-label="Mes courses"><svg class="ic"><use href="#i-liste"/></svg><i class="rond__badge" id="nb-courses" hidden></i></button>
@@ -252,6 +252,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="assets/vendor/leaflet/leaflet.js" defer></script>
-  <script src="assets/js/reserver.js?v=6" defer></script>
+  <script src="assets/js/reserver.js?v=7" defer></script>
 </body>
 </html>

@@ -21,7 +21,7 @@
 .installation { border-color: rgba(0, 0, 0, 0.175); background: linear-gradient(120deg, rgba(0, 0, 0, 0.04), var(--surface) 60%); }
 .liste a:hover { background: rgba(0, 0, 0, 0.024); }
 .pastille--brouillon, .pastille--archivee, .pastille--annulee { color: #3a3a3f; background: rgba(0, 0, 0, 0.048); }
-.pastille--envoye, .pastille--envoyee, .pastille--en_cours, .pastille--attente { color: #0027b8; background: rgba(0, 0, 0, 0.059); }
+.pastille--envoye, .pastille--envoyee, .pastille--en_cours, .pastille--attente { color: #816537; background: rgba(0, 0, 0, 0.059); }
 .pastille--accepte, .pastille--payee, .pastille--traitee, .pastille--retenue, .pastille--publie { color: #23945c; }
 .pastille--refuse, .pastille--refusee, .pastille--retard { color: #ac0c0c; }
 .chip span { background: rgba(0, 0, 0, 0.056); }
@@ -38,8 +38,8 @@ button.fiche:hover { border-color: rgba(0, 0, 0, 0.25); }
 .onglet.is-actif span { background: rgba(255, 255, 255, 0.9); }
 .agent-tuile:hover { border-color: rgba(0, 0, 0, 0.25); }
 .agent-avatar { border: 1px solid rgba(0, 0, 0, 0.175); }
-.agent-avatar--secondaire { background: rgba(0, 0, 0, 0.045); color: #0027b8; border-color: rgba(0, 0, 0, 0.15); }
-.cat--secondaire { background: rgba(0, 0, 0, 0.054); color: #0027b8; }
+.agent-avatar--secondaire { background: rgba(0, 0, 0, 0.045); color: #816537; border-color: rgba(0, 0, 0, 0.15); }
+.cat--secondaire { background: rgba(0, 0, 0, 0.054); color: #816537; }
 .point { background: rgba(0, 0, 0, 0.06); }
 .docs__jauge { background: rgba(0, 0, 0, 0.06); }
 .depot { border: 1.5px dashed rgba(0, 0, 0, 0.2); background: rgba(0, 0, 0, 0.04); }
@@ -186,7 +186,7 @@ code { background: rgba(0, 0, 0, 0.04); }
 .cp__marque small { color: #0b0b0c; }
 .cp__type small { color: #0b0b0c; }
 .cp__type b { color: #0b0b0c; }
-.cp__filet { background: linear-gradient(90deg, #0b0b0c, #a9c4ff 50%, #0b0b0c); }
+.cp__filet { background: linear-gradient(90deg, #0b0b0c, #e5d8c3 50%, #0b0b0c); }
 .cp__photo { border: 0.45mm solid rgba(0, 0, 0, 0.5); }
 .cp__sans-photo { color: #3a3a3f; }
 .cp__champ { border-bottom: 0.25mm solid rgba(0, 0, 0, 0.14); }
@@ -208,7 +208,7 @@ code { background: rgba(0, 0, 0, 0.04); }
 .fl__t2 { color: #0b0b0c; }
 .fl__intro { color: #3a3a3f; }
 .fl__secteur { border: 0.35mm solid rgba(0, 0, 0, 0.5); color: #0b0b0c; }
-.fl__filet { background: linear-gradient(90deg, #0b0b0c, #a9c4ff 50%, #0b0b0c); }
+.fl__filet { background: linear-gradient(90deg, #0b0b0c, #e5d8c3 50%, #0b0b0c); }
 .fl__kicker { color: #0b0b0c; }
 .fl__carte { border-top: 1mm solid rgba(0, 0, 0, 0.5); }
 .fl__ic { background: #ffffff; color: #0b0b0c; }
@@ -252,7 +252,7 @@ code { background: rgba(0, 0, 0, 0.04); }
 body.moi { background: radial-gradient(120% 60% at 50% -10%, rgba(0, 0, 0, 0.09), transparent 60%), radial-gradient(80% 50% at 50% 110%, rgba(0, 0, 0, 0.04), transparent 60%), #ffffff; }
 body.moi::before { background-image: linear-gradient(rgba(0, 0, 0, 0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.018) 1px, transparent 1px); }
 .moi-badge { border: 1px solid rgba(0, 0, 0, 0.2); background: rgba(0, 0, 0, 0.045); }
-.moi-chef h1 em { background: linear-gradient(100deg, #0b0b0c 0%, #a9c4ff 40%, #0b0b0c 60%, #a9c4ff 80%, #0b0b0c 100%); }
+.moi-chef h1 em { background: linear-gradient(100deg, #0b0b0c 0%, #e5d8c3 40%, #0b0b0c 60%, #e5d8c3 80%, #0b0b0c 100%); }
 .moi-scene__halo { background: conic-gradient(from 0deg, transparent, rgba(0, 0, 0, 0.072), transparent 30%, rgba(0, 0, 0, 0.045), transparent 60%); }
 .carte3d__face { box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.12), 0 0 40px -10px rgba(0, 0, 0, 0.12); }
 .carte3d__reflet { background: radial-gradient(70% 90% at var(--sx) var(--sy), rgba(255, 255, 255, 0.55), transparent 55%), linear-gradient(115deg, transparent 30%, rgba(246, 226, 168, 0.35) calc(var(--sx) - 8%), rgba(255, 255, 255, 0.5) var(--sx), rgba(0, 0, 0, 0.135) calc(var(--sx) + 8%), transparent 75%); }
@@ -277,11 +277,11 @@ body.moi::before { background-image: linear-gradient(rgba(0, 0, 0, 0.018) 1px, t
    thème bleu nuit. Version bleue : tag git v1.0.
    ========================================================= */
 :root {
-  --bg: #f5f5f7;
+  --bg: #f7f3ec;
   --side: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f5f5f7;
-  --surface-3: #ebebef;
+  --surface-2: #f7f3ec;
+  --surface-3: #eee8dd;
   --line: rgba(0, 0, 0, 0.07);
   --line-2: rgba(0, 0, 0, 0.12);
   --gold: #0b0b0c;
@@ -291,7 +291,7 @@ body.moi::before { background-image: linear-gradient(rgba(0, 0, 0, 0.018) 1px, t
   --gold-soft: rgba(0, 0, 0, 0.05);
   --green: #1f9d5c;
   --blue: #6e6e73;
-  --red: #d71f2c;
+  --red: #ac864a;
   --text: #0b0b0c;
   --text-2: #3a3a3f;
   --muted: #86868b;
@@ -305,7 +305,7 @@ body { background: var(--bg) !important; color: var(--text-2); }
 ::selection { background: #0b0b0c; color: #fff; }
 :focus-visible { outline-color: #0b0b0c; }
 h1, h2, h3 { letter-spacing: -0.02em; }
-.kicker { color: #d71f2c !important; letter-spacing: 0.12em; }
+.kicker { color: #ac864a !important; letter-spacing: 0.12em; }
 
 /* Boutons en pastille : noir pour l'action principale, contour pour le reste */
 .btn { border-radius: 999px !important; background: #fff; border-color: var(--line-2); color: var(--text); transition: background-color 0.25s var(--ease), border-color 0.25s, color 0.25s, transform 0.25s var(--ease) !important; }
@@ -314,7 +314,7 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 .btn--gold:hover { background: #2a2a2e !important; color: #fff !important; filter: none !important; transform: translateY(-1px); }
 .btn--danger { background: var(--red) !important; color: #fff !important; }
 .btn--danger:hover { color: #fff !important; }
-.btn--danger-ghost:hover { color: var(--red) !important; border-color: var(--red) !important; background: rgba(215, 31, 44, 0.06) !important; }
+.btn--danger-ghost:hover { color: var(--red) !important; border-color: var(--red) !important; background: rgba(172, 134, 74, 0.06) !important; }
 .btn--ghost { background: transparent !important; }
 
 /* Champs */
@@ -338,7 +338,7 @@ h1, h2, h3 { letter-spacing: -0.02em; }
 .action, .raccourci-admin, .outil { transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease) !important; }
 .action:hover, .raccourci-admin:hover, .outil:hover { transform: translateY(-3px) !important; box-shadow: 0 24px 50px -26px rgba(0, 0, 0, 0.3) !important; }
 .action__ic, .raccourci-admin__ic { background: var(--bg) !important; border: 0 !important; color: #0b0b0c !important; }
-.action:hover .action__ic, .raccourci-admin:hover .raccourci-admin__ic { background: #d71f2c !important; color: #fff !important; }
+.action:hover .action__ic, .raccourci-admin:hover .raccourci-admin__ic { background: #ac864a !important; color: #fff !important; }
 
 /* Tableaux */
 table th { color: var(--muted) !important; }
@@ -347,11 +347,11 @@ table th { color: var(--muted) !important; }
 /* Pastilles d'état lisibles sur blanc */
 .pastille--envoye, .pastille--envoyee, .pastille--en_cours, .pastille--attente { color: #9a5b00 !important; background: #fff4e0 !important; }
 .pastille--accepte, .pastille--payee, .pastille--traitee, .pastille--retenue, .pastille--publie { color: #1f7a4d !important; background: #e6f7ee !important; }
-.pastille--refuse, .pastille--refusee, .pastille--retard { color: #b51823 !important; background: #fdecee !important; }
+.pastille--refuse, .pastille--refusee, .pastille--retard { color: #90703e !important; background: #f8f5f1 !important; }
 .pastille--brouillon, .pastille--archivee, .pastille--annulee { color: #6e6e73 !important; background: #f0f0f3 !important; }
 
 /* Connexion */
-.auth { background: #f5f5f7 !important; }
+.auth { background: #f7f3ec !important; }
 .auth::before { display: none !important; }
 .auth__carte { background: #fff !important; border: 0 !important; border-radius: 28px !important; box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.25) !important; animation: adm-monte 0.9s var(--ease) both; }
 

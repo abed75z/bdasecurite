@@ -68,7 +68,7 @@ export async function pageContenu(ctx) {
   const titre = saisie({ value: a.titre || '', maxlength: 160 });
   const texte = zoneTexte({ rows: 4, value: a.texte || '', maxlength: 400 });
   let visuel = a.visuel === 'logo' ? 'logo' : 'photo';
-  const choixVisuel = h('div', { class: 'choix-visuel' }, [['photo', 'Téléphone', ''], ['logo', 'Logo BDA', '/assets/img/embleme-hd.png']].map(([v, lib]) => {
+  const choixVisuel = h('div', { class: 'choix-visuel' }, [['photo', 'Téléphone', ''], ['logo', 'Logo BDA', '/assets/img/embleme-hd.png?v=3']].map(([v, lib]) => {
     const b = h('button', { type: 'button', class: `choix-visuel__btn ${visuel === v ? 'is-actif' : ''}`, onclick: () => {
       visuel = v;
       choixVisuel.querySelectorAll('button').forEach((x) => x.classList.toggle('is-actif', x === b));

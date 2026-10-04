@@ -2,16 +2,16 @@
    POINTAGE AGENT — écran téléphone aux couleurs du logo BDA
    ========================================================= */
 :root {
-  --bg: #050b1d; --surface: #0b1734; --surface-2: #11214a; --line: rgba(255, 255, 255, 0.09);
-  --text: #f3f6fc; --muted: #a9b4cf; --muted-2: #7584a6;
-  --red: #e8222f; --red-light: #ff5c66; --blue: #2563ff; --blue-light: #5b8cff; --green: #3ecf8e;
+  --bg: #13110f; --surface: #23201c; --surface-2: #332f28; --line: rgba(255, 255, 255, 0.09);
+  --text: #f3f6fc; --muted: #cfc0a9; --muted-2: #7584a6;
+  --red: #b69054; --red-light: #ceb58d; --blue: #be9c66; --blue-light: #ceb58c; --green: #3ecf8e;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 * { box-sizing: border-box; margin: 0; }
 html, body { min-height: 100%; }
 body {
   font: 15px/1.5 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--muted); -webkit-font-smoothing: antialiased;
-  background: radial-gradient(90% 60% at 50% 0%, rgba(37, 99, 255, 0.22), transparent 70%), radial-gradient(70% 50% at 50% 100%, rgba(232, 34, 48, 0.12), transparent 70%), var(--bg);
+  background: radial-gradient(90% 60% at 50% 0%, rgba(190, 156, 102, 0.22), transparent 70%), radial-gradient(70% 50% at 50% 100%, rgba(182, 144, 84, 0.12), transparent 70%), var(--bg);
   background-attachment: fixed; -webkit-tap-highlight-color: transparent;
 }
 button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
@@ -19,7 +19,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
 /* En-tête */
 .pt-tete { display: flex; align-items: center; gap: 11px; padding: 4px 0 6px; }
-.pt-tete__logo { width: 42px; height: auto; filter: drop-shadow(0 6px 14px rgba(37, 99, 255, 0.35)); }
+.pt-tete__logo { width: 42px; height: auto; filter: drop-shadow(0 6px 14px rgba(190, 156, 102, 0.35)); }
 .pt-tete b { display: block; font: 700 15px "Montserrat", sans-serif; color: var(--text); letter-spacing: 0.04em; }
 .pt-tete small { display: block; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red-light); font-weight: 600; }
 .pt-horloge { margin-left: auto; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.04); font: 700 15px "Montserrat", sans-serif; color: var(--text); font-variant-numeric: tabular-nums; }
@@ -37,14 +37,14 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .pt-bonjour h1 { margin-top: 4px; font: 800 30px/1.1 "Montserrat", sans-serif; color: var(--text); letter-spacing: -0.02em; }
 .pt-poste { margin-top: 2px; font-size: 14px; }
 
-.pt-prevu { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-radius: 14px; border: 1px solid rgba(91, 140, 255, 0.28); background: linear-gradient(120deg, rgba(37, 99, 255, 0.14), rgba(11, 23, 52, 0.7)); color: var(--text); font-weight: 600; }
+.pt-prevu { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-radius: 14px; border: 1px solid rgba(206, 181, 140, 0.28); background: linear-gradient(120deg, rgba(190, 156, 102, 0.14), rgba(35, 32, 28, 0.7)); color: var(--text); font-weight: 600; }
 .pt-prevu small { display: block; font-weight: 500; font-size: 12.5px; color: var(--muted); }
 .pt-prevu .pt-ic { color: var(--blue-light); }
 
 /* Zone du gros bouton */
-.pt-zone { position: relative; display: grid; justify-items: center; gap: 10px; padding: 24px 16px 20px; border-radius: 24px; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(17, 33, 74, 0.75), rgba(8, 17, 41, 0.75)); overflow: hidden; }
-.pt-zone::before { content: ""; position: absolute; inset: -40% -20% auto; height: 80%; background: radial-gradient(closest-side, rgba(37, 99, 255, 0.28), transparent); pointer-events: none; }
-.pt-zone.is-en-service::before { background: radial-gradient(closest-side, rgba(232, 34, 48, 0.3), transparent); }
+.pt-zone { position: relative; display: grid; justify-items: center; gap: 10px; padding: 24px 16px 20px; border-radius: 24px; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(51, 47, 40, 0.75), rgba(27, 25, 22, 0.75)); overflow: hidden; }
+.pt-zone::before { content: ""; position: absolute; inset: -40% -20% auto; height: 80%; background: radial-gradient(closest-side, rgba(190, 156, 102, 0.28), transparent); pointer-events: none; }
+.pt-zone.is-en-service::before { background: radial-gradient(closest-side, rgba(182, 144, 84, 0.3), transparent); }
 .pt-statut { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 5px 13px; border-radius: 99px; background: rgba(255, 255, 255, 0.06); border: 1px solid var(--line); font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text); }
 .pt-statut i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted-2); }
 .is-en-service .pt-statut i { background: var(--green); box-shadow: 0 0 0 0 rgba(62, 207, 142, 0.6); animation: pt-pouls 1.8s ease-out infinite; }
@@ -54,8 +54,8 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
 .pt-bouton { position: relative; width: 230px; height: 230px; margin-top: 8px; border-radius: 50%; display: grid; place-items: center; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; transition: transform 0.25s var(--ease); }
 .pt-bouton__coeur { position: absolute; inset: 20px; border-radius: 50%; display: grid; place-content: center; justify-items: center; gap: 10px; color: #fff; text-align: center; padding: 0 22px; transition: transform 0.3s var(--ease), box-shadow 0.3s; }
-.pt-bouton--debut .pt-bouton__coeur { background: radial-gradient(circle at 35% 30%, #6a9bff, #2563ff 55%, #1640b8); box-shadow: 0 20px 50px -14px rgba(37, 99, 255, 0.9), inset 0 2px 0 rgba(255, 255, 255, 0.25); }
-.pt-bouton--fin .pt-bouton__coeur { background: radial-gradient(circle at 35% 30%, #ff6e77, #e8222f 55%, #a3101b); box-shadow: 0 20px 50px -14px rgba(232, 34, 48, 0.9), inset 0 2px 0 rgba(255, 255, 255, 0.25); }
+.pt-bouton--debut .pt-bouton__coeur { background: radial-gradient(circle at 35% 30%, #d2bb97, #be9c66 55%, #90713e); box-shadow: 0 20px 50px -14px rgba(190, 156, 102, 0.9), inset 0 2px 0 rgba(255, 255, 255, 0.25); }
+.pt-bouton--fin .pt-bouton__coeur { background: radial-gradient(circle at 35% 30%, #d4bd9a, #b69054 55%, #7d6236); box-shadow: 0 20px 50px -14px rgba(182, 144, 84, 0.9), inset 0 2px 0 rgba(255, 255, 255, 0.25); }
 .pt-bouton__txt { font: 800 16px/1.2 "Montserrat", sans-serif; letter-spacing: 0.04em; text-transform: uppercase; }
 .pt-bouton.is-appui { transform: scale(0.96); }
 .pt-bouton.is-appui .pt-bouton__coeur { transform: scale(0.97); }
@@ -71,7 +71,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .pt-aide { position: relative; font-size: 12.5px; color: var(--muted-2); }
 
 /* Cartes */
-.pt-carte { display: grid; gap: 12px; padding: 16px; border-radius: 18px; border: 1px solid var(--line); background: rgba(11, 23, 52, 0.7); }
+.pt-carte { display: grid; gap: 12px; padding: 16px; border-radius: 18px; border: 1px solid var(--line); background: rgba(35, 32, 28, 0.7); }
 .pt-semaine { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 600; }
 .pt-semaine b { margin-left: auto; font: 800 20px "Montserrat", sans-serif; color: var(--text); }
 .pt-semaine .pt-ic { color: var(--red-light); }
@@ -86,7 +86,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 
 .pt-vide { justify-items: center; text-align: center; padding: 34px 20px; margin-top: 30px; }
 .pt-vide h1 { font: 800 21px "Montserrat", sans-serif; color: var(--text); }
-.pt-lien { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding: 12px 18px; border-radius: 12px; background: linear-gradient(135deg, #ff5a64, #e8222f 50%, #b0111d); color: #fff; font-weight: 700; text-decoration: none; }
+.pt-lien { display: inline-flex; align-items: center; gap: 8px; margin-top: 6px; padding: 12px 18px; border-radius: 12px; background: linear-gradient(135deg, #ceb48c, #b69054 50%, #876a3a); color: #fff; font-weight: 700; text-decoration: none; }
 
 /* Icônes */
 .pt-ic { display: inline-grid; width: 20px; height: 20px; flex: none; }
@@ -96,10 +96,10 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .pt-ic--grand { width: 46px; height: 46px; color: var(--red-light); }
 
 /* Messages */
-.pt-toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 10; display: flex; align-items: center; gap: 10px; width: min(92vw, 420px); padding: 13px 16px; border-radius: 14px; background: #0f1f46; border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text); font-size: 14px; font-weight: 500; box-shadow: 0 20px 50px -14px rgba(0, 0, 0, 0.8); transform: translate(-50%, 140%); transition: transform 0.45s var(--ease); }
+.pt-toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 10; display: flex; align-items: center; gap: 10px; width: min(92vw, 420px); padding: 13px 16px; border-radius: 14px; background: #302c25; border: 1px solid rgba(255, 255, 255, 0.12); color: var(--text); font-size: 14px; font-weight: 500; box-shadow: 0 20px 50px -14px rgba(0, 0, 0, 0.8); transform: translate(-50%, 140%); transition: transform 0.45s var(--ease); }
 .pt-toast.is-on { transform: translate(-50%, 0); }
 .pt-toast--ok .pt-ic { color: var(--green); }
-.pt-toast--erreur { border-color: rgba(232, 34, 48, 0.6); }
+.pt-toast--erreur { border-color: rgba(182, 144, 84, 0.6); }
 .pt-toast--erreur .pt-ic { color: var(--red-light); }
 .pt-toast--info .pt-ic { color: var(--blue-light); }
 
@@ -111,11 +111,11 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 /* =========================================================
    THÈME BLANC 2.0 — couleurs de l'ancien thème éclaircies
    ========================================================= */
-:root { --bg: #f5f5f7; --surface: #ffffff; --surface-2: #f5f5f7; --line: rgba(0, 0, 0, 0.08); --text: #0b0b0c; --muted: #4a4a4f; --muted-2: #86868b; --red: #d71f2c; --red-light: #d71f2c; --blue: #0b0b0c; --blue-light: #0b0b0c; --green: #1f9d5c; --ease: cubic-bezier(0.22, 1, 0.36, 1); }
+:root { --bg: #f7f3ec; --surface: #ffffff; --surface-2: #f7f3ec; --line: rgba(0, 0, 0, 0.08); --text: #0b0b0c; --muted: #4a4a4f; --muted-2: #86868b; --red: #ac864a; --red-light: #ac864a; --blue: #0b0b0c; --blue-light: #0b0b0c; --green: #1f9d5c; --ease: cubic-bezier(0.22, 1, 0.36, 1); }
 html { color-scheme: light; }
-body { background: #f5f5f7 !important; color: var(--muted); }
+body { background: #f7f3ec !important; color: var(--muted); }
 .pt-tete__logo { filter: none !important; }
-body { background: radial-gradient(90% 60% at 50% 0%, rgba(0, 0, 0, 0.099), transparent 70%), radial-gradient(70% 50% at 50% 100%, rgba(232, 34, 48, 0.12), transparent 70%), var(--bg); }
+body { background: radial-gradient(90% 60% at 50% 0%, rgba(0, 0, 0, 0.099), transparent 70%), radial-gradient(70% 50% at 50% 100%, rgba(182, 144, 84, 0.12), transparent 70%), var(--bg); }
 .pt-horloge { background: rgba(0, 0, 0, 0.032); }
 .pt-prevu { border: 1px solid rgba(0, 0, 0, 0.14); background: linear-gradient(120deg, rgba(0, 0, 0, 0.063), rgba(255, 255, 255, 0.9)); }
 .pt-zone { background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)); }
@@ -129,3 +129,6 @@ body { background: radial-gradient(90% 60% at 50% 0%, rgba(0, 0, 0, 0.099), tran
 .pt-carte { background: rgba(255, 255, 255, 0.9); }
 .pt-ic--bouton svg { fill: #0b0b0c; }
 .pt-toast { background: #ffffff; border: 1px solid rgba(0, 0, 0, 0.108); box-shadow: 0 20px 50px -14px rgba(0, 0, 0, 0.22); }
+
+/* Thème or (logo BDA Security Group) : texte noir sur le doré */
+.pt-bouton--fin .pt-bouton__coeur, .pt-lien { color: #0b0b0c; }

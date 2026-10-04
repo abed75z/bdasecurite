@@ -50,7 +50,7 @@ function afficherDoc(ctx, { titre, nomFichier, paysage, outils, contenu }) {
   ajusterZoom(zone, feuille);
 }
 const enTete = (P, titre, sous) => h('div', { class: 'doc-tete' },
-  h('img', { class: 'bp-logo', src: 'logo-document.jpg', alt: '' }),
+  h('img', { class: 'bp-logo', src: 'logo-document.jpg?v=3', alt: '' }),
   h('div', { class: 'doc-tete__emp' }, h('b', { class: 'bp-nom' }, P.employeur.nom), String(P.employeur.adresse || '').split('\n').filter(Boolean).map((l) => h('div', null, l)),
     h('div', null, [P.employeur.siret ? `SIRET ${P.employeur.siret}` : '', P.employeur.urssaf ? `URSSAF ${P.employeur.urssaf}` : ''].filter(Boolean).join(' · '))),
   h('div', { class: 'doc-tete__titre' }, h('h2', null, titre), sous ? h('div', { class: 'bp-periode' }, sous) : null));

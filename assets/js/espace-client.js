@@ -95,7 +95,7 @@ function carteAuth(titre, texte, ...contenu) {
     h('section', { class: 'ec-auth__visuel', 'aria-hidden': 'true' },
       h('div', { class: 'ec-auth__slogan' }, h('span', null, 'BDA Sécurité'), h('p', null, 'Vos devis, vos factures et un contact direct avec votre responsable de mission, ', h('em', null, 'au même endroit.')))),
     h('section', { class: 'ec-auth__carte' },
-      h('a', { class: 'ec-auth__marque', href: '/' }, h('img', { src: '/assets/img/embleme.png', alt: '', width: 46, height: 47 }), h('span', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Espace client'))),
+      h('a', { class: 'ec-auth__marque', href: '/' }, h('img', { src: '/assets/img/embleme.png?v=3', alt: '', width: 46, height: 47 }), h('span', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Espace client'))),
       h('h1', null, titre),
       texte ? h('p', { class: 'ec-auth__texte' }, texte) : null,
       contenu,
@@ -155,7 +155,7 @@ function naviguer() {
   const lien = ([k, lib]) => h('a', { href: `#/${k}`, class: `ec-nav__item ${k === onglet ? 'is-actif' : ''}` }, ic(k), h('span', null, lib), badge(k));
   const deconnexion = async () => { try { await api('deconnexion', {}); } catch (e) { /* déjà sorti */ } donnees = null; ecranConnexion('Vous êtes déconnecté. À bientôt !'); };
   const cote = h('aside', { class: 'ec-cote' },
-    h('a', { class: 'ec-cote__marque', href: '#/accueil' }, h('img', { src: '/assets/img/embleme.png', alt: '', width: 40, height: 41 }), h('span', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Espace client'))),
+    h('a', { class: 'ec-cote__marque', href: '#/accueil' }, h('img', { src: '/assets/img/embleme.png?v=3', alt: '', width: 40, height: 41 }), h('span', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Espace client'))),
     h('div', { class: 'ec-cote__client' }, h('span', { class: 'ec-avatar' }, initiales(donnees.client.nom)), h('span', null, h('b', null, donnees.client.nom), h('small', null, donnees.client.email))),
     h('nav', { class: 'ec-nav', 'aria-label': 'Espace client' }, ONGLETS.map(lien)),
     h('div', { class: 'ec-cote__bas' },
@@ -260,7 +260,7 @@ async function vueDocument(id) {
     accepter);
   const feuille = h('article', { class: 'ec-feuille' },
     h('header', { class: 'ec-feuille__tete' },
-      h('img', { src: '/admin/logo-document.jpg', alt: 'BDA Sécurité', class: 'ec-feuille__logo' }),
+      h('img', { src: '/admin/logo-document.jpg?v=3', alt: 'BDA Sécurité', class: 'ec-feuille__logo' }),
       h('div', { class: 'ec-feuille__titre' }, h('h2', null, estFacture ? 'Facture' : 'Devis'), h('b', null, `N° ${doc.numero}`), pastille(doc.type, doc.statut))),
     h('div', { class: 'ec-feuille__parties' },
       h('div', null, h('small', null, 'Émetteur'), h('b', null, d.emetteurNom || 'BDA SECURITE'), h('p', null, texte(d.emetteur))),

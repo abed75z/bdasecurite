@@ -24,9 +24,9 @@ function svg(classe, contenu, viewBox = '0 0 24 24') {
   s.innerHTML = contenu;
   return s;
 }
-const couronne = (classe) => svg(classe, '<defs><linearGradient id="orC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a9c4ff"/><stop offset=".5" stop-color="#3b7bff"/><stop offset="1" stop-color="#9c7a38"/></linearGradient></defs>'
+const couronne = (classe) => svg(classe, '<defs><linearGradient id="orC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e5d8c3"/><stop offset=".5" stop-color="#c4a676"/><stop offset="1" stop-color="#9c7a38"/></linearGradient></defs>'
   + '<path d="M8 44 5 16l14 12L32 6l13 22 14-12-3 28Z" fill="url(#orC)"/><rect x="8" y="48" width="48" height="6" rx="2" fill="url(#orC)"/>'
-  + '<circle cx="5" cy="14" r="3.4" fill="#a9c4ff"/><circle cx="32" cy="5" r="3.6" fill="#a9c4ff"/><circle cx="59" cy="14" r="3.4" fill="#a9c4ff"/>', '0 0 64 58');
+  + '<circle cx="5" cy="14" r="3.4" fill="#e5d8c3"/><circle cx="32" cy="5" r="3.6" fill="#e5d8c3"/><circle cx="59" cy="14" r="3.4" fill="#e5d8c3"/>', '0 0 64 58');
 
 /* ---------- Démarrage ---------- */
 async function demarrer() {

@@ -73,7 +73,7 @@
     const form = h('form', { class: 'as-saisie' }, champ, bouton);
     const panneau = h('section', { class: 'as-panneau', role: 'dialog', 'aria-label': 'Assistant BDA Sécurité', hidden: true },
       h('header', { class: 'as-tete' },
-        h('img', { src: '/assets/img/ecusson-petit.png', alt: '', width: 262, height: 221 }),
+        h('img', { src: '/assets/img/ecusson-petit.png?v=3', alt: '', width: 200, height: 204 }),
         h('div', null, h('b', null, 'Assistant BDA Sécurité'), statutTxt),
         h('button', { class: 'as-tete__fermer', type: 'button', 'aria-label': 'Fermer', onclick: () => ouvrir(false) }, ic(I.croix))),
       fil, form,
@@ -266,7 +266,7 @@
         if (etat.ouvert) return;
         const t = h('div', { class: 'as-teaser', role: 'status' },
           h('button', { class: 'as-teaser__x', type: 'button', 'aria-label': 'Fermer', onclick: (e) => { e.stopPropagation(); t.remove(); } }, '×'),
-          h('img', { src: '/assets/img/ecusson-petit.png', alt: '', width: 262, height: 221 }),
+          h('img', { src: '/assets/img/ecusson-petit.png?v=3', alt: '', width: 200, height: 204 }),
           h('p', null, h('b', null, 'Une question ?'), 'Tarifs, disponibilités, devis… je vous réponds tout de suite.'));
         t.addEventListener('click', () => ouvrir(true));
         document.body.append(t);

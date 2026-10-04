@@ -6,7 +6,7 @@
   <title>BDA Sécurité &amp; VTC Premium — Carte de visite</title>
   <meta name="description" content="Sécurité privée et chauffeurs VTC premium à Paris et en Île-de-France, 24/7. Appelez, écrivez sur WhatsApp ou demandez un devis gratuit.">
   <meta name="robots" content="noindex">
-  <meta name="theme-color" content="#050b1d">
+  <meta name="theme-color" content="#13110f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="BDA Sécurité">
@@ -16,19 +16,19 @@
   <meta property="og:url" content="https://bdasecurite.com/carte">
   <meta property="og:title" content="BDA Sécurité & VTC Premium — Carte de visite">
   <meta property="og:description" content="Sécurité privée · VTC Premium · Paris & Île-de-France, 24/7. Appelez, WhatsApp, devis gratuit en 2 minutes.">
-  <meta property="og:image" content="https://bdasecurite.com/assets/img/og-image.jpg">
+  <meta property="og:image" content="https://bdasecurite.com/assets/img/og-image.jpg?v=3">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="assets/img/favicon.svg?v=2" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=2">
+  <link rel="icon" href="assets/img/favicon.svg?v=3" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=3">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://images.unsplash.com">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #050b1d; --surface: #0b1734; --surface-2: #11214a; --line: rgba(255, 255, 255, .08);
-      --gold: #e8222f; --gold-light: #ff5c66; --gold-grad: linear-gradient(135deg, #ff5a64 0%, #e8222f 50%, #b0111d 100%);
-      --text: #f3f6fc; --text-2: #c3cbe0; --muted: #8390ad; --ease: cubic-bezier(.16, 1, .3, 1);
+      --bg: #13110f; --surface: #23201c; --surface-2: #332f28; --line: rgba(255, 255, 255, .08);
+      --gold: #b69054; --gold-light: #ceb58d; --gold-grad: linear-gradient(135deg, #ceb48c 0%, #b69054 50%, #876a3a 100%);
+      --text: #f3f6fc; --text-2: #e0d5c3; --muted: #8390ad; --ease: cubic-bezier(.16, 1, .3, 1);
     }
     *, *::before, *::after { box-sizing: border-box; }
     html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
@@ -43,13 +43,13 @@
     /* ----- Couverture ----- */
     .couverture { position: relative; height: 300px; overflow: hidden; }
     .couverture img { width: 100%; height: 100%; object-fit: cover; filter: saturate(.8); transform: scale(1.08); animation: respire 18s ease-in-out infinite alternate; }
-    .couverture::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(5, 11, 29, .35) 0%, rgba(5, 11, 29, .55) 45%, var(--bg) 100%), radial-gradient(80% 60% at 50% 0%, rgba(232, 34, 48, .28), transparent 70%); }
+    .couverture::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(19, 17, 15, .35) 0%, rgba(19, 17, 15, .55) 45%, var(--bg) 100%), radial-gradient(80% 60% at 50% 0%, rgba(182, 144, 84, .28), transparent 70%); }
     @keyframes respire { to { transform: scale(1.18) translateY(-8px); } }
     .couverture__haut { position: absolute; z-index: 1; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; align-items: center; padding: max(16px, env(safe-area-inset-top)) 18px 0; }
-    .pastille-live { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 99px; background: rgba(5, 11, 29, .6); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, .12); font-size: 12px; color: var(--text); }
+    .pastille-live { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 99px; background: rgba(19, 17, 15, .6); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, .12); font-size: 12px; color: var(--text); }
     .pastille-live i { width: 8px; height: 8px; border-radius: 50%; background: #4cc38a; box-shadow: 0 0 0 0 rgba(76, 195, 138, .7); animation: pouls 2s infinite; }
     @keyframes pouls { 70% { box-shadow: 0 0 0 8px rgba(76, 195, 138, 0); } 100% { box-shadow: 0 0 0 0 rgba(76, 195, 138, 0); } }
-    .rond { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(5, 11, 29, .6); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, .12); color: var(--text); }
+    .rond { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(19, 17, 15, .6); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, .12); color: var(--text); }
 
     main { position: relative; width: min(480px, 100%); margin: -210px auto 0; padding: 0 18px 120px; display: grid; gap: 22px; }
 
@@ -62,9 +62,9 @@
     .carte3d.is-retournee { transform: rotateY(180deg); }
     .face { position: absolute; inset: 0; border-radius: 16px; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; box-shadow: 0 30px 60px -22px rgba(0, 0, 0, .95), 0 0 0 1px rgba(255, 255, 255, .06); }
     .face::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .16) 45%, transparent 60%); transform: translateX(var(--brillance, -60%)); transition: transform .3s; }
-    .recto { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #fff; background: radial-gradient(90% 80% at 50% 0%, rgba(232, 34, 48, .3), transparent 65%), linear-gradient(160deg, #19181a, #060d24 70%); }
-    .recto::before { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(232, 34, 48, .5); border-radius: 10px; }
-    .recto__logo { width: 66px; height: auto; margin-bottom: 4px; filter: drop-shadow(0 6px 14px rgba(232, 34, 48, .35)); }
+    .recto { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #fff; background: radial-gradient(90% 80% at 50% 0%, rgba(182, 144, 84, .3), transparent 65%), linear-gradient(160deg, #19181a, #181612 70%); }
+    .recto::before { content: ""; position: absolute; inset: 9px; border: 1px solid rgba(182, 144, 84, .5); border-radius: 10px; }
+    .recto__logo { width: 66px; height: auto; margin-bottom: 4px; filter: drop-shadow(0 6px 14px rgba(182, 144, 84, .35)); }
     .recto b { font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 25px; letter-spacing: .05em; background: linear-gradient(180deg, #fff, #d9d3c6); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .recto small { font-size: 8.5px; font-weight: 600; letter-spacing: .34em; text-transform: uppercase; color: var(--gold); }
     .recto em { position: absolute; bottom: 16px; font-style: normal; font-size: 8.5px; letter-spacing: .16em; color: #8f8b82; }
@@ -74,16 +74,16 @@
     .verso__infos small { display: block; margin: 2px 0 10px; font-size: 8.5px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: #b08a45; }
     .verso__infos ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; font-size: 11.5px; font-weight: 500; }
     .verso__infos li { display: flex; align-items: center; gap: 7px; }
-    .verso__infos li i { display: grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: #060d24; color: var(--gold); }
+    .verso__infos li i { display: grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: #181612; color: var(--gold); }
     .verso__infos li .ic { width: 9px; height: 9px; stroke-width: 2.4; }
-    .verso__bande { position: absolute; left: 0; right: 0; bottom: 0; height: 18px; background: #060d24; border-top: 2px solid var(--gold); }
+    .verso__bande { position: absolute; left: 0; right: 0; bottom: 0; height: 18px; background: #181612; border-top: 2px solid var(--gold); }
     .verso__qr { width: 92px; padding: 18px 16px 0 6px; }
     .verso__qr svg { width: 100%; height: auto; display: block; }
     .indice { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
     .indice .ic { width: 15px; height: 15px; }
 
     /* ----- Présentation ----- */
-    .pour { margin: 0; padding: 12px 16px; border-radius: 14px; background: var(--gold-soft, rgba(232, 34, 48, .1)); border: 1px solid rgba(232, 34, 48, .35); text-align: center; font-size: 13.5px; color: var(--text-2); }
+    .pour { margin: 0; padding: 12px 16px; border-radius: 14px; background: var(--gold-soft, rgba(182, 144, 84, .1)); border: 1px solid rgba(182, 144, 84, .35); text-align: center; font-size: 13.5px; color: var(--text-2); }
     .pour b { color: var(--gold-light); }
     .intro { text-align: center; display: grid; gap: 6px; }
     .intro h1 { margin: 0; font-size: 30px; line-height: 1.15; color: var(--text); }
@@ -97,9 +97,9 @@
     .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
     .action { display: grid; justify-items: center; gap: 7px; padding: 14px 4px 12px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); font-size: 12px; font-weight: 500; color: var(--text); transition: transform .2s, border-color .2s; }
     .action:active { transform: scale(.95); }
-    .action span { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: #060d24; border: 1px solid rgba(232, 34, 48, .4); color: var(--gold-light); }
+    .action span { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: #181612; border: 1px solid rgba(182, 144, 84, .4); color: var(--gold-light); }
     .action--wa span { color: #6fe39c; border-color: rgba(111, 227, 156, .4); }
-    .devis { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; border-radius: 20px; background: var(--gold-grad); color: #fff; box-shadow: 0 18px 40px -18px rgba(232, 34, 48, .9); }
+    .devis { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px; border-radius: 20px; background: var(--gold-grad); color: #fff; box-shadow: 0 18px 40px -18px rgba(182, 144, 84, .9); }
     .devis::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, .45) 50%, transparent 65%); transform: translateX(-100%); animation: reflet 4s ease-in-out infinite 1.5s; }
     @keyframes reflet { 30%, 100% { transform: translateX(100%); } }
     .devis b { display: block; font-size: 16px; }
@@ -114,7 +114,7 @@
     .service { position: relative; scroll-snap-align: start; height: 210px; border-radius: 20px; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
     .service img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s var(--ease); }
     .service:active img { transform: scale(1.05); }
-    .service::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(5, 11, 29, .92)); }
+    .service::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 30%, rgba(19, 17, 15, .92)); }
     .service div { position: absolute; z-index: 1; left: 16px; right: 16px; bottom: 14px; }
     .service b { display: block; color: #fff; font-size: 16px; font-weight: 600; }
     .service small { color: #d8d4cb; font-size: 12.5px; }
@@ -145,14 +145,14 @@
     .barre .ic { width: 18px; height: 18px; }
 
     /* ----- Mode présentation (QR plein écran) ----- */
-    .presentation { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; align-content: center; gap: 18px; padding: 24px; text-align: center; background: radial-gradient(70% 50% at 50% 30%, rgba(232, 34, 48, .22), transparent 70%), #050b1d; animation: fondu .35s ease; }
+    .presentation { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; align-content: center; gap: 18px; padding: 24px; text-align: center; background: radial-gradient(70% 50% at 50% 30%, rgba(182, 144, 84, .22), transparent 70%), #13110f; animation: fondu .35s ease; }
     @keyframes fondu { from { opacity: 0; } }
-    .presentation__qr { width: min(300px, 78vw); padding: 18px; border-radius: 26px; background: #fff; box-shadow: 0 0 0 6px rgba(232, 34, 48, .35), 0 30px 80px -20px #000; }
+    .presentation__qr { width: min(300px, 78vw); padding: 18px; border-radius: 26px; background: #fff; box-shadow: 0 0 0 6px rgba(182, 144, 84, .35), 0 30px 80px -20px #000; }
     .presentation__qr svg { display: block; width: 100%; height: auto; }
     .presentation h2 { margin: 0; font-size: 26px; color: var(--text); }
     .presentation p { margin: 0; color: var(--muted); font-size: 13.5px; }
     .presentation .rond { position: absolute; top: max(16px, env(safe-area-inset-top)); right: 16px; }
-    .toast { position: fixed; z-index: 60; left: 50%; bottom: 100px; transform: translate(-50%, 20px); padding: 10px 16px; border-radius: 12px; background: #1b1b20; border: 1px solid rgba(232, 34, 48, .4); color: var(--text); font-size: 13px; opacity: 0; transition: opacity .25s, transform .3s; pointer-events: none; }
+    .toast { position: fixed; z-index: 60; left: 50%; bottom: 100px; transform: translate(-50%, 20px); padding: 10px 16px; border-radius: 12px; background: #1b1b20; border: 1px solid rgba(182, 144, 84, .4); color: var(--text); font-size: 13px; opacity: 0; transition: opacity .25s, transform .3s; pointer-events: none; }
     .toast.is-in { opacity: 1; transform: translate(-50%, 0); }
     .apparait { opacity: 0; transform: translateY(18px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
     .apparait.is-vu { opacity: 1; transform: none; }
@@ -162,7 +162,7 @@
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <defs><linearGradient id="or" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8d94"/><stop offset=".45" stop-color="#e8222f"/><stop offset="1" stop-color="#a3101b"/></linearGradient></defs>
+    <defs><linearGradient id="or" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ddcbaf"/><stop offset=".45" stop-color="#b69054"/><stop offset="1" stop-color="#7d6236"/></linearGradient></defs>
     <symbol id="logo" viewBox="0 0 200 240">
       <path d="M100 8 184 40s2 88-14 122c-18 38-54 60-70 70-16-10-52-32-70-70C14 128 16 40 16 40Z" fill="none" stroke="url(#or)" stroke-width="10" stroke-linejoin="round"/>
       <path d="M100 30 164 54s2 70-11 97c-14 30-42 47-53 55-11-8-39-25-53-55-13-27-11-97-11-97Z" fill="none" stroke="url(#or)" stroke-width="4" stroke-linejoin="round"/>
@@ -195,7 +195,7 @@
       <div class="flotte is-auto" id="flotte">
         <div class="carte3d" id="carte3d" role="button" tabindex="0" aria-label="Retourner la carte">
           <div class="face recto">
-            <img class="recto__logo" src="/assets/img/embleme.png" alt="" width="128" height="131">
+            <img class="recto__logo" src="/assets/img/embleme.png?v=3" alt="" width="128" height="130">
             <b>BDA SÉCURITÉ</b>
             <small>Sécurité privée · VTC Premium</small>
             <em>PARIS &amp; ÎLE-DE-FRANCE · 24/7</em>

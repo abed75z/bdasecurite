@@ -3,9 +3,9 @@
    Même présentation que les PDF envoyés aux clients.
    ========================================================= */
 .feuille {
-  --or: #d31f2b; --or-clair: #f0a3a8; --or-fonce: #0d2560;
-  --or-grad: linear-gradient(90deg, #e8222f 0%, #b0111d 45%, #0d2560 100%);
-  --encre: #17171c; --encre-2: #44444f; --gris: #7a7a86; --trait: #dfe4ee; --creme: #f6f8fc;
+  --or: #a98449; --or-clair: #dfceb4; --or-fonce: #0b0b0c;
+  --or-grad: linear-gradient(90deg, #d9be88 0%, #b8955f 50%, #9a7843 100%);
+  --encre: #17171c; --encre-2: #44444f; --gris: #7a7a86; --trait: #eee8df; --creme: #faf7f1;
   position: relative; display: flex; flex-direction: column; width: 210mm; min-height: 297mm; margin: 0 auto;
   padding: 11mm 15mm 9mm; background: #fff; color: var(--encre); border-radius: 4px;
   box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.85);
@@ -13,8 +13,8 @@
 }
 .feuille--paysage { width: 297mm; min-height: 210mm; padding: 9mm 10mm 7mm; }
 .feuille [contenteditable] { outline: none; border-radius: 3px; white-space: pre-wrap; transition: background-color 0.2s, box-shadow 0.2s; min-width: 2ch; }
-.feuille [contenteditable]:hover { background: rgba(211, 31, 43, 0.08); box-shadow: 0 0 0 1px rgba(211, 31, 43, 0.35); }
-.feuille [contenteditable]:focus { background: rgba(211, 31, 43, 0.1); box-shadow: 0 0 0 2px var(--or); }
+.feuille [contenteditable]:hover { background: rgba(169, 132, 73, 0.08); box-shadow: 0 0 0 1px rgba(169, 132, 73, 0.35); }
+.feuille [contenteditable]:focus { background: rgba(169, 132, 73, 0.1); box-shadow: 0 0 0 2px var(--or); }
 .feuille [contenteditable]:empty::before { content: attr(data-ph); color: #aab3c5; }
 .feuille h2, .feuille h3 { color: var(--encre); }
 
@@ -55,7 +55,7 @@
 .f-table col.c-q { width: 25mm; }
 .f-table col.c-pu { width: 33mm; }
 .f-table col.c-t { width: 30mm; }
-.f-table th { padding: 2.8mm 3mm; background: #0b1838; color: var(--or-clair); text-align: left; font: 600 7.2pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; }
+.f-table th { padding: 2.8mm 3mm; background: #26221d; color: var(--or-clair); text-align: left; font: 600 7.2pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; }
 .f-table th:first-child { border-radius: 6px 0 0 0; }
 .f-table th:last-child { border-radius: 0 6px 0 0; }
 .f-table .r { text-align: right; }
@@ -66,20 +66,20 @@
 .f-detail { color: var(--gris); font-size: 8.4pt; }
 .f-total { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .f-in { width: 100%; min-width: 0; border: 0; background: transparent; padding: 1px 3px; border-radius: 3px; text-align: right; outline: none; color: var(--encre); font-variant-numeric: tabular-nums; }
-.f-in:hover { background: rgba(211, 31, 43, 0.08); box-shadow: 0 0 0 1px rgba(211, 31, 43, 0.35); }
-.f-in:focus { background: rgba(211, 31, 43, 0.1); box-shadow: 0 0 0 2px var(--or); }
+.f-in:hover { background: rgba(169, 132, 73, 0.08); box-shadow: 0 0 0 1px rgba(169, 132, 73, 0.35); }
+.f-in:focus { background: rgba(169, 132, 73, 0.1); box-shadow: 0 0 0 2px var(--or); }
 .f-in.is-bad { box-shadow: 0 0 0 2px #e5484d; }
 .f-outils { position: absolute; right: -19mm; top: 50%; transform: translateY(-50%); display: flex; gap: 4px; }
-.f-outils button, .f-outil-agent { width: 26px; height: 22px; border: 1px solid #cfd6e4; border-radius: 5px; background: #fff; color: var(--encre-2); font-size: 11px; font-weight: 600; line-height: 1; cursor: pointer; }
+.f-outils button, .f-outil-agent { width: 26px; height: 22px; border: 1px solid #e4dccf; border-radius: 5px; background: #fff; color: var(--encre-2); font-size: 11px; font-weight: 600; line-height: 1; cursor: pointer; }
 .f-outils button:hover { border-color: var(--or); color: var(--or-fonce); }
 .f-outils .del:hover, .f-outil-agent:hover { border-color: #e5484d; color: #e5484d; }
 .f-ajout { align-self: flex-start; margin-top: 2.5mm; border: 1px dashed var(--or); background: transparent; color: var(--or-fonce); border-radius: 6px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
-.f-ajout:hover { background: rgba(211, 31, 43, 0.1); }
+.f-ajout:hover { background: rgba(169, 132, 73, 0.1); }
 
 .f-totaux { width: 84mm; margin: 4mm 0 0 auto; break-inside: avoid; }
 .f-totaux > div { display: flex; justify-content: space-between; align-items: center; gap: 4mm; padding: 1.9mm 3mm; border-bottom: 1px solid var(--trait); }
 .f-totaux b { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.f-totaux .grand { margin-top: 1.5mm; border: 0; border-radius: 6px; background: var(--or-grad); color: #fff; padding: 3mm; font: 700 11pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.03em; }
+.f-totaux .grand { margin-top: 1.5mm; border: 0; border-radius: 6px; background: var(--or-grad); color: #0b0b0c; padding: 3mm; font: 700 11pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.03em; }
 .f-totaux .sub { font-size: 8.8pt; color: var(--encre-2); }
 .f-pct { width: 34px; border: 0; border-bottom: 1px dashed var(--or); background: transparent; text-align: center; padding: 0; outline: none; color: var(--encre); }
 .f-print { display: none; }
@@ -87,11 +87,11 @@
 .f-bas .f-totaux { width: auto; margin: 0; }
 .f-conditions .f-petit { margin-top: 1mm; }
 .f-petit { font-size: 8pt; color: var(--encre-2); }
-.f-paiement { margin-top: 6mm; padding: 4mm 5mm; border: 1px solid rgba(211, 31, 43, 0.55); border-radius: 8px; background: linear-gradient(180deg, #fbfcfe, #fff); break-inside: avoid; }
+.f-paiement { margin-top: 6mm; padding: 4mm 5mm; border: 1px solid rgba(169, 132, 73, 0.55); border-radius: 8px; background: linear-gradient(180deg, #fbfcfe, #fff); break-inside: avoid; }
 .f-paiement h3 { margin: 0 0 2mm; font: 600 7.5pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.18em; text-transform: uppercase; color: var(--or-fonce); }
 .f-paiement__main { font-size: 10.5pt; font-weight: 600; letter-spacing: 0.02em; margin-bottom: 2.5mm; }
 .f-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; margin-top: 5mm; break-inside: avoid; }
-.f-signe { min-height: 23mm; padding: 3mm 4mm; border: 1px dashed rgba(211, 31, 43, 0.8); border-radius: 8px; }
+.f-signe { min-height: 23mm; padding: 3mm 4mm; border: 1px dashed rgba(169, 132, 73, 0.8); border-radius: 8px; }
 .f-signe p { margin: 1mm 0 0; font-size: 8pt; color: var(--encre-2); }
 .f-espace { flex: 1 0 4mm; }
 .f-pied { padding-top: 3mm; border-top: 1px solid var(--trait); font-size: 6.6pt; line-height: 1.45; color: var(--gris); text-align: center; white-space: pre-wrap; }
@@ -107,14 +107,14 @@
 .plan { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8.5pt; }
 .plan col.c-agent { width: 36mm; }
 .plan col.c-tot { width: 13mm; }
-.plan th { padding: 1.4mm 0; background: #0b1838; color: var(--or-clair); font: 600 7.5pt "Montserrat", "Segoe UI", sans-serif; border: 1px solid #0b1838; }
-.plan th.wd { background: #1b2a52; color: #d6d6de; font-size: 6.5pt; border-color: #1b2a52; }
-.plan th.we { color: #fff; background: #1d2747; border-color: #1d2747; }
+.plan th { padding: 1.4mm 0; background: #26221d; color: var(--or-clair); font: 600 7.5pt "Montserrat", "Segoe UI", sans-serif; border: 1px solid #26221d; }
+.plan th.wd { background: #3d3830; color: #d6d6de; font-size: 6.5pt; border-color: #3d3830; }
+.plan th.we { color: #fff; background: #38332c; border-color: #38332c; }
 .plan th.ho { color: #111; background: var(--or); border-color: var(--or); }
 .plan th.th-agent { text-align: left; padding-left: 3mm; }
 .plan td { height: 10.5mm; padding: 0; border: 1px solid var(--trait); text-align: center; vertical-align: middle; }
-.plan td.we { background: #f2f5fa; }
-.plan td.ho { background: #e3e9f5; }
+.plan td.we { background: #f9f7f3; }
+.plan td.ho { background: #f3eee5; }
 .plan .agent { position: relative; text-align: left; padding: 1mm 2.5mm; }
 .agent__nom { font-weight: 600; }
 .agent__poste { font-size: 7.3pt; color: var(--gris); }
@@ -123,19 +123,19 @@
 .plan .cell input { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: transparent; color: transparent; text-align: center; font: 600 9pt "Inter", sans-serif; padding: 0 4px; outline: none; cursor: text; caret-color: var(--encre); }
 .plan .cell input:focus { left: 50%; width: 104px; transform: translateX(-50%); z-index: 5; color: var(--encre); background: #fff; border-radius: 6px; box-shadow: 0 0 0 2px var(--or), 0 8px 20px -8px rgba(0, 0, 0, 0.45); }
 .plan .cell .pv { display: block; font-size: 7.2pt; font-weight: 600; line-height: 1.15; pointer-events: none; }
-.plan .cell.has { background-image: linear-gradient(rgba(211, 31, 43, 0.2), rgba(211, 31, 43, 0.2)); }
+.plan .cell.has { background-image: linear-gradient(rgba(169, 132, 73, 0.2), rgba(169, 132, 73, 0.2)); }
 .plan .cell.code .pv { color: var(--gris); font-weight: 500; }
 .plan .cell.bad .pv { color: #e5484d; }
 .plan .tot { background: var(--creme); font-weight: 600; font-size: 8pt; font-variant-numeric: tabular-nums; }
-.plan .t-total { background: #eaeff8; }
-.plan tfoot td { background: #0b1838; color: var(--or-clair); font-size: 7.2pt; font-weight: 600; border-color: #0b1838; height: 7mm; }
+.plan .t-total { background: #f6f2ec; }
+.plan tfoot td { background: #26221d; color: var(--or-clair); font-size: 7.2pt; font-weight: 600; border-color: #26221d; height: 7mm; }
 .plan tfoot .agent { color: #fff; }
 .plan-vide { height: 16mm !important; color: var(--gris); font-style: italic; }
 .plan-legende { display: flex; flex-wrap: wrap; gap: 2mm 7mm; margin-top: 4mm; font-size: 7.8pt; color: var(--encre-2); }
 .plan-legende i { display: inline-block; width: 3.4mm; height: 3.4mm; margin-right: 1.5mm; border-radius: 1mm; vertical-align: -0.5mm; border: 1px solid var(--trait); }
-.plan-legende .lg-we { background: #f2f5fa; }
-.plan-legende .lg-ho { background: #e3e9f5; }
-.plan-legende .lg-has { background: #edf1f8; }
+.plan-legende .lg-we { background: #f9f7f3; }
+.plan-legende .lg-ho { background: #f3eee5; }
+.plan-legende .lg-has { background: #f7f4ee; }
 
 /* ---------- Impression ---------- */
 @media print {
@@ -180,15 +180,15 @@
   body:not(.capture-pdf) .plan .cell .pv { font-size: 13px; font-weight: 700; line-height: 1.35; color: #111; font-variant-numeric: tabular-nums; }
   body:not(.capture-pdf) .plan .cell.code .pv { color: var(--gris); font-weight: 600; }
   body:not(.capture-pdf) .plan .cell.bad .pv { color: #e5484d; }
-  body:not(.capture-pdf) .plan .cell.has { background: #e6ecf7; }
-  body:not(.capture-pdf) .plan .cell.code { background: #eceff5; }
+  body:not(.capture-pdf) .plan .cell.has { background: #f4f0e9; }
+  body:not(.capture-pdf) .plan .cell.code { background: #f5f2ec; }
   body:not(.capture-pdf) .plan .tot { font-size: 11pt; padding: 0 6px; }
   body:not(.capture-pdf) .plan tfoot td { font-size: 9.5pt; height: 34px; }
   /* Colonne des agents fixe : on voit toujours à qui sont les heures en faisant défiler */
   body:not(.capture-pdf) .plan td.agent,
   body:not(.capture-pdf) .plan th.th-agent { position: sticky; left: 0; z-index: 3; min-width: 150px; background: #fff; box-shadow: 1px 0 0 var(--trait); }
-  body:not(.capture-pdf) .plan th.th-agent { background: #0b1838; }
-  body:not(.capture-pdf) .plan tfoot td.agent { background: #0b1838; }
+  body:not(.capture-pdf) .plan th.th-agent { background: #26221d; }
+  body:not(.capture-pdf) .plan tfoot td.agent { background: #26221d; }
 }
 
 /* ---------- Bulletin de paie (A4 portrait, présentation « clarifiée ») ---------- */
@@ -211,23 +211,23 @@
 .bp-table col.bp-c1 { width: 19mm; }
 .bp-table col.bp-c2 { width: 21mm; }
 .bp-table col.bp-c3 { width: 15mm; }
-.bp-table th { padding: 1mm 1.6mm; background: #0b1838; color: var(--or-clair); font: 600 6pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; text-align: left; border: 1px solid #0b1838; }
+.bp-table th { padding: 1mm 1.6mm; background: #26221d; color: var(--or-clair); font: 600 6pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; text-align: left; border: 1px solid #26221d; }
 .bp-table th.r, .bp-table td.r { text-align: right; }
 .bp-table th.c { text-align: center; }
-.bp-table td { padding: 0.45mm 1.6mm; border-bottom: 1px solid #e9edf4; vertical-align: top; }
+.bp-table td { padding: 0.45mm 1.6mm; border-bottom: 1px solid #f4f0e9; vertical-align: top; }
 .bp-table td.r { white-space: nowrap; }
-.bp-table tfoot td { padding: 1mm 1.6mm; background: #eaeff8; font-weight: 700; border-bottom: 0; }
+.bp-table tfoot td { padding: 1mm 1.6mm; background: #f6f2ec; font-weight: 700; border-bottom: 0; }
 .bp-sect td { padding-top: 1.1mm; font: 700 6.2pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--or-fonce); border-bottom-color: var(--trait); }
 .bp-nets { display: grid; grid-template-columns: minmax(0, 1fr) 58mm; gap: 5mm; align-items: stretch; margin-top: 1mm; }
 .bp-nets__col { display: grid; gap: 1.2mm; align-content: start; }
-.bp-ligne { display: flex; justify-content: space-between; gap: 4mm; padding: 0.7mm 2mm; border-bottom: 1px solid #e9edf4; }
+.bp-ligne { display: flex; justify-content: space-between; gap: 4mm; padding: 0.7mm 2mm; border-bottom: 1px solid #f4f0e9; }
 .bp-ligne b { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .bp-ligne--fort { background: var(--creme); font-size: 8.4pt; font-weight: 600; border-bottom: 0; border-radius: 4px; padding: 1.2mm 2mm; }
 .bp-impot { display: grid; grid-template-columns: repeat(3, auto); gap: 0.6mm 4mm; margin-top: 0.8mm; padding: 1.8mm 2mm; border: 1px solid var(--trait); border-radius: 5px; }
 .bp-impot .f-label { grid-column: 1 / -1; margin-bottom: 0.4mm; }
 .bp-impot div { display: grid; gap: 0.2mm; }
 .bp-impot div span { font-size: 6.4pt; color: var(--gris); }
-.bp-paye { display: grid; align-content: center; justify-items: center; gap: 1.2mm; padding: 3mm 3mm; border-radius: 6px; background: var(--or-grad); color: #fff; text-align: center; }
+.bp-paye { display: grid; align-content: center; justify-items: center; gap: 1.2mm; padding: 3mm 3mm; border-radius: 6px; background: var(--or-grad); color: #0b0b0c; text-align: center; }
 .bp-paye .f-label { color: #3b2c0c; margin: 0; }
 .bp-paye b { font: 700 15pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.02em; font-variant-numeric: tabular-nums; }
 .bp-paye small { font-size: 6.8pt; font-weight: 600; }
@@ -310,21 +310,21 @@
 .bt-net__ligne b, .bt-net__dont b { white-space: nowrap; }
 .bt-paye { justify-self: end; display: grid; min-width: 36mm; border: 1px solid #222; text-align: center; }
 .bt-paye span { padding: 0.8mm 2mm; font-weight: 700; border-bottom: 1px solid #222; }
-.bt-paye b { padding: 1.2mm 2mm; font-size: 11pt; background: #eaeff8; }
+.bt-paye b { padding: 1.2mm 2mm; font-size: 11pt; background: #f6f2ec; }
 .bt-cout { display: flex; justify-content: space-between; gap: 4mm; font-size: 6.4pt; color: #555; }
 .bt-mention { margin: 3mm 0 0; padding-top: 1.6mm; border-top: 1px solid #bbb; font-size: 6.2pt; color: #555; text-align: center; }
 
 /* ---------- Fiche de paie modifiable directement sur la feuille ---------- */
-.bt-ed { display: inline-block; min-width: 1.6em; padding: 0 1px; border-bottom: 1px dashed rgba(211, 31, 43, 0.55); cursor: text; }
+.bt-ed { display: inline-block; min-width: 1.6em; padding: 0 1px; border-bottom: 1px dashed rgba(169, 132, 73, 0.55); cursor: text; }
 .bt-ed--multi { display: block; white-space: pre-wrap; }
-.bt-ed:hover { background: rgba(211, 31, 43, 0.12) !important; }
+.bt-ed:hover { background: rgba(169, 132, 73, 0.12) !important; }
 .bt-ed:focus { background: #f5f8fd !important; box-shadow: 0 0 0 2px var(--or) !important; border-bottom-color: transparent; }
 .bt-table td .bt-ed { text-align: inherit; }
-.bt-suppr { float: right; width: 15px; height: 15px; margin-left: 4px; border-radius: 50%; border: 1px solid #cfd6e4; color: #8f99ae; font-size: 10px; line-height: 12px; text-align: center; opacity: 0; transition: opacity 0.15s; }
+.bt-suppr { float: right; width: 15px; height: 15px; margin-left: 4px; border-radius: 50%; border: 1px solid #e4dccf; color: #8f99ae; font-size: 10px; line-height: 12px; text-align: center; opacity: 0; transition: opacity 0.15s; }
 .bt-table tr:hover .bt-suppr { opacity: 1; }
 .bt-suppr:hover { color: #fff; background: #e5484d; border-color: #e5484d; }
 .bt-ajout { padding: 1mm 2mm; border-radius: 4px; border: 1px dashed var(--or); color: var(--or-fonce); font: 600 7pt Arial, sans-serif; background: #fafbfe; }
-.bt-ajout:hover { background: #eef2f9; }
+.bt-ajout:hover { background: #f8f4ef; }
 .bt-vide td { color: #a6afc2; }
 @media print { .bt-ecran, .bt-vide { display: none !important; } .bt-ed { border-bottom: 0; } }
 .capture-pdf .bt-ecran, .capture-pdf .bt-vide { display: none !important; }

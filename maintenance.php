@@ -62,20 +62,20 @@ function page_maintenance(array $etat): void
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <meta name="theme-color" content="#050b1d">
+  <meta name="theme-color" content="#13110f">
   <title>Site en maintenance — BDA Sécurité &amp; VTC Premium</title>
-  <link rel="icon" href="/assets/img/favicon.svg?v=2" type="image/svg+xml">
+  <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
   <style>
-    :root { --bg: #050b1d; --or: #e8222f; --or-clair: #ff5c66; --texte: #f3f6fc; --texte-2: #b4bdd2; --ligne: rgba(255, 255, 255, .12); }
+    :root { --bg: #13110f; --or: #b69054; --or-clair: #ceb58d; --texte: #f3f6fc; --texte-2: #b4bdd2; --ligne: rgba(255, 255, 255, .12); }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
-    body { margin: 0; display: grid; place-items: center; padding: 24px 16px; background: radial-gradient(110% 70% at 50% 0%, rgba(232, 34, 48, .12), transparent 60%), var(--bg); color: var(--texte); font: 400 15px/1.6 Poppins, system-ui, sans-serif; text-align: center; }
+    body { margin: 0; display: grid; place-items: center; padding: 24px 16px; background: radial-gradient(110% 70% at 50% 0%, rgba(182, 144, 84, .12), transparent 60%), var(--bg); color: var(--texte); font: 400 15px/1.6 Poppins, system-ui, sans-serif; text-align: center; }
     main { width: min(440px, 100%); animation: entree .6s cubic-bezier(.16, 1, .3, 1) both; }
-    .logo { width: min(260px, 80%); height: auto; margin: 0 auto 30px; display: block; }
-    .badge { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 6px 13px; border-radius: 99px; background: rgba(232, 34, 48, .12); border: 1px solid rgba(232, 34, 48, .35); color: var(--or-clair); font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+    .logo { width: min(300px, 86%); height: auto; margin: 0 auto 30px; display: block; border-radius: 18px; box-shadow: 0 18px 50px -20px rgba(0, 0, 0, .7); }
+    .badge { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px; padding: 6px 13px; border-radius: 99px; background: rgba(182, 144, 84, .12); border: 1px solid rgba(182, 144, 84, .35); color: var(--or-clair); font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
     .badge i { width: 7px; height: 7px; border-radius: 50%; background: var(--or); animation: pulse 1.8s ease-in-out infinite; }
     h1 { margin: 0 0 12px; font: 500 clamp(28px, 7vw, 36px)/1.15 "Playfair Display", Georgia, serif; }
     h1 em { color: var(--or-clair); }
@@ -83,7 +83,7 @@ function page_maintenance(array $etat): void
     .retour { color: var(--or-clair); font-weight: 500; }
     .actions { display: grid; gap: 10px; margin-top: 28px; }
     .btn { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 0 20px; border-radius: 14px; font-weight: 600; text-decoration: none; }
-    .btn--or { background: linear-gradient(135deg, #ff5a64 0%, #e8222f 50%, #b0111d 100%); color: #fff; }
+    .btn--or { background: linear-gradient(135deg, #e0c995 0%, #bf9c64 50%, #a07d47 100%); color: #0b0b0c; }
     .btn--ligne { border: 1px solid var(--ligne); color: var(--texte); }
     .btn--ligne:hover { border-color: var(--or); }
     .btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -95,7 +95,7 @@ function page_maintenance(array $etat): void
 </head>
 <body>
   <main>
-    <img class="logo" src="/assets/img/logo-bda.webp" alt="BDA Sécurité &amp; VTC Premium" width="900" height="1066">
+    <img class="logo" src="/assets/img/logo-bda.png?v=3" alt="BDA Sécurité &amp; VTC Premium" width="600" height="528">
     <span class="badge"><i></i>Maintenance</span>
     <h1>Nous revenons <em>très vite.</em></h1>
     <p><?= nl2br($e($message)) ?></p>

@@ -1624,3 +1624,6 @@ body:has(.lp-hero) .nav:not(.is-compact) .nav__survol { background: rgba(255, 25
 .pied-marque__bda { width: min(52vw, 560px); aspect-ratio: 798 / 216; background: linear-gradient(180deg, #0b0b0c 0%, #0b0b0c 55%, rgba(11, 11, 12, 0.6) 100%); -webkit-mask: url(../img/marque-bda.png?v=1) center / contain no-repeat; mask: url(../img/marque-bda.png?v=1) center / contain no-repeat; }
 .pied-marque__sg { width: min(91vw, 984px); aspect-ratio: 1402 / 74; background: linear-gradient(90deg, #b39a70 0%, #c4a472 40%, #dcbd84 68%, #b29a71 100%); -webkit-mask: url(../img/marque-sg.png?v=1) center / contain no-repeat; mask: url(../img/marque-sg.png?v=1) center / contain no-repeat; }
 @media (prefers-reduced-motion: reduce) { .pied-marque--logo i { opacity: 1; transform: none; transition: none; } }
+
+/* Cartes des pages de services : la dernière carte seule prend toute la largeur (pas de trou) */
+@media (min-width: 700px) { .lp-cards > :last-child:nth-child(odd) { grid-column: 1 / -1; } }

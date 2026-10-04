@@ -68,7 +68,7 @@ $secteurs = [
       ['lock', 'Contrôle des accès', 'Surveillance du hall, des ascenseurs et des accès de service ; filtrage discret des personnes non autorisées.'],
       ['clock', 'Rondes de nuit', 'Rondes régulières dans les étages, parkings et locaux techniques, main courante tenue à jour.'],
       ['user', 'Accueil des VIP', 'Arrivées discrètes, accompagnement jusqu’à la chambre, coordination avec les équipes de protection.'],
-      ['ticket', 'Événements & réceptions', 'Galas, mariages, séminaires dans vos salons : un dispositif dimensionné et élégant.'],
+      ['ticket', 'Événements & réceptions', 'Galas, séminaires dans vos salons : un dispositif dimensionné et élégant.'],
     ],
     'h2c' => 'Un partenaire <em>à la hauteur de vos clients.</em>',
     'points' => [['Des agents présentables', 'qui respectent les codes de l’hôtellerie de luxe.'], ['Discrétion absolue', 'sur l’identité et les habitudes de vos clients.'], ['Renforts rapides', 'pour vos pics d’activité et vos événements.'], ['Agents titulaires de la carte CNAPS', 'et entreprise autorisée.'], ['Un responsable unique', 'joignable 24h/24.']],
@@ -169,7 +169,7 @@ $secteurs = [
     'k1' => 'Notre expérience diplomatique', 'h2a' => 'La confiance <em>d’une représentation diplomatique.</em>',
     'intro' => [
       'Nous assurons aujourd’hui la sécurité du <strong>Consulat général de Colombie à Paris</strong>, une collaboration toujours en cours. Cette expérience nous a appris les exigences propres aux institutions : ponctualité, discrétion, respect des protocoles.',
-      'Nos agents gèrent l’accueil et le filtrage du public, les files d’attente des jours d’affluence, la surveillance des accès et la sécurité des événements officiels. <a href="references">Découvrir nos références</a>.',
+      'Nos agents gèrent l’accueil et le filtrage du public, les files d’attente des jours d’affluence, la surveillance des accès et la sécurité des événements officiels.',
     ],
     'h2b' => 'Nos missions <em>pour les institutions.</em>',
     'cartes' => [

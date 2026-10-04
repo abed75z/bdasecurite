@@ -529,7 +529,7 @@
   const PAGES_RUBRIQUE = {
     tarifs: ['tarifs'], references: ['references'], avisClients: ['avis'], recrutement: ['recrutement'],
     ssiap: ['securite-incendie-ssiap-paris'],
-    offreVtc: ['chauffeur-prive-vtc-paris', 'transfert-aeroport-paris', 'chauffeur-mariage-paris', 'chauffeur-securite-vip-paris', 'reserver'],
+    offreVtc: ['chauffeur-prive-vtc-paris', 'transfert-aeroport-paris', 'chauffeur-securite-vip-paris', 'reserver'],
   };
   const pageCourante = location.pathname.replace(/^\/|\.html$/g, '');
   let contenuOriginal = [];

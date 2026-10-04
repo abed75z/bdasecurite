@@ -132,7 +132,7 @@ foreach ($toutes as $p) {
         </div>
         <nav class="lp-box" aria-label="Pages liées" data-reveal>
           <p class="kicker">{$e($p['groupe'] === 'zone' ? 'Autres secteurs d’intervention' : 'Autres secteurs d’activité')}</p>
-          <ul>{$liens}<li><a href="references">Nos références <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a></li></ul>
+          <ul>{$liens}</ul>
         </nav>
       </aside>
     </div>
@@ -156,12 +156,9 @@ echo count($toutes) . " pages générées.\n";
 
 /* ---------- Pages spéciales : Références (FR) et version anglaise ---------- */
 $speciales = [
-  ['slug' => 'references', 'lang' => 'fr', 'main' => 'references.main.html',
-    'title' => 'Nos références : Consulat général de Colombie et clients | BDA Security Group',
-    'description' => 'Ils nous font confiance : le Consulat général de Colombie à Paris, entreprises, hôtels, commerces. Découvrez les références de BDA Security Group, société de sécurité privée à Paris.'],
   ['slug' => 'en', 'lang' => 'en', 'main' => 'en.main.html',
     'title' => 'Private Security & Chauffeur Service in Paris | BDA Security Group',
-    'description' => 'Licensed security officers, close protection, event security and premium chauffeur service in Paris. Trusted by the Consulate General of Colombia. Free quote, 24/7.'],
+    'description' => 'Licensed security officers, close protection, event security and premium chauffeur service in Paris. Free quote, 24/7.'],
 ];
 $anglais = [
   '<html lang="fr">' => '<html lang="en">', 'content="fr_FR"' => 'content="en_GB"',

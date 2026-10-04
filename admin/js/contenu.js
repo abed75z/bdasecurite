@@ -23,7 +23,7 @@ const PRIX = [
     ['protection', 'Protection rapprochée (heure)'], ['protectionJour', 'Protection rapprochée (journée 8 h)'],
   ], '€'],
   ['Majorations', [['nuit', 'Nuit (21 h – 6 h)'], ['dimanche', 'Dimanche'], ['ferie', 'Jour férié']], '%'],
-  ['VTC · TTC berline', [['orly', 'Paris ↔ Orly'], ['cdg', 'Paris ↔ Roissy-CDG'], ['beauvais', 'Paris ↔ Beauvais'], ['heure', 'À disposition (heure)'], ['demi', 'Demi-journée (4 h)'], ['journee', 'Journée (8 h)'], ['mariage', 'Mariage']], '€'],
+  ['VTC · TTC berline', [['orly', 'Paris ↔ Orly'], ['cdg', 'Paris ↔ Roissy-CDG'], ['beauvais', 'Paris ↔ Beauvais'], ['heure', 'À disposition (heure)'], ['demi', 'Demi-journée (4 h)'], ['journee', 'Journée (8 h)']], '€'],
   ['VTC · TTC van 7 places', [['orlyVan', 'Paris ↔ Orly'], ['cdgVan', 'Paris ↔ Roissy-CDG'], ['beauvaisVan', 'Paris ↔ Beauvais'], ['heureVan', 'À disposition (heure)'], ['demiVan', 'Demi-journée (4 h)'], ['journeeVan', 'Journée (8 h)']], '€'],
 ];
 

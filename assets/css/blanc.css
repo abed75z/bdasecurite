@@ -1453,3 +1453,126 @@ body:has(.ac-hero--nuit) .nav.is-compact .nav__survol, body:has(.ac-hero--nuit):
   .ac-hero--epure { padding-bottom: 56px !important; }
 }
 @media (prefers-reduced-motion: reduce) { .ac-hero--epure .ac-hero__grille::after { animation: none; display: none; } }
+
+/* =========================================================
+   VERSION 2.9 — « luxe » : en-têtes sombres sur toutes les pages
+   de service, grain cinéma, reflet argenté, cartes et étapes
+   redessinées pour des textes courts
+   ========================================================= */
+
+/* ---------- Grain cinéma (sections sombres) ---------- */
+.ac-hero--nuit .ac-hero__grille::before, .lp-hero::after, .ac-ia > .container::before, .ac-contact__carte .poussiere::after {
+  content: ""; position: absolute; inset: -50%; z-index: 0; pointer-events: none; opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(6) infinite;
+}
+.ac-hero--nuit { isolation: isolate; }
+@keyframes grain { 0% { transform: translate(0, 0); } 20% { transform: translate(-3%, 2%); } 40% { transform: translate(2%, -3%); } 60% { transform: translate(-2%, -1%); } 80% { transform: translate(3%, 3%); } 100% { transform: translate(0, 0); } }
+.ac-hero--nuit .ac-hero__grille::before { position: absolute; inset: -60vh -50vw; z-index: -1; }
+.ac-ia > .container { position: relative; }
+.ac-ia > .container::before { inset: -40% -60%; }
+
+/* ---------- Reflet argenté sur le mot clé des titres sombres ---------- */
+.ac-hero--nuit .h1 em, .lp-hero .h1 em {
+  background: linear-gradient(100deg, #ffffff 0%, #ffffff 40%, #9a9aa0 50%, #ffffff 60%, #ffffff 100%) 100% 0 / 250% 100% no-repeat !important;
+  -webkit-background-clip: text !important; background-clip: text !important; color: transparent !important;
+  animation: argent 7s 2s ease-in-out infinite !important;
+}
+@keyframes argent { 0%, 65% { background-position: 100% 0; } 100% { background-position: 0% 0; } }
+
+/* =========================================================
+   EN-TÊTES DES PAGES DE SERVICE : nuit, photo plein cadre
+   ========================================================= */
+.lp-hero { background: #050608 !important; isolation: isolate; min-height: min(78svh, 820px) !important; }
+.lp-hero__photo { inset: 0 !important; -webkit-mask-image: none !important; mask-image: none !important; }
+.lp-hero__photo img { filter: saturate(0.85) brightness(0.62) !important; animation: photo-recule 2.6s var(--ease) both, ken-burns 30s 2.6s ease-in-out infinite alternate !important; }
+.lp-hero__photo::before { display: none !important; }
+.lp-hero__photo::after {
+  background:
+    linear-gradient(90deg, rgba(5, 6, 8, 0.96) 0%, rgba(5, 6, 8, 0.82) 38%, rgba(5, 6, 8, 0.3) 72%, rgba(5, 6, 8, 0.15) 100%),
+    linear-gradient(180deg, rgba(5, 6, 8, 0.4) 0%, rgba(5, 6, 8, 0) 30%, rgba(5, 6, 8, 0) 65%, rgba(5, 6, 8, 0.9) 100%) !important;
+}
+.lp-hero::after { z-index: 1; }
+.lp-hero .container { position: relative; z-index: 2; }
+.lp-hero .h1, .lp-hero .h1 em { color: #fff !important; }
+.lp-hero .lead { color: #c7c7cc !important; }
+.lp-hero .kicker { color: #ff6b74 !important; }
+.lp-crumbs, .lp-crumbs span { color: #8e8e93 !important; }
+.lp-crumbs a { color: #e5e5ea !important; }
+.lp-hero .hero__trust li { color: #e5e5ea !important; }
+.lp-hero .hero__trust .tick { background: rgba(255, 255, 255, 0.12) !important; color: #fff !important; }
+.lp-hero .btn--outline { color: #fff !important; border-color: rgba(255, 255, 255, 0.35) !important; background-image: linear-gradient(#fff, #fff) !important; }
+.lp-hero .btn--outline:hover { color: var(--noir) !important; }
+.lp-hero .btn--outline:hover .icon { color: var(--rouge) !important; }
+/* Ligne rouge qui balaie le bas de l'en-tête */
+.lp-hero__copy { position: relative; }
+.lp-hero__copy::after { content: ""; position: absolute; left: 0; bottom: -28px; width: 120px; height: 2px; background: linear-gradient(90deg, transparent, #ff5a64, transparent); opacity: 0; animation: scanne 5s 2.5s ease-in-out infinite; }
+@media (max-width: 900px) {
+  .lp-hero__photo::after { background: linear-gradient(180deg, rgba(5, 6, 8, 0.72), rgba(5, 6, 8, 0.88) 60%, rgba(5, 6, 8, 0.97)) !important; }
+  .lp-hero__copy::after { left: 50%; margin-left: -60px; }
+}
+
+/* Barre du haut sombre et transparente en haut des pages à en-tête sombre */
+body:has(.lp-hero):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) {
+  background: linear-gradient(180deg, rgba(5, 6, 8, 0.72), rgba(5, 6, 8, 0.25)) !important; border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+body:has(.lp-hero):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) :is(.nav__links > a, .nav__drop-btn, .nav__marque b) { color: #fff !important; }
+body:has(.lp-hero):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) .nav__marque small { color: #a1a1a6; }
+body:has(.lp-hero):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) :is(.nav__tel, .nav__client, .burger) { border-color: rgba(255, 255, 255, 0.3) !important; color: #fff !important; }
+body:has(.lp-hero):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) .nav__client .icon { color: #fff !important; }
+body:has(.lp-hero):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) .burger span { background: #fff !important; }
+body:has(.lp-hero):not(:has(.nav__links:hover)) .nav:not(.is-compact) .nav__links > a[aria-current="page"], body:has(.lp-hero):not(:has(.nav__links:hover)) .nav:not(.is-compact) .nav__drop.is-current .nav__drop-btn { box-shadow: inset 0 -2px 0 #fff !important; }
+body:has(.lp-hero) .nav:not(.is-compact) .nav__survol { background: rgba(255, 255, 255, 0.12); }
+
+/* =========================================================
+   CONTENU DES PAGES : sobre, aéré, pensé pour des textes courts
+   ========================================================= */
+.lp-article > section { padding-bottom: clamp(40px, 5vw, 64px); }
+.lp-article > section > p:not(.kicker) { font-size: clamp(1.1rem, 1rem + 0.4vw, 1.3rem); line-height: 1.55; color: var(--muted); max-width: 680px; }
+
+/* Cartes : le noir monte depuis le bas au survol */
+.lp-card { position: relative; overflow: hidden; isolation: isolate; background: var(--bg-2) !important; transition: transform 0.6s var(--ease), box-shadow 0.6s var(--ease) !important; }
+.lp-card::before { content: "" !important; display: block !important; position: absolute; inset: 0; z-index: -1; background: var(--noir); transform: translateY(101%); transition: transform 0.65s var(--ease); }
+.lp-card:hover { transform: translateY(-6px) !important; box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.5) !important; background: var(--bg-2) !important; }
+.lp-card:hover::before { transform: none; }
+.lp-card h3, .lp-card p, .lp-card .link-arrow { transition: color 0.4s; }
+.lp-card:hover h3, .lp-card:hover .link-arrow { color: #fff !important; }
+.lp-card:hover p { color: #a1a1a6 !important; }
+.lp-card:hover .ico { background: var(--rouge) !important; color: #fff !important; }
+.lp-card .ico { transition: background-color 0.4s, color 0.4s, transform 0.6s var(--ease) !important; }
+.lp-card:hover .ico { transform: rotate(-8deg) scale(1.08); }
+.lp-card h3 { font-size: 19px !important; letter-spacing: -0.02em; }
+
+/* Listes : pastilles en grille */
+.lp-list { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px !important; }
+.lp-list li { align-items: center !important; gap: 12px !important; padding: 16px 18px !important; border-radius: 16px; background: var(--bg-2); border: 0 !important; transition: background-color 0.3s, transform 0.4s var(--ease); }
+.lp-list li:hover { background: #ececf0; transform: translateX(4px); }
+.lp-list li > div { font-weight: 600; color: var(--noir); font-size: 15.5px; }
+.lp-list li .icon { color: var(--rouge) !important; background: #fff !important; width: 30px !important; height: 30px !important; padding: 7px; border-radius: 50%; flex: none; }
+
+/* Étapes : grands numéros, ligne qui se dessine */
+.lp-steps { counter-reset: etape; display: grid !important; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 !important; }
+.lp-steps li { position: relative; padding: 26px 22px 8px 0 !important; background: none !important; border-radius: 0 !important; min-height: 0; }
+.lp-steps li::before { position: static !important; display: block; margin-bottom: 12px; font-size: 44px !important; line-height: 1 !important; color: transparent !important; -webkit-text-fill-color: transparent !important; -webkit-text-stroke: 1.5px var(--rouge); background: none !important; }
+.lp-steps li::after { content: ""; position: absolute; left: 0; right: 22px; top: 0; height: 2px; background: var(--noir); transform: scaleX(0); transform-origin: left; transition: transform 1.1s var(--ease); transition-delay: calc(var(--i, 0) * 0.15s + 0.2s); }
+.lp-steps li.is-in::after { transform: none; }
+.lp-steps li b { font-size: 18px !important; letter-spacing: -0.02em; line-height: 1.25; display: block; }
+.lp-steps li:nth-child(1) { --i: 0; } .lp-steps li:nth-child(2) { --i: 1; } .lp-steps li:nth-child(3) { --i: 2; } .lp-steps li:nth-child(4) { --i: 3; }
+
+/* Photos : zoom très lent au survol */
+.lp-photo img { transition: transform 1.6s var(--ease) !important; }
+.lp-photo:hover img { transform: scale(1.05) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-hero--nuit .ac-hero__grille::before, .lp-hero::after, .ac-ia > .container::before, .ac-contact__carte .poussiere::after, .ac-hero--nuit .h1 em, .lp-hero .h1 em, .lp-hero__photo img, .lp-hero__copy::after { animation: none !important; }
+  .lp-steps li::after { transform: none; transition: none; }
+}
+
+/* Accueil : le titre est découpé mot par mot → le reflet argenté s'applique à chaque mot, le souligné rouge reste sur « 24h/24. » */
+.ac-hero--nuit .h1 em { background: linear-gradient(var(--rouge), var(--rouge)) no-repeat 0 94% / 0% 0.085em !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; color: #fff !important; animation: souligne 1.1s 1.15s var(--ease) forwards !important; }
+.ac-hero--nuit .h1 em .mot > span {
+  background: linear-gradient(100deg, #ffffff 0%, #ffffff 40%, #9a9aa0 50%, #ffffff 60%, #ffffff 100%) 100% 0 / 250% 100% no-repeat;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: mot-monte 1s var(--ease) both, argent 7s 2.5s ease-in-out infinite; animation-delay: calc(0.12s + var(--m) * 0.055s), 2.5s;
+}
+@media (prefers-reduced-motion: reduce) { .ac-hero--nuit .h1 em .mot > span { animation: none; } .ac-hero--nuit .h1 em { animation: none !important; background-size: 100% 0.085em !important; } }

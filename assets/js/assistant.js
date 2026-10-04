@@ -257,7 +257,12 @@
     let vu = false;
     try { vu = sessionStorage.getItem('bda-assistant-teaser') === '1'; } catch (e) { /* rien */ }
     if (ACCUEIL && !vu) {
-      setTimeout(() => {
+      // Après le premier écran seulement (le haut de l'accueil reste dégagé)
+      const quandDefile = (fn) => {
+        const verifier = () => { if (window.scrollY > window.innerHeight * 0.7) { window.removeEventListener('scroll', verifier); setTimeout(fn, 1500); } };
+        window.addEventListener('scroll', verifier, { passive: true });
+      };
+      quandDefile(() => {
         if (etat.ouvert) return;
         const t = h('div', { class: 'as-teaser', role: 'status' },
           h('button', { class: 'as-teaser__x', type: 'button', 'aria-label': 'Fermer', onclick: (e) => { e.stopPropagation(); t.remove(); } }, '×'),
@@ -267,7 +272,7 @@
         document.body.append(t);
         requestAnimationFrame(() => t.classList.add('is-on'));
         try { sessionStorage.setItem('bda-assistant-teaser', '1'); } catch (e) { /* rien */ }
-      }, 5000);
+      });
     }
   }
 

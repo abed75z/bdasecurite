@@ -1422,3 +1422,34 @@ body:has(.ac-hero--nuit):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-ope
 body:has(.ac-hero--nuit):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) .burger span { background: #fff !important; }
 body:has(.ac-hero--nuit) .nav__survol { background: rgba(255, 255, 255, 0.12); }
 body:has(.ac-hero--nuit) .nav.is-compact .nav__survol, body:has(.ac-hero--nuit):has(.nav__links:hover) .nav__survol { background: rgba(0, 0, 0, 0.055); }
+
+/* =========================================================
+   VERSION 2.8 — hero « nuit » épuré pour tous
+   Une seule colonne de texte, la photo comme unique visuel
+   ========================================================= */
+.ac-hero--epure .ac-hero__grille { grid-template-columns: 1fr !important; }
+.ac-hero--epure .ac-hero__texte { max-width: 660px; gap: 24px !important; }
+.ac-hero--epure .h1 { font-size: clamp(2.5rem, 1.2rem + 3.6vw, 4.6rem) !important; max-width: 660px; }
+.ac-hero--epure .lead { max-width: 520px !important; }
+/* Photo : l'Arc de Triomphe se place à droite, le texte reste sur une zone sombre */
+.ac-hero--nuit::before { background-position: left 62% !important; opacity: 0.7 !important; }
+.ac-hero--nuit::after {
+  background:
+    linear-gradient(90deg, rgba(5, 6, 8, 0.95) 0%, rgba(5, 6, 8, 0.82) 34%, rgba(5, 6, 8, 0.35) 64%, rgba(5, 6, 8, 0.2) 100%),
+    linear-gradient(180deg, rgba(5, 6, 8, 0.35) 0%, rgba(5, 6, 8, 0) 30%, rgba(5, 6, 8, 0) 70%, rgba(5, 6, 8, 0.85) 100%) !important;
+}
+/* Fine ligne rouge qui balaie le bas de l'écran, comme un scanner */
+.ac-hero--epure .ac-hero__grille::after { content: ""; position: absolute; left: 0; bottom: -24px; width: 120px; height: 2px; background: linear-gradient(90deg, transparent, #ff5a64, transparent); animation: scanne 5s 2s ease-in-out infinite; opacity: 0; }
+@keyframes scanne { 0% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateX(min(560px, 70vw)); opacity: 0; } }
+/* Preuves : une ligne légère, sans sous-titres */
+.ac-hero--epure .ac-preuves { gap: 10px 28px; padding-top: 20px; }
+.ac-hero--epure .ac-preuves li { gap: 8px; }
+.ac-hero--epure .ac-preuves b { font-size: 14px; font-weight: 600; color: #e5e5ea !important; }
+.ac-hero--epure .ac-preuves .icon { width: 18px; height: 18px; }
+/* Mobile : photo plus sombre, texte sur toute la largeur */
+@media (max-width: 1020px) {
+  .ac-hero--nuit::before { background-position: 58% 62% !important; opacity: 0.5 !important; }
+  .ac-hero--nuit::after { background: linear-gradient(180deg, rgba(5, 6, 8, 0.7), rgba(5, 6, 8, 0.85) 60%, rgba(5, 6, 8, 0.95)) !important; }
+  .ac-hero--epure { padding-bottom: 56px !important; }
+}
+@media (prefers-reduced-motion: reduce) { .ac-hero--epure .ac-hero__grille::after { animation: none; display: none; } }

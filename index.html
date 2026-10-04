@@ -78,7 +78,7 @@
   <link rel="stylesheet" href="assets/css/hero.css?v=6">
   <link rel="stylesheet" href="assets/css/sections.css?v=6">
   <link rel="stylesheet" href="assets/css/pro.css?v=6">
-  <link rel="stylesheet" href="assets/css/blanc.css?v=15">
+  <link rel="stylesheet" href="assets/css/blanc.css?v=17">
 </head>
 <body>
 
@@ -191,13 +191,18 @@
   <section class="ac-hero" aria-labelledby="hero-title">
     <div class="container ac-hero__grille">
       <div class="ac-hero__texte">
-        <a class="ac-pilule" href="#assistant-ia" data-visible="assistant"><i aria-hidden="true"></i><span class="ac-pilule__txt" data-alterne>Assistant en ligne · réponse immédiate</span><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-        <h1 class="h1" id="hero-title" data-accueil="titre">Agents de sécurité et chauffeurs privés à Paris, <em>24h/24.</em></h1>
-        <p class="lead" data-accueil="texte">Une seule équipe autorisée par le CNAPS, du devis à la fin de la mission.</p>
+        <p class="ac-hero__sur"><span>Sécurité privée B2B</span>Paris &amp; Île-de-France</p>
+        <h1 class="h1" id="hero-title" data-accueil="titre">La sécurité de vos sites professionnels, <em>24h/24.</em></h1>
+        <p class="lead" data-accueil="texte">Agents de sécurité, agents SSIAP et sécurité événementielle pour les hôtels, bureaux, commerces, chantiers et institutions. Un interlocuteur unique, du devis à la prise de poste.</p>
         <div class="ac-hero__actions">
-          <a class="btn btn--gold" href="devis">Demander un devis gratuit <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <a class="btn btn--outline" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> 06 11 67 86 25</a>
+          <a class="btn btn--gold" href="devis">Demander un devis <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <button class="btn btn--outline" type="button" data-rappel><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Être rappelé</button>
         </div>
+        <ul class="ac-preuves" aria-label="Nos garanties">
+          <li><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg><span><b>Autorisation CNAPS</b><small>AUT-075-2124-07-01-20250906336</small></span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg><span><b>Consulat général de Colombie</b><small>Référence en cours</small></span></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><span><b>24h/24, 7j/7</b><small>Remplacements assurés</small></span></li>
+        </ul>
       </div>
       <div class="ac-hero__visuel">
         <div class="tel" aria-hidden="true">
@@ -212,24 +217,20 @@
               </div>
               <div class="tel__fil">
                 <p class="tel__jour">Aujourd'hui</p>
-                <div class="msg msg--moi" data-etape="1"><p>Bonjour, nous organisons un dîner de gala vendredi soir dans le 8<sup>e</sup>, environ 150 invités. Seriez-vous disponibles pour la sécurité de 19 h à 1 h&nbsp;?</p><small>10:42 <i class="tel__lu"></i></small></div>
+                <div class="msg msg--moi" data-etape="1"><p>Bonjour, hôtel 4 étoiles dans le 8<sup>e</sup>. Nous cherchons un agent SSIAP 1 de nuit, de 21 h à 7 h, à partir du 1<sup>er</sup> novembre.</p><small>10:42 <i class="tel__lu"></i></small></div>
                 <div class="msg msg--saisie" data-etape="2"><span></span><span></span><span></span></div>
-                <div class="msg msg--bda" data-etape="3"><p>Bonjour, oui nous sommes disponibles. Pour 150 invités, je vous conseille deux agents en costume : un au contrôle des invitations, un en salle. Je vous prépare le devis.</p><small>10:44</small></div>
-                <div class="msg msg--bda msg--doc" data-etape="4"><div class="msg__fichier"><span class="msg__pdf">PDF</span><span><b>Devis DV-2026-018</b><small>1 page · 84 Ko</small></span></div><small>10:51</small></div>
-                <div class="msg msg--moi" data-etape="5"><p>C'est validé de notre côté, merci.</p><small>11:05 <i class="tel__lu"></i></small></div>
+                <div class="msg msg--bda" data-etape="3"><p>Bonjour, c'est noté. Nous pouvons positionner un agent SSIAP 1 diplômé et à jour de son recyclage, avec remplacement assuré en cas d'absence. Je vous prépare le devis.</p><small>10:44</small></div>
+                <div class="msg msg--bda msg--doc" data-etape="4"><div class="msg__fichier"><span class="msg__pdf">PDF</span><span><b>Devis DV-2026-024</b><small>1 page · 92 Ko</small></span></div><small>10:58</small></div>
+                <div class="msg msg--moi" data-etape="5"><p>Devis validé, merci pour la réactivité.</p><small>11:05 <i class="tel__lu"></i></small></div>
                 <div class="msg msg--saisie" data-etape="6"><span></span><span></span><span></span></div>
-                <div class="msg msg--bda" data-etape="7"><p>Merci. Vos agents seront sur place à 18 h 45 pour le brief avec votre responsable.</p><small>11:06</small></div>
+                <div class="msg msg--bda" data-etape="7"><p>Merci. Votre agent sera présenté à votre chef de réception le 31 octobre à 20 h 30.</p><small>11:06</small></div>
               </div>
               <div class="tel__saisie"><span>Message</span><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
             </div>
           </div>
         </div>
-        <div class="notif notif--1" aria-hidden="true"><span class="notif__ico notif__ico--ok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><div><b>Devis validé</b><small>Gala · 150 invités</small></div></div>
-        <div class="notif notif--2" aria-hidden="true"><span class="notif__ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><div><b>Agents en poste</b><small>Vendredi · 18 h 45</small></div></div>
-        <div class="ac-hero__badge">
-          <img src="assets/img/ecusson-petit.png" alt="" width="262" height="221">
-          <div><b>Autorisation CNAPS</b><span>AUT-075-2124-07-01-20250906336</span></div>
-        </div>
+        <div class="notif notif--1" aria-hidden="true"><span class="notif__ico notif__ico--ok"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><div><b>Devis validé</b><small>Hôtel · Paris 8<sup>e</sup></small></div></div>
+        <div class="notif notif--2" aria-hidden="true"><span class="notif__ico"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><div><b>Agent SSIAP en poste</b><small>Nuit · 21 h – 7 h</small></div></div>
         <div class="ac-hero__logo-alt" aria-hidden="true"><img src="assets/img/logo-bda.webp" alt="" width="900" height="1066" loading="lazy" decoding="async"></div>
       </div>
     </div>
@@ -237,13 +238,15 @@
   </section>
 
   <!-- ============ GARANTIES ============ -->
-  <section class="ac-garanties" aria-label="Nos garanties">
+  <section class="ac-garanties ac-secteurs-bande" aria-label="Nos secteurs">
     <div class="container">
       <ul class="ac-garanties__liste">
-        <li><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg><b>Autorisé CNAPS</b></li>
-        <li><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><b>Agents SSIAP 1, 2 et 3</b></li>
-        <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><b>24h/24, 7j/7</b></li>
-        <li><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg><b>Consulat de Colombie</b></li>
+        <li><a href="securite-hotels-paris"><svg class="icon" aria-hidden="true"><use href="#i-building"/></svg><b>Hôtels</b></a></li>
+        <li><a href="securite-bureaux-entreprises-paris"><svg class="icon" aria-hidden="true"><use href="#i-briefcase"/></svg><b>Bureaux</b></a></li>
+        <li><a href="securite-commerces-paris"><svg class="icon" aria-hidden="true"><use href="#i-ticket"/></svg><b>Commerces</b></a></li>
+        <li><a href="gardiennage-chantier-paris"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><b>Chantiers</b></a></li>
+        <li><a href="securite-evenementielle-paris"><svg class="icon" aria-hidden="true"><use href="#i-star"/></svg><b>Événements</b></a></li>
+        <li><a href="securite-ambassades-consulats-paris"><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg><b>Institutions</b></a></li>
       </ul>
     </div>
   </section>
@@ -476,6 +479,32 @@
 
 </main>
 
+<!-- ============ ÊTRE RAPPELÉ ============ -->
+<dialog class="rappel" aria-labelledby="rappel-titre">
+  <form class="rappel__form" novalidate>
+    <button class="rappel__x" type="button" aria-label="Fermer" data-fermer>&times;</button>
+    <p class="kicker">Être rappelé</p>
+    <h2 class="rappel__titre" id="rappel-titre">Un responsable vous rappelle.</h2>
+    <p class="rappel__texte">Laissez votre numéro : nous vous rappelons pour comprendre votre besoin, sans engagement.</p>
+    <label class="rappel__champ"><span>Nom et société</span><input name="nom" type="text" autocomplete="organization" maxlength="120" required placeholder="Ex. : Marie Durand, Hôtel Lumière"></label>
+    <label class="rappel__champ"><span>Téléphone</span><input name="tel" type="tel" autocomplete="tel" maxlength="30" required placeholder="06 12 34 56 78"></label>
+    <div class="rappel__ligne">
+      <label class="rappel__champ"><span>Secteur</span><select name="secteur"><option>Hôtel</option><option>Bureaux / entreprise</option><option>Commerce</option><option>Chantier</option><option>Événement</option><option>Institution</option><option>Résidence / copropriété</option><option>Autre</option></select></label>
+      <label class="rappel__champ"><span>Quand ?</span><select name="creneau"><option>Dès que possible</option><option>Ce matin</option><option>Cet après-midi</option><option>En fin de journée</option><option>Demain</option></select></label>
+    </div>
+    <input class="rappel__piege" name="site_web" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <p class="rappel__erreur" role="alert" hidden></p>
+    <button class="btn btn--gold rappel__envoyer" type="submit">Être rappelé <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+    <p class="rappel__mention">Vos informations servent uniquement à vous rappeler. <a href="mentions-legales">Confidentialité</a></p>
+  </form>
+  <div class="rappel__merci" hidden>
+    <span class="rappel__coche" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
+    <h2 class="rappel__titre">C'est noté.</h2>
+    <p class="rappel__texte">Un responsable vous rappelle au plus vite. Pour une urgence : <a href="tel:+33611678625">06 11 67 86 25</a>.</p>
+    <button class="btn btn--outline" type="button" data-fermer>Fermer</button>
+  </div>
+</dialog>
+
 <!-- ============ FOOTER ============ -->
 <footer class="footer">
   <div class="container">
@@ -560,6 +589,7 @@
 <script src="assets/js/assistant.js?v=3"></script>
 <script src="assets/js/avis-data.js"></script>
 <script src="assets/js/home.js?v=8"></script>
-<script src="assets/js/anim.js?v=7"></script>
+<script src="assets/js/anim.js?v=8"></script>
+<script src="assets/js/rappel.js?v=1"></script>
 </body>
 </html>

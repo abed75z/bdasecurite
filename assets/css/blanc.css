@@ -1292,3 +1292,133 @@ html.intro .notif--2 { animation-delay: 3.6s, 4.6s !important; }
   .poussiere { display: none; }
 }
 .ac-hero__visuel::before { left: 50% !important; top: 47% !important; }
+
+/* =========================================================
+   VERSION 2.7 — hero B2B, bande des secteurs, « Être rappelé »,
+   variante « nuit » (aperçu : ?hero=nuit)
+   ========================================================= */
+
+/* ---------- Hero : sur-titre ---------- */
+.ac-hero__sur { display: inline-flex; align-items: center; gap: 12px; margin: 0; font-size: 14px; font-weight: 600; color: #6e6e73; }
+.ac-hero__sur span { position: relative; overflow: hidden; padding: 6px 12px; border-radius: 999px; background: var(--noir); color: #fff; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; }
+.ac-hero__sur span::after { content: ""; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%); transform: translateX(-120%); animation: reflet-pastille 5s 2s ease-in-out infinite; }
+@keyframes reflet-pastille { 0%, 70% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+.ac-hero .h1 { font-size: clamp(2.4rem, 1.3rem + 3.5vw, 4.4rem) !important; max-width: 720px; }
+.ac-hero__texte .lead { max-width: 580px !important; font-size: clamp(1.05rem, 0.98rem + 0.4vw, 1.25rem) !important; }
+.ac-hero__texte > :nth-child(5) { animation-delay: 0.55s !important; }
+
+/* ---------- Hero : preuves de confiance ---------- */
+.ac-preuves { display: flex; flex-wrap: wrap; gap: 0; margin: 4px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); padding-top: 18px; }
+.ac-preuves li { display: flex; align-items: center; gap: 10px; padding-right: 22px; margin-right: 22px; border-right: 1px solid var(--line); }
+.ac-preuves li:last-child { border-right: 0; margin-right: 0; padding-right: 0; }
+.ac-preuves .icon { width: 22px; height: 22px; flex: none; color: var(--rouge); stroke-dasharray: 140; animation: dessine 1.6s var(--ease) both; }
+.ac-preuves li:nth-child(1) .icon { animation-delay: 1s; } .ac-preuves li:nth-child(2) .icon { animation-delay: 1.15s; } .ac-preuves li:nth-child(3) .icon { animation-delay: 1.3s; }
+.ac-preuves b { display: block; font-size: 14px; color: var(--noir); line-height: 1.2; }
+.ac-preuves small { display: block; font-size: 12px; color: #86868b; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .ac-preuves { display: grid; gap: 12px; } .ac-preuves li { border-right: 0; margin: 0; padding: 0; } }
+
+/* ---------- Bouton « Être rappelé » : le combiné sonne de temps en temps ---------- */
+[data-rappel] .icon { transform-origin: 50% 60%; animation: sonne 4.5s 3.5s ease-in-out infinite; }
+@keyframes sonne { 0%, 82%, 100% { transform: none; } 85% { transform: rotate(-14deg); } 88% { transform: rotate(12deg); } 91% { transform: rotate(-9deg); } 94% { transform: rotate(6deg); } }
+button.btn { cursor: pointer; font-family: var(--font-body); }
+
+/* ---------- Bande des secteurs (sous le hero) ---------- */
+.ac-secteurs-bande .ac-garanties__liste { grid-template-columns: repeat(6, 1fr) !important; }
+.ac-secteurs-bande .ac-garanties__liste li { padding: 0 !important; }
+.ac-secteurs-bande .ac-garanties__liste li:nth-child(5) { --c: 4; } .ac-secteurs-bande .ac-garanties__liste li:nth-child(6) { --c: 5; }
+.ac-secteurs-bande a { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; padding: 20px 16px; border-radius: 14px; color: var(--noir); transition: background-color 0.3s; }
+.ac-secteurs-bande a::after { content: "→"; margin-left: auto; color: var(--rouge); font-weight: 700; opacity: 0; transform: translateX(-6px); transition: opacity 0.3s, transform 0.4s var(--ease); }
+.ac-secteurs-bande a:hover { background: var(--bg-2); }
+.ac-secteurs-bande a:hover::after { opacity: 1; transform: none; }
+.ac-secteurs-bande a:hover .icon { transform: scale(1.15) rotate(-6deg); }
+@media (max-width: 1020px) { .ac-secteurs-bande .ac-garanties__liste { grid-template-columns: repeat(3, 1fr) !important; } }
+@media (max-width: 560px) { .ac-secteurs-bande .ac-garanties__liste { grid-template-columns: 1fr 1fr !important; } .ac-secteurs-bande a { padding: 14px 10px; } }
+
+/* ---------- Fenêtre « Être rappelé » ---------- */
+dialog.rappel { width: min(500px, calc(100% - 28px)); max-height: calc(100dvh - 28px); padding: 0; border: 0; border-radius: 30px; background: #fff; color: var(--muted); box-shadow: 0 50px 120px -30px rgba(0, 0, 0, 0.5); overflow: auto; }
+dialog.rappel[open] { animation: rappel-ouvre 0.5s var(--ease) both; }
+dialog.rappel.se-ferme { animation: rappel-ferme 0.22s ease both; }
+dialog.rappel::backdrop { background: rgba(10, 10, 12, 0.45); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: apparait 0.3s both; }
+@keyframes rappel-ouvre { from { opacity: 0; transform: translateY(24px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes rappel-ferme { to { opacity: 0; transform: translateY(12px) scale(0.97); } }
+.rappel__form, .rappel__merci { position: relative; display: grid; gap: 14px; padding: 34px 32px 28px; }
+.rappel__merci { justify-items: center; text-align: center; padding: 44px 32px 36px; }
+.rappel__x { position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; border: 0; border-radius: 50%; background: var(--bg-2); color: var(--noir); font-size: 22px; line-height: 1; cursor: pointer; transition: background-color 0.2s, transform 0.3s var(--ease); }
+.rappel__x:hover { background: #e8e8ed; transform: rotate(90deg); }
+.rappel__titre { margin: 0; font-family: var(--font-display); font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: var(--noir); line-height: 1.1; }
+.rappel__texte { margin: -4px 0 4px; font-size: 15px; }
+.rappel__texte a { color: var(--noir); font-weight: 700; }
+.rappel__champ { display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--noir); }
+.rappel__champ input, .rappel__champ select { width: 100%; height: 50px; padding: 0 16px; border: 1px solid var(--line-strong); border-radius: 14px; background: #fff; font: 500 16px var(--font-body); color: var(--noir); transition: border-color 0.2s, box-shadow 0.2s; }
+.rappel__champ input:focus, .rappel__champ select:focus { outline: none; border-color: var(--noir); box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.06); }
+.rappel__ligne { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.rappel__piege { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.rappel__erreur { margin: 0; padding: 10px 14px; border-radius: 12px; background: #fdecee; color: #b51823; font-size: 14px; }
+.rappel__envoyer { width: 100%; justify-content: center; margin-top: 4px; }
+.rappel__envoyer:disabled { opacity: 0.6; cursor: wait; }
+.rappel__mention { margin: 0; font-size: 12px; color: #86868b; text-align: center; }
+.rappel__mention a { color: inherit; text-decoration: underline; }
+.rappel__coche { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: #22c55e; animation: pop 0.6s var(--ease) both; }
+.rappel__coche svg { width: 36px; height: 36px; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 30; animation: dessine-coche 0.6s 0.3s ease both; }
+@keyframes pop { from { transform: scale(0.4); opacity: 0; } 60% { transform: scale(1.08); } to { transform: none; opacity: 1; } }
+@keyframes dessine-coche { from { stroke-dashoffset: 30; } to { stroke-dashoffset: 0; } }
+@media (max-width: 480px) { .rappel__ligne { grid-template-columns: 1fr; } .rappel__form { padding: 30px 20px 22px; } }
+html.rappel-ouvert { overflow: hidden; }
+
+/* =========================================================
+   VARIANTE « NUIT » — photo de Paris la nuit, voile sombre
+   ========================================================= */
+.ac-hero--nuit { background: #050608 !important; }
+.ac-hero--nuit::before {
+  content: "" !important; display: block !important; position: absolute !important; inset: 0 !important; z-index: 0; width: auto !important; aspect-ratio: auto !important; border-radius: 0 !important;
+  background: url("https://images.unsplash.com/photo-1596889465414-fdc945153c81?auto=format&fit=crop&w=2200&q=70") center 62% / cover no-repeat !important;
+  opacity: 0.62 !important; -webkit-mask: none !important; mask: none !important; animation: ken-burns 34s ease-in-out infinite alternate !important; pointer-events: none;
+}
+.ac-hero--nuit::after {
+  content: "" !important; position: absolute !important; inset: 0 !important; z-index: 0; width: auto !important; aspect-ratio: auto !important; border-radius: 0 !important; animation: none !important; pointer-events: none;
+  background: linear-gradient(90deg, rgba(5, 6, 8, 0.94) 0%, rgba(5, 6, 8, 0.78) 42%, rgba(5, 6, 8, 0.38) 75%, rgba(5, 6, 8, 0.55) 100%), linear-gradient(180deg, rgba(5, 6, 8, 0.25) 0%, rgba(5, 6, 8, 0) 35%, rgba(5, 6, 8, 0.9) 100%) !important;
+}
+@keyframes ken-burns { from { transform: scale(1.04) translate(0, 0); } to { transform: scale(1.14) translate(-2%, -1.5%); } }
+.ac-hero--nuit .ac-hero__grille { position: relative; z-index: 1; }
+.ac-hero--nuit .h1, .ac-hero--nuit .h1 em, .ac-hero--nuit .ac-preuves b { color: #fff !important; }
+.ac-hero--nuit .lead { color: #c7c7cc !important; }
+.ac-hero--nuit .ac-hero__sur { color: #a1a1a6; }
+.ac-hero--nuit .ac-hero__sur span { background: var(--rouge); }
+.ac-hero--nuit .ac-preuves { border-top-color: rgba(255, 255, 255, 0.14); }
+.ac-hero--nuit .ac-preuves li { border-right-color: rgba(255, 255, 255, 0.14); }
+.ac-hero--nuit .ac-preuves small { color: #8e8e93; }
+.ac-hero--nuit .ac-preuves .icon { color: #ff6b74; }
+.ac-hero--nuit .btn--outline { color: #fff !important; border-color: rgba(255, 255, 255, 0.35) !important; background-image: linear-gradient(#fff, #fff) !important; }
+.ac-hero--nuit .btn--outline:hover { color: var(--noir) !important; background-image: linear-gradient(#fff, #fff) !important; }
+.ac-hero--nuit .btn--outline:hover .icon { color: var(--rouge) !important; }
+.ac-hero--nuit .ac-hero__visuel::before { background: repeating-radial-gradient(circle, rgba(255, 255, 255, 0) 0 63px, rgba(255, 255, 255, 0.08) 64px 65px) !important; }
+.ac-hero--nuit .ac-hero__visuel::after { background: conic-gradient(from 0deg, rgba(255, 90, 100, 0.35), rgba(215, 31, 44, 0) 22%, rgba(215, 31, 44, 0) 100%); }
+.ac-hero--nuit .tel__cadre { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.25), inset 0 0 0 4px #08090c, 0 70px 120px -40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 80px -10px rgba(215, 31, 44, 0.35) !important; }
+.ac-hero--nuit .ac-defiler { color: #8e8e93; }
+.ac-hero--nuit .ac-defiler span { border-color: rgba(255, 255, 255, 0.35); }
+.ac-hero--nuit + .ac-garanties .container { border-top: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ac-hero__sur span::after, [data-rappel] .icon, .ac-hero--nuit::before, .ac-preuves .icon { animation: none !important; }
+}
+
+/* ---------- Ajustements v2.7 ---------- */
+dialog.rappel { margin: auto; }
+.rappel__form[hidden], .rappel__merci[hidden] { display: none !important; }
+.ac-hero .h1 { font-size: clamp(2.3rem, 1.15rem + 3vw, 3.9rem) !important; max-width: 640px; }
+.ac-preuves { display: flex; flex-wrap: wrap; gap: 14px 30px; }
+.ac-preuves li { border-right: 0 !important; margin-right: 0 !important; padding-right: 0 !important; }
+.ac-preuves b { font-size: 13.5px; }
+.ac-preuves small { font-size: 11.5px; }
+
+/* Variante nuit : barre du haut sombre et transparente tant qu'on est en haut de page */
+body:has(.ac-hero--nuit):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) {
+  background: linear-gradient(180deg, rgba(5, 6, 8, 0.72), rgba(5, 6, 8, 0.25)) !important; border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+body:has(.ac-hero--nuit):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) :is(.nav__links > a, .nav__drop-btn, .nav__marque b) { color: #fff !important; }
+body:has(.ac-hero--nuit):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) .nav__marque small { color: #a1a1a6; }
+body:has(.ac-hero--nuit):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) :is(.nav__tel, .nav__client, .burger) { border-color: rgba(255, 255, 255, 0.3) !important; color: #fff !important; }
+body:has(.ac-hero--nuit):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) .nav__client .icon { color: #fff !important; }
+body:has(.ac-hero--nuit):not(:has(.nav__links:hover)):not(:has(.nav__drop.is-open)) .nav:not(.is-compact) .burger span { background: #fff !important; }
+body:has(.ac-hero--nuit) .nav__survol { background: rgba(255, 255, 255, 0.12); }
+body:has(.ac-hero--nuit) .nav.is-compact .nav__survol, body:has(.ac-hero--nuit):has(.nav__links:hover) .nav__survol { background: rgba(0, 0, 0, 0.055); }

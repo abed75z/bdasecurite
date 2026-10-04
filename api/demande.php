@@ -14,7 +14,16 @@ try {
   if (!limiter('demande', 8, 3600)) echec('Trop de demandes envoyées. Réessayez plus tard ou appelez-nous.', 429);
   $data = champs_formulaire($b);
   if (count($data) < 3) echec('Demande incomplète.');
+  // « Être rappelé » (accueil) : nom + téléphone suffisent, et un email prévient l'équipe tout de suite
+  $rappel = ($data['Prestation'] ?? '') === 'Demande de rappel';
+  if ($rappel) {
+    if (trim($data['Nom / Société'] ?? '') === '') echec('Indiquez votre nom ou votre société.');
+    if (strlen(preg_replace('/\D/', '', $data['Téléphone'] ?? '')) < 9) echec('Indiquez un numéro de téléphone valide.');
+  }
   db()->prepare("INSERT INTO demandes (recu, statut, data) VALUES (?, 'nouvelle', ?)")->execute([maintenant(), json_encode($data, JSON_UNESCAPED_UNICODE)]);
+  if ($rappel) {
+    envoyer_mail('Demande de rappel : ' . ($data['Nom / Société'] ?? ''), "Un visiteur demande à être rappelé depuis l'accueil du site.\n\nNom / Société : " . ($data['Nom / Société'] ?? '') . "\nTéléphone : " . ($data['Téléphone'] ?? '') . "\nCréneau : " . ($data['Date souhaitée'] ?? '') . "\nSecteur : " . ($data['Secteur'] ?? '') . "\n\nVoir dans l'admin : https://bdasecurite.com/admin/#/demandes");
+  }
   repondre(['ok' => true]);
 } catch (Throwable $e) {
   error_log('[BDA demande] ' . $e->getMessage());

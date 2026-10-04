@@ -61,6 +61,14 @@
     });
   }
 
+  /* ---------- Aperçu de l'accueil « nuit » : ?hero=nuit (et ?hero=clair pour revenir) ---------- */
+  try {
+    const q = new URLSearchParams(location.search).get('hero');
+    if (q === 'nuit') sessionStorage.setItem('bda-hero', 'nuit');
+    if (q === 'clair') sessionStorage.removeItem('bda-hero');
+    if (sessionStorage.getItem('bda-hero') === 'nuit') document.querySelector('.ac-hero')?.classList.add('ac-hero--nuit');
+  } catch (e) { /* stockage indisponible */ }
+
   /* ---------- Rideau d'ouverture : filet de sécurité (jamais bloquant) ---------- */
   const rideau = document.querySelector('.rideau');
   if (rideau && document.documentElement.classList.contains('intro')) {

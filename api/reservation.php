@@ -104,7 +104,7 @@ try {
     ->execute([$ref, $jeton, maintenant(), 'attente', date('Y-m-d H:i:s', $quand), $prix, json_encode($data, JSON_UNESCAPED_UNICODE)]);
 
   envoyer_mail("Nouvelle réservation VTC $ref — " . date('d/m', $quand) . " à $heure", "Nouvelle réservation à confirmer.\n\n" . resume_reservation($ref, $data) . "\n\nConfirmer dans l'espace admin : https://bdasecurite.com/admin/#/vtc", $email);
-  if ($email !== '') envoyer_mail("Votre réservation $ref — BDA Sécurité & VTC Premium", "Bonjour $nom,\n\nNous avons bien reçu votre réservation. Nous vous confirmons la course très vite par téléphone ou WhatsApp.\n\n" . resume_reservation($ref, $data) . "\n\nSuivre ou annuler votre réservation : https://bdasecurite.com/reserver#suivi=$jeton\n\nBDA Sécurité & VTC Premium — 06 11 67 86 25", '', $email);
+  if ($email !== '') envoyer_mail("Votre réservation $ref — BDA Security Group", "Bonjour $nom,\n\nNous avons bien reçu votre réservation. Nous vous confirmons la course très vite par téléphone ou WhatsApp.\n\n" . resume_reservation($ref, $data) . "\n\nSuivre ou annuler votre réservation : https://bdasecurite.com/reserver#suivi=$jeton\n\nBDA Security Group — 06 11 67 86 25", '', $email);
   repondre(['ok' => true, 'ref' => $ref, 'jeton' => $jeton, 'prix' => $prix]);
 } catch (Throwable $e) {
   error_log('[BDA reservation] ' . $e->getMessage());

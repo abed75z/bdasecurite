@@ -10,7 +10,7 @@ const RUBRIQUES = [
   ['assistant', 'Assistant du site', 'Fenêtre de discussion en bas à droite (robot + conseillers)'],
   ['tarifs', 'Page Tarifs', 'Page /tarifs, lien « Tarifs » du menu et du pied de page'],
   ['prixAccueil', 'Prix sur l’accueil', 'Bandeau « Tarifs transparents » de la page d’accueil'],
-  ['offreVtc', 'Offre VTC Premium', 'Menu VTC, pages chauffeur et transferts, prix VTC'],
+  ['offreVtc', 'Offre chauffeur privé (VTC)', 'Menu VTC, pages chauffeur et transferts, prix VTC'],
   ['ssiap', 'Sécurité incendie SSIAP', 'Page SSIAP et ses liens'],
   ['references', 'Page Références', 'Page /references et ses liens'],
   ['avisClients', 'Avis clients', 'Page /avis, liens et note moyenne sur l’accueil'],

@@ -1,8 +1,8 @@
 {
   "id": "/admin/moi",
-  "name": "BDA Sécurité — Mon accès",
+  "name": "BDA Security Group — Mon accès",
   "short_name": "BDA · Chef",
-  "description": "Accès personnel du gérant : carte professionnelle BDA Sécurité.",
+  "description": "Accès personnel du gérant : carte professionnelle BDA Security Group.",
   "lang": "fr",
   "start_url": "/admin/moi",
   "scope": "/admin/",

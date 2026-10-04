@@ -93,9 +93,9 @@ function carteAuth(titre, texte, ...contenu) {
   document.body.classList.remove('ec--app');
   return h('main', { class: 'ec-auth' },
     h('section', { class: 'ec-auth__visuel', 'aria-hidden': 'true' },
-      h('div', { class: 'ec-auth__slogan' }, h('span', null, 'BDA Sécurité'), h('p', null, 'Vos devis, vos factures et un contact direct avec votre responsable de mission, ', h('em', null, 'au même endroit.')))),
+      h('div', { class: 'ec-auth__slogan' }, h('span', null, 'BDA Security Group'), h('p', null, 'Vos devis, vos factures et un contact direct avec votre responsable de mission, ', h('em', null, 'au même endroit.')))),
     h('section', { class: 'ec-auth__carte' },
-      h('a', { class: 'ec-auth__marque', href: '/' }, h('img', { src: '/assets/img/embleme.png?v=3', alt: '', width: 46, height: 47 }), h('span', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Espace client'))),
+      h('a', { class: 'ec-auth__marque', href: '/' }, h('img', { src: '/assets/img/embleme.png?v=3', alt: '', width: 46, height: 47 }), h('span', null, h('b', null, 'BDA Security Group'), h('small', null, 'Espace client'))),
       h('h1', null, titre),
       texte ? h('p', { class: 'ec-auth__texte' }, texte) : null,
       contenu,
@@ -112,7 +112,7 @@ function ecranConnexion(message) {
     catch (err) { msg.textContent = err.message; btn.disabled = false; }
   } }, champ('Email', email), champ('Mot de passe', mdp), msg, btn);
   racine.replaceChildren(carteAuth('Connexion', 'Accédez à votre espace client sécurisé.', form,
-    h('p', { class: 'ec-auth__petit' }, 'Première connexion : utilisez le lien d’activation reçu de BDA Sécurité. Mot de passe oublié : contactez-nous, nous vous envoyons un nouveau lien.')));
+    h('p', { class: 'ec-auth__petit' }, 'Première connexion : utilisez le lien d’activation reçu de BDA Security Group. Mot de passe oublié : contactez-nous, nous vous envoyons un nouveau lien.')));
   email.focus();
 }
 async function ecranInvitation(jeton) {
@@ -155,7 +155,7 @@ function naviguer() {
   const lien = ([k, lib]) => h('a', { href: `#/${k}`, class: `ec-nav__item ${k === onglet ? 'is-actif' : ''}` }, ic(k), h('span', null, lib), badge(k));
   const deconnexion = async () => { try { await api('deconnexion', {}); } catch (e) { /* déjà sorti */ } donnees = null; ecranConnexion('Vous êtes déconnecté. À bientôt !'); };
   const cote = h('aside', { class: 'ec-cote' },
-    h('a', { class: 'ec-cote__marque', href: '#/accueil' }, h('img', { src: '/assets/img/embleme.png?v=3', alt: '', width: 40, height: 41 }), h('span', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Espace client'))),
+    h('a', { class: 'ec-cote__marque', href: '#/accueil' }, h('img', { src: '/assets/img/embleme.png?v=3', alt: '', width: 40, height: 41 }), h('span', null, h('b', null, 'BDA Security Group'), h('small', null, 'Espace client'))),
     h('div', { class: 'ec-cote__client' }, h('span', { class: 'ec-avatar' }, initiales(donnees.client.nom)), h('span', null, h('b', null, donnees.client.nom), h('small', null, donnees.client.email))),
     h('nav', { class: 'ec-nav', 'aria-label': 'Espace client' }, ONGLETS.map(lien)),
     h('div', { class: 'ec-cote__bas' },
@@ -186,9 +186,9 @@ function vueAccueil() {
     h('div', { class: 'ec-tuiles' },
       tuile('#/devis', 'devis', 'Devis', aValider.length ? `${aValider.length} à valider` : String(devis.length), aValider.length ? 'En attente de votre accord' : 'Devis reçus', aValider.length > 0),
       tuile('#/factures', 'factures', 'Factures', aRegler.length ? `${aRegler.length} à régler` : String(factures.length), aRegler.length ? 'En attente de règlement' : 'Factures reçues', aRegler.length > 0),
-      tuile('#/messages', 'messages', 'Messages', messagesNonLus ? `${messagesNonLus} non lu${messagesNonLus > 1 ? 's' : ''}` : 'Écrire', messagesNonLus ? 'Réponse de BDA Sécurité' : 'Une question ? Écrivez-nous', messagesNonLus > 0)),
+      tuile('#/messages', 'messages', 'Messages', messagesNonLus ? `${messagesNonLus} non lu${messagesNonLus > 1 ? 's' : ''}` : 'Écrire', messagesNonLus ? 'Réponse de BDA Security Group' : 'Une question ? Écrivez-nous', messagesNonLus > 0)),
     h('section', { class: 'ec-carte' }, h('div', { class: 'ec-carte__tete' }, h('h2', null, 'Derniers documents reçus')),
-      recents.length ? h('ul', { class: 'ec-liste' }, recents.map(ligneDoc)) : h('div', { class: 'ec-vide' }, ic('devis'), h('p', null, 'Vos devis et factures apparaîtront ici dès que BDA Sécurité vous les enverra.'))),
+      recents.length ? h('ul', { class: 'ec-liste' }, recents.map(ligneDoc)) : h('div', { class: 'ec-vide' }, ic('devis'), h('p', null, 'Vos devis et factures apparaîtront ici dès que BDA Security Group vous les enverra.'))),
     h('section', { class: 'ec-carte ec-contact' },
       h('div', null, h('h2', null, 'Une question, une nouvelle mission ?'), h('p', null, 'Votre responsable de mission vous répond rapidement.')),
       h('div', { class: 'ec-boutons' },
@@ -247,9 +247,9 @@ async function vueDocument(id) {
   const qte = (l) => (l.unite === 'h' ? fmtHeures(+l.qte || 0) : new Intl.NumberFormat('fr-FR').format(+l.qte || 0));
   const texte = (t) => String(t || '').split('\n').map((x, i) => [i ? h('br') : null, x]);
   const accepter = !estFacture && doc.statut === 'envoye' ? h('button', { class: 'btn btn--gold', type: 'button', onclick: async (e) => {
-    if (!confirm(`Accepter le devis ${doc.numero} ? BDA Sécurité sera prévenu immédiatement.`)) return;
+    if (!confirm(`Accepter le devis ${doc.numero} ? BDA Security Group sera prévenu immédiatement.`)) return;
     e.currentTarget.disabled = true;
-    try { await api('devis.accepter', { id: doc.id }); toast('Merci ! Votre accord a bien été transmis à BDA Sécurité.'); await recharger(); naviguer(); }
+    try { await api('devis.accepter', { id: doc.id }); toast('Merci ! Votre accord a bien été transmis à BDA Security Group.'); await recharger(); naviguer(); }
     catch (err) { toast(err.message, true); e.currentTarget.disabled = false; }
   } }, ic('coche'), 'Accepter ce devis') : null;
   const actions = h('div', { class: 'ec-doc__actions' },
@@ -260,10 +260,10 @@ async function vueDocument(id) {
     accepter);
   const feuille = h('article', { class: 'ec-feuille' },
     h('header', { class: 'ec-feuille__tete' },
-      h('img', { src: '/admin/logo-document.jpg?v=3', alt: 'BDA Sécurité', class: 'ec-feuille__logo' }),
+      h('img', { src: '/admin/logo-document.jpg?v=3', alt: 'BDA Security Group', class: 'ec-feuille__logo' }),
       h('div', { class: 'ec-feuille__titre' }, h('h2', null, estFacture ? 'Facture' : 'Devis'), h('b', null, `N° ${doc.numero}`), pastille(doc.type, doc.statut))),
     h('div', { class: 'ec-feuille__parties' },
-      h('div', null, h('small', null, 'Émetteur'), h('b', null, d.emetteurNom || 'BDA SECURITE'), h('p', null, texte(d.emetteur))),
+      h('div', null, h('small', null, 'Émetteur'), h('b', null, d.emetteurNom || 'BDA Security Group'), h('p', null, texte(d.emetteur))),
       h('div', null, h('small', null, estFacture ? 'Facturé à' : 'À l’attention de'), h('b', null, d.client?.nom || ''), h('p', null, texte(d.client?.adresse)))),
     h('div', { class: 'ec-feuille__meta' },
       h('span', null, h('small', null, 'Date'), frDate(doc.date)),
@@ -292,20 +292,20 @@ async function vueMessages() {
   const { messages } = await api('messages');
   if (donnees.messagesNonLus) { donnees.messagesNonLus = 0; document.querySelectorAll('.ec-nav__item.is-actif .ec-nav__badge, .ec-barre .is-actif .ec-nav__badge').forEach((b) => b.remove()); }
   const fil = h('div', { class: 'ec-fil' }, messages.length
-    ? messages.map((m) => h('div', { class: `ec-bulle ec-bulle--${m.auteur}` }, h('p', null, m.texte), h('small', null, `${m.auteur === 'admin' ? 'BDA Sécurité' : 'Vous'} · ${frDateHeure(m.cree)}`)))
+    ? messages.map((m) => h('div', { class: `ec-bulle ec-bulle--${m.auteur}` }, h('p', null, m.texte), h('small', null, `${m.auteur === 'admin' ? 'BDA Security Group' : 'Vous'} · ${frDateHeure(m.cree)}`)))
     : h('div', { class: 'ec-vide' }, ic('messages'), h('p', null, 'Posez votre question, demandez une modification de devis ou une nouvelle mission : votre responsable vous répond rapidement.')));
   const zone = h('textarea', { class: 'ec-input ec-fil__saisie', rows: 3, placeholder: 'Écrivez votre message…', maxlength: 4000 });
   const btn = h('button', { class: 'btn btn--gold', type: 'button', onclick: async () => {
     const texte = zone.value.trim();
     if (texte.length < 2) return zone.focus();
     btn.disabled = true;
-    try { await api('message.envoyer', { texte }); toast('Message envoyé à BDA Sécurité.'); naviguer(); }
+    try { await api('message.envoyer', { texte }); toast('Message envoyé à BDA Security Group.'); naviguer(); }
     catch (err) { toast(err.message, true); btn.disabled = false; }
   } }, ic('envoyer'), 'Envoyer');
   zone.addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); btn.click(); } });
   requestAnimationFrame(() => { fil.scrollTop = fil.scrollHeight; });
   return [
-    entete('Messagerie', 'Écrire à BDA Sécurité', 'Votre message arrive directement chez votre responsable de mission. Réponse par ici et par email.'),
+    entete('Messagerie', 'Écrire à BDA Security Group', 'Votre message arrive directement chez votre responsable de mission. Réponse par ici et par email.'),
     h('section', { class: 'ec-carte ec-messagerie' }, fil, h('div', { class: 'ec-fil__envoi' }, zone, btn)),
     h('p', { class: 'ec-petit ec-centre' }, 'Pour une urgence, appelez le ', h('a', { href: 'tel:+33611678625' }, '06 11 67 86 25'), ', 24h/24.'),
   ];

@@ -21,7 +21,7 @@ $v = '5';
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BDA · Chef">
-<title>Mon accès — BDA Sécurité</title>
+<title>Mon accès — BDA Security Group</title>
 <base href="/admin/">
 <link rel="icon" href="/admin/icone-moi-180.png" type="image/png">
 <link rel="apple-touch-icon" href="/admin/icone-moi-180.png">

@@ -63,7 +63,7 @@ function page_maintenance(array $etat): void
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#13110f">
-  <title>Site en maintenance — BDA Sécurité &amp; VTC Premium</title>
+  <title>Site en maintenance — BDA Security Group</title>
   <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -95,7 +95,7 @@ function page_maintenance(array $etat): void
 </head>
 <body>
   <main>
-    <img class="logo" src="/assets/img/logo-bda.png?v=3" alt="BDA Sécurité &amp; VTC Premium" width="600" height="528">
+    <img class="logo" src="/assets/img/logo-bda.png?v=3" alt="BDA Security Group" width="600" height="528">
     <span class="badge"><i></i>Maintenance</span>
     <h1>Nous revenons <em>très vite.</em></h1>
     <p><?= nl2br($e($message)) ?></p>
@@ -105,7 +105,7 @@ function page_maintenance(array $etat): void
       <a class="btn btn--ligne" href="https://wa.me/33784739070" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>WhatsApp 07 84 73 90 70</a>
       <a class="btn btn--ligne" href="mailto:bdasecurite@gmail.com"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>bdasecurite@gmail.com</a>
     </div>
-    <footer>BDA Sécurité &amp; VTC Premium · Paris</footer>
+    <footer>BDA Security Group · Paris</footer>
   </main>
 </body>
 </html>

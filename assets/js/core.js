@@ -451,7 +451,7 @@
 
     const FERMES = {
       devis: ['Demandes en ligne momentanément fermées', 'Pour un devis, appelez-nous ou écrivez-nous sur WhatsApp : nous vous répondons rapidement.', tel + wa],
-      recrutement: ['Les candidatures sont fermées pour le moment', 'Merci de votre intérêt pour BDA Sécurité. Revenez bientôt : nos prochains postes seront publiés ici.', ''],
+      recrutement: ['Les candidatures sont fermées pour le moment', 'Merci de votre intérêt pour BDA Security Group. Revenez bientôt : nos prochains postes seront publiés ici.', ''],
       avis: ['Le dépôt d’avis est momentanément fermé', 'Merci de votre confiance ! Vous pouvez toujours lire les avis de nos clients sur cette page.', ''],
     };
     const services = () => {

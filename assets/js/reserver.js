@@ -521,9 +521,9 @@
     const fin = new Date(`${c.date}T${c.heure}`); fin.setMinutes(fin.getMinutes() + Math.max(30, Math.round(c.min || 60)));
     const f = `${fin.getFullYear()}${pad(fin.getMonth() + 1)}${pad(fin.getDate())}T${pad(fin.getHours())}${pad(fin.getMinutes())}00`;
     const esc = (s) => String(s).replace(/[\\;,]/g, (m) => `\\${m}`).replace(/\n/g, '\\n');
-    const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//BDA VTC//FR', 'BEGIN:VEVENT', `UID:${c.ref}@bdasecurite.com`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
-      `DTSTART:${debut}`, `DTEND:${f}`, `SUMMARY:${esc(`Chauffeur BDA VTC — ${c.ref}`)}`, `LOCATION:${esc(c.depart)}`,
-      `DESCRIPTION:${esc(`${c.depart}${c.arrivee ? ` → ${c.arrivee}` : ''}\nBDA VTC : 06 11 67 86 25\nSuivi : https://bdasecurite.com/reserver#suivi=${c.jeton}`)}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//BDA Security Group//FR', 'BEGIN:VEVENT', `UID:${c.ref}@bdasecurite.com`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').slice(0, 15)}Z`,
+      `DTSTART:${debut}`, `DTEND:${f}`, `SUMMARY:${esc(`Chauffeur BDA Security Group — ${c.ref}`)}`, `LOCATION:${esc(c.depart)}`,
+      `DESCRIPTION:${esc(`${c.depart}${c.arrivee ? ` → ${c.arrivee}` : ''}\nBDA Security Group : 06 11 67 86 25\nSuivi : https://bdasecurite.com/reserver#suivi=${c.jeton}`)}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
     a.download = `course-${c.ref}.ics`;

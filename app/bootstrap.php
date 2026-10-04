@@ -333,7 +333,7 @@ function envoyer_mail(string $sujet, string $message, string $repondreA = '', st
 {
   if (getenv('BDA_NO_MAIL')) return true; // tests sur ordinateur
   $sujet = str_replace(["\r", "\n"], ' ', $sujet);
-  $entetes = ['From: BDA Securite <noreply@bdasecurite.com>', 'MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: 8bit'];
+  $entetes = ['From: BDA Security Group <noreply@bdasecurite.com>', 'MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: 8bit'];
   if ($repondreA !== '' && filter_var($repondreA, FILTER_VALIDATE_EMAIL)) $entetes[] = 'Reply-To: ' . $repondreA;
   return @mail($destinataire, mb_encode_mimeheader($sujet, 'UTF-8'), $message, implode("\r\n", $entetes));
 }
@@ -342,14 +342,14 @@ function envoyer_mail(string $sujet, string $message, string $repondreA = '', st
 function reglages_defaut(): array
 {
   return [
-    'nom' => 'BDA SECURITE',
+    'nom' => 'BDA Security Group',
     'emetteur' => "Abdelouahab BOUIDIA EI\n61 rue de la Croix Saint-Simon\n75020 PARIS\nSIRET : 977 933 316 00019\nAPE : 8010Z\nTÉL : 07.84.73.90.70",
     'email' => BDA_EMAIL,
     'beneficiaire' => 'ABDELOUAHAB BOUIDIA',
     'iban' => '',
     'conditionsFacture' => "Conditions générales de vente : Aucun escompte accordé en cas de paiement comptant.\nTVA non applicable, art. 293 B du CGI.\nEn cas de retard de paiement : pénalités égales à trois fois le taux d'intérêt légal et indemnité forfaitaire de 40 € pour frais de recouvrement (art. L441-10 du Code de commerce).",
     'conditionsDevis' => "Devis valable 30 jours à compter de sa date d'émission.\nAcompte à la signature du devis, solde à réception de la facture de fin de mission.\nAucun escompte accordé en cas de paiement comptant. TVA non applicable, art. 293 B du CGI.",
-    'pied' => "BDA SECURITE — Abdelouahab Bouidia EI — SIRET 977 933 316 00019 — APE 8010Z — Autorisation d'exercice CNAPS n° AUT-075-2124-07-01-20250906336\n« L'autorisation d'exercice ne confère aucune prérogative de puissance publique à l'entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du Code de la sécurité intérieure)",
+    'pied' => "BDA Security Group — Abdelouahab Bouidia EI — SIRET 977 933 316 00019 — APE 8010Z — Autorisation d'exercice CNAPS n° AUT-075-2124-07-01-20250906336\n« L'autorisation d'exercice ne confère aucune prérogative de puissance publique à l'entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du Code de la sécurité intérieure)",
     'prefixeFacture' => 'FA-{AAAA}-',
     'prefixeDevis' => 'DV-{AAAA}-',
     'echeanceJours' => 7,
@@ -477,8 +477,8 @@ function site_reglages_defaut(): array
     'visible' => array_fill_keys(SITE_VISIBLES, true),
     'tarifs' => SITE_TARIFS,
     'accueil' => [
-      'titre' => 'La sécurité de vos sites professionnels, [24h/24.]',
-      'texte' => 'Agents de sécurité, SSIAP et événementiel pour les hôtels, bureaux, commerces et chantiers. Un interlocuteur unique.',
+      'titre' => 'Votre sécurité, [en toute discrétion.]',
+      'texte' => 'Protection rapprochée, chauffeur privé, événements et sécurité privée.',
       'note' => '',
       'visuel' => 'photo',
     ],
@@ -486,8 +486,8 @@ function site_reglages_defaut(): array
 }
 // Anciens textes par défaut de l'accueil (trop longs) : remplacés par les nouveaux s'ils n'ont pas été personnalisés
 const ACCUEIL_ANCIENS = [
-  'titre' => ['Agents de sécurité et chauffeurs privés à Paris, [24h/24.]'],
-  'texte' => ["Gardiennage, sécurité incendie, sécurité d'événements, protection rapprochée et transport haut de gamme : une seule équipe, autorisée par le CNAPS, et un interlocuteur unique du devis jusqu'à la fin de la mission.", 'Une seule équipe autorisée par le CNAPS, du devis à la fin de la mission.', 'Agents de sécurité, agents SSIAP et sécurité événementielle pour les hôtels, bureaux, commerces, chantiers et institutions. Un interlocuteur unique, du devis à la prise de poste.'],
+  'titre' => ['Agents de sécurité et chauffeurs privés à Paris, [24h/24.]', 'La sécurité de vos sites professionnels, [24h/24.]'],
+  'texte' => ['Agents de sécurité, SSIAP et événementiel pour les hôtels, bureaux, commerces et chantiers. Un interlocuteur unique.', "Gardiennage, sécurité incendie, sécurité d'événements, protection rapprochée et transport haut de gamme : une seule équipe, autorisée par le CNAPS, et un interlocuteur unique du devis jusqu'à la fin de la mission.", 'Une seule équipe autorisée par le CNAPS, du devis à la fin de la mission.', 'Agents de sécurité, agents SSIAP et sécurité événementielle pour les hôtels, bureaux, commerces, chantiers et institutions. Un interlocuteur unique, du devis à la prise de poste.'],
   'note' => ['Réponse rapide · Devis gratuit et sans engagement · Interventions en urgence étudiées 24h/24'],
 ];
 function site_reglages(): array

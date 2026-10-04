@@ -118,7 +118,7 @@ async function creerLien(ag, recharger) {
   let lien;
   try { ({ lien } = await api('pointage.lien', { agent_id: ag.id })); } catch (e) { return erreur(e); }
   const prenom = String(ag.nom).trim().split(/\s+/)[0];
-  const message = `Bonjour ${prenom}, voici ton lien de pointage BDA Sécurité (personnel, ne le partage pas) : ${lien}\nOuvre-le à chaque prise et fin de service, et ajoute-le à l'écran d'accueil de ton téléphone.`;
+  const message = `Bonjour ${prenom}, voici ton lien de pointage BDA Security Group (personnel, ne le partage pas) : ${lien}\nOuvre-le à chaque prise et fin de service, et ajoute-le à l'écran d'accueil de ton téléphone.`;
   const champLien = h('input', { class: 'input pt-lien-champ', type: 'text', value: lien, readonly: true, onfocus: (e) => e.target.select() });
   const copier = async () => { try { await navigator.clipboard.writeText(lien); toast('Lien copié.'); } catch (e) { champLien.select(); document.execCommand('copy'); toast('Lien copié.'); } };
   await modale({

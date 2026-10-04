@@ -21,7 +21,7 @@ export const FLYER_DEFAUT = {
   section: 'Trois offres, une seule exigence : l\'excellence',
   offres: [
     { icone: 'bouclier', titre: 'Sécurité privée', sous: 'Commerces · bureaux · sites', points: ['Gardiennage & surveillance', 'Contrôle d\'accès & filtrage', 'Sécurité d\'événements'] },
-    { icone: 'voiture', titre: 'VTC Premium', sous: 'Hôtels · clients · collaborateurs', points: ['Transferts aéroports & gares', 'Mise à disposition à l\'heure', 'Déplacements professionnels'] },
+    { icone: 'voiture', titre: 'Chauffeur privé', sous: 'Hôtels · clients · collaborateurs', points: ['Transferts aéroports & gares', 'Mise à disposition à l\'heure', 'Déplacements professionnels'] },
     { icone: 'etoile', titre: 'Offre VIP combinée', sous: 'Personnalités · délégations', points: ['Chauffeur + agent de sécurité', 'Accompagnement VIP', 'Soirées privées & galas'] },
   ],
   chiffres: [
@@ -36,7 +36,7 @@ export const FLYER_DEFAUT = {
   tel2Label: 'WhatsApp', tel2: '07 84 73 90 70',
   infos: 'bdasecurite.com     bdasecurite@gmail.com     Paris & Île-de-France',
   qr: 'https://bdasecurite.com/devis', qrTitre: 'Scannez-moi', qrSous: 'Devis en 2 minutes',
-  pied: 'BDA Sécurité & VTC Premium — EURL · SIRET 109 076 463 00016 · Autorisation CNAPS n° AUT-075-2124-07-01-20250906336\n« L\'autorisation d\'exercice ne confère aucune prérogative de puissance publique à l\'entreprise ou aux personnes qui en bénéficient. » (art. L612-14 CSI)',
+  pied: 'BDA Security Group — EURL · SIRET 109 076 463 00016 · Autorisation CNAPS n° AUT-075-2124-07-01-20250906336\n« L\'autorisation d\'exercice ne confère aucune prérogative de puissance publique à l\'entreprise ou aux personnes qui en bénéficient. » (art. L612-14 CSI)',
   afficher: { secteurs: true, chiffres: true, reference: true, qr: true },
 };
 const copie = (o) => JSON.parse(JSON.stringify(o));
@@ -60,7 +60,7 @@ export function flyer(d, surChange = null) {
 
   return h('article', { class: `fl ${mod ? 'fl--modifiable' : ''}` },
     h('header', { class: 'fl__hero' },
-      h('div', { class: 'fl__marque' }, ecusson('fl__logo'), h('div', null, h('b', null, 'BDA SÉCURITÉ'), h('small', null, 'Sécurité privée · VTC Premium'))),
+      h('div', { class: 'fl__marque' }, ecusson('fl__logo'), h('div', null, h('b', null, 'BDA SECURITY GROUP'), h('small', null, 'Sécurité privée · Chauffeur privé'))),
       h('h1', { class: 'fl__titre' }, t('span', 'fl__t1', d, 'titre1', 'Titre'), t('span', 'fl__t2', d, 'titre2', 'Suite du titre')),
       t('p', 'fl__intro', d, 'intro', 'Texte de présentation'),
       d.afficher.secteurs ? h('div', { class: 'fl__secteurs' }, d.secteurs.map((_, i) => t('span', 'fl__secteur', d.secteurs, i, 'Secteur'))) : null),

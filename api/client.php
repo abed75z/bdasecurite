@@ -101,7 +101,7 @@ try {
 
     case 'invitation.verifier':
       $c = invitation_valide((string)($_GET['jeton'] ?? ''));
-      if (!$c) echec('Ce lien n’est plus valable. Demandez-en un nouveau à BDA Sécurité (06 11 67 86 25).', 404);
+      if (!$c) echec('Ce lien n’est plus valable. Demandez-en un nouveau à BDA Security Group (06 11 67 86 25).', 404);
       repondre(['ok' => true, 'client' => $c['nom'], 'email' => $c['email']]);
 
     case 'invitation':
@@ -109,7 +109,7 @@ try {
       $cle = 'client-inv:' . empreinte_client();
       if (tentatives($cle, 3600) >= 10) echec('Trop de tentatives. Réessayez plus tard.', 429);
       $c = invitation_valide(chaine($b['jeton'] ?? ''));
-      if (!$c) { noter_tentative($cle); echec('Ce lien n’est plus valable. Demandez-en un nouveau à BDA Sécurité.', 404); }
+      if (!$c) { noter_tentative($cle); echec('Ce lien n’est plus valable. Demandez-en un nouveau à BDA Security Group.', 404); }
       $mdp = chaine($b['motdepasse'] ?? '');
       if (mb_strlen($mdp) < 8) echec('Le mot de passe doit contenir au moins 8 caractères.');
       if (mb_strlen($mdp) > 200) echec('Mot de passe trop long.');
@@ -197,7 +197,7 @@ try {
       readfile($chemin);
       exit;
 
-    /* ----- Messagerie avec BDA Sécurité ----- */
+    /* ----- Messagerie avec BDA Security Group ----- */
     case 'messages':
       $c = exiger_compte();
       $st = db()->prepare('SELECT id, auteur, texte, cree FROM messages_clients WHERE client_id = ? ORDER BY id DESC LIMIT 200');

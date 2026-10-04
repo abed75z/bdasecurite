@@ -330,18 +330,15 @@
     });
   }
 
-  /* ---------- Grand nom du pied de page : lettres qui montent ---------- */
+  /* ---------- Grand nom du pied de page : « BDA / SECURITY GROUP » qui monte ---------- */
   document.querySelectorAll('.footer .container').forEach((c) => {
     const footer = c.closest('.footer');
     const bloc = document.createElement('div');
-    bloc.className = 'pied-marque';
+    bloc.className = 'pied-marque pied-marque--logo';
     bloc.setAttribute('aria-hidden', 'true');
-    let l = 0;
-    'BDA Sécurité'.split('').forEach((ch, i) => {
-      const s = document.createElement('span');
-      if (ch === ' ') { s.className = 'espace'; s.innerHTML = '&nbsp;'; } else s.textContent = ch;
-      if (i > 3) s.classList.add('rouge');
-      s.style.setProperty('--l', l++);
+    ['pied-marque__bda', 'pied-marque__sg'].forEach((cls) => {
+      const s = document.createElement('i');
+      s.className = cls;
       bloc.append(s);
     });
     c.append(bloc);

@@ -71,10 +71,10 @@
     const champ = h('textarea', { class: 'as-champ', rows: 1, maxlength: 1000, placeholder: 'Écrivez votre question…', 'aria-label': 'Votre message' });
     const bouton = h('button', { class: 'as-envoyer', type: 'submit', 'aria-label': 'Envoyer' }, ic(I.envoyer));
     const form = h('form', { class: 'as-saisie' }, champ, bouton);
-    const panneau = h('section', { class: 'as-panneau', role: 'dialog', 'aria-label': 'Assistant BDA Sécurité', hidden: true },
+    const panneau = h('section', { class: 'as-panneau', role: 'dialog', 'aria-label': 'Assistant BDA Security Group', hidden: true },
       h('header', { class: 'as-tete' },
         h('img', { src: '/assets/img/ecusson-petit.png?v=3', alt: '', width: 200, height: 204 }),
-        h('div', null, h('b', null, 'Assistant BDA Sécurité'), statutTxt),
+        h('div', null, h('b', null, 'Assistant BDA Security Group'), statutTxt),
         h('button', { class: 'as-tete__fermer', type: 'button', 'aria-label': 'Fermer', onclick: () => ouvrir(false) }, ic(I.croix))),
       fil, form,
       h('footer', { class: 'as-pied' },
@@ -220,7 +220,7 @@
             } catch (e) { /* hors ligne */ }
           }
           if (!fil.children.length) {
-            bulle('robot', 'Bonjour, je suis l’assistant de BDA Sécurité. Posez-moi votre question : prestations, tarifs, disponibilités, zones d’intervention… Je peux aussi vous mettre en relation avec un conseiller.');
+            bulle('robot', 'Bonjour, je suis l’assistant de BDA Security Group. Posez-moi votre question : prestations, tarifs, disponibilités, zones d’intervention… Je peux aussi vous mettre en relation avec un conseiller.');
             suggestions(['Nos tarifs', 'Un agent pour ce soir', 'Sécurité d’un événement', 'Transfert aéroport', 'Parler à un conseiller']);
           }
         }

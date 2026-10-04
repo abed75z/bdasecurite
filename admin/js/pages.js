@@ -194,7 +194,7 @@ async function pageDemandes(ctx) {
         h('p', { class: 'modale__meta' }, `Reçue le ${dateLisible(d.recu, true)}`),
         h('div', { class: 'modale__raccourcis' },
           tel ? h('a', { class: 'btn btn--ghost', href: `tel:${tel.replace(/[^\d+]/g, '')}` }, icone('telephone'), 'Appeler') : null,
-          mail ? h('a', { class: 'btn btn--ghost', href: `mailto:${mail}?subject=${encodeURIComponent(`Votre demande de devis ${v['Référence'] || ''} — BDA Sécurité`)}` }, icone('mail'), 'Répondre par email') : null),
+          mail ? h('a', { class: 'btn btn--ghost', href: `mailto:${mail}?subject=${encodeURIComponent(`Votre demande de devis ${v['Référence'] || ''} — BDA Security Group`)}` }, icone('mail'), 'Répondre par email') : null),
       ],
       actions: [
         { libelle: 'Supprimer', classe: 'btn--danger-ghost', valeur: 'supprimer' },
@@ -381,14 +381,14 @@ async function accesClient(c) {
     : ['Invitation créée, en attente d’activation', 'attente'];
   const zoneLien = h('div');
   const montrerLien = (lien) => {
-    const texte = `Bonjour, voici votre accès à l’espace client BDA Sécurité (devis, factures, planning). Choisissez votre mot de passe ici : ${lien}`;
+    const texte = `Bonjour, voici votre accès à l’espace client BDA Security Group (devis, factures, planning). Choisissez votre mot de passe ici : ${lien}`;
     zoneLien.replaceChildren(h('div', { class: 'lien-acces' },
       h('small', null, 'Lien d’activation (valable 7 jours) — à envoyer au client :'),
       h('input', { class: 'input', readonly: true, value: lien, onfocus: (e) => e.target.select() }),
       h('div', { class: 'lien-acces__boutons' },
         h('button', { class: 'btn btn--gold btn--petit', type: 'button', onclick: async () => { try { await navigator.clipboard.writeText(lien); toast('Lien copié.'); } catch (e) { erreur(e); } } }, icone('copier'), 'Copier'),
         h('a', { class: 'btn btn--ghost btn--petit', href: `https://wa.me/?text=${encodeURIComponent(texte)}`, target: '_blank', rel: 'noopener' }, 'WhatsApp'),
-        h('a', { class: 'btn btn--ghost btn--petit', href: `mailto:${encodeURIComponent(email.value.trim())}?subject=${encodeURIComponent('Votre espace client BDA Sécurité')}&body=${encodeURIComponent(texte)}` }, icone('mail'), 'Email'))));
+        h('a', { class: 'btn btn--ghost btn--petit', href: `mailto:${encodeURIComponent(email.value.trim())}?subject=${encodeURIComponent('Votre espace client BDA Security Group')}&body=${encodeURIComponent(texte)}` }, icone('mail'), 'Email'))));
   };
   const creer = async (envoyer) => {
     try {

@@ -89,7 +89,7 @@ async function pageReservations(ctx) {
     const note = zoneTexte({ value: d.note || '', rows: 2, placeholder: 'Note interne (le client ne la voit pas)' });
     const lireForm = () => ({ prix: parseFloat(prix.value.replace(',', '.')) || 0, chauffeur: chauffeur.value.trim(), note: note.value });
     const quandTxt = `${dateFr(d.date)} à ${d.heure}`;
-    const msg = (etatTxt) => `Bonjour ${d.nom}, c'est BDA VTC. Votre course du ${quandTxt} (${d.depart?.label}${d.mode === 'dispo' ? ` · mise à disposition ${d.heures} h` : ` → ${d.arrivee?.label}`}) est ${etatTxt}${chauffeur.value.trim() ? `. Votre chauffeur : ${chauffeur.value.trim()}` : ''}. Prix : ${prix.value} €. Merci de votre confiance !`;
+    const msg = (etatTxt) => `Bonjour ${d.nom}, c'est BDA Security Group. Votre course du ${quandTxt} (${d.depart?.label}${d.mode === 'dispo' ? ` · mise à disposition ${d.heures} h` : ` → ${d.arrivee?.label}`}) est ${etatTxt}${chauffeur.value.trim() ? `. Votre chauffeur : ${chauffeur.value.trim()}` : ''}. Prix : ${prix.value} €. Merci de votre confiance !`;
     const itineraire = d.mode === 'trajet' && d.arrivee
       ? `https://www.google.com/maps/dir/?api=1&origin=${d.depart.lat},${d.depart.lon}&destination=${d.arrivee.lat},${d.arrivee.lon}&travelmode=driving`
       : `https://www.google.com/maps/search/?api=1&query=${d.depart?.lat},${d.depart?.lon}`;

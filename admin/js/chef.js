@@ -219,7 +219,7 @@ function afficher(acces, carte, cartes, nbAgents) {
   const infos = h('ul', { class: 'moi-infos' },
     h('li', null, icone('agents'), h('span', null, h('b', null, String(nbAgents)), nbAgents > 1 ? ' agents sous votre direction' : ' agent sous votre direction')),
     h('li', null, icone('cadenas'), h('span', null, acces.direct ? 'Appareil de confiance · ' : 'Session sécurisée · ', acces.appareil || 'cet appareil')),
-    h('li', null, icone('bouclier'), h('span', null, d.numero ? `Carte pro ${d.numero}` : 'BDA Sécurité · Sécurité privée & VTC')));
+    h('li', null, icone('bouclier'), h('span', null, d.numero ? `Carte pro ${d.numero}` : 'BDA Security Group · Sécurité privée & VTC')));
 
   // Ouverture directe (sans mot de passe) sur cet appareil : activée / retirée
   const direct = h('div', { class: `moi-direct ${acces.direct ? 'is-on' : ''}` },
@@ -250,7 +250,7 @@ function afficher(acces, carte, cartes, nbAgents) {
       couronne('moi-chef__couronne'),
       h('p', { class: 'moi-chef__salut' }, `${salut}, chef.`),
       h('h1', null, prenom, ' ', h('em', null, (d.nom || '').toUpperCase())),
-      h('p', { class: 'moi-chef__titre' }, h('span', null, d.fonction || 'Gérant'), ' · Fondateur de BDA Sécurité')),
+      h('p', { class: 'moi-chef__titre' }, h('span', null, d.fonction || 'Gérant'), ' · Fondateur de BDA Security Group')),
     scene,
     aide,
     permissionIos ? boutonGyro : null,

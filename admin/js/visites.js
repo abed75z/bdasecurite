@@ -21,9 +21,9 @@ export const VISITE_DEFAUT = {
 export function rectoVisite(d) {
   return h('div', { class: 'cv cv--recto' },
     ecusson('cv__logo'),
-    h('b', { class: 'cv__marque' }, 'BDA SÉCURITÉ'),
+    h('b', { class: 'cv__marque' }, 'BDA SECURITY GROUP'),
     h('span', { class: 'cv__filet' }),
-    h('small', { class: 'cv__slogan' }, 'Sécurité privée · VTC Premium'),
+    h('small', { class: 'cv__slogan' }, 'Sécurité privée · Chauffeur privé'),
     d.zone ? h('span', { class: 'cv__zone' }, d.zone) : null);
 }
 export function versoVisite(d) {
@@ -39,7 +39,7 @@ export function versoVisite(d) {
         ligne('telephone', d.tel1Label, d.tel1), ligne('telephone', d.tel2Label, d.tel2),
         ligne('mail', '', d.email), ligne('site', '', d.site))),
     qr,
-    h('div', { class: 'cv__bande' }, ecusson('cv__mini'), h('span', null, 'BDA Sécurité')));
+    h('div', { class: 'cv__bande' }, ecusson('cv__mini'), h('span', null, 'BDA Security Group')));
 }
 
 function imprimerVisites(d, mode, enPdf = false) {
@@ -88,7 +88,7 @@ function blocDigital() {
   // Lien personnalisé : la carte s'ouvre sur « Carte préparée pour … »
   const pour = saisie({ placeholder: 'Nom du prospect (facultatif), ex. Hôtel Lutetia', maxlength: 60 });
   const lien = () => (pour.value.trim() ? `${URL_CARTE}?pour=${encodeURIComponent(pour.value.trim())}` : URL_CARTE);
-  const message = () => `${pour.value.trim() ? `Bonjour ${pour.value.trim()}, voici` : 'Bonjour, voici'} la carte de BDA Sécurité & VTC Premium (sécurité privée et chauffeurs VTC à Paris, 24/7) :`;
+  const message = () => `${pour.value.trim() ? `Bonjour ${pour.value.trim()}, voici` : 'Bonjour, voici'} la carte de BDA Security Group (sécurité privée et chauffeurs VTC à Paris, 24/7) :`;
   const affiche = h('a', { class: 'digitale__lien', target: '_blank', rel: 'noopener' });
   const btnWa = h('a', { class: 'btn btn--gold', target: '_blank', rel: 'noopener' }, icone('envoyer'), 'Envoyer par WhatsApp');
   const btnSms = h('a', { class: 'btn btn--ghost' }, icone('mail'), 'Par SMS');

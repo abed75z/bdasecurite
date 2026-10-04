@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>BDA Sécurité &amp; VTC Premium — Carte de visite</title>
+  <title>BDA Security Group — Carte de visite</title>
   <meta name="description" content="Sécurité privée et chauffeurs VTC premium à Paris et en Île-de-France, 24/7. Appelez, écrivez sur WhatsApp ou demandez un devis gratuit.">
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#13110f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="BDA Sécurité">
+  <meta name="apple-mobile-web-app-title" content="BDA Security Group">
   <link rel="canonical" href="https://bdasecurite.com/carte">
   <link rel="manifest" href="manifest-carte-bda.webmanifest">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://bdasecurite.com/carte">
-  <meta property="og:title" content="BDA Sécurité & VTC Premium — Carte de visite">
-  <meta property="og:description" content="Sécurité privée · VTC Premium · Paris & Île-de-France, 24/7. Appelez, WhatsApp, devis gratuit en 2 minutes.">
-  <meta property="og:image" content="https://bdasecurite.com/assets/img/og-image.jpg?v=3">
+  <meta property="og:title" content="BDA Security Group — Carte de visite">
+  <meta property="og:description" content="Sécurité privée · Chauffeur privé · Paris & Île-de-France, 24/7. Appelez, WhatsApp, devis gratuit en 2 minutes.">
+  <meta property="og:image" content="https://bdasecurite.com/assets/img/og-image.jpg?v=4">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="assets/img/favicon.svg?v=3" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=3">
@@ -196,8 +196,8 @@
         <div class="carte3d" id="carte3d" role="button" tabindex="0" aria-label="Retourner la carte">
           <div class="face recto">
             <img class="recto__logo" src="/assets/img/embleme.png?v=3" alt="" width="128" height="130">
-            <b>BDA SÉCURITÉ</b>
-            <small>Sécurité privée · VTC Premium</small>
+            <b>BDA SECURITY GROUP</b>
+            <small>Sécurité privée · Chauffeur privé</small>
             <em>PARIS &amp; ÎLE-DE-FRANCE · 24/7</em>
           </div>
           <div class="face verso">
@@ -222,7 +222,7 @@
     <p class="pour" id="pour" hidden></p>
 
     <section class="intro apparait">
-      <span class="kicker">Sécurité privée &amp; VTC Premium</span>
+      <span class="kicker">Protection rapprochée &amp; chauffeur privé</span>
       <h1 class="serif">Votre sécurité, <em>en première classe.</em></h1>
       <p>Gardiennage, sécurité d'événements, protection rapprochée et chauffeurs privés à Paris et en Île-de-France. Un seul interlocuteur, discret et ponctuel.</p>
     </section>
@@ -267,7 +267,7 @@
     </div>
 
     <div class="outils apparait">
-      <a href="/assets/bda-securite.vcf" download="BDA Sécurité.vcf"><svg class="ic"><use href="#i-contact"/></svg>Enregistrer le contact</a>
+      <a href="/assets/bda-securite.vcf" download="BDA Security Group.vcf"><svg class="ic"><use href="#i-contact"/></svg>Enregistrer le contact</a>
       <button type="button" id="partager"><svg class="ic"><use href="#i-partage"/></svg>Partager la carte</button>
       <button type="button" id="presenter"><svg class="ic"><use href="#i-qr"/></svg>Montrer le QR code</button>
     </div>
@@ -287,7 +287,7 @@
 
   <div class="presentation" id="presentation" hidden role="dialog" aria-modal="true" aria-label="QR code de la carte">
     <button class="rond" type="button" id="fermer" aria-label="Fermer"><svg class="ic"><use href="#i-croix"/></svg></button>
-    <span class="kicker">BDA Sécurité &amp; VTC Premium</span>
+    <span class="kicker">BDA Security Group</span>
     <div class="presentation__qr" id="grand-qr"></div>
     <h2 class="serif">Scannez pour ouvrir ma carte</h2>
     <p>Visez ce code avec l'appareil photo du téléphone.</p>
@@ -303,13 +303,13 @@
     const toast = (txt) => { const t = $('toast'); t.textContent = txt; t.classList.add('is-in'); setTimeout(() => t.classList.remove('is-in'), 2200); };
 
     // Carte préparée pour un prospect (?pour=Hôtel Lutetia)
-    let messageWa = 'Bonjour BDA Sécurité, je souhaite un renseignement.';
+    let messageWa = 'Bonjour BDA Security Group, je souhaite un renseignement.';
     if (pour) {
       const p = $('pour');
       p.append('Carte préparée pour ', Object.assign(document.createElement('b'), { textContent: pour }));
       p.hidden = false;
-      document.title = `BDA Sécurité — pour ${pour}`;
-      messageWa = `Bonjour BDA Sécurité, c'est ${pour}. J'ai bien reçu votre carte, je souhaite un renseignement.`;
+      document.title = `BDA Security Group — pour ${pour}`;
+      messageWa = `Bonjour BDA Security Group, c'est ${pour}. J'ai bien reçu votre carte, je souhaite un renseignement.`;
     }
     const wa = `https://wa.me/33784739070?text=${encodeURIComponent(messageWa)}`;
     $('lien-wa').href = wa; $('barre-wa').href = wa;
@@ -375,7 +375,7 @@
 
     // Partager (WhatsApp, SMS… via le menu du téléphone) ou copier le lien
     const partager = async () => {
-      const donnees = { title: 'BDA Sécurité & VTC Premium', text: 'Sécurité privée et chauffeurs VTC premium à Paris, 24/7. Voici notre carte :', url: urlCarte };
+      const donnees = { title: 'BDA Security Group', text: 'Sécurité privée et chauffeurs VTC premium à Paris, 24/7. Voici notre carte :', url: urlCarte };
       try {
         if (navigator.share) await navigator.share(donnees);
         else { await navigator.clipboard.writeText(urlCarte); toast('Lien copié !'); }

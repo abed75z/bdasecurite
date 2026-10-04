@@ -5,7 +5,7 @@ require __DIR__ . '/../app/bootstrap.php';
 entetes_securite();
 header('Cache-Control: no-store');
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'");
-$v = '18';
+$v = '19';
 ?><!doctype html>
 <html lang="fr">
 <head>
@@ -15,7 +15,7 @@ $v = '18';
 <meta name="theme-color" content="#f7f3ec">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="BDA Admin">
-<title>Espace admin — BDA Sécurité &amp; VTC Premium</title>
+<title>Espace admin — BDA Security Group</title>
 <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png?v=3">
 <link rel="manifest" href="manifest.webmanifest">

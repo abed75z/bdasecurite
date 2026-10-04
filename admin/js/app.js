@@ -61,7 +61,7 @@ function ecranAccueil(titre, ...contenu) {
   return h('main', { class: 'auth' },
     h('section', { class: 'auth__carte' },
       h('span', { class: 'auth__zone' }, icone('cadenas'), 'Zone sécurisée · accès administrateur'),
-      h('div', { class: 'auth__marque' }, ecusson(), h('div', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Console d’administration'))),
+      h('div', { class: 'auth__marque' }, ecusson(), h('div', null, h('b', null, 'BDA Security Group'), h('small', null, 'Console d’administration'))),
       h('h1', null, titre),
       contenu,
       h('ul', { class: 'auth__garanties' },
@@ -162,7 +162,7 @@ function lancerApplication() {
 
   const utilisateur = String(etat.session.utilisateur || '');
   const cote = h('aside', { class: 'cote' },
-    h('a', { href: '#/', class: 'cote__marque', onclick: fermerMenu }, ecusson(), h('div', null, h('b', null, 'BDA Sécurité'), h('small', null, 'Console', h('span', { class: 'tag-admin' }, 'Admin')))),
+    h('a', { href: '#/', class: 'cote__marque', onclick: fermerMenu }, ecusson(), h('div', null, h('b', null, 'BDA Security Group'), h('small', null, 'Console', h('span', { class: 'tag-admin' }, 'Admin')))),
     menuEl,
     h('div', { class: 'cote__bas' },
       lien({ route: 'parametres', libelle: 'Paramètres', icone: 'reglages' }),

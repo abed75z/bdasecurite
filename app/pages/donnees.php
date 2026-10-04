@@ -54,7 +54,7 @@ function zone(string $slug, string $nom, string $fil, string $lieu, string $zone
 $secteurs = [
   [
     'slug' => 'securite-hotels-paris', 'fil' => 'Hôtels & palaces', 'photo' => P_OREILLETTE, 'pos' => '50% 25%',
-    'title' => 'Sécurité hôtel à Paris : agents pour hôtels et palaces | BDA Sécurité',
+    'title' => 'Sécurité hôtel à Paris : agents pour hôtels et palaces | BDA Security Group',
     'description' => 'Agents de sécurité pour hôtels, palaces et résidences de tourisme à Paris : sûreté des clients, contrôle des accès, rondes de nuit, VIP. Agents CNAPS, devis gratuit.',
     'kicker' => 'Secteur hôtellerie · Paris', 'h1' => 'Sécurité des hôtels <em>et palaces à Paris.</em>',
     'lead' => 'Des agents discrets et élégants qui protègent vos clients, votre personnel et votre établissement, sans jamais troubler l’expérience de séjour.',
@@ -81,7 +81,7 @@ $secteurs = [
   ],
   [
     'slug' => 'securite-commerces-paris', 'fil' => 'Commerces & boutiques', 'photo' => P_AGENT, 'pos' => '50% 30%',
-    'title' => 'Agent de sécurité magasin à Paris : boutiques, luxe, commerces | BDA Sécurité',
+    'title' => 'Agent de sécurité magasin à Paris : boutiques, luxe, commerces | BDA Security Group',
     'description' => 'Agents de sécurité pour boutiques, magasins de luxe et commerces à Paris : prévention des vols, accueil, filtrage, fermeture. Agents CNAPS, devis gratuit, 7j/7.',
     'kicker' => 'Secteur commerce · Paris', 'h1' => 'Sécurité des commerces <em>et boutiques.</em>',
     'lead' => 'Un agent à l’entrée change tout : moins de vols, des clients rassurés et une équipe de vente plus sereine, en semaine comme le dimanche.',
@@ -108,7 +108,7 @@ $secteurs = [
   ],
   [
     'slug' => 'gardiennage-chantier-paris', 'fil' => 'Chantiers', 'photo' => P_SECURITE, 'pos' => '50% 70%', 'service' => 'gardiennage',
-    'title' => 'Gardiennage de chantier à Paris et en Île-de-France | BDA Sécurité',
+    'title' => 'Gardiennage de chantier à Paris et en Île-de-France | BDA Security Group',
     'description' => 'Gardiennage de chantier à Paris et en Île-de-France : surveillance de nuit et du week-end, rondes, contrôle des livraisons, prévention des vols de matériel. Devis gratuit.',
     'kicker' => 'Secteur BTP · Île-de-France', 'h1' => 'Gardiennage <em>de chantier.</em>',
     'lead' => 'Vols de matériel, de câbles ou de carburant, dégradations, squats : nos agents surveillent votre chantier la nuit, le week-end et pendant les congés.',
@@ -162,7 +162,7 @@ $secteurs = [
   ],
   [
     'slug' => 'securite-ambassades-consulats-paris', 'fil' => 'Ambassades & consulats', 'photo' => P_OREILLETTE, 'pos' => '50% 25%',
-    'title' => 'Sécurité d’ambassades et de consulats à Paris | BDA Sécurité',
+    'title' => 'Sécurité d’ambassades et de consulats à Paris | BDA Security Group',
     'description' => 'Sécurité des représentations diplomatiques à Paris : agents pour ambassades, consulats et institutions, contrôle d’accès, accueil du public, discrétion absolue. Référence : Consulat général de Colombie.',
     'kicker' => 'Institutions & diplomatie · Paris', 'h1' => 'Sécurité des ambassades <em>et consulats.</em>',
     'lead' => 'Accueil du public, contrôle des accès, discrétion absolue : nous accompagnons les représentations diplomatiques avec la rigueur qu’elles exigent.',
@@ -189,7 +189,7 @@ $secteurs = [
   ],
   [
     'slug' => 'securite-residences-coproprietes-paris', 'fil' => 'Résidences & copropriétés', 'photo' => P_AGENT, 'pos' => '50% 30%',
-    'title' => 'Gardiennage de résidences et copropriétés à Paris | BDA Sécurité',
+    'title' => 'Gardiennage de résidences et copropriétés à Paris | BDA Security Group',
     'description' => 'Sécurité de résidences, copropriétés et immeubles à Paris : rondes, présence de nuit, lutte contre les squats et les intrusions, sécurité des parkings. Devis gratuit pour syndics et particuliers.',
     'kicker' => 'Résidentiel · Paris & Île-de-France', 'h1' => 'Sécurité des résidences <em>et copropriétés.</em>',
     'lead' => 'Intrusions, squats de halls, parkings dégradés : nos agents rétablissent la tranquillité des résidents, pour les syndics, bailleurs et propriétaires.',

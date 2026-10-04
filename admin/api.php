@@ -371,8 +371,8 @@ try {
       if ($statut !== $r['statut'] && in_array($statut, ['confirmee', 'annulee'], true) && !empty($d['email'])) {
         $quand = date('d/m/Y', strtotime($d['date'])) . ' à ' . $d['heure'];
         $txt = $statut === 'confirmee'
-          ? "Bonjour {$d['nom']},\n\nVotre course du $quand est confirmée" . (!empty($d['chauffeur']) ? " : votre chauffeur sera {$d['chauffeur']}" : '') . ".\nPrix : " . number_format($prix, 2, ',', ' ') . " €\n\nSuivre votre réservation : https://bdasecurite.com/reserver#suivi={$r['jeton']}\n\nBDA Sécurité & VTC Premium — 06 11 67 86 25"
-          : "Bonjour {$d['nom']},\n\nVotre réservation du $quand a été annulée. Pour toute question : 06 11 67 86 25.\n\nBDA Sécurité & VTC Premium";
+          ? "Bonjour {$d['nom']},\n\nVotre course du $quand est confirmée" . (!empty($d['chauffeur']) ? " : votre chauffeur sera {$d['chauffeur']}" : '') . ".\nPrix : " . number_format($prix, 2, ',', ' ') . " €\n\nSuivre votre réservation : https://bdasecurite.com/reserver#suivi={$r['jeton']}\n\nBDA Security Group — 06 11 67 86 25"
+          : "Bonjour {$d['nom']},\n\nVotre réservation du $quand a été annulée. Pour toute question : 06 11 67 86 25.\n\nBDA Security Group";
         envoyer_mail(($statut === 'confirmee' ? 'Course confirmée' : 'Réservation annulée') . " — {$r['ref']}", $txt, BDA_EMAIL, $d['email']);
       }
       repondre(['ok' => true]);
@@ -873,7 +873,7 @@ try {
       $lien = (est_https() ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'bdasecurite.com') . '/espace-client#invitation=' . $jeton;
       $envoye = false;
       if (!empty($b['envoyer'])) {
-        $envoye = envoyer_mail('Votre espace client BDA Sécurité', "Bonjour,\n\nVotre espace client BDA Sécurité est prêt. Vous y retrouverez vos devis, vos factures et le planning de vos agents.\n\nPour l'activer, choisissez votre mot de passe avec ce lien (valable 7 jours) :\n$lien\n\nVotre identifiant : $email\n\nÀ très bientôt,\nBDA Sécurité & VTC Premium — 06 11 67 86 25", BDA_EMAIL, $email);
+        $envoye = envoyer_mail('Votre espace client BDA Security Group', "Bonjour,\n\nVotre espace client BDA Security Group est prêt. Vous y retrouverez vos devis, vos factures et le planning de vos agents.\n\nPour l'activer, choisissez votre mot de passe avec ce lien (valable 7 jours) :\n$lien\n\nVotre identifiant : $email\n\nÀ très bientôt,\nBDA Security Group — 06 11 67 86 25", BDA_EMAIL, $email);
       }
       journal('securite', "Espace client : lien d'invitation créé pour {$c['nom']} ($email)" . ($envoye ? ', envoyé par email' : ''));
       repondre(['ok' => true, 'lien' => $lien, 'expire' => $expire, 'envoye' => $envoye]);
@@ -963,7 +963,7 @@ try {
       $cpt->execute([$client['id']]);
       $compte = $cpt->fetch();
       if ($compte && !empty($_POST['prevenir'])) {
-        $mail = envoyer_mail("$titre disponible dans votre espace client", "Bonjour,\n\nBDA Sécurité vient de déposer « $titre » dans votre espace client (rubrique Factures > Détails et documents).\n\nConsultez-le ici : https://bdasecurite.com/espace-client#/factures\n\nBDA Sécurité — 06 11 67 86 25", BDA_EMAIL, (string)$compte['email']);
+        $mail = envoyer_mail("$titre disponible dans votre espace client", "Bonjour,\n\nBDA Security Group vient de déposer « $titre » dans votre espace client (rubrique Factures > Détails et documents).\n\nConsultez-le ici : https://bdasecurite.com/espace-client#/factures\n\nBDA Security Group — 06 11 67 86 25", BDA_EMAIL, (string)$compte['email']);
       }
       journal('document', "« $titre » envoyé dans l’espace client de {$client['nom']}" . ($mail ? ' (client prévenu par email)' : ''));
       repondre(['ok' => true, 'id' => $nouvelId, 'compte' => (bool)$compte, 'email' => $mail]);
@@ -1010,7 +1010,7 @@ try {
       db()->prepare('UPDATE documents SET partage = ?, statut = ?, maj = ? WHERE id = ?')->execute([$quand, $statut, $quand, $d['id']]);
       $mail = false;
       if ((int)$compte['actif'] === 1) {
-        $mail = envoyer_mail("$nom {$d['numero']} disponible dans votre espace client", "Bonjour,\n\nBDA Sécurité vient de déposer " . ($d['type'] === 'facture' ? 'une nouvelle facture' : 'un nouveau devis') . " ({$d['numero']}) dans votre espace client.\n\nConsultez-" . ($d['type'] === 'facture' ? 'la' : 'le') . " ici : https://bdasecurite.com/espace-client\n\nBDA Sécurité & VTC Premium — 06 11 67 86 25", BDA_EMAIL, $compte['email']);
+        $mail = envoyer_mail("$nom {$d['numero']} disponible dans votre espace client", "Bonjour,\n\nBDA Security Group vient de déposer " . ($d['type'] === 'facture' ? 'une nouvelle facture' : 'un nouveau devis') . " ({$d['numero']}) dans votre espace client.\n\nConsultez-" . ($d['type'] === 'facture' ? 'la' : 'le') . " ici : https://bdasecurite.com/espace-client\n\nBDA Security Group — 06 11 67 86 25", BDA_EMAIL, $compte['email']);
       }
       journal('document', "$nom {$d['numero']} envoyé dans l’espace client de {$d['client']}" . ($mail ? ' (client prévenu par email)' : ''));
       repondre(['ok' => true, 'partage' => $quand, 'statut' => $statut, 'email' => $mail, 'actif' => (int)$compte['actif'] === 1]);
@@ -1043,7 +1043,7 @@ try {
       $c = $st->fetch();
       if (!$c) echec('Ce client n’a pas d’espace client.', 404);
       db()->prepare("INSERT INTO messages_clients (client_id, auteur, texte, cree, lu) VALUES (?, 'admin', ?, ?, 0)")->execute([$id, $texte, maintenant()]);
-      if ((int)$c['actif'] === 1) envoyer_mail('Nouveau message de BDA Sécurité', "Bonjour,\n\nBDA Sécurité vous a répondu dans votre espace client :\n\n« $texte »\n\nRépondre : https://bdasecurite.com/espace-client#/messages\n\nBDA Sécurité & VTC Premium — 06 11 67 86 25", BDA_EMAIL, $c['email']);
+      if ((int)$c['actif'] === 1) envoyer_mail('Nouveau message de BDA Security Group', "Bonjour,\n\nBDA Security Group vous a répondu dans votre espace client :\n\n« $texte »\n\nRépondre : https://bdasecurite.com/espace-client#/messages\n\nBDA Security Group — 06 11 67 86 25", BDA_EMAIL, $c['email']);
       journal('site', "Réponse envoyée à {$c['nom']} (espace client)");
       repondre(['ok' => true]);
 

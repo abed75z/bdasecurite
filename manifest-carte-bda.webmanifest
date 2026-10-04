@@ -1,6 +1,6 @@
 {
-  "name": "BDA Sécurité — Carte de visite",
-  "short_name": "BDA Sécurité",
+  "name": "BDA Security Group — Carte de visite",
+  "short_name": "BDA Security Group",
   "start_url": "/carte",
   "scope": "/carte",
   "display": "standalone",

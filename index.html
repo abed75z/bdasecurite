@@ -200,7 +200,7 @@
         </ul>
       </div>
     </div>
-    <a class="ac-defiler" href="#assistant-ia" aria-label="Faire défiler vers la suite"><span></span>Découvrir</a>
+    <a class="ac-defiler" href="#services" aria-label="Faire défiler vers la suite"><span></span>Découvrir</a>
   </section>
 
   <!-- ============ GARANTIES ============ -->
@@ -217,42 +217,6 @@
     </div>
   </section>
 
-  <!-- ============ ASSISTANT EN LIGNE ============ -->
-  <section class="section ac-ia" id="assistant-ia" aria-labelledby="ia-title" data-visible="assistant">
-    <div class="container ac-ia__grille">
-      <div class="ac-ia__texte">
-        <p class="kicker">Assistant en ligne · 24h/24</p>
-        <h2 class="h2" id="ia-title">Une question&nbsp;? Réponse immédiate.</h2>
-        <p class="lead">Tarifs, disponibilités, devis&nbsp;: réponse immédiate, et un conseiller si besoin.</p>
-        <form class="ia-champ" data-assistant-form autocomplete="off">
-          <span class="ia-champ__anneau" aria-hidden="true"></span>
-          <svg class="ia-champ__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <input type="text" name="q" maxlength="300" aria-label="Votre question à l'assistant" placeholder="Posez votre question…" data-exemples="Combien coûte un agent de nuit ?|Vous êtes disponibles ce week-end ?|Il me faut 2 agents pour un gala|Un chauffeur pour Orly demain matin ?">
-          <button type="submit" aria-label="Envoyer la question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
-        </form>
-        <div class="ia-puces">
-          <button type="button" data-assistant data-question="Quels sont vos tarifs ?">Vos tarifs</button>
-          <button type="button" data-assistant data-question="Pouvez-vous intervenir en urgence ce soir ?">Urgence ce soir</button>
-          <button type="button" data-assistant data-question="Je cherche des agents pour un événement">Un événement</button>
-          <button type="button" data-assistant data-question="Je voudrais parler à un conseiller">Parler à un conseiller</button>
-        </div>
-      </div>
-      <div class="ac-ia__demo" aria-hidden="true">
-        <div class="ia-fenetre">
-          <div class="ia-fenetre__tete"><img src="assets/img/ecusson-petit.png?v=3" alt="" width="200" height="204"><div><b>Assistant BDA Security Group</b><small>En ligne</small></div></div>
-          <div class="ia-fenetre__fil" data-demo>
-            <p class="ia-bulle ia-bulle--moi" data-texte="Combien coûte un agent de sécurité la nuit ?"></p>
-            <p class="ia-bulle ia-bulle--robot ia-bulle--saisie"><span></span><span></span><span></span></p>
-            <p class="ia-bulle ia-bulle--robot">Un agent démarre à <b><span data-prix="agent" data-dec="1">22</span> € HT/h</b>, avec <b>+<span data-prix="nuit">10</span> %</b> la nuit (21 h – 6 h). Vacation minimale de 4 heures. Je vous prépare un devis&nbsp;?</p>
-            <p class="ia-bulle ia-bulle--moi" data-texte="Oui, pour 2 agents samedi soir."></p>
-            <p class="ia-bulle ia-bulle--robot ia-bulle--saisie"><span></span><span></span><span></span></p>
-            <p class="ia-bulle ia-bulle--robot">Parfait. Laissez-moi votre numéro&nbsp;: un conseiller vous rappelle dans la foulée.</p>
-          </div>
-          <div class="ia-fenetre__pied"><span>Écrivez votre question…</span><i></i></div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ============ SERVICES ============ -->
   <section class="section ac-offre" id="services" aria-labelledby="services-title">
@@ -300,6 +264,43 @@
           <span class="tuile__txt"><b>Chauffeur + sécurité</b><span>Votre trajet et votre protection, organisés ensemble.</span></span>
           <span class="tuile__lien">Découvrir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
         </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ASSISTANT EN LIGNE ============ -->
+  <section class="section ac-ia" id="assistant-ia" aria-labelledby="ia-title" data-visible="assistant">
+    <div class="container ac-ia__grille">
+      <div class="ac-ia__texte">
+        <p class="kicker">Assistant en ligne · 24h/24</p>
+        <h2 class="h2" id="ia-title">Une question&nbsp;? Réponse immédiate.</h2>
+        <p class="lead">Tarifs, disponibilités, devis&nbsp;: réponse immédiate, et un conseiller si besoin.</p>
+        <form class="ia-champ" data-assistant-form autocomplete="off">
+          <span class="ia-champ__anneau" aria-hidden="true"></span>
+          <svg class="ia-champ__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <input type="text" name="q" maxlength="300" aria-label="Votre question à l'assistant" placeholder="Posez votre question…" data-exemples="Combien coûte un agent de nuit ?|Vous êtes disponibles ce week-end ?|Il me faut 2 agents pour un gala|Un chauffeur pour Orly demain matin ?">
+          <button type="submit" aria-label="Envoyer la question"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+        </form>
+        <div class="ia-puces">
+          <button type="button" data-assistant data-question="Quels sont vos tarifs ?">Vos tarifs</button>
+          <button type="button" data-assistant data-question="Pouvez-vous intervenir en urgence ce soir ?">Urgence ce soir</button>
+          <button type="button" data-assistant data-question="Je cherche des agents pour un événement">Un événement</button>
+          <button type="button" data-assistant data-question="Je voudrais parler à un conseiller">Parler à un conseiller</button>
+        </div>
+      </div>
+      <div class="ac-ia__demo" aria-hidden="true">
+        <div class="ia-fenetre">
+          <div class="ia-fenetre__tete"><img src="assets/img/ecusson-petit.png?v=3" alt="" width="200" height="204"><div><b>Assistant BDA Security Group</b><small>En ligne</small></div></div>
+          <div class="ia-fenetre__fil" data-demo>
+            <p class="ia-bulle ia-bulle--moi" data-texte="Combien coûte un agent de sécurité la nuit ?"></p>
+            <p class="ia-bulle ia-bulle--robot ia-bulle--saisie"><span></span><span></span><span></span></p>
+            <p class="ia-bulle ia-bulle--robot">Un agent démarre à <b><span data-prix="agent" data-dec="1">22</span> € HT/h</b>, avec <b>+<span data-prix="nuit">10</span> %</b> la nuit (21 h – 6 h). Vacation minimale de 4 heures. Je vous prépare un devis&nbsp;?</p>
+            <p class="ia-bulle ia-bulle--moi" data-texte="Oui, pour 2 agents samedi soir."></p>
+            <p class="ia-bulle ia-bulle--robot ia-bulle--saisie"><span></span><span></span><span></span></p>
+            <p class="ia-bulle ia-bulle--robot">Parfait. Laissez-moi votre numéro&nbsp;: un conseiller vous rappelle dans la foulée.</p>
+          </div>
+          <div class="ia-fenetre__pied"><span>Écrivez votre question…</span><i></i></div>
+        </div>
       </div>
     </div>
   </section>

@@ -79,7 +79,7 @@
     mesurer();
     window.addEventListener('resize', mesurer);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(mesurer);
-  }
+  } else document.documentElement.style.setProperty('--garanties-h', '0px');
 
   /* ---------- Barre du haut plus compacte une fois la page défilée ---------- */
   const nav = document.querySelector('.nav');

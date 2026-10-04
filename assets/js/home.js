@@ -75,6 +75,31 @@
     });
   }
 
+  /* ---------- Vidéo de fond du premier écran (accueil uniquement) ----------
+     Version téléphone en portrait ou sous 768 px, image fixe si « réduire les animations »
+     ou économie de données, pause quand le premier écran n'est plus visible. */
+  function videoFond() {
+    const fond = document.querySelector('.ac-fond');
+    const v = fond && fond.querySelector('video');
+    if (!v) return;
+    const mobile = window.matchMedia('(max-width: 767px), (orientation: portrait)').matches;
+    const eco = navigator.connection && navigator.connection.saveData;
+    if (reduced || eco) { v.remove(); return; }
+    v.muted = true; v.defaultMuted = true;
+    v.src = 'assets/video/' + (mobile ? 'bda-fond-paris-mobile-720x1280.mp4' : 'bda-fond-paris-1920x1080.mp4') + '?v=1';
+    v.addEventListener('playing', () => v.classList.add('is-on'), { once: true });
+    let visible = true;
+    const jouer = () => { if (!visible || document.hidden || !v.paused) return; const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+    v.addEventListener('canplay', jouer);
+    document.addEventListener('visibilitychange', jouer);
+    // iPhone en économie d'énergie : la lecture automatique peut être bloquée jusqu'au premier geste
+    ['touchstart', 'pointerdown', 'scroll'].forEach((ev) => window.addEventListener(ev, jouer, { once: true, passive: true }));
+    jouer();
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) jouer(); else v.pause(); }).observe(fond);
+    }
+  }
+
   /* ---------- Manifeste : les mots s'allument au scroll ---------- */
   function manifesto() {
     const text = document.querySelector('[data-words]');
@@ -233,6 +258,7 @@
     setTimeout(lancer, 1200);
   }
 
+  videoFond();
   telephone();
   marquees();
   reviewsBand();

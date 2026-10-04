@@ -1630,3 +1630,22 @@ body:has(.lp-hero) .nav:not(.is-compact) .nav__survol { background: rgba(255, 25
 
 /* Accueil, « Nos services » : cartes sur deux colonnes, sans grand bloc noir */
 @media (min-width: 601px) { #services .tuiles { grid-template-columns: 1fr 1fr; grid-auto-rows: minmax(210px, auto); } }
+
+/* =========================================================
+   ACCUEIL — VIDÉO DE FOND (Paris de nuit), à la place de la photo
+   Étalonnage léger à l'affichage (noirs plus profonds, doré plus riche),
+   voile sombre pour la lisibilité, grain cinéma existant par-dessus.
+   ========================================================= */
+.ac-hero--video::before { display: none !important; animation: none !important; }
+.ac-fond { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #050608 url("../video/bda-fond-paris-poster.jpg?v=1") center / cover no-repeat; filter: contrast(1.12) brightness(0.97) saturate(1.12) sepia(0.06); }
+.ac-fond__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.2s ease; }
+.ac-fond__video.is-on { opacity: 1; }
+.ac-hero--video::after {
+  background: linear-gradient(90deg, rgba(5, 6, 8, 0.86) 0%, rgba(5, 6, 8, 0.62) 42%, rgba(5, 6, 8, 0.26) 78%, rgba(5, 6, 8, 0.36) 100%),
+              linear-gradient(180deg, rgba(5, 6, 8, 0.32) 0%, rgba(5, 6, 8, 0) 30%, rgba(5, 6, 8, 0) 62%, rgba(5, 6, 8, 0.86) 100%) !important;
+}
+@media (max-width: 767px), (orientation: portrait) {
+  .ac-fond { background-image: url("../video/bda-fond-paris-mobile-poster.jpg?v=1"); }
+  .ac-hero--video::after { background: linear-gradient(0deg, rgba(5, 6, 8, 0.92) 0%, rgba(5, 6, 8, 0.74) 50%, rgba(5, 6, 8, 0.58) 100%) !important; }
+}
+.ac-hero--video .lead, .ac-hero--video .ac-hero__sur, .ac-hero--video .ac-preuves b { text-shadow: 0 1px 14px rgba(0, 0, 0, 0.7); }

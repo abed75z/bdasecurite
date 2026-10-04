@@ -3,7 +3,7 @@
    Carte au format carte bancaire (85,6 × 54 mm), recto et verso,
    photo recadrable, impression sur A4 (à découper) ou en format carte.
    ========================================================= */
-import { api, h, icone, ecusson, toast, erreur, confirmer, champ, saisie, zoneTexte } from './outils.js';
+import { api, h, icone, ecusson, marqueLogo, toast, erreur, confirmer, champ, saisie, zoneTexte } from './outils.js';
 import { enregistreurAuto, ajusterEchelle, imprimerPages } from './creations.js';
 import { telechargerPages } from './pdf.js';
 
@@ -15,7 +15,7 @@ export const CARTE_DEFAUT = {
   photo: '', zoom: 1, px: 50, py: 35,
   type: 'AGENT', labelNumero: 'N° carte pro CNAPS', zone: 'Paris & Île-de-France', dispo: '24/7',
   verso: true,
-  texteVerso: 'Cette carte est strictement personnelle et reste la propriété de BDA Security Group. En cas de perte, merci de nous la retourner.',
+  texteVerso: 'Cette carte est strictement personnelle et reste la propriété de BDA Security Group (BDASECURITE). En cas de perte, merci de nous la retourner.',
   autorisation: 'Autorisation d\'exercice CNAPS n° AUT-075-2124-07-01-20250906336',
   legal: '« L\'autorisation d\'exercice ne confère aucune prérogative de puissance publique à l\'entreprise ou aux personnes qui en bénéficient. » Art. L.612-14 du Code de la sécurité intérieure.',
   contact: '06 11 67 86 25 · bdasecurite.com',
@@ -31,7 +31,7 @@ export function recto(d) {
   return h('div', { class: 'cp cp--recto' },
     h('div', { class: 'cp__haut' },
       ecusson('cp__logo'),
-      h('div', { class: 'cp__marque' }, h('b', null, 'BDA SECURITY GROUP'), h('small', null, 'Sécurité privée · Chauffeur privé')),
+      h('div', { class: 'cp__marque' }, marqueLogo('', true)),
       h('div', { class: 'cp__type' }, h('small', null, 'Carte'), h('b', null, d.type || 'AGENT'))),
     h('div', { class: 'cp__filet' }),
     h('div', { class: 'cp__corps' },
@@ -45,8 +45,8 @@ export function recto(d) {
 export function verso(d) {
   return h('div', { class: 'cp cp--verso' },
     h('div', { class: 'cp__cadre' },
-      h('div', { class: 'cp__verso-marque' }, ecusson('cp__logo'), h('div', null, h('b', null, 'BDA SECURITY GROUP'), h('small', null, 'Sécurité privée · Chauffeur privé'))),
-      h('p', { class: 'cp__verso-texte' }, d.texteVerso),
+      h('div', { class: 'cp__verso-marque' }, ecusson('cp__logo'), marqueLogo()),
+      h('p', { class: 'cp__verso-texte' }, String(d.texteVerso || '').replace(/BDA S[ée]curit[ée](?: (?:&|et) VTC Premium)?/g, 'BDA Security Group (BDASECURITE)')),
       h('p', { class: 'cp__verso-aut' }, d.autorisation),
       h('p', { class: 'cp__verso-legal' }, d.legal),
       h('div', { class: 'cp__verso-pied' }, h('span', null, d.contact), h('span', { class: 'cp__signature' }, 'Signature du titulaire'))));

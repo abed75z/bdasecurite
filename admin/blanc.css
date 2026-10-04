@@ -370,3 +370,47 @@ table th { color: var(--muted) !important; }
 /* Titres : Manrope épais, comme sur le site */
 .auth__marque b, .cote__marque b, .bienvenue h2, .etat-site__txt h2, .poste h2, .assist-tete h2 { font-family: var(--serif) !important; font-weight: 800 !important; letter-spacing: -0.03em !important; }
 .carte__tete h2, .page h1, .haut h1 { font-family: var(--serif); font-weight: 800; letter-spacing: -0.025em; }
+
+/* =========================================================
+   Nom « BDA / SECURITY GROUP » avec les lettres du logo
+   (cartes agents, cartes de visite, flyers ; images = rendu identique en PDF)
+   ========================================================= */
+.marque-logo { display: inline-flex; flex-direction: column; align-items: center; line-height: 0; }
+.marque-logo img { display: block; height: auto; max-width: none; }
+/* carte agent : bandeau du recto */
+.cp__marque .marque-logo { gap: 0.9mm; }
+.cp__marque .marque-logo__bda { width: 15mm; }
+.cp__marque .marque-logo__sg { width: 26.4mm; }
+/* carte agent : verso */
+.cp__verso-marque .marque-logo { gap: 0.7mm; }
+.cp__verso-marque .marque-logo__bda { width: 11.5mm; }
+.cp__verso-marque .marque-logo__sg { width: 20.2mm; }
+/* carte de visite : recto */
+.cv__marque-logo { gap: 1.5mm; margin-top: 0.6mm; }
+.cv__marque-logo .marque-logo__bda { width: 27mm; }
+.cv__marque-logo .marque-logo__sg { width: 47.4mm; }
+/* flyer */
+.fl__marque .marque-logo { gap: 2.2mm; }
+.fl__marque .marque-logo__bda { width: 38mm; }
+.fl__marque .marque-logo__sg { width: 66.8mm; }
+/* Titre du flyer : même style que la phrase du site (gras, sans empattement), une phrase par ligne */
+.fl__titre { font-family: "Manrope", "Inter", system-ui, sans-serif; font-weight: 800; font-size: 8.2mm; line-height: 1.14; letter-spacing: -0.035em; }
+.fl__t1, .fl__t2 { color: #0b0b0c; white-space: nowrap; }
+
+/* ---------- Zones de la marque en noir, comme le haut du site ---------- */
+/* carte agent : bandeau du haut */
+.cp__haut { background: radial-gradient(40mm 20mm at 85% 0%, rgba(201, 173, 122, 0.16), transparent 70%), #0b0b0c; }
+.cp__type small { color: #a7a39b; }
+.cp__type b { color: #f6f2ea; }
+.cp__filet { background: linear-gradient(90deg, #8a6c3c, #dcc391 50%, #8a6c3c); }
+/* carte de visite : recto noir, liseré doré */
+.cv--recto { color: #f6f2ea; background: radial-gradient(60mm 40mm at 50% 0%, rgba(201, 173, 122, 0.2), transparent 65%), #0b0b0c; }
+.cv--recto::after { border: 0.25mm solid rgba(201, 173, 122, 0.5); }
+.cv__filet { background: linear-gradient(90deg, transparent, #c4a472, transparent); }
+.cv__zone { color: #a7a39b; }
+/* flyer : en-tête noir, titre en blanc */
+.fl__hero { color: #f6f2ea; background: radial-gradient(130mm 90mm at 100% 0%, rgba(201, 173, 122, 0.18), transparent 62%), #0b0b0c; }
+.fl__t1, .fl__t2 { color: #ffffff; }
+.fl__intro { color: #c9c3b8; }
+.fl__secteur { border: 0.35mm solid rgba(220, 195, 145, 0.55); color: #f6f2ea; }
+.fl__filet { background: linear-gradient(90deg, #8a6c3c, #dcc391 50%, #8a6c3c); }

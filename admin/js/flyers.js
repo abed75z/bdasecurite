@@ -3,7 +3,7 @@
    Flyer A4 aux couleurs BDA : chaque texte se modifie au clic,
    sections masquables, QR code généré, impression A4 ou A5.
    ========================================================= */
-import { api, h, icone, ecusson, toast, erreur, confirmer, champ, saisie, dateLisible } from './outils.js';
+import { api, h, icone, ecusson, marqueLogo, toast, erreur, confirmer, champ, saisie, dateLisible } from './outils.js';
 import { enregistreurAuto, editable, ajusterEchelle, imprimerPages } from './creations.js';
 import { qrSvg } from './qr.js';
 import { telechargerPages } from './pdf.js';
@@ -13,8 +13,8 @@ const ICONES = ['bouclier', 'voiture', 'etoile', 'couronne', 'cle', 'camera', 'o
 export const FLYER_DEFAUT = {
   nom: 'Flyer BDA',
   format: 'A4',
-  titre1: 'Votre sécurité,',
-  titre2: 'en première classe.',
+  titre1: 'Votre confiance, notre priorité.',
+  titre2: 'Votre tranquillité, notre engagement.',
   intro: 'Gardiennage, surveillance et chauffeurs privés à Paris et en Île-de-France. Un seul interlocuteur, discret, ponctuel et élégant.',
   secteurs: ['Commerces', 'Hôtels', 'Entreprises', 'Événements'],
   kicker: 'Ce que nous faisons pour vous',
@@ -36,13 +36,16 @@ export const FLYER_DEFAUT = {
   tel2Label: 'WhatsApp', tel2: '07 84 73 90 70',
   infos: 'bdasecurite.com     bdasecurite@gmail.com     Paris & Île-de-France',
   qr: 'https://bdasecurite.com/devis', qrTitre: 'Scannez-moi', qrSous: 'Devis en 2 minutes',
-  pied: 'BDA Security Group — EURL · SIRET 109 076 463 00016 · Autorisation CNAPS n° AUT-075-2124-07-01-20250906336\n« L\'autorisation d\'exercice ne confère aucune prérogative de puissance publique à l\'entreprise ou aux personnes qui en bénéficient. » (art. L612-14 CSI)',
+  pied: 'BDA Security Group — BDASECURITE, EURL · SIRET 109 076 463 00016 · Autorisation CNAPS n° AUT-075-2124-07-01-20250906336\n« L\'autorisation d\'exercice ne confère aucune prérogative de puissance publique à l\'entreprise ou aux personnes qui en bénéficient. » (art. L612-14 CSI)',
   afficher: { secteurs: true, chiffres: true, reference: true, qr: true },
 };
 const copie = (o) => JSON.parse(JSON.stringify(o));
 function completer(data) {
   const d = { ...copie(FLYER_DEFAUT), ...data };
   d.afficher = { ...FLYER_DEFAUT.afficher, ...(data.afficher || {}) };
+  // flyers déjà enregistrés : ancien titre et ancienne ligne légale remplacés
+  if (d.titre1 === 'Votre sécurité,' && d.titre2 === 'en première classe.') { d.titre1 = FLYER_DEFAUT.titre1; d.titre2 = FLYER_DEFAUT.titre2; }
+  d.pied = String(d.pied || '').replace(/^BDA (?:Sécurité & VTC Premium|Security Group) — EURL/, 'BDA Security Group — BDASECURITE, EURL');
   return d;
 }
 
@@ -60,7 +63,7 @@ export function flyer(d, surChange = null) {
 
   return h('article', { class: `fl ${mod ? 'fl--modifiable' : ''}` },
     h('header', { class: 'fl__hero' },
-      h('div', { class: 'fl__marque' }, ecusson('fl__logo'), h('div', null, h('b', null, 'BDA SECURITY GROUP'), h('small', null, 'Sécurité privée · Chauffeur privé'))),
+      h('div', { class: 'fl__marque' }, ecusson('fl__logo'), marqueLogo('', true)),
       h('h1', { class: 'fl__titre' }, t('span', 'fl__t1', d, 'titre1', 'Titre'), t('span', 'fl__t2', d, 'titre2', 'Suite du titre')),
       t('p', 'fl__intro', d, 'intro', 'Texte de présentation'),
       d.afficher.secteurs ? h('div', { class: 'fl__secteurs' }, d.secteurs.map((_, i) => t('span', 'fl__secteur', d.secteurs, i, 'Secteur'))) : null),

@@ -140,6 +140,13 @@ export function icone(nom, cls = '') {
   return svg;
 }
 // Écusson « BDA » : le logo officiel (même image sur le site, les cartes agents et les flyers)
+// Nom « BDA / SECURITY GROUP » avec les lettres du logo (images : elles passent aussi dans les PDF)
+// sombre = true : version fond noir, identique au haut du site (BDA blanc, SECURITY GROUP doré clair)
+export function marqueLogo(cls = '', sombre = false) {
+  return h('span', { class: `marque-logo ${cls}`.trim(), role: 'img', 'aria-label': 'BDA Security Group' },
+    h('img', { class: 'marque-logo__bda', src: sombre ? '/assets/img/marque-bda-blanc.png?v=1' : '/assets/img/marque-bda-noir.png?v=1', alt: '' }),
+    h('img', { class: 'marque-logo__sg', src: sombre ? '/assets/img/marque-sg-or-clair.png?v=1' : '/assets/img/marque-sg-or.png?v=1', alt: '' }));
+}
 export function ecusson(cls = '') {
   const img = document.createElement('img');
   img.src = '/assets/img/embleme-hd.png?v=3';

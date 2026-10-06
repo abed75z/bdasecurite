@@ -314,6 +314,48 @@
     });
   }
 
+  /* ---------- Bouton « Se connecter » : espace client ou espace équipe ---------- */
+  function connexion() {
+    const btn = document.querySelector('.nav__client');
+    if (!btn) return;
+    const en = root.lang === 'en';
+    const T = en
+      ? { titre: 'Sign in', client: ['Client area', 'Quotes, invoices, messages'], equipe: ['Team area', 'Officers & drivers: schedule, payslips, leave'] }
+      : { titre: 'Se connecter', client: ['Espace client', 'Devis, factures, messages'], equipe: ['Espace équipe', 'Agents & chauffeurs : planning, paie, congés'] };
+    const ico = {
+      client: '<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/>',
+      equipe: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+    };
+    const choix = (cle, href) => `<a class="cx-pop__choix" href="${href}" role="menuitem"><span class="cx-pop__ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ico[cle]}</svg></span><span class="cx-pop__txt"><b>${T[cle][0]}</b><small>${T[cle][1]}</small></span><svg class="cx-pop__fl" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>`;
+    const pop = document.createElement('div');
+    pop.className = 'cx-pop';
+    pop.id = 'cx-pop';
+    pop.setAttribute('role', 'menu');
+    pop.innerHTML = `<p class="cx-pop__titre">${T.titre}</p>${choix('client', 'espace-client')}${choix('equipe', 'espace-equipe')}`;
+    btn.after(pop);
+    btn.setAttribute('aria-label', T.titre);
+    btn.setAttribute('aria-haspopup', 'menu');
+    btn.setAttribute('aria-controls', 'cx-pop');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.title = T.titre;
+    const label = btn.querySelector('span');
+    if (label) label.textContent = T.titre;
+    const ouvrir = (o) => {
+      pop.classList.toggle('is-open', o);
+      btn.setAttribute('aria-expanded', String(o));
+      if (o) document.querySelector('.nav')?.classList.remove('is-hidden');
+    };
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const o = !pop.classList.contains('is-open');
+      ouvrir(o);
+      if (o) pop.querySelector('a')?.focus({ preventScroll: true });
+    });
+    document.addEventListener('click', (e) => { if (!e.target.closest('.cx-pop')) ouvrir(false); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && pop.classList.contains('is-open')) { ouvrir(false); btn.focus(); } });
+  }
+
   /* ---------- Menus déroulants du haut (Sécurité, VTC) ---------- */
   function menusDeroulants() {
     const menus = [...document.querySelectorAll('.nav__drop')];
@@ -589,6 +631,7 @@
   reglagesSite();
   navigation();
   menusDeroulants();
+  connexion();
   reveal();
   effets();
   misc();

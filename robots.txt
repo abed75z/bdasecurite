@@ -4,5 +4,6 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
+Disallow: /espace-equipe
 
 Sitemap: https://bdasecurite.com/sitemap.xml

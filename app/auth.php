@@ -57,6 +57,8 @@ const ACTIONS_ADMIN = [
   // Fiches de paie : salaires et n° de sécurité sociale, réservés au gérant
   'paie.parametres', 'paie.parametres.enregistrer', 'paie.salaries', 'paie.salarie.enregistrer',
   'paie.bulletins', 'paie.bulletin', 'paie.bulletin.enregistrer', 'paie.bulletin.supprimer',
+  // Fiches de paie déposées dans l'Espace équipe, suppression d'un compte agent
+  'equipe.paie.ajouter', 'equipe.paie.fichier', 'equipe.paie.supprimer', 'equipe.compte.supprimer',
 ];
 function utilisateur_courant(): ?array
 {

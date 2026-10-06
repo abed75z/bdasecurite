@@ -27,7 +27,12 @@ const STATUTS = [
   'reservation' => ['attente', 'confirmee', 'terminee', 'annulee'],
 ];
 // Documents d'un agent (les 5 premiers sont obligatoires)
-const DOC_TYPES = ['identite', 'carte_pro', 'diplome_aps', 'secu', 'rib', 'certif', 'attestation', 'cv', 'dossier', 'autre'];
+const DOC_TYPES = ['identite', 'carte_pro', 'diplome_aps', 'secu', 'rib', 'certif', 'attestation', 'cv', 'dossier', 'autre', 'contrat', 'carte_vtc', 'permis', 'assurance', 'justificatif'];
+// Documents qu'un agent voit d'office dans son Espace équipe (les autres : seulement si l'admin les rend visibles)
+const DOC_VISIBLES_AGENT = ['contrat', 'carte_pro', 'diplome_aps', 'certif', 'attestation', 'carte_vtc', 'permis', 'assurance'];
+// Espace équipe : poste créé à la validation d'un compte, code écrit au planning pour une absence acceptée
+const EQ_POSTE_METIER = ['securite' => 'ADS', 'ssiap' => 'SSIAP', 'chauffeur' => 'Chauffeur VTC'];
+const EQ_CODE_ABSENCE = ['conges' => 'CP', 'maladie' => 'M', 'absence' => 'ABS', 'indispo' => 'R'];
 
 /* ---------- Réponses JSON ---------- */
 function repondre(array $data, int $code = 200): void
@@ -223,6 +228,72 @@ function schema(PDO $db): void
       PRAGMA user_version = 13;
     SQL);
   }
+  if ($version < 14) {
+    // Espace équipe (agents de sécurité et chauffeurs) : comptes créés sur le site et validés dans l'admin,
+    // appareils mémorisés, fiches de paie déposées, absences, main courante, consignes
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS comptes_equipe (id INTEGER PRIMARY KEY, agent_id INTEGER NOT NULL DEFAULT 0, identifiant TEXT NOT NULL UNIQUE COLLATE NOCASE, email TEXT NOT NULL COLLATE NOCASE, prenom TEXT NOT NULL, nom TEXT NOT NULL, tel TEXT NOT NULL DEFAULT '', metier TEXT NOT NULL DEFAULT 'securite', hash TEXT NOT NULL, statut TEXT NOT NULL DEFAULT 'attente', echecs INTEGER NOT NULL DEFAULT 0, bloque_jusqu TEXT NOT NULL DEFAULT '', reset TEXT NOT NULL DEFAULT '', reset_expire TEXT NOT NULL DEFAULT '', derniere TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL, valide TEXT NOT NULL DEFAULT '');
+      CREATE TABLE IF NOT EXISTS equipe_appareils (id INTEGER PRIMARY KEY, compte_id INTEGER NOT NULL, jeton TEXT NOT NULL UNIQUE, appareil TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL, vu TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS equipe_paies (id INTEGER PRIMARY KEY, agent_id INTEGER NOT NULL, mois TEXT NOT NULL, titre TEXT NOT NULL, fichier TEXT NOT NULL, nom TEXT NOT NULL, taille INTEGER NOT NULL, ajoute TEXT NOT NULL, vu TEXT NOT NULL DEFAULT '');
+      CREATE TABLE IF NOT EXISTS absences (id INTEGER PRIMARY KEY, agent_id INTEGER NOT NULL, type TEXT NOT NULL, du TEXT NOT NULL, au TEXT NOT NULL, motif TEXT NOT NULL DEFAULT '', justificatif INTEGER NOT NULL DEFAULT 0, statut TEXT NOT NULL DEFAULT 'attente', reponse TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL, traite TEXT NOT NULL DEFAULT '');
+      CREATE TABLE IF NOT EXISTS main_courante (id INTEGER PRIMARY KEY, agent_id INTEGER NOT NULL, quand TEXT NOT NULL, site TEXT NOT NULL DEFAULT '', categorie TEXT NOT NULL, gravite TEXT NOT NULL DEFAULT 'normale', texte TEXT NOT NULL, photos TEXT NOT NULL DEFAULT '[]', statut TEXT NOT NULL DEFAULT 'nouveau', commentaire TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS consignes (id INTEGER PRIMARY KEY, agent_id INTEGER NOT NULL DEFAULT 0, texte TEXT NOT NULL, cree TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_paies ON equipe_paies (agent_id, mois);
+      CREATE INDEX IF NOT EXISTS i_absences ON absences (agent_id, statut);
+      CREATE INDEX IF NOT EXISTS i_mc ON main_courante (agent_id, statut);
+      ALTER TABLE agents ADD COLUMN profil TEXT NOT NULL DEFAULT '{}';
+      ALTER TABLE agent_docs ADD COLUMN visible INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE agent_docs ADD COLUMN source TEXT NOT NULL DEFAULT 'admin';
+      UPDATE agent_docs SET visible = 1 WHERE type IN ('contrat', 'carte_pro', 'diplome_aps', 'certif', 'attestation', 'carte_vtc', 'permis', 'assurance');
+      PRAGMA user_version = 14;
+    SQL);
+  }
+}
+// Dossier privé des documents des agents (dans le stockage hors du site)
+function dossier_docs(): string
+{
+  $dir = dossier_donnees() . '/agents';
+  if (!is_dir($dir) && !@mkdir($dir, 0700, true)) echec('Espace de stockage indisponible.', 500);
+  return $dir;
+}
+// Vrai format du fichier, lu dans son contenu (pas dans son nom)
+function type_fichier(string $chemin): string
+{
+  $debut = (string)file_get_contents($chemin, false, null, 0, 16);
+  if (strncmp($debut, '%PDF', 4) === 0) return 'application/pdf';
+  if (strncmp($debut, "\x89PNG", 4) === 0) return 'image/png';
+  if (strncmp($debut, "\xFF\xD8\xFF", 3) === 0) return 'image/jpeg';
+  if (strncmp($debut, 'RIFF', 4) === 0 && substr($debut, 8, 4) === 'WEBP') return 'image/webp';
+  return '';
+}
+// Taille maximale d'un envoi acceptée par l'hébergement (en octets)
+function limite_envoi(): int
+{
+  $octets = function (string $v): int {
+    $n = (int)$v;
+    $u = strtolower(substr(trim($v), -1));
+    return $u === 'g' ? $n * 1073741824 : ($u === 'm' ? $n * 1048576 : ($u === 'k' ? $n * 1024 : $n));
+  };
+  return min($octets((string)ini_get('upload_max_filesize')), $octets((string)ini_get('post_max_size'))) ?: 2097152;
+}
+// Nom sans accents ni casse, pour reconnaître un agent dans le planning
+function nom_simple(string $s): string
+{
+  $s = mb_strtolower(trim($s), 'UTF-8');
+  $s = strtr($s, ['à' => 'a', 'â' => 'a', 'ä' => 'a', 'á' => 'a', 'ç' => 'c', 'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e', 'î' => 'i', 'ï' => 'i', 'í' => 'i', 'ô' => 'o', 'ö' => 'o', 'ó' => 'o', 'ù' => 'u', 'û' => 'u', 'ü' => 'u', 'ú' => 'u', 'ÿ' => 'y', 'ñ' => 'n', '-' => ' ', '\'' => ' ']);
+  return (string)preg_replace('/\s+/', ' ', $s);
+}
+// Ligne d'un agent dans le planning d'un mois (reconnu par son numéro, sinon par son nom)
+function ligne_planning(array $p, array $agent): ?array
+{
+  foreach ((array)($p['agents'] ?? []) as $a) {
+    if ((int)($a['id'] ?? 0) === (int)$agent['id']) return $a;
+  }
+  $cle = nom_simple((string)$agent['nom']);
+  foreach ((array)($p['agents'] ?? []) as $a) {
+    if (empty($a['id']) && nom_simple((string)($a['nom'] ?? '')) === $cle) return $a;
+  }
+  return null;
 }
 // Pointage : agent reconnu par son lien personnel (null si lien inconnu ou agent inactif)
 function agent_par_lien(string $jeton): ?array

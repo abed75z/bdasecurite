@@ -11,6 +11,7 @@ import { pagePlanning } from './planning.js';
 import { pagePaie } from './paie.js';
 import { pageEnvois } from './envois.js';
 import { pagePointage } from './pointage.js';
+import { pageEquipe } from './equipe.js';
 import { pageCartes } from './cartes.js';
 import { pageFlyers } from './flyers.js';
 import { pageVisites } from './visites.js';
@@ -30,6 +31,7 @@ export const PAGES = {
   factures: (ctx) => (ctx.params[0] ? editeurDocument(ctx, 'facture', ctx.params[0]) : listeDocuments(ctx, 'facture')),
   planning: pagePlanning,
   pointage: pagePointage,
+  equipe: pageEquipe,
   paie: pagePaie,
   pdf: pageEnvois,
   clients: pageClients,

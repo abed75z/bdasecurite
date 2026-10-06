@@ -14,6 +14,11 @@ export const DOCS = [
   { type: 'rib', libelle: 'RIB', obligatoire: true },
   { type: 'certif', libelle: 'Certifications (SST, Vigipirate…)' },
   { type: 'attestation', libelle: 'Attestations' },
+  { type: 'contrat', libelle: 'Contrat de travail' },
+  { type: 'carte_vtc', libelle: 'Carte VTC' },
+  { type: 'permis', libelle: 'Permis de conduire' },
+  { type: 'assurance', libelle: 'Assurance' },
+  { type: 'justificatif', libelle: 'Justificatifs (absences)' },
   { type: 'cv', libelle: 'CV' },
   { type: 'dossier', libelle: 'Dossier complet (PDF)' },
   { type: 'autre', libelle: 'Autres documents' },
@@ -139,7 +144,11 @@ async function ficheAgent(ctx, id) {
     return h('div', { class: 'fichier' },
       h('a', { class: 'fichier__apercu', href: lien(d), target: '_blank', rel: 'noopener', title: 'Ouvrir' },
         d.mime.startsWith('image/') ? h('img', { src: lien(d), alt: '', loading: 'lazy' }) : h('span', { class: 'fichier__pdf' }, 'PDF')),
-      h('div', { class: 'fichier__txt' }, h('a', { href: lien(d), target: '_blank', rel: 'noopener' }, d.nom), h('small', null, `${Math.max(1, Math.round(d.taille / 1024))} Ko · ajouté le ${dateLisible(d.ajoute)}`), choix),
+      h('div', { class: 'fichier__txt' }, h('a', { href: lien(d), target: '_blank', rel: 'noopener' }, d.nom), h('small', null, `${Math.max(1, Math.round(d.taille / 1024))} Ko · ajouté le ${dateLisible(d.ajoute)}${d.source === 'agent' ? ' · envoyé par l’agent' : ''}`), choix),
+      // Visible dans l'Espace équipe de l'agent (contrat, carte pro, attestations… ; jamais par défaut pour le reste)
+      d.source === 'agent' ? null : h('button', { class: `icon-btn ${+d.visible ? 'is-actif' : ''}`, type: 'button', title: +d.visible ? 'Visible dans l’Espace équipe de l’agent (cliquer pour masquer)' : 'Masqué pour l’agent (cliquer pour le lui montrer)', 'aria-pressed': +d.visible ? 'true' : 'false', style: +d.visible ? { color: 'var(--gold)' } : { opacity: 0.45 }, onclick: async () => {
+        try { await api('equipe.doc.visible', { id: d.id, visible: !+d.visible }); d.visible = +d.visible ? 0 : 1; toast(+d.visible ? 'Document visible dans l’Espace équipe de l’agent.' : 'Document masqué pour l’agent.'); dessinerDocs(); } catch (e) { erreur(e); }
+      } }, icone('oeil')),
       h('button', { class: 'icon-btn', type: 'button', 'aria-label': 'Supprimer ce document', onclick: async () => {
         if (!(await confirmer(`Supprimer « ${d.nom} » ?`, { ok: 'Supprimer', danger: true }))) return;
         try { await api('agent.doc.supprimer', { id: d.id }); await recharger(); } catch (e) { erreur(e); }

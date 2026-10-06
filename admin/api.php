@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -638,7 +638,7 @@ try {
 
     /* ----- Documents des agents (pièces d'identité, cartes pro…) : fichiers privés, hors du site ----- */
     case 'agent.docs':
-      $st = db()->prepare('SELECT id, type, nom, mime, taille, ajoute FROM agent_docs WHERE agent_id = ? ORDER BY type, nom');
+      $st = db()->prepare('SELECT id, type, nom, mime, taille, ajoute, visible, source FROM agent_docs WHERE agent_id = ? ORDER BY type, nom');
       $st->execute([(int)($_GET['agent'] ?? 0)]);
       repondre(['ok' => true, 'docs' => $st->fetchAll(), 'limite' => limite_envoi()]);
 
@@ -693,6 +693,178 @@ try {
       if ($f !== '') @unlink(dossier_docs() . '/' . basename($f));
       supprimer_ligne('agent_docs', $id);
 
+    /* ================= Espace équipe (comptes des agents, fiches, absences, main courante) ================= */
+    case 'equipe':
+      $q = fn(string $sql) => db()->query($sql)->fetchAll();
+      $comptes = $q("SELECT ce.id, ce.agent_id, ce.identifiant, ce.email, ce.prenom, ce.nom, ce.tel, ce.metier, ce.statut, ce.derniere, ce.cree, ce.valide, a.nom AS agent_nom,
+        (SELECT COUNT(*) FROM equipe_appareils ea WHERE ea.compte_id = ce.id) AS appareils FROM comptes_equipe ce LEFT JOIN agents a ON a.id = ce.agent_id ORDER BY (ce.statut = 'attente') DESC, ce.cree DESC");
+      $absences = $q("SELECT ab.*, a.nom AS agent_nom FROM absences ab LEFT JOIN agents a ON a.id = ab.agent_id ORDER BY (ab.statut = 'attente') DESC, ab.du DESC LIMIT 300");
+      $mc = $q("SELECT m.id, m.agent_id, m.quand, m.site, m.categorie, m.gravite, m.texte, m.photos, m.statut, m.commentaire, m.cree, a.nom AS agent_nom FROM main_courante m LEFT JOIN agents a ON a.id = m.agent_id ORDER BY (m.statut = 'nouveau') DESC, m.quand DESC LIMIT 300");
+      foreach ($mc as &$m) $m['photos'] = count(json_decode((string)$m['photos'], true) ?: []);
+      unset($m);
+      $paies = role_courant() === 'admin' ? $q('SELECT p.id, p.agent_id, p.mois, p.titre, p.taille, p.ajoute, p.vu, a.nom AS agent_nom FROM equipe_paies p LEFT JOIN agents a ON a.id = p.agent_id ORDER BY p.mois DESC, a.nom LIMIT 500') : null;
+      repondre(['ok' => true, 'comptes' => $comptes, 'absences' => $absences, 'mainCourante' => $mc, 'paies' => $paies,
+        'consignes' => $q('SELECT c.*, a.nom AS agent_nom FROM consignes c LEFT JOIN agents a ON a.id = c.agent_id ORDER BY c.id DESC LIMIT 100'),
+        'agents' => $q('SELECT id, nom, poste, actif, profil FROM agents ORDER BY actif DESC, nom COLLATE NOCASE'), 'limite' => limite_envoi()]);
+
+    case 'equipe.compte.valider':
+      $b = corps();
+      $c = eq_compte_admin((int)($b['id'] ?? 0));
+      $agentId = (int)($b['agent_id'] ?? 0);
+      if ($agentId) {
+        $st = db()->prepare('SELECT id FROM agents WHERE id = ?');
+        $st->execute([$agentId]);
+        if (!$st->fetchColumn()) echec('Agent introuvable.', 404);
+        $pris = db()->prepare("SELECT prenom || ' ' || nom FROM comptes_equipe WHERE agent_id = ? AND id <> ? AND statut IN ('actif', 'bloque')");
+        $pris->execute([$agentId, $c['id']]);
+        if ($autre = $pris->fetchColumn()) echec("Cette fiche agent est déjà reliée au compte de $autre.", 409);
+        db()->prepare("UPDATE agents SET actif = 1, tel = CASE WHEN tel = '' THEN ? ELSE tel END WHERE id = ?")->execute([$c['tel'], $agentId]);
+      } else {
+        db()->prepare('INSERT INTO agents (nom, poste, tel, actif, cree) VALUES (?, ?, ?, 1, ?)')->execute([$c['prenom'] . ' ' . $c['nom'], EQ_POSTE_METIER[$c['metier']] ?? 'ADS', $c['tel'], maintenant()]);
+        $agentId = (int)db()->lastInsertId();
+      }
+      db()->prepare("UPDATE comptes_equipe SET statut = 'actif', agent_id = ?, valide = ?, echecs = 0, bloque_jusqu = '' WHERE id = ?")->execute([$agentId, maintenant(), $c['id']]);
+      $mail = envoyer_mail('Votre accès à l’Espace équipe est activé', "Bonjour {$c['prenom']},\n\nBonne nouvelle : la direction a validé votre compte.\nVous pouvez maintenant vous connecter avec votre identifiant « {$c['identifiant']} » et votre mot de passe :\n\nhttps://bdasecurite.com/espace-equipe\n\nVous y trouverez votre planning, vos fiches de paie, vos documents, vos demandes de congés et la main courante.\n\nBienvenue dans l'équipe,\nBDA Security Group", BDA_EMAIL, (string)$c['email']);
+      journal('equipe', "Espace équipe : compte de {$c['prenom']} {$c['nom']} validé");
+      repondre(['ok' => true, 'agent_id' => $agentId, 'email' => $mail]);
+
+    case 'equipe.compte.statut':
+      $b = corps();
+      $c = eq_compte_admin((int)($b['id'] ?? 0));
+      $statut = in_array($b['statut'] ?? '', ['refuse', 'bloque', 'actif'], true) ? (string)$b['statut'] : '';
+      if ($statut === '') echec('Statut inconnu.');
+      if ($statut === 'actif' && !(int)$c['agent_id']) echec('Validez d’abord ce compte.');
+      db()->prepare('UPDATE comptes_equipe SET statut = ?, echecs = 0, bloque_jusqu = \'\' WHERE id = ?')->execute([$statut, $c['id']]);
+      if ($statut !== 'actif') db()->prepare('DELETE FROM equipe_appareils WHERE compte_id = ?')->execute([$c['id']]);
+      journal('equipe', "Espace équipe : compte de {$c['prenom']} {$c['nom']} " . ['refuse' => 'refusé', 'bloque' => 'suspendu', 'actif' => 'réactivé'][$statut]);
+      repondre(['ok' => true]);
+
+    case 'equipe.compte.lier':
+      $b = corps();
+      $c = eq_compte_admin((int)($b['id'] ?? 0));
+      $agentId = (int)($b['agent_id'] ?? 0);
+      $st = db()->prepare('SELECT nom FROM agents WHERE id = ?');
+      $st->execute([$agentId]);
+      $nomAgent = $st->fetchColumn();
+      if (!$nomAgent) echec('Agent introuvable.', 404);
+      db()->prepare('UPDATE comptes_equipe SET agent_id = ? WHERE id = ?')->execute([$agentId, $c['id']]);
+      journal('equipe', "Espace équipe : compte de {$c['prenom']} {$c['nom']} relié à la fiche « $nomAgent »");
+      repondre(['ok' => true]);
+
+    case 'equipe.compte.deconnecter':
+      $c = eq_compte_admin((int)(corps()['id'] ?? 0));
+      db()->prepare('DELETE FROM equipe_appareils WHERE compte_id = ?')->execute([$c['id']]);
+      journal('securite', "Espace équipe : appareils de {$c['prenom']} {$c['nom']} déconnectés");
+      repondre(['ok' => true]);
+
+    case 'equipe.compte.supprimer':
+      $c = eq_compte_admin((int)(corps()['id'] ?? 0));
+      db()->prepare('DELETE FROM equipe_appareils WHERE compte_id = ?')->execute([$c['id']]);
+      db()->prepare('DELETE FROM comptes_equipe WHERE id = ?')->execute([$c['id']]);
+      journal('equipe', "Espace équipe : compte de {$c['prenom']} {$c['nom']} supprimé (la fiche agent est conservée)");
+      repondre(['ok' => true]);
+
+    case 'equipe.paie.ajouter':
+      $agentId = (int)($_POST['agent_id'] ?? 0);
+      $st = db()->prepare('SELECT id, nom FROM agents WHERE id = ?');
+      $st->execute([$agentId]);
+      $agent = $st->fetch();
+      if (!$agent) echec('Agent introuvable.', 404);
+      $mois = preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', (string)($_POST['mois'] ?? '')) ? (string)$_POST['mois'] : '';
+      if ($mois === '') echec('Choisissez le mois de la fiche.');
+      $f = $_FILES['fichier'] ?? null;
+      if (!is_array($f) || ($f['error'] ?? 1) !== UPLOAD_ERR_OK || !is_uploaded_file((string)$f['tmp_name'])) echec("Le fichier n'a pas été reçu.");
+      if ((int)$f['size'] > 15 * 1048576) echec('Fichier trop lourd (15 Mo maximum).');
+      if (type_fichier((string)$f['tmp_name']) !== 'application/pdf') echec('Seuls les PDF sont acceptés.');
+      $fichier = bin2hex(random_bytes(16)) . '.bin';
+      if (!move_uploaded_file((string)$f['tmp_name'], eq_dossier_admin('paies') . '/' . $fichier)) echec('Enregistrement impossible.', 500);
+      $libMois = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'][(int)substr($mois, 5) - 1] . ' ' . substr($mois, 0, 4);
+      $titre = texte($_POST['titre'] ?? '', 120) ?: "Fiche de paie — $libMois";
+      db()->prepare('INSERT INTO equipe_paies (agent_id, mois, titre, fichier, nom, taille, ajoute) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        ->execute([$agentId, $mois, $titre, $fichier, 'Fiche-de-paie-' . $mois . '.pdf', (int)$f['size'], maintenant()]);
+      $mail = false;
+      if (!empty($_POST['prevenir'])) {
+        $cp = db()->prepare("SELECT email, prenom FROM comptes_equipe WHERE agent_id = ? AND statut = 'actif' LIMIT 1");
+        $cp->execute([$agentId]);
+        if ($cpt = $cp->fetch()) $mail = envoyer_mail("Votre fiche de paie de $libMois est disponible", "Bonjour {$cpt['prenom']},\n\nVotre fiche de paie de $libMois est disponible dans votre Espace équipe :\nhttps://bdasecurite.com/espace-equipe#/paie\n\nBDA Security Group", BDA_EMAIL, (string)$cpt['email']);
+      }
+      journal('document', "Fiche de paie $libMois déposée pour {$agent['nom']}" . ($mail ? ' (prévenu par email)' : ''));
+      repondre(['ok' => true, 'id' => (int)db()->lastInsertId(), 'email' => $mail]);
+
+    case 'equipe.paie.fichier':
+      $st = db()->prepare('SELECT fichier, nom FROM equipe_paies WHERE id = ?');
+      $st->execute([(int)($_GET['id'] ?? 0)]);
+      $e = $st->fetch();
+      $chemin = $e ? eq_dossier_admin('paies') . '/' . basename((string)$e['fichier']) : '';
+      if (!$chemin || !is_file($chemin)) echec('PDF introuvable.', 404);
+      header('Content-Type: application/pdf');
+      header('Content-Length: ' . filesize($chemin));
+      header('Content-Disposition: inline; filename="' . preg_replace('/[^\w .()-]+/u', '_', (string)$e['nom']) . '"');
+      header('Cache-Control: private, no-store');
+      readfile($chemin);
+      exit;
+
+    case 'equipe.paie.supprimer':
+      $id = (int)(corps()['id'] ?? 0);
+      $st = db()->prepare('SELECT fichier FROM equipe_paies WHERE id = ?');
+      $st->execute([$id]);
+      $fi = (string)$st->fetchColumn();
+      if ($fi !== '') @unlink(eq_dossier_admin('paies') . '/' . basename($fi));
+      supprimer_ligne('equipe_paies', $id);
+
+    case 'equipe.absence.repondre':
+      $b = corps();
+      $st = db()->prepare('SELECT ab.*, a.nom AS agent_nom FROM absences ab JOIN agents a ON a.id = ab.agent_id WHERE ab.id = ?');
+      $st->execute([(int)($b['id'] ?? 0)]);
+      $ab = $st->fetch();
+      if (!$ab) echec('Demande introuvable.', 404);
+      $statut = in_array($b['statut'] ?? '', ['acceptee', 'refusee'], true) ? (string)$b['statut'] : '';
+      if ($statut === '') echec('Réponse inconnue.');
+      $reponse = texte($b['reponse'] ?? '', 600);
+      db()->prepare('UPDATE absences SET statut = ?, reponse = ?, traite = ? WHERE id = ?')->execute([$statut, $reponse, maintenant(), $ab['id']]);
+      $jours = 0;
+      if ($statut === 'acceptee' && !empty($b['planning'])) $jours = eq_absence_planning(['id' => $ab['agent_id'], 'nom' => $ab['agent_nom']], $ab['du'], $ab['au'], EQ_CODE_ABSENCE[$ab['type']] ?? 'ABS');
+      $periode = $ab['du'] === $ab['au'] ? 'du ' . date('d/m/Y', strtotime($ab['du'])) : 'du ' . date('d/m/Y', strtotime($ab['du'])) . ' au ' . date('d/m/Y', strtotime($ab['au']));
+      $cp = db()->prepare("SELECT email, prenom FROM comptes_equipe WHERE agent_id = ? AND statut = 'actif' LIMIT 1");
+      $cp->execute([$ab['agent_id']]);
+      if ($cpt = $cp->fetch()) envoyer_mail('Votre demande ' . $periode . ' est ' . ($statut === 'acceptee' ? 'acceptée' : 'refusée'), "Bonjour {$cpt['prenom']},\n\nVotre demande $periode a été " . ($statut === 'acceptee' ? 'acceptée' : 'refusée') . ' par la direction.' . ($reponse !== '' ? "\n\nMessage : $reponse" : '') . "\n\nhttps://bdasecurite.com/espace-equipe#/absences\n\nBDA Security Group", BDA_EMAIL, (string)$cpt['email']);
+      journal('equipe', "Absence de {$ab['agent_nom']} $periode " . ($statut === 'acceptee' ? 'acceptée' : 'refusée') . ($jours ? " ($jours jour(s) notés au planning)" : ''));
+      repondre(['ok' => true, 'jours' => $jours]);
+
+    case 'equipe.mc.traiter':
+      $b = corps();
+      $statut = in_array($b['statut'] ?? '', ['nouveau', 'lu', 'traite'], true) ? (string)$b['statut'] : 'lu';
+      db()->prepare('UPDATE main_courante SET statut = ?, commentaire = ? WHERE id = ?')->execute([$statut, texte($b['commentaire'] ?? '', 1000), (int)($b['id'] ?? 0)]);
+      repondre(['ok' => true]);
+
+    case 'equipe.mc.photo':
+      $st = db()->prepare('SELECT photos FROM main_courante WHERE id = ?');
+      $st->execute([(int)($_GET['id'] ?? 0)]);
+      $ph = json_decode((string)$st->fetchColumn(), true) ?: [];
+      $p = $ph[(int)($_GET['n'] ?? 0)] ?? null;
+      $chemin = $p ? eq_dossier_admin('main-courante') . '/' . basename((string)$p['f']) : '';
+      if (!$chemin || !is_file($chemin)) echec('Photo introuvable.', 404);
+      header('Content-Type: ' . $p['m']);
+      header('Content-Length: ' . filesize($chemin));
+      header('Cache-Control: private, no-store');
+      readfile($chemin);
+      exit;
+
+    case 'equipe.consigne.ajouter':
+      $b = corps();
+      $t = texte($b['texte'] ?? '', 1000);
+      if (mb_strlen($t) < 3) echec('Écrivez la consigne.');
+      db()->prepare('INSERT INTO consignes (agent_id, texte, cree) VALUES (?, ?, ?)')->execute([(int)($b['agent_id'] ?? 0), $t, maintenant()]);
+      repondre(['ok' => true, 'id' => (int)db()->lastInsertId()]);
+
+    case 'equipe.consigne.supprimer':
+      supprimer_ligne('consignes', (int)(corps()['id'] ?? 0));
+
+    case 'equipe.doc.visible':
+      $b = corps();
+      db()->prepare('UPDATE agent_docs SET visible = ? WHERE id = ?')->execute([empty($b['visible']) ? 0 : 1, (int)($b['id'] ?? 0)]);
+      repondre(['ok' => true]);
+
     /* ================= Demandes, candidatures, avis ================= */
     case 'demandes':
     case 'candidatures':
@@ -742,7 +914,7 @@ try {
     case 'export':
       journal('securite', 'Sauvegarde complète des données téléchargée');
       $export = ['format' => 'bda-admin-sauvegarde', 'version' => 1, 'date' => maintenant(), 'reglages' => reglages()];
-      foreach (['documents', 'plannings', 'clients', 'agents', 'agent_docs', 'reservations', 'creations', 'demandes', 'candidatures', 'avis', 'notes', 'salaries', 'bulletins'] as $t) {
+      foreach (['documents', 'plannings', 'clients', 'agents', 'agent_docs', 'reservations', 'creations', 'demandes', 'candidatures', 'avis', 'notes', 'salaries', 'bulletins', 'absences', 'main_courante', 'consignes', 'equipe_paies'] as $t) {
         $export[$t] = db()->query("SELECT * FROM $t")->fetchAll();
       }
       header('Content-Disposition: attachment; filename="bda-sauvegarde-' . date('Y-m-d') . '.json"');
@@ -1331,7 +1503,46 @@ function compteurs(): array
     'horsLigne' => site_hors_ligne() ? 1 : 0,
     'messages' => $q("SELECT COUNT(*) FROM messages_clients WHERE auteur = 'client' AND lu = 0"),
     'assistance' => $q("SELECT COUNT(*) FROM assist_conv WHERE statut = 'attente' OR (statut = 'equipe' AND non_lu > 0)"),
+    'equipe' => $q("SELECT (SELECT COUNT(*) FROM comptes_equipe WHERE statut = 'attente') + (SELECT COUNT(*) FROM absences WHERE statut = 'attente') + (SELECT COUNT(*) FROM main_courante WHERE statut = 'nouveau')"),
   ];
+}
+/* ---------- Espace équipe ---------- */
+function eq_dossier_admin(string $sous): string
+{
+  $dir = dossier_donnees() . '/equipe/' . $sous;
+  if (!is_dir($dir) && !@mkdir($dir, 0700, true)) echec('Espace de stockage indisponible.', 500);
+  return $dir;
+}
+function eq_compte_admin(int $id): array
+{
+  $st = db()->prepare('SELECT * FROM comptes_equipe WHERE id = ?');
+  $st->execute([$id]);
+  $c = $st->fetch();
+  if (!$c) echec('Compte introuvable.', 404);
+  return $c;
+}
+// Absence acceptée : le code (CP, M, ABS, R) est écrit dans le planning de chaque jour concerné
+function eq_absence_planning(array $agent, string $du, string $au, string $code): int
+{
+  $n = 0;
+  $parMois = [];
+  for ($t = strtotime($du); $t <= strtotime($au); $t += 86400) $parMois[date('Y-m', $t)][] = date('Y-m-d', $t);
+  foreach ($parMois as $mois => $jours) {
+    $st = db()->prepare('SELECT data FROM plannings WHERE mois = ?');
+    $st->execute([$mois]);
+    $p = json_decode((string)$st->fetchColumn(), true);
+    if (!is_array($p)) continue;
+    foreach ($p['agents'] as &$a) {
+      $memeId = (int)($a['id'] ?? 0) === (int)$agent['id'];
+      if (!$memeId && (!empty($a['id']) || nom_simple((string)($a['nom'] ?? '')) !== nom_simple((string)$agent['nom']))) continue;
+      $a['jours'] = (array)($a['jours'] ?? []);
+      foreach ($jours as $j) { $a['jours'][$j] = $code; $n++; }
+      break;
+    }
+    unset($a);
+    db()->prepare('UPDATE plannings SET data = ?, maj = ? WHERE mois = ?')->execute([json_encode($p, JSON_UNESCAPED_UNICODE), maintenant(), $mois]);
+  }
+  return $n;
 }
 // Page d'accueil : ce qui attend une action, et les derniers éléments modifiés (aucun montant)
 function accueil(): array
@@ -1409,31 +1620,4 @@ function importer_fichier(array $f): array
     }
   }
   return $res;
-}
-// Dossier privé des documents des agents (dans le stockage hors du site)
-function dossier_docs(): string
-{
-  $dir = dossier_donnees() . '/agents';
-  if (!is_dir($dir) && !@mkdir($dir, 0700, true)) echec('Espace de stockage indisponible.', 500);
-  return $dir;
-}
-// Vrai format du fichier, lu dans son contenu (pas dans son nom)
-function type_fichier(string $chemin): string
-{
-  $debut = (string)file_get_contents($chemin, false, null, 0, 16);
-  if (strncmp($debut, '%PDF', 4) === 0) return 'application/pdf';
-  if (strncmp($debut, "\x89PNG", 4) === 0) return 'image/png';
-  if (strncmp($debut, "\xFF\xD8\xFF", 3) === 0) return 'image/jpeg';
-  if (strncmp($debut, 'RIFF', 4) === 0 && substr($debut, 8, 4) === 'WEBP') return 'image/webp';
-  return '';
-}
-// Taille maximale d'un envoi acceptée par l'hébergement (en octets)
-function limite_envoi(): int
-{
-  $octets = function (string $v): int {
-    $n = (int)$v;
-    $u = strtolower(substr(trim($v), -1));
-    return $u === 'g' ? $n * 1073741824 : ($u === 'm' ? $n * 1048576 : ($u === 'k' ? $n * 1024 : $n));
-  };
-  return min($octets((string)ini_get('upload_max_filesize')), $octets((string)ini_get('post_max_size'))) ?: 2097152;
 }

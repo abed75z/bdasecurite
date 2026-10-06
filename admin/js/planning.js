@@ -237,7 +237,7 @@ export async function pagePlanning(ctx) {
     choixAgent.value = '';
     if (!val) return;
     const ag = agents.find((x) => String(x.id) === val);
-    p.agents.push({ nom: ag ? ag.nom : '', poste: ag ? ag.poste : 'ADS', jours: {} });
+    p.agents.push({ ...(ag ? { id: +ag.id } : {}), nom: ag ? ag.nom : '', poste: ag ? ag.poste : 'ADS', jours: {} });
     dessiner(); change();
     if (!ag) $$('.agent__nom', table).pop()?.focus();
   } }, h('option', { value: '' }, '+ Ajouter un agent…'), agents.filter((a) => +a.actif).map((a) => h('option', { value: a.id }, `${a.nom} (${a.poste})`)), h('option', { value: 'libre' }, 'Autre (saisie libre)'));
@@ -248,7 +248,7 @@ export async function pagePlanning(ctx) {
     const { planning: pp } = await api('planning', undefined, { mois: prec });
     if (!pp?.agents?.length) return toast('Aucun agent dans le planning du mois précédent.', 'erreur');
     const noms = new Set(p.agents.map((a) => a.nom));
-    pp.agents.forEach((a) => { if (!noms.has(a.nom)) p.agents.push({ nom: a.nom, poste: a.poste, jours: {} }); });
+    pp.agents.forEach((a) => { if (!noms.has(a.nom)) p.agents.push({ ...(a.id ? { id: a.id } : {}), nom: a.nom, poste: a.poste, jours: {} }); });
     ['client', 'site', 'mission'].forEach((k) => { if (!p[k]) p[k] = pp[k] || ''; });
     champsInfos.forEach((f) => f());
     dessiner(); change();

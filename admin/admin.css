@@ -1177,3 +1177,40 @@ code { font-family: var(--mono); font-size: 0.92em; color: var(--gold-light); ba
 .as-repondre { border-top: 1px solid var(--line); padding: 14px 20px; display: grid; gap: 10px; }
 .as-repondre__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 @media (max-width: 900px) { .as { grid-template-columns: 1fr; } .as-liste { border-right: 0; border-bottom: 1px solid var(--line); max-height: 320px; } }
+
+/* ---------- Espace équipe (comptes des agents, congés, main courante) ---------- */
+.eqa-onglets { margin-bottom: 16px; flex-wrap: wrap; }
+.eqa-pile { display: grid; gap: 16px; }
+.eqa-demandes { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.eqa-demande { display: grid; gap: 14px; padding: 16px; border-radius: 14px; border: 1px solid var(--gold); background: var(--gold-soft); }
+.eqa-demande__tete { display: flex; align-items: center; gap: 12px; }
+.eqa-demande__tete b { display: block; font-size: 15px; }
+.eqa-demande__tete small { color: var(--muted); font-size: 12px; }
+.eqa-avatar { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; flex: none; background: var(--gold-grad); color: #fff; font-weight: 700; }
+.eqa-infos { display: grid; gap: 6px; font-size: 13px; color: var(--text-2); }
+.eqa-infos span { display: flex; align-items: center; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+.eqa-infos svg { width: 15px; height: 15px; color: var(--gold); flex: none; }
+.eqa-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.eqa-td-actions { white-space: nowrap; text-align: right; }
+.eqa-td-actions > * + * { margin-left: 4px; }
+.eqa-td-actions .btn { vertical-align: middle; }
+.eqa-cartes { display: grid; gap: 12px; }
+.eqa-carte { display: grid; gap: 10px; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); }
+.eqa-carte.is-attente { border-color: var(--gold); }
+.eqa-carte.is-urgent { border-color: #e06666; box-shadow: inset 3px 0 0 #e06666; }
+.eqa-carte__tete { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.eqa-carte__tete b { display: block; }
+.eqa-carte__tete small { font-size: 12px; }
+.eqa-carte__titre { font-weight: 600; }
+.eqa-pastilles { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.eqa-texte { margin: 0; white-space: pre-line; color: var(--text-2); line-height: 1.55; }
+.eqa-reponse { margin: 0; font-size: 13px; color: var(--text-2); }
+.eqa-piece { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--gold); width: fit-content; }
+.eqa-piece svg { width: 15px; height: 15px; }
+.eqa-photos { display: flex; gap: 8px; flex-wrap: wrap; }
+.eqa-photos img { width: 92px; height: 92px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); display: block; }
+.eqa-case { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); cursor: pointer; }
+.eqa-note { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; margin: 0; }
+.eqa-note svg { width: 15px; height: 15px; flex: none; margin-top: 2px; }
+.eqa-lien code { display: block; padding: 12px; border-radius: 10px; border: 1px solid var(--line); background: rgba(127, 127, 127, 0.06); font-size: 13px; overflow-wrap: anywhere; user-select: all; }
+@media (max-width: 600px) { .eqa-demandes { grid-template-columns: 1fr; } .eqa-carte__tete { flex-direction: column; } .eqa-pastilles { justify-content: flex-start; } }

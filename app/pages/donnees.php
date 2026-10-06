@@ -33,8 +33,8 @@ function zone(string $slug, string $nom, string $fil, string $lieu, string $zone
 {
   return $plus + [
     'slug' => $slug, 'fil' => $fil, 'zoneServie' => $zoneServie, 'photo' => $photo, 'pos' => '50% 30%',
-    'title' => "Agent de sécurité $nom | Société de sécurité BDA",
-    'description' => "Société de sécurité privée $lieu : agents titulaires de la carte CNAPS pour le gardiennage, le contrôle d’accès, vos événements et la protection rapprochée. Devis gratuit, 24h/24.",
+    'title' => "Agent de sécurité $nom | BDA Security Group",
+    'description' => "Agents de sécurité CNAPS $lieu : gardiennage, contrôle d’accès, événements et protection rapprochée. Devis gratuit, 24h/24.",
     'kicker' => "Sécurité privée · $nom",
     'h1' => "Agent de sécurité <em>$lieu.</em>",
     'lead' => "Des agents de sécurité qualifiés et discrets $lieu, pour vos locaux, vos commerces, vos événements et vos proches. Un seul interlocuteur, 24h/24 et 7j/7.",
@@ -54,8 +54,8 @@ function zone(string $slug, string $nom, string $fil, string $lieu, string $zone
 $secteurs = [
   [
     'slug' => 'securite-hotels-paris', 'fil' => 'Hôtels & palaces', 'photo' => P_OREILLETTE, 'pos' => '50% 25%',
-    'title' => 'Sécurité hôtel à Paris : agents pour hôtels et palaces | BDA Security Group',
-    'description' => 'Agents de sécurité pour hôtels, palaces et résidences de tourisme à Paris : sûreté des clients, contrôle des accès, rondes de nuit, VIP. Agents CNAPS, devis gratuit.',
+    'title' => 'Agent de sécurité hôtel à Paris | BDA Security Group',
+    'description' => 'Agents de sécurité pour hôtels et palaces à Paris : sûreté des clients, contrôle des accès, rondes de nuit, accueil VIP. Agents CNAPS, devis gratuit.',
     'kicker' => 'Secteur hôtellerie · Paris', 'h1' => 'Sécurité des hôtels <em>et palaces à Paris.</em>',
     'lead' => 'Des agents discrets et élégants qui protègent vos clients, votre personnel et votre établissement, sans jamais troubler l’expérience de séjour.',
     'k1' => 'L’hôtellerie haut de gamme', 'h2a' => 'La sécurité au service <em>de l’hospitalité.</em>',
@@ -81,8 +81,8 @@ $secteurs = [
   ],
   [
     'slug' => 'securite-commerces-paris', 'fil' => 'Commerces & boutiques', 'photo' => P_AGENT, 'pos' => '50% 30%',
-    'title' => 'Agent de sécurité magasin à Paris : boutiques, luxe, commerces | BDA Security Group',
-    'description' => 'Agents de sécurité pour boutiques, magasins de luxe et commerces à Paris : prévention des vols, accueil, filtrage, fermeture. Agents CNAPS, devis gratuit, 7j/7.',
+    'title' => 'Agent de sécurité magasin à Paris | BDA Security Group',
+    'description' => 'Agents de sécurité pour boutiques, magasins de luxe et commerces à Paris : prévention des vols, accueil, filtrage. Agents CNAPS, devis gratuit, 7j/7.',
     'kicker' => 'Secteur commerce · Paris', 'h1' => 'Sécurité des commerces <em>et boutiques.</em>',
     'lead' => 'Un agent à l’entrée change tout : moins de vols, des clients rassurés et une équipe de vente plus sereine, en semaine comme le dimanche.',
     'k1' => 'Commerce & retail', 'h2a' => 'Prévenir les vols <em>sans effrayer vos clients.</em>',
@@ -108,8 +108,8 @@ $secteurs = [
   ],
   [
     'slug' => 'gardiennage-chantier-paris', 'fil' => 'Chantiers', 'photo' => P_SECURITE, 'pos' => '50% 70%', 'service' => 'gardiennage',
-    'title' => 'Gardiennage de chantier à Paris et en Île-de-France | BDA Security Group',
-    'description' => 'Gardiennage de chantier à Paris et en Île-de-France : surveillance de nuit et du week-end, rondes, contrôle des livraisons, prévention des vols de matériel. Devis gratuit.',
+    'title' => 'Gardiennage de chantier à Paris | BDA Security Group',
+    'description' => 'Gardiennage de chantier à Paris et en Île-de-France : surveillance de nuit et du week-end, rondes, prévention des vols de matériel. Devis gratuit.',
     'kicker' => 'Secteur BTP · Île-de-France', 'h1' => 'Gardiennage <em>de chantier.</em>',
     'lead' => 'Vols de matériel, de câbles ou de carburant, dégradations, squats : nos agents surveillent votre chantier la nuit, le week-end et pendant les congés.',
     'k1' => 'BTP & promotion immobilière', 'h2a' => 'Votre chantier protégé, <em>même quand il est fermé.</em>',
@@ -135,8 +135,8 @@ $secteurs = [
   ],
   [
     'slug' => 'securite-bureaux-entreprises-paris', 'fil' => 'Bureaux & sièges sociaux', 'photo' => P_OREILLETTE, 'pos' => '50% 30%',
-    'title' => 'Sécurité de bureaux et d’entreprises à Paris : accueil, contrôle d’accès | BDA',
-    'description' => 'Agents de sécurité pour bureaux, sièges sociaux et entreprises à Paris : accueil, contrôle d’accès, sûreté des collaborateurs, rondes. Agents CNAPS, devis gratuit.',
+    'title' => 'Sécurité d’entreprise et bureaux à Paris | BDA Security Group',
+    'description' => 'Agents de sécurité pour bureaux, sièges sociaux et entreprises à Paris : accueil, contrôle d’accès, rondes, sûreté des équipes. Devis gratuit.',
     'kicker' => 'Entreprises · Paris & La Défense', 'h1' => 'Sécurité des bureaux <em>et des entreprises.</em>',
     'lead' => 'Accueil des visiteurs, contrôle des accès, sûreté de vos collaborateurs : une sécurité professionnelle qui valorise l’image de votre entreprise.',
     'k1' => 'Sièges sociaux & espaces de travail', 'h2a' => 'La sécurité <em>au cœur de votre entreprise.</em>',
@@ -162,8 +162,8 @@ $secteurs = [
   ],
   [
     'slug' => 'securite-ambassades-consulats-paris', 'fil' => 'Ambassades & consulats', 'photo' => P_OREILLETTE, 'pos' => '50% 25%',
-    'title' => 'Sécurité d’ambassades et de consulats à Paris | BDA Security Group',
-    'description' => 'Sécurité des représentations diplomatiques à Paris : agents pour ambassades, consulats et institutions, contrôle d’accès, accueil du public, discrétion absolue. Référence : Consulat général de Colombie.',
+    'title' => 'Sécurité ambassades et consulats à Paris | BDA Security Group',
+    'description' => 'Sécurité des ambassades, consulats et institutions à Paris : contrôle d’accès, accueil du public, discrétion absolue. Agents CNAPS, devis gratuit.',
     'kicker' => 'Institutions & diplomatie · Paris', 'h1' => 'Sécurité des ambassades <em>et consulats.</em>',
     'lead' => 'Accueil du public, contrôle des accès, discrétion absolue : nous accompagnons les représentations diplomatiques avec la rigueur qu’elles exigent.',
     'k1' => 'Notre expérience diplomatique', 'h2a' => 'La confiance <em>d’une représentation diplomatique.</em>',
@@ -189,8 +189,8 @@ $secteurs = [
   ],
   [
     'slug' => 'securite-residences-coproprietes-paris', 'fil' => 'Résidences & copropriétés', 'photo' => P_AGENT, 'pos' => '50% 30%',
-    'title' => 'Gardiennage de résidences et copropriétés à Paris | BDA Security Group',
-    'description' => 'Sécurité de résidences, copropriétés et immeubles à Paris : rondes, présence de nuit, lutte contre les squats et les intrusions, sécurité des parkings. Devis gratuit pour syndics et particuliers.',
+    'title' => 'Gardiennage de résidences à Paris | BDA Security Group',
+    'description' => 'Sécurité de résidences, copropriétés et immeubles à Paris : rondes, présence de nuit, lutte contre les squats et les intrusions. Devis gratuit.',
     'kicker' => 'Résidentiel · Paris & Île-de-France', 'h1' => 'Sécurité des résidences <em>et copropriétés.</em>',
     'lead' => 'Intrusions, squats de halls, parkings dégradés : nos agents rétablissent la tranquillité des résidents, pour les syndics, bailleurs et propriétaires.',
     'k1' => 'Syndics, bailleurs & propriétaires', 'h2a' => 'La tranquillité <em>des résidents d’abord.</em>',

@@ -1,14 +1,22 @@
 {
+  "id": "/admin/",
   "name": "BDA Security Group — Admin",
   "short_name": "BDA Admin",
+  "description": "Espace de gestion BDA Security Group : demandes, opportunités, équipe, planning.",
+  "lang": "fr",
   "start_url": "/admin/",
   "scope": "/admin/",
   "display": "standalone",
-  "background_color": "#13110f",
-  "theme_color": "#13110f",
+  "orientation": "portrait",
+  "background_color": "#0b0b0c",
+  "theme_color": "#0b0b0c",
   "icons": [
     { "src": "/assets/img/apple-touch-icon.png?v=3", "sizes": "180x180", "type": "image/png" },
     { "src": "/assets/img/icon-192.png?v=3", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "/assets/img/icon-512.png?v=3", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Opportunités", "short_name": "Opportunités", "url": "/admin/#/opportunites", "icons": [{ "src": "/assets/img/icon-192.png?v=3", "sizes": "192x192" }] },
+    { "name": "Demandes reçues", "short_name": "Demandes", "url": "/admin/#/demandes", "icons": [{ "src": "/assets/img/icon-192.png?v=3", "sizes": "192x192" }] }
   ]
 }

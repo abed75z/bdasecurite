@@ -59,6 +59,8 @@ const ACTIONS_ADMIN = [
   'paie.bulletins', 'paie.bulletin', 'paie.bulletin.enregistrer', 'paie.bulletin.supprimer',
   // Fiches de paie déposées dans l'Espace équipe, suppression d'un compte agent
   'equipe.paie.ajouter', 'equipe.paie.fichier', 'equipe.paie.supprimer', 'equipe.compte.supprimer',
+  // Veille commerciale : appels d'offres, recrutements, secrets (Discord, France Travail), notifications
+  'opportunites', 'opportunite.statut', 'opportunite.note', 'veille.lancer', 'veille.reglages', 'veille.reglages.enregistrer', 'veille.tester', 'push.abonner', 'push.desabonner',
 ];
 function utilisateur_courant(): ?array
 {

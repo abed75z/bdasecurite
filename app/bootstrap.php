@@ -248,6 +248,16 @@ function schema(PDO $db): void
       PRAGMA user_version = 14;
     SQL);
   }
+  if ($version < 15) {
+    // Veille commerciale : appels d'offres (BOAMP) et recrutements (France Travail), abonnements aux notifications
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS opportunites (id INTEGER PRIMARY KEY, source TEXT NOT NULL, ref TEXT NOT NULL, type TEXT NOT NULL, nature TEXT NOT NULL DEFAULT '', titre TEXT NOT NULL, acheteur TEXT NOT NULL DEFAULT '', lieu TEXT NOT NULL DEFAULT '', departements TEXT NOT NULL DEFAULT '', date_parution TEXT NOT NULL DEFAULT '', date_limite TEXT NOT NULL DEFAULT '', url TEXT NOT NULL DEFAULT '', url_dossier TEXT NOT NULL DEFAULT '', montant REAL NOT NULL DEFAULT 0, score INTEGER NOT NULL DEFAULT 0, niveau TEXT NOT NULL DEFAULT 'faible', alertes TEXT NOT NULL DEFAULT '[]', motifs TEXT NOT NULL DEFAULT '[]', extrait TEXT NOT NULL DEFAULT '', statut TEXT NOT NULL DEFAULT 'a_traiter', note TEXT NOT NULL DEFAULT '', notifie INTEGER NOT NULL DEFAULT 0, rappel_j3 INTEGER NOT NULL DEFAULT 0, cree TEXT NOT NULL, maj TEXT NOT NULL, UNIQUE (source, ref));
+      CREATE INDEX IF NOT EXISTS i_opp_statut ON opportunites (statut, date_limite);
+      CREATE TABLE IF NOT EXISTS veille_vus (source TEXT NOT NULL, ref TEXT NOT NULL, vu TEXT NOT NULL, PRIMARY KEY (source, ref));
+      CREATE TABLE IF NOT EXISTS push_abonnements (id INTEGER PRIMARY KEY, endpoint TEXT NOT NULL UNIQUE, p256dh TEXT NOT NULL, auth TEXT NOT NULL, uid INTEGER NOT NULL DEFAULT 0, appareil TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL, vu TEXT NOT NULL DEFAULT '');
+      PRAGMA user_version = 15;
+    SQL);
+  }
 }
 // Dossier privé des documents des agents (dans le stockage hors du site)
 function dossier_docs(): string

@@ -2,3 +2,11 @@
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Secrets et données : jamais sur GitHub
+.env
+*.env
+.env.*
+bda-admin-data/
+*.sqlite
+*.lock

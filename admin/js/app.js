@@ -12,6 +12,7 @@ const MENU = [
   { route: '', libelle: 'Accueil', icone: 'accueil' },
   { groupe: 'Clients' },
   { route: 'demandes', libelle: 'Demandes reçues', icone: 'demande', badge: 'demandes' },
+  { route: 'opportunites', libelle: 'Opportunités', icone: 'eclair', badge: 'opportunites', admin: true },
   { route: 'assistance', libelle: 'Assistance site', icone: 'activite', badge: 'assistance', alerte: true },
   { route: 'messages', libelle: 'Messages', icone: 'mail', badge: 'messages' },
   { route: 'devis', libelle: 'Devis', icone: 'devis' },
@@ -248,6 +249,14 @@ async function router() {
     zonePage.replaceChildren(h('div', { class: 'vide' }, icone('alerte'), h('p', null, e.message), h('button', { class: 'btn btn--ghost', onclick: router }, 'Réessayer')));
     erreur(e);
   }
+}
+
+// Application installable (écran d'accueil) et réception des notifications de la veille
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/admin/sw.js', { scope: '/admin/' }).catch(() => {});
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (e.data?.type === 'ouvrir' && e.data.url) location.href = e.data.url;
+  });
 }
 
 demarrer();

@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -865,6 +865,97 @@ try {
       db()->prepare('UPDATE agent_docs SET visible = ? WHERE id = ?')->execute([empty($b['visible']) ? 0 : 1, (int)($b['id'] ?? 0)]);
       repondre(['ok' => true]);
 
+    /* ================= Veille commerciale (appels d'offres et recrutements) ================= */
+    case 'opportunites':
+      require_once __DIR__ . '/../app/veille/veille.php';
+      veille_cles_auto();
+      $liste = db()->query("SELECT id, source, ref, type, nature, titre, acheteur, lieu, departements, date_parution, date_limite, url, url_dossier, montant, score, niveau, alertes, extrait, statut, note, cree
+        FROM opportunites ORDER BY CASE WHEN date_limite = '' THEN 1 ELSE 0 END, date_limite, date_parution DESC LIMIT 3000")->fetchAll();
+      foreach ($liste as &$o) { $o['alertes'] = json_decode((string)$o['alertes'], true) ?: []; $o['montant'] = (float)$o['montant']; $o['score'] = (int)$o['score']; }
+      unset($o);
+      $vuAvant = (string)(db()->query("SELECT v FROM reglages WHERE k = 'veille_vu_le'")->fetchColumn() ?: '');
+      db()->prepare("INSERT INTO reglages (k, v) VALUES ('veille_vu_le', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v")->execute([maintenant()]);
+      repondre(['ok' => true, 'opportunites' => $liste, 'etat' => veille_etat(), 'vuAvant' => $vuAvant, 'maintenant' => maintenant(),
+        'vapid' => veille_env('VAPID_PUBLIC_KEY'), 'discord' => veille_env('DISCORD_WEBHOOK_URL') !== '', 'franceTravail' => veille_env('FT_CLIENT_ID') !== '' && veille_env('FT_CLIENT_SECRET') !== '',
+        'abonnements' => (int)db()->query('SELECT COUNT(*) FROM push_abonnements')->fetchColumn()]);
+
+    case 'opportunite.statut':
+      $b = corps();
+      $statut = in_array($b['statut'] ?? '', ['a_traiter', 'contacte', 'ignore'], true) ? (string)$b['statut'] : '';
+      if ($statut === '') echec('Statut inconnu.');
+      db()->prepare('UPDATE opportunites SET statut = ?, maj = ? WHERE id = ?')->execute([$statut, maintenant(), (int)($b['id'] ?? 0)]);
+      repondre(['ok' => true]);
+
+    case 'opportunite.note':
+      $b = corps();
+      db()->prepare('UPDATE opportunites SET note = ?, maj = ? WHERE id = ?')->execute([texte($b['note'] ?? '', 2000), maintenant(), (int)($b['id'] ?? 0)]);
+      repondre(['ok' => true]);
+
+    case 'veille.lancer':
+      require_once __DIR__ . '/../app/veille/veille.php';
+      session_write_close(); // la collecte peut durer : on libère la session
+      $r = veille_lancer('manuel');
+      if (!$r['ok']) echec($r['message'], 409);
+      repondre(['ok' => true, 'nouveaux' => $r['nouveaux'], 'etat' => $r['etat']]);
+
+    case 'veille.reglages':
+      require_once __DIR__ . '/../app/veille/veille.php';
+      veille_cles_auto();
+      $wh = veille_env('DISCORD_WEBHOOK_URL');
+      $ft = veille_env('FT_CLIENT_ID');
+      $hote = preg_replace('/[^a-z0-9.:-]/i', '', (string)($_SERVER['HTTP_HOST'] ?? 'bdasecurite.com'));
+      repondre(['ok' => true,
+        'discord' => $wh === '' ? '' : preg_replace('#(/webhooks/\d{4})\d+/(.{4}).*#', '$1…/$2…', $wh),
+        'ftId' => $ft === '' ? '' : mb_substr($ft, 0, 22) . '…',
+        'ftSecret' => veille_env('FT_CLIENT_SECRET') !== '',
+        'cron' => 'https://' . $hote . '/api/veille-cron.php?cle=' . veille_env('VEILLE_CRON_KEY'),
+        'envFichier' => 'bda-admin-data/.env (hors du site)']);
+
+    case 'veille.reglages.enregistrer':
+      require_once __DIR__ . '/../app/veille/veille.php';
+      $b = corps();
+      $maj = [];
+      $wh = trim(chaine($b['discord'] ?? ''));
+      if ($wh !== '') {
+        if (!preg_match('#^https://(discord|discordapp)\.com/api/webhooks/\d+/[\w-]+$#', $wh)) echec('Adresse de webhook Discord invalide.');
+        $maj['DISCORD_WEBHOOK_URL'] = $wh;
+      }
+      $id = trim(chaine($b['ftId'] ?? ''));
+      if ($id !== '') $maj['FT_CLIENT_ID'] = mb_substr($id, 0, 200);
+      $sec = trim(chaine($b['ftSecret'] ?? ''));
+      if ($sec !== '') $maj['FT_CLIENT_SECRET'] = mb_substr($sec, 0, 200);
+      foreach ((array)($b['effacer'] ?? []) as $k) if (in_array($k, ['DISCORD_WEBHOOK_URL', 'FT_CLIENT_ID', 'FT_CLIENT_SECRET'], true)) $maj[$k] = '';
+      if (!empty($b['nouveauCodeCron'])) $maj['VEILLE_CRON_KEY'] = bin2hex(random_bytes(24));
+      if ($maj) veille_env_ecrire($maj);
+      journal('securite', 'Réglages de la veille commerciale modifiés (' . implode(', ', array_keys($maj)) . ')');
+      repondre(['ok' => true]);
+
+    case 'veille.tester':
+      require_once __DIR__ . '/../app/veille/veille.php';
+      $d = discord_envoyer([[
+        'title' => 'Test de la veille BDA Security Group', 'url' => 'https://bdasecurite.com/admin/#/opportunites', 'color' => DISCORD_OR,
+        'description' => 'Si vous voyez ce message, les alertes Discord fonctionnent ✅',
+        'fields' => [['name' => 'Acheteur', 'value' => 'Exemple : Ville de Paris', 'inline' => true], ['name' => 'Lieu', 'value' => 'Dép. 75', 'inline' => true], ['name' => 'Date limite', 'value' => discord_date(date('Y-m-d 12:00:00', time() + 9 * 86400)), 'inline' => true]],
+        'footer' => ['text' => 'BDA Security Group · Veille'], 'timestamp' => gmdate('c'),
+      ]], '🧪 Message de test');
+      $p = webpush_tous(['title' => 'Test BDA Veille', 'body' => 'Les notifications fonctionnent ✅', 'url' => '/admin/#/opportunites', 'tag' => 'veille-test']);
+      repondre(['ok' => true, 'discord' => $d, 'push' => $p]);
+
+    case 'push.abonner':
+      $b = corps();
+      $endpoint = chaine($b['endpoint'] ?? '');
+      $p256dh = chaine($b['keys']['p256dh'] ?? '');
+      $auth = chaine($b['keys']['auth'] ?? '');
+      if (!preg_match('#^https://[\w.-]+/#', $endpoint) || strlen($endpoint) > 1000 || $p256dh === '' || $auth === '') echec('Abonnement invalide.');
+      db()->prepare('INSERT INTO push_abonnements (endpoint, p256dh, auth, uid, appareil, cree, vu) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(endpoint) DO UPDATE SET p256dh = excluded.p256dh, auth = excluded.auth, uid = excluded.uid, appareil = excluded.appareil')
+        ->execute([$endpoint, $p256dh, $auth, (int)($_SESSION['uid'] ?? 0), appareil(), maintenant(), maintenant()]);
+      journal('securite', 'Notifications de la veille activées sur ' . appareil());
+      repondre(['ok' => true]);
+
+    case 'push.desabonner':
+      db()->prepare('DELETE FROM push_abonnements WHERE endpoint = ?')->execute([chaine(corps()['endpoint'] ?? '')]);
+      repondre(['ok' => true]);
+
     /* ================= Demandes, candidatures, avis ================= */
     case 'demandes':
     case 'candidatures':
@@ -1504,6 +1595,7 @@ function compteurs(): array
     'messages' => $q("SELECT COUNT(*) FROM messages_clients WHERE auteur = 'client' AND lu = 0"),
     'assistance' => $q("SELECT COUNT(*) FROM assist_conv WHERE statut = 'attente' OR (statut = 'equipe' AND non_lu > 0)"),
     'equipe' => $q("SELECT (SELECT COUNT(*) FROM comptes_equipe WHERE statut = 'attente') + (SELECT COUNT(*) FROM absences WHERE statut = 'attente') + (SELECT COUNT(*) FROM main_courante WHERE statut = 'nouveau')"),
+    'opportunites' => $q("SELECT COUNT(*) FROM opportunites WHERE statut = 'a_traiter' AND cree > COALESCE((SELECT v FROM reglages WHERE k = 'veille_vu_le'), '')"),
   ];
 }
 /* ---------- Espace équipe ---------- */

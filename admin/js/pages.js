@@ -12,6 +12,7 @@ import { pagePaie } from './paie.js';
 import { pageEnvois } from './envois.js';
 import { pagePointage } from './pointage.js';
 import { pageEquipe } from './equipe.js';
+import { pageOpportunites } from './opportunites.js';
 import { pageCartes } from './cartes.js';
 import { pageFlyers } from './flyers.js';
 import { pageVisites } from './visites.js';
@@ -32,6 +33,7 @@ export const PAGES = {
   planning: pagePlanning,
   pointage: pagePointage,
   equipe: pageEquipe,
+  opportunites: pageOpportunites,
   paie: pagePaie,
   pdf: pageEnvois,
   clients: pageClients,

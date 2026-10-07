@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -56,6 +56,8 @@ try {
         noter_tentative($cle);
         noter_tentative('connexion:*');
         journal('alerte', 'Connexion refusée : mauvais identifiant ou mot de passe (identifiant saisi « ' . texte($b['login'] ?? '', 40) . ' »)');
+        $refus = tentatives('connexion:*', 900);
+        if ($refus === 1 || $refus % 5 === 0) notifier('securite', 'Connexion refusée à l’admin', "Mauvais identifiant ou mot de passe · $refus essai(s) en 15 min · " . appareil(), '/admin/#/securite', 'admin-refus');
         usleep(700000);
         echec('Identifiant ou mot de passe incorrect.', 401);
       }
@@ -65,6 +67,7 @@ try {
       db()->prepare('DELETE FROM tentatives WHERE k = ?')->execute([$cle]);
       ouvrir_session_utilisateur($u);
       journal('acces', "Connexion de {$u['login']}");
+      notifier('securite', 'Connexion à l’admin', appareil() . ' · ' . date('H\hi'), '/admin/#/securite', 'admin-connexion');
       repondre(['ok' => true] + etat_session());
 
     case 'activation':
@@ -949,11 +952,37 @@ try {
       if (!preg_match('#^https://[\w.-]+/#', $endpoint) || strlen($endpoint) > 1000 || $p256dh === '' || $auth === '') echec('Abonnement invalide.');
       db()->prepare('INSERT INTO push_abonnements (endpoint, p256dh, auth, uid, appareil, cree, vu) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(endpoint) DO UPDATE SET p256dh = excluded.p256dh, auth = excluded.auth, uid = excluded.uid, appareil = excluded.appareil')
         ->execute([$endpoint, $p256dh, $auth, (int)($_SESSION['uid'] ?? 0), appareil(), maintenant(), maintenant()]);
-      journal('securite', 'Notifications de la veille activées sur ' . appareil());
+      journal('securite', 'Notifications activées sur ' . appareil());
       repondre(['ok' => true]);
 
     case 'push.desabonner':
       db()->prepare('DELETE FROM push_abonnements WHERE endpoint = ?')->execute([chaine(corps()['endpoint'] ?? '')]);
+      repondre(['ok' => true]);
+
+    /* ================= Notifications (tout ce qui arrive, sur les appareils abonnés) ================= */
+    case 'notif.prefs':
+      require_once __DIR__ . '/../app/veille/veille.php';
+      veille_cles_auto();
+      $cats = [];
+      foreach (NOTIF_CATEGORIES as $k => [$lib, $detail]) $cats[] = ['cle' => $k, 'libelle' => $lib, 'detail' => $detail];
+      repondre(['ok' => true, 'categories' => $cats, 'prefs' => notif_prefs(), 'vapid' => veille_env('VAPID_PUBLIC_KEY'), 'attente' => notif_total_attente(),
+        'appareils' => db()->query('SELECT p.id, p.endpoint, p.appareil, p.cree, p.vu, u.login FROM push_abonnements p LEFT JOIN utilisateurs u ON u.id = p.uid ORDER BY p.vu DESC, p.id DESC')->fetchAll()]);
+
+    case 'notif.prefs.enregistrer':
+      $p = notif_prefs_enregistrer((array)(corps()['prefs'] ?? []));
+      journal('systeme', 'Choix des notifications mis à jour');
+      repondre(['ok' => true, 'prefs' => $p]);
+
+    case 'notif.tester':
+      require_once __DIR__ . '/../app/veille/veille.php';
+      $n = (int)db()->query('SELECT COUNT(*) FROM push_abonnements')->fetchColumn();
+      if (!$n) echec('Aucun appareil abonné : activez d’abord les notifications sur votre téléphone.', 409);
+      notif_push(['title' => 'Test BDA Admin', 'body' => 'Les notifications fonctionnent sur cet appareil.', 'url' => '/admin/#/notifications', 'tag' => 'notif-test', 'badge' => notif_total_attente()]);
+      repondre(['ok' => true, 'appareils' => $n]);
+
+    case 'notif.appareil.retirer':
+      db()->prepare('DELETE FROM push_abonnements WHERE id = ?')->execute([(int)(corps()['id'] ?? 0)]);
+      journal('securite', 'Notifications retirées d’un appareil');
       repondre(['ok' => true]);
 
     /* ================= Demandes, candidatures, avis ================= */

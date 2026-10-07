@@ -97,6 +97,7 @@ try {
       }
       ouvrir_session_client($c);
       journal('acces', "Espace client : connexion de {$c['nom']}");
+      notifier('espace_client', 'Connexion à l’espace client', 'Un client vient de se connecter.', '/admin/#/clients');
       repondre(etat_client());
 
     case 'invitation.verifier':
@@ -116,6 +117,7 @@ try {
       db()->prepare("UPDATE comptes_clients SET hash = ?, invitation = '', invitation_expire = '' WHERE id = ?")->execute([password_hash($mdp, PASSWORD_DEFAULT), $c['id']]);
       ouvrir_session_client($c);
       journal('securite', "Espace client activé par {$c['nom']}");
+      notifier('espace_client', 'Espace client activé', 'Un client a choisi son mot de passe.', '/admin/#/clients');
       repondre(etat_client());
 
     case 'deconnexion':
@@ -160,6 +162,7 @@ try {
       if ($e['vu'] === '') {
         db()->prepare('UPDATE envois_clients SET vu = ? WHERE id = ?')->execute([maintenant(), $e['id']]);
         journal('document', "« {$e['titre']} » téléchargé par {$c['nom']} dans son espace client");
+        notifier('espace_client', 'PDF téléchargé', 'Un client a téléchargé un document de son espace.', '/admin/#/pdf');
       }
       header('Content-Type: application/pdf');
       header('Content-Length: ' . filesize($chemin));
@@ -177,6 +180,7 @@ try {
       if ($d['vu_client'] === '') {
         db()->prepare('UPDATE documents SET vu_client = ? WHERE id = ?')->execute([maintenant(), $d['id']]);
         journal('document', ($d['type'] === 'facture' ? 'Facture ' : 'Devis ') . "{$d['numero']} ouvert par {$c['nom']} dans son espace client");
+        notifier('espace_client', ($d['type'] === 'facture' ? 'Facture ' : 'Devis ') . $d['numero'] . ' consulté' . ($d['type'] === 'facture' ? 'e' : ''), 'Ouvert par le client dans son espace.', '/admin/#/' . ($d['type'] === 'facture' ? 'factures' : 'devis') . '/' . (int)$d['id'], 'doc-vu-' . (int)$d['id']);
       }
       $d['data'] = json_decode((string)$d['data'], true) ?: [];
       repondre(['ok' => true, 'document' => $d]);
@@ -213,6 +217,7 @@ try {
       if (!limiter('client-message:' . $c['client_id'], 20, 3600)) echec('Trop de messages envoyés. Réessayez dans un moment ou appelez-nous au 06 11 67 86 25.', 429);
       db()->prepare("INSERT INTO messages_clients (client_id, auteur, texte, cree) VALUES (?, 'client', ?, ?)")->execute([$c['client_id'], $texte, maintenant()]);
       journal('site', "Nouveau message de {$c['nom']} (espace client)");
+      notifier('messages', 'Nouveau message d’un client', 'Ouvrez la messagerie de l’admin pour le lire.', '/admin/#/messages', 'message-client');
       envoyer_mail("Message de {$c['nom']} — espace client", "{$c['nom']} vous a écrit depuis son espace client :\n\n$texte\n\n—\nRépondre depuis l'admin : https://bdasecurite.com/admin/#/messages\nOu répondez directement à cet email ({$c['email']}).", $c['email']);
       repondre(['ok' => true]);
 
@@ -226,6 +231,7 @@ try {
       if ($d['statut'] !== 'envoye') echec('Ce devis ne peut plus être accepté en ligne. Contactez-nous au 06 11 67 86 25.', 409);
       db()->prepare("UPDATE documents SET statut = 'accepte', maj = ? WHERE id = ?")->execute([maintenant(), $id]);
       journal('document', "Devis {$d['numero']} ACCEPTÉ EN LIGNE par {$c['nom']} (espace client)");
+      notifier('espace_client', "Devis {$d['numero']} accepté", 'Accepté en ligne depuis l’espace client.', '/admin/#/devis/' . $id, 'devis-' . $id);
       envoyer_mail("Devis {$d['numero']} accepté par {$c['nom']}", "Bonne nouvelle : {$c['nom']} vient d'accepter le devis {$d['numero']} depuis son espace client ({$c['email']}).\n\nhttps://bdasecurite.com/admin/#/devis/$id");
       repondre(['ok' => true]);
 

@@ -62,6 +62,7 @@ try {
       db()->prepare('INSERT INTO pointages (agent_id, debut, site, lat_debut, lng_debut, prec_debut, cree) VALUES (?, ?, ?, ?, ?, ?, ?)')
         ->execute([$id, maintenant(), $pl['site'], $lat, $lng, $prec, maintenant()]);
       journal('equipe', "Prise de service : {$agent['nom']}" . ($pl['site'] !== '' ? " ({$pl['site']})" : ''));
+      notifier('pointages', 'Prise de service', 'Un agent a commencé son service à ' . date('H\hi') . '.', '/admin/#/pointage');
       repondre(['ok' => true, 'enCours' => $enCours()]);
 
     case 'fin':
@@ -73,6 +74,7 @@ try {
       db()->prepare('UPDATE pointages SET fin = ?, lat_fin = ?, lng_fin = ?, prec_fin = ? WHERE id = ?')->execute([$fin, $lat, $lng, $prec, $p['id']]);
       $min = (int)round((strtotime($fin) - strtotime($p['debut'])) / 60);
       journal('equipe', sprintf('Fin de service : %s (%dh%02d)', $agent['nom'], intdiv($min, 60), $min % 60));
+      notifier('pointages', 'Fin de service', sprintf('Un agent a terminé son service (%dh%02d).', intdiv($min, 60), $min % 60), '/admin/#/pointage');
       repondre(['ok' => true, 'debut' => $p['debut'], 'fin' => $fin, 'minutes' => $min]);
   }
 } catch (Throwable $e) {

@@ -34,13 +34,14 @@ const MENU = [
   { groupe: 'Outils' },
   { route: 'creations', libelle: 'Cartes & flyers', icone: 'badge' },
   { route: 'notes', libelle: 'Notes', icone: 'crayon' },
+  { route: 'notifications', libelle: 'Notifications', icone: 'mobile', admin: true },
 ];
 // Pages rangées dans une rubrique du menu sans y figurer elles-mêmes
 const PARENT = { cartes: 'creations', visites: 'creations', flyers: 'creations' };
 // Rubrique affichée au-dessus du titre de chaque page
 const GROUPE = {};
 MENU.reduce((g, m) => { if (m.groupe) return m.groupe; GROUPE[m.route] = g; return g; }, 'Tableau de bord');
-Object.assign(GROUPE, { parametres: 'Compte', securite: 'Compte', cartes: 'Outils', visites: 'Outils', flyers: 'Outils' });
+Object.assign(GROUPE, { parametres: 'Compte', securite: 'Compte', notifications: 'Outils', cartes: 'Outils', visites: 'Outils', flyers: 'Outils' });
 
 /* ---------- Démarrage ---------- */
 async function demarrer() {
@@ -218,6 +219,9 @@ export async function majCompteurs() {
       b.textContent = n > 99 ? '99+' : n;
       b.hidden = n === 0;
     });
+    // Pastille sur l'icône de l'application installée : ce qui attend une action
+    const attente = ['demandes', 'messages', 'assistance', 'avis', 'reservations', 'candidatures', 'equipe'].reduce((s, k) => s + (compteurs[k] || 0), 0);
+    if ('setAppBadge' in navigator) (attente ? navigator.setAppBadge(attente) : navigator.clearAppBadge()).catch(() => {});
   } catch (e) { /* silencieux */ }
 }
 

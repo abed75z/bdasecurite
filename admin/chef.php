@@ -23,9 +23,9 @@ $v = '5';
 <meta name="apple-mobile-web-app-title" content="BDA · Chef">
 <title>Mon accès — BDA Security Group</title>
 <base href="/admin/">
-<link rel="icon" href="/admin/icone-moi-180.png" type="image/png">
-<link rel="apple-touch-icon" href="/admin/icone-moi-180.png">
-<link rel="manifest" href="/admin/manifest-moi.webmanifest">
+<link rel="icon" href="/admin/icone-moi-180.png?v=2" type="image/png">
+<link rel="apple-touch-icon" href="/admin/icone-moi-180.png?v=2">
+<link rel="manifest" href="/admin/manifest-moi.webmanifest?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">

@@ -2,7 +2,7 @@
    ESPACE ADMIN BDA — Opportunités (veille commerciale)
    Appels d'offres BOAMP (sécurité, chauffeur) et recrutements France Travail,
    triés par date limite. Statut à traiter / contacté / ignoré et note libre.
-   Notifications sur téléphone (Web Push) et réglages des secrets (admin).
+   Notifications sur téléphone : page Notifications. Réglages des secrets (admin).
    ========================================================= */
 import { api, h, icone, toast, erreur, modale, champ, saisie, zoneTexte, dateLisible, ilYa, attendre } from './outils.js';
 
@@ -33,7 +33,7 @@ export async function pageOpportunites(ctx) {
 
   ctx.actions(
     h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => reglages(recharger) }, icone('reglages'), h('span', null, 'Réglages')),
-    boutonNotifications(d),
+    h('a', { class: 'btn btn--ghost', href: '#/notifications' }, icone('mobile'), h('span', null, 'Notifications')),
     h('button', { class: 'btn btn--gold', type: 'button', onclick: (e) => lancer(e.currentTarget, recharger) }, icone('eclair'), h('span', null, 'Lancer maintenant')));
 
   const liste = d.opportunites;
@@ -157,64 +157,6 @@ async function lancer(bouton, recharger) {
   } catch (e) { erreur(e); }
   bouton.disabled = false;
   lib.textContent = avant;
-}
-
-/* ---------- Notifications sur le téléphone (Web Push) ---------- */
-const estIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
-const estInstallee = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-function cleVapid(b64) {
-  const p = '='.repeat((4 - (b64.length % 4)) % 4);
-  const raw = atob((b64 + p).replace(/-/g, '+').replace(/_/g, '/'));
-  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
-}
-async function enregistrementSw() {
-  return navigator.serviceWorker.register('/admin/sw.js', { scope: '/admin/' });
-}
-function boutonNotifications(d) {
-  const lib = h('span', null, 'Notifications');
-  const btn = h('button', { class: 'btn btn--ghost', type: 'button' }, icone('mobile'), lib);
-  const pret = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
-  (async () => {
-    if (!pret) return;
-    try {
-      const reg = await enregistrementSw();
-      const abo = await reg.pushManager.getSubscription();
-      lib.textContent = abo ? 'Notifications ✓' : 'Activer les notifications';
-    } catch (e) { /* SW indisponible */ }
-  })();
-  btn.addEventListener('click', async () => {
-    if (!pret) {
-      return modale({
-        titre: 'Activer les notifications',
-        contenu: h('div', { class: 'form-grille' }, estIos() && !estInstallee()
-          ? [h('p', null, "Sur iPhone, les notifications ne marchent qu'avec l'admin installé sur l'écran d'accueil :"),
-            h('ol', { class: 'op-etapes' }, h('li', null, 'Dans Safari, appuyez sur le bouton Partager (carré avec une flèche).'), h('li', null, "Choisissez « Sur l'écran d'accueil », puis « Ajouter »."), h('li', null, "Ouvrez « BDA Admin » depuis l'icône, revenez sur Opportunités et appuyez sur « Activer les notifications »."))]
-          : h('p', null, 'Ce navigateur ne gère pas les notifications. Utilisez Chrome, Edge, Firefox ou Safari (iPhone : après ajout à l’écran d’accueil).')),
-        actions: [{ libelle: 'Compris', classe: 'btn--gold', valeur: true, submit: true }],
-      });
-    }
-    try {
-      const reg = await enregistrementSw();
-      let abo = await reg.pushManager.getSubscription();
-      if (abo) {
-        const ok = await modale({ titre: 'Notifications activées', contenu: h('p', { class: 'modale__texte' }, 'Cet appareil reçoit les alertes de la veille. Voulez-vous les désactiver ?'),
-          actions: [{ libelle: 'Garder', classe: 'btn--ghost', valeur: false }, { libelle: 'Désactiver', classe: 'btn--danger', valeur: true, submit: true }] });
-        if (ok !== true) return;
-        await api('push.desabonner', { endpoint: abo.endpoint });
-        await abo.unsubscribe();
-        lib.textContent = 'Activer les notifications';
-        return toast('Notifications désactivées sur cet appareil.');
-      }
-      const perm = await Notification.requestPermission();
-      if (perm !== 'granted') return erreur('Notifications refusées : autorisez-les dans les réglages du navigateur.');
-      if (!d.vapid) return erreur('Clés de notification absentes : rechargez la page.');
-      abo = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: cleVapid(d.vapid) });
-      await api('push.abonner', abo.toJSON());
-      lib.textContent = 'Notifications ✓';
-      toast('Notifications activées sur cet appareil ✓');
-    } catch (e) { erreur(e); }
-  });
-  return btn;
 }
 
 /* ---------- Réglages (secrets rangés dans le .env privé du serveur) ---------- */

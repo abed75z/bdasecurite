@@ -235,6 +235,7 @@ try {
       db()->prepare('INSERT INTO comptes_equipe (identifiant, email, prenom, nom, tel, metier, hash, statut, cree) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
         ->execute([$identifiant, $email, $prenom, mb_strtoupper($nom), $tel, $metier, password_hash($mdp, PASSWORD_DEFAULT), 'attente', maintenant()]);
       journal('equipe', "Espace équipe : demande d’accès de $prenom " . mb_strtoupper($nom) . ' (' . EQ_METIERS[$metier] . ')');
+      notifier('equipe', 'Demande d’accès à l’Espace équipe', EQ_METIERS[$metier] . ' · compte à valider', '/admin/#/equipe/comptes', 'eq-inscription');
       envoyer_mail("Espace équipe : demande d'accès de $prenom $nom", "$prenom " . mb_strtoupper($nom) . ' (' . EQ_METIERS[$metier] . ") demande l'accès à l'Espace équipe.\n\nTéléphone : $tel\nEmail : $email\nIdentifiant choisi : $identifiant\n\nValider ou refuser : https://bdasecurite.com/admin/#/equipe", $email);
       repondre(['ok' => true]);
 
@@ -264,6 +265,7 @@ try {
       if (password_needs_rehash($c['hash'], PASSWORD_DEFAULT)) db()->prepare('UPDATE comptes_equipe SET hash = ? WHERE id = ?')->execute([password_hash(chaine($b['motdepasse']), PASSWORD_DEFAULT), $c['id']]);
       eq_ouvrir($c, !isset($b['memoriser']) || !empty($b['memoriser']));
       journal('acces', "Espace équipe : connexion de {$c['prenom']} {$c['nom']}");
+      notifier('equipe', 'Connexion à l’Espace équipe', 'Un agent vient de se connecter.', '/admin/#/equipe/comptes', 'eq-connexion');
       repondre(eq_etat());
 
     case 'deconnexion':
@@ -418,6 +420,7 @@ try {
       db()->prepare("INSERT INTO agent_docs (agent_id, type, nom, fichier, mime, taille, ajoute, visible, source) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 'agent')")
         ->execute([(int)$c['agent_id'], $type, $nom, $fichier, $mime, (int)$f['size'], maintenant()]);
       journal('equipe', "Espace équipe : document « $nom » déposé par {$c['prenom']} {$c['nom']}");
+      notifier('equipe', 'Document déposé par un agent', 'À vérifier dans sa fiche agent.', '/admin/#/agents', 'eq-doc');
       repondre(['ok' => true, 'id' => (int)db()->lastInsertId()]);
 
     case 'document.supprimer':
@@ -472,6 +475,7 @@ try {
         ->execute([(int)$c['agent_id'], $type, $du, $au, texte($b['motif'] ?? '', 600), $justif, maintenant()]);
       $periode = $du === $au ? 'le ' . date('d/m/Y', strtotime($du)) : 'du ' . date('d/m/Y', strtotime($du)) . ' au ' . date('d/m/Y', strtotime($au));
       journal('equipe', "Espace équipe : {$c['prenom']} {$c['nom']} demande « " . EQ_ABSENCES[$type] . " » $periode");
+      notifier('absences', 'Demande d’absence', EQ_ABSENCES[$type] . " $periode · à accepter ou refuser", '/admin/#/equipe/absences', 'eq-absence');
       envoyer_mail("Demande d'absence — {$c['prenom']} {$c['nom']}", "{$c['prenom']} {$c['nom']} demande : " . EQ_ABSENCES[$type] . " $periode." . (texte($b['motif'] ?? '', 600) !== '' ? "\nMotif : " . texte($b['motif'], 600) : '') . ($justif ? "\nUn justificatif est joint." : '') . "\n\nRépondre : https://bdasecurite.com/admin/#/equipe", (string)$c['email']);
       repondre(['ok' => true]);
 
@@ -480,6 +484,7 @@ try {
       $st = db()->prepare("UPDATE absences SET statut = 'annulee', traite = ? WHERE id = ? AND agent_id = ? AND statut = 'attente'");
       $st->execute([maintenant(), (int)(corps()['id'] ?? 0), (int)$c['agent_id']]);
       if (!$st->rowCount()) echec('Cette demande a déjà été traitée : contactez la direction.', 409);
+      notifier('absences', 'Demande d’absence annulée', 'Annulée par l’agent.', '/admin/#/equipe/absences', 'eq-absence');
       repondre(['ok' => true]);
 
     /* ================= Main courante ================= */
@@ -522,6 +527,7 @@ try {
       db()->prepare('INSERT INTO main_courante (agent_id, quand, site, categorie, gravite, texte, photos, cree) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
         ->execute([(int)$c['agent_id'], $quand, $site, $cat, $grav, $texteMc, json_encode($photos), maintenant()]);
       journal($grav === 'urgente' ? 'alerte' : 'equipe', "Main courante ($grav) : " . EQ_INCIDENTS[$cat] . " signalé par {$c['prenom']} {$c['nom']}" . ($site !== '' ? " à $site" : ''));
+      notifier('incidents', ($grav === 'urgente' ? 'URGENT · ' : '') . 'Main courante : ' . EQ_INCIDENTS[$cat], 'Gravité ' . $grav . (count($photos) ? ' · ' . count($photos) . ' photo(s)' : '') . ' · signalé par un agent', '/admin/#/equipe/main-courante', 'mc-' . (int)db()->lastInsertId());
       envoyer_mail(($grav === 'urgente' ? 'URGENT — ' : '') . 'Main courante : ' . EQ_INCIDENTS[$cat] . " ({$c['prenom']} {$c['nom']})",
         "Événement signalé par {$c['prenom']} {$c['nom']} (" . ($c['agent_tel'] ?: $c['tel']) . ")\n\nQuand : " . date('d/m/Y à H:i', strtotime($quand)) . "\nSite : " . ($site ?: 'non précisé') . "\nType : " . EQ_INCIDENTS[$cat] . "\nGravité : $grav\n\n$texteMc\n\n" . (count($photos) ? count($photos) . " photo(s) jointe(s).\n\n" : '') . 'Voir : https://bdasecurite.com/admin/#/equipe/main-courante', (string)$c['email']);
       repondre(['ok' => true, 'id' => (int)db()->lastInsertId()]);
@@ -595,6 +601,7 @@ try {
       db()->prepare('INSERT INTO pointages (agent_id, debut, site, lat_debut, lng_debut, prec_debut, cree) VALUES (?, ?, ?, ?, ?, ?, ?)')
         ->execute([$aid, maintenant(), $p['client'], $lat, $lng, $prec, maintenant()]);
       journal('equipe', "Prise de service : {$c['agent_nom']}" . ($p['client'] !== '' ? " ({$p['client']})" : '') . ' — espace équipe');
+      notifier('pointages', 'Prise de service', 'Un agent a commencé son service à ' . date('H\hi') . '.', '/admin/#/pointage');
       repondre(['ok' => true, 'enCours' => eq_en_cours($aid)]);
 
     case 'pointer.fin':
@@ -607,6 +614,7 @@ try {
       db()->prepare('UPDATE pointages SET fin = ?, lat_fin = ?, lng_fin = ?, prec_fin = ? WHERE id = ?')->execute([$fin, $lat, $lng, $prec, $p['id']]);
       $min = (int)round((strtotime($fin) - strtotime($p['debut'])) / 60);
       journal('equipe', sprintf('Fin de service : %s (%dh%02d) — espace équipe', $c['agent_nom'], intdiv($min, 60), $min % 60));
+      notifier('pointages', 'Fin de service', sprintf('Un agent a terminé son service (%dh%02d).', intdiv($min, 60), $min % 60), '/admin/#/pointage');
       repondre(['ok' => true, 'minutes' => $min]);
 
     /* ================= Courses VTC (chauffeurs) ================= */

@@ -15,6 +15,7 @@ try {
   $data = champs_formulaire($b);
   if (count($data) < 3) echec('Candidature incomplète.');
   db()->prepare("INSERT INTO candidatures (recu, statut, data) VALUES (?, 'nouvelle', ?)")->execute([maintenant(), json_encode($data, JSON_UNESCAPED_UNICODE)]);
+  notifier('candidatures', 'Nouvelle candidature', 'Reçue depuis la page Recrutement.', '/admin/#/candidatures', 'candidature-' . (int)db()->lastInsertId());
   repondre(['ok' => true]);
 } catch (Throwable $e) {
   error_log('[BDA candidature] ' . $e->getMessage());

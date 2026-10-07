@@ -59,6 +59,7 @@ try {
       // Conversation déjà entre les mains de l'équipe : le robot ne répond plus
       if (in_array($conv['statut'], ['attente', 'equipe'], true)) {
         db()->prepare('UPDATE assist_conv SET non_lu = non_lu + 1 WHERE id = ?')->execute([$id]);
+        notifier('assistance', 'Assistant du site : nouveau message', 'Un visiteur vous a répondu dans la discussion.', '/admin/#/assistance/' . $id, 'assist-' . $id);
         repondre(['ok' => true, 'jeton' => $jeton, 'statut' => $conv['statut'], 'messages' => $nouveaux, 'conseiller' => false, 'suggestions' => []]);
       }
       // Historique pour l'IA
@@ -108,6 +109,7 @@ try {
       $fil = implode("\n", array_map(fn ($m) => substr($m['cree'], 11, 5) . ' ' . ['visiteur' => 'Visiteur', 'robot' => 'Assistant', 'equipe' => 'BDA'][$m['auteur']] . ' : ' . $m['texte'], $st->fetchAll()));
       envoyer_mail("Assistant du site : {$nom} demande un conseiller", "Un visiteur demande à parler à un conseiller.\n\nNom : {$nom}\nContact : {$contact}\nPage : {$conv['page']}\n\nDiscussion :\n{$fil}\n\nRépondez-lui depuis l'admin : https://bdasecurite.com/admin/#/assistance/{$id}");
       journal('site', "Assistant : {$nom} demande un conseiller");
+      notifier('assistance', 'Un visiteur demande un conseiller', 'Assistant du site : répondez-lui depuis l’admin.', '/admin/#/assistance/' . $id, 'assist-' . $id);
       repondre(['ok' => true, 'jeton' => $jeton, 'statut' => 'attente', 'messages' => $nouveaux]);
 
     case 'suivi':

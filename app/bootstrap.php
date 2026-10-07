@@ -653,3 +653,5 @@ function journal(string $type, string $message): void
     error_log('[BDA journal] ' . $e->getMessage());
   }
 }
+
+require_once __DIR__ . '/notifications.php';

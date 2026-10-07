@@ -39,6 +39,7 @@ try {
   if (!limiter('avis', 5, 86400)) echec('Vous avez déjà envoyé plusieurs avis aujourd\'hui. Merci !', 429);
 
   db()->prepare("INSERT INTO avis (recu, nom, note, prestation, texte, email, statut) VALUES (?, ?, ?, ?, ?, ?, 'attente')")->execute([maintenant(), $nom, $note, $prestation, $texte, $email]);
+  notifier('avis', "Nouvel avis $note/5", 'Il attend votre validation avant d’être publié.', '/admin/#/avis', 'avis-' . (int)db()->lastInsertId());
   envoyer_mail(
     'Nouvel avis ' . str_repeat('★', $note) . ' — ' . $nom,
     "Un nouvel avis attend votre validation.\n\nNom : $nom\nNote : $note/5\nPrestation : " . ($prestation ?: '—') . "\n\n$texte\n\nPour le publier : https://bdasecurite.com/admin/#/avis",

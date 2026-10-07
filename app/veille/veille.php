@@ -81,6 +81,8 @@ function veille_lancer(string $origine = 'auto'): array
     veille_etat_enregistrer($etat);
     $total = count($nouveaux['boamp']) + count($nouveaux['francetravail']);
     journal('site', "Veille commerciale ($origine) : $total nouvelle(s) opportunité(s)");
+    // Une fois par jour après 8 h : rappels du matin (factures en retard, cartes pro, demandes en attente)
+    if ($origine === 'auto') notif_rappels_du_jour();
     return ['ok' => true, 'nouveaux' => ['boamp' => count($nouveaux['boamp']), 'francetravail' => count($nouveaux['francetravail'])], 'etat' => $etat];
   } finally {
     flock($verrou, LOCK_UN);
@@ -119,7 +121,8 @@ function veille_notifier(array $nouveaux, array $premiers): array
   $envoyer = function (array $embeds, string $contenu, array $push) use (&$res, &$discordOk, &$erreurs) {
     $d = discord_envoyer($embeds, $contenu);
     if (!$d['ok']) { $discordOk = false; $erreurs[] = $d['erreur']; } else $res['messages'] += $d['envoyes'];
-    $p = webpush_tous($push);
+    if (empty(notif_prefs()['veille'])) return; // catégorie coupée dans l'admin (Notifications)
+    $p = webpush_tous($push + ['categorie' => 'veille']);
     foreach ($p as $k => $v) $res['push'][$k] += $v;
   };
   $lire = function (array $ids): array {

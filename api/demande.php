@@ -21,6 +21,8 @@ try {
     if (strlen(preg_replace('/\D/', '', $data['Téléphone'] ?? '')) < 9) echec('Indiquez un numéro de téléphone valide.');
   }
   db()->prepare("INSERT INTO demandes (recu, statut, data) VALUES (?, 'nouvelle', ?)")->execute([maintenant(), json_encode($data, JSON_UNESCAPED_UNICODE)]);
+  $id = (int)db()->lastInsertId();
+  notifier('demandes', $rappel ? 'Demande de rappel' : 'Nouvelle demande de devis', $rappel ? 'Un visiteur veut être rappelé.' : 'Envoyée depuis le site, à traiter.', '/admin/#/demandes/' . $id, 'demande-' . $id);
   if ($rappel) {
     envoyer_mail('Demande de rappel : ' . ($data['Nom / Société'] ?? ''), "Un visiteur demande à être rappelé depuis l'accueil du site.\n\nNom / Société : " . ($data['Nom / Société'] ?? '') . "\nTéléphone : " . ($data['Téléphone'] ?? '') . "\nCréneau : " . ($data['Date souhaitée'] ?? '') . "\nSecteur : " . ($data['Secteur'] ?? '') . "\n\nVoir dans l'admin : https://bdasecurite.com/admin/#/demandes");
   }

@@ -1296,3 +1296,27 @@ code { font-family: var(--mono); font-size: 0.92em; color: var(--gold-light); ba
   .op-statuts { margin-left: 0; width: 100%; }
   .op-statut { flex: 1; }
 }
+
+/* ---------- Notifications (tout ce qui arrive, sur les appareils abonnés) ---------- */
+.notif-page { display: grid; gap: 18px; max-width: 860px; }
+.notif-tete { gap: 18px; }
+.notif-tete__etat { display: flex; align-items: flex-start; gap: 14px; }
+.notif-tete__etat h2 { font-size: 16px; margin: 2px 0 6px; }
+.notif-tete__etat p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.notif-pastille { flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; background: var(--surface-3); color: var(--muted); border: 1px solid var(--line-2); }
+.notif-pastille .ic { width: 22px; height: 22px; }
+.notif-pastille.is-on { background: var(--gold-grad); color: #151310; border-color: transparent; }
+.notif-tete > .btn { justify-self: start; }
+.notif-note { display: flex; align-items: flex-start; gap: 8px; margin: 0; padding: 10px 12px; border-radius: 10px; background: var(--gold-soft); color: var(--text); font-size: 12px; line-height: 1.5; }
+.notif-note .ic { flex: none; width: 16px; height: 16px; margin-top: 1px; color: var(--gold); }
+.notif-appareils { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.notif-appareils li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); }
+.notif-appareils li > div { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.notif-appareils b { font-size: 13.5px; font-weight: 600; }
+.notif-appareils em { font-style: normal; color: var(--gold); font-weight: 600; }
+.notif-appareils small { color: var(--muted); font-size: 11.5px; }
+.notif-appareils__ic { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--gold-soft); color: var(--gold); }
+.notif-appareils__ic .ic { width: 18px; height: 18px; }
+@media (max-width: 640px) {
+  .notif-tete > .btn { justify-self: stretch; justify-content: center; }
+}

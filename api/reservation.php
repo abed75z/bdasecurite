@@ -34,6 +34,7 @@ try {
     db()->prepare("UPDATE reservations SET statut = 'annulee' WHERE id = ?")->execute([$r['id']]);
     $d = $r['data'];
     envoyer_mail("Réservation {$r['ref']} annulée par le client", "Le client a annulé sa réservation.\n\n" . resume_reservation($r['ref'], $d) . "\n\nhttps://bdasecurite.com/admin/#/vtc");
+    notifier('vtc', "Réservation {$r['ref']} annulée", 'Annulée par le client depuis son lien de suivi.', '/admin/#/vtc', 'vtc-' . $r['ref']);
     $r['statut'] = 'annulee';
     repondre(['ok' => true, 'reservation' => vue_client($r)]);
   }
@@ -103,6 +104,7 @@ try {
   db()->prepare('INSERT INTO reservations (ref, jeton, recu, statut, date_course, prix, data) VALUES (?, ?, ?, ?, ?, ?, ?)')
     ->execute([$ref, $jeton, maintenant(), 'attente', date('Y-m-d H:i:s', $quand), $prix, json_encode($data, JSON_UNESCAPED_UNICODE)]);
 
+  notifier('vtc', "Réservation VTC $ref", 'Course le ' . date('d/m', $quand) . " à $heure · " . ($vehicule === 'van' ? 'Van' : 'Berline') . " · $prix € · à confirmer", '/admin/#/vtc', 'vtc-' . $ref);
   envoyer_mail("Nouvelle réservation VTC $ref — " . date('d/m', $quand) . " à $heure", "Nouvelle réservation à confirmer.\n\n" . resume_reservation($ref, $data) . "\n\nConfirmer dans l'espace admin : https://bdasecurite.com/admin/#/vtc", $email);
   if ($email !== '') envoyer_mail("Votre réservation $ref — BDA Security Group", "Bonjour $nom,\n\nNous avons bien reçu votre réservation. Nous vous confirmons la course très vite par téléphone ou WhatsApp.\n\n" . resume_reservation($ref, $data) . "\n\nSuivre ou annuler votre réservation : https://bdasecurite.com/reserver#suivi=$jeton\n\nBDA Security Group — 06 11 67 86 25", '', $email);
   repondre(['ok' => true, 'ref' => $ref, 'jeton' => $jeton, 'prix' => $prix]);

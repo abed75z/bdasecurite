@@ -63,6 +63,8 @@ const ACTIONS_ADMIN = [
   'opportunites', 'opportunite.statut', 'opportunite.note', 'veille.lancer', 'veille.reglages', 'veille.reglages.enregistrer', 'veille.tester', 'push.abonner', 'push.desabonner',
   // Notifications sur les appareils de la direction
   'notif.prefs', 'notif.prefs.enregistrer', 'notif.tester', 'notif.appareil.retirer',
+  // Serveur Discord de la direction : jeton du bot, installation, synchronisation
+  'discord', 'discord.jeton', 'discord.installer', 'discord.sync',
 ];
 function utilisateur_courant(): ?array
 {

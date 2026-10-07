@@ -258,6 +258,18 @@ function schema(PDO $db): void
       PRAGMA user_version = 15;
     SQL);
   }
+  if ($version < 16) {
+    // Serveur Discord de la direction (autorisé par le gérant le 07/10/2026) : file d'envoi, dossiers et fils,
+    // liens privés à durée limitée vers les documents (les fichiers restent ici), coffre-fort chiffré
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS dc_file (id INTEGER PRIMARY KEY, salon TEXT NOT NULL DEFAULT '', message TEXT NOT NULL, etat TEXT NOT NULL DEFAULT 'attente', essais INTEGER NOT NULL DEFAULT 0, erreur TEXT NOT NULL DEFAULT '', message_id TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL, maj TEXT NOT NULL DEFAULT '');
+      CREATE INDEX IF NOT EXISTS i_dc_file ON dc_file (etat, id);
+      CREATE TABLE IF NOT EXISTS dc_fils (type TEXT NOT NULL, ref TEXT NOT NULL, canal TEXT NOT NULL, fil TEXT NOT NULL DEFAULT '', message TEXT NOT NULL DEFAULT '', empreinte TEXT NOT NULL DEFAULT '', maj TEXT NOT NULL, PRIMARY KEY (type, ref));
+      CREATE TABLE IF NOT EXISTS liens_prives (jeton TEXT PRIMARY KEY, type TEXT NOT NULL, ref TEXT NOT NULL, libelle TEXT NOT NULL DEFAULT '', expire INTEGER NOT NULL, ouvertures INTEGER NOT NULL DEFAULT 0, cree TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS coffre (id INTEGER PRIMARY KEY, service TEXT NOT NULL, lien TEXT NOT NULL DEFAULT '', identifiant TEXT NOT NULL DEFAULT '', secret TEXT NOT NULL DEFAULT '', note TEXT NOT NULL DEFAULT '', message_id TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL, maj TEXT NOT NULL, vu TEXT NOT NULL DEFAULT '');
+      PRAGMA user_version = 16;
+    SQL);
+  }
 }
 // Dossier privé des documents des agents (dans le stockage hors du site)
 function dossier_docs(): string
@@ -649,9 +661,35 @@ function journal(string $type, string $message): void
   try {
     db()->prepare('INSERT INTO journal (quand, type, message, appareil, ip) VALUES (?, ?, ?, ?, ?)')->execute([maintenant(), $type, mb_substr($message, 0, 300), appareil(), ip_masquee()]);
     if (random_int(1, 50) === 1) db()->exec("DELETE FROM journal WHERE quand < datetime('now', '-365 days') OR id <= (SELECT MAX(id) - 5000 FROM journal)");
+    // Copie dans le salon #journal du serveur Discord de la direction (et détail de la notification qui suit)
+    $GLOBALS['__dernier_journal'] = $message;
+    if (function_exists('notif_journal')) notif_journal($type, $message);
   } catch (Throwable $e) {
     error_log('[BDA journal] ' . $e->getMessage());
   }
+}
+// Absence acceptée : le code (CP, M, ABS, R) est écrit dans le planning de chaque jour concerné
+function eq_absence_planning(array $agent, string $du, string $au, string $code): int
+{
+  $n = 0;
+  $parMois = [];
+  for ($t = strtotime($du); $t <= strtotime($au); $t += 86400) $parMois[date('Y-m', $t)][] = date('Y-m-d', $t);
+  foreach ($parMois as $mois => $jours) {
+    $st = db()->prepare('SELECT data FROM plannings WHERE mois = ?');
+    $st->execute([$mois]);
+    $p = json_decode((string)$st->fetchColumn(), true);
+    if (!is_array($p)) continue;
+    foreach ($p['agents'] as &$a) {
+      $memeId = (int)($a['id'] ?? 0) === (int)$agent['id'];
+      if (!$memeId && (!empty($a['id']) || nom_simple((string)($a['nom'] ?? '')) !== nom_simple((string)$agent['nom']))) continue;
+      $a['jours'] = (array)($a['jours'] ?? []);
+      foreach ($jours as $j) { $a['jours'][$j] = $code; $n++; }
+      break;
+    }
+    unset($a);
+    db()->prepare('UPDATE plannings SET data = ?, maj = ? WHERE mois = ?')->execute([json_encode($p, JSON_UNESCAPED_UNICODE), maintenant(), $mois]);
+  }
+  return $n;
 }
 
 require_once __DIR__ . '/notifications.php';

@@ -5,7 +5,7 @@
    ========================================================= */
 declare(strict_types=1);
 
-const VEILLE_ENV_CLES = ['DISCORD_WEBHOOK_URL', 'FT_CLIENT_ID', 'FT_CLIENT_SECRET', 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT', 'VEILLE_CRON_KEY'];
+const VEILLE_ENV_CLES = ['DISCORD_WEBHOOK_URL', 'FT_CLIENT_ID', 'FT_CLIENT_SECRET', 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT', 'VEILLE_CRON_KEY', 'DISCORD_BOT_TOKEN', 'DISCORD_ADMIN_IDS', 'COFFRE_CLE'];
 
 function veille_env_chemin(): string
 {

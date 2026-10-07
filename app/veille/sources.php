@@ -197,77 +197,86 @@ function boamp_collecter(int $jours, array &$journal): array
   return $res;
 }
 
-/* ---------- France Travail ---------- */
+/* ---------- France Travail : La Bonne Boîte v2 ----------
+   L'API « Offres d'emploi » n'est plus proposée aux applications francetravail.io (07/10/2026) :
+   on interroge La Bonne Boîte, qui donne les entreprises d'Île-de-France qui vont recruter
+   des agents de sécurité (métier K2503) dans les 6 prochains mois. Les sociétés de sécurité et
+   d'intérim sont écartées : il reste des prospects (foyers, musées, parcs, établissements…)
+   à qui proposer des agents. Application francetravail.io : API « La Bonne Boîte » ajoutée. */
 function ft_jeton(): string
 {
   $id = veille_env('FT_CLIENT_ID');
   $secret = veille_env('FT_CLIENT_SECRET');
   if ($id === '' || $secret === '') throw new RuntimeException('Identifiants France Travail à configurer (Réglages de la veille).');
   $r = veille_http('POST', 'https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=%2Fpartenaire', ['Content-Type: application/x-www-form-urlencoded'],
-    http_build_query(['grant_type' => 'client_credentials', 'client_id' => $id, 'client_secret' => $secret, 'scope' => 'api_offresdemploiv2 o2dsoffre']), 20);
+    http_build_query(['grant_type' => 'client_credentials', 'client_id' => $id, 'client_secret' => $secret, 'scope' => 'api_labonneboitev2 search office']), 20);
   $j = json_decode($r['corps'], true);
   if ($r['code'] !== 200 || empty($j['access_token'])) {
     $err = $j['error'] ?? '';
-    throw new RuntimeException($err === 'invalid_client' ? 'France Travail refuse les identifiants (vérifiez la clé secrète et que l’API « Offres d’emploi » est bien ajoutée à votre application).' : "Connexion France Travail impossible (HTTP {$r['code']}).");
+    throw new RuntimeException($err === 'invalid_client' ? 'France Travail refuse les identifiants (vérifiez la clé secrète et que l’API « La Bonne Boîte » est bien ajoutée à votre application francetravail.io).' : "Connexion France Travail impossible (HTTP {$r['code']}" . ($err ? " : $err" : '') . ').');
   }
   return (string)$j['access_token'];
 }
 function ft_exclue(array $o): bool
 {
   $c = veille_config()['france_travail'];
-  $secteur = (string)($o['secteurActivite'] ?? '');
-  foreach ($c['secteurs_exclus'] as $s) if ($secteur !== '' && str_starts_with($secteur, $s)) return true;
-  $nom = veille_normaliser((string)($o['entreprise']['nom'] ?? ''));
+  $naf = (string)($o['naf'] ?? '');
+  foreach ($c['secteurs_exclus'] as $s) if ($naf !== '' && str_starts_with($naf, $s)) return true;
+  $nom = veille_normaliser(($o['company_name'] ?? '') . ' ' . ($o['office_name'] ?? ''));
   foreach ($c['noms_exclus'] as $m) { $m2 = trim(veille_normaliser($m)); if ($m2 !== '' && str_contains($nom, $m2)) return true; }
-  $txt = veille_normaliser(($o['description'] ?? '') . ' ' . ($o['entreprise']['description'] ?? ''));
-  foreach ($c['textes_exclus'] as $m) if (str_contains($txt, trim(veille_normaliser($m)))) return true;
   return false;
 }
 function ft_collecter(int $jours, array &$journal): array
 {
   $c = veille_config();
+  $ftc = $c['france_travail'];
+  $min = (float)($ftc['potentiel_min'] ?? 10);
   $jeton = ft_jeton();
-  $publiee = $jours <= 1 ? 1 : ($jours <= 3 ? 3 : ($jours <= 7 ? 7 : ($jours <= 14 ? 14 : 31)));
+  $deps = implode('&', array_map(fn($d) => 'department_number=' . (int)$d, $c['departements']));
   $res = [];
   $total = 0;
   $exclues = 0;
-  foreach ($c['departements'] as $dep) {
-    for ($debut = 0; $debut <= 3000; $debut += 150) {
-      $url = 'https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search?' . http_build_query([
-        'codeROME' => $c['france_travail']['rome'], 'departement' => $dep, 'publieeDepuis' => $publiee, 'range' => $debut . '-' . ($debut + 149),
-      ]);
-      $r = veille_http('GET', $url, ['Authorization: Bearer ' . $jeton, 'Accept: application/json'], null, 25);
-      if ($r['code'] === 204) break; // aucune offre
-      if ($r['code'] === 429) { sleep(1); $r = veille_http('GET', $url, ['Authorization: Bearer ' . $jeton, 'Accept: application/json'], null, 25); }
-      if ($r['code'] !== 200 && $r['code'] !== 206) throw new RuntimeException("France Travail a répondu HTTP {$r['code']} (département $dep).");
-      $j = json_decode($r['corps'], true) ?: [];
-      $offres = $j['resultats'] ?? [];
-      foreach ($offres as $o) {
-        $total++;
-        if (ft_exclue($o)) { $exclues++; continue; }
-        $res[] = [
-          'source' => 'francetravail', 'ref' => (string)$o['id'], 'type' => 'recrutement',
-          'nature' => trim(($o['typeContratLibelle'] ?? '') . (isset($o['dureeTravailLibelle']) ? ' · ' . $o['dureeTravailLibelle'] : '')),
-          'titre' => trim((string)($o['intitule'] ?? 'Offre d’emploi')),
-          'acheteur' => trim((string)($o['entreprise']['nom'] ?? 'Employeur non communiqué')),
-          'lieu' => trim((string)($o['lieuTravail']['libelle'] ?? '')),
-          'departements' => $dep,
-          'date_parution' => substr((string)($o['dateCreation'] ?? ''), 0, 10),
-          'date_limite' => '',
-          'url' => (string)($o['origineOffre']['urlOrigine'] ?? ('https://candidat.francetravail.fr/offres/recherche/detail/' . $o['id'])),
-          'url_dossier' => '',
-          'montant' => 0, 'score' => 0, 'niveau' => 'moyen',
-          'alertes' => array_values(array_filter([$o['secteurActiviteLibelle'] ?? '', $o['salaire']['libelle'] ?? ''])),
-          'motifs' => [],
-          'extrait' => mb_substr(trim((string)($o['description'] ?? '')), 0, 600),
-        ];
-      }
-      $plage = $r['entetes']['content-range'] ?? '';
-      $totalDep = preg_match('#/(\d+)#', $plage, $m) ? (int)$m[1] : 0;
-      if (count($offres) < 150 || $debut + 150 >= $totalDep) break;
+  $faibles = 0;
+  for ($page = 1; $page <= 15; $page++) {
+    $url = 'https://api.francetravail.io/partenaire/labonneboite/v2/recherche?rome=' . rawurlencode((string)$ftc['rome']) . '&' . $deps . "&page=$page&page_size=100&sort_by=hiring_potential&sort_direction=desc";
+    $r = veille_http('GET', $url, ['Authorization: Bearer ' . $jeton, 'Accept: application/json'], null, 25);
+    if ($r['code'] === 429) { sleep(1); $r = veille_http('GET', $url, ['Authorization: Bearer ' . $jeton, 'Accept: application/json'], null, 25); }
+    if ($r['code'] !== 200) throw new RuntimeException("France Travail (La Bonne Boîte) a répondu HTTP {$r['code']} : " . mb_substr(strip_tags($r['corps']), 0, 120));
+    $j = json_decode($r['corps'], true) ?: [];
+    $items = (array)($j['items'] ?? []);
+    foreach ($items as $o) {
+      $total++;
+      if (ft_exclue($o)) { $exclues++; continue; }
+      $pot = round((float)($o['hiring_potential'] ?? 0), 1);
+      if ($pot < $min) { $faibles++; continue; }
+      $siret = preg_replace('/\D/', '', (string)($o['siret'] ?? ''));
+      $nom = trim((string)($o['company_name'] ?? '')) ?: 'Entreprise';
+      $agence = trim((string)($o['office_name'] ?? ''));
+      $effMin = (int)($o['headcount_min'] ?? 0);
+      $effMax = (int)($o['headcount_max'] ?? 0);
+      $effectif = $effMax > 0 ? ($effMin === $effMax ? "$effMin salariés" : "$effMin à $effMax salariés") : '';
+      $fort = !empty($o['is_high_potential']) || $pot >= 40;
+      $res[] = [
+        'source' => 'francetravail', 'ref' => 'lbb-' . ($siret !== '' ? $siret : (string)($o['id'] ?? md5($nom))), 'type' => 'recrutement',
+        'nature' => trim((string)($o['naf_label'] ?? '')),
+        'titre' => 'Va recruter des agents de sécurité' . ($effectif !== '' ? " · $effectif" : ''),
+        'acheteur' => $nom . ($agence !== '' && mb_strtolower($agence) !== mb_strtolower($nom) ? " ($agence)" : ''),
+        'lieu' => trim(($o['city'] ?? '') . ' ' . ($o['postcode'] ?? '')),
+        'departements' => (string)($o['department_number'] ?? ''),
+        'date_parution' => date('Y-m-d'),
+        'date_limite' => '',
+        'url' => $siret !== '' ? 'https://annuaire-entreprises.data.gouv.fr/etablissement/' . $siret : 'https://labonneboite.francetravail.fr/',
+        'url_dossier' => '',
+        'montant' => 0, 'score' => (int)round($pot), 'niveau' => $fort ? 'fort' : ($pot >= 20 ? 'moyen' : 'faible'),
+        'alertes' => array_values(array_filter([$fort ? 'Fort potentiel d’embauche' : '', $effectif])),
+        'motifs' => [],
+        'extrait' => 'Secteur : ' . ($o['naf_label'] ?? '—') . ' (' . ($o['naf'] ?? '') . ")\nEffectif : " . ($effectif ?: 'non communiqué') . "\nPotentiel d’embauche (6 prochains mois) : $pot/100" . ($siret !== '' ? "\nSIRET : $siret" : ''),
+      ];
     }
-    usleep(150000); // l'API limite le nombre d'appels par seconde
+    $hits = (int)($j['hits'] ?? 0);
+    if (count($items) < 100 || $page * 100 >= $hits) break;
+    usleep(600000); // La Bonne Boîte : 2 appels par seconde au maximum
   }
-  $journal[] = "$total offres d'agent de sécurité (K2503), $exclues écartées (sociétés de sécurité, intérim, « pour notre client »), " . count($res) . ' employeurs directs.';
+  $journal[] = "$total entreprises vont recruter des agents de sécurité (K2503, Île-de-France) : $exclues sociétés de sécurité ou d'intérim écartées, $faibles à faible potentiel, " . count($res) . ' prospects.';
   return $res;
 }

@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -985,6 +985,49 @@ try {
       journal('securite', 'Notifications retirées d’un appareil');
       repondre(['ok' => true]);
 
+    /* ================= Serveur Discord de la direction ================= */
+    case 'discord':
+      require_once __DIR__ . '/../app/discord/structure.php';
+      $c = dc_config();
+      $file = db()->query("SELECT SUM(etat = 'attente') a, SUM(etat = 'erreur') e, SUM(etat = 'envoye') s FROM dc_file")->fetch() ?: [];
+      repondre(['ok' => true, 'discord' => [
+        'jeton' => dc_jeton() !== '', 'installe' => (string)($c['installe'] ?? ''), 'synchro' => (string)($c['synchro'] ?? ''),
+        'guild' => (string)($c['guild'] ?? ''), 'salons' => count((array)($c['salons'] ?? [])), 'coffre' => (int)db()->query('SELECT COUNT(*) FROM coffre')->fetchColumn(),
+        'file' => ['attente' => (int)($file['a'] ?? 0), 'erreurs' => (int)($file['e'] ?? 0), 'envoyes' => (int)($file['s'] ?? 0)],
+        'sodium' => function_exists('sodium_crypto_sign_verify_detached'), 'lienBot' => dc_lien_autorisation((string)($c['guild'] ?? '')),
+      ]]);
+
+    case 'discord.jeton':
+      require_once __DIR__ . '/../app/discord/bot.php';
+      $jeton = trim(chaine(corps()['jeton'] ?? ''));
+      if ($jeton === '') {
+        veille_env_ecrire(['DISCORD_BOT_TOKEN' => '']);
+        journal('securite', 'Discord : jeton du bot retiré');
+        repondre(['ok' => true]);
+      }
+      if (!preg_match('/^[A-Za-z0-9_\-.]{50,120}$/', $jeton)) echec('Jeton invalide : copiez-le depuis le portail Discord (Bot > Réinitialiser le token).');
+      $r = dc_api('GET', '/users/@me', null, ['jeton' => $jeton]);
+      if (!$r['ok']) echec('Discord refuse ce jeton : ' . $r['erreur']);
+      veille_env_ecrire(['DISCORD_BOT_TOKEN' => $jeton]);
+      journal('securite', 'Discord : jeton du bot enregistré (' . ($r['json']['username'] ?? 'bot') . ')');
+      repondre(['ok' => true, 'bot' => (string)($r['json']['username'] ?? '')]);
+
+    case 'discord.installer':
+      session_write_close();
+      require_once __DIR__ . '/../app/discord/structure.php';
+      try {
+        $j = dc_installer();
+      } catch (Throwable $e) {
+        echec($e->getMessage(), 409);
+      }
+      repondre(['ok' => true, 'journal' => $j]);
+
+    case 'discord.sync':
+      session_write_close();
+      require_once __DIR__ . '/../app/discord/structure.php';
+      if (!dc_pret()) echec('Installez d’abord le serveur Discord.', 409);
+      repondre(['ok' => true, 'journal' => dc_cron(true)]);
+
     /* ================= Demandes, candidatures, avis ================= */
     case 'demandes':
     case 'candidatures':
@@ -1641,29 +1684,6 @@ function eq_compte_admin(int $id): array
   $c = $st->fetch();
   if (!$c) echec('Compte introuvable.', 404);
   return $c;
-}
-// Absence acceptée : le code (CP, M, ABS, R) est écrit dans le planning de chaque jour concerné
-function eq_absence_planning(array $agent, string $du, string $au, string $code): int
-{
-  $n = 0;
-  $parMois = [];
-  for ($t = strtotime($du); $t <= strtotime($au); $t += 86400) $parMois[date('Y-m', $t)][] = date('Y-m-d', $t);
-  foreach ($parMois as $mois => $jours) {
-    $st = db()->prepare('SELECT data FROM plannings WHERE mois = ?');
-    $st->execute([$mois]);
-    $p = json_decode((string)$st->fetchColumn(), true);
-    if (!is_array($p)) continue;
-    foreach ($p['agents'] as &$a) {
-      $memeId = (int)($a['id'] ?? 0) === (int)$agent['id'];
-      if (!$memeId && (!empty($a['id']) || nom_simple((string)($a['nom'] ?? '')) !== nom_simple((string)$agent['nom']))) continue;
-      $a['jours'] = (array)($a['jours'] ?? []);
-      foreach ($jours as $j) { $a['jours'][$j] = $code; $n++; }
-      break;
-    }
-    unset($a);
-    db()->prepare('UPDATE plannings SET data = ?, maj = ? WHERE mois = ?')->execute([json_encode($p, JSON_UNESCAPED_UNICODE), maintenant(), $mois]);
-  }
-  return $n;
 }
 // Page d'accueil : ce qui attend une action, et les derniers éléments modifiés (aucun montant)
 function accueil(): array

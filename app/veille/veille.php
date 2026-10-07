@@ -118,10 +118,22 @@ function veille_notifier(array $nouveaux, array $premiers): array
   $res = ['discord' => null, 'push' => ['envoyes' => 0, 'supprimes' => 0, 'erreurs' => 0], 'messages' => 0];
   $discordOk = true;
   $erreurs = [];
-  $envoyer = function (array $embeds, string $contenu, array $push) use (&$res, &$discordOk, &$erreurs) {
-    $d = discord_envoyer($embeds, $contenu);
+  $bot = dc_actif();
+  if ($bot) require_once __DIR__ . '/../discord/vues.php';
+  $envoyer = function (array $embeds, string $contenu, array $push, string $salon = 'appels-offres', array $ids = [], string $prefixe = '') use (&$res, &$discordOk, &$erreurs, $bot) {
+    $d = ['ok' => false, 'erreur' => ''];
+    if ($bot) {
+      // Serveur de la direction : cartes sobres, boutons Contacté / Ignorer / Note, menu pour les résumés
+      $os = $ids ? dc_q('SELECT * FROM opportunites WHERE id IN (' . implode(',', array_map('intval', $ids)) . ')') : [];
+      $msg = ['content' => trim((string)preg_replace('/[\x{1F000}-\x{1FAFF}\x{2600}-\x{27BF}\x{FE0F}]/u', '', $contenu)), 'embeds' => $os ? array_map(fn($o) => dcv_opportunite_carte($o, $prefixe), array_slice($os, 0, 10)) : $embeds];
+      if (count($os) === 1) $msg['components'] = dcv_opportunite_boutons($os[0]);
+      elseif ($os) $msg['components'] = [dc_liste('s:opportunite', 'Traiter une de ces opportunités…', array_map(fn($o) => dc_option($o['source'] === 'boamp' ? $o['titre'] : $o['acheteur'], (string)$o['id'], $o['source'] === 'boamp' ? $o['acheteur'] : $o['lieu']), array_slice($os, 0, 25)))];
+      $e = dc_envoyer($salon, $msg);
+      if ($e['ok']) $d = ['ok' => true, 'envoyes' => 1];
+    }
+    if (!$d['ok']) $d = discord_envoyer($embeds, $contenu);
     if (!$d['ok']) { $discordOk = false; $erreurs[] = $d['erreur']; } else $res['messages'] += $d['envoyes'];
-    if (empty(notif_prefs()['veille'])) return; // catégorie coupée dans l'admin (Notifications)
+    if (!$push || empty(notif_prefs()['veille'])) return; // catégorie coupée dans l'admin (Notifications)
     $p = webpush_tous($push + ['categorie' => 'veille']);
     foreach ($p as $k => $v) $res['push'][$k] += $v;
   };
@@ -144,7 +156,8 @@ function veille_notifier(array $nouveaux, array $premiers): array
     if (isset($premiers['francetravail'])) $lignes[] = "• **" . count($rec) . " employeurs directs** qui recrutent des agents de sécurité";
     $lignes[] = "Les plus intéressants ci-dessous · tout est dans l'admin : https://bdasecurite.com/admin/#/opportunites";
     $embeds = array_map(fn($o) => discord_embed($o), array_slice($aoNotif, 0, 10));
-    $envoyer($embeds, implode("\n", $lignes), ['title' => 'Veille BDA activée', 'body' => count($ao) . " appels d'offres et " . count($rec) . ' recrutements trouvés.', 'url' => '/admin/#/opportunites', 'tag' => 'veille-recap']);
+    $envoyer($embeds, implode("\n", $lignes), ['title' => 'Veille BDA activée', 'body' => count($ao) . " appels d'offres et " . count($rec) . ' entreprises qui recrutent trouvés.', 'url' => '/admin/#/opportunites', 'tag' => 'veille-recap'], 'appels-offres', array_map(fn($o) => (int)$o['id'], array_slice($aoNotif, 0, 10)));
+    if (isset($premiers['francetravail']) && $rec) $envoyer([], count($rec) . ' entreprises d’Île-de-France vont recruter des agents de sécurité : proposez-leur vos agents.', [], 'entreprises-qui-recrutent', array_map(fn($o) => (int)$o['id'], array_slice($rec, 0, 10)));
     // les rappels J-3 déjà proches sont inclus dans ce récapitulatif
     db()->exec("UPDATE opportunites SET notifie = 1");
     db()->prepare("UPDATE opportunites SET rappel_j3 = 1 WHERE date_limite <> '' AND date_limite <= ?")->execute([date('Y-m-d H:i:s', time() + veille_config()['rappel_jours'] * 86400)]);
@@ -159,20 +172,20 @@ function veille_notifier(array $nouveaux, array $premiers): array
     if (count($aoNotif) <= 3) {
       foreach ($aoNotif as $o) {
         $j = veille_jours_restants((string)$o['date_limite']);
-        $envoyer([discord_embed($o)], '🔔 **Nouvel appel d’offres**', ['title' => ($o['type'] === 'chauffeur' ? '🚘 ' : '🛡️ ') . 'Nouvel appel d’offres', 'body' => mb_substr($o['titre'], 0, 120) . ' — ' . $o['acheteur'] . ($j !== null ? " (J-$j)" : ''), 'url' => '/admin/#/opportunites/' . $o['id'], 'tag' => 'opp-' . $o['id']]);
+        $envoyer([discord_embed($o)], '🔔 **Nouvel appel d’offres**', ['title' => ($o['type'] === 'chauffeur' ? '🚘 ' : '🛡️ ') . 'Nouvel appel d’offres', 'body' => mb_substr($o['titre'], 0, 120) . ' — ' . $o['acheteur'] . ($j !== null ? " (J-$j)" : ''), 'url' => '/admin/#/opportunites/' . $o['id'], 'tag' => 'opp-' . $o['id']], 'appels-offres', [(int)$o['id']]);
       }
     } else {
       $embeds = array_map(fn($o) => discord_embed($o), array_slice($aoNotif, 0, 10));
       $reste = count($aoNotif) - count($embeds);
       $envoyer($embeds, '🔔 **' . count($aoNotif) . ' nouveaux appels d’offres**' . ($reste > 0 ? " (les 10 plus intéressants ci-dessous, $reste autres dans l'admin)" : ''),
-        ['title' => count($aoNotif) . ' nouveaux appels d’offres', 'body' => 'Dont : ' . mb_substr($aoNotif[0]['titre'], 0, 90) . '…', 'url' => '/admin/#/opportunites', 'tag' => 'veille-resume']);
+        ['title' => count($aoNotif) . ' nouveaux appels d’offres', 'body' => 'Dont : ' . mb_substr($aoNotif[0]['titre'], 0, 90) . '…', 'url' => '/admin/#/opportunites', 'tag' => 'veille-resume'], 'appels-offres', array_map(fn($o) => (int)$o['id'], array_slice($aoNotif, 0, 25)));
     }
   }
   // 3) Nouveaux recrutements (employeurs directs) : un résumé
   if ($rec) {
     $embeds = array_map(fn($o) => discord_embed($o), array_slice($rec, 0, 5));
-    $envoyer($embeds, '👥 **' . count($rec) . ' employeur(s) direct(s) recrutent des agents de sécurité**' . (count($rec) > 5 ? ' (5 premiers ci-dessous)' : '') . ' : proposez-leur vos agents.',
-      ['title' => count($rec) . ' nouveau(x) recrutement(s)', 'body' => $rec[0]['acheteur'] . ' — ' . mb_substr($rec[0]['titre'], 0, 80), 'url' => '/admin/#/opportunites', 'tag' => 'veille-recrutements']);
+    $envoyer($embeds, '👥 **' . count($rec) . ' entreprise(s) vont recruter des agents de sécurité**' . (count($rec) > 5 ? ' (5 premières ci-dessous)' : '') . ' : proposez-leur vos agents.',
+      ['title' => count($rec) . ' entreprise(s) qui recrutent', 'body' => $rec[0]['acheteur'] . ' — ' . mb_substr($rec[0]['titre'], 0, 80), 'url' => '/admin/#/opportunites', 'tag' => 'veille-recrutements'], 'entreprises-qui-recrutent', array_map(fn($o) => (int)$o['id'], array_slice($rec, 0, 25)));
   }
   if ($ao || $rec) db()->exec('UPDATE opportunites SET notifie = 1 WHERE notifie = 0');
 
@@ -185,11 +198,11 @@ function veille_notifier(array $nouveaux, array $premiers): array
     if (count($rappels) <= 3) {
       foreach ($rappels as $o) {
         $j = veille_jours_restants((string)$o['date_limite']);
-        $envoyer([discord_embed($o, "⏰ J-$j · ")], "⏰ **Rappel : date limite dans $j jour(s)**", ['title' => "⏰ J-$j : date limite proche", 'body' => mb_substr($o['titre'], 0, 120), 'url' => '/admin/#/opportunites/' . $o['id'], 'tag' => 'rappel-' . $o['id']]);
+        $envoyer([discord_embed($o, "⏰ J-$j · ")], "⏰ **Rappel : date limite dans $j jour(s)**", ['title' => "⏰ J-$j : date limite proche", 'body' => mb_substr($o['titre'], 0, 120), 'url' => '/admin/#/opportunites/' . $o['id'], 'tag' => 'rappel-' . $o['id']], 'appels-offres', [(int)$o['id']], "J-$j · ");
       }
     } else {
       $envoyer(array_map(fn($o) => discord_embed($o, '⏰ J-' . veille_jours_restants((string)$o['date_limite']) . ' · '), array_slice($rappels, 0, 10)), '⏰ **' . count($rappels) . ' appels d’offres arrivent à leur date limite**',
-        ['title' => '⏰ ' . count($rappels) . ' dates limites proches', 'body' => 'Ouvrez la veille pour ne rien rater.', 'url' => '/admin/#/opportunites', 'tag' => 'rappels']);
+        ['title' => '⏰ ' . count($rappels) . ' dates limites proches', 'body' => 'Ouvrez la veille pour ne rien rater.', 'url' => '/admin/#/opportunites', 'tag' => 'rappels'], 'appels-offres', array_map(fn($o) => (int)$o['id'], array_slice($rappels, 0, 25)), 'Date limite proche · ');
     }
     $ids = implode(',', array_map(fn($o) => (int)$o['id'], $rappels));
     db()->exec("UPDATE opportunites SET rappel_j3 = 1 WHERE id IN ($ids)");

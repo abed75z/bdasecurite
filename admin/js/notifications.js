@@ -56,7 +56,7 @@ function aideInstallation() {
 /* ---------- Page ---------- */
 export async function pageNotifications(ctx) {
   ctx.titre('Notifications');
-  const [d, abo] = await Promise.all([api('notif.prefs'), abonnementActuel()]);
+  const [d, abo, dc] = await Promise.all([api('notif.prefs'), abonnementActuel(), api('discord').then((r) => r.discord).catch(() => null)]);
   if (!ctx.actuel()) return;
   const recharger = () => pageNotifications(ctx);
   const actif = !!abo;
@@ -138,5 +138,47 @@ export async function pageNotifications(ctx) {
         } }, icone('poubelle')))))
       : h('p', { class: 'vide' }, 'Aucun appareil pour le moment.'));
 
-  ctx.afficher(h('div', { class: 'notif-page' }, appareil, categories, appareils));
+  ctx.afficher(h('div', { class: 'notif-page' }, appareil, categories, dc ? carteDiscord(dc, recharger) : null, appareils));
+}
+
+/* ---------- Serveur Discord de la direction ---------- */
+function carteDiscord(dc, recharger) {
+  const jeton = h('input', { class: 'input', type: 'password', autocomplete: 'off', placeholder: dc.jeton ? 'Jeton enregistré · collez-en un nouveau pour le remplacer' : 'Collez ici le jeton du bot (portail Discord > Bot)' });
+  const occupe = async (b, travail) => {
+    b.disabled = true;
+    b.classList.add('is-loading');
+    try { await travail(); } catch (err) { erreur(err); } finally { b.disabled = false; b.classList.remove('is-loading'); }
+  };
+  const journal = (titre, lignes) => modale({ titre, contenu: h('ul', { class: 'op-etapes' }, (lignes || []).map((l) => h('li', null, l))), actions: [{ libelle: 'Fermer', classe: 'btn--gold', valeur: true, submit: true }] });
+  const etat = [
+    dc.jeton ? 'Jeton du bot enregistré' : 'Jeton du bot à coller',
+    dc.installe ? `serveur installé ${ilYa(dc.installe)} · ${dc.salons} salons` : 'serveur pas encore installé',
+    dc.synchro ? `dernière mise à jour ${ilYa(dc.synchro)}` : '',
+    `${dc.file.envoyes} message(s) envoyés · ${dc.file.attente} en attente${dc.file.erreurs ? ` · ${dc.file.erreurs} en erreur` : ''}`,
+    `${dc.coffre} accès dans le coffre-fort`,
+  ].filter(Boolean).join(' · ');
+  return h('section', { class: 'carte' },
+    h('header', { class: 'carte__tete' }, h('h2', null, 'Serveur Discord de la direction'), h('small', null, 'Alertes détaillées, panel, dossiers, coffre-fort')),
+    h('p', { class: 'notif-note' }, icone(dc.jeton && dc.installe ? 'coche' : 'alerte'), etat),
+    !dc.sodium ? h('p', { class: 'notif-note' }, icone('alerte'), 'Le serveur ne sait pas vérifier les signatures Discord (extension sodium absente) : les commandes / ne répondront pas.') : null,
+    h('div', { class: 'champ' }, h('span', { class: 'champ__label' }, 'Jeton du bot'), jeton,
+      h('small', { class: 'champ__aide' }, 'Rangé dans le fichier privé .env du serveur, jamais affiché. Régénérez-le dans le portail Discord s’il a été partagé.')),
+    h('div', { class: 'notif-actions' },
+      h('button', { class: 'btn btn--gold', type: 'button', onclick: (e) => occupe(e.currentTarget, async () => {
+        const r = await api('discord.jeton', { jeton: jeton.value.trim() });
+        toast(jeton.value.trim() ? `Jeton enregistré (bot ${r.bot}).` : 'Jeton retiré.');
+        recharger();
+      }) }, icone('cle'), h('span', null, 'Enregistrer le jeton')),
+      h('button', { class: 'btn btn--ghost', type: 'button', disabled: !dc.jeton, onclick: (e) => occupe(e.currentTarget, async () => {
+        const r = await api('discord.installer', {});
+        await journal('Serveur Discord installé', r.journal);
+        recharger();
+      }) }, icone('reglages'), h('span', null, 'Installer / réparer le serveur')),
+      h('button', { class: 'btn btn--ghost', type: 'button', disabled: !dc.installe, onclick: (e) => occupe(e.currentTarget, async () => {
+        const r = await api('discord.sync', {});
+        await journal('Serveur Discord mis à jour', r.journal);
+        recharger();
+      }) }, icone('activite'), h('span', null, 'Tout mettre à jour')),
+      dc.guild ? h('a', { class: 'btn btn--ghost', href: `https://discord.com/channels/${dc.guild}`, target: '_blank', rel: 'noopener' }, icone('site'), h('span', null, 'Ouvrir Discord')) : null,
+      h('a', { class: 'btn btn--ghost', href: dc.lienBot, target: '_blank', rel: 'noopener' }, icone('bouclier'), h('span', null, 'Droits du bot'))));
 }

@@ -9,8 +9,25 @@ declare(strict_types=1);
 require __DIR__ . '/../app/bootstrap.php';
 require __DIR__ . '/../app/veille/veille.php';
 
+// Serveur Discord de la direction : panel, tableau de bord, dossiers, rappels… et une fois par jour le projet de A à Z
+function veille_cron_discord(): void
+{
+  if (!dc_actif()) return;
+  try {
+    require_once __DIR__ . '/../app/discord/structure.php';
+    dc_cron();
+    if ((dc_config()['projet_jour'] ?? '') !== date('Y-m-d')) {
+      dc_publier_projet();
+      dc_config_maj(['projet_jour' => date('Y-m-d')]);
+    }
+  } catch (Throwable $e) {
+    error_log('[BDA discord cron] ' . $e->getMessage());
+  }
+}
+
 if (PHP_SAPI === 'cli') {
   $r = veille_lancer('cron');
+  veille_cron_discord();
   echo json_encode(['ok' => $r['ok'], 'nouveaux' => $r['nouveaux'] ?? null, 'message' => $r['message'] ?? ''], JSON_UNESCAPED_UNICODE), "\n";
   exit;
 }
@@ -36,6 +53,7 @@ try {
   if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
   else { @ob_end_flush(); flush(); }
   veille_lancer('auto');
+  veille_cron_discord();
 } catch (Throwable $e) {
   error_log('[BDA veille-cron] ' . $e->getMessage());
   if (!headers_sent()) echec('Erreur du serveur.', 500);

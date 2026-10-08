@@ -10,3 +10,6 @@ desktop.ini
 bda-admin-data/
 *.sqlite
 *.lock
+
+# Marqueur « site hors ligne » écrit par le serveur
+.site-hors-ligne

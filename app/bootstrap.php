@@ -610,6 +610,10 @@ function fichier_hors_ligne(): string
 function site_hors_ligne(): ?array
 {
   $f = fichier_hors_ligne();
+  // Apache ne peut pas lire le dossier privé des données : un marqueur vide dans le dossier du site
+  // lui indique que le site est hors ligne (voir .htaccess). Il suit toujours l'état réel.
+  $marqueur = dirname(__DIR__) . '/.site-hors-ligne';
+  if (is_file($f) !== is_file($marqueur)) is_file($f) ? @file_put_contents($marqueur, '') : @unlink($marqueur);
   if (!is_file($f)) return null;
   $v = json_decode((string)@file_get_contents($f), true);
   return is_array($v) ? $v : ['depuis' => '', 'message' => '', 'retour' => ''];

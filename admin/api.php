@@ -460,7 +460,7 @@ try {
     case 'site.horsligne':
       $b = corps();
       if (!empty($b['actif'])) {
-        $etat = ['depuis' => maintenant(), 'message' => texte($b['message'] ?? '', 500), 'retour' => texte($b['retour'] ?? '', 80)];
+        $etat = ['depuis' => maintenant(), 'message' => texte($b['message'] ?? '', 500), 'retour' => texte($b['retour'] ?? '', 80), 'vide' => !empty($b['vide'])];
         if (@file_put_contents(fichier_hors_ligne(), json_encode($etat, JSON_UNESCAPED_UNICODE), LOCK_EX) === false) echec("Impossible de mettre le site hors ligne (écriture refusée).", 500);
         poser_apercu();
         journal('site', 'SITE MIS HORS LIGNE (page de maintenance pour les visiteurs)');

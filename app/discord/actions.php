@@ -411,7 +411,7 @@ function dc_action(array $i, array $p, bool $prive): array
     case 'site':
       if (!dc_proprio()) return dc_rep_texte('Réservé au gérant.');
       if ($op === 'off') {
-        $etat = ['depuis' => maintenant(), 'message' => '', 'retour' => ''];
+        $etat = ['depuis' => maintenant(), 'message' => '', 'retour' => '', 'vide' => true];
         if (@file_put_contents(fichier_hors_ligne(), json_encode($etat, JSON_UNESCAPED_UNICODE), LOCK_EX) === false) return dc_rep_texte('Impossible de mettre le site hors ligne.');
         journal('site', 'SITE MIS HORS LIGNE (page de maintenance pour les visiteurs)' . $qui);
       } elseif (is_file(fichier_hors_ligne())) {

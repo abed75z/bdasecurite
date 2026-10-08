@@ -52,6 +52,11 @@ function page_maintenance(array $etat): void
   header('Cache-Control: no-store');
   header('X-Robots-Tag: noindex');
   header('Content-Type: text/html; charset=utf-8');
+  // « Page blanche » choisie dans l'admin : rien n'est affiché aux visiteurs
+  if (!empty($etat['vide'])) {
+    echo '<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title></title></head><body style="margin:0;background:#fff"></body></html>';
+    exit;
+  }
   $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
   $message = trim((string)($etat['message'] ?? '')) ?: 'Notre site fait peau neuve et revient très vite. Nos équipes restent joignables 24 h/24.';
   $retour = trim((string)($etat['retour'] ?? ''));

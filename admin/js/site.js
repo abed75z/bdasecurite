@@ -41,17 +41,20 @@ export async function pageSite(ctx) {
   async function mettreHorsLigne() {
     const message = zoneTexte({ rows: 3, value: MESSAGE_DEFAUT, maxlength: 500 });
     const retour = saisie({ placeholder: 'ex. demain à 10 h (facultatif)', maxlength: 80 });
+    const vide = h('input', { type: 'checkbox', checked: true });
+    const champsMessage = h('div', { class: 'form-grille', hidden: true }, champ('Message affiché aux visiteurs', message), champ('Retour prévu', retour));
+    vide.addEventListener('change', () => { champsMessage.hidden = vide.checked; });
     const ok = await modale({
       titre: 'Mettre le site hors ligne',
       contenu: [
-        h('p', { class: 'astuce' }, 'Les visiteurs verront une page « Maintenance » avec vos numéros (appel, WhatsApp, email). Vos pages, vos données et cet espace admin ne sont pas touchés : un clic suffit pour tout remettre.'),
-        champ('Message affiché aux visiteurs', message),
-        champ('Retour prévu', retour),
+        h('p', { class: 'astuce' }, 'Vos pages, vos données et cet espace admin ne sont pas touchés : un clic suffit pour tout remettre.'),
+        h('label', { class: 'champ champ--case' }, vide, h('span', null, 'Page blanche : les visiteurs ne voient rien du tout (aucun message)')),
+        champsMessage,
       ],
       actions: [
         { libelle: 'Annuler', classe: 'btn--ghost', valeur: false },
         { libelle: 'Mettre hors ligne', classe: 'btn--danger', submit: true, action: async () => {
-          try { ({ site: s } = await api('site.horsligne', { actif: true, message: message.value.trim(), retour: retour.value.trim() })); return true; } catch (e) { erreur(e); return false; }
+          try { ({ site: s } = await api('site.horsligne', { actif: true, vide: vide.checked, message: message.value.trim(), retour: retour.value.trim() })); return true; } catch (e) { erreur(e); return false; }
         } },
       ],
     });

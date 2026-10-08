@@ -32,6 +32,13 @@ RewriteRule ^ https://bdasecurite.com/%1 [R=301,L]
 # Pages retirées le 04/10/2026 : redirigées définitivement (anciens liens et Google)
 RewriteRule ^chauffeur-mariage-paris(\.html)?/?$ https://bdasecurite.com/chauffeur-prive-vtc-paris [R=301,L]
 RewriteRule ^references(\.html)?/?$ https://bdasecurite.com/ [R=301,L]
+# Diagnostic temporaire (chemin vu par Apache)
+RewriteCond %{QUERY_STRING} ^diagdr$
+RewriteRule ^ - [E=DIAGDR:%{DOCUMENT_ROOT}|%{CONTEXT_DOCUMENT_ROOT}|%{SCRIPT_FILENAME}]
+<IfModule mod_headers.c>
+  Header always set X-Diag-DR "%{DIAGDR}e" env=DIAGDR
+  Header always set X-Diag-DR2 "%{REDIRECT_DIAGDR}e" env=REDIRECT_DIAGDR
+</IfModule>
 # Site hors ligne (admin > Contrôle du site) : les pages passent par maintenance.php,
 # qui affiche la page de maintenance aux visiteurs et le site normal à l'administrateur.
 # (l'espace admin, les services et les images restent accessibles)

@@ -69,7 +69,7 @@ function page_maintenance(array $etat): void
   <meta name="robots" content="noindex">
   <meta name="theme-color" content="#13110f">
   <title>Site en maintenance — BDA Security Group</title>
-  <link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml">
+  <link rel="icon" href="/assets/img/favicon.svg?v=4" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;1,500&display=swap" rel="stylesheet">
@@ -100,7 +100,7 @@ function page_maintenance(array $etat): void
 </head>
 <body>
   <main>
-    <img class="logo" src="/assets/img/logo-bda.png?v=3" alt="BDA Security Group" width="600" height="528">
+    <img class="logo" src="/assets/img/logo.png?v=2" alt="BDA Security Group" width="512" height="512">
     <span class="badge"><i></i>Maintenance</span>
     <h1>Nous revenons <em>très vite.</em></h1>
     <p><?= nl2br($e($message)) ?></p>

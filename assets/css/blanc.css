@@ -1750,3 +1750,9 @@ body:has(.lp-hero) .nav:not(.is-compact) .nav__survol { background: rgba(255, 25
   .nav__inner:has(.nav__links--d) .nav__links--d { margin-left: 0 !important; }
   .nav__inner:has(.nav__links--d) .nav__links:not(.nav__links--d) { margin-right: 0 !important; }
 }
+
+/* Téléphone et tablette : pas de photo derrière le titre des pages, fond noir et lueur dorée seulement */
+@media (max-width: 900px) {
+  .lp-hero__photo img, .rv-hero__photo img { display: none !important; }
+  .lp-hero__photo { background: radial-gradient(120% 70% at 50% 0%, rgba(176, 141, 87, 0.16), transparent 60%), #0b0b0c !important; }
+}

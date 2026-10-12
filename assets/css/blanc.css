@@ -1707,3 +1707,39 @@ body:has(.lp-hero) .nav:not(.is-compact) .nav__survol { background: rgba(255, 25
   font: 800 10.5px/1 var(--font-display, 'Manrope', sans-serif); letter-spacing: 0.14em; padding-left: 0.14em;
   color: #e3c98f; box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.5);
 }
+
+/* =========================================================
+   Page Entreprises (entreprises.html) : sobre, 3 blocs + formulaire
+   ========================================================= */
+.ent-sites { background: var(--bg-2); }
+.ent-tuiles { grid-template-columns: repeat(3, 1fr) !important; grid-auto-rows: minmax(190px, auto) !important; margin-top: 8px; }
+@media (max-width: 1020px) { .ent-tuiles { grid-template-columns: 1fr 1fr !important; } }
+@media (max-width: 600px) { .ent-tuiles { grid-template-columns: 1fr !important; } }
+.ent-offre { background: #fff; }
+.ent-offre .ac-engagements { margin-top: 10px; }
+.ent-demande { background: var(--bg-2); }
+.ent-demande__grille { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(28px, 5vw, 72px); align-items: start; }
+.ent-demande__texte .lead { margin-top: 14px; max-width: 30ch; }
+.ent-contact { list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 12px; }
+.ent-contact li { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+.ent-contact .icon { width: 20px; height: 20px; color: var(--rouge); }
+.ent-contact a { color: var(--noir); text-decoration: none; }
+.ent-contact a:hover { text-decoration: underline; }
+.ent-carte { background: #fff; border-radius: 28px; padding: clamp(22px, 3vw, 36px); box-shadow: var(--ombre-forte, 0 30px 60px -30px rgba(0, 0, 0, 0.25)); }
+.ent-form { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.ent-form__large { grid-column: 1 / -1; }
+.ent-form .rappel__champ small { font-weight: 500; color: #86868b; }
+.ent-form textarea { width: 100%; min-height: 96px; padding: 14px 16px; border: 1px solid var(--line-strong); border-radius: 14px; background: #fff; font: 500 16px/1.45 var(--font-body); color: var(--noir); resize: vertical; transition: border-color 0.2s, box-shadow 0.2s; }
+.ent-form textarea:focus { outline: none; border-color: var(--noir); box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.06); }
+.ent-form .btn { justify-content: center; height: 54px; }
+.ent-merci { display: grid; justify-items: center; gap: 12px; text-align: center; padding: 24px 0; }
+.ent-merci[hidden] { display: none; }
+.ent-merci p { color: var(--muted); max-width: 34ch; }
+@media (max-width: 900px) { .ent-demande__grille { grid-template-columns: 1fr; } .ent-demande__texte .lead { max-width: none; } }
+@media (max-width: 520px) { .ent-form { grid-template-columns: 1fr; } }
+
+/* Accueil : ligne « Vous êtes une entreprise ? » */
+.ac-pro { background: var(--noir); color: #f3eee5; }
+.ac-pro__ligne { display: flex; align-items: center; justify-content: space-between; gap: 18px 28px; flex-wrap: wrap; padding-block: 30px; }
+.ac-pro__ligne p { margin: 0; font: 700 clamp(1.15rem, 0.9rem + 0.9vw, 1.6rem)/1.25 var(--font-display); letter-spacing: -0.02em; color: #f3eee5; }
+.ac-pro__ligne p span { color: #d9bd85; }

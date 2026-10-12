@@ -1,0 +1,19 @@
+# Prévient Bing (et les moteurs IndexNow : Yandex, Seznam, Naver…) à chaque mise à jour du site,
+# pour que les pages modifiées soient réindexées vite. La clé IndexNow est publique (fichier à la racine).
+name: IndexNow
+on:
+  push:
+    branches: [main]
+    paths: ['**.html', 'sitemap.xml']
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Attendre la mise en ligne OVH
+        run: sleep 90
+      - name: Envoyer les pages du sitemap
+        run: |
+          urls=$(curl -fsS https://bdasecurite.com/sitemap.xml | grep -o '<loc>[^<]*' | sed 's/<loc>//' | jq -R . | jq -sc .)
+          body=$(jq -nc --argjson u "$urls" '{host:"bdasecurite.com",key:"e288de38da05433f999b99b796a79f6c",keyLocation:"https://bdasecurite.com/e288de38da05433f999b99b796a79f6c.txt",urlList:$u}')
+          curl -sS -o /dev/null -w "IndexNow : %{http_code}\n" -X POST https://api.indexnow.org/indexnow -H 'Content-Type: application/json; charset=utf-8' -d "$body"

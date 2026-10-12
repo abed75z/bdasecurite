@@ -1743,3 +1743,10 @@ body:has(.lp-hero) .nav:not(.is-compact) .nav__survol { background: rgba(255, 25
 .ac-pro__ligne { display: flex; align-items: center; justify-content: space-between; gap: 18px 28px; flex-wrap: wrap; padding-block: 30px; }
 .ac-pro__ligne p { margin: 0; font: 700 clamp(1.15rem, 0.9rem + 0.9vw, 1.6rem)/1.25 var(--font-display); letter-spacing: -0.02em; color: #f3eee5; }
 .ac-pro__ligne p span { color: #d9bd85; }
+
+/* En-tête : même espace à gauche et à droite du logo (les deux menus n'ont pas la même largeur) */
+@media (min-width: 1181px) {
+  .nav__inner:has(.nav__links--d) .nav__marque:not(.nav__marque--gauche) { position: static; transform: none; margin-left: auto !important; margin-right: auto !important; }
+  .nav__inner:has(.nav__links--d) .nav__links--d { margin-left: 0 !important; }
+  .nav__inner:has(.nav__links--d) .nav__links:not(.nav__links--d) { margin-right: 0 !important; }
+}

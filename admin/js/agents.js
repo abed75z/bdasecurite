@@ -72,7 +72,7 @@ const falsifiee = (a) => /falsifi/i.test(a.carte || '');
 
 async function listeAgents(ctx) {
   ctx.titre('Agents');
-  let { agents } = await api('agents');
+  const { agents } = await api('agents');
   ctx.actions(
     h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => importerRegistre() }, icone('telecharger'), h('span', null, 'Mettre à jour depuis le registre')),
     h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => importerDossier(ctx) }, icone('telecharger'), h('span', null, 'Importer un dossier')),
@@ -81,81 +81,69 @@ async function listeAgents(ctx) {
   const auj = iso(new Date()), dans90 = iso(new Date(Date.now() + 90 * 864e5));
   const etatCarte = (a) => (falsifiee(a) ? 'Falsifiée' : !a.validite ? '' : a.validite < auj ? 'Expirée' : a.validite <= dans90 ? 'Expire bientôt' : 'Valide');
   const mien = (a) => (a.categorie || 'primaire') !== 'secours';
-  const resumeDocs = (a) => {
-    const i = infosDe(a);
-    const ok = etatDocs(a.docs).filter((e) => e.etat === 'ok').length;
-    const enLigne = Object.values(a.docs || {}).reduce((s, n) => s + +n, 0);
-    return [enLigne ? `${ok}/${OBLIGATOIRES.length} obligatoires dans l'admin` : '', i.docs || ''].filter(Boolean).join(' · ');
-  };
+  const ORDRE = ['primaire', 'secondaire', 'secours'];
+  const lignesTexte = (...v) => v.filter((x) => x && String(x).trim()).map((x) => h('span', { class: 'cell-ligne' }, x));
 
-  // Colonnes : [titre, valeur affichée / triée, classe]
+  // Colonnes : [titre, clé de tri, contenu de la cellule]
   const COLS = [
-    ['Nom', (a) => a.nom, 'col-nom'],
-    ['Équipe', (a) => EQUIPE[a.categorie || 'primaire'], ''],
-    ['Poste', (a) => a.poste, ''],
-    ['Téléphone', (a) => a.tel, 'col-nowrap'],
-    ['Email', (a) => infosDe(a).mail, ''],
-    ['Ville', (a) => infosDe(a).ville, ''],
-    ['N° carte pro', (a) => a.carte, 'col-nowrap'],
-    ['Fin carte', (a) => a.validite, 'col-nowrap'],
-    ['Carte', etatCarte, 'col-nowrap'],
-    ['SSIAP / SST', (a) => infosDe(a).qualifs, ''],
-    ['Langues', (a) => infosDe(a).langues, ''],
-    ['Permis', (a) => infosDe(a).vehicule, ''],
-    ['Documents', resumeDocs, 'col-large'],
-    ['Notes', (a) => a.notes, 'col-large'],
+    ['Nom', (a) => a.nom, (a, i) => [h('b', null, a.nom), ...lignesTexte(i.ville), +a.actif || !mien(a) ? null : h('span', { class: 'cell-ligne muet' }, 'inactif')]],
+    ['Équipe', (a) => ORDRE.indexOf(a.categorie || 'primaire') + a.poste, (a) => [h('span', { class: `cat-pastille cat-pastille--${a.categorie || 'primaire'}` }, EQUIPE[a.categorie || 'primaire']), ...lignesTexte(a.poste)]],
+    ['Contact', (a) => a.tel, (a, i) => [
+      a.tel ? h('a', { class: 'cell-ligne', href: `tel:${a.tel.replace(/[^\d+]/g, '')}`, onclick: (e) => e.stopPropagation() }, a.tel) : null,
+      i.mail ? h('a', { class: 'cell-ligne cell-mail', href: `mailto:${i.mail}`, onclick: (e) => e.stopPropagation() }, i.mail) : null]],
+    ['Carte pro', (a) => a.validite || 'zzzz', (a) => {
+      const e = etatCarte(a);
+      return [e ? h('span', { class: `etat-carte etat-carte--${sansAccents(e).replace(/\s+/g, '-')}` }, e + (a.validite && !falsifiee(a) ? ` · ${isoVersFr(a.validite)}` : '')) : null,
+        ...lignesTexte(falsifiee(a) ? '' : a.carte).map((n) => { n.classList.add('cell-num'); return n; })];
+    }],
+    ['Qualifications', (a, i) => i.qualifs, (a, i) => lignesTexte(i.qualifs, i.langues, i.vehicule)],
+    ['Documents', (a, i) => i.docs, (a, i) => {
+      const n = Object.values(a.docs || {}).reduce((s, x) => s + +x, 0);
+      return lignesTexte(n ? `${n} fichier${n > 1 ? 's' : ''} dans l'admin` : '', i.docs);
+    }],
+    ['Notes', (a) => a.notes, (a) => lignesTexte(a.notes)],
   ];
 
-  let filtre = 'tous', recherche = '', tri = null, sens = 1;
-  const onglets = h('div', { class: 'onglets' });
-  const compte = { tous: agents.length, mes: agents.filter(mien).length, secours: agents.filter((a) => !mien(a)).length };
-  const dessinerOnglets = () => onglets.replaceChildren(...[['tous', 'Tous'], ['mes', 'Mes agents'], ['secours', 'Agents de secours']].map(([k, l]) => h('button', {
-    type: 'button', class: `onglet ${filtre === k ? 'is-actif' : ''}`, onclick: () => { filtre = k; dessinerOnglets(); dessiner(); },
-  }, l, h('span', null, compte[k]))));
-
+  let recherche = '', tri = null, sens = 1;
   const tete = h('thead');
   const corpsT = h('tbody');
   const table = h('table', { class: 'tableau tableau--agents' }, tete, corpsT);
 
-  function cellule(a, [, f, cls], n) {
-    const v = String(f(a) ?? '');
-    if (n === 0) return h('td', { class: cls }, h('b', null, v), +a.actif || !mien(a) ? null : h('small', { class: 'muet' }, ' (inactif)'));
-    if (n === 3 && v) return h('td', { class: cls }, h('a', { href: `tel:${v.replace(/[^\d+]/g, '')}`, onclick: (e) => e.stopPropagation() }, v));
-    if (n === 4 && v) return h('td', { class: cls }, h('a', { href: `mailto:${v}`, onclick: (e) => e.stopPropagation() }, v));
-    if (n === 7) return h('td', { class: cls }, v ? isoVersFr(v) : '');
-    if (n === 8 && v) return h('td', { class: cls }, h('span', { class: `etat-carte etat-carte--${sansAccents(v).replace(/\s+/g, '-')}` }, v));
-    return h('td', { class: cls, title: v.length > 40 ? v : null }, v);
-  }
   function ligne(a) {
+    const i = infosDe(a);
     const alerte = mien(a) && (falsifiee(a) || etatCarte(a) === 'Expirée');
-    return h('tr', { class: alerte ? 'ligne--alerte' : '', tabindex: 0, onclick: () => ctx.aller(`#/agents/${a.id}`), onkeydown: (e) => { if (e.key === 'Enter') ctx.aller(`#/agents/${a.id}`); } },
-      COLS.map((c, n) => cellule(a, c, n)));
+    return h('tr', { class: alerte ? 'ligne--alerte' : '', tabindex: 0, title: 'Ouvrir la fiche', onclick: () => ctx.aller(`#/agents/${a.id}`), onkeydown: (e) => { if (e.key === 'Enter') ctx.aller(`#/agents/${a.id}`); } },
+      COLS.map(([, , rendu]) => h('td', null, rendu(a, i))));
   }
   const section = (titre, n) => h('tr', { class: 'ligne--section' }, h('td', { colspan: COLS.length }, titre, h('span', null, ` · ${n}`)));
 
   function dessinerTete() {
     tete.replaceChildren(h('tr', null, COLS.map(([t], n) => h('th', {
-      class: tri === n ? 'is-trie' : '', onclick: () => { sens = tri === n ? -sens : 1; tri = n; dessinerTete(); dessiner(); },
-    }, t, tri === n ? (sens > 0 ? ' ▲' : ' ▼') : ''))));
+      class: tri === n ? 'is-trie' : '', title: 'Trier', onclick: () => { sens = tri === n ? -sens : 1; tri = n; dessinerTete(); dessiner(); },
+    }, t, h('span', { class: 'tri' }, tri === n ? (sens > 0 ? '▲' : '▼') : '')))));
   }
   function dessiner() {
     const q = sansAccents(recherche).trim();
-    const texteDe = (a) => sansAccents([a.nom, a.poste, a.tel, a.carte, a.notes, ...Object.values(infosDe(a))].join(' '));
-    let vis = agents.filter((a) => (filtre === 'tous' || (filtre === 'mes') === mien(a)) && (!q || q.split(/\s+/).every((m) => texteDe(a).includes(m))));
-    const cle = (a) => (tri === null ? sansAccents(a.nom) : sansAccents(String(COLS[tri][1](a) ?? '')));
+    const texteDe = (a) => sansAccents([a.nom, a.poste, a.tel, a.carte, a.notes, EQUIPE[a.categorie || 'primaire'], ...Object.values(infosDe(a))].join(' '));
+    const vis = agents.filter((a) => !q || q.split(/\s+/).every((m) => texteDe(a).includes(m)));
+    const cle = (a) => sansAccents(String((tri === null ? a.nom : COLS[tri][1](a, infosDe(a))) ?? ''));
     vis.sort((x, y) => { const a = cle(x), b = cle(y); return (!a) - (!b) || a.localeCompare(b, 'fr', { numeric: true }) * sens; });
-    if (tri === null) vis.sort((x, y) => ['primaire', 'secondaire', 'secours'].indexOf(x.categorie || 'primaire') - ['primaire', 'secondaire', 'secours'].indexOf(y.categorie || 'primaire'));
     const mes = vis.filter(mien), sec = vis.filter((a) => !mien(a));
+    if (tri === null) mes.sort((x, y) => ORDRE.indexOf(x.categorie || 'primaire') - ORDRE.indexOf(y.categorie || 'primaire'));
     const lignes = [];
-    if (mes.length) { if (filtre === 'tous') lignes.push(section('Mes agents', mes.length)); lignes.push(...mes.map(ligne)); }
-    if (sec.length) { if (filtre === 'tous') lignes.push(section('Agents de secours', sec.length)); lignes.push(...sec.map(ligne)); }
-    corpsT.replaceChildren(...(lignes.length ? lignes : [h('tr', null, h('td', { colspan: COLS.length, class: 'muet' }, agents.length ? 'Aucun agent ne correspond.' : 'Aucun agent pour le moment. Utilisez « Mettre à jour depuis le registre » ou « Nouvel agent ».'))]));
+    if (mes.length) lignes.push(section('Mes agents', mes.length), ...mes.map(ligne));
+    if (sec.length) lignes.push(section('Agents de secours', sec.length), ...sec.map(ligne));
+    corpsT.replaceChildren(...(lignes.length ? lignes : [h('tr', null, h('td', { colspan: COLS.length, class: 'muet' }, agents.length ? 'Aucun agent ne correspond à la recherche.' : 'Aucun agent pour le moment. Utilisez « Mettre à jour depuis le registre » ou « Nouvel agent ».'))]));
   }
   const rech = saisie({ type: 'search', class: 'input input--recherche', placeholder: 'Rechercher (nom, ville, SSIAP, espagnol…)', oninput: (e) => { recherche = e.target.value; dessiner(); } });
-  ctx.afficher(h('div', { class: 'carte__outils' }, onglets, h('div', { class: 'recherche' }, icone('recherche'), rech)),
+  const nbAlertes = agents.filter((a) => mien(a) && (falsifiee(a) || etatCarte(a) === 'Expirée')).length;
+  ctx.afficher(
+    h('div', { class: 'carte__outils agents-outils' },
+      h('p', { class: 'agents-resume' }, h('b', null, agents.length), ` personnes · ${agents.filter(mien).length} agents · ${agents.filter((a) => !mien(a)).length} agents de secours`,
+        nbAlertes ? h('span', { class: 'agents-resume__alerte' }, ` · ${nbAlertes} carte${nbAlertes > 1 ? 's' : ''} pro expirée${nbAlertes > 1 ? 's' : ''} ou falsifiée${nbAlertes > 1 ? 's' : ''}`) : null),
+      h('div', { class: 'recherche' }, icone('recherche'), rech)),
     h('div', { class: 'tableau-agents' }, table),
-    h('p', { class: 'legende-docs' }, h('span', null, 'Cliquez sur une ligne pour ouvrir la fiche et les documents.'), h('span', null, 'Ligne en rouge : carte pro expirée ou falsifiée.')));
-  dessinerOnglets();
+    h('p', { class: 'legende-docs' }, h('span', null, 'Cliquez sur une ligne pour ouvrir la fiche.'), h('span', null, 'Cliquez sur un titre de colonne pour trier.'), h('span', null, 'En rouge : carte pro expirée ou falsifiée.')));
   dessinerTete();
   dessiner();
 }
@@ -334,7 +322,7 @@ async function ficheAgent(ctx, id) {
     vehicule: saisie({ value: infos.vehicule || '', placeholder: 'ex. Permis B · véhiculé' }),
     docs: zoneTexte({ value: infos.docs || '', rows: 2, placeholder: 'Documents reçus par mail ou Indeed' }),
   };
-  const form = h('form', { class: 'panneau__bloc', onsubmit: async (e) => {
+  const form = h('form', { class: 'agent-fiche', onsubmit: async (e) => {
     e.preventDefault();
     if (!f.nom.value.trim()) return f.nom.focus();
     try {
@@ -343,22 +331,31 @@ async function ficheAgent(ctx, id) {
       ctx.titre(f.nom.value.trim()); toast('Agent enregistré.');
     } catch (err) { erreur(err); }
   } },
-  h('h3', null, 'Informations'),
-  champ('Nom et prénom', f.nom), champ('Catégorie', f.categorie), champ('Poste', f.poste), champ('Téléphone', f.tel), champ('Email', fi.mail), champ('Ville', fi.ville),
-  champ('N° de carte professionnelle', f.carte), champ('Carte pro valable jusqu\'au', f.validite),
-  champ('SSIAP / SST', fi.qualifs), champ('Langues', fi.langues), champ('Permis / véhicule', fi.vehicule), champ('Documents reçus', fi.docs), champ('Notes (privées)', f.notes),
-  h('label', { class: 'case' }, f.actif, h('span', null, 'Agent actif (proposé dans le planning)')),
-  h('button', { class: 'btn btn--gold btn--bloc', type: 'submit' }, icone('coche'), 'Enregistrer'));
+  h('div', { class: 'agent-fiche__groupe' }, h('h3', null, 'Identité et contact'),
+    h('div', { class: 'form-grille form-grille--2' }, champ('Nom et prénom', f.nom), champ('Catégorie', f.categorie), champ('Poste', f.poste), champ('Téléphone', f.tel), champ('Email', fi.mail), champ('Ville', fi.ville))),
+  h('div', { class: 'agent-fiche__groupe' }, h('h3', null, 'Carte professionnelle'),
+    h('div', { class: 'form-grille form-grille--2' }, champ('N° de carte professionnelle', f.carte), champ('Valable jusqu\'au', f.validite))),
+  h('div', { class: 'agent-fiche__groupe' }, h('h3', null, 'Qualifications'),
+    h('div', { class: 'form-grille form-grille--2' }, champ('SSIAP / SST', fi.qualifs), champ('Langues', fi.langues), champ('Permis / véhicule', fi.vehicule))),
+  h('div', { class: 'agent-fiche__groupe' }, h('h3', null, 'Suivi'),
+    h('div', { class: 'form-grille form-grille--2' }, champ('Documents reçus (mail, Indeed)', fi.docs), champ('Notes (privées)', f.notes))),
+  h('div', { class: 'agent-fiche__pied' },
+    h('label', { class: 'case' }, f.actif, h('span', null, 'Agent actif (proposé dans le planning)')),
+    h('button', { class: 'lien-btn lien-btn--danger', type: 'button', onclick: async () => {
+      if (!(await confirmer(`Supprimer ${a.nom} et tous ses documents ? Les plannings déjà faits ne changent pas.`, { ok: 'Supprimer', danger: true }))) return;
+      try { await api('agent.supprimer', { id }); toast('Agent supprimé.'); ctx.aller('#/agents'); } catch (e) { erreur(e); }
+    } }, icone('poubelle'), 'Supprimer l\'agent'),
+    h('button', { class: 'btn btn--gold', type: 'submit' }, icone('coche'), 'Enregistrer')));
 
-  const panneau = h('aside', { class: 'panneau' }, form,
-    h('div', { class: 'panneau__liens' }, h('span'),
-      h('button', { class: 'lien-btn lien-btn--danger', type: 'button', onclick: async () => {
-        if (!(await confirmer(`Supprimer ${a.nom} et tous ses documents ? Les plannings déjà faits ne changent pas.`, { ok: 'Supprimer', danger: true }))) return;
-        try { await api('agent.supprimer', { id }); toast('Agent supprimé.'); ctx.aller('#/agents'); } catch (e) { erreur(e); }
-      } }, icone('poubelle'), 'Supprimer l\'agent')));
+  // Les documents restent cachés : il faut cliquer sur « Voir ses documents » pour les afficher
+  const blocDocs = h('section', { class: 'carte', hidden: true }, h('header', { class: 'carte__tete' }, h('h2', null, 'Documents'), h('small', null, 'Privés : visibles uniquement ici, une fois connecté')), zoneDocs);
+  const boutonDocs = h('button', { class: 'btn btn--ghost btn--docs', type: 'button', onclick: () => {
+    blocDocs.hidden = !blocDocs.hidden;
+    boutonDocs.replaceChildren(icone('oeil'), h('span', null, blocDocs.hidden ? 'Voir ses documents' : 'Masquer ses documents'));
+    if (!blocDocs.hidden) { dessinerDocs(); blocDocs.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  } }, icone('oeil'), h('span', null, 'Voir ses documents'));
 
-  ctx.afficher(h('div', { class: 'editeur editeur--agent' }, h('section', { class: 'carte' }, h('header', { class: 'carte__tete' }, h('h2', null, 'Documents'), h('small', null, 'Privés : visibles uniquement ici, une fois connecté')), zoneDocs), panneau));
-  dessinerDocs();
+  ctx.afficher(h('div', { class: 'agent-page' }, h('section', { class: 'carte' }, form), h('div', { class: 'agent-page__docs' }, boutonDocs), blocDocs));
 }
 
 /* ---------- Envoi d'un fichier (photo allégée si elle dépasse la limite de l'hébergement) ---------- */

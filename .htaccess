@@ -32,6 +32,8 @@ RewriteRule ^ https://bdasecurite.com/%1 [R=301,L]
 # Pages retirées le 04/10/2026 : redirigées définitivement (anciens liens et Google)
 RewriteRule ^chauffeur-mariage-paris(\.html)?/?$ https://bdasecurite.com/chauffeur-prive-vtc-paris [R=301,L]
 RewriteRule ^references(\.html)?/?$ https://bdasecurite.com/ [R=301,L]
+# Page retirée le 12/10/2026 : le transfert aéroport fait partie du service chauffeur privé
+RewriteRule ^transfert-aeroport-paris(\.html)?/?$ https://bdasecurite.com/chauffeur-prive-vtc-paris [R=301,L]
 # Site hors ligne (admin > Contrôle du site) : les pages passent par maintenance.php,
 # qui affiche la page de maintenance aux visiteurs et le site normal à l'administrateur.
 # (l'espace admin, les services et les images restent accessibles)

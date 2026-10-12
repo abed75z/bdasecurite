@@ -8,7 +8,6 @@
   'use strict';
   const CLE = 'bda-assistant';
   const API = '/api/assistant.php';
-  const ACCUEIL = location.pathname === '/' || /\/index(\.html)?$/.test(location.pathname);
   let etat = { jeton: '', dernier: 0, statut: 'robot', ouvert: false };
   try { Object.assign(etat, JSON.parse(localStorage.getItem(CLE) || '{}')); } catch (e) { /* stockage indisponible */ }
   const sauver = () => { try { localStorage.setItem(CLE, JSON.stringify({ jeton: etat.jeton, dernier: etat.dernier, statut: etat.statut })); } catch (e) { /* rien */ } };
@@ -73,7 +72,7 @@
     const form = h('form', { class: 'as-saisie' }, champ, bouton);
     const panneau = h('section', { class: 'as-panneau', role: 'dialog', 'aria-label': 'Assistant BDA Security Group', hidden: true },
       h('header', { class: 'as-tete' },
-        h('img', { src: '/assets/img/ecusson-petit.png?v=3', alt: '', width: 200, height: 204 }),
+        h('span', { class: 'bda-mono', 'aria-hidden': 'true' }, 'BDA'),
         h('div', null, h('b', null, 'Assistant BDA Security Group'), statutTxt),
         h('button', { class: 'as-tete__fermer', type: 'button', 'aria-label': 'Fermer', onclick: () => ouvrir(false) }, ic(I.croix))),
       fil, form,
@@ -204,7 +203,6 @@
       requestAnimationFrame(() => panneau.classList.toggle('is-ouvert', on));
       lanceur.classList.toggle('is-ouvert', on);
       lanceur.setAttribute('aria-expanded', String(on));
-      document.querySelector('.as-teaser')?.remove();
       if (on) {
         pastille.hidden = true; lanceur.classList.remove('a-nouveau');
         if (!accueilli) {
@@ -221,7 +219,7 @@
           }
           if (!fil.children.length) {
             bulle('robot', 'Bonjour, je suis l’assistant de BDA Security Group. Posez-moi votre question : prestations, tarifs, disponibilités, zones d’intervention… Je peux aussi vous mettre en relation avec un conseiller.');
-            suggestions(['Nos tarifs', 'Un agent pour ce soir', 'Sécurité d’un événement', 'Transfert aéroport', 'Parler à un conseiller']);
+            suggestions(['Nos tarifs', 'Un agent pour ce soir', 'Sécurité d’un événement', 'Un chauffeur privé', 'Parler à un conseiller']);
           }
         }
         if (matchMedia('(min-width: 641px)').matches) champ.focus();
@@ -252,28 +250,6 @@
     if (etat.jeton && (etat.statut === 'attente' || etat.statut === 'equipe')) verifier();
     // Retour sur l'onglet : on regarde tout de suite si l'équipe a répondu
     document.addEventListener('visibilitychange', () => { if (!document.hidden && (etat.statut === 'attente' || etat.statut === 'equipe')) verifier(); });
-
-    // Accueil : petite invitation après quelques secondes (une fois par visite)
-    let vu = false;
-    try { vu = sessionStorage.getItem('bda-assistant-teaser') === '1'; } catch (e) { /* rien */ }
-    if (ACCUEIL && !vu) {
-      // Après le premier écran seulement (le haut de l'accueil reste dégagé)
-      const quandDefile = (fn) => {
-        const verifier = () => { if (window.scrollY > window.innerHeight * 0.7) { window.removeEventListener('scroll', verifier); setTimeout(fn, 1500); } };
-        window.addEventListener('scroll', verifier, { passive: true });
-      };
-      quandDefile(() => {
-        if (etat.ouvert) return;
-        const t = h('div', { class: 'as-teaser', role: 'status' },
-          h('button', { class: 'as-teaser__x', type: 'button', 'aria-label': 'Fermer', onclick: (e) => { e.stopPropagation(); t.remove(); } }, '×'),
-          h('img', { src: '/assets/img/ecusson-petit.png?v=3', alt: '', width: 200, height: 204 }),
-          h('p', null, h('b', null, 'Une question ?'), 'Tarifs, disponibilités, devis… je vous réponds tout de suite.'));
-        t.addEventListener('click', () => ouvrir(true));
-        document.body.append(t);
-        requestAnimationFrame(() => t.classList.add('is-on'));
-        try { sessionStorage.setItem('bda-assistant-teaser', '1'); } catch (e) { /* rien */ }
-      });
-    }
   }
 
   // L'assistant n'apparaît que s'il est activé dans l'admin (Contenu & tarifs)

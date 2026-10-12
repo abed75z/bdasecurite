@@ -57,7 +57,6 @@
             { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Protection rapprochée et garde du corps", "url": "https://bdasecurite.com/protection-rapprochee-paris" } },
             { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Sécurité événementielle", "url": "https://bdasecurite.com/securite-evenementielle-paris" } },
             { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Chauffeur privé VTC", "url": "https://bdasecurite.com/chauffeur-prive-vtc-paris" } },
-            { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Transfert aéroport en VTC", "url": "https://bdasecurite.com/transfert-aeroport-paris" } },
             { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Chauffeur et garde du corps", "url": "https://bdasecurite.com/chauffeur-securite-vip-paris" } }
           ]
         }
@@ -90,8 +89,8 @@
   <link rel="stylesheet" href="assets/css/style.css?v=15">
   <link rel="stylesheet" href="assets/css/hero.css?v=15">
   <link rel="stylesheet" href="assets/css/sections.css?v=15">
-  <link rel="stylesheet" href="assets/css/pro.css?v=15">
-  <link rel="stylesheet" href="assets/css/blanc.css?v=30">
+  <link rel="stylesheet" href="assets/css/pro.css?v=16">
+  <link rel="stylesheet" href="assets/css/blanc.css?v=31">
 </head>
 <body>
 
@@ -146,7 +145,6 @@
 <!-- ============ Navigation ============ -->
 <header class="nav">
   <div class="nav__inner">
-    <a class="brand" href="/" aria-label="BDA Security Group — accueil"><img class="brand__mark" src="assets/img/ecusson-petit.png?v=3" alt="" width="200" height="204"></a>
     <nav class="nav__links" aria-label="Navigation principale">
       <div class="nav__drop">
         <button class="nav__drop-btn" type="button" aria-expanded="false">Sécurité privée <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
@@ -159,7 +157,7 @@
       <div class="nav__drop" data-visible="offreVtc">
         <button class="nav__drop-btn" type="button" aria-expanded="false">Chauffeur privé <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav__panel">
-          <div class="nav__col"><a href="chauffeur-prive-vtc-paris"><b>Chauffeur privé VTC</b><small>À l’heure ou au trajet</small></a><a href="transfert-aeroport-paris"><b>Transfert aéroport</b><small>CDG, Orly, Beauvais, gares</small></a><a href="chauffeur-securite-vip-paris"><b>Chauffeur + sécurité VIP</b><small>Conduit et protégé</small></a><a href="reserver" data-vtc hidden><b>Réserver en ligne</b><small>Prix affiché, confirmation immédiate</small></a></div>
+          <div class="nav__col"><a href="chauffeur-prive-vtc-paris"><b>Chauffeur privé VTC</b><small>À l’heure ou au trajet</small></a><a href="chauffeur-securite-vip-paris"><b>Chauffeur + sécurité VIP</b><small>Conduit et protégé</small></a><a href="reserver" data-vtc hidden><b>Réserver en ligne</b><small>Prix affiché, confirmation immédiate</small></a></div>
         </div>
       </div>
       <a href="tarifs">Tarifs</a>
@@ -182,7 +180,7 @@
     <a href="/" aria-current="page" class="mm__lien">Accueil</a>
     <details class="mm__groupe" open><summary>Sécurité privée</summary><div><a href="securite-privee-paris">Agents de sécurité</a><a href="securite-incendie-ssiap-paris">Sécurité incendie SSIAP</a><a href="protection-rapprochee-paris">Protection rapprochée</a><a href="securite-evenementielle-paris">Sécurité événementielle</a><a href="gardiennage-chantier-paris">Gardiennage de chantier</a></div></details>
     <details class="mm__groupe"><summary>Par secteur</summary><div><a href="securite-hotels-paris">Hôtels</a><a href="securite-commerces-paris">Commerces</a><a href="securite-bureaux-entreprises-paris">Bureaux & entreprises</a><a href="securite-ambassades-consulats-paris">Ambassades & consulats</a><a href="securite-residences-coproprietes-paris">Résidences & copropriétés</a></div></details>
-    <details class="mm__groupe" data-visible="offreVtc"><summary>Chauffeur privé</summary><div><a href="chauffeur-prive-vtc-paris">Chauffeur privé VTC</a><a href="transfert-aeroport-paris">Transfert aéroport</a><a href="chauffeur-securite-vip-paris">Chauffeur + sécurité VIP</a></div></details>
+    <details class="mm__groupe" data-visible="offreVtc"><summary>Chauffeur privé</summary><div><a href="chauffeur-prive-vtc-paris">Chauffeur privé VTC</a><a href="chauffeur-securite-vip-paris">Chauffeur + sécurité VIP</a></div></details>
     <a href="tarifs" class="mm__lien">Tarifs</a>
     <a href="avis" class="mm__lien">Avis clients</a>
     <a href="recrutement" class="mm__lien">Recrutement</a>
@@ -256,9 +254,9 @@
       </div>
 
       <div class="tuiles" id="vtc" role="tabpanel" aria-labelledby="onglet-vtc" data-visible="offreVtc" hidden>
-        <a class="tuile" href="transfert-aeroport-paris">
-          <svg class="tuile__ico" aria-hidden="true"><use href="#i-plane"/></svg>
-          <span class="tuile__txt"><b>Aéroports et gares</b><span>CDG, Orly, Beauvais.</span></span>
+        <a class="tuile" href="chauffeur-prive-vtc-paris">
+          <svg class="tuile__ico" aria-hidden="true"><use href="#i-car"/></svg>
+          <span class="tuile__txt"><b>Chauffeur privé</b><span>À l'heure, à la journée ou au trajet.</span></span>
           <span class="tuile__lien">Découvrir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></span>
         </a>
         <a class="tuile" href="chauffeur-securite-vip-paris">
@@ -284,7 +282,7 @@
         <li><span>Agent de sécurité</span><b>dès <span data-prix="agent" data-dec="1">22</span> € <small>HT/h</small></b></li>
         <li><span>Agent SSIAP 1</span><b>dès <span data-prix="ssiap1" data-dec="1">23,50</span> € <small>HT/h</small></b></li>
         <li><span>Événementiel</span><b>dès <span data-prix="evenementiel" data-dec="1">24</span> € <small>HT/h</small></b></li>
-        <li data-visible="offreVtc"><span>Chauffeur Paris ↔ Orly</span><b><span data-prix="orly" data-dec="1">38</span> € <small>TTC</small></b></li>
+        <li data-visible="offreVtc"><span>Chauffeur privé</span><b>dès <span data-prix="heure" data-dec="1">55</span> € <small>TTC/h</small></b></li>
       </ul>
       <a class="btn btn--outline" href="tarifs">Tous les tarifs <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
     </div>
@@ -294,6 +292,29 @@
   <section class="section ac-manifeste" id="engagements" aria-labelledby="eng-title">
     <div class="container">
       <h2 class="manifeste" id="eng-title" data-surligne>Votre confiance, notre priorité.<br>Votre tranquillité, notre engagement.</h2>
+      <ul class="ac-engagements" aria-label="Nos engagements">
+        <li><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg><b>Agents vérifiés</b><span>Carte professionnelle CNAPS contrôlée pour chacun.</span></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><b>Un seul interlocuteur</b><span>Un responsable joignable du début à la fin.</span></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-users"/></svg><b>Remplacement assuré</b><span>Un agent absent est remplacé, sans que vous ayez à vous en occuper.</span></li>
+        <li><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg><b>Devis gratuit</b><span>Clair, détaillé et sans engagement.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ MÉTHODE ============ -->
+  <section class="section ac-methode" id="process" aria-labelledby="process-title">
+    <div class="container">
+      <div class="ac-centre">
+        <p class="kicker">Comment ça marche</p>
+        <h2 class="h2" id="process-title">Quatre étapes, c'est tout.</h2>
+      </div>
+      <ol class="ac-etapes" data-ligne>
+        <li><span>01</span><div><b>Votre demande</b><p>En ligne en deux minutes, ou par téléphone.</p></div><svg class="etape__ico" aria-hidden="true"><use href="#i-message"/></svg></li>
+        <li><span>02</span><div><b>Notre appel</b><p>Lieu, horaires, consignes : on fait le point avec vous.</p></div><svg class="etape__ico" aria-hidden="true"><use href="#i-phone"/></svg></li>
+        <li><span>03</span><div><b>Votre devis</b><p>Clair, détaillé et sans engagement.</p></div><svg class="etape__ico" aria-hidden="true"><use href="#i-file"/></svg></li>
+        <li><span>04</span><div><b>La mission</b><p>Agents briefés, un responsable joignable à tout moment.</p></div><svg class="etape__ico" aria-hidden="true"><use href="#i-shield-check"/></svg></li>
+      </ol>
+      <div class="ac-methode__cta"><a class="btn btn--gold" href="devis">Demander un devis gratuit <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
     </div>
   </section>
 
@@ -319,7 +340,7 @@
       </div>
       <div class="ac-ia__demo" aria-hidden="true">
         <div class="ia-fenetre">
-          <div class="ia-fenetre__tete"><img src="assets/img/ecusson-petit.png?v=3" alt="" width="200" height="204"><div><b>Assistant BDA Security Group</b><small>En ligne</small></div></div>
+          <div class="ia-fenetre__tete"><span class="bda-mono" aria-hidden="true">BDA</span><div><b>Assistant BDA Security Group</b><small>En ligne</small></div></div>
           <div class="ia-fenetre__fil" data-demo>
             <p class="ia-bulle ia-bulle--moi" data-texte="Combien coûte un agent de sécurité la nuit ?"></p>
             <p class="ia-bulle ia-bulle--robot ia-bulle--saisie"><span></span><span></span><span></span></p>
@@ -435,7 +456,7 @@
         <h4>Chauffeur privé</h4>
         <ul>
           <li><a href="chauffeur-prive-vtc-paris">Chauffeur privé VTC</a></li>
-          <li><a href="transfert-aeroport-paris">Transfert aéroport</a></li>
+          <li></li>
           <li><a href="chauffeur-securite-vip-paris">Chauffeur + sécurité VIP</a></li>
         </ul>
       </div>
@@ -473,11 +494,11 @@
   <a class="btn btn--gold" href="devis">Demander un devis</a>
 </div>
 
-<script src="assets/js/core.js?v=22"></script>
-<script src="assets/js/assistant.js?v=13"></script>
+<script src="assets/js/core.js?v=23"></script>
+<script src="assets/js/assistant.js?v=14"></script>
 <script src="assets/js/avis-data.js?v=2"></script>
 <script src="assets/js/home.js?v=17"></script>
-<script src="assets/js/anim.js?v=18"></script>
+<script src="assets/js/anim.js?v=19"></script>
 <script src="assets/js/rappel.js?v=10"></script>
 </body>
 </html>

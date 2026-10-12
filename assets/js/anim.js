@@ -106,7 +106,7 @@
     h.classList.add('mots');
   });
   if (titresMots.length && 'IntersectionObserver' in window) {
-    const ioT = new IntersectionObserver((en) => en.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('vu'); ioT.unobserve(e.target); } }), { threshold: 0.3 });
+    const ioT = new IntersectionObserver((en) => en.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('vu'); ioT.unobserve(e.target); } }), { threshold: 0, rootMargin: '0px 0px 8% 0px' });
     titresMots.forEach((h) => ioT.observe(h));
   } else titresMots.forEach((h) => h.classList.add('vu'));
 
@@ -132,7 +132,7 @@
       if (!e.isIntersecting) return;
       e.target.classList.add('vu');
       io.unobserve(e.target);
-    }), { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    }), { threshold: 0, rootMargin: '0px 0px 12% 0px' }); // démarre juste avant l'arrivée à l'écran : jamais de zone vide
     elts.forEach((el) => io.observe(el));
     // Filet de sécurité : rien ne doit rester caché (onglet en arrière-plan, impression…)
     window.addEventListener('beforeprint', () => elts.forEach((el) => el.classList.add('vu')));

@@ -237,7 +237,7 @@
         e.target.dispatchEvent(new CustomEvent('reveal'));
         io.unobserve(e.target);
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    }, { threshold: 0, rootMargin: '0px 0px 12% 0px' }); // démarre juste avant l'arrivée à l'écran
     els.forEach((e) => io.observe(e));
   }
 
@@ -320,13 +320,9 @@
     if (!btn) return;
     const en = root.lang === 'en';
     const T = en
-      ? { titre: 'Sign in', client: ['Client area', 'Quotes, invoices, messages'], equipe: ['Team area', 'Officers & drivers: schedule, payslips, leave'] }
-      : { titre: 'Se connecter', client: ['Espace client', 'Devis, factures, messages'], equipe: ['Espace équipe', 'Agents & chauffeurs : planning, paie, congés'] };
-    const ico = {
-      client: '<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/>',
-      equipe: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
-    };
-    const choix = (cle, href) => `<a class="cx-pop__choix" href="${href}" role="menuitem"><span class="cx-pop__ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ico[cle]}</svg></span><span class="cx-pop__txt"><b>${T[cle][0]}</b><small>${T[cle][1]}</small></span><svg class="cx-pop__fl" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>`;
+      ? { titre: 'Sign in', client: 'Client area', equipe: 'Team area' }
+      : { titre: 'Se connecter', client: 'Espace client', equipe: 'Espace équipe' };
+    const choix = (cle, href) => `<a class="cx-pop__choix" href="${href}" role="menuitem"><span class="cx-pop__txt"><b>${T[cle]}</b></span><svg class="cx-pop__fl" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>`;
     const pop = document.createElement('div');
     pop.className = 'cx-pop';
     pop.id = 'cx-pop';
@@ -403,12 +399,12 @@
     });
 
     // Cascade : chaque enfant des listes apparaît un peu après le précédent
-    const listes = '.ac-liste, .ac-points, .ac-etapes, .ac-garanties__liste, .tf-cartes, .lp-cards, .lp-list, .faq, .ac-tarifs ul, .ac-contact__moyens';
+    const listes = '.ac-liste, .ac-points, .ac-etapes, .ac-engagements, .ac-garanties__liste, .tf-cartes, .lp-cards, .lp-list, .faq, .ac-tarifs ul, .ac-contact__moyens';
     const enfants = [];
     document.querySelectorAll(listes).forEach((l) => [...l.children].forEach((c, i) => { c.classList.add('cascade'); c.style.setProperty('--c', i); enfants.push(c); }));
     if (reduced || !('IntersectionObserver' in window)) enfants.forEach((c) => c.classList.add('is-in'));
     else {
-      const io = new IntersectionObserver((entrees) => entrees.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); } }), { threshold: 0.15, rootMargin: '0px 0px -5% 0px' });
+      const io = new IntersectionObserver((entrees) => entrees.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); } }), { threshold: 0, rootMargin: '0px 0px 12% 0px' });
       enfants.forEach((c) => io.observe(c));
     }
 
@@ -571,7 +567,7 @@
   const PAGES_RUBRIQUE = {
     tarifs: ['tarifs'], references: ['references'], avisClients: ['avis'], recrutement: ['recrutement'],
     ssiap: ['securite-incendie-ssiap-paris'],
-    offreVtc: ['chauffeur-prive-vtc-paris', 'transfert-aeroport-paris', 'chauffeur-securite-vip-paris', 'reserver'],
+    offreVtc: ['chauffeur-prive-vtc-paris', 'chauffeur-securite-vip-paris', 'reserver'],
   };
   const pageCourante = location.pathname.replace(/^\/|\.html$/g, '');
   let contenuOriginal = [];

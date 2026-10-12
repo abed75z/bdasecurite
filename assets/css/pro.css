@@ -445,8 +445,8 @@ body { font-feature-settings: "ss01", "cv11"; text-rendering: optimizeLegibility
    EFFETS « PREMIUM » (sobres, sans fond galaxie)
    ========================================================= */
 :root { --ease-pro: cubic-bezier(.2, .7, .2, 1); }
-[data-reveal] { transition: opacity 0.8s var(--ease-pro), transform 0.9s var(--ease-pro) !important; transition-delay: var(--d, 0ms) !important; }
-.js [data-reveal]:not(.is-in) { opacity: 0; transform: translateY(22px) !important; }
+[data-reveal] { transition: opacity 0.55s var(--ease-pro), transform 0.65s var(--ease-pro) !important; transition-delay: var(--d, 0ms) !important; }
+.js [data-reveal]:not(.is-in) { opacity: 0; transform: translateY(14px) !important; }
 
 /* Rubriques masquées depuis l'admin */
 .est-masque { display: none !important; }

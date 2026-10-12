@@ -4,7 +4,7 @@
    fiche de chaque agent avec ses documents : présents,
    manquants ou à vérifier. Import d'un dossier entier.
    ========================================================= */
-import { api, apiFichier, h, icone, toast, erreur, modale, confirmer, champ, saisie, zoneTexte, statutPastille, iso, dateLisible } from './outils.js';
+import { api, apiFichier, h, icone, toast, erreur, modale, confirmer, champ, saisie, zoneTexte, iso, isoVersFr, dateLisible } from './outils.js';
 
 export const DOCS = [
   { type: 'identite', libelle: 'Pièce d\'identité', obligatoire: true },
@@ -24,7 +24,7 @@ export const DOCS = [
   { type: 'autre', libelle: 'Autres documents' },
 ];
 const OBLIGATOIRES = DOCS.filter((d) => d.obligatoire);
-const CATEGORIES = { primaire: 'Équipe principale', secondaire: 'Renfort' };
+const CATEGORIES = { primaire: 'Équipe principale', secondaire: 'Renfort', secours: 'Agent de secours' };
 const POSTES = ['ADS', 'Agent de protection rapprochée', 'Agent événementiel', 'Chef d\'équipe', 'Chauffeur VTC', 'SSIAP'];
 const EXTENSIONS = /\.(pdf|png|jpe?g|webp)$/i;
 
@@ -62,49 +62,161 @@ export function pageAgents(ctx) {
   return listeAgents(ctx);
 }
 
+/* =========================================================
+   TABLEAU (même présentation que le registre Excel) :
+   « Mes agents » puis « Agents de secours », une ligne par personne
+   ========================================================= */
+const infosDe = (a) => { try { return typeof a.infos === 'string' ? JSON.parse(a.infos || '{}') : (a.infos || {}); } catch { return {}; } };
+const EQUIPE = { primaire: 'Principale', secondaire: 'Renfort', secours: 'Secours' };
+const falsifiee = (a) => /falsifi/i.test(a.carte || '');
+
 async function listeAgents(ctx) {
   ctx.titre('Agents');
   let { agents } = await api('agents');
   ctx.actions(
+    h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => importerRegistre() }, icone('telecharger'), h('span', null, 'Mettre à jour depuis le registre')),
     h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => importerDossier(ctx) }, icone('telecharger'), h('span', null, 'Importer un dossier')),
     h('button', { class: 'btn btn--gold', type: 'button', onclick: () => nouvelAgent(ctx) }, icone('plus'), h('span', null, 'Nouvel agent')));
 
-  let filtre = 'primaire', recherche = '';
-  const grille = h('div', { class: 'agents-grille' });
-  const compte = (c) => agents.filter((a) => (a.categorie || 'primaire') === c).length;
-  const onglets = h('div', { class: 'onglets' });
-  const dessinerOnglets = () => onglets.replaceChildren(...[['primaire', 'Équipe principale'], ['secondaire', 'Renfort'], ['tous', 'Tous']].map(([k, l]) => h('button', {
-    type: 'button', class: `onglet ${filtre === k ? 'is-actif' : ''}`, onclick: () => { filtre = k; dessinerOnglets(); dessiner(); },
-  }, l, h('span', null, k === 'tous' ? agents.length : compte(k)))));
-
   const auj = iso(new Date()), dans90 = iso(new Date(Date.now() + 90 * 864e5));
-  function tuile(a) {
-    const etats = etatDocs(a.docs);
-    const ok = etats.filter((e) => e.etat === 'ok').length;
-    const initiales = String(a.nom).split(/\s+/).filter(Boolean).slice(0, 2).map((m) => m[0]).join('').toUpperCase();
-    const carte = !a.validite ? null : a.validite < auj ? statutPastille('retard', 'Carte pro expirée') : a.validite <= dans90 ? statutPastille('nouvelle', 'Carte pro bientôt expirée') : null;
-    return h('a', { class: `agent-tuile ${+a.actif ? '' : 'agent-tuile--inactif'}`, href: `#/agents/${a.id}` },
-      h('div', { class: 'agent-tuile__tete' },
-        h('span', { class: `agent-avatar agent-avatar--${a.categorie || 'primaire'}` }, initiales || '?'),
-        h('div', { class: 'agent-tuile__nom' }, h('b', null, a.nom), h('small', null, [a.poste, +a.actif ? '' : 'inactif'].filter(Boolean).join(' · '))),
-        filtre === 'tous' ? h('span', { class: `cat cat--${a.categorie || 'primaire'}` }, a.categorie === 'secondaire' ? 'Renfort' : 'Équipe') : null),
-      h('div', { class: 'agent-docs' },
-        h('div', { class: 'agent-docs__points' }, etats.map((e) => h('span', { class: `point point--${e.etat}`, title: `${e.libelle} : ${e.etat === 'ok' ? 'présent' : e.etat === 'verifier' ? 'à vérifier dans le dossier PDF' : 'manquant'}` }))),
-        h('small', null, ok === OBLIGATOIRES.length ? 'Dossier complet' : `${ok}/${OBLIGATOIRES.length} documents obligatoires`)),
-      carte);
+  const etatCarte = (a) => (falsifiee(a) ? 'Falsifiée' : !a.validite ? '' : a.validite < auj ? 'Expirée' : a.validite <= dans90 ? 'Expire bientôt' : 'Valide');
+  const mien = (a) => (a.categorie || 'primaire') !== 'secours';
+  const resumeDocs = (a) => {
+    const i = infosDe(a);
+    const ok = etatDocs(a.docs).filter((e) => e.etat === 'ok').length;
+    const enLigne = Object.values(a.docs || {}).reduce((s, n) => s + +n, 0);
+    return [enLigne ? `${ok}/${OBLIGATOIRES.length} obligatoires dans l'admin` : '', i.docs || ''].filter(Boolean).join(' · ');
+  };
+
+  // Colonnes : [titre, valeur affichée / triée, classe]
+  const COLS = [
+    ['Nom', (a) => a.nom, 'col-nom'],
+    ['Équipe', (a) => EQUIPE[a.categorie || 'primaire'], ''],
+    ['Poste', (a) => a.poste, ''],
+    ['Téléphone', (a) => a.tel, 'col-nowrap'],
+    ['Email', (a) => infosDe(a).mail, ''],
+    ['Ville', (a) => infosDe(a).ville, ''],
+    ['N° carte pro', (a) => a.carte, 'col-nowrap'],
+    ['Fin carte', (a) => a.validite, 'col-nowrap'],
+    ['Carte', etatCarte, 'col-nowrap'],
+    ['SSIAP / SST', (a) => infosDe(a).qualifs, ''],
+    ['Langues', (a) => infosDe(a).langues, ''],
+    ['Permis', (a) => infosDe(a).vehicule, ''],
+    ['Documents', resumeDocs, 'col-large'],
+    ['Notes', (a) => a.notes, 'col-large'],
+  ];
+
+  let filtre = 'tous', recherche = '', tri = null, sens = 1;
+  const onglets = h('div', { class: 'onglets' });
+  const compte = { tous: agents.length, mes: agents.filter(mien).length, secours: agents.filter((a) => !mien(a)).length };
+  const dessinerOnglets = () => onglets.replaceChildren(...[['tous', 'Tous'], ['mes', 'Mes agents'], ['secours', 'Agents de secours']].map(([k, l]) => h('button', {
+    type: 'button', class: `onglet ${filtre === k ? 'is-actif' : ''}`, onclick: () => { filtre = k; dessinerOnglets(); dessiner(); },
+  }, l, h('span', null, compte[k]))));
+
+  const tete = h('thead');
+  const corpsT = h('tbody');
+  const table = h('table', { class: 'tableau tableau--agents' }, tete, corpsT);
+
+  function cellule(a, [, f, cls], n) {
+    const v = String(f(a) ?? '');
+    if (n === 0) return h('td', { class: cls }, h('b', null, v), +a.actif || !mien(a) ? null : h('small', { class: 'muet' }, ' (inactif)'));
+    if (n === 3 && v) return h('td', { class: cls }, h('a', { href: `tel:${v.replace(/[^\d+]/g, '')}`, onclick: (e) => e.stopPropagation() }, v));
+    if (n === 4 && v) return h('td', { class: cls }, h('a', { href: `mailto:${v}`, onclick: (e) => e.stopPropagation() }, v));
+    if (n === 7) return h('td', { class: cls }, v ? isoVersFr(v) : '');
+    if (n === 8 && v) return h('td', { class: cls }, h('span', { class: `etat-carte etat-carte--${sansAccents(v).replace(/\s+/g, '-')}` }, v));
+    return h('td', { class: cls, title: v.length > 40 ? v : null }, v);
+  }
+  function ligne(a) {
+    const alerte = mien(a) && (falsifiee(a) || etatCarte(a) === 'Expirée');
+    return h('tr', { class: alerte ? 'ligne--alerte' : '', tabindex: 0, onclick: () => ctx.aller(`#/agents/${a.id}`), onkeydown: (e) => { if (e.key === 'Enter') ctx.aller(`#/agents/${a.id}`); } },
+      COLS.map((c, n) => cellule(a, c, n)));
+  }
+  const section = (titre, n) => h('tr', { class: 'ligne--section' }, h('td', { colspan: COLS.length }, titre, h('span', null, ` · ${n}`)));
+
+  function dessinerTete() {
+    tete.replaceChildren(h('tr', null, COLS.map(([t], n) => h('th', {
+      class: tri === n ? 'is-trie' : '', onclick: () => { sens = tri === n ? -sens : 1; tri = n; dessinerTete(); dessiner(); },
+    }, t, tri === n ? (sens > 0 ? ' ▲' : ' ▼') : ''))));
   }
   function dessiner() {
-    const q = cleNom(recherche);
-    const vis = agents.filter((a) => (filtre === 'tous' || (a.categorie || 'primaire') === filtre) && (!q || cleNom(a.nom).includes(q) || sansAccents(a.nom).includes(sansAccents(recherche))));
-    grille.replaceChildren(...(vis.length ? vis.map(tuile) : [h('div', { class: 'vide' }, icone('agents'), h('p', null, agents.length ? 'Aucun agent ici.' : 'Aucun agent pour le moment. Utilisez « Importer un dossier » pour ajouter d\'un coup un dossier d\'agents (un sous-dossier par agent), ou « Nouvel agent ».'))]));
+    const q = sansAccents(recherche).trim();
+    const texteDe = (a) => sansAccents([a.nom, a.poste, a.tel, a.carte, a.notes, ...Object.values(infosDe(a))].join(' '));
+    let vis = agents.filter((a) => (filtre === 'tous' || (filtre === 'mes') === mien(a)) && (!q || q.split(/\s+/).every((m) => texteDe(a).includes(m))));
+    const cle = (a) => (tri === null ? sansAccents(a.nom) : sansAccents(String(COLS[tri][1](a) ?? '')));
+    vis.sort((x, y) => { const a = cle(x), b = cle(y); return (!a) - (!b) || a.localeCompare(b, 'fr', { numeric: true }) * sens; });
+    if (tri === null) vis.sort((x, y) => ['primaire', 'secondaire', 'secours'].indexOf(x.categorie || 'primaire') - ['primaire', 'secondaire', 'secours'].indexOf(y.categorie || 'primaire'));
+    const mes = vis.filter(mien), sec = vis.filter((a) => !mien(a));
+    const lignes = [];
+    if (mes.length) { if (filtre === 'tous') lignes.push(section('Mes agents', mes.length)); lignes.push(...mes.map(ligne)); }
+    if (sec.length) { if (filtre === 'tous') lignes.push(section('Agents de secours', sec.length)); lignes.push(...sec.map(ligne)); }
+    corpsT.replaceChildren(...(lignes.length ? lignes : [h('tr', null, h('td', { colspan: COLS.length, class: 'muet' }, agents.length ? 'Aucun agent ne correspond.' : 'Aucun agent pour le moment. Utilisez « Mettre à jour depuis le registre » ou « Nouvel agent ».'))]));
   }
-  const rech = saisie({ type: 'search', class: 'input input--recherche', placeholder: 'Rechercher un agent…', oninput: (e) => { recherche = e.target.value; dessiner(); } });
-  const legende = h('p', { class: 'legende-docs' },
-    h('span', null, h('i', { class: 'point point--ok' }), 'présent'), h('span', null, h('i', { class: 'point point--verifier' }), 'à vérifier dans le dossier PDF'), h('span', null, h('i', { class: 'point point--manque' }), 'manquant'),
-    h('span', { class: 'muet' }, '· Pièce d\'identité, carte pro, diplôme APS, sécurité sociale, RIB'));
-  ctx.afficher(h('div', { class: 'carte__outils' }, onglets, h('div', { class: 'recherche' }, icone('recherche'), rech)), grille, legende);
+  const rech = saisie({ type: 'search', class: 'input input--recherche', placeholder: 'Rechercher (nom, ville, SSIAP, espagnol…)', oninput: (e) => { recherche = e.target.value; dessiner(); } });
+  ctx.afficher(h('div', { class: 'carte__outils' }, onglets, h('div', { class: 'recherche' }, icone('recherche'), rech)),
+    h('div', { class: 'tableau-agents' }, table),
+    h('p', { class: 'legende-docs' }, h('span', null, 'Cliquez sur une ligne pour ouvrir la fiche et les documents.'), h('span', null, 'Ligne en rouge : carte pro expirée ou falsifiée.')));
   dessinerOnglets();
+  dessinerTete();
   dessiner();
+}
+
+/* ---------- Import du registre (fichier « donnees.json » du dossier bda-recrutement) ---------- */
+const lev = (a, b) => { const d = Array.from({ length: a.length + 1 }, (_, i) => [i]); for (let j = 1; j <= b.length; j++) d[0][j] = j; for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[a.length][b.length]; };
+const frIso = (s) => { const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s || ''); return m ? `${m[3]}-${m[2]}-${m[1]}` : ''; };
+const finDepuisNumero = (c) => { const m = /^CAR-\d{3}-(\d{4})-(\d{2})-(\d{2})/i.exec(c || ''); return m ? `${m[1]}-${m[2]}-${m[3]}` : ''; };
+
+async function importerRegistre() {
+  const choix = h('input', { type: 'file', accept: '.json,application/json', hidden: true });
+  document.body.append(choix);
+  const fichier = await new Promise((ok) => { choix.onchange = () => ok(choix.files[0]); choix.click(); });
+  choix.remove();
+  if (!fichier) return;
+  let reg;
+  try { reg = JSON.parse((await fichier.text()).replace(/^﻿/, '')); } catch { return toast('Ce fichier n\'est pas le registre (donnees.json).', 'erreur'); }
+  const personnes = [...(reg.agents || []).map((p) => ({ ...p, _mien: true })), ...(reg.candidats || []).map((p) => ({ ...p, _mien: false }))];
+  if (!personnes.length) return toast('Registre vide ou format inconnu.', 'erreur');
+
+  const { agents } = await api('agents');
+  const parCle = new Map(agents.map((a) => [cleNom(a.nom), a]));
+  const chiffres = (t) => String(t || '').replace(/\D/g, '').slice(-9);
+  const parTel = new Map(agents.filter((a) => chiffres(a.tel).length === 9).map((a) => [chiffres(a.tel), a]));
+  const trouver = (p) => {
+    const nom = `${p.nom} ${p.prenom}`.trim();
+    let a = parCle.get(cleNom(nom)) || (chiffres(p.tel).length === 9 && parTel.get(chiffres(p.tel)));
+    if (!a) {
+      // Même nom de famille et prénom presque identique (« Sliou » / « Saliou »)
+      const fam = sansAccents(p.nom).trim(), pre = sansAccents(p.prenom).trim();
+      a = agents.find((x) => {
+        const mots = sansAccents(x.nom).split(/\s+/).filter(Boolean);
+        const iFam = mots.findIndex((m) => fam.split(/\s+/).some((f) => lev(m, f) <= 1 || (m.length >= 4 && f.length >= 4 && (f.includes(m) || m.includes(f)))));
+        return iFam >= 0 && pre && mots.some((m, i) => i !== iFam && lev(m, pre.split(/\s+/)[0]) <= 2);
+      });
+    }
+    return a || null;
+  };
+  const lignes = personnes.map((p) => {
+    const a = trouver(p);
+    const vtc = /vtc|chauffeur/i.test(`${p.equipe} ${p.poste}`);
+    const carteBrute = String(p.carte || '');
+    const carte = /^CAR-/i.test(carteBrute) || /falsifi/i.test(carteBrute) ? carteBrute : '';
+    return {
+      id: a ? a.id : 0,
+      nom: a ? a.nom : `${p.nom} ${p.prenom}`.trim(),
+      categorie: p._mien ? (/renfort|secondaire/i.test(p.equipe) ? 'secondaire' : 'primaire') : 'secours',
+      poste: vtc ? 'Chauffeur VTC' : /apr|protection rapproch/i.test(p.poste || '') ? 'Agent de protection rapprochée' : 'ADS',
+      tel: p.tel || '', carte, validite: frIso(p.fin) || finDepuisNumero(carte),
+      notes: [String(p.reponse || '').replace(/^[✔☎✖]\s*/, ''), p.notes].filter(Boolean).join(' · '),
+      infos: { sexe: p.sexe, mail: p.mail, ville: p.ville, vehicule: p.vehicule, taille: p.taille, qualifs: [p.ssiap, carte ? '' : carteBrute].filter(Boolean).join(' · '), langues: p.langues, fin_identite: p.cni, docs: p.docs, source: p.source, contact: p.contact, reponse: p.reponse },
+    };
+  });
+  const connus = lignes.filter((l) => l.id).length;
+  const ok = await confirmer(`${personnes.length} personnes dans le registre : ${connus} déjà dans l'admin (complétées sans effacer ce que vous avez saisi), ${personnes.length - connus} à ajouter${lignes.some((l) => !l.id && l.categorie === 'secours') ? ' (les agents de secours ne sont pas proposés dans le planning)' : ''}. Continuer ?`, { titre: 'Mettre à jour depuis le registre', ok: 'Mettre à jour' });
+  if (!ok) return;
+  try {
+    const r = await api('agents.importer', { lignes });
+    toast(`Registre importé : ${r.maj} agent${r.maj > 1 ? 's' : ''} mis à jour, ${r.crees} ajouté${r.crees > 1 ? 's' : ''}.`);
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  } catch (e) { erreur(e); }
 }
 
 async function nouvelAgent(ctx) {
@@ -212,17 +324,29 @@ async function ficheAgent(ctx, id) {
     notes: zoneTexte({ value: a.notes, rows: 3 }),
     actif: h('input', { type: 'checkbox', checked: !!+a.actif }),
   };
+  // Infos du tableau (registre) : email, ville, qualifications…
+  const infos = infosDe(a);
+  const fi = {
+    mail: saisie({ value: infos.mail || '', type: 'email' }),
+    ville: saisie({ value: infos.ville || '' }),
+    qualifs: saisie({ value: infos.qualifs || '', placeholder: 'ex. SSIAP 1 · SST' }),
+    langues: saisie({ value: infos.langues || '' }),
+    vehicule: saisie({ value: infos.vehicule || '', placeholder: 'ex. Permis B · véhiculé' }),
+    docs: zoneTexte({ value: infos.docs || '', rows: 2, placeholder: 'Documents reçus par mail ou Indeed' }),
+  };
   const form = h('form', { class: 'panneau__bloc', onsubmit: async (e) => {
     e.preventDefault();
     if (!f.nom.value.trim()) return f.nom.focus();
     try {
-      await api('agent.enregistrer', { id, nom: f.nom.value, categorie: f.categorie.value, poste: f.poste.value, tel: f.tel.value, carte: f.carte.value, validite: f.validite.value, notes: f.notes.value, actif: f.actif.checked ? 1 : 0 });
+      const nouvellesInfos = { ...infos, ...Object.fromEntries(Object.entries(fi).map(([k, el]) => [k, el.value])) };
+      await api('agent.enregistrer', { id, nom: f.nom.value, categorie: f.categorie.value, poste: f.poste.value, tel: f.tel.value, carte: f.carte.value, validite: f.validite.value, notes: f.notes.value, actif: f.actif.checked ? 1 : 0, infos: nouvellesInfos });
       ctx.titre(f.nom.value.trim()); toast('Agent enregistré.');
     } catch (err) { erreur(err); }
   } },
   h('h3', null, 'Informations'),
-  champ('Nom et prénom', f.nom), champ('Catégorie', f.categorie), champ('Poste', f.poste), champ('Téléphone', f.tel),
-  champ('N° de carte professionnelle', f.carte), champ('Carte pro valable jusqu\'au', f.validite), champ('Notes (privées)', f.notes),
+  champ('Nom et prénom', f.nom), champ('Catégorie', f.categorie), champ('Poste', f.poste), champ('Téléphone', f.tel), champ('Email', fi.mail), champ('Ville', fi.ville),
+  champ('N° de carte professionnelle', f.carte), champ('Carte pro valable jusqu\'au', f.validite),
+  champ('SSIAP / SST', fi.qualifs), champ('Langues', fi.langues), champ('Permis / véhicule', fi.vehicule), champ('Documents reçus', fi.docs), champ('Notes (privées)', f.notes),
   h('label', { class: 'case' }, f.actif, h('span', null, 'Agent actif (proposé dans le planning)')),
   h('button', { class: 'btn btn--gold btn--bloc', type: 'submit' }, icone('coche'), 'Enregistrer'));
 

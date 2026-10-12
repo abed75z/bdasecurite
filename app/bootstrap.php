@@ -270,6 +270,26 @@ function schema(PDO $db): void
       PRAGMA user_version = 16;
     SQL);
   }
+  if ($version < 17) {
+    // Tableau des agents : infos du registre (email, ville, qualifications, langues…) et catégorie « secours » (candidats retenus)
+    $db->exec(<<<'SQL'
+      ALTER TABLE agents ADD COLUMN infos TEXT NOT NULL DEFAULT '{}';
+      PRAGMA user_version = 17;
+    SQL);
+  }
+}
+// Catégorie d'un agent : équipe principale, renfort, ou agent de secours (candidat retenu)
+function agent_categorie($c): string
+{
+  return in_array($c, ['primaire', 'secondaire', 'secours'], true) ? $c : 'primaire';
+}
+// Infos complémentaires du tableau des agents (liste fermée de champs texte)
+const AGENT_INFOS = ['sexe', 'mail', 'ville', 'vehicule', 'taille', 'qualifs', 'langues', 'fin_identite', 'docs', 'source', 'contact', 'reponse'];
+function agent_infos(array $i): string
+{
+  $propre = [];
+  foreach (AGENT_INFOS as $k) $propre[$k] = texte($i[$k] ?? '', 300);
+  return json_encode($propre, JSON_UNESCAPED_UNICODE);
 }
 // Dossier privé des documents des agents (dans le stockage hors du site)
 function dossier_docs(): string

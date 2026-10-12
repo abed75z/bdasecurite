@@ -622,11 +622,52 @@ try {
 
     case 'agent.enregistrer':
       $b = corps();
-      $v = [texte($b['nom'] ?? '', 120), texte($b['poste'] ?? 'ADS', 60), texte($b['tel'] ?? '', 60), texte($b['carte'] ?? '', 80), texte($b['validite'] ?? '', 10), texte($b['notes'] ?? '', 2000), empty($b['actif']) ? 0 : 1, ($b['categorie'] ?? '') === 'secondaire' ? 'secondaire' : 'primaire'];
+      $v = [texte($b['nom'] ?? '', 120), texte($b['poste'] ?? 'ADS', 60), texte($b['tel'] ?? '', 60), texte($b['carte'] ?? '', 80), texte($b['validite'] ?? '', 10), texte($b['notes'] ?? '', 2000), empty($b['actif']) ? 0 : 1, agent_categorie($b['categorie'] ?? '')];
       if ($v[0] === '') echec("Le nom de l'agent est obligatoire.");
       if ($v[4] !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $v[4])) echec('Date de validité invalide.');
       if (empty($b['id'])) journal('equipe', "Agent ajouté : {$v[0]}");
-      repondre(['ok' => true, 'id' => enregistrer_ligne('agents', ['nom', 'poste', 'tel', 'carte', 'validite', 'notes', 'actif', 'categorie'], $v, (int)($b['id'] ?? 0))]);
+      $cols = ['nom', 'poste', 'tel', 'carte', 'validite', 'notes', 'actif', 'categorie'];
+      // Les infos du tableau ne changent que si elles sont envoyées (les autres écrans ne les connaissent pas)
+      if (isset($b['infos']) && is_array($b['infos'])) { $cols[] = 'infos'; $v[] = agent_infos($b['infos']); }
+      repondre(['ok' => true, 'id' => enregistrer_ligne('agents', $cols, $v, (int)($b['id'] ?? 0))]);
+
+    /* ----- Import du registre (donnees.json du PC du gérant) : complète les agents connus, ajoute les autres ----- */
+    case 'agents.importer':
+      $lignes = corps()['lignes'] ?? [];
+      if (!is_array($lignes) || count($lignes) > 1500) echec('Registre invalide.');
+      $maj = 0; $crees = 0;
+      $lire = db()->prepare('SELECT * FROM agents WHERE id = ?');
+      db()->beginTransaction();
+      foreach ($lignes as $l) {
+        if (!is_array($l)) continue;
+        $nom = texte($l['nom'] ?? '', 120);
+        if ($nom === '') continue;
+        $validite = texte($l['validite'] ?? '', 10);
+        if ($validite !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $validite)) $validite = '';
+        $infos = json_decode(agent_infos(is_array($l['infos'] ?? null) ? $l['infos'] : []), true);
+        $ancien = null;
+        if ((int)($l['id'] ?? 0)) { $lire->execute([(int)$l['id']]); $ancien = $lire->fetch() ?: null; }
+        if ($ancien) {
+          // On complète sans effacer ce qui a déjà été saisi dans l'admin
+          $garder = fn(string $champ, string $neuf): string => $neuf !== '' ? $neuf : (string)$ancien[$champ];
+          $infosAnc = json_decode((string)$ancien['infos'], true) ?: [];
+          db()->prepare('UPDATE agents SET poste = ?, tel = ?, carte = ?, validite = ?, notes = ?, infos = ? WHERE id = ?')->execute([
+            $garder('poste', texte($l['poste'] ?? '', 60)), $garder('tel', texte($l['tel'] ?? '', 60)), $garder('carte', texte($l['carte'] ?? '', 80)), $garder('validite', $validite),
+            (string)$ancien['notes'] !== '' ? (string)$ancien['notes'] : texte($l['notes'] ?? '', 2000),
+            json_encode(array_merge($infosAnc, array_filter($infos, fn($x) => $x !== '')), JSON_UNESCAPED_UNICODE), (int)$ancien['id']]);
+          $maj++;
+        } else {
+          // Les agents de secours ne sont pas proposés dans le planning tant qu'on ne les active pas
+          $cat = agent_categorie($l['categorie'] ?? 'secours');
+          db()->prepare('INSERT INTO agents (nom, poste, tel, carte, validite, notes, actif, categorie, infos, cree) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute([
+            $nom, texte($l['poste'] ?? '', 60) ?: 'ADS', texte($l['tel'] ?? '', 60), texte($l['carte'] ?? '', 80), $validite, texte($l['notes'] ?? '', 2000),
+            $cat === 'secours' ? 0 : 1, $cat, json_encode($infos, JSON_UNESCAPED_UNICODE), maintenant()]);
+          $crees++;
+        }
+      }
+      db()->commit();
+      journal('equipe', "Registre des agents importé : $maj mis à jour, $crees ajouté(s)");
+      repondre(['ok' => true, 'maj' => $maj, 'crees' => $crees]);
 
     case 'agent.supprimer':
       $id = (int)(corps()['id'] ?? 0);

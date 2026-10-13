@@ -6,9 +6,10 @@
    ========================================================= */
 import { api, h, icone, toast, erreur, modale, champ, saisie, zoneTexte, dateLisible, ilYa, attendre } from './outils.js';
 
-const TYPES = [['tout', 'Tout'], ['securite', '🛡️ Sécurité'], ['chauffeur', '🚘 Chauffeur'], ['recrutement', '👥 Recrutements']];
+const TYPES = [['tout', 'Tout'], ['securite', 'Sécurité'], ['chauffeur', 'Chauffeur'], ['recrutement', 'Recrutements']];
 const STATUTS = [['a_traiter', 'À traiter'], ['contacte', 'Contactés'], ['ignore', 'Ignorés'], ['tous', 'Tous']];
-const NIVEAUX = { fort: ['🟢', 'Très pertinent'], moyen: ['🟡', 'À regarder'], faible: ['⚪', 'Faible'] };
+// La couleur du badge (vert, orange, gris) indique le niveau : pas d'emoji
+const NIVEAUX = { fort: 'Très pertinent', moyen: 'À regarder', faible: 'Faible' };
 const SOURCES = { boamp: "Appels d'offres (BOAMP)", francetravail: 'Recrutements (France Travail)' };
 const euros = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
 const filtres = { type: 'tout', statut: 'a_traiter', faibles: true, q: '' };
@@ -75,7 +76,7 @@ export async function pageOpportunites(ctx) {
   const zoneTypes = h('div', { class: 'chips' });
   const zoneStatuts = h('div', { class: 'chips' });
   const recherche = saisie({ type: 'search', class: 'input input--recherche', placeholder: 'Rechercher (acheteur, ville, mot…)', value: filtres.q, oninput: attendre((e) => { filtres.q = e.target.value; dessiner(); }, 200) });
-  const faibles = h('label', { class: 'op-bascule' }, h('input', { type: 'checkbox', checked: filtres.faibles ? true : null, onchange: (e) => { filtres.faibles = e.target.checked; memoriser(); dessiner(); } }), h('span', null, 'Afficher les ⚪ faibles'));
+  const faibles = h('label', { class: 'op-bascule' }, h('input', { type: 'checkbox', checked: filtres.faibles ? true : null, onchange: (e) => { filtres.faibles = e.target.checked; memoriser(); dessiner(); } }), h('span', null, 'Afficher les faibles'));
   const zone = h('div', { class: 'op-liste' });
 
   function dessiner() {
@@ -103,7 +104,7 @@ export async function pageOpportunites(ctx) {
 function carte(o, vuAvant, cible, redessiner) {
   const j = joursRestants(o.date_limite);
   const urgence = j === null ? 'aucune' : j < 0 ? 'clos' : j <= 3 ? 'rouge' : j <= 7 ? 'orange' : 'or';
-  const [pastille, libNiveau] = NIVEAUX[o.niveau] || ['', ''];
+  const libNiveau = NIVEAUX[o.niveau] || '';
   const statutZone = h('div', { class: 'op-statuts' });
   const majStatut = () => statutZone.replaceChildren(...[['a_traiter', 'À traiter'], ['contacte', 'Contacté'], ['ignore', 'Ignoré']].map(([k, l]) => h('button', {
     type: 'button', class: `op-statut ${o.statut === k ? `is-actif is-${k}` : ''}`, 'aria-pressed': o.statut === k ? 'true' : 'false',
@@ -121,12 +122,12 @@ function carte(o, vuAvant, cible, redessiner) {
   const infos = [o.acheteur, o.lieu].filter(Boolean).join(' · ');
   return h('article', { class: `op-carte op-carte--${o.type} ${o.statut === 'ignore' ? 'is-ignore' : ''} ${cible ? 'is-cible' : ''}`, id: `opp-${o.id}` },
     h('div', { class: `op-jx op-jx--${urgence}` },
-      j === null ? [h('b', null, o.type === 'recrutement' ? '👥' : '—'), h('span', null, o.type === 'recrutement' ? dateLisible(o.date_parution) : 'sans date')]
+      j === null ? [h('b', null, o.type === 'recrutement' ? icone('agents') : '—'), h('span', null, o.type === 'recrutement' ? dateLisible(o.date_parution) : 'sans date')]
         : j < 0 ? [h('b', null, 'Clos'), h('span', null, dateLisible(o.date_limite))]
           : [h('b', null, j === 0 ? 'J' : `J-${j}`), h('span', null, dateLisible(o.date_limite, true))]),
     h('div', { class: 'op-corps' },
       h('div', { class: 'op-meta' },
-        o.type !== 'recrutement' ? h('span', { class: `op-niveau op-niveau--${o.niveau}`, title: `Score ${o.score}` }, pastille, ' ', libNiveau) : null,
+        o.type !== 'recrutement' ? h('span', { class: `op-niveau op-niveau--${o.niveau}`, title: `Score ${o.score}` }, libNiveau) : null,
         h('span', { class: 'op-type' }, TYPES.find(([k]) => k === o.type)?.[1] || ''),
         o.nature ? h('span', { class: 'muet' }, o.nature) : null,
         o.cree > vuAvant && vuAvant ? h('span', { class: 'op-nouveau' }, 'Nouveau') : null),

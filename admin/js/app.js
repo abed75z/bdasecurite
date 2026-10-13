@@ -1,7 +1,7 @@
 /* =========================================================
    ESPACE ADMIN BDA — démarrage, connexion, menu et navigation
    ========================================================= */
-import { api, quandDeconnecte, h, $, $$, icone, ecusson, toast, erreur, champ, saisie } from './outils.js';
+import { api, quandDeconnecte, h, $, $$, icone, marqueLogo, toast, erreur, champ, saisie } from './outils.js';
 import { PAGES } from './pages.js';
 import { installerPalette } from './commandes.js';
 
@@ -63,8 +63,9 @@ async function demarrer() {
 function ecranAccueil(titre, ...contenu) {
   return h('main', { class: 'auth' },
     h('section', { class: 'auth__carte' },
+      // Logo du site (BDA / SECURITY GROUP), version sur fond clair
+      h('div', { class: 'auth__marque' }, marqueLogo('auth__logo'), h('small', null, 'Console d’administration')),
       h('span', { class: 'auth__zone' }, icone('cadenas'), 'Zone sécurisée · accès administrateur'),
-      h('div', { class: 'auth__marque' }, ecusson(), h('div', null, h('b', null, 'BDA Security Group'), h('small', null, 'Console d’administration'))),
       h('h1', null, titre),
       contenu,
       h('ul', { class: 'auth__garanties' },
@@ -161,17 +162,20 @@ function lancerApplication() {
     icone(m.icone), h('span', null, m.libelle), m.badge ? h('b', { class: `nav__badge ${m.alerte ? 'nav__badge--alerte' : ''}`, dataset: { badge: m.badge }, hidden: true }) : null);
   // Les rubriques « admin » (fiches de paie) n'apparaissent pas pour un compte manager
   const menu = MENU.filter((m) => !m.admin || etat.session.role === 'admin');
-  menuEl = h('nav', { class: 'nav', 'aria-label': 'Menu principal' }, menu.map((m) => (m.groupe ? h('p', { class: 'nav__groupe' }, m.groupe) : lien(m))));
+  menuEl = h('nav', { class: 'nav', 'aria-label': 'Menu principal' }, menu.map((m) => (m.groupe ? h('p', { class: 'nav__groupe' }, m.groupe) : lien(m))),
+    // Compte : dans la liste qui défile, pour laisser toute la hauteur au menu
+    h('p', { class: 'nav__groupe' }, 'Compte'),
+    lien({ route: 'parametres', libelle: 'Paramètres', icone: 'reglages' }),
+    lien({ route: 'securite', libelle: 'Accès & sécurité', icone: 'bouclier' }),
+    h('a', { class: 'nav__item nav__item--chef', href: '/admin/moi' }, icone('couronne'), h('span', null, 'Mon accès chef')),
+    h('a', { class: 'nav__item', href: '/', target: '_blank', rel: 'noopener' }, icone('site'), h('span', null, 'Voir le site')));
 
   const utilisateur = String(etat.session.utilisateur || '');
   const cote = h('aside', { class: 'cote' },
-    h('a', { href: '#/', class: 'cote__marque', onclick: fermerMenu }, ecusson(), h('div', null, h('b', null, 'BDA Security Group'), h('small', null, 'Console', h('span', { class: 'tag-admin' }, 'Admin')))),
+    // En haut à gauche : le logo du site public (BDA blanc, SECURITY GROUP doré) sur la barre noire
+    h('a', { href: '#/', class: 'cote__marque', title: 'Accueil de l’administration', onclick: fermerMenu }, marqueLogo('cote__logo', true)),
     menuEl,
     h('div', { class: 'cote__bas' },
-      lien({ route: 'parametres', libelle: 'Paramètres', icone: 'reglages' }),
-      lien({ route: 'securite', libelle: 'Accès & sécurité', icone: 'bouclier' }),
-      h('a', { class: 'nav__item nav__item--chef', href: '/admin/moi' }, icone('couronne'), h('span', null, 'Mon accès chef')),
-      h('a', { class: 'nav__item', href: '/', target: '_blank', rel: 'noopener' }, icone('site'), h('span', null, 'Voir le site')),
       h('div', { class: 'profil' }, h('span', { class: 'profil__avatar', 'aria-hidden': 'true' }, utilisateur.charAt(0) || 'A'),
         h('div', null, h('b', null, utilisateur), h('small', null, 'Administrateur')),
         h('button', { class: 'icon-btn', type: 'button', title: 'Se déconnecter', 'aria-label': 'Se déconnecter', onclick: deconnexion }, icone('sortie')))));
@@ -225,12 +229,22 @@ export async function majCompteurs() {
   } catch (e) { /* silencieux */ }
 }
 
+// Le menu défile : la rubrique ouverte reste visible
+function montrerRubrique() {
+  const a = menuEl?.querySelector('.nav__item.is-actif');
+  if (!a) return;
+  const haut = a.offsetTop, bas = haut + a.offsetHeight;
+  if (haut < menuEl.scrollTop) menuEl.scrollTop = haut - 8;
+  else if (bas > menuEl.scrollTop + menuEl.clientHeight) menuEl.scrollTop = bas - menuEl.clientHeight + 8;
+}
+
 let jetonNavigation = 0;
 async function router() {
   const [route = '', ...params] = location.hash.replace(/^#\/?/, '').split('/').map(decodeURIComponent);
   const page = PAGES[route] || PAGES[''];
   const actif = PAGES[route] ? (PARENT[route] || route) : '';
   $$('.cote .nav__item[data-route]').forEach((a) => a.classList.toggle('is-actif', a.dataset.route === actif));
+  montrerRubrique();
   const jeton = ++jetonNavigation;
   zonePage.replaceChildren(h('div', { class: 'chargement' }, h('span'), h('span'), h('span')));
   actionsPage.replaceChildren();

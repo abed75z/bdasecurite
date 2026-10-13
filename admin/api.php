@@ -618,7 +618,39 @@ try {
       $docs = [];
       foreach (db()->query('SELECT agent_id, type, COUNT(*) n FROM agent_docs GROUP BY agent_id, type') as $l) $docs[(int)$l['agent_id']][$l['type']] = (int)$l['n'];
       foreach ($agents as &$a) { $a['docs'] = (object)($docs[(int)$a['id']] ?? []); $a['pointage'] = $a['pointage'] !== ''; }
-      repondre(['ok' => true, 'agents' => $agents]);
+      repondre(['ok' => true, 'agents' => $agents, 'dracar' => (string)(reglage_json('dracar')['lien'] ?? '')]);
+
+    /* ----- Carte pro : résultat de la vérification officielle sur DRACAR (faite par le gérant dans son espace CNAPS) ----- */
+    case 'agent.carte.verifiee':
+      $b = corps();
+      $st = db()->prepare('SELECT * FROM agents WHERE id = ?');
+      $st->execute([(int)($b['id'] ?? 0)]);
+      $a = $st->fetch();
+      if (!$a) echec('Agent introuvable.', 404);
+      $statut = (string)($b['statut'] ?? '');
+      if (!in_array($statut, ['actif', 'inactif', 'retire', 'introuvable'], true)) echec('Choisissez le résultat affiché par DRACAR.');
+      $validite = texte($b['validite'] ?? '', 10);
+      if ($validite !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $validite)) echec('Date de validité invalide.');
+      $nub = preg_replace('/\D/', '', (string)($b['nub'] ?? ''));
+      if ($nub !== '' && strlen($nub) !== 7) echec('Le NUB compte 7 chiffres.');
+      $infos = json_decode((string)$a['infos'], true) ?: [];
+      $activite = texte($b['activite'] ?? '', 120);
+      if ($activite !== '') $infos['activite'] = $activite;
+      if ($nub !== '') $infos['nub'] = $nub;
+      $infos['dracar'] = $statut;
+      $infos['dracar_le'] = substr(maintenant(), 0, 10);
+      $propres = agent_infos($infos);
+      $validite = $validite !== '' ? $validite : (string)$a['validite'];
+      db()->prepare('UPDATE agents SET validite = ?, infos = ? WHERE id = ?')->execute([$validite, $propres, (int)$a['id']]);
+      journal('equipe', "Carte pro vérifiée sur DRACAR : {$a['nom']} ($statut)");
+      repondre(['ok' => true, 'validite' => $validite, 'infos' => json_decode($propres, true)]);
+
+    // Lien de la page DRACAR du gérant (bouton « Vérifier sur DRACAR »)
+    case 'dracar.lien':
+      $lien = trim((string)(corps()['lien'] ?? ''));
+      if ($lien !== '' && !preg_match('#^https://[^\s<>"\']+$#i', $lien)) echec('Le lien doit commencer par https://');
+      db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['dracar', json_encode(['lien' => texte($lien, 400)], JSON_UNESCAPED_UNICODE)]);
+      repondre(['ok' => true, 'lien' => $lien]);
 
     case 'agent.enregistrer':
       $b = corps();

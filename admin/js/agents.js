@@ -4,7 +4,8 @@
    fiche de chaque agent avec ses documents : présents,
    manquants ou à vérifier. Import d'un dossier entier.
    ========================================================= */
-import { api, apiFichier, h, icone, toast, erreur, modale, confirmer, champ, saisie, zoneTexte, iso, isoVersFr, dateLisible } from './outils.js';
+import { api, apiFichier, h, icone, toast, erreur, modale, confirmer, champ, saisie, zoneTexte, isoVersFr, dateLisible } from './outils.js';
+import { etatTitre, lireCarte, ouvrirCartePro } from './carte-pro.js';
 
 export const DOCS = [
   { type: 'identite', libelle: 'Pièce d\'identité', obligatoire: true },
@@ -72,14 +73,16 @@ const falsifiee = (a) => /falsifi/i.test(a.carte || '');
 
 async function listeAgents(ctx) {
   ctx.titre('Agents');
-  const { agents } = await api('agents');
+  const { agents, dracar } = await api('agents');
   ctx.actions(
+    h('button', { class: 'btn btn--carte-pro', type: 'button', onclick: () => ouvrirCartePro({ agents, dracar }) }, icone('badge'), h('span', null, 'Carte pro')),
     h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => importerRegistre() }, icone('telecharger'), h('span', null, 'Mettre à jour depuis le registre')),
     h('button', { class: 'btn btn--ghost', type: 'button', onclick: () => importerDossier(ctx) }, icone('telecharger'), h('span', null, 'Importer un dossier')),
     h('button', { class: 'btn btn--gold', type: 'button', onclick: () => nouvelAgent(ctx) }, icone('plus'), h('span', null, 'Nouvel agent')));
 
-  const auj = iso(new Date()), dans90 = iso(new Date(Date.now() + 90 * 864e5));
-  const etatCarte = (a) => (falsifiee(a) ? 'Falsifiée' : !a.validite ? '' : a.validite < auj ? 'Expirée' : a.validite <= dans90 ? 'Expire bientôt' : 'Valide');
+  // Carte pro : dates, carte refusée et dernier résultat DRACAR (pas d'état pour une carte VTC sans date)
+  const etatCarte = (a) => { const e = etatTitre(a); return e.code === 'a-verifier' && !/CAR-/i.test(a.carte || '') ? null : e; };
+  const enAlerte = (a) => mien(a) && !!etatCarte(a)?.grave;
   const mien = (a) => (a.categorie || 'primaire') !== 'secours';
   const ORDRE = ['primaire', 'secondaire', 'secours'];
   const lignesTexte = (...v) => v.filter((x) => x && String(x).trim()).map((x) => h('span', { class: 'cell-ligne' }, x));
@@ -92,9 +95,10 @@ async function listeAgents(ctx) {
       a.tel ? h('a', { class: 'cell-ligne', href: `tel:${a.tel.replace(/[^\d+]/g, '')}`, onclick: (e) => e.stopPropagation() }, a.tel) : null,
       i.mail ? h('a', { class: 'cell-ligne cell-mail', href: `mailto:${i.mail}`, onclick: (e) => e.stopPropagation() }, i.mail) : null]],
     ['Carte pro', (a) => a.validite || 'zzzz', (a) => {
-      const e = etatCarte(a);
-      return [e ? h('span', { class: `etat-carte etat-carte--${sansAccents(e).replace(/\s+/g, '-')}` }, e + (a.validite && !falsifiee(a) ? ` · ${isoVersFr(a.validite)}` : '')) : null,
-        ...lignesTexte(falsifiee(a) ? '' : a.carte).map((n) => { n.classList.add('cell-num'); return n; })];
+      const e = etatCarte(a), i = infosDe(a);
+      return [e ? h('span', { class: `etat-carte etat-carte--${e.code}` }, e.libelle + (e.fin ? ` · ${isoVersFr(e.fin)}` : '')) : null,
+        ...lignesTexte(falsifiee(a) ? '' : a.carte).map((n) => { n.classList.add('cell-num'); return n; }),
+        i.dracar ? h('span', { class: `cell-ligne cell-dracar cell-dracar--${i.dracar}`, title: 'Résultat noté depuis DRACAR' }, `${i.dracar === 'actif' ? '✔' : '✖'} DRACAR ${isoVersFr(i.dracar_le)}`) : null];
     }],
     ['Qualifications', (a, i) => i.qualifs, (a, i) => lignesTexte(i.qualifs, i.langues, i.vehicule)],
     ['Documents', (a, i) => i.docs, (a, i) => {
@@ -111,7 +115,7 @@ async function listeAgents(ctx) {
 
   function ligne(a) {
     const i = infosDe(a);
-    const alerte = mien(a) && (falsifiee(a) || etatCarte(a) === 'Expirée');
+    const alerte = enAlerte(a);
     return h('tr', { class: alerte ? 'ligne--alerte' : '', tabindex: 0, title: 'Ouvrir la fiche', onclick: () => ctx.aller(`#/agents/${a.id}`), onkeydown: (e) => { if (e.key === 'Enter') ctx.aller(`#/agents/${a.id}`); } },
       COLS.map(([, , rendu]) => h('td', null, rendu(a, i))));
   }
@@ -136,14 +140,14 @@ async function listeAgents(ctx) {
     corpsT.replaceChildren(...(lignes.length ? lignes : [h('tr', null, h('td', { colspan: COLS.length, class: 'muet' }, agents.length ? 'Aucun agent ne correspond à la recherche.' : 'Aucun agent pour le moment. Utilisez « Mettre à jour depuis le registre » ou « Nouvel agent ».'))]));
   }
   const rech = saisie({ type: 'search', class: 'input input--recherche', placeholder: 'Rechercher (nom, ville, SSIAP, espagnol…)', oninput: (e) => { recherche = e.target.value; dessiner(); } });
-  const nbAlertes = agents.filter((a) => mien(a) && (falsifiee(a) || etatCarte(a) === 'Expirée')).length;
+  const nbAlertes = agents.filter(enAlerte).length;
   ctx.afficher(
     h('div', { class: 'carte__outils agents-outils' },
       h('p', { class: 'agents-resume' }, h('b', null, agents.length), ` personnes · ${agents.filter(mien).length} agents · ${agents.filter((a) => !mien(a)).length} agents de secours`,
-        nbAlertes ? h('span', { class: 'agents-resume__alerte' }, ` · ${nbAlertes} carte${nbAlertes > 1 ? 's' : ''} pro expirée${nbAlertes > 1 ? 's' : ''} ou falsifiée${nbAlertes > 1 ? 's' : ''}`) : null),
+        nbAlertes ? h('span', { class: 'agents-resume__alerte' }, ` · ${nbAlertes} carte${nbAlertes > 1 ? 's' : ''} pro expirée${nbAlertes > 1 ? 's' : ''} ou refusée${nbAlertes > 1 ? 's' : ''}`) : null),
       h('div', { class: 'recherche' }, icone('recherche'), rech)),
     h('div', { class: 'tableau-agents' }, table),
-    h('p', { class: 'legende-docs' }, h('span', null, 'Cliquez sur une ligne pour ouvrir la fiche.'), h('span', null, 'Cliquez sur un titre de colonne pour trier.'), h('span', null, 'En rouge : carte pro expirée ou falsifiée.')));
+    h('p', { class: 'legende-docs' }, h('span', null, 'Cliquez sur une ligne pour ouvrir la fiche.'), h('span', null, 'Cliquez sur un titre de colonne pour trier.'), h('span', null, 'En rouge : carte pro expirée, falsifiée ou refusée sur DRACAR.')));
   dessinerTete();
   dessiner();
 }
@@ -186,7 +190,7 @@ async function importerRegistre() {
     const a = trouver(p);
     const vtc = /vtc|chauffeur/i.test(`${p.equipe} ${p.poste}`);
     const carteBrute = String(p.carte || '');
-    const carte = /^CAR-/i.test(carteBrute) || /falsifi/i.test(carteBrute) ? carteBrute : '';
+    const carte = /CAR-/i.test(carteBrute) || /falsifi/i.test(carteBrute) ? carteBrute : '';
     return {
       id: a ? a.id : 0,
       nom: a ? a.nom : `${p.nom} ${p.prenom}`.trim(),
@@ -221,11 +225,19 @@ async function nouvelAgent(ctx) {
   if (id) ctx.aller(`#/agents/${id}`);
 }
 
+// Pastille d'état de la carte pro sur la fiche (dates + dernier résultat DRACAR)
+function etatFiche(a) {
+  const e = etatTitre(a);
+  if (e.code === 'a-verifier' && lireCarte(a.carte).format === 'aucun') return null;
+  const i = infosDe(a);
+  return h('span', { class: `etat-carte etat-carte--${e.code} etat-carte--fiche` }, e.libelle + (e.fin ? ` · ${isoVersFr(e.fin)}` : '') + (i.dracar ? ` · DRACAR ${isoVersFr(i.dracar_le)}` : ''));
+}
+
 /* =========================================================
    FICHE AGENT
    ========================================================= */
 async function ficheAgent(ctx, id) {
-  const [{ agents }, res] = await Promise.all([api('agents'), api('agent.docs', undefined, { agent: id })]);
+  const [{ agents, dracar }, res] = await Promise.all([api('agents'), api('agent.docs', undefined, { agent: id })]);
   const a = agents.find((x) => +x.id === id);
   if (!a) throw new Error('Agent introuvable.');
   let docs = res.docs;
@@ -307,7 +319,7 @@ async function ficheAgent(ctx, id) {
     categorie: h('select', { class: 'input' }, Object.entries(CATEGORIES).map(([k, l]) => h('option', { value: k, selected: (a.categorie || 'primaire') === k }, l))),
     poste: h('select', { class: 'input' }, POSTES.map((p) => h('option', { value: p, selected: p === a.poste }, p)), !POSTES.includes(a.poste) ? h('option', { value: a.poste, selected: true }, a.poste) : null),
     tel: saisie({ value: a.tel, type: 'tel' }),
-    carte: saisie({ value: a.carte, placeholder: 'ex. CAR-075-2030-…' }),
+    carte: saisie({ value: a.carte, placeholder: 'ex. 2026-0061049-CAR-SH-1001740' }),
     validite: saisie({ value: a.validite, type: 'date' }),
     notes: zoneTexte({ value: a.notes, rows: 3 }),
     actif: h('input', { type: 'checkbox', checked: !!+a.actif }),
@@ -333,7 +345,8 @@ async function ficheAgent(ctx, id) {
   } },
   h('div', { class: 'agent-fiche__groupe' }, h('h3', null, 'Identité et contact'),
     h('div', { class: 'form-grille form-grille--2' }, champ('Nom et prénom', f.nom), champ('Catégorie', f.categorie), champ('Poste', f.poste), champ('Téléphone', f.tel), champ('Email', fi.mail), champ('Ville', fi.ville))),
-  h('div', { class: 'agent-fiche__groupe' }, h('h3', null, 'Carte professionnelle'),
+  h('div', { class: 'agent-fiche__groupe' }, h('h3', { class: 'agent-fiche__titre-carte' }, 'Carte professionnelle', etatFiche(a),
+      h('button', { class: 'lien-btn', type: 'button', onclick: () => ouvrirCartePro({ agents, dracar, agent: a }) }, icone('badge'), 'Vérifier la carte')),
     h('div', { class: 'form-grille form-grille--2' }, champ('N° de carte professionnelle', f.carte), champ('Valable jusqu\'au', f.validite))),
   h('div', { class: 'agent-fiche__groupe' }, h('h3', null, 'Qualifications'),
     h('div', { class: 'form-grille form-grille--2' }, champ('SSIAP / SST', fi.qualifs), champ('Langues', fi.langues), champ('Permis / véhicule', fi.vehicule))),

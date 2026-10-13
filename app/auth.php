@@ -49,7 +49,7 @@ function connecte(): bool
 const ROLES = ['admin', 'manager'];
 const ACTIONS_ADMIN = [
   'utilisateurs', 'utilisateur.creer', 'utilisateur.modifier', 'utilisateur.supprimer',
-  'reglages.enregistrer', 'export', 'import', 'site.horsligne', 'connexions', 'connexion.revoquer', 'vtc.tarifs.enregistrer',
+  'reglages.enregistrer', 'dracar.lien', 'export', 'import', 'site.horsligne', 'connexions', 'connexion.revoquer', 'vtc.tarifs.enregistrer',
   'chef.memoriser', 'chef.oublier', 'chef.appareils', 'chef.revoquer',
   'agent.supprimer', 'client.supprimer', 'document.supprimer',
   // Clé API de l'assistant (facturée au gérant)

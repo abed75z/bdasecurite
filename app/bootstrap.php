@@ -284,7 +284,8 @@ function agent_categorie($c): string
   return in_array($c, ['primaire', 'secondaire', 'secours'], true) ? $c : 'primaire';
 }
 // Infos complémentaires du tableau des agents (liste fermée de champs texte)
-const AGENT_INFOS = ['sexe', 'mail', 'ville', 'vehicule', 'taille', 'qualifs', 'langues', 'fin_identite', 'docs', 'source', 'contact', 'reponse'];
+// activite, nub, dracar, dracar_le : carte pro (activité autorisée, numéro bénéficiaire, dernière vérification officielle)
+const AGENT_INFOS = ['sexe', 'mail', 'ville', 'vehicule', 'taille', 'qualifs', 'langues', 'fin_identite', 'docs', 'source', 'contact', 'reponse', 'activite', 'nub', 'dracar', 'dracar_le'];
 function agent_infos(array $i): string
 {
   $propre = [];

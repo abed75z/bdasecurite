@@ -9,6 +9,8 @@
 
   // Site sobre (15/10/2026) : aucun effet décoratif (étoiles, parallaxe, inclinaison, compteurs, apparitions…)
   const reduced = true;
+  // Effets légers gardés (apparitions en fondu) sauf si le visiteur demande moins d'animations
+  const moinsAnim = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   const lerp = (a, b, t) => a + (b - a) * t;
   const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
@@ -230,7 +232,7 @@
     // Titres affichés directement (plus de découpage mot par mot : rendu plus sobre)
     document.querySelectorAll('[data-split]').forEach((e) => e.classList.add('is-in'));
     const els = document.querySelectorAll('[data-reveal]');
-    if (reduced || !('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('is-in')); return; }
+    if (moinsAnim || !('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('is-in')); return; }
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => {
         if (!e.isIntersecting) return;
@@ -403,7 +405,7 @@
     const listes = '.ac-liste, .ac-points, .ac-etapes, .ac-engagements, .ac-garanties__liste, .tf-cartes, .lp-cards, .lp-list, .faq, .ac-tarifs ul, .ac-contact__moyens';
     const enfants = [];
     document.querySelectorAll(listes).forEach((l) => [...l.children].forEach((c, i) => { c.classList.add('cascade'); c.style.setProperty('--c', i); enfants.push(c); }));
-    if (reduced || !('IntersectionObserver' in window)) enfants.forEach((c) => c.classList.add('is-in'));
+    if (moinsAnim || !('IntersectionObserver' in window)) enfants.forEach((c) => c.classList.add('is-in'));
     else {
       const io = new IntersectionObserver((entrees) => entrees.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); } }), { threshold: 0, rootMargin: '0px 0px 12% 0px' });
       enfants.forEach((c) => io.observe(c));

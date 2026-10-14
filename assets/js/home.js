@@ -84,7 +84,9 @@
     if (!v) return;
     const mobile = window.matchMedia('(max-width: 767px), (orientation: portrait)').matches;
     const eco = navigator.connection && navigator.connection.saveData;
-    if (reduced || eco) { v.remove(); return; }
+    // La vidéo reste active même en mode sobre ; image fixe seulement si le visiteur demande moins d'animations
+    const moinsAnim = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (moinsAnim || eco) { v.remove(); return; }
     v.muted = true; v.defaultMuted = true;
     v.src = 'assets/video/' + (mobile ? 'bda-fond-paris-mobile-720x1280.mp4' : 'bda-fond-paris-1920x1080.mp4') + '?v=1';
     v.addEventListener('playing', () => v.classList.add('is-on'), { once: true });

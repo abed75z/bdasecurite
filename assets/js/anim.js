@@ -11,6 +11,8 @@
 (() => {
   // Site sobre (15/10/2026) : titres, manifeste, bandeau, zooms et apparitions sans animation
   const reduit = true;
+  // Apparitions en fondu gardées, sauf si le visiteur demande moins d'animations
+  const moinsAnim = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
   /* ---------- Scroll : une seule boucle par image ---------- */
@@ -119,7 +121,7 @@
   ].join(',');
   const elts = [...document.querySelectorAll(cibles + ', .tuiles .tuile, .ac-ia__texte > :not(.h2), .ac-ia__demo')].filter((el) => !el.closest('.ac-hero, .lp-hero, .tf-hero') && !el.classList.contains('cascade') && !el.classList.contains('mots'));
   document.querySelectorAll('.tuiles .tuile').forEach((t) => t.classList.add('rv--zoom'));
-  if (!reduit && 'IntersectionObserver' in window) {
+  if (!moinsAnim && 'IntersectionObserver' in window) {
     // Délai en cascade pour les éléments d'un même parent
     const vus = new Map();
     elts.forEach((el) => {
@@ -344,7 +346,7 @@
     });
     c.append(bloc);
     footer.classList.add('a-marque');
-    if (reduit || !('IntersectionObserver' in window)) { bloc.classList.add('vu'); return; }
+    if (moinsAnim || !('IntersectionObserver' in window)) { bloc.classList.add('vu'); return; }
     const o = new IntersectionObserver((en) => { if (en[0].isIntersecting) { bloc.classList.add('vu'); o.disconnect(); } }, { threshold: 0.2 });
     o.observe(bloc);
   });

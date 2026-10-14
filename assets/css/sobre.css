@@ -3,47 +3,67 @@
    Typographie raffinée (tailles maîtrisées, hiérarchie claire,
    espacements réguliers) et mouvement minimal : plus de rebonds,
    zooms, textes qui défilent ni effets décoratifs. Seules restent
-   des transitions courtes (couleurs, fonds, ombres).
+   des transitions et apparitions légères et fluides.
    Chargée en dernier, après blanc.css. Ne change ni le contenu
    ni le fonctionnement des pages.
    ========================================================= */
 
-/* ---------- 1. Mouvement ---------- */
+/* ---------- 1. Mouvement : léger, fluide, jamais spectaculaire ---------- */
 
-/* Toutes les animations CSS se figent immédiatement sur leur état final */
+/* Les anciennes animations décoratives se figent sur leur état final */
 *, *::before, *::after {
   animation-duration: 0.001ms !important;
   animation-delay: 0s !important;
   animation-iteration-count: 1 !important;
-  scroll-behavior: auto !important;
 }
-/* Transitions : courtes et discrètes, sans délai en cascade */
+/* Transitions souples et courtes (survols, menus, couleurs) */
 *, *::before, *::after {
-  transition-duration: 0.18s !important;
+  transition-duration: 0.25s !important;
   transition-delay: 0s !important;
-  transition-timing-function: ease !important;
+  transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1) !important;
 }
-/* Seuls les indicateurs de chargement continuent de tourner */
+/* Les indicateurs de chargement continuent de tourner */
 .btn.is-loading::before, .cta.is-loading::after,
 [class*="spinner"], [class*="loader"], .is-loading .spin {
   animation-duration: 0.8s !important;
   animation-iteration-count: infinite !important;
 }
 
-/* Contenu toujours visible : plus d'apparition au défilement */
-.rv, .cascade, [data-reveal], .tuile, .tuiles .tuile, .mot > span,
-.h2.mots .mot > span, .manifeste.mots .mot > span,
-.ac-hero__texte > *, .ac-hero__visuel, .ac-hero__badge {
-  opacity: 1 !important;
-  transform: none !important;
-  filter: none !important;
+/* Premier écran : le texte arrive en fondu, ligne après ligne, au chargement */
+@keyframes sobre-entree { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.ac-hero__texte > *, .lp-hero .container > *, .tf-hero .container > * {
+  animation-name: sobre-entree !important;
+  animation-duration: 0.8s !important;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+  animation-fill-mode: both !important;
 }
+.ac-hero__texte > :nth-child(2), .lp-hero .container > :nth-child(2), .tf-hero .container > :nth-child(2) { animation-delay: 0.08s !important; }
+.ac-hero__texte > :nth-child(3), .lp-hero .container > :nth-child(3), .tf-hero .container > :nth-child(3) { animation-delay: 0.16s !important; }
+.ac-hero__texte > :nth-child(4), .lp-hero .container > :nth-child(4), .tf-hero .container > :nth-child(4) { animation-delay: 0.24s !important; }
+.ac-hero__texte > :nth-child(n+5), .lp-hero .container > :nth-child(n+5), .tf-hero .container > :nth-child(n+5) { animation-delay: 0.32s !important; }
+.ac-hero__texte, .ac-hero .tel { transform: none !important; opacity: 1 !important; }
+/* Vidéo de fond : apparaît en douceur */
+.ac-fond__video { transition: opacity 1.2s ease !important; }
+
+/* Au défilement : les blocs apparaissent en fondu en remontant de quelques pixels */
+.rv, .cascade, [data-reveal] {
+  filter: none !important;
+  transition-property: opacity, transform, box-shadow, background-color, border-color, color !important;
+  transition-duration: 0.7s, 0.6s, 0.35s, 0.25s, 0.25s, 0.25s !important;
+}
+.rv:not(.vu), .cascade:not(.is-in), [data-reveal]:not(.is-in) { opacity: 0 !important; transform: translateY(14px) !important; }
+.rv.vu, .cascade.is-in, [data-reveal].is-in { opacity: 1 !important; transform: none !important; }
+/* Les en-têtes de page restent toujours visibles */
+.jobs-hero [data-reveal], .lp-hero [data-reveal], .rv-hero [data-reveal], .tf-hero [data-reveal], .hero [data-reveal] { opacity: 1 !important; transform: none !important; }
+
+/* Titres : affichés entiers (plus de mots qui montent un par un) */
+.mot > span, .h2.mots .mot > span, .manifeste.mots .mot > span { opacity: 1 !important; transform: none !important; }
 .manifeste .mm-mot { color: inherit !important; }
 
 /* Rideau d'ouverture, bandeau de mots défilants, particules, ciel animé */
 .rideau, .defile, #sky, [data-particules], .particules, .ac-defiler span { display: none !important; }
 
-/* Plus de zooms, rotations ni « sauts » au survol */
+/* Icônes et photos : plus de zooms ni de rotations au survol */
 .tuile:hover .tuile__ico, .tuile--noire:hover .tuile__embleme, .brand:hover .brand__mark,
 .ia-champ button:hover, .ac-garanties__liste li:hover .icon, .footer .brand:hover .brand__mark,
 .ac-secteurs-bande a:hover .icon, .lp-card:hover .ico, .lp-photo:hover img,
@@ -51,17 +71,39 @@
 .perk:hover .perk__icon, .ref-galerie figure:hover img {
   transform: none !important;
 }
-/* Cartes : au survol, simple changement d'ombre (pas de déplacement) */
-.ac-etapes li.cascade.is-in:hover, .tf-carte.cascade.is-in:hover, .lp-card.cascade.is-in:hover,
-.tuile:hover, .lp-card:hover, .tf-carte:hover, .rv-card:hover, .job:hover {
-  transform: none !important;
-}
 /* Photos fixes (plus de zoom ni de parallaxe) */
 [data-zoom], [data-zoom] img, .ac-hero__photo img, .ac-ref__photo img { transform: none !important; }
-.ac-hero__texte, .ac-hero .tel { transform: none !important; opacity: 1 !important; }
 
-/* Petits titres : plus d'effet d'écartement des lettres */
+/* Cartes : au survol, elles se soulèvent légèrement avec une ombre douce */
+.tuile, .lp-card, .tf-carte, .ac-etapes li, .rv-card, .job {
+  transition-property: opacity, transform, box-shadow, background-color, border-color, color !important;
+  transition-duration: 0.7s, 0.45s, 0.45s, 0.25s, 0.25s, 0.25s !important;
+}
+.tuile:hover, .lp-card:hover, .tf-carte:hover, .ac-etapes li:hover, .rv-card:hover, .job:hover,
+.tuile.rv.vu:hover, .lp-card.cascade.is-in:hover, .tf-carte.cascade.is-in:hover, .ac-etapes li.cascade.is-in:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 18px 40px -24px rgba(11, 11, 12, 0.28) !important;
+}
+/* Boutons : léger éclat au survol */
+.btn:hover { filter: brightness(1.04); }
+.btn:active { transform: translateY(1px); }
+/* Liens du pied de page et du menu : soulignement fin qui apparaît */
+.footer a:not(.btn):not(.brand) { text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.footer a:not(.btn):not(.brand):hover { text-decoration-color: currentColor; }
+
+/* Signature du pied de page : fondu doux à son arrivée */
+.pied-marque--logo i { transition-property: opacity, transform !important; transition-duration: 1s !important; }
+.pied-marque--logo:not(.vu) i { opacity: 0 !important; transform: translateY(12px) !important; }
+.pied-marque--logo.vu i { opacity: 1 !important; transform: none !important; }
+.pied-marque--logo.vu .pied-marque__sg { transition-delay: 0.15s !important; }
+
+/* Petits titres : lettres fixes */
 .kicker.rv, .kicker.rv.vu { letter-spacing: 0.14em !important; }
+
+/* Visiteurs qui demandent moins d'animations : tout est immédiat */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.001ms !important; animation-duration: 0.001ms !important; }
+  .rv, .cascade, [data-reveal], }
 
 /* ---------- 2. Typographie ---------- */
 
@@ -170,4 +212,6 @@ p { text-wrap: pretty; }
 .pied-marque.pied-marque--logo { gap: clamp(10px, 1.2vw, 16px) !important; margin: clamp(36px, 5vw, 64px) 0 clamp(22px, 3vw, 36px) !important; }
 .pied-marque__bda { width: min(36vw, 300px) !important; }
 .pied-marque__sg { width: min(64vw, 527px) !important; }
-.pied-marque--logo i { opacity: 1 !important; transform: none !important; }
+
+/* Accueil : section « Assistant en ligne » retirée (15/10/2026, demande du gérant) */
+.ac-ia { display: none !important; }

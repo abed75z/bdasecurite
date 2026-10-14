@@ -323,9 +323,13 @@
     if (!btn) return;
     const en = root.lang === 'en';
     const T = en
-      ? { titre: 'Sign in', client: 'Client area', equipe: 'Team area' }
-      : { titre: 'Se connecter', client: 'Espace client', equipe: 'Espace équipe' };
-    const choix = (cle, href) => `<a class="cx-pop__choix" href="${href}" role="menuitem"><span class="cx-pop__txt"><b>${T[cle]}</b></span><svg class="cx-pop__fl" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>`;
+      ? { titre: 'My account', client: 'Client area', equipe: 'Team area', dClient: 'Quotes, invoices, missions', dEquipe: 'Agents & drivers' }
+      : { titre: 'Mon espace', client: 'Espace client', equipe: 'Espace agent', dClient: 'Devis, factures, missions', dEquipe: 'Planning, pointage, documents' };
+    const ICO = {
+      client: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg>',
+      equipe: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>'
+    };
+    const choix = (cle, href) => `<a class="cx-pop__choix" href="${href}" role="menuitem"><span class="cx-pop__ico">${ICO[cle]}</span><span class="cx-pop__txt"><b>${T[cle]}</b><small>${cle === 'client' ? T.dClient : T.dEquipe}</small></span><svg class="cx-pop__fl" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>`;
     const pop = document.createElement('div');
     pop.className = 'cx-pop';
     pop.id = 'cx-pop';

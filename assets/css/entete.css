@@ -1,0 +1,266 @@
+/* =========================================================
+   EN-TÊTE v2 (15/10/2026)
+   Barre sombre pleine largeur, contenu aligné sur trois zones :
+   rubriques à gauche · logo au centre · actions à droite.
+   Typographie fine, survols discrets, menus déroulants compacts
+   (sans flou ni voile sur la page), version mobile compacte.
+   Chargée en dernier (après sobre.css).
+   ========================================================= */
+
+.nav.nav--v2 {
+  --e-fond: #0e0e10;
+  --e-fond-2: #151517;
+  --e-texte: #f3efe8;
+  --e-doux: rgba(243, 239, 232, 0.72);
+  --e-ligne: rgba(243, 239, 232, 0.1);
+  --e-or: #c9a874;
+  --e-h: 76px;
+  position: fixed !important;
+  inset: 0 0 auto !important;
+  z-index: 60 !important;
+  height: var(--e-h) !important;
+  background: var(--e-fond) !important;
+  border-bottom: 1px solid var(--e-ligne) !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  transform: none !important;
+  transition: height 0.3s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.3s ease !important;
+}
+/* Au défilement : un peu plus compacte, légère ombre */
+.nav.nav--v2.is-compact, .nav.nav--v2.is-scrolled { --e-h: 66px; box-shadow: 0 8px 24px -18px rgba(0, 0, 0, 0.55) !important; }
+:root:has(.nav--v2) { --nav-h: 76px; }
+
+/* Plus de voile flou sur la page, plus de repère qui glisse */
+body::after { display: none !important; }
+.nav--v2 .nav__survol { display: none !important; }
+
+/* ---------- Trois zones alignées sur toute la largeur ---------- */
+.nav--v2 .nav__inner {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 24px !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100%;
+  margin: 0 !important;
+  padding-inline: clamp(20px, 2.2vw, 40px);
+}
+.nav--v2 .nav__links { grid-column: 1; grid-row: 1; justify-self: start; display: flex !important; align-items: center; gap: 2px !important; margin: 0 !important; }
+.nav--v2 .nav__marque { grid-column: 2; grid-row: 1; justify-self: center; position: static !important; transform: none !important; margin: 0 !important; }
+.nav--v2 .nav__actions { grid-column: 3; grid-row: 1; justify-self: end; display: flex !important; align-items: center; gap: 10px !important; margin: 0 !important; position: relative; }
+
+/* Logo (lettres du logo) en clair sur la barre sombre */
+.nav--v2 .nav__marque b { color: var(--e-texte) !important; }
+.nav--v2 .nav__marque:hover { opacity: 0.92; }
+
+/* ---------- Rubriques ---------- */
+.nav--v2 .nav__links > a, .nav--v2 .nav__drop-btn {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 40px; padding: 0 8px !important;
+  border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important;
+  font-family: var(--font-body, Inter, system-ui, sans-serif) !important;
+  font-size: 13.5px !important; font-weight: 450 !important; letter-spacing: 0.01em !important; text-transform: none !important;
+  color: var(--e-doux) !important;
+  white-space: nowrap; cursor: pointer;
+  transition: color 0.2s ease !important;
+}
+/* Soulignement fin et doré au survol / page active */
+.nav--v2 .nav__links > a::after, .nav--v2 .nav__drop-btn::after, .nav--v2 .nav__links > a::before {
+  content: ""; position: absolute; left: 8px; right: 8px; bottom: 6px; height: 1px;
+  background: var(--e-or) !important; transform: scaleX(0); transform-origin: center;
+  transition: transform 0.25s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+}
+.nav--v2 .nav__links > a::before { display: none !important; }
+.nav--v2 .nav__links > a:hover, .nav--v2 .nav__drop-btn:hover, .nav--v2 .nav__drop.is-open .nav__drop-btn,
+.nav--v2 .nav__links > a[aria-current="page"], .nav--v2 .nav__drop.is-current .nav__drop-btn { color: var(--e-texte) !important; box-shadow: none !important; }
+.nav--v2 .nav__links > a:hover::after, .nav--v2 .nav__drop-btn:hover::after, .nav--v2 .nav__drop.is-open .nav__drop-btn::after,
+.nav--v2 .nav__links > a[aria-current="page"]::after, .nav--v2 .nav__drop.is-current .nav__drop-btn::after { transform: scaleX(1); }
+.nav--v2 .nav__chev { width: 13px !important; height: 13px !important; opacity: 0.6; stroke-width: 1.6; transition: transform 0.25s ease !important; }
+.nav--v2 .nav__drop.is-open .nav__chev { transform: rotate(180deg); }
+
+/* ---------- Menus déroulants : cartes compactes sous la rubrique ---------- */
+.nav--v2 .nav__drop { position: relative !important; }
+.nav--v2 .nav__panel, .nav--v2 .nav__panel--large, .nav--v2 .nav__panel--petit {
+  position: absolute !important; top: calc(100% + 12px) !important; left: 0 !important; right: auto !important;
+  display: grid !important; grid-template-columns: 1fr; gap: 0 !important;
+  width: max-content !important; min-width: 260px !important; max-width: 640px !important;
+  margin: 0 !important; padding: 10px !important;
+  background: var(--e-fond-2) !important;
+  border: 1px solid var(--e-ligne) !important; border-radius: 12px !important;
+  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.6) !important;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  opacity: 0; visibility: hidden; transform: translateY(4px) !important;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s 0.2s !important;
+  animation: none !important;
+}
+.nav--v2 .nav__panel::before { content: ""; position: absolute; left: 0; right: 0; top: -14px !important; height: 14px !important; } /* pont de survol */
+.nav--v2 .nav__panel--large { grid-template-columns: 1.15fr 1fr !important; gap: 4px 18px !important; padding: 14px !important; }
+.nav--v2 .nav__drop.is-open .nav__panel { opacity: 1; visibility: visible; transform: none !important; transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s !important; }
+@media (hover: hover) and (pointer: fine) {
+  .nav--v2 .nav__drop:hover .nav__panel { opacity: 1; visibility: visible; transform: none !important; transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s !important; }
+}
+.nav--v2 .nav__col { display: grid !important; gap: 2px !important; align-content: start; grid-template-columns: 1fr !important; }
+.nav--v2 .nav__col > * { animation: none !important; }
+.nav--v2 .nav__col-titre {
+  margin: 0 !important; padding: 6px 12px 8px !important;
+  font-size: 11px !important; font-weight: 600 !important; letter-spacing: 0.14em !important; text-transform: uppercase;
+  color: var(--e-or) !important;
+}
+.nav--v2 .nav__col a {
+  display: grid !important; gap: 2px; padding: 9px 12px !important; border-radius: 8px !important;
+  background: none !important; color: var(--e-texte) !important;
+  font-size: 14px !important; font-weight: 450 !important; line-height: 1.35;
+  transition: background-color 0.2s ease, color 0.2s ease !important;
+}
+.nav--v2 .nav__col a b { font-family: var(--font-body, Inter, system-ui, sans-serif) !important; font-size: 14px !important; font-weight: 550 !important; letter-spacing: 0 !important; color: var(--e-texte) !important; }
+.nav--v2 .nav__col a small { font-size: 12.5px !important; color: rgba(243, 239, 232, 0.5) !important; }
+.nav--v2 .nav__col--simple a { color: var(--e-doux) !important; }
+.nav--v2 .nav__col a:hover, .nav--v2 .nav__col a[aria-current="page"] { background: rgba(243, 239, 232, 0.06) !important; color: var(--e-texte) !important; padding-left: 12px !important; }
+
+/* ---------- Actions : téléphone · Mon espace · Devis gratuit ---------- */
+.nav--v2 .nav__tel {
+  display: inline-flex !important; align-items: center; gap: 8px;
+  width: auto !important; height: 40px !important; padding: 0 6px !important;
+  border: 0 !important; border-radius: 0 !important; background: none !important;
+  font-size: 14px; font-weight: 450; letter-spacing: 0.02em; font-variant-numeric: tabular-nums;
+  color: var(--e-doux) !important; transition: color 0.2s ease !important;
+}
+.nav--v2 .nav__tel span { display: inline !important; }
+.nav--v2 .nav__tel .icon { width: 16px; height: 16px; color: var(--e-or) !important; }
+.nav--v2 .nav__tel:hover { color: var(--e-texte) !important; }
+
+.nav--v2 .nav__client, .nav--v2 .nav__appeler {
+  display: inline-flex !important; align-items: center; gap: 8px;
+  width: auto !important; height: 40px !important; padding: 0 14px 0 12px !important;
+  border: 1px solid rgba(243, 239, 232, 0.2) !important; border-radius: 999px !important;
+  background: transparent !important; box-shadow: none !important;
+  font-size: 13.5px !important; font-weight: 500 !important; letter-spacing: 0.01em !important; text-transform: none !important;
+  color: var(--e-texte) !important;
+  transition: border-color 0.2s ease, background-color 0.2s ease !important;
+}
+.nav--v2 .nav__client span, .nav--v2 .nav__appeler span { display: inline !important; }
+.nav--v2 .nav__client .icon, .nav--v2 .nav__appeler .icon { width: 16px; height: 16px; color: var(--e-or) !important; stroke-width: 1.6; }
+.nav--v2 .nav__client::after {
+  content: ""; width: 7px; height: 7px; margin-left: 2px; margin-top: -3px;
+  border-right: 1.4px solid currentColor; border-bottom: 1.4px solid currentColor; transform: rotate(45deg); opacity: 0.6;
+}
+.nav--v2 .nav__client:hover, .nav--v2 .nav__client[aria-expanded="true"], .nav--v2 .nav__appeler:hover { border-color: rgba(201, 168, 116, 0.6) !important; background: rgba(243, 239, 232, 0.04) !important; }
+
+.nav--v2 .nav__devis {
+  display: inline-flex; align-items: center; height: 40px; padding: 0 18px; border-radius: 999px;
+  background: linear-gradient(135deg, #e2c896 0%, #c4a472 55%, #a8854f 100%);
+  color: #0e0e10 !important; font-size: 13.5px; font-weight: 600; letter-spacing: 0.01em; white-space: nowrap;
+  transition: filter 0.2s ease, box-shadow 0.2s ease !important;
+}
+.nav--v2 .nav__devis:hover { filter: brightness(1.05); box-shadow: 0 8px 20px -12px rgba(201, 168, 116, 0.8); }
+
+/* Fenêtre « Mon espace » : deux accès clairs, avec description */
+.nav--v2 .cx-pop {
+  top: calc(100% + 12px) !important; right: 0 !important; left: auto !important; min-width: 280px !important; padding: 8px !important;
+  background: var(--e-fond-2) !important; border: 1px solid var(--e-ligne) !important; border-radius: 12px !important;
+  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.6) !important;
+}
+.nav--v2 .cx-pop::before { display: none !important; }
+.nav--v2 .cx-pop__titre { padding: 6px 12px 8px !important; margin: 0 !important; font-size: 11px !important; font-weight: 600 !important; letter-spacing: 0.14em !important; text-transform: uppercase; color: var(--e-or) !important; }
+.nav--v2 .cx-pop__choix { display: flex !important; align-items: center; gap: 12px; padding: 10px 12px !important; border-radius: 8px !important; color: var(--e-texte) !important; background: none !important; transition: background-color 0.2s ease !important; }
+.nav--v2 .cx-pop__choix:hover, .nav--v2 .cx-pop__choix:focus-visible { background: rgba(243, 239, 232, 0.06) !important; }
+.nav--v2 .cx-pop__ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; background: rgba(201, 168, 116, 0.12); color: var(--e-or); }
+.nav--v2 .cx-pop__ico svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.nav--v2 .cx-pop__txt { display: grid; gap: 2px; flex: 1; }
+.nav--v2 .cx-pop__txt b { font-size: 14px; font-weight: 550; color: var(--e-texte); }
+.nav--v2 .cx-pop__txt small { font-size: 12.5px; color: rgba(243, 239, 232, 0.5); }
+.nav--v2 .cx-pop__fl { width: 15px; height: 15px; fill: none; stroke: rgba(243, 239, 232, 0.4); stroke-width: 1.6; }
+
+/* Burger (tablette et téléphone) */
+.nav--v2 .burger {
+  display: none; width: 42px !important; height: 42px !important; border-radius: 10px !important;
+  border: 1px solid rgba(243, 239, 232, 0.18) !important; background: none !important;
+}
+.nav--v2 .burger span { left: 12px !important; right: 12px !important; height: 1.4px !important; background: var(--e-texte) !important; }
+.nav--v2 .burger span:nth-child(1) { top: 14px !important; } .nav--v2 .burger span:nth-child(2) { top: 20px !important; } .nav--v2 .burger span:nth-child(3) { top: 26px !important; }
+.menu-open .nav--v2 .burger span:nth-child(1) { transform: translateY(6px) rotate(45deg) !important; }
+.menu-open .nav--v2 .burger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg) !important; }
+
+/* ---------- Écrans moyens : on garde l'essentiel ---------- */
+@media (max-width: 1360px) {
+  .nav--v2 .nav__tel span { display: none !important; }
+  .nav--v2 .nav__tel { width: 40px !important; justify-content: center; padding: 0 !important; border: 1px solid rgba(243, 239, 232, 0.18) !important; border-radius: 999px !important; }
+}
+@media (max-width: 1325px) {
+  .nav--v2 .nav__inner { position: relative; }
+  .nav--v2 .nav__actions { position: static !important; }
+  .nav--v2 .cx-pop { top: calc(100% + 8px) !important; right: clamp(16px, 2.2vw, 40px) !important; }
+  .nav--v2 .nav__links { display: none !important; }
+  .nav--v2 .burger { display: block !important; position: absolute !important; left: clamp(16px, 2.2vw, 40px); top: 50%; transform: translateY(-50%); }
+}
+/* Téléphone : barre compacte (menu · logo · appel) */
+@media (max-width: 720px) {
+  .nav.nav--v2 { --e-h: 62px; }
+  .nav.nav--v2.is-compact, .nav.nav--v2.is-scrolled { --e-h: 58px; }
+  :root:has(.nav--v2) { --nav-h: 62px; }
+  .nav--v2 .nav__inner { padding-inline: 16px; gap: 12px !important; }
+  .nav--v2:not(.nav--epure) .nav__client, .nav--v2 .nav__devis, .nav--v2:not(.nav--epure) .cx-pop { display: none !important; }
+  .nav--v2 .nav__tel { width: 42px !important; height: 42px !important; border: 1px solid rgba(243, 239, 232, 0.18) !important; border-radius: 10px !important; }
+  .nav--v2.nav--epure .nav__client { display: inline-flex !important; width: 42px !important; padding: 0 !important; justify-content: center; }
+  .nav--v2.nav--epure .nav__client span, .nav--v2.nav--epure .nav__client::after, .nav--v2.nav--epure .nav__appeler span { display: none !important; }
+  .nav--v2.nav--epure .nav__appeler { width: 42px !important; padding: 0 !important; justify-content: center; }
+}
+
+/* Pages Devis / Merci : en-tête épuré (logo au centre, espace client et appel à droite) */
+.nav--v2.nav--epure .nav__actions { grid-column: 3 !important; justify-self: end; display: flex !important; }
+.nav--v2.nav--epure .nav__client::after { display: none; }
+
+/* ---------- Menu mobile : panneau sombre sous la barre, sans flou ---------- */
+.mobile-menu {
+  position: fixed !important; inset: var(--nav-h, 62px) 0 0 !important; z-index: 59 !important;
+  padding: 8px 20px calc(24px + env(safe-area-inset-bottom)) !important;
+  display: flex !important; flex-direction: column; gap: 18px !important; overflow-y: auto;
+  background: #0e0e10 !important; color: #f3efe8;
+  -webkit-backdrop-filter: none !important; backdrop-filter: none !important;
+  border-top: 1px solid rgba(243, 239, 232, 0.08);
+  opacity: 0; visibility: hidden; transform: translateY(-6px);
+  transition: opacity 0.22s ease, transform 0.22s ease, visibility 0s 0.22s !important;
+}
+.menu-open .mobile-menu { opacity: 1 !important; visibility: visible !important; transform: none; transition: opacity 0.22s ease, transform 0.22s ease, visibility 0s !important; }
+.mobile-menu .mm { display: grid; gap: 0 !important; }
+.mobile-menu .mm > * { animation: none !important; opacity: 1 !important; transform: none !important; }
+.mobile-menu .mm__lien, .mobile-menu .mm__groupe > summary {
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 54px; padding: 0 2px !important; border-bottom: 1px solid rgba(243, 239, 232, 0.08);
+  font-family: var(--font-body, Inter, system-ui, sans-serif) !important; font-size: 16px !important; font-weight: 500 !important; letter-spacing: 0 !important;
+  color: #f3efe8 !important; background: none !important; list-style: none; cursor: pointer;
+}
+.mobile-menu .mm__lien small { font-size: 12.5px; font-weight: 400; color: rgba(243, 239, 232, 0.5); margin-left: 8px; }
+.mobile-menu .mm__groupe > summary::-webkit-details-marker { display: none; }
+.mobile-menu .mm__groupe > summary::after {
+  content: ""; width: 8px; height: 8px; margin-right: 4px; border-right: 1.4px solid #c9a874; border-bottom: 1.4px solid #c9a874;
+  transform: rotate(45deg); transition: transform 0.2s ease !important;
+}
+.mobile-menu .mm__groupe[open] > summary::after { transform: rotate(-135deg); }
+.mobile-menu .mm__groupe > div { display: grid; padding: 6px 0 10px 12px !important; border-bottom: 1px solid rgba(243, 239, 232, 0.08); }
+.mobile-menu .mm__groupe > div a { padding: 10px 0 !important; font-size: 15px !important; font-weight: 400 !important; color: rgba(243, 239, 232, 0.72) !important; }
+.mobile-menu .mm a[aria-current="page"] { color: #c9a874 !important; }
+.mobile-menu__foot { margin-top: auto; display: grid !important; gap: 10px !important; }
+.mobile-menu__foot .btn { height: 48px; border-radius: 999px !important; font-size: 15px !important; font-weight: 600 !important; }
+.mobile-menu__foot .btn--outline { color: #f3efe8 !important; border-color: rgba(243, 239, 232, 0.2) !important; background: none !important; }
+html.a-annonce .mobile-menu { inset: calc(var(--nav-h, 62px) + var(--annonce-h, 40px)) 0 0 !important; }
+
+/* ---------- Bulle « Une question ? » de l'assistant retirée ---------- */
+.as-lanceur, .as-teaser, .as-panneau, .as-lanceur__pastille { display: none !important; }
+
+/* La barre reste sombre, même menu ouvert (l'ancien style la repeignait en blanc) */
+html body .nav.nav--v2,
+html body:has(.nav__drop.is-open) .nav.nav--v2,
+html body:has(.nav__links:hover) .nav.nav--v2,
+html body:has(.ac-hero--nuit) .nav.nav--v2,
+html body:has(.lp-hero) .nav.nav--v2 {
+  background: var(--e-fond) !important;
+  border-bottom-color: var(--e-ligne) !important;
+}
+html body .nav.nav--v2 .nav__marque b { color: var(--e-texte) !important; }
+html body .nav.nav--v2 :is(.nav__links > a, .nav__drop-btn) { color: var(--e-doux) !important; }
+html body .nav.nav--v2 :is(.nav__links > a:hover, .nav__drop-btn:hover, .nav__links > a[aria-current="page"]),
+html body .nav.nav--v2 .nav__drop:is(.is-open, .is-current) .nav__drop-btn { color: var(--e-texte) !important; }

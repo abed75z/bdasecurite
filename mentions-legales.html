@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="assets/css/pro.css?v=16">
   <link rel="stylesheet" href="assets/css/blanc.css?v=34">
   <link rel="stylesheet" href="assets/css/sobre.css?v=3">
+  <link rel="stylesheet" href="assets/css/entete.css?v=3">
 </head>
 <body>
 
@@ -51,8 +52,9 @@
 
 <div class="ambient" aria-hidden="true"></div>
 
-<header class="nav">
+<header class="nav nav--v2">
   <div class="nav__inner">
+    <a class="nav__marque" href="/" aria-label="BDA Security Group, accueil"><b>BDA</b><small>Security Group</small></a>
     <nav class="nav__links" aria-label="Navigation principale">
       <div class="nav__drop">
         <button class="nav__drop-btn" type="button" aria-expanded="false">Sécurité privée <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
@@ -68,17 +70,19 @@
           <div class="nav__col"><a href="chauffeur-prive-vtc-paris"><b>Chauffeur privé VTC</b><small>À l’heure ou au trajet</small></a><a href="chauffeur-securite-vip-paris"><b>Chauffeur + sécurité VIP</b><small>Conduit et protégé</small></a><a href="reserver" data-vtc hidden><b>Réserver en ligne</b><small>Prix affiché, confirmation immédiate</small></a></div>
         </div>
       </div>
-      <a href="tarifs">Tarifs</a>
-    </nav>
-    <a class="nav__marque" href="/"><b>BDA</b><small>Security Group</small></a>
-    <nav class="nav__links nav__links--d" aria-label="Navigation principale (suite)">
       <a href="entreprises">Entreprises</a>
-      <a href="avis">Avis clients</a>
-      <a href="recrutement">Recrutement</a>
+      <a href="tarifs">Tarifs</a>
+      <div class="nav__drop">
+        <button class="nav__drop-btn" type="button" aria-expanded="false">La société <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav__panel nav__panel--petit">
+          <div class="nav__col"><a href="avis"><b>Avis clients</b><small>Ce que disent nos clients</small></a><a href="recrutement"><b>Recrutement</b><small>Rejoindre nos équipes</small></a></div>
+        </div>
+      </div>
     </nav>
     <div class="nav__actions">
       <a class="nav__tel" href="tel:+33611678625" aria-label="Appeler le 06 11 67 86 25"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span>06 11 67 86 25</span></a>
       <a class="btn btn--outline nav__client" href="espace-client" aria-label="Espace client"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg><span>Espace client</span></a>
+      <a class="nav__devis" href="devis">Devis gratuit</a>
       <button class="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
     </div>
   </div>
@@ -95,7 +99,7 @@
     <a href="avis" class="mm__lien">Avis clients</a>
     <a href="recrutement" class="mm__lien">Recrutement</a>
     <a href="espace-client" class="mm__lien">Espace client</a>
-    <a href="espace-equipe" class="mm__lien">Espace équipe <small>agents &amp; chauffeurs</small></a>
+    <a href="espace-equipe" class="mm__lien">Espace agent <small>agents &amp; chauffeurs</small></a>
   </nav>
   <div class="mobile-menu__foot">
     <a class="btn btn--gold btn--block" href="devis">Demander un devis gratuit</a>
@@ -249,7 +253,7 @@
   </div>
 </footer>
 
-<script src="assets/js/core.js?v=25"></script>
+<script src="assets/js/core.js?v=27"></script>
 <script src="assets/js/assistant.js?v=14"></script>
 <script src="assets/js/anim.js?v=21"></script>
 </body>

@@ -1,0 +1,173 @@
+/* =========================================================
+   SOBRE — couche finale du site public (15/10/2026)
+   Typographie raffinée (tailles maîtrisées, hiérarchie claire,
+   espacements réguliers) et mouvement minimal : plus de rebonds,
+   zooms, textes qui défilent ni effets décoratifs. Seules restent
+   des transitions courtes (couleurs, fonds, ombres).
+   Chargée en dernier, après blanc.css. Ne change ni le contenu
+   ni le fonctionnement des pages.
+   ========================================================= */
+
+/* ---------- 1. Mouvement ---------- */
+
+/* Toutes les animations CSS se figent immédiatement sur leur état final */
+*, *::before, *::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+}
+/* Transitions : courtes et discrètes, sans délai en cascade */
+*, *::before, *::after {
+  transition-duration: 0.18s !important;
+  transition-delay: 0s !important;
+  transition-timing-function: ease !important;
+}
+/* Seuls les indicateurs de chargement continuent de tourner */
+.btn.is-loading::before, .cta.is-loading::after,
+[class*="spinner"], [class*="loader"], .is-loading .spin {
+  animation-duration: 0.8s !important;
+  animation-iteration-count: infinite !important;
+}
+
+/* Contenu toujours visible : plus d'apparition au défilement */
+.rv, .cascade, [data-reveal], .tuile, .tuiles .tuile, .mot > span,
+.h2.mots .mot > span, .manifeste.mots .mot > span,
+.ac-hero__texte > *, .ac-hero__visuel, .ac-hero__badge {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+.manifeste .mm-mot { color: inherit !important; }
+
+/* Rideau d'ouverture, bandeau de mots défilants, particules, ciel animé */
+.rideau, .defile, #sky, [data-particules], .particules, .ac-defiler span { display: none !important; }
+
+/* Plus de zooms, rotations ni « sauts » au survol */
+.tuile:hover .tuile__ico, .tuile--noire:hover .tuile__embleme, .brand:hover .brand__mark,
+.ia-champ button:hover, .ac-garanties__liste li:hover .icon, .footer .brand:hover .brand__mark,
+.ac-secteurs-bande a:hover .icon, .lp-card:hover .ico, .lp-photo:hover img,
+.feature__list li:hover .icon, .shot:hover img, .ref__photo:hover img, .step:hover .step__icon,
+.perk:hover .perk__icon, .ref-galerie figure:hover img {
+  transform: none !important;
+}
+/* Cartes : au survol, simple changement d'ombre (pas de déplacement) */
+.ac-etapes li.cascade.is-in:hover, .tf-carte.cascade.is-in:hover, .lp-card.cascade.is-in:hover,
+.tuile:hover, .lp-card:hover, .tf-carte:hover, .rv-card:hover, .job:hover {
+  transform: none !important;
+}
+/* Photos fixes (plus de zoom ni de parallaxe) */
+[data-zoom], [data-zoom] img, .ac-hero__photo img, .ac-ref__photo img { transform: none !important; }
+.ac-hero__texte, .ac-hero .tel { transform: none !important; opacity: 1 !important; }
+
+/* Petits titres : plus d'effet d'écartement des lettres */
+.kicker.rv, .kicker.rv.vu { letter-spacing: 0.14em !important; }
+
+/* ---------- 2. Typographie ---------- */
+
+body {
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+p { text-wrap: pretty; }
+
+.h1, .h2, .h3, h1, h2, h3, h4 { text-wrap: balance; }
+
+/* Grand titre : présent mais mesuré */
+.h1, .ac-hero .h1 {
+  font-size: clamp(2.15rem, 1.45rem + 2.1vw, 3.35rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.028em !important;
+  line-height: 1.1 !important;
+}
+.ac-hero .h1 { max-width: 620px; }
+
+/* Titres de section */
+.h2 {
+  font-size: clamp(1.7rem, 1.25rem + 1.3vw, 2.45rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.022em !important;
+  line-height: 1.15 !important;
+}
+.h3, h3 {
+  font-size: clamp(1.15rem, 1.05rem + 0.35vw, 1.4rem);
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  line-height: 1.3;
+}
+
+/* Texte d'introduction */
+.lead {
+  font-size: clamp(1.03rem, 0.98rem + 0.2vw, 1.15rem) !important;
+  line-height: 1.65 !important;
+}
+
+/* Petits titres au-dessus des titres */
+.kicker {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.14em !important;
+}
+
+/* Manifeste : citation élégante plutôt qu'affiche */
+.manifeste {
+  font-size: clamp(1.45rem, 1.1rem + 1.15vw, 2.15rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.018em !important;
+  line-height: 1.32 !important;
+  max-width: 920px;
+}
+
+/* Chiffres clés */
+.chiffres b {
+  font-size: clamp(2rem, 1.6rem + 1.2vw, 2.75rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em !important;
+}
+
+/* Tuiles de services */
+.tuile__txt b {
+  font-size: clamp(1.12rem, 1.02rem + 0.3vw, 1.32rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.015em !important;
+  line-height: 1.25 !important;
+}
+
+/* Bloc « Entreprises » de l'accueil */
+.ac-pro p {
+  font-size: clamp(1.08rem, 1rem + 0.35vw, 1.3rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  line-height: 1.4 !important;
+}
+
+/* Menu déroulant (ordinateur) */
+.nav__col a b { font-size: 16px !important; font-weight: 700 !important; letter-spacing: -0.01em !important; }
+
+/* Étapes numérotées des pages */
+.lp-steps li::before { font-size: 18px !important; font-weight: 700 !important; }
+
+/* Engagements */
+.ac-engagements b { font-size: 16px !important; font-weight: 700 !important; }
+
+/* Boutons : lecture nette, sans majuscules criardes */
+.btn { font-weight: 600; letter-spacing: 0; }
+
+/* ---------- 3. Espacements ---------- */
+
+.section { padding-block: clamp(64px, 7vw, 112px) !important; }
+
+/* ---------- 4. Détails ---------- */
+
+/* Démonstration de l'assistant : fenêtre droite, sans anneau lumineux tournant */
+.ia-fenetre { transform: none !important; }
+.ia-champ__anneau { display: none !important; }
+
+/* Signature du pied de page : élégante, sans occuper tout l'écran */
+.pied-marque.pied-marque--logo { gap: clamp(10px, 1.2vw, 16px) !important; margin: clamp(36px, 5vw, 64px) 0 clamp(22px, 3vw, 36px) !important; }
+.pied-marque__bda { width: min(36vw, 300px) !important; }
+.pied-marque__sg { width: min(64vw, 527px) !important; }
+.pied-marque--logo i { opacity: 1 !important; transform: none !important; }

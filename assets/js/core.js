@@ -7,7 +7,8 @@
   const root = document.documentElement;
   root.classList.add('js');
 
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Site sobre (15/10/2026) : aucun effet décoratif (étoiles, parallaxe, inclinaison, compteurs, apparitions…)
+  const reduced = true;
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   const lerp = (a, b, t) => a + (b - a) * t;
   const clamp = (v, min, max) => Math.min(max, Math.max(min, v));

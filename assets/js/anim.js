@@ -9,7 +9,8 @@
    Tout est désactivé si le visiteur préfère moins d'animations.
    ========================================================= */
 (() => {
-  const reduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Site sobre (15/10/2026) : titres, manifeste, bandeau, zooms et apparitions sans animation
+  const reduit = true;
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
   /* ---------- Scroll : une seule boucle par image ---------- */

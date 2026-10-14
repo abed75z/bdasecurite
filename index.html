@@ -93,7 +93,7 @@
   <link rel="stylesheet" href="assets/css/pro.css?v=16">
   <link rel="stylesheet" href="assets/css/blanc.css?v=34">
   <link rel="stylesheet" href="assets/css/sobre.css?v=3">
-  <link rel="stylesheet" href="assets/css/entete.css?v=6">
+  <link rel="stylesheet" href="assets/css/entete.css?v=9">
 </head>
 <body>
 
@@ -161,10 +161,15 @@
       <div class="nav__drop" data-visible="offreVtc">
         <button class="nav__drop-btn" type="button" aria-expanded="false">Chauffeur privé <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav__panel">
-          <div class="nav__col"><a href="chauffeur-prive-vtc-paris"><b>Chauffeur privé VTC</b><small>À l’heure ou au trajet</small></a><a href="chauffeur-securite-vip-paris"><b>Chauffeur + sécurité VIP</b><small>Conduit et protégé</small></a><a href="reserver" data-vtc hidden><b>Réserver en ligne</b><small>Prix affiché, confirmation immédiate</small></a></div>
+          <div class="nav__col"><a href="chauffeur-prive-vtc-paris"><b>Chauffeur privé VTC</b><small>À l’heure ou au trajet</small></a><a href="chauffeur-securite-vip-paris"><b>Chauffeur + sécurité VIP</b><small>Conduit et protégé</small></a></div>
         </div>
       </div>
-      <a href="entreprises">Entreprises</a>
+      <div class="nav__drop">
+        <button class="nav__drop-btn" type="button" aria-expanded="false">Entreprises <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="nav__panel nav__panel--entreprise">
+          <div class="nav__col"><p class="nav__col-titre">Entreprises</p><p class="nav__texte">Hôtels, commerces, bureaux, événements : une offre sur mesure pour votre activité.</p><a class="nav__cta" href="entreprises">Contactez-nous pour votre entreprise</a></div>
+        </div>
+      </div>
     </nav>
     <div class="nav__droite">
       <nav class="nav__links nav__links--d" aria-label="Navigation principale (suite)">
@@ -172,12 +177,14 @@
         <div class="nav__drop">
           <button class="nav__drop-btn" type="button" aria-expanded="false">La société <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
           <div class="nav__panel nav__panel--petit">
-            <div class="nav__col"><a href="avis"><b>Avis clients</b><small>Ce que disent nos clients</small></a><a href="recrutement"><b>Recrutement</b><small>Rejoindre nos équipes</small></a></div>
+            <div class="nav__col"><a href="recrutement"><b>Recrutement</b><small>Rejoindre nos équipes</small></a></div>
           </div>
         </div>
       </nav>
       <div class="nav__actions">
-        <a class="btn btn--outline nav__client" href="espace-client" aria-label="Espace client"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg><span>Espace client</span></a>
+        <a class="nav__espace" href="espace-client"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg><span>Espace client</span></a>
+        <a class="nav__espace" href="espace-equipe"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg><span>Espace agent</span></a>
+        <a class="nav__tel" href="tel:+33611678625" aria-label="Appeler le 06 11 67 86 25" title="06 11 67 86 25"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg></a>
         <button class="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
       </div>
     </div>
@@ -513,7 +520,7 @@
   <a class="btn btn--gold" href="devis">Demander un devis</a>
 </div>
 
-<script src="assets/js/core.js?v=27"></script>
+<script src="assets/js/core.js?v=29"></script>
 <script src="assets/js/assistant.js?v=14"></script>
 <script src="assets/js/avis-data.js?v=2"></script>
 <script src="assets/js/home.js?v=18"></script>

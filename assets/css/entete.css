@@ -269,3 +269,63 @@ html body .nav.nav--v2 .nav__drop:is(.is-open, .is-current) .nav__drop-btn { col
 
 /* Menu « La société » (à droite) : s'ouvre vers la gauche pour rester dans l'écran */
 .nav--v2 .nav__links--d .nav__panel { left: auto !important; right: 0 !important; }
+
+/* =========================================================
+   Étape 3 (15/10/2026) : menus qui restent ouverts, Entreprises,
+   deux accès Espace client / Espace agent, icône téléphone
+   ========================================================= */
+
+/* Rubriques sur toute la hauteur de la barre : le menu s'ouvre collé à la barre, sans vide */
+.nav--v2 .nav__inner > .nav__links, .nav--v2 .nav__droite, .nav--v2 .nav__links--d { align-self: stretch; height: 100%; }
+.nav--v2 .nav__drop { align-self: stretch; display: flex !important; align-items: center; }
+.nav--v2 .nav__panel, .nav--v2 .nav__panel--large, .nav--v2 .nav__panel--petit, .nav--v2 .nav__panel--entreprise { top: 100% !important; }
+.nav--v2 .nav__panel::before { top: -12px !important; height: 12px !important; }
+.nav--v2 .nav__drop.is-open .nav__panel { pointer-events: auto; }
+
+/* Menu « Entreprises » : court texte et bouton fin vers la page Entreprises */
+.nav--v2 .nav__panel--entreprise { width: 352px !important; min-width: 0 !important; padding: 16px 14px 14px !important; }
+.nav--v2 .nav__texte { margin: 0 12px 14px; font-size: 13px; line-height: 1.55; color: rgba(243, 239, 232, 0.62); }
+.nav--v2 .nav__col a.nav__cta {
+  display: flex !important; align-items: center; justify-content: center; gap: 8px;
+  margin: 0 12px 2px; padding: 10px 16px !important;
+  border: 1px solid rgba(201, 168, 116, 0.55); border-radius: 999px !important;
+  background: none !important; color: var(--e-texte) !important;
+  font-size: 13px !important; font-weight: 500 !important; letter-spacing: 0.01em; text-align: center; white-space: nowrap;
+  transition: background-color 0.2s ease, border-color 0.2s ease !important;
+}
+.nav--v2 .nav__col a.nav__cta::after { content: "→"; color: var(--e-or); font-size: 13px; }
+.nav--v2 .nav__col a.nav__cta:hover { background: rgba(201, 168, 116, 0.12) !important; border-color: var(--e-or); padding-left: 16px !important; }
+
+/* Côté droit : La société · Espace client · Espace agent · téléphone */
+.nav--v2 .nav__droite { gap: 14px; }
+.nav--v2 .nav__actions { gap: 8px !important; }
+.nav--v2 .nav__espace {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 36px; padding: 0 14px 0 11px;
+  border: 1px solid rgba(243, 239, 232, 0.16); border-radius: 999px;
+  color: var(--e-texte) !important; font-size: 13px; font-weight: 500; letter-spacing: 0.01em; white-space: nowrap;
+  transition: border-color 0.2s ease, background-color 0.2s ease !important;
+}
+.nav--v2 .nav__espace .icon { width: 15px; height: 15px; fill: none; stroke: currentColor; color: var(--e-or); stroke-width: 1.6; }
+.nav--v2 .nav__espace:hover { border-color: rgba(201, 168, 116, 0.6); background: rgba(243, 239, 232, 0.04); }
+.nav--v2 .nav__actions .nav__tel {
+  width: 36px !important; height: 36px !important; padding: 0 !important; justify-content: center;
+  border: 1px solid rgba(243, 239, 232, 0.16) !important; border-radius: 999px !important;
+}
+.nav--v2 .nav__actions .nav__tel:hover { border-color: rgba(201, 168, 116, 0.6) !important; background: rgba(243, 239, 232, 0.04) !important; }
+
+/* Écrans moyens : les deux espaces passent en icônes (le nom apparaît au survol) */
+@media (max-width: 1260px) {
+  .nav--v2 .nav__espace { width: 36px; padding: 0; justify-content: center; }
+  .nav--v2 .nav__espace span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+/* Téléphone : menu · logo · téléphone (les espaces sont dans le menu) */
+@media (max-width: 720px) {
+  .nav--v2 .nav__espace { display: none !important; }
+  .nav--v2 .nav__actions .nav__tel { width: 42px !important; height: 42px !important; border-radius: 10px !important; }
+}
+
+/* Ouverture pilotée par le script (délais) : le simple survol CSS n'ouvre plus le menu */
+@media (hover: hover) and (pointer: fine) {
+  html.js .nav--v2 .nav__drop:hover:not(.is-open) .nav__panel { opacity: 0 !important; visibility: hidden !important; transform: translateY(4px) !important; }
+}

@@ -377,7 +377,19 @@
         m.classList.toggle('is-open', ouvert);
         btn.setAttribute('aria-expanded', String(ouvert));
       });
-      m.addEventListener('mouseleave', () => { m.classList.remove('is-open'); btn?.setAttribute('aria-expanded', 'false'); });
+      // Souris : ouverture au survol, fermeture avec un court délai (on peut descendre dans le menu sans qu'il disparaisse)
+      let minuteur = 0, ouvreur = 0;
+      const souris = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      // Si un autre menu est déjà ouvert, on attend un instant avant de basculer (passage en diagonale)
+      if (souris) m.addEventListener('mouseenter', () => {
+        clearTimeout(minuteur); clearTimeout(ouvreur);
+        const autreOuvert = menus.some((x) => x !== m && x.classList.contains('is-open'));
+        ouvreur = setTimeout(() => { fermerTout(m); m.classList.add('is-open'); btn?.setAttribute('aria-expanded', 'true'); }, autreOuvert ? 220 : 0);
+      });
+      m.addEventListener('mouseleave', () => {
+        clearTimeout(minuteur); clearTimeout(ouvreur);
+        minuteur = setTimeout(() => { m.classList.remove('is-open'); btn?.setAttribute('aria-expanded', 'false'); }, souris ? 320 : 0);
+      });
     });
     document.addEventListener('click', (e) => { if (!e.target.closest('.nav__drop')) fermerTout(); });
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape') fermerTout(); });

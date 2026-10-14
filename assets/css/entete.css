@@ -47,9 +47,11 @@ body::after { display: none !important; }
   margin: 0 !important;
   padding-inline: clamp(20px, 2.2vw, 40px);
 }
-.nav--v2 .nav__links { grid-column: 1; grid-row: 1; justify-self: start; display: flex !important; align-items: center; gap: 2px !important; margin: 0 !important; }
+.nav--v2 .nav__inner > .nav__links { grid-column: 1; grid-row: 1; justify-self: stretch; display: flex !important; align-items: center; justify-content: space-evenly; gap: 8px !important; margin: 0 !important; }
+.nav--v2 .nav__droite { grid-column: 3; grid-row: 1; justify-self: stretch; display: flex; align-items: center; gap: 16px; min-width: 0; }
+.nav--v2 .nav__links--d { flex: 1; display: flex !important; align-items: center; justify-content: space-evenly; gap: 8px !important; margin: 0 !important; }
 .nav--v2 .nav__marque { grid-column: 2; grid-row: 1; justify-self: center; position: static !important; transform: none !important; margin: 0 !important; }
-.nav--v2 .nav__actions { grid-column: 3; grid-row: 1; justify-self: end; display: flex !important; align-items: center; gap: 10px !important; margin: 0 !important; position: relative; }
+.nav--v2 .nav__actions { flex: none; display: flex !important; align-items: center; gap: 10px !important; margin: 0 !important; position: relative; }
 
 /* Logo (lettres du logo) en clair sur la barre sombre */
 .nav--v2 .nav__marque b { color: var(--e-texte) !important; }
@@ -84,7 +86,7 @@ body::after { display: none !important; }
 /* ---------- Menus déroulants : cartes compactes sous la rubrique ---------- */
 .nav--v2 .nav__drop { position: relative !important; }
 .nav--v2 .nav__panel, .nav--v2 .nav__panel--large, .nav--v2 .nav__panel--petit {
-  position: absolute !important; top: calc(100% + 12px) !important; left: 0 !important; right: auto !important;
+  position: absolute !important; top: calc(100% + 8px) !important; left: 0 !important; right: auto !important;
   display: grid !important; grid-template-columns: 1fr; gap: 0 !important;
   width: max-content !important; min-width: 260px !important; max-width: 640px !important;
   margin: 0 !important; padding: 10px !important;
@@ -96,7 +98,7 @@ body::after { display: none !important; }
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s 0.2s !important;
   animation: none !important;
 }
-.nav--v2 .nav__panel::before { content: ""; position: absolute; left: 0; right: 0; top: -14px !important; height: 14px !important; } /* pont de survol */
+.nav--v2 .nav__panel::before { content: "" !important; display: block !important; position: absolute; left: -12px; right: -12px; top: -22px !important; height: 22px !important; background: transparent; } /* pont de survol : le menu reste ouvert pendant qu on descend la souris */
 .nav--v2 .nav__panel--large { grid-template-columns: 1.15fr 1fr !important; gap: 4px 18px !important; padding: 14px !important; }
 .nav--v2 .nav__drop.is-open .nav__panel { opacity: 1; visibility: visible; transform: none !important; transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s !important; }
 @media (hover: hover) and (pointer: fine) {
@@ -189,24 +191,24 @@ body::after { display: none !important; }
   .nav--v2 .nav__tel span { display: none !important; }
   .nav--v2 .nav__tel { width: 40px !important; justify-content: center; padding: 0 !important; border: 1px solid rgba(243, 239, 232, 0.18) !important; border-radius: 999px !important; }
 }
-@media (max-width: 1325px) {
+@media (max-width: 1080px) {
   .nav--v2 .nav__inner { position: relative; }
   .nav--v2 .nav__actions { position: static !important; }
   .nav--v2 .cx-pop { top: calc(100% + 8px) !important; right: clamp(16px, 2.2vw, 40px) !important; }
-  .nav--v2 .nav__links { display: none !important; }
+  .nav--v2 .nav__links, .nav--v2 .nav__inner > .nav__links, .nav--v2 .nav__droite > .nav__links--d { display: none !important; }
+  .nav--v2 .nav__droite { justify-content: flex-end; }
   .nav--v2 .burger { display: block !important; position: absolute !important; left: clamp(16px, 2.2vw, 40px); top: 50%; transform: translateY(-50%); }
 }
-/* Téléphone : barre compacte (menu · logo · appel) */
+/* Téléphone : barre compacte (menu · logo · mon espace) */
 @media (max-width: 720px) {
   .nav.nav--v2 { --e-h: 62px; }
   .nav.nav--v2.is-compact, .nav.nav--v2.is-scrolled { --e-h: 58px; }
   :root:has(.nav--v2) { --nav-h: 62px; }
   .nav--v2 .nav__inner { padding-inline: 16px; gap: 12px !important; }
-  .nav--v2:not(.nav--epure) .nav__client, .nav--v2 .nav__devis, .nav--v2:not(.nav--epure) .cx-pop { display: none !important; }
-  .nav--v2 .nav__tel { width: 42px !important; height: 42px !important; border: 1px solid rgba(243, 239, 232, 0.18) !important; border-radius: 10px !important; }
-  .nav--v2.nav--epure .nav__client { display: inline-flex !important; width: 42px !important; padding: 0 !important; justify-content: center; }
-  .nav--v2.nav--epure .nav__client span, .nav--v2.nav--epure .nav__client::after, .nav--v2.nav--epure .nav__appeler span { display: none !important; }
-  .nav--v2.nav--epure .nav__appeler { width: 42px !important; padding: 0 !important; justify-content: center; }
+  .nav--v2 .nav__client { display: inline-flex !important; width: 42px !important; height: 42px !important; padding: 0 !important; justify-content: center; border-radius: 10px !important; }
+  .nav--v2 .nav__client span, .nav--v2 .nav__client::after, .nav--v2.nav--epure .nav__appeler span { display: none !important; }
+  .nav--v2 .cx-pop { right: 16px !important; min-width: 0 !important; width: calc(100vw - 32px) !important; max-width: 340px; }
+  .nav--v2.nav--epure .nav__appeler { width: 42px !important; height: 42px !important; padding: 0 !important; justify-content: center; border-radius: 10px !important; }
 }
 
 /* Pages Devis / Merci : en-tête épuré (logo au centre, espace client et appel à droite) */
@@ -264,3 +266,6 @@ html body .nav.nav--v2 .nav__marque b { color: var(--e-texte) !important; }
 html body .nav.nav--v2 :is(.nav__links > a, .nav__drop-btn) { color: var(--e-doux) !important; }
 html body .nav.nav--v2 :is(.nav__links > a:hover, .nav__drop-btn:hover, .nav__links > a[aria-current="page"]),
 html body .nav.nav--v2 .nav__drop:is(.is-open, .is-current) .nav__drop-btn { color: var(--e-texte) !important; }
+
+/* Menu « La société » (à droite) : s'ouvre vers la gauche pour rester dans l'écran */
+.nav--v2 .nav__links--d .nav__panel { left: auto !important; right: 0 !important; }

@@ -1,0 +1,121 @@
+/* =========================================================
+   CONNEXION — espace client et espace agent
+   Une carte centrée, fond clair, noir et gris, sans effet.
+   L'or reste uniquement sur le blason.
+   ========================================================= */
+
+/* ---------- Palette claire de l'écran de connexion (espace agent) ---------- */
+body.eq:not(.eq--app) {
+  --fond: #f5f4f1; --carte: #fff; --carte-2: #f7f6f3; --carte-3: #e9e6e0;
+  --ligne: #e3e0da; --ligne-forte: #cfcac1;
+  --texte: #0b0b0c; --doux: #5b5b60; --pale: #86868b;
+  --or: #0b0b0c; --or-clair: #0b0b0c; --or-fonce: #0b0b0c; --or-degrade: #0b0b0c;
+  color-scheme: light;
+  background: #f5f4f1; color: #0b0b0c;
+}
+body.eq:not(.eq--app)::before { display: none; }
+body.ec:not(.ec--app) { background: #f5f4f1 !important; }
+
+/* ---------- Mise en page : une carte au centre ---------- */
+.ec-auth--centre, .eq-auth--centre {
+  display: grid !important; grid-template-columns: 1fr !important; place-items: center;
+  min-height: 100svh; padding: 32px 16px; background: #f5f4f1 !important;
+}
+.ec-auth--centre .ec-auth__carte, .eq-auth--centre .eq-auth__carte {
+  display: grid !important; gap: 16px; align-content: start;
+  width: min(420px, 100%) !important; max-width: none !important; margin: 0 !important;
+  padding: 36px 32px 28px !important;
+  background: #fff; border: 1px solid #e3e0da; border-radius: 10px;
+  box-shadow: 0 24px 50px -40px rgba(11, 11, 12, 0.35);
+}
+.ec-auth--centre .ec-auth__carte > *, .eq-auth--centre .eq-auth__carte > * { animation: none !important; }
+
+/* Marque */
+.ec-auth--centre .ec-auth__marque, .eq-auth--centre .eq-marque {
+  display: flex !important; flex-direction: column; align-items: center; gap: 10px;
+  margin: 0 0 8px !important; text-align: center; color: #0b0b0c !important; text-decoration: none !important;
+}
+.ec-auth--centre .ec-auth__marque img, .eq-auth--centre .eq-marque img { width: 34px !important; height: auto; filter: none !important; }
+.ec-auth--centre .ec-auth__marque b, .eq-auth--centre .eq-marque b {
+  display: block; font-family: 'Manrope', system-ui, sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 0.02em; color: #0b0b0c;
+}
+.ec-auth--centre .ec-auth__marque small, .eq-auth--centre .eq-marque small {
+  display: block; margin-top: 2px; font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: #86868b !important;
+}
+
+/* Titre et textes */
+.ec-auth--centre h1, .eq-auth--centre h1 {
+  margin: 4px 0 0; padding-top: 18px; border-top: 1px solid #e3e0da;
+  font-family: 'Manrope', system-ui, sans-serif; font-size: 22px !important; font-weight: 700 !important; letter-spacing: -0.015em !important; color: #0b0b0c;
+}
+.ec-auth--centre .ec-auth__texte, .eq-auth--centre .eq-auth__texte { margin: -8px 0 0 !important; font-size: 14px; color: #5b5b60; }
+.ec-auth--centre .ec-auth__petit, .ec-auth--centre .ec-auth__aide, .eq-auth--centre .eq-auth__aide {
+  margin: 0 !important; font-size: 13px; color: #86868b; text-align: center;
+}
+.ec-auth--centre .ec-auth__aide, .eq-auth--centre .eq-auth__aide { padding-top: 14px; border-top: 1px solid #e3e0da; }
+.ec-auth--centre .ec-auth__aide a, .eq-auth--centre .eq-auth__aide a, .ec-auth--centre .ec-auth__id b { color: #0b0b0c !important; text-decoration: none; font-weight: 600; }
+.ec-auth--centre .ec-auth__aide a:hover, .eq-auth--centre .eq-auth__aide a:hover { text-decoration: underline; }
+
+/* ---------- Champs ---------- */
+.ec-auth--centre .ec-form, .eq-auth--centre .eq-form { gap: 14px !important; }
+.ec-auth--centre .ec-champ, .eq-auth--centre .eq-champ > span { font-size: 13px !important; font-weight: 600; color: #0b0b0c !important; letter-spacing: 0 !important; }
+.ec-auth--centre .ec-input, .eq-auth--centre .eq-input {
+  min-height: 46px; height: 46px; padding: 0 14px !important;
+  background: #fff !important; color: #0b0b0c !important;
+  border: 1px solid #d4d0c8 !important; border-radius: 6px !important;
+  font-size: 15px !important; box-shadow: none !important;
+}
+.eq-auth--centre textarea.eq-input { height: auto; padding: 12px 14px !important; }
+.ec-auth--centre .ec-input::placeholder, .eq-auth--centre .eq-input::placeholder { color: #a5a29c; }
+.ec-auth--centre .ec-input:focus, .eq-auth--centre .eq-input:focus {
+  outline: none; border-color: #0b0b0c !important; background: #fff !important; box-shadow: 0 0 0 3px rgba(11, 11, 12, 0.07) !important;
+}
+.eq-auth--centre .eq-input.is-ok { border-color: #3c8a62 !important; }
+.eq-auth--centre .eq-input.is-ko { border-color: #a8443b !important; }
+.eq-auth--centre .eq-mdp button { color: #86868b; border-radius: 6px; }
+.eq-auth--centre .eq-mdp button:hover { color: #0b0b0c; }
+.ec-auth--centre .ec-erreur, .eq-auth--centre .eq-erreur { color: #a8443b !important; font-size: 13px; }
+
+/* Case « rester connecté », liens */
+.eq-auth--centre .eq-case { font-size: 13px; color: #5b5b60; }
+.eq-auth--centre .eq-case input { width: 18px; height: 18px; border-radius: 3px; border: 1px solid #b9b4ab; }
+.eq-auth--centre .eq-case input:checked { background: #0b0b0c; border-color: #0b0b0c; }
+.eq-auth--centre .eq-case input:checked::after { border-color: #fff; width: 5px; height: 9px; border-width: 0 2px 2px 0; }
+.eq-auth--centre .eq-lien { color: #0b0b0c; font-size: 13px; font-weight: 600; }
+
+/* Choix (inscription) */
+.eq-auth--centre .eq-choix .eq-tuile { border-radius: 6px; border-color: #d4d0c8; background: #fff; }
+.eq-auth--centre .eq-choix .eq-tuile .eq-ic { color: #5b5b60; }
+.eq-auth--centre .eq-choix input:checked + .eq-tuile { border-color: #0b0b0c; background: #f7f6f3; box-shadow: inset 0 0 0 1px #0b0b0c; }
+.eq-auth--centre .eq-etapes span { height: 3px; border-radius: 0; background: #e9e6e0; }
+.eq-auth--centre .eq-etapes span::after { background: #0b0b0c; }
+
+/* ---------- Boutons ---------- */
+.ec-auth--centre .btn, .eq-auth--centre .eq-btn {
+  min-height: 48px; border-radius: 6px !important; background: #0b0b0c !important; color: #fff !important;
+  border: 0 !important; box-shadow: none !important; font-weight: 600; letter-spacing: 0; transform: none !important;
+}
+.ec-auth--centre .btn:hover, .eq-auth--centre .eq-btn:hover { background: #2a2a2d !important; }
+.eq-auth--centre .eq-btn::after { display: none !important; }
+.eq-auth--centre .eq-btn--ghost, .ec-auth--centre .btn--outline {
+  background: #fff !important; color: #0b0b0c !important; border: 1px solid #cfcac1 !important;
+}
+.eq-auth--centre .eq-btn--ghost:hover, .ec-auth--centre .btn--outline:hover { border-color: #0b0b0c !important; background: #fff !important; }
+.eq-auth--centre .eq-auth__bascule {
+  margin-top: 0 !important; padding: 12px 0 0 !important; border: 0 !important; border-top: 1px solid #e3e0da !important; border-radius: 0 !important;
+  font-size: 13px; color: #5b5b60;
+}
+
+/* Écran de chargement : blason fixe */
+body.eq:not(.eq--app) .eq-chargement img { animation: none; filter: none; width: 40px; }
+
+@media (max-width: 480px) {
+  .ec-auth--centre .ec-auth__carte, .eq-auth--centre .eq-auth__carte { padding: 28px 20px 22px !important; }
+}
+
+/* La carte garde ses marges intérieures, même avec des contenus larges (inscription) */
+.ec-auth--centre .ec-auth__carte, .eq-auth--centre .eq-auth__carte { grid-template-columns: minmax(0, 1fr); justify-content: stretch !important; }
+.eq-auth--centre .eq-choix--3 { grid-template-columns: 1fr !important; }
+.eq-auth--centre .eq-choix .eq-tuile { padding: 12px 14px; }
+.eq-auth--centre .eq-choix .eq-tuile small { display: inline; margin-left: 6px; }
+.eq-auth--centre .eq-anim > *, .eq-auth--centre .eq-anim { animation: none !important; }

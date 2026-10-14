@@ -91,15 +91,13 @@ async function demarrer() {
 /* ---------- Connexion / activation ---------- */
 function carteAuth(titre, texte, ...contenu) {
   document.body.classList.remove('ec--app');
-  return h('main', { class: 'ec-auth' },
-    h('section', { class: 'ec-auth__visuel', 'aria-hidden': 'true' },
-      h('div', { class: 'ec-auth__slogan' }, h('span', null, 'BDA Security Group'), h('p', null, 'Vos devis, vos factures et un contact direct avec votre responsable de mission, ', h('em', null, 'au même endroit.')))),
+  return h('main', { class: 'ec-auth ec-auth--centre' },
     h('section', { class: 'ec-auth__carte' },
-      h('a', { class: 'ec-auth__marque', href: '/' }, h('img', { src: '/assets/img/embleme.png?v=3', alt: '', width: 46, height: 47 }), h('span', null, h('b', null, 'BDA Security Group'), h('small', null, 'Espace client'))),
+      h('a', { class: 'ec-auth__marque', href: '/' }, h('img', { src: '/assets/img/blason.svg?v=1', alt: '', width: 34, height: 43 }), h('span', null, h('b', null, 'BDA Security Group'), h('small', null, 'Espace client'))),
       h('h1', null, titre),
       texte ? h('p', { class: 'ec-auth__texte' }, texte) : null,
       contenu,
-      h('p', { class: 'ec-auth__aide' }, 'Besoin d’aide ? ', h('a', { href: 'tel:+33611678625' }, '06 11 67 86 25'), ' · ', h('a', { href: 'https://wa.me/33784739070', target: '_blank', rel: 'noopener' }, 'WhatsApp'), ' · ', h('a', { href: '/' }, 'Retour au site'))));
+      h('p', { class: 'ec-auth__aide' }, h('a', { href: 'tel:+33611678625' }, '06 11 67 86 25'), ' · ', h('a', { href: '/' }, 'Retour au site'))));
 }
 function ecranConnexion(message) {
   const email = saisie({ type: 'email', autocomplete: 'username', required: true, placeholder: 'vous@entreprise.fr' });
@@ -111,8 +109,8 @@ function ecranConnexion(message) {
     try { await api('connexion', { email: email.value.trim(), motdepasse: mdp.value }); ouvrir(); }
     catch (err) { msg.textContent = err.message; btn.disabled = false; }
   } }, champ('Email', email), champ('Mot de passe', mdp), msg, btn);
-  racine.replaceChildren(carteAuth('Connexion', 'Accédez à votre espace client sécurisé.', form,
-    h('p', { class: 'ec-auth__petit' }, 'Première connexion : utilisez le lien d’activation reçu de BDA Security Group. Mot de passe oublié : contactez-nous, nous vous envoyons un nouveau lien.')));
+  racine.replaceChildren(carteAuth('Connexion', '', form,
+    h('p', { class: 'ec-auth__petit' }, 'Première connexion ou mot de passe oublié : contactez-nous.')));
   email.focus();
 }
 async function ecranInvitation(jeton) {
@@ -155,7 +153,7 @@ function naviguer() {
   const lien = ([k, lib]) => h('a', { href: `#/${k}`, class: `ec-nav__item ${k === onglet ? 'is-actif' : ''}` }, ic(k), h('span', null, lib), badge(k));
   const deconnexion = async () => { try { await api('deconnexion', {}); } catch (e) { /* déjà sorti */ } donnees = null; ecranConnexion('Vous êtes déconnecté. À bientôt !'); };
   const cote = h('aside', { class: 'ec-cote' },
-    h('a', { class: 'ec-cote__marque', href: '#/accueil' }, h('img', { src: '/assets/img/embleme.png?v=3', alt: '', width: 40, height: 41 }), h('span', null, h('b', null, 'BDA Security Group'), h('small', null, 'Espace client'))),
+    h('a', { class: 'ec-cote__marque', href: '#/accueil' }, h('img', { src: '/assets/img/blason.svg?v=1', alt: '', width: 40, height: 41 }), h('span', null, h('b', null, 'BDA Security Group'), h('small', null, 'Espace client'))),
     h('div', { class: 'ec-cote__client' }, h('span', { class: 'ec-avatar' }, initiales(donnees.client.nom)), h('span', null, h('b', null, donnees.client.nom), h('small', null, donnees.client.email))),
     h('nav', { class: 'ec-nav', 'aria-label': 'Espace client' }, ONGLETS.map(lien)),
     h('div', { class: 'ec-cote__bas' },

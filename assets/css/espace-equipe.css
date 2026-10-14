@@ -304,7 +304,7 @@ input[type="date"].eq-input, input[type="datetime-local"].eq-input, input[type="
   background: radial-gradient(120% 140% at 100% 0%, rgba(201, 166, 107, .22), transparent 55%), linear-gradient(160deg, #1e1b15, #121214 60%);
   border-color: var(--ligne-forte);
 }
-.eq-service::after { content: ''; position: absolute; right: -40px; bottom: -60px; width: 220px; height: 220px; background: url('/assets/img/embleme.png?v=3') center/contain no-repeat; opacity: .06; pointer-events: none; }
+.eq-service::after { content: ''; position: absolute; right: -40px; bottom: -60px; width: 220px; height: 220px; background: url('/assets/img/blason.svg?v=1') center/contain no-repeat; opacity: .06; pointer-events: none; }
 .eq-service__jour { color: var(--or); font-size: .75rem; letter-spacing: .2em; text-transform: uppercase; font-weight: 700; }
 .eq-service__creneau { font-family: var(--titre); font-weight: 800; font-size: clamp(2rem, 7vw, 2.9rem); letter-spacing: -.03em; line-height: 1.1; margin: .35rem 0 .2rem; }
 .eq-service__site { color: var(--doux); display: flex; align-items: center; gap: .4rem; }

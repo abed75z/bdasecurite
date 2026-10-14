@@ -277,3 +277,48 @@ form .btn, form button[type="submit"], .rappel__envoyer { border-radius: 6px !im
 .ent-merci .h3 { margin: 0; }
 @media (max-width: 900px) { .ent-demande__texte { position: static; } }
 @media (max-width: 600px) { .ent-bloc { grid-template-columns: 1fr; } }
+
+/* ---------- 7. L'or avec parcimonie ---------- */
+/* L'or reste sur le logo, le titre et le bouton principal du haut de page.
+   Ailleurs : noir, blanc et gris. */
+
+/* Boutons « dorés » : noirs sur fond clair */
+.btn--gold { background: #0b0b0c !important; background-image: none !important; color: #fff !important; border-color: #0b0b0c !important; box-shadow: none !important; }
+.btn--gold:hover { background: #2a2a2d !important; filter: none; }
+.btn--gold .icon { color: currentColor !important; }
+/* … blancs sur fond sombre */
+.mobile-menu .btn--gold, .ac-pro .btn--gold, .ac-tarifs .btn--gold, .footer .btn--gold,
+.lp-cta .btn--gold, .ac-final .btn--gold, .tf-cta .btn--gold {
+  background: #fff !important; color: #0b0b0c !important; border-color: #fff !important;
+}
+.mobile-menu .btn--gold:hover, .ac-pro .btn--gold:hover, .ac-tarifs .btn--gold:hover, .footer .btn--gold:hover,
+.lp-cta .btn--gold:hover, .ac-final .btn--gold:hover, .tf-cta .btn--gold:hover { background: #ecebe8 !important; }
+/* … et un seul bouton doré, sobre et sans reflet, en haut de page */
+.ac-hero .btn--gold, .lp-hero .btn--gold, .tf-hero .btn--gold, .rv-hero .btn--gold {
+  background: #c2a36d !important; color: #0b0b0c !important; border-color: #c2a36d !important;
+}
+.ac-hero .btn--gold:hover, .lp-hero .btn--gold:hover, .tf-hero .btn--gold:hover, .rv-hero .btn--gold:hover { background: #d0b480 !important; }
+
+/* Icônes : de la couleur du texte */
+main svg.icon, .footer svg.icon, .mobile-menu svg.icon, .btn svg.icon { color: inherit !important; }
+.nav__espace svg.icon, .nav__tel svg.icon { color: #d9d6d0 !important; }
+.nav__espace, .nav__tel { border-color: rgba(255, 255, 255, 0.18) !important; }
+.nav__espace:hover, .nav__tel:hover { border-color: rgba(255, 255, 255, 0.45) !important; }
+.nav__cta { border-color: rgba(255, 255, 255, 0.3) !important; color: #fff !important; }
+.nav__cta:hover { border-color: #fff !important; }
+
+/* Petits titres, numéros et textes d'accent : gris */
+.kicker { color: #86868b !important; }
+.ac-hero .kicker, .lp-hero .kicker, .tf-hero .kicker, .rv-hero .kicker, .jobs-hero .kicker,
+.ac-pro .kicker, .ac-tarifs .kicker, .lp-cta .kicker, .ac-final .kicker { color: rgba(255, 255, 255, 0.7) !important; }
+.ac-etapes li > span:first-child, .lp-steps li::before, .etape__num { color: #86868b !important; }
+.ac-tarifs__titre { color: #fff !important; }
+.ac-pro p span { color: inherit !important; }
+.ac-methode .etape__ico { stroke: #4a4a4f !important; }
+.tuile__lien { color: #0b0b0c !important; }
+.haut-page__anneau { stroke: #0b0b0c !important; }
+.lp-list .icon, .lp-list svg { color: #4a4a4f !important; stroke: currentColor !important; }
+.lp-box .kicker { color: rgba(255, 255, 255, 0.7) !important; }
+.lp-box a[aria-current] { color: #0b0b0c !important; }
+.lp-box .btn--gold, .tf-carte--vedette .btn--gold { background: #fff !important; color: #0b0b0c !important; border-color: #fff !important; }
+.lp-box .btn--gold:hover, .tf-carte--vedette .btn--gold:hover { background: #ecebe8 !important; }

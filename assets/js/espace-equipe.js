@@ -247,21 +247,13 @@ async function demarrer() {
 function carteAuth(titre, texte, ...contenu) {
   document.body.classList.remove('eq--app');
   clearInterval(minuteur);
-  const page = h('main', { class: 'eq-auth' },
-    h('section', { class: 'eq-auth__visuel', 'aria-hidden': 'true' },
-      h('div', { class: 'eq-auth__halo' }),
-      h('div', { class: 'eq-auth__haut' }, h('span', { class: 'eq-surtitre' }, 'Espace réservé · Équipe BDA')),
-      h('img', { class: 'eq-auth__embleme', src: '/assets/img/embleme-hd.png?v=3', alt: '' }),
-      h('div', { class: 'eq-auth__bas' },
-        h('h2', null, 'Votre quotidien d’agent, ', h('span', { class: 'eq-or-texte' }, 'au même endroit.')),
-        h('p', null, 'Planning, fiches de paie, documents, congés et main courante. Simple, rapide, sécurisé.'),
-        h('div', { class: 'eq-auth__puces' }, [['planning', 'Planning en direct'], ['cadenas', 'Fiches de paie protégées'], ['mc', 'Main courante'], ['absences', 'Congés en 2 clics']].map(([i, t]) => h('span', null, ic(i), t))))),
-    anim(h('section', { class: 'eq-auth__carte' },
-      h('a', { class: 'eq-marque', href: '/' }, h('img', { src: '/assets/img/embleme.png?v=3', alt: '', width: 44, height: 45 }), h('span', null, h('b', null, 'BDA SECURITY GROUP'), h('small', null, 'Espace équipe'))),
+  const page = h('main', { class: 'eq-auth eq-auth--centre' },
+    h('section', { class: 'eq-auth__carte' },
+      h('a', { class: 'eq-marque', href: '/' }, h('img', { src: '/assets/img/blason.svg?v=1', alt: '', width: 34, height: 43 }), h('span', null, h('b', null, 'BDA Security Group'), h('small', null, 'Espace agent'))),
       titre ? h('h1', null, titre) : null,
       texte ? h('p', { class: 'eq-auth__texte' }, texte) : null,
       ...contenu,
-      h('p', { class: 'eq-auth__aide' }, 'Un souci ? Appelez la direction au ', h('a', { href: 'tel:+33611678625' }, '06 11 67 86 25'), ' · ', h('a', { href: '/' }, 'Retour au site')))));
+      h('p', { class: 'eq-auth__aide' }, h('a', { href: 'tel:+33611678625' }, '06 11 67 86 25'), ' · ', h('a', { href: '/' }, 'Retour au site'))));
   racine.replaceChildren(page);
   window.scrollTo(0, 0);
 }
@@ -285,7 +277,7 @@ function ecranConnexion(message) {
     champ('Mot de passe', mdp.bloc),
     h('div', { class: 'eq-ligne-flex' }, h('label', { class: 'eq-case' }, memo, 'Rester connecté sur cet appareil'), h('button', { class: 'eq-lien', type: 'button', onclick: ecranOubli }, 'Mot de passe oublié ?')),
     msg, btn);
-  carteAuth('Connexion', 'Connectez-vous avec l’identifiant que vous avez choisi.', form,
+  carteAuth('Connexion', '', form,
     h('div', { class: 'eq-auth__bascule' }, h('span', null, 'Nouveau dans l’équipe ?'), h('button', { class: 'eq-btn eq-btn--ghost eq-btn--petit', type: 'button', onclick: () => { history.replaceState(null, '', '#inscription'); ecranInscription(); } }, 'Créer mon compte')));
   id.focus();
 }
@@ -499,12 +491,12 @@ function ouvrirApplication() {
   };
   racine.replaceChildren(h('div', { class: 'eq-app' },
     h('aside', { class: 'eq-cote' },
-      h('a', { class: 'eq-marque', href: '#/' }, h('img', { src: '/assets/img/embleme.png?v=3', alt: '', width: 44, height: 45 }), h('span', null, h('b', null, 'BDA SECURITY GROUP'), h('small', null, 'Espace équipe'))),
+      h('a', { class: 'eq-marque', href: '#/' }, h('img', { src: '/assets/img/blason.svg?v=1', alt: '', width: 44, height: 45 }), h('span', null, h('b', null, 'BDA SECURITY GROUP'), h('small', null, 'Espace équipe'))),
       nav,
       h('div', { class: 'eq-cote__bas' }, moiCote, h('button', { class: 'eq-btn eq-btn--ghost eq-btn--petit', type: 'button', onclick: deconnexion }, ic('sortie'), 'Se déconnecter'))),
     h('div', null,
       h('header', { class: 'eq-entete' },
-        h('a', { class: 'eq-marque', href: '#/' }, h('img', { src: '/assets/img/embleme.png?v=3', alt: '', width: 34, height: 35 }), h('span', null, h('b', null, 'BDA'), h('small', null, 'Équipe'))),
+        h('a', { class: 'eq-marque', href: '#/' }, h('img', { src: '/assets/img/blason.svg?v=1', alt: '', width: 34, height: 35 }), h('span', null, h('b', null, 'BDA'), h('small', null, 'Équipe'))),
         avatar),
       principal),
     onglets));

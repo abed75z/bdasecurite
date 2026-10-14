@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Recrutement agent de sécurité &amp; chauffeur | BDA Security Group</title>
-  <meta name="description" content="BDA Security Group recrute à Paris : agents de sécurité (APS), SSIAP, protection rapprochée et chauffeurs VTC. Postulez en 3 minutes.">
+  <meta name="description" content="BDA Security Group recrute à Paris : agents de sécurité (APS), SSIAP, protection rapprochée et chauffeurs VTC. Postulez en ligne.">
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="/favicon.ico" sizes="48x48">
   <link rel="icon" href="assets/img/favicon.svg?v=4" type="image/svg+xml">
@@ -14,7 +14,7 @@
   <meta property="og:locale" content="fr_FR">
   <meta property="og:site_name" content="BDA Security Group">
   <meta property="og:title" content="Recrutement agent de sécurité &amp; chauffeur | BDA Security Group">
-  <meta property="og:description" content="BDA Security Group recrute à Paris : agents de sécurité (APS), SSIAP, protection rapprochée et chauffeurs VTC. Postulez en 3 minutes.">
+  <meta property="og:description" content="BDA Security Group recrute à Paris : agents de sécurité (APS), SSIAP, protection rapprochée et chauffeurs VTC. Postulez en ligne.">
   <meta property="og:url" content="https://bdasecurite.com/recrutement">
   <meta property="og:image" content="https://bdasecurite.com/assets/img/og-image.jpg?v=5">
   <meta property="og:image:width" content="1200">
@@ -29,14 +29,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=15">
-  <link rel="stylesheet" href="assets/css/hero.css?v=15">
   <link rel="stylesheet" href="assets/css/sections.css?v=15">
-  <link rel="stylesheet" href="assets/css/devis.css?v=15">
-  <link rel="stylesheet" href="assets/css/recrutement.css?v=15">
   <link rel="stylesheet" href="assets/css/pro.css?v=16">
   <link rel="stylesheet" href="assets/css/blanc.css?v=34">
-  <link rel="stylesheet" href="assets/css/sobre.css?v=3">
+  <link rel="stylesheet" href="assets/css/sobre.css?v=4">
   <link rel="stylesheet" href="assets/css/entete.css?v=9">
+  <link rel="stylesheet" href="assets/css/candidature.css?v=2">
 </head>
 <body>
 
@@ -146,304 +144,117 @@
   </div>
 </div>
 
-<main>
-  <!-- ============ HERO ============ -->
-  <section class="jobs-hero" aria-labelledby="jobs-title" data-anim>
-    <div class="hero__bg" aria-hidden="true">
-      <div class="aurora"><i></i><i></i><i></i></div>
-      <div class="hero__halo"></div>
-    </div>
-    <div class="container jobs-hero__grid">
-      <div class="jobs-hero__copy">
-        <p class="kicker" data-reveal="fade">Recrutement · Paris</p>
-        <h1 class="h1" id="jobs-title" data-split>Faites carrière <em>dans l'excellence.</em></h1>
-        <p class="lead" data-reveal style="--d:300ms">Agents de sécurité, SSIAP, protection rapprochée et chauffeurs VTC : rejoignez une équipe exigeante.</p>
-        <div class="hero__ctas" data-reveal style="--d:450ms">
-          <a class="btn btn--gold" href="#candidature">Postuler maintenant <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <a class="btn btn--outline" href="#postes">Voir les postes</a>
-        </div>
-        <ul class="hero__trust" data-reveal="fade" style="--d:650ms">
-          <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Candidature en 3 minutes</li>
-          <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Postes ouverts H/F</li>
-          <li><span class="tick"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span> Paris &amp; Île-de-France</li>
-        </ul>
-      </div>
+<main class="rc">
+  <div class="rc__page">
+    <header class="rc__tete">
+      <p class="rc__sur">Recrutement</p>
+      <h1 class="rc__titre">Rejoindre BDA Security Group</h1>
+      <p class="rc__intro">Agents de sécurité, gardes du corps et chauffeurs privés · Paris et Île-de-France.</p>
+    </header>
 
-      <div data-reveal="fade" style="--d:200ms">
-        <div class="board" data-tilt="5" aria-hidden="true">
-          <div class="board__head">
-            <b>Recrutement ouvert</b>
-            <span class="pill pill--green"><span class="status-dot"></span> En cours</span>
+    <div class="apply-card" id="candidature">
+      <form id="candidature-form" class="rc-form" novalidate data-service="recrutement">
+
+        <fieldset class="rc-bloc">
+          <legend><span>1</span>Poste souhaité</legend>
+          <div class="rc-postes rc-large" data-champ="poste">
+            <label><input type="radio" name="poste" value="Agent de sécurité" required><span><b>Agent de sécurité</b><small>Sites, accueil, rondes, événementiel</small></span></label>
+            <label><input type="radio" name="poste" value="Garde du corps (protection rapprochée)"><span><b>Garde du corps</b><small>Protection rapprochée</small></span></label>
+            <label><input type="radio" name="poste" value="Chauffeur privé (VTC)"><span><b>Chauffeur privé</b><small>Carte VTC</small></span></label>
           </div>
-          <ul class="board__list">
-            <li class="board__item" style="--i:0; --accent: 190, 156, 102"><span class="board__ico"><svg class="icon"><use href="#i-shield"/></svg></span><span><b>Agent de sécurité (APS)</b><small>Sites, accueil, contrôle d'accès</small></span><span class="pill pill--gold">Ouvert</span></li>
-            <li class="board__item" style="--i:1; --accent: 206, 181, 141"><span class="board__ico"><svg class="icon"><use href="#i-user"/></svg></span><span><b>Protection rapprochée</b><small>Accompagnement de personnalités</small></span><span class="pill pill--gold">Ouvert</span></li>
-            <li class="board__item" style="--i:2; --accent: 197, 168, 121"><span class="board__ico"><svg class="icon"><use href="#i-ticket"/></svg></span><span><b>Sécurité événementielle</b><small>Soirées, salons, galas</small></span><span class="pill pill--gold">Ouvert</span></li>
-            <li class="board__item" style="--i:3; --accent: 182, 144, 84"><span class="board__ico"><svg class="icon"><use href="#i-car"/></svg></span><span><b>Chauffeur privé</b><small>Transferts, mise à disposition</small></span><span class="pill pill--gold">Ouvert</span></li>
-          </ul>
-          <div class="board__foot"><span>Chaque candidature est étudiée</span><b>H/F</b></div>
-        </div>
-      </div>
-    </div>
-  </section>
+        </fieldset>
 
-  <!-- ============ BANDEAUX ============ -->
-  <section class="marquee" aria-label="Les qualités que nous recherchons" data-anim>
-    <div class="marquee__band" data-marquee="1">
-      <div class="marquee__track">
-        <div class="marquee__group">
-          <span class="marquee__item">Agents de sécurité <i></i></span>
-          <span class="marquee__item">Protection rapprochée <i></i></span>
-          <span class="marquee__item">Événementiel <i></i></span>
-          <span class="marquee__item">Chauffeurs VTC <i></i></span>
-          <span class="marquee__item">Paris &amp; Île-de-France <i></i></span>
-        </div>
-      </div>
-    </div>
-    <div class="marquee__band marquee__band--alt" data-marquee="-1">
-      <div class="marquee__track">
-        <div class="marquee__group">
-          <span class="marquee__item marquee__item--serif">Discrétion <i></i></span>
-          <span class="marquee__item marquee__item--serif">Ponctualité <i></i></span>
-          <span class="marquee__item marquee__item--serif">Sang-froid <i></i></span>
-          <span class="marquee__item marquee__item--serif">Présentation <i></i></span>
-          <span class="marquee__item marquee__item--serif">Esprit d'équipe <i></i></span>
-          <span class="marquee__item marquee__item--serif">Sens du service <i></i></span>
-        </div>
-      </div>
-    </div>
-  </section>
+        <fieldset class="rc-bloc">
+          <legend><span>2</span>Vos coordonnées</legend>
+          <label class="rc-champ"><span>Nom</span><input type="text" id="c-nom" name="nom" autocomplete="family-name" maxlength="80" required></label>
+          <label class="rc-champ"><span>Prénom</span><input type="text" id="c-prenom" name="prenom" autocomplete="given-name" maxlength="80" required></label>
+          <label class="rc-champ"><span>Date de naissance</span><input type="date" id="c-naissance" name="naissance" autocomplete="bday" required></label>
+          <label class="rc-champ"><span>Ville ou code postal</span><input type="text" id="c-ville" name="ville" autocomplete="address-level2" maxlength="80" required></label>
+          <label class="rc-champ"><span>Téléphone</span><input type="tel" id="c-tel" name="telephone" autocomplete="tel" inputmode="tel" maxlength="30" required></label>
+          <label class="rc-champ"><span>E-mail</span><input type="email" id="c-email" name="email" autocomplete="email" inputmode="email" maxlength="160" required></label>
+        </fieldset>
 
-  <!-- ============ POURQUOI NOUS REJOINDRE (textes à ajuster selon vos conditions) ============ -->
-  <section class="section" id="avantages" aria-labelledby="why-title">
-    <div class="container">
-      <div class="section__head">
-        <p class="kicker kicker--center" data-reveal="fade">Pourquoi nous rejoindre</p>
-        <h2 class="h2" id="why-title" data-split>Plus qu'un poste, <em>une équipe.</em></h2>
-        <p class="lead" data-reveal>Un cadre exigeant, respectueux et motivant.</p>
-      </div>
-      <div class="perks" data-stagger>
-        <div data-reveal><article class="perk"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-star"/></svg></span><h3 class="h3">Des missions variées</h3><p>Événements, soirées privées, accompagnement VIP, transferts.</p></article></div>
-        <div data-reveal><article class="perk"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-calendar"/></svg></span><h3 class="h3">Des plannings adaptés</h3><p>Jour, nuit, week-end.</p></article></div>
-        <div data-reveal><article class="perk"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-users"/></svg></span><h3 class="h3">Une équipe à taille humaine</h3><p>Un management de proximité.</p></article></div>
-        <div data-reveal><article class="perk"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-diamond"/></svg></span><h3 class="h3">Une rémunération attractive</h3><p>Une rémunération à la hauteur de votre exigence, selon votre profil et vos missions.</p></article></div>
-        <div data-reveal><article class="perk"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-trend"/></svg></span><h3 class="h3">De vraies évolutions</h3><p>Chef d'équipe, protection rapprochée, missions VIP.</p></article></div>
-        <div data-reveal><article class="perk"><span class="perk__icon" aria-hidden="true"><svg class="icon"><use href="#i-shield-check"/></svg></span><h3 class="h3">Une image premium</h3><p>Tenue soignée, clientèle exigeante, missions haut de gamme.</p></article></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ POSTES OUVERTS ============ -->
-  <section class="section" id="postes" aria-labelledby="jobs-list-title" style="padding-top:0">
-    <div class="container">
-      <div class="section__head">
-        <p class="kicker kicker--center" data-reveal="fade">Postes ouverts</p>
-        <h2 class="h2" id="jobs-list-title" data-split>Trouvez votre place <em>chez BDA.</em></h2>
-      </div>
-      <div class="jobs" data-stagger>
-        <div data-reveal><article class="job">
-          <div class="job__top"><span class="job__ico" aria-hidden="true"><svg class="icon"><use href="#i-shield"/></svg></span><div><h3 class="h3">Agent de sécurité (APS)</h3><div class="job__tags"><span>H/F</span><span>Paris &amp; IDF</span><span>Temps plein ou partiel</span></div></div></div>
-          <p>Surveillance de sites, accueil, contrôle d'accès et rondes : vous êtes le premier garant de la sécurité des lieux et des personnes.</p>
-          <ul class="job__req">
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Carte professionnelle CNAPS en cours de validité</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>SST (sauveteur secouriste du travail) apprécié</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Excellente présentation, ponctualité et rigueur</li>
-          </ul>
-          <a class="btn btn--gold btn--sm" href="#candidature" data-job="Agent de sécurité (APS)">Postuler <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-        </article></div>
-        <div data-reveal><article class="job">
-          <div class="job__top"><span class="job__ico" aria-hidden="true"><svg class="icon"><use href="#i-user"/></svg></span><div><h3 class="h3">Agent de protection rapprochée</h3><div class="job__tags"><span>H/F</span><span>Paris &amp; IDF</span><span>Missions ponctuelles</span></div></div></div>
-          <p>Accompagnement et protection de personnalités, dirigeants et invités de marque, en lien étroit avec nos chauffeurs.</p>
-          <ul class="job__req">
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Carte professionnelle CNAPS « protection physique des personnes »</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Expérience souhaitée, permis B</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Discrétion absolue, anglais apprécié</li>
-          </ul>
-          <a class="btn btn--gold btn--sm" href="#candidature" data-job="Agent de protection rapprochée">Postuler <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-        </article></div>
-        <div data-reveal><article class="job">
-          <div class="job__top"><span class="job__ico" aria-hidden="true"><svg class="icon"><use href="#i-ticket"/></svg></span><div><h3 class="h3">Agent de sécurité événementielle</h3><div class="job__tags"><span>H/F</span><span>Paris &amp; IDF</span><span>Soirs &amp; week-ends</span></div></div></div>
-          <p>Filtrage, palpation, gestion des flux et des accès lors de soirées, salons, galas et événements privés.</p>
-          <ul class="job__req">
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Carte professionnelle CNAPS en cours de validité</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Disponible en soirée et le week-end</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Sens du contact et sang-froid</li>
-          </ul>
-          <a class="btn btn--gold btn--sm" href="#candidature" data-job="Agent de sécurité événementielle">Postuler <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-        </article></div>
-        <div data-reveal><article class="job">
-          <div class="job__top"><span class="job__ico" aria-hidden="true"><svg class="icon"><use href="#i-car"/></svg></span><div><h3 class="h3">Chauffeur privé (VTC)</h3><div class="job__tags"><span>H/F</span><span>Paris &amp; IDF</span><span>Temps plein ou partiel</span></div></div></div>
-          <p>Transferts aéroports et gares, mise à disposition, événements et clientèle d'affaires, avec un service irréprochable.</p>
-          <ul class="job__req">
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Carte professionnelle VTC en cours de validité</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Permis B depuis 3 ans minimum</li>
-            <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Présentation soignée, bonne connaissance de Paris, anglais apprécié</li>
-          </ul>
-          <a class="btn btn--gold btn--sm" href="#candidature" data-job="Chauffeur privé (VTC)">Postuler <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-        </article></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ ÉTAPES ============ -->
-  <section class="section" aria-labelledby="steps-title" style="padding-top:0">
-    <div class="container">
-      <div class="section__head">
-        <p class="kicker kicker--center" data-reveal="fade">Comment ça se passe</p>
-        <h2 class="h2" id="steps-title" data-split>Un recrutement <em>simple et rapide.</em></h2>
-      </div>
-      <ol class="steps4" data-stagger>
-        <li data-reveal><span class="dot" aria-hidden="true"><svg class="icon"><use href="#i-edit"/></svg></span><b>Candidature en ligne</b><small>Remplissez le formulaire ci-dessous : 3 minutes suffisent.</small></li>
-        <li data-reveal><span class="dot" aria-hidden="true"><svg class="icon"><use href="#i-shield-check"/></svg></span><b>Vérification</b><small>Nous vérifions votre carte professionnelle et votre profil.</small></li>
-        <li data-reveal><span class="dot" aria-hidden="true"><svg class="icon"><use href="#i-message"/></svg></span><b>Entretien</b><small>Un échange par téléphone ou en rendez-vous pour faire connaissance.</small></li>
-        <li data-reveal><span class="dot" aria-hidden="true"><svg class="icon"><use href="#i-flag"/></svg></span><b>Première mission</b><small>Intégration, présentation de l'équipe et c'est parti.</small></li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- ============ CANDIDATURE ============ -->
-  <section class="section" id="candidature" aria-labelledby="apply-title" style="padding-top:0">
-    <div class="container apply">
-      <div class="apply__aside">
-        <p class="kicker">Candidature</p>
-        <h2 class="h2" id="apply-title">Rejoignez <em>l'équipe BDA.</em></h2>
-        <p class="lead">Trois minutes suffisent. Chaque candidature est étudiée.</p>
-        <ul>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Aucun CV obligatoire pour postuler</li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Vos informations restent confidentielles</li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Candidatures spontanées bienvenues</li>
-        </ul>
-        <figure class="apply__photo">
-          <img src="https://images.unsplash.com/photo-1618371731836-2b9bff9ac72a?auto=format&amp;fit=crop&amp;w=900&amp;h=640&amp;q=72" alt="Agent de sécurité en costume noir, lunettes de soleil et badge" width="900" height="640" loading="lazy" decoding="async">
-        </figure>
-      </div>
-
-      <div class="apply-card" data-reveal>
-        <form id="candidature-form" novalidate data-service="recrutement">
-          <div class="field">
-            <label for="c-poste">Poste souhaité</label>
-            <select class="input" id="c-poste" name="poste" required>
-              <option value="">Choisissez un poste…</option>
-              <option>Agent de sécurité (APS)</option>
-              <option>Agent de protection rapprochée</option>
-              <option>Agent de sécurité événementielle</option>
-              <option>Chauffeur privé (VTC)</option>
-              <option>Candidature spontanée</option>
-            </select>
-            <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Choisissez un poste.</span></p>
-          </div>
-          <div class="fields">
-            <div class="field field--full">
-              <label for="c-nom">Nom et prénom</label>
-              <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><input class="input" type="text" id="c-nom" name="nom" autocomplete="name" placeholder="Ex. : Karim Benali" required></div>
-              <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Indiquez votre nom et prénom.</span></p>
-            </div>
-            <div class="field">
-              <label for="c-tel">Téléphone</label>
-              <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><input class="input" type="tel" id="c-tel" name="telephone" autocomplete="tel" inputmode="tel" placeholder="06 12 34 56 78" required></div>
-              <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Numéro invalide.</span></p>
-            </div>
-            <div class="field">
-              <label for="c-email">Email</label>
-              <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><input class="input" type="email" id="c-email" name="email" autocomplete="email" inputmode="email" placeholder="vous@exemple.fr" required></div>
-              <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Adresse email invalide.</span></p>
-            </div>
-            <div class="field">
-              <label for="c-ville">Ville <em>facultatif</em></label>
-              <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><input class="input" type="text" id="c-ville" name="ville" autocomplete="address-level2" placeholder="Ex. : Paris 11e"></div>
-            </div>
-            <div class="field">
-              <label for="c-carte">Carte professionnelle</label>
-              <select class="input" id="c-carte" name="carte" required>
-                <option value="">Sélectionnez…</option>
-                <option>Carte CNAPS (sécurité)</option>
-                <option>Carte VTC</option>
-                <option>Carte CNAPS + carte VTC</option>
-                <option>En cours d'obtention</option>
-                <option>Aucune pour le moment</option>
-              </select>
-              <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Indiquez votre situation.</span></p>
-            </div>
-            <div class="field">
-              <label for="c-num">N° de carte <em>facultatif</em></label>
-              <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg><input class="input" type="text" id="c-num" name="numero_carte" placeholder="Ex. : CAR-075-…"></div>
-            </div>
-            <div class="field">
-              <label for="c-exp">Expérience</label>
-              <select class="input" id="c-exp" name="experience" required>
-                <option value="">Sélectionnez…</option>
-                <option>Débutant(e)</option>
-                <option>Moins de 2 ans</option>
-                <option>De 2 à 5 ans</option>
-                <option>Plus de 5 ans</option>
-              </select>
-              <p class="field__error"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span>Indiquez votre expérience.</span></p>
-            </div>
-            <div class="field field--full">
-              <span class="label">Disponibilités <em style="font-style:normal;color:var(--muted-2);font-size:13px;font-weight:400">facultatif</em></span>
-              <div class="pick">
-                <label><input type="checkbox" name="dispo" value="Jour"><span>Jour</span></label>
-                <label><input type="checkbox" name="dispo" value="Nuit"><span>Nuit</span></label>
-                <label><input type="checkbox" name="dispo" value="Week-end"><span>Week-end</span></label>
-                <label><input type="checkbox" name="dispo" value="Jours fériés"><span>Jours fériés</span></label>
-              </div>
-            </div>
-            <label class="check field--full"><input type="checkbox" id="c-permis" name="permis"><span class="check__box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span>Je suis titulaire du permis B</span></label>
-            <div class="field field--full">
-              <label for="c-cv">Lien vers votre CV ou LinkedIn <em>facultatif</em></label>
-              <div class="input-wrap"><svg class="icon" aria-hidden="true"><use href="#i-link"/></svg><input class="input" type="url" id="c-cv" name="cv" placeholder="https://…"></div>
-            </div>
-            <div class="field field--full">
-              <label for="c-message">Quelques mots sur vous <em>facultatif</em></label>
-              <textarea class="input" id="c-message" name="message" rows="4" placeholder="Votre parcours, vos atouts, ce qui vous motive à rejoindre BDA…"></textarea>
+        <fieldset class="rc-bloc" data-pour="securite" hidden>
+          <legend><span>3</span>Carte professionnelle et diplômes</legend>
+          <label class="rc-champ"><span>Carte professionnelle CNAPS</span><select id="c-carte-cnaps" name="carte_cnaps"><option value="">Sélectionner</option><option>Oui, en cours de validité</option><option>Demande en cours</option><option>Non</option></select></label>
+          <label class="rc-champ"><span>N° de carte <small>facultatif</small></span><input type="text" id="c-num-cnaps" name="numero_cnaps" maxlength="60" placeholder="CAR-075-…"></label>
+          <label class="rc-champ"><span>Date de fin de validité <small>facultatif</small></span><input type="date" id="c-fin-cnaps" name="fin_cnaps"></label>
+          <div class="rc-champ rc-large"><span>Mentions de la carte <small>facultatif</small></span>
+            <div class="rc-cases">
+              <label><input type="checkbox" name="mention" value="Surveillance humaine / gardiennage"><span>Surveillance humaine / gardiennage</span></label>
+              <label><input type="checkbox" name="mention" value="Protection physique des personnes"><span>Protection physique des personnes</span></label>
+              <label><input type="checkbox" name="mention" value="Agent cynophile"><span>Agent cynophile</span></label>
             </div>
           </div>
-          <label class="check"><input type="checkbox" id="c-consent" name="consentement" required><span class="check__box"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span><span>J'accepte que mes informations soient utilisées pour étudier ma candidature. Elles sont conservées 2 ans maximum. <a href="mentions-legales#donnees" target="_blank" rel="noopener" style="color:var(--gold-light);text-decoration:underline">En savoir plus</a></span></label>
-          <div class="hp" aria-hidden="true"><label for="c-site">Ne pas remplir</label><input type="text" id="c-site" name="site_web" tabindex="-1" autocomplete="off"></div>
-          <p class="step-error" role="alert"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span></span></p>
-          <button type="submit" class="btn btn--gold"><span class="btn__label">Envoyer ma candidature <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg></span></button>
-        </form>
-
-        <div class="apply-done" role="status">
-          <svg class="ok" viewBox="0 0 96 96" aria-hidden="true"><circle cx="48" cy="48" r="44"/><path d="M30 50l12 12 24-26"/></svg>
-          <h3 class="h3">Merci <span data-done-name></span>, <em>candidature reçue !</em></h3>
-          <p>Votre candidature pour le poste <strong data-done-job></strong> a bien été envoyée. Nous l'étudions et revenons vers vous si votre profil correspond à nos besoins.</p>
-          <div class="apply-done__actions">
-            <a class="btn btn--gold" href="mailto:bdasecurite@gmail.com" data-cv-link><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg> Envoyer mon CV par email</a>
-            <a class="btn btn--outline" href="/">Retour à l'accueil</a>
+          <div class="rc-champ rc-large"><span>Diplômes et formations <small>facultatif</small></span>
+            <div class="rc-cases">
+              <label><input type="checkbox" name="diplome" value="TFP / CQP APS"><span>TFP / CQP APS</span></label>
+              <label><input type="checkbox" name="diplome" value="TFP A3P"><span>TFP A3P</span></label>
+              <label><input type="checkbox" name="diplome" value="SSIAP 1"><span>SSIAP 1</span></label>
+              <label><input type="checkbox" name="diplome" value="SSIAP 2"><span>SSIAP 2</span></label>
+              <label><input type="checkbox" name="diplome" value="SSIAP 3"><span>SSIAP 3</span></label>
+              <label><input type="checkbox" name="diplome" value="SST / PSC1"><span>SST / PSC1</span></label>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </section>
+        </fieldset>
 
-  <!-- ============ FAQ CANDIDATS ============ -->
-  <section class="section" id="faq-candidats" aria-labelledby="faqc-title" style="padding-top:0">
-    <div class="container">
-      <div class="section__head">
-        <p class="kicker kicker--center" data-reveal="fade">Questions fréquentes</p>
-        <h2 class="h2" id="faqc-title" data-split>Avant de <em>postuler.</em></h2>
-      </div>
-      <div class="faq" data-stagger>
-        <div class="faq__item" data-reveal>
-          <button class="faq__q" type="button" id="fc-q1" aria-expanded="false" aria-controls="fc-a1">Faut-il obligatoirement une carte professionnelle ?<span class="faq__plus" aria-hidden="true"></span></button>
-          <div class="faq__a" id="fc-a1" role="region" aria-labelledby="fc-q1"><div><p>Oui pour exercer : la carte professionnelle délivrée par le CNAPS est obligatoire pour les métiers de la sécurité privée, et la carte professionnelle VTC pour les chauffeurs. Si la vôtre est en cours d'obtention, vous pouvez déjà postuler.</p></div></div>
-        </div>
-        <div class="faq__item" data-reveal>
-          <button class="faq__q" type="button" id="fc-q2" aria-expanded="false" aria-controls="fc-a2">Les débutants peuvent-ils postuler ?<span class="faq__plus" aria-hidden="true"></span></button>
-          <div class="faq__a" id="fc-a2" role="region" aria-labelledby="fc-q2"><div><p>Oui. Dès lors que vous êtes titulaire de la carte professionnelle requise, votre motivation, votre présentation et votre sérieux comptent autant que votre expérience.</p></div></div>
-        </div>
-        <div class="faq__item" data-reveal>
-          <button class="faq__q" type="button" id="fc-q3" aria-expanded="false" aria-controls="fc-a3">Quels sont les horaires ?<span class="faq__plus" aria-hidden="true"></span></button>
-          <div class="faq__a" id="fc-a3" role="region" aria-labelledby="fc-q3"><div><p>Ils dépendent des missions : jour, nuit, week-end ou jours fériés. Indiquez vos disponibilités dans le formulaire, nous en tenons compte pour construire les plannings.</p></div></div>
-        </div>
-        <div class="faq__item" data-reveal>
-          <button class="faq__q" type="button" id="fc-q4" aria-expanded="false" aria-controls="fc-a4">Comment envoyer mon CV ?<span class="faq__plus" aria-hidden="true"></span></button>
-          <div class="faq__a" id="fc-a4" role="region" aria-labelledby="fc-q4"><div><p>Le CV n'est pas obligatoire pour postuler. Vous pouvez indiquer un lien (LinkedIn, Google Drive…) dans le formulaire, ou nous l'envoyer par email à <a href="mailto:bdasecurite@gmail.com" style="color:var(--gold-light)">bdasecurite@gmail.com</a> après votre candidature.</p></div></div>
-        </div>
+        <fieldset class="rc-bloc" data-pour="vtc" hidden>
+          <legend><span>3</span>Carte VTC et véhicule</legend>
+          <label class="rc-champ"><span>Carte professionnelle VTC</span><select id="c-carte-vtc" name="carte_vtc"><option value="">Sélectionner</option><option>Oui, en cours de validité</option><option>Demande en cours</option><option>Non</option></select></label>
+          <label class="rc-champ"><span>N° de carte <small>facultatif</small></span><input type="text" id="c-num-vtc" name="numero_vtc" maxlength="60"></label>
+          <label class="rc-champ"><span>Date de fin de validité <small>facultatif</small></span><input type="date" id="c-fin-vtc" name="fin_vtc"></label>
+          <label class="rc-champ"><span>Permis B depuis</span><select id="c-anc-permis" name="anciennete_permis"><option value="">Sélectionner</option><option>Moins de 3 ans</option><option>3 à 5 ans</option><option>5 à 10 ans</option><option>Plus de 10 ans</option></select></label>
+          <label class="rc-champ"><span>Véhicule VTC personnel</span><select id="c-vehicule-vtc" name="vehicule_vtc"><option value="">Sélectionner</option><option>Oui</option><option>Non</option></select></label>
+          <label class="rc-champ"><span>Modèle du véhicule <small>facultatif</small></span><input type="text" id="c-modele" name="modele" maxlength="80" placeholder="Marque, modèle, année"></label>
+        </fieldset>
+
+        <fieldset class="rc-bloc">
+          <legend><span>4</span>Expérience</legend>
+          <label class="rc-champ"><span>Expérience dans le métier</span><select id="c-exp" name="experience" required><option value="">Sélectionner</option><option>Débutant(e)</option><option>Moins de 2 ans</option><option>De 2 à 5 ans</option><option>Plus de 5 ans</option></select></label>
+          <label class="rc-champ"><span>Langues parlées <small>facultatif</small></span><input type="text" id="c-langues" name="langues" maxlength="120" placeholder="Français, anglais…"></label>
+          <label class="rc-champ rc-large"><span>Derniers postes ou employeurs <small>facultatif</small></span><input type="text" id="c-parcours" name="parcours" maxlength="200"></label>
+        </fieldset>
+
+        <fieldset class="rc-bloc">
+          <legend><span>5</span>Disponibilités</legend>
+          <div class="rc-champ rc-large"><span>Contrat recherché</span>
+            <div class="rc-cases">
+              <label><input type="checkbox" name="contrat" value="Temps plein"><span>Temps plein</span></label>
+              <label><input type="checkbox" name="contrat" value="Temps partiel"><span>Temps partiel</span></label>
+              <label><input type="checkbox" name="contrat" value="Missions ponctuelles"><span>Missions ponctuelles</span></label>
+            </div>
+          </div>
+          <div class="rc-champ rc-large"><span>Créneaux</span>
+            <div class="rc-cases">
+              <label><input type="checkbox" name="dispo" value="Jour"><span>Jour</span></label>
+              <label><input type="checkbox" name="dispo" value="Nuit"><span>Nuit</span></label>
+              <label><input type="checkbox" name="dispo" value="Week-end"><span>Week-end</span></label>
+              <label><input type="checkbox" name="dispo" value="Jours fériés"><span>Jours fériés</span></label>
+            </div>
+          </div>
+          <label class="rc-champ"><span>Disponible à partir du <small>facultatif</small></span><input type="date" id="c-debut" name="debut"></label>
+          <label class="rc-champ"><span>Permis B</span><select id="c-permis" name="permis" required><option value="">Sélectionner</option><option>Oui</option><option>Non</option></select></label>
+        </fieldset>
+
+        <fieldset class="rc-bloc">
+          <legend><span>6</span>Pour finir</legend>
+          <label class="rc-champ rc-large"><span>Lien vers votre CV ou LinkedIn <small>facultatif</small></span><input type="url" id="c-cv" name="cv" maxlength="300" placeholder="https://"></label>
+          <label class="rc-champ rc-large"><span>Message <small>facultatif</small></span><textarea id="c-message" name="message" rows="4" maxlength="1500"></textarea></label>
+          <label class="rc-accord rc-large"><input type="checkbox" id="c-consent" name="consentement" required><span>J'accepte que mes informations soient utilisées pour étudier ma candidature. Elles sont conservées 2 ans maximum. <a href="mentions-legales#donnees" target="_blank" rel="noopener">En savoir plus</a></span></label>
+        </fieldset>
+
+        <div class="hp" aria-hidden="true"><label for="c-site">Ne pas remplir</label><input type="text" id="c-site" name="site_web" tabindex="-1" autocomplete="off"></div>
+        <p class="step-error" role="alert"><span></span></p>
+        <button type="submit" class="rc-envoyer"><span class="btn__label">Envoyer ma candidature</span></button>
+      </form>
+
+      <div class="apply-done" role="status">
+        <h2 class="rc-titre-2">Candidature envoyée.</h2>
+        <p>Merci <span data-done-name></span>. Votre candidature pour le poste <strong data-done-job></strong> a bien été reçue. Nous revenons vers vous si votre profil correspond à nos besoins.</p>
+        <p><a href="mailto:contact@bdasecurite.com" data-cv-link>Envoyer mon CV par e-mail</a></p>
       </div>
     </div>
-  </section>
+  </div>
 </main>
 
 <!-- ============ FOOTER ============ -->
@@ -458,7 +269,7 @@
         <p>BDA Security Group (BDA Sécurité) : protection rapprochée, chauffeur privé et sécurité privée à Paris. Autorisée par le CNAPS, 24h/24.</p>
         <ul class="footer__contact">
           <li><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg><span><a href="tel:+33611678625">06 11 67 86 25</a> · <a href="tel:+33784739070">07 84 73 90 70</a></span></li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><a href="mailto:bdasecurite@gmail.com">bdasecurite@gmail.com</a></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg><a href="mailto:contact@bdasecurite.com">contact@bdasecurite.com</a></li>
           <li><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><span>61 rue de la Croix Saint-Simon, 75020 Paris</span></li>
         </ul>
       </div>
@@ -512,20 +323,9 @@
   </div>
 </footer>
 
-<a class="wa" href="https://wa.me/33784739070?text=Bonjour%20BDA%2C%20je%20souhaite%20postuler." target="_blank" rel="noopener" aria-label="Nous écrire sur WhatsApp">
-  <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3.2A12.7 12.7 0 0 0 5.1 22.4L3.4 28.8l6.6-1.7A12.7 12.7 0 1 0 16 3.2Zm0 23.1c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-3.9 1 1-3.8-.3-.4a10.5 10.5 0 1 1 9 4.9Zm5.8-7.9c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.6 8.6 0 0 1-4.3-3.7c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.5l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.6 4.9 2.1.9 2.9 1 3.9.8.6-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5-.1-.2-.3-.3-.7-.4Z"/></svg>
-  <span>Une question ?</span>
-</a>
 
-<div class="mobile-bar">
-  <a class="btn btn--outline" href="tel:+33611678625"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Appeler</a>
-  <a class="btn btn--gold" href="#candidature">Postuler</a>
-</div>
 
 <script src="assets/js/core.js?v=29"></script>
-<script src="assets/js/assistant.js?v=14"></script>
-<script src="assets/js/home.js?v=18"></script>
-<script src="assets/js/recrutement.js?v=2"></script>
-<script src="assets/js/anim.js?v=21"></script>
+<script src="assets/js/recrutement.js?v=3"></script>
 </body>
 </html>

@@ -15,7 +15,7 @@ mb_internal_encoding('UTF-8');
 
 // Empreinte SHA-256 du code d'activation / de secours (le code lui-même n'est enregistré nulle part)
 const BDA_CODE_HASH = '0c4b9975757c5132b2b8c88b4dc36e0171fa8f8f14f4faef5889755b61b0dce1';
-const BDA_EMAIL = 'bdasecurite@gmail.com';
+const BDA_EMAIL = 'contact@bdasecurite.com'; // adresse publique (redirigée vers la boîte Gmail)
 const BDA_AVIS_GOOGLE = 'https://script.google.com/macros/s/AKfycby8EgzFHBFd_1HG8vhYJjtOCbHOyBJHvhL3UrpFTPKV2sXHQfq9J2VaA1SCRCXkdy5cjA/exec';
 
 const STATUTS = [

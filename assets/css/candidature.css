@@ -1,0 +1,78 @@
+/* =========================================================
+   RECRUTEMENT — page simple : un titre et le questionnaire.
+   Noir, blanc, gris ; pas d'effet.
+   ========================================================= */
+.rc { background: #fff; padding: clamp(110px, 12vw, 150px) 16px clamp(56px, 8vw, 96px); }
+.rc__page { max-width: 760px; margin: 0 auto; }
+.rc .apply-card { padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: none !important; box-shadow: none !important; }
+.rc__tete { margin-bottom: 36px; padding-bottom: 28px; border-bottom: 1px solid #e3e0da; }
+.rc__sur { margin: 0 0 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #86868b; }
+.rc__titre { margin: 0; font-family: var(--font-display, inherit); font-size: clamp(1.9rem, 1.5rem + 1.4vw, 2.6rem); font-weight: 700; letter-spacing: -0.025em; line-height: 1.12; color: #0b0b0c; }
+.rc__intro { margin: 12px 0 0; font-size: 16px; color: #5b5b60; }
+
+.rc-form { display: grid; gap: 34px; }
+.rc-bloc { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 18px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.rc-bloc[hidden] { display: none; }
+.rc-bloc legend { display: flex; align-items: center; gap: 10px; width: 100%; margin: 0 0 18px; padding: 0 0 10px; border-bottom: 1px solid #e3e0da; font-size: 15px; font-weight: 700; color: #0b0b0c; }
+.rc-bloc legend span { display: inline-grid; place-items: center; width: 22px; height: 22px; border: 1px solid #0b0b0c; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.rc-large { grid-column: 1 / -1; }
+
+.rc-champ { display: grid; gap: 7px; min-width: 0; font-size: 13px; font-weight: 600; color: #0b0b0c; }
+.rc-champ > span small { margin-left: 4px; font-weight: 400; color: #86868b; }
+.rc-champ input, .rc-champ select, .rc-champ textarea {
+  width: 100%; height: 46px; padding: 0 14px; border: 1px solid #d4d0c8 !important; border-radius: 6px !important;
+  background: #fff; font: 500 15px var(--font-body, inherit); color: #0b0b0c; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.rc-champ textarea { height: auto; min-height: 120px; padding: 12px 14px; line-height: 1.5; resize: vertical; }
+.rc-champ select { appearance: none; -webkit-appearance: none; padding-right: 38px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center / 16px; }
+.rc-champ input::placeholder, .rc-champ textarea::placeholder { color: #a5a29c; font-weight: 400; }
+.rc-champ input:focus, .rc-champ select:focus, .rc-champ textarea:focus { outline: none; border-color: #0b0b0c !important; box-shadow: 0 0 0 3px rgba(11, 11, 12, 0.07); }
+.is-invalid input, .is-invalid select, .is-invalid textarea { border-color: #a8443b !important; }
+
+/* Choix du poste */
+.rc-postes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.rc-postes label { position: relative; cursor: pointer; }
+.rc-postes input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.rc-postes span { display: grid; gap: 3px; height: 100%; padding: 14px 16px; border: 1px solid #d4d0c8; border-radius: 6px; background: #fff; transition: border-color 0.2s, background-color 0.2s; }
+.rc-postes b { font-size: 15px; font-weight: 600; color: #0b0b0c; }
+.rc-postes small { font-size: 13px; color: #86868b; }
+.rc-postes label:hover span { border-color: #8f8b84; }
+.rc-postes input:checked + span { border-color: #0b0b0c; box-shadow: inset 0 0 0 1px #0b0b0c; background: #f7f6f3; }
+.rc-postes input:focus-visible + span { box-shadow: 0 0 0 3px rgba(11, 11, 12, 0.12); }
+.is-invalid.rc-postes span { border-color: #a8443b; }
+
+/* Cases à cocher */
+.rc-cases { display: flex; flex-wrap: wrap; gap: 8px; }
+.rc-cases label { position: relative; cursor: pointer; }
+.rc-cases input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.rc-cases span { display: inline-block; padding: 9px 14px; border: 1px solid #d4d0c8; border-radius: 6px; background: #fff; font-size: 14px; font-weight: 500; color: #0b0b0c; transition: border-color 0.2s, background-color 0.2s, color 0.2s; }
+.rc-cases label:hover span { border-color: #8f8b84; }
+.rc-cases input:checked + span { border-color: #0b0b0c; background: #0b0b0c; color: #fff; }
+.rc-cases input:focus-visible + span { box-shadow: 0 0 0 3px rgba(11, 11, 12, 0.12); }
+
+/* Consentement */
+.rc-accord { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; font-weight: 400; line-height: 1.5; color: #5b5b60; cursor: pointer; }
+.rc-accord input { flex: none; width: 18px; height: 18px; margin: 2px 0 0; accent-color: #0b0b0c; }
+.rc-accord a { color: #0b0b0c; text-decoration: underline; }
+.rc-accord.is-invalid span { color: #a8443b; }
+
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.step-error { display: none; margin: 0; padding: 10px 14px; border-left: 2px solid #a8443b; background: #faf4f3; color: #8a3a33; font-size: 14px; }
+.step-error.is-visible { display: block; }
+
+.rc-envoyer { width: 100%; height: 52px; border: 0; border-radius: 6px; background: #0b0b0c; color: #fff; font: 600 15px var(--font-body, inherit); cursor: pointer; transition: background-color 0.2s; }
+.rc-envoyer:hover { background: #2a2a2d; }
+.rc-envoyer:disabled { opacity: 0.6; cursor: wait; }
+
+/* Confirmation */
+.apply-done { display: none; padding: 8px 0; }
+.apply-card.is-done .rc-form { display: none; }
+.apply-card.is-done .apply-done { display: block; }
+.rc-titre-2 { margin: 0 0 10px; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; color: #0b0b0c; }
+.apply-done p { margin: 0 0 12px; color: #5b5b60; }
+.apply-done a { color: #0b0b0c; font-weight: 600; }
+
+@media (max-width: 640px) {
+  .rc-bloc { grid-template-columns: 1fr; }
+  .rc-postes { grid-template-columns: 1fr; }
+}

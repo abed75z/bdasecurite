@@ -237,13 +237,13 @@ function coffre_semer(): void
   $services = [
     ['Hébergement OVHcloud (site, domaine)', 'https://www.ovh.com/manager/', ''],
     ['GitHub (code du site)', 'https://github.com/abed75z/bdasecurite', 'abed75z'],
-    ['Gmail BDA', 'https://mail.google.com', BDA_EMAIL],
-    ['Google Business Profile', 'https://business.google.com', BDA_EMAIL],
-    ['Google Search Console', 'https://search.google.com/search-console', BDA_EMAIL],
+    ['Gmail BDA', 'https://mail.google.com', 'bdasecurite@gmail.com'],
+    ['Google Business Profile', 'https://business.google.com', 'bdasecurite@gmail.com'],
+    ['Google Search Console', 'https://search.google.com/search-console', 'bdasecurite@gmail.com'],
     ['Espace admin du site', 'https://bdasecurite.com/admin', ''],
     ['Discord (compte et portail développeur)', 'https://discord.com/developers/applications', ''],
     ['cron-job.org (tâche toutes les 30 min)', 'https://console.cron-job.org', ''],
-    ['francetravail.io (API La Bonne Boîte)', 'https://francetravail.io/compte/applications', BDA_EMAIL],
+    ['francetravail.io (API La Bonne Boîte)', 'https://francetravail.io/compte/applications', 'bdasecurite@gmail.com'],
     ['France Travail Pro (espace recruteur)', 'https://entreprise.francetravail.fr', ''],
   ];
   require_once __DIR__ . '/actions.php';

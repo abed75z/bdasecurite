@@ -215,3 +215,65 @@ p { text-wrap: pretty; }
 
 /* Accueil : section « Assistant en ligne » retirée (15/10/2026, demande du gérant) */
 .ac-ia { display: none !important; }
+
+/* ---------- 5. Formulaires : lignes nettes, angles discrets ---------- */
+/* Champs, listes et zones de texte : bord fin, coins à peine arrondis */
+.input, input.input, textarea.input, select.input,
+.rappel__champ input, .rappel__champ select, .ent-form textarea, .ent-form input, .ent-form select,
+.tf-champ select, .tf-champ input, .champ input, .champ textarea,
+main input[type="text"], main input[type="email"], main input[type="tel"], main input[type="url"],
+main input[type="number"], main input[type="date"], main input[type="time"], main select, main textarea {
+  border-radius: 6px !important;
+  border-width: 1px !important;
+  box-shadow: none;
+}
+.input:focus, .rappel__champ input:focus, .rappel__champ select:focus, .ent-form textarea:focus, .ent-form input:focus, .ent-form select:focus,
+main input:focus, main select:focus, main textarea:focus {
+  outline: none !important;
+  border-color: #0b0b0c !important;
+  box-shadow: 0 0 0 3px rgba(11, 11, 12, 0.07) !important;
+}
+/* Cartes de choix, cases et puces */
+.opt__card { border-radius: 8px !important; }
+.opt__icon { border-radius: 6px !important; }
+.check__box { border-radius: 3px !important; }
+.pick span { border-radius: 6px !important; }
+.opt-lien, .step-error, .rappel__erreur { border-radius: 6px !important; }
+.choix-rapides button { border-radius: 6px !important; }
+/* Blocs qui contiennent les formulaires */
+.form-card, .ent-carte, .apply-card, .tf-calc { border-radius: 10px !important; }
+dialog.rappel { border-radius: 12px !important; }
+/* Boutons d'envoi des formulaires : rectangulaires, comme les champs */
+form .btn, form button[type="submit"], .rappel__envoyer { border-radius: 6px !important; }
+
+/* ---------- 6. Page Entreprises : étude du besoin ---------- */
+.ent-demande__texte { position: sticky; top: 110px; }
+.ent-points { list-style: none; margin: 26px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.ent-points li { position: relative; padding: 12px 0 12px 22px; border-bottom: 1px solid var(--line); font-size: 15px; font-weight: 600; color: var(--noir); }
+.ent-points li::before { content: ""; position: absolute; left: 0; top: 50%; width: 10px; height: 1px; background: #ac864a; }
+.ent-direct { margin: 24px 0 0; font-size: 15px; line-height: 1.8; }
+.ent-direct a { color: var(--noir); font-weight: 600; text-decoration: none; }
+.ent-direct a:hover { text-decoration: underline; }
+.ent-carte { background: #fff !important; border: 1px solid var(--line) !important; box-shadow: 0 24px 50px -40px rgba(11, 11, 12, 0.35) !important; padding: clamp(22px, 3vw, 36px) !important; }
+.ent-form { display: grid !important; grid-template-columns: 1fr !important; gap: 30px !important; }
+.ent-bloc { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.ent-bloc legend { width: 100%; margin: 0 0 18px; padding: 0 0 10px; border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #86868b; }
+.ent-champ { display: grid; gap: 7px; min-width: 0; font-size: 13px; font-weight: 600; color: var(--noir); }
+.ent-champ > span small { margin-left: 4px; font-weight: 400; color: #86868b; }
+.ent-champ input, .ent-champ select, .ent-champ textarea { width: 100%; height: 46px; padding: 0 14px; border: 1px solid #d4d0c8 !important; background: #fff; font: 500 15px var(--font-body); color: var(--noir); }
+.ent-champ textarea { height: auto; min-height: 110px; padding: 12px 14px; line-height: 1.5; resize: vertical; }
+.ent-champ select { appearance: none; -webkit-appearance: none; padding-right: 38px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center / 16px; }
+.ent-champ.is-invalid input, .ent-champ.is-invalid select { border-color: #a8443b !important; }
+.ent-cases { display: flex; flex-wrap: wrap; gap: 8px; }
+.ent-cases label { position: relative; cursor: pointer; }
+.ent-cases input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.ent-cases span { display: inline-block; padding: 9px 14px; border: 1px solid #d4d0c8; border-radius: 6px; background: #fff; font-size: 14px; font-weight: 500; color: var(--noir); }
+.ent-cases label:hover span { border-color: #8f8b84; }
+.ent-cases input:checked + span { border-color: #0b0b0c; background: #0b0b0c; color: #fff; }
+.ent-cases input:focus-visible + span { box-shadow: 0 0 0 3px rgba(11, 11, 12, 0.12); }
+.ent-form .rappel__erreur { padding: 10px 14px; border-left: 2px solid #a8443b; background: #faf4f3; color: #8a3a33; }
+.ent-envoyer { width: 100%; height: 52px; justify-content: center; }
+.ent-merci { padding: 40px 0 !important; }
+.ent-merci .h3 { margin: 0; }
+@media (max-width: 900px) { .ent-demande__texte { position: static; } }
+@media (max-width: 600px) { .ent-bloc { grid-template-columns: 1fr; } }

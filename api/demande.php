@@ -31,7 +31,9 @@ try {
     envoyer_mail('Demande de rappel : ' . ($data['Nom / Société'] ?? ''), "Un visiteur demande à être rappelé depuis l'accueil du site.\n\nNom / Société : " . ($data['Nom / Société'] ?? '') . "\nTéléphone : " . ($data['Téléphone'] ?? '') . "\nCréneau : " . ($data['Date souhaitée'] ?? '') . "\nSecteur : " . ($data['Secteur'] ?? '') . "\n\nVoir dans l'admin : https://bdasecurite.com/admin/#/demandes");
   }
   if ($entreprise) {
-    envoyer_mail('Demande d’une entreprise : ' . ($data['Nom / Société'] ?? ''), "Une entreprise demande une proposition depuis la page Entreprises du site.\n\nSociété (contact) : " . ($data['Nom / Société'] ?? '') . "\nTéléphone : " . ($data['Téléphone'] ?? '') . "\nE-mail : " . ($data['Email'] ?? '') . "\nType de site : " . ($data['Secteur'] ?? '') . "\nBesoin : " . ($data['Fréquence'] ?? '') . "\nDétails : " . ($data['Détails'] ?? '') . "\n\nVoir dans l'admin : https://bdasecurite.com/admin/#/demandes", (string)($data['Email'] ?? ''));
+    $lignes = '';
+    foreach ($data as $k => $v) if ($k !== 'Prestation' && trim((string)$v) !== '') $lignes .= "$k : $v\n";
+    envoyer_mail('Demande d’une entreprise : ' . ($data['Nom / Société'] ?? ''), "Une entreprise demande une étude depuis la page Entreprises du site.\n\n" . $lignes . "\nVoir dans l'admin : https://bdasecurite.com/admin/#/demandes", (string)($data['Email'] ?? ''));
   }
   repondre(['ok' => true]);
 } catch (Throwable $e) {

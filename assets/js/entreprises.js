@@ -1,4 +1,4 @@
-/* Page Entreprises : demande de proposition (arrive dans l'admin, « Demandes reçues ») */
+/* Page Entreprises : étude du besoin (arrive dans l'admin, « Demandes reçues ») */
 (() => {
   const form = document.querySelector('[data-proposition]');
   if (!form) return;
@@ -10,12 +10,21 @@
     e.preventDefault();
     const d = new FormData(form);
     const val = (k) => String(d.get(k) || '').trim();
-    const montrer = (msg) => { erreur.textContent = msg; erreur.hidden = false; };
-    if (!val('societe')) return montrer('Indiquez le nom de votre société.');
-    if (!val('nom')) return montrer('Indiquez votre nom.');
-    if (val('tel').replace(/\D/g, '').length < 9) return montrer('Indiquez un numéro de téléphone valide.');
-    if (val('email') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email'))) return montrer('L’adresse e-mail semble incomplète.');
+    const liste = (k) => d.getAll(k).map(String).join(', ');
+    const montrer = (msg, champ) => {
+      erreur.textContent = msg; erreur.hidden = false;
+      form.querySelectorAll('.is-invalid').forEach((x) => x.classList.remove('is-invalid'));
+      if (champ) { const el = form.elements[champ]; el.closest('.ent-champ')?.classList.add('is-invalid'); el.focus(); }
+    };
+    if (!val('societe')) return montrer('Indiquez le nom de votre société.', 'societe');
+    if (!val('nom')) return montrer('Indiquez votre nom et prénom.', 'nom');
+    if (val('tel').replace(/\D/g, '').length < 9) return montrer('Indiquez un numéro de téléphone valide.', 'tel');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val('email'))) return montrer('Indiquez une adresse e-mail valide.', 'email');
+    if (!val('site')) return montrer('Choisissez le type d’établissement.', 'site');
+    if (!val('lieu')) return montrer('Indiquez la ville ou le code postal du site.', 'lieu');
+    if (!val('besoin')) return montrer('Choisissez le type de mission.', 'besoin');
     erreur.hidden = true;
+    form.querySelectorAll('.is-invalid').forEach((x) => x.classList.remove('is-invalid'));
     bouton.disabled = true;
     try {
       const r = await fetch('/api/demande.php', {
@@ -24,10 +33,17 @@
         body: JSON.stringify({
           'Prestation': 'Proposition entreprise',
           'Nom / Société': `${val('societe')} (${val('nom')})`,
+          'Fonction': val('fonction'),
           'Téléphone': val('tel'),
           'Email': val('email'),
           'Secteur': val('site'),
+          'Lieu': val('lieu'),
+          'Prestations souhaitées': liste('prestation') || 'Non précisé',
           'Fréquence': val('besoin'),
+          'Nombre d’agents': val('agents'),
+          'Horaires': liste('horaires') || 'Non précisé',
+          'Démarrage': val('debut'),
+          'Contact préféré': val('contact'),
           'Détails': val('message'),
           site_web: val('site_web'),
         }),
@@ -42,4 +58,5 @@
     }
     bouton.disabled = false;
   });
+  form.addEventListener('input', (e) => e.target.closest('.ent-champ')?.classList.remove('is-invalid'));
 })();

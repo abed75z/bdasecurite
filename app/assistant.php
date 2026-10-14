@@ -63,7 +63,7 @@ L'ENTREPRISE
 - Disponible 24h/24 et 7j/7, jours fériés compris. Les demandes urgentes sont étudiées à toute heure par téléphone.
 - Zone : tout Paris et l'Île-de-France (75, 92, 93, 94, 77, 78, 91, 95), notamment Paris 1er, 8e, 9e, 16e, 17e, 20e, La Défense, Neuilly-sur-Seine, Boulogne-Billancourt, Saint-Denis.
 - Référence : sécurité du Consulat général de Colombie à Paris (collaboration en cours).
-- Contact : téléphone principal 06 11 67 86 25, second numéro et WhatsApp 07 84 73 90 70, email bdasecurite@gmail.com.
+- Contact : téléphone principal 06 11 67 86 25, second numéro et WhatsApp 07 84 73 90 70, email contact@bdasecurite.com.
 
 SÉCURITÉ PRIVÉE — PRESTATIONS
 - Agents de sécurité : gardiennage et surveillance de sites, accueil, contrôle d'accès et filtrage, rondes de jour comme de nuit, prévention des vols.
@@ -87,7 +87,7 @@ CLIENTS ET DOCUMENTS
 
 RECRUTEMENT
 - Postes ouverts (H/F, Paris et Île-de-France) : agent de sécurité APS (temps plein ou partiel ; carte CNAPS en cours de validité, SST apprécié, excellente présentation), agent de protection rapprochée (missions ponctuelles ; carte CNAPS « protection physique des personnes », expérience souhaitée, permis B, anglais apprécié), agent de sécurité événementielle (soirs et week-ends ; carte CNAPS, sens du contact, sang-froid), chauffeur privé VTC (temps plein ou partiel ; carte VTC en cours de validité, permis B depuis 3 ans, bonne connaissance de Paris, anglais apprécié). Candidatures spontanées bienvenues.
-- Candidature en ligne en 3 minutes sur /recrutement, CV non obligatoire (lien LinkedIn ou Drive possible, ou CV par email à bdasecurite@gmail.com). Étapes : candidature, vérification de la carte professionnelle, entretien (téléphone ou rendez-vous), première mission. Les débutants titulaires de la carte peuvent postuler ; une carte en cours d'obtention n'empêche pas de postuler. Horaires selon les missions (jour, nuit, week-end, fériés), plannings construits avec l'agent. Rémunération selon le profil et les missions (ne jamais donner de montant).
+- Candidature en ligne en 3 minutes sur /recrutement, CV non obligatoire (lien LinkedIn ou Drive possible, ou CV par email à contact@bdasecurite.com). Étapes : candidature, vérification de la carte professionnelle, entretien (téléphone ou rendez-vous), première mission. Les débutants titulaires de la carte peuvent postuler ; une carte en cours d'obtention n'empêche pas de postuler. Horaires selon les missions (jour, nuit, week-end, fériés), plannings construits avec l'agent. Rémunération selon le profil et les missions (ne jamais donner de montant).
 
 INFORMATIONS DÉTAILLÉES — SÉCURITÉ
 - Réglementation : la sécurité privée est encadrée par le Code de la sécurité intérieure et contrôlée par le CNAPS (Conseil national des activités privées de sécurité). À vérifier chez tout prestataire : l'autorisation d'exercice de l'entreprise, la carte professionnelle de chaque agent, un devis écrit et détaillé. L'autorisation d'exercice ne confère aucune prérogative de puissance publique (article L.612-14 du Code de la sécurité intérieure).
@@ -110,7 +110,7 @@ INFORMATIONS DÉTAILLÉES — VTC
 
 INFORMATIONS LÉGALES (publiques)
 - Les activités BDA Security Group sont exercées par BDASECURITE (EURL au capital de 2 000 €, siège 61 rue de la Croix Saint-Simon 75020 Paris, SIRET 109 076 463 00016, TVA intracommunautaire FR95 109 076 463, immatriculée au RNE) et par une entreprise individuelle à l'enseigne « BDA SECURITE » (SIRET 977 933 316 00019). Site hébergé par OVH.
-- Données personnelles : utilisées uniquement pour répondre aux demandes, jamais vendues ; conservées 3 ans après le dernier contact (2 ans pour les candidatures) ; droits d'accès, de rectification et de suppression par email à bdasecurite@gmail.com ; réclamation possible auprès de la CNIL. Aucun cookie publicitaire.
+- Données personnelles : utilisées uniquement pour répondre aux demandes, jamais vendues ; conservées 3 ans après le dernier contact (2 ans pour les candidatures) ; droits d'accès, de rectification et de suppression par email à contact@bdasecurite.com ; réclamation possible auprès de la CNIL. Aucun cookie publicitaire.
 - Avis clients : publiés sur la page /avis après vérification ; chacun peut laisser un avis sur cette page.
 
 CE QUE TU NE DONNES JAMAIS
@@ -183,7 +183,7 @@ function assist_local(string $question): array
     [['carte bancaire', 'cb', 'especes', 'cash', 'payer en ligne', 'paypal'], 'Le paiement se fait par virement bancaire à réception de facture (acompte possible indiqué sur le devis). Il n’y a pas de paiement par carte en ligne.', ['Parler à un conseiller'], false],
     [['facture', 'note de frais'], 'Une facture vous est remise pour chaque prestation, utile pour vos notes de frais ou votre comptabilité. Le règlement se fait par virement bancaire à réception de facture, et vos factures sont disponibles dans votre espace client.', ['Espace client'], false],
     // Données personnelles, avis, langues, divers
-    [['donnees personnelles', 'rgpd', 'cookies', 'supprimer mes donnees', 'mes donnees'], 'Vos données servent uniquement à répondre à votre demande et ne sont jamais vendues. Elles sont conservées 3 ans après le dernier contact. Vous pouvez demander leur accès ou leur suppression à bdasecurite@gmail.com. Le site ne dépose aucun cookie publicitaire.', [], false],
+    [['donnees personnelles', 'rgpd', 'cookies', 'supprimer mes donnees', 'mes donnees'], 'Vos données servent uniquement à répondre à votre demande et ne sont jamais vendues. Elles sont conservées 3 ans après le dernier contact. Vous pouvez demander leur accès ou leur suppression à contact@bdasecurite.com. Le site ne dépose aucun cookie publicitaire.', [], false],
     [['laisser un avis', 'donner mon avis', 'noter', 'mettre un avis'], 'Avec plaisir : vous pouvez laisser votre avis sur la page Avis clients. Il est publié après une vérification rapide.', ['Avis clients'], false],
     [['anglais', 'english', 'speak', 'langue', 'arabe', 'espagnol'], 'Vous pouvez nous écrire dans votre langue. Certains de nos agents et chauffeurs parlent anglais : précisez-le dans votre demande, nous en tenons compte selon les disponibilités.', ['Demander un devis'], false],
     [['assurance', 'assure', 'responsabilite civile'], 'Pour les attestations et documents administratifs liés à votre mission, un conseiller vous répondra directement et pourra vous les transmettre.', ['Parler à un conseiller'], true],
@@ -215,7 +215,7 @@ function assist_local(string $question): array
     [['recrut', 'emploi', 'travailler', 'job', 'postuler', 'candidature', 'embauche', 'cv '], 'Nous recrutons des agents de sécurité (carte CNAPS), des agents SSIAP, des agents de protection rapprochée et des chauffeurs VTC. Vous pouvez postuler en ligne sur la page Recrutement.', ['Voir le recrutement'], false],
     [['facture', 'paiement', 'payer', 'virement', 'acompte', 'tva', 'reglement'], 'Le paiement se fait par virement bancaire à réception de facture ; un acompte peut être indiqué sur le devis. Vos devis et factures sont disponibles dans votre espace client. Pour une question sur une facture, un conseiller vous répond.', ['Parler à un conseiller'], false],
     [['espace client', 'mon compte', 'connexion', 'identifiant', 'mot de passe', 'connecter'], 'Votre espace client (page Espace client) regroupe vos devis, factures, le détail des heures et la messagerie avec BDA. L’accès est créé par notre équipe : si vous ne l’avez pas reçu, un conseiller peut vous l’envoyer.', ['Parler à un conseiller'], false],
-    [['telephone', 'numero', 'appeler', 'contact', 'mail', 'email', 'adresse', 'whatsapp', 'joindre'], 'Vous pouvez nous joindre 24h/24 au 06 11 67 86 25, sur WhatsApp au 07 84 73 90 70, ou par email à bdasecurite@gmail.com. Nos bureaux sont au 61 rue de la Croix Saint-Simon, 75020 Paris.', ['Parler à un conseiller'], false],
+    [['telephone', 'numero', 'appeler', 'contact', 'mail', 'email', 'adresse', 'whatsapp', 'joindre'], 'Vous pouvez nous joindre 24h/24 au 06 11 67 86 25, sur WhatsApp au 07 84 73 90 70, ou par email à contact@bdasecurite.com. Nos bureaux sont au 61 rue de la Croix Saint-Simon, 75020 Paris.', ['Parler à un conseiller'], false],
     [['agent', 'gardiennage', 'surveillance', 'securite', 'vigile', 'gardien', 'ronde', 'controle d acces', 'accueil'], 'Nos agents de sécurité, titulaires de la carte professionnelle CNAPS, assurent gardiennage, accueil, contrôle d’accès et rondes, de jour comme de nuit.' . ($prixOk ? " À partir de {$p('agent')} € HT par agent et par heure (4 heures minimum)." : '') . ' ' . $devis, ['Nos tarifs', 'Demander un devis'], false],
     [['merci', 'parfait', 'super', 'top', 'genial', 'd accord', 'ok '], 'Avec plaisir ! N’hésitez pas si vous avez une autre question.', ['Demander un devis'], false],
     [['au revoir', 'bonne journee', 'bonne soiree', 'a bientot', 'bye'], 'Merci de votre visite et à bientôt chez BDA Security Group.', [], false],

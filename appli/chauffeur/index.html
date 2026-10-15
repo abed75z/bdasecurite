@@ -11,9 +11,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BDA Chauffeur">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest?v=20261015-1511">
-<link rel="apple-touch-icon" href="icone-180.png?v=20261015-1511">
-<link rel="icon" href="icone-192.png?v=20261015-1511" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?v=20261015-1527">
+<link rel="apple-touch-icon" href="icone-180.png?v=20261015-1527">
+<link rel="icon" href="icone-192.png?v=20261015-1527" type="image/png">
 </head>
 <body><title>BDA Chauffeur</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,6 +112,8 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
 .cases-code { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .cases-code input { height: 66px; width: 100%; border-radius: 14px; border: 2px solid transparent; background: var(--surface); text-align: center; font: 800 28px/1 var(--display); color: var(--texte); }
 .cases-code input:focus { outline: none; border-color: var(--or); }
+.code-unique { height: 72px; width: 100%; border-radius: 16px; border: 2px solid transparent; background: var(--surface); text-align: center; font: 800 34px/1 var(--display); letter-spacing: 0.5em; padding-left: 0.5em; color: var(--texte); }
+.code-unique:focus { outline: none; border-color: var(--or); }
 .erreur { margin: 0; color: var(--rouge); font-size: 13px; }
 
 /* offre de course */
@@ -185,10 +187,10 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
 .bulle-msg { max-width: 78%; display: grid; gap: 3px; }
 .bulle-msg p { margin: 0; padding: 10px 13px; border-radius: 18px; font-size: 14.5px; line-height: 1.4; overflow-wrap: anywhere; }
 .bulle-msg small { font-size: 10.5px; color: var(--texte-3); padding: 0 6px; }
-.bulle-msg.chauffeur { align-self: flex-end; justify-items: end; }
-.bulle-msg.chauffeur p { background: var(--principal); color: var(--sur-principal); border-bottom-right-radius: 6px; }
-.bulle-msg.client { align-self: flex-start; }
-.bulle-msg.client p { background: var(--surface-2); border-bottom-left-radius: 6px; }
+.bulle-msg.de-chauffeur { align-self: flex-end; justify-items: end; }
+.bulle-msg.de-chauffeur p { background: var(--principal); color: var(--sur-principal); border-bottom-right-radius: 6px; }
+.bulle-msg.de-client { align-self: flex-start; }
+.bulle-msg.de-client p { background: var(--surface-2); border-bottom-left-radius: 6px; }
 .chat-rapides { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 6px 14px; }
 .chat-rapides button { flex: none; height: 34px; padding: 0 13px; border-radius: 99px; background: var(--surface); font: 600 13px/1 var(--texte-police); }
 .chat-saisie { display: grid; grid-template-columns: minmax(0, 1fr) 48px; gap: 8px; padding: 8px 14px 16px; }
@@ -225,6 +227,29 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
 .coche { width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; background: var(--principal); color: var(--sur-principal); justify-self: center; }
 .coche .ic { width: 30px; height: 30px; stroke-width: 2.4; }
 @media (prefers-reduced-motion: reduce) { .p, .feuille, .offre, .consigne, .modale, .chat { animation: none; } #carte { transition: none; } }
+/* maquette ou vraie appli reliée au serveur BDA */
+.reel .demo-seul { display: none !important; }
+.demo .reel-seul { display: none !important; }
+.champ { display: grid; gap: 7px; min-width: 0; }
+.champ > span { font: 600 13px/1 var(--texte-police); color: var(--texte-2); }
+.champ input, .connexion input { width: 100%; min-width: 0; height: 56px; padding: 0 16px; border-radius: 14px; border: 2px solid transparent; background: #161616; color: #fff; font: 500 16px/1 var(--texte-police); }
+.appareil[data-mode="clair"] .champ input { background: var(--surface); color: var(--texte); }
+.champ input:focus, .connexion input:focus { outline: none; border-color: var(--or); }
+.connexion .erreur { color: #ff8a8d; }
+.connexion a { color: #a7a7a7; font-size: 13.5px; text-align: center; }
+.alerte-gps { position: absolute; top: 66px; left: 14px; right: 14px; z-index: 7; padding: 11px 14px; border-radius: 14px; background: #2a1414; color: #ffc2c2; font-size: 13px; line-height: 1.4; box-shadow: var(--ombre); }
+.choix-gammes { display: flex; flex-wrap: wrap; gap: 8px; }
+.choix-gammes button { height: 40px; padding: 0 15px; border-radius: 99px; background: var(--surface-2); font: 600 13.5px/1 var(--texte-police); }
+.choix-gammes button[aria-pressed="true"] { background: var(--principal); color: var(--sur-principal); }
+.doc-bon { display: grid; gap: 9px; padding: 14px; border-radius: 16px; background: var(--surface); }
+.doc-bon > b { font: 800 15px/1.2 var(--display); }
+.doc-bon div { display: flex; justify-content: space-between; gap: 14px; font-size: 13.5px; }
+.doc-bon span { color: var(--texte-2); flex: none; }
+.doc-bon div b { text-align: right; font-weight: 600; overflow-wrap: anywhere; }
+.resa { display: grid; gap: 10px; padding: 14px; border-radius: 16px; background: var(--surface); }
+.resa .haut-resa { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.resa .haut-resa b { font: 800 16px/1.2 var(--display); }
+.resa .haut-resa span { font: 800 17px/1 var(--display); }
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -299,6 +324,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
     <span class="gains-pastille" id="gains-jour">0 €</span>
   </div>
   <div class="consigne" id="consigne" hidden></div>
+  <div class="alerte-gps" id="alerte-gps" hidden></div>
   <section class="feuille" id="feuille" aria-live="polite"></section>
   <main class="page" id="page" hidden></main>
   <section class="offre" id="offre" hidden aria-live="assertive"></section>
@@ -348,7 +374,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
   const metres = (a, b) => Math.hypot((a.x - b.x) * MX, (a.y - b.y) * MY);
 
   /* ================= Données de démonstration (noms fictifs) ================= */
-  const CHAUFFEUR = { prenom: 'Karim', note: '4,96', voiture: 'Mercedes Classe E', couleur: 'Noire', plaque: 'GH-482-TZ', gamme: 'Berline', courses: 1284, depuis: 'mars 2024' };
+  let CHAUFFEUR = { prenom: 'Karim', note: '4,96', voiture: 'Mercedes Classe E', couleur: 'Noire', plaque: 'GH-482-TZ', gamme: 'Berline', courses: 1284, depuis: 'mars 2024' };
   const lieu = (titre, sous, lon, lat) => ({ titre, sous, x: qx(lon), y: qy(lat) });
   const OFFRES = [
     { client: 'Sarah', note: '4,9', depart: lieu('8 Rue Scribe', '75009 Paris', 2.331232, 48.872666), arrivee: lieu('Gare de Lyon', 'Paris 12e', 2.3734, 48.8443), prix: 40, options: ['2 bagages'], code: true },
@@ -361,8 +387,9 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
   const VUES_CARTE = { carte: 1, approche: 1, attente: 1, course: 1, fin: 1 };
   const etat = {
     ecran: 'carte', enLigne: false, gps: true, langue: 'fr', depart: DEPART_DEFAUT, modeAffichage: lire('bda-chauffeur-affichage', 'sombre'),
-    connecte: lire('bda-chauffeur-connecte', false), offre: null, course: null, indexOffre: 0, gains: { jour: 0, courses: 0, pourboires: 0, enLigneDepuis: 0, minutesEnLigne: 0 },
+    connecte: REEL ? !!lire('bda-chauffeur-jeton', '') : lire('bda-chauffeur-connecte', false), offre: null, course: null, indexOffre: 0, gains: { jour: 0, courses: 0, pourboires: 0, enLigneDepuis: 0, minutesEnLigne: 0 },
     historique: [], conversations: {}, sons: true,
+    reservations: [], mesReservations: [], jour: { total: 0, courses: 0 }, ouvert: true, pushActif: false, // vraie appli
   };
   const dessinerMiniCarte = () => {}, majResultats = () => {};
 
@@ -1301,7 +1328,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
   // en ligne et libre : la voiture se balade dans les rues ; en course : elle suit l'itinéraire
   const balade = { tr: null, t0: 0, dur: 1, attente: false };
   function majBalade(t) {
-    if (!etat.enLigne || etat.course || !moteur.pret) return;
+    if (REEL || !etat.enLigne || etat.course || !moteur.pret) return; // vraie appli : la voiture suit le GPS
     if (balade.tr) { const f = (t - balade.t0) / balade.dur; const p = pointSur(balade.tr, f); Object.assign(pos, p); if (f < 1) return; }
     if (balade.attente) return;
     balade.attente = true;
@@ -1348,7 +1375,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
     if (!o) { el.hidden = true; el.innerHTML = ''; return; }
     const kmA = o.rA ? o.rA.metres / 1000 : 1, minA = o.rA ? Math.max(1, Math.round(o.rA.secondes / 60)) : 3;
     const kmC = o.rC ? o.rC.metres / 1000 : 5, minC = o.rC ? Math.max(1, Math.round(o.rC.secondes / 60)) : 15;
-    el.innerHTML = `<div class="offre-haut"><span class="type">${ic('voiture', 'ic-s')}Nouvelle course · ${esc(CHAUFFEUR.gamme)}</span><span class="minuteur"><svg viewBox="0 0 52 52"><circle class="f" cx="26" cy="26" r="23"/><circle class="v" id="offre-anneau" cx="26" cy="26" r="23"/></svg><span id="offre-sec">15</span></span></div>
+    el.innerHTML = `<div class="offre-haut"><span class="type">${ic('voiture', 'ic-s')}Nouvelle course · ${esc(o.gammeNom || CHAUFFEUR.gamme)}${o.favori ? " · favori" : ""}</span><span class="minuteur"><svg viewBox="0 0 52 52"><circle class="f" cx="26" cy="26" r="23"/><circle class="v" id="offre-anneau" cx="26" cy="26" r="23"/></svg><span id="offre-sec">${Math.round(o.duree / 1000)}</span></span></div>
       <div class="offre-prix">${euros(o.prix)}<small>${km1(kmC)} km · ${minC} min de course · prix garanti au client</small></div>
       <div class="trajet"><div><span class="pt"></span><span>${esc(o.depart.titre)}<small>À ${minA} min · ${km1(kmA)} km de vous</small></span></div><div><span class="pt pt-carre"></span><span>${esc(o.arrivee.titre)}<small>${esc(o.arrivee.sous)}</small></span></div></div>
       <div class="puces"><span class="puce">${ic('etoile', 'ic-xs')}${esc(o.client)} · ${esc(o.note)}</span>${o.options.map((x) => `<span class="puce">${esc(x)}</span>`).join('')}${o.code ? `<span class="puce or">${ic('cadenas', 'ic-xs')}Code de sécurité</span>` : ''}</div>
@@ -1396,8 +1423,8 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
     const c = etat.course, cv = conv(), chat = $('#chat');
     if (!c || !cv) { fermerChat(); return; }
     chat.innerHTML = `<header class="chat-tete"><button class="bouton-rond" type="button" data-a="fermerChat" aria-label="Fermer">${ic('retour')}</button><span class="avatar">${esc(c.client[0])}</span><span><b>${esc(c.client)}</b><small>${esc(c.depart.titre)}</small></span><button class="bouton-rond" type="button" data-a="appeler" aria-label="Appeler">${ic('telephone')}</button></header>
-      <p class="chat-info">Messages transmis par BDA · numéros masqués</p>
-      <div class="chat-liste" id="chat-liste">${cv.messages.map((m) => `<div class="bulle-msg ${m.de}"><p>${esc(m.texte)}</p><small>${heure(m.t)}</small></div>`).join('') || '<p class="chat-vide">Écrivez au client.</p>'}</div>
+      <p class="chat-info">${REEL ? "Messages transmis par BDA" : "Messages transmis par BDA · numéros masqués"}</p>
+      <div class="chat-liste" id="chat-liste">${cv.messages.map((m) => `<div class="bulle-msg de-${m.de}"><p>${esc(m.texte)}</p><small>${heure(m.t)}</small></div>`).join('') || '<p class="chat-vide">Écrivez au client.</p>'}</div>
       <div class="chat-rapides">${RAPIDES.map((r) => `<button type="button" data-a="envoyerRapide" data-v="${esc(r)}">${esc(r)}</button>`).join('')}</div>
       <div class="chat-saisie"><input id="chat-texte" type="text" autocomplete="off" placeholder="Votre message…" aria-label="Votre message"><button class="chat-envoyer" type="button" data-a="envoyerMessage" aria-label="Envoyer">${ic('fleche')}</button></div>`;
     const l = $('#chat-liste'); l.scrollTop = l.scrollHeight;
@@ -1414,17 +1441,20 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
   const blocClient = (c) => `<div class="client"><span class="avatar">${esc(c.client[0])}</span><span><b>${esc(c.client)} <span class="etoile">${ic('etoile')}${esc(c.note)}</span></b><small>${esc(c.options.join(' · '))}</small></span><span class="actions"><button class="rond" type="button" data-a="appeler" aria-label="Appeler">${ic('telephone', 'ic-s')}</button><button class="rond" type="button" data-a="ouvrirChat" aria-label="Message">${ic('message', 'ic-s')}<span class="pastille-nb" id="nb-msg" hidden></span></button></span></div>`;
   const VUES = {
     carte() {
-      const g = etat.gains;
+      const g = etat.gains, total = REEL ? etat.jour.total : g.jour, nb = REEL ? etat.jour.courses : g.courses;
       if (!etat.enLigne) return `<div class="poignee"></div><div class="pile">
         <div class="titre-feuille"><h2>Vous êtes hors ligne</h2></div>
-        <p class="sous">Passez en ligne pour recevoir des courses autour de vous.</p>
-        <div class="tuiles"><div class="tuile"><b>${euros(g.jour)}</b><small>aujourd’hui</small></div><div class="tuile"><b>${g.courses}</b><small>course${g.courses > 1 ? 's' : ''}</small></div><div class="tuile"><b>${CHAUFFEUR.note}</b><small>note</small></div></div>
+        <p class="sous">${REEL && !etat.ouvert ? 'L’appli est fermée par la direction pour le moment.' : 'Passez en ligne pour recevoir des courses autour de vous.'}</p>
+        <div class="tuiles"><div class="tuile"><b>${euros(total)}</b><small>aujourd’hui</small></div><div class="tuile"><b>${nb}</b><small>course${nb > 1 ? 's' : ''}</small></div><div class="tuile"><b>${esc(CHAUFFEUR.note)}</b><small>note</small></div></div>
+        ${blocReservations()}
         <button class="btn btn-vert" type="button" data-a="basculerLigne">${ic('volant')}Passer en ligne</button>
-        <p class="petit centre">Zones les plus demandées en ce moment : Opéra, Gare de Lyon, Saint-Lazare (démo).</p></div>`;
+        <p class="petit centre demo-seul">Zones les plus demandées en ce moment : Opéra, Gare de Lyon, Saint-Lazare (démo).</p>
+        <p class="petit centre reel-seul">En ligne, votre position est envoyée à BDA pour vous proposer les courses proches. Hors ligne, elle n’est plus envoyée.</p></div>`;
       return `<div class="poignee"></div><div class="pile">
-        <div class="titre-feuille"><h2>Recherche de courses…</h2><span>${euros(g.jour)}</span></div>
+        <div class="titre-feuille"><h2>Recherche de courses…</h2><span>${euros(total)}</span></div>
         <div class="barre"><i style="width:40%;animation:none"></i></div>
-        <p class="sous">Restez près des zones animées : la prochaine course vous sera proposée ici.</p>
+        <p class="sous">Restez près des zones animées : la prochaine course vous sera proposée ici${REEL ? ', avec une sonnerie' : ''}.</p>
+        ${blocReservations()}
         <button class="btn btn-second" type="button" data-a="basculerLigne">Passer hors ligne</button></div>`;
     },
     approche() {
@@ -1435,42 +1465,54 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
         <div class="trajet"><div><span class="pt"></span><span>${esc(c.depart.titre)}<small>${esc(c.depart.sous)}</small></span></div></div>
         ${blocClient(c)}
         <button class="btn btn-principal" type="button" data-a="arrive">${ic('pin')}Je suis arrivé</button>
-        <p class="petit centre">Démo : le trajet est accéléré.</p></div>`;
+        ${REEL ? `<div class="duo"><button class="btn btn-lien" type="button" data-a="voirBon">${ic('recu', 'ic-s')}Bon de réservation</button><button class="btn btn-lien" type="button" data-a="abandonner">Je ne peux pas y aller</button></div>` : ''}
+        <p class="petit centre demo-seul">Démo : le trajet est accéléré.</p></div>`;
     },
     attente() {
-      const c = etat.course;
+      const c = etat.course, m = c.attente || 5;
       return `<div class="poignee"></div><div class="pile">
-        <div class="titre-feuille"><h2>En attente ${/^[aeiouyéèêàâîïôû]/i.test(c.client) ? 'd’' : 'de '}${esc(c.client)}</h2><span id="attente">5:00</span></div>
-        <p class="sous">L’attente offerte au client est de 5 minutes. Le client a été prévenu de votre arrivée.</p>
+        <div class="titre-feuille"><h2>En attente ${/^[aeiouyéèêàâîïôû]/i.test(c.client) ? 'd’' : 'de '}${esc(c.client)}</h2><span id="attente">${m}:00</span></div>
+        <p class="sous">L’attente offerte au client est de ${m} minutes. Le client a été prévenu de votre arrivée.</p>
         ${blocClient(c)}
         ${c.code ? `<p class="sous">${ic('cadenas', 'ic-xs')} Demandez son code de sécurité à ${esc(c.client)} avant de démarrer.</p>` : ''}
         <button class="btn btn-or" type="button" data-a="clientABord">Client à bord · démarrer</button>
-        <button class="btn btn-lien" type="button" data-a="clientAbsent">Client absent</button></div>`;
+        <div class="duo"><button class="btn btn-lien" type="button" data-a="clientAbsent">Client absent</button>${REEL ? `<button class="btn btn-lien" type="button" data-a="voirBon">${ic('recu', 'ic-s')}Bon de réservation</button>` : ''}</div></div>`;
     },
     course() {
       const c = etat.course;
       return `<div class="poignee"></div><div class="pile">
         <div class="titre-feuille"><h2>En course</h2><span id="eta"></span></div>
         <div class="barre"><i id="barre"></i></div>
-        <div class="trajet"><div><span class="pt pt-carre"></span><span>${esc(c.arrivee.titre)}<small>${esc(c.arrivee.sous)}</small></span></div></div>
+        <div class="trajet"><div><span class="pt pt-carre"></span><span>${c.arrivee ? `${esc(c.arrivee.titre)}<small>${esc(c.arrivee.sous)}</small>` : `Chauffeur à disposition · ${esc(c.heures)} h<small>Le client vous guide</small>`}</span></div></div>
         ${blocClient(c)}
         <button class="btn btn-principal" type="button" data-a="terminer">${ic('check')}Terminer la course</button>
-        <p class="petit centre">Démo : le trajet est accéléré.</p></div>`;
+        ${REEL ? `<button class="btn btn-lien" type="button" data-a="voirBon">${ic('recu', 'ic-s')}Bon de réservation</button>` : ''}
+        <p class="petit centre demo-seul">Démo : le trajet est accéléré.</p></div>`;
     },
     fin() {
-      const c = etat.course;
+      const c = etat.course, total = c.prix + (c.protection || 0);
       return `<div class="poignee"></div><div class="pile">
         <div class="coche">${ic('check')}</div>
         <div class="titre-feuille" style="justify-content:center"><h2>Course terminée</h2></div>
-        <div class="tuiles"><div class="tuile"><b>${euros(c.prix)}</b><small>course</small></div><div class="tuile"><b>${euros(c.pourboire)}</b><small>pourboire</small></div><div class="tuile"><b>${euros(etat.gains.jour)}</b><small>aujourd’hui</small></div></div>
+        ${REEL ? `<div class="tuiles"><div class="tuile"><b>${euros(total)}</b><small>à encaisser</small></div><div class="tuile"><b>${euros(c.prix)}</b><small>transport</small></div><div class="tuile"><b>${euros(etat.jour.total)}</b><small>aujourd’hui</small></div></div>
+          <p class="sous centre">Encaissez ${euros(total)} auprès du client (espèces ou carte).${c.protection ? ` Dont ${euros(c.protection)} de protection, facturée à part.` : ''}</p>`
+        : `<div class="tuiles"><div class="tuile"><b>${euros(c.prix)}</b><small>course</small></div><div class="tuile"><b>${euros(c.pourboire)}</b><small>pourboire</small></div><div class="tuile"><b>${euros(etat.gains.jour)}</b><small>aujourd’hui</small></div></div>`}
         <p class="sous centre">Votre avis sur ${esc(c.client)}</p>
         <div class="etoiles">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-a="noteClient" data-v="${n}" aria-pressed="${n <= (c.noteClient || 5)}" aria-label="${n} étoile${n > 1 ? 's' : ''}">${ic('etoile')}</button>`).join('')}</div>
-        <button class="btn btn-vert" type="button" data-a="repasserEnLigne">Rester en ligne</button>
-        <p class="petit centre">Démo : la répartition entre chauffeur et BDA sera définie dans la vraie appli.</p></div>`;
+        <button class="btn btn-vert" type="button" data-a="repasserEnLigne">${REEL && !etat.enLigne ? 'Retour à la carte' : 'Rester en ligne'}</button>
+        <p class="petit centre demo-seul">Démo : la répartition entre chauffeur et BDA sera définie dans la vraie appli.</p></div>`;
     },
+  };
+  // réservations : à accepter (proposées à tous les chauffeurs de la gamme) et déjà confiées à ce chauffeur
+  const blocReservations = () => {
+    if (!REEL) return '';
+    const a = etat.reservations.length, m = etat.mesReservations.length;
+    if (!a && !m) return '';
+    return `<div class="duo">${a ? `<button class="btn btn-second" type="button" data-a="voirReservations" data-v="a">${ic('calendrier', 'ic-s')}${a} à accepter</button>` : '<span></span>'}${m ? `<button class="btn btn-second" type="button" data-a="voirReservations" data-v="m">${ic('check', 'ic-s')}${m} confirmée${m > 1 ? 's' : ''}</button>` : '<span></span>'}</div>`;
   };
   const PAGES = {
     gains() {
+      if (REEL) return pageGainsReelle();
       const g = etat.gains, jours = ['L', 'M', 'M', 'J', 'V', 'S', 'D'], auj = (new Date().getDay() + 6) % 7;
       const demo = [142, 186, 98, 224, 260, 310, 120]; demo[auj] = g.jour;
       const max = Math.max(...demo, 1);
@@ -1484,17 +1526,18 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
       </div>`;
     },
     messages() {
-      const c = etat.course, cv = conv();
+      const c = etat.course, cv = conv(), dernier = cv && cv.messages.length ? cv.messages[cv.messages.length - 1].texte : 'Aucun message pour l’instant';
       return `<div class="p">
         <h1 class="grand-titre">Messages</h1>
-        ${c && cv ? `<button class="ligne" type="button" data-a="ouvrirChat"><span class="pastille">${ic('message', 'ic-s')}</span><span><b>${esc(c.client)} · course en cours</b><small>${esc(cv.messages[cv.messages.length - 1].texte)}</small></span><span class="droite">${ic('chevron', 'ic-s')}</span></button>` : ''}
-        <div class="ligne"><span class="pastille">${ic('cloche', 'ic-s')}</span><span><b>BDA · Planning</b><small>Forte demande attendue ce soir à la Gare de Lyon (démo).</small></span><span></span></div>
+        ${c && cv ? `<button class="ligne" type="button" data-a="ouvrirChat"><span class="pastille">${ic('message', 'ic-s')}</span><span><b>${esc(c.client)} · course en cours</b><small>${esc(dernier)}</small></span><span class="droite">${ic('chevron', 'ic-s')}</span></button>` : ''}
+        <div class="ligne demo-seul"><span class="pastille">${ic('cloche', 'ic-s')}</span><span><b>BDA · Planning</b><small>Forte demande attendue ce soir à la Gare de Lyon (démo).</small></span><span></span></div>
         <div class="ligne"><span class="pastille">${ic('info', 'ic-s')}</span><span><b>BDA · Rappel</b><small>Pensez à vérifier le code de sécurité quand le client l’a activé.</small></span><span></span></div>
         <p class="petit">La messagerie avec les clients s’ouvre pendant une course. Elle sera reliée à l’appli client par le serveur BDA.</p>
       </div>`;
     },
     profil() {
-      const docs = [['Carte professionnelle VTC', 'Valide jusqu’en 2029', 'ok'], ['Permis de conduire', 'Valide', 'ok'], ['Assurance VTC', 'Expire le 31/12/2026', 'bientot'], ['Contrôle technique', 'Valide jusqu’au 05/2027', 'ok'], ['Signalétique VTC (macaron)', 'Posée', 'ok']];
+      if (REEL) return pageProfilReelle();
+      const docs =[['Carte professionnelle VTC', 'Valide jusqu’en 2029', 'ok'], ['Permis de conduire', 'Valide', 'ok'], ['Assurance VTC', 'Expire le 31/12/2026', 'bientot'], ['Contrôle technique', 'Valide jusqu’au 05/2027', 'ok'], ['Signalétique VTC (macaron)', 'Posée', 'ok']];
       return `<div class="p">
         <h1 class="grand-titre">Profil</h1>
         <div class="carte-pro"><div class="haut-cp"><b>BDA</b><span>Chauffeur partenaire</span></div>
@@ -1522,12 +1565,13 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
     nav.querySelectorAll('button').forEach((b) => b.setAttribute('aria-current', (b.dataset.v === e || (b.dataset.v === 'carte' && surCarte)) ? 'page' : 'false'));
     if (surCarte) { feuille.innerHTML = VUES[e](); feuille.style.animation = 'none'; void feuille.offsetWidth; feuille.style.animation = ''; }
     else { page.innerHTML = PAGES[e](); page.scrollTop = 0; }
-    const st = $('#statut'); st.classList.toggle('en-ligne', etat.enLigne); st.querySelector('span').textContent = etat.course ? 'En course' : etat.enLigne ? 'En ligne' : 'Hors ligne';
-    $('#gains-jour').textContent = euros(etat.gains.jour);
+    const st = $('#statut'); st.classList.toggle('en-ligne', etat.enLigne); st.querySelector('span').textContent = etat.course && etat.ecran !== 'fin' ? 'En course' : etat.enLigne ? 'En ligne' : 'Hors ligne';
+    $('#gains-jour').textContent = euros(REEL ? etat.jour.total : etat.gains.jour);
     majEtatCarte(); majPastilles(); majDirect();
   }
   function aller(e) { etat.ecran = e; libre = false; rendu(); }
   function majDirect() {
+    if (REEL) { majDirectReel(); return; }
     const c = etat.course, e = etat.ecran, eta = $('#eta'), barre = $('#barre'), cons = $('#consigne');
     let f = 0, nav2 = null, minTotal = 0;
     if (c && e === 'approche') { f = avance(c.tA0, c.dA); nav2 = c.navA; minTotal = c.rA ? c.rA.secondes / 60 : 4; if (f >= 1) { arriverAuClient(); return; } }
@@ -1550,9 +1594,12 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
       zone.b = feuille.hidden ? ch : Math.max(220, feuille.getBoundingClientRect().top - appareil.getBoundingClientRect().top);
       zone.t = 70;
       majBalade(t);
-      if (c && e === 'approche' && c.trA) Object.assign(pos, pointSur(c.trA, avance(c.tA0, c.dA)));
-      if (c && e === 'course' && c.trC) Object.assign(pos, pointSur(c.trC, avance(c.tC0, c.dC)));
-      if (c && e === 'attente') { pos.u = uDeX(c.depart.x); pos.v = vDeY(c.depart.y); }
+      if (REEL) lisserPosition(dt);
+      else {
+        if (c && e === 'approche' && c.trA) Object.assign(pos, pointSur(c.trA, avance(c.tA0, c.dA)));
+        if (c && e === 'course' && c.trC) Object.assign(pos, pointSur(c.trC, avance(c.tC0, c.dC)));
+        if (c && e === 'attente') { pos.u = uDeX(c.depart.x); pos.v = vDeY(c.depart.y); }
+      }
       const gps = gpsActif();
       if (gps) { cible.u = pos.u; cible.v = pos.v; cible.z = 16.9; }
       else if (c && e === 'fin') { cible.u = pos.u; cible.v = pos.v; cible.z = 16; }
@@ -1571,9 +1618,10 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
       if (cle !== cleFond) { cleFond = cle; if (poser) poser(fctx, dpr); else fctx.setTransform(dpr, 0, 0, dpr, 0, 0); dessinerBase(fctx, cam, P); }
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(fond, 0, 0);
       if (poser) poser(ctx, dpr); else ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      if (c && e === 'approche' && c.trA) { dessinerTrace(ctx, cam, c.trA, avance(c.tA0, c.dA), P.trace, P, 6, true); repereDepart(ctx, cam, c.depart, t, P); }
+      const fa = c ? (c.reel ? c.fA || 0 : avance(c.tA0, c.dA)) : 0, fc = c ? (c.reel ? c.fC || 0 : avance(c.tC0, c.dC)) : 0;
+      if (c && e === 'approche') { if (c.trA) dessinerTrace(ctx, cam, c.trA, fa, P.trace, P, 6, true); repereDepart(ctx, cam, c.depart, t, P); }
       if (c && e === 'attente') repereDepart(ctx, cam, c.depart, t, P);
-      if (c && e === 'course' && c.trC) { dessinerTrace(ctx, cam, c.trC, avance(c.tC0, c.dC), P.trace, P, 6, true); repereArrivee(ctx, cam, c.arrivee, P); }
+      if (c && e === 'course') { if (c.trC) dessinerTrace(ctx, cam, c.trC, fc, P.trace, P, 6, true); if (c.arrivee) repereArrivee(ctx, cam, c.arrivee, P); }
       if (etat.offre && etat.offre.rA) { const tr = trace(etat.offre.rA.pts); dessinerTrace(ctx, cam, tr, 0, P.traceGris, P, 4); repereDepart(ctx, cam, etat.offre.depart, t, P); }
       dessinerVoiture(ctx, cam, pos, pos.a, true, P);
     } else appareil.classList.remove('vue-gps');
@@ -1623,6 +1671,469 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
     basculerSons() { etat.sons = !etat.sons; son('clic'); rendu(); },
     fermerModale(_, el, ev) { if (el && el.classList.contains('voile') && ev && ev.target !== el) return; fermerModale(); },
   };
+  /* =========================================================
+     VRAIE APPLI CHAUFFEUR : liaison avec le serveur BDA
+     Connexion avec le compte de l'Espace équipe, position GPS envoyée seulement en ligne ou en course.
+     ========================================================= */
+  let jeton = REEL ? lire('bda-chauffeur-jeton', '') : '';
+  const LEGAL = { enseigne: 'BDA SECURITE', exploitant: 'Abdelouahab Bouidia, entrepreneur individuel', siret: '977 933 316 00019', evtc: '', tel: '06 11 67 86 25' };
+  async function api(action, donnees, params) {
+    const qs = new URLSearchParams({ a: action, ...(params || {}) });
+    const o = { headers: { Accept: 'application/json' }, cache: 'no-store' };
+    if (jeton) o.headers['X-BDA-Jeton'] = jeton;
+    if (donnees !== undefined) { o.method = 'POST'; o.headers['Content-Type'] = 'application/json'; o.body = JSON.stringify(donnees); }
+    let r;
+    try { r = await fetch(`${SERVEUR}?${qs}`, o); } catch { throw Object.assign(new Error('Pas de connexion internet.'), { statut: 0 }); }
+    const j = await r.json().catch(() => ({}));
+    if (r.status === 401 && jeton && action !== 'chauffeur.connexion') deconnexionLocale(j.erreur || 'Session expirée : reconnectez-vous.');
+    if (!r.ok || j.ok === false) throw Object.assign(new Error(j.erreur || `Erreur du serveur (${r.status}).`), { statut: r.status, donnees: j });
+    return j;
+  }
+  const depuisServeur = (l) => (l ? { titre: l.titre, sous: l.sous || '', x: qx(l.lng), y: qy(l.lat) } : null);
+  const dateServeur = (s) => (s ? new Date(String(s).replace(' ', 'T')) : null);
+
+  /* ----- Connexion ----- */
+  function vueConnexionReelle(erreur = '', identifiant = '') {
+    $('#connexion').innerHTML = `<div class="logo"><b>BDA</b><span>ESPACE CHAUFFEUR</span></div>
+      <h1>Bonjour, chauffeur BDA</h1>
+      <p>Connectez-vous avec votre identifiant de l’Espace équipe BDA.</p>
+      <input id="cx-id" type="text" autocomplete="username" autocapitalize="off" placeholder="Identifiant ou e-mail" value="${esc(identifiant)}">
+      <input id="cx-mdp" type="password" autocomplete="current-password" placeholder="Mot de passe">
+      ${erreur ? `<p class="erreur" role="alert">${esc(erreur)}</p>` : ''}
+      <button class="btn btn-or" type="button" data-a="connexionReelle">Se connecter</button>
+      <a href="/espace-equipe" target="_blank" rel="noopener">Mot de passe oublié ou pas encore de compte : Espace équipe</a>`;
+  }
+  function deconnexionLocale(message) {
+    jeton = ''; ecrire('bda-chauffeur-jeton', '');
+    arreterGps(); clearTimeout(minuteurEtat); relacherEcran();
+    etat.connecte = false; etat.enLigne = false; etat.offre = null; etat.course = null; afficherOffre(); fermerChat();
+    vueConnexionReelle(message || ''); $('#connexion').hidden = false; aller('carte');
+  }
+  async function chargerProfil() {
+    try {
+      const r = await api('chauffeur.moi');
+      const ch = r.chauffeur, v = ch.vehicule || {};
+      etat.gammesConnues = r.gammes;
+      CHAUFFEUR = { ...CHAUFFEUR, prenom: ch.prenom, nom: ch.nom, note: ch.note, nbNotes: ch.nbNotes, voiture: v.modele || '', couleur: v.couleur || '', plaque: v.plaque || '', gammes: ch.gammes, gamme: ch.gammes.map((g) => (r.gammes.find((x) => x.cle === g) || {}).nom || g).join(', '), identifiant: ch.identifiant, tel: ch.tel };
+      etat.enLigne = !!ch.enLigne;
+      if (etat.enLigne) { demarrerGps(); garderEcran(); }
+      rendu();
+      if (!CHAUFFEUR.plaque) { aller('profil'); toast('Renseignez votre véhicule avant votre première course.'); }
+    } catch (e) { if (e.statut !== 401) toast(e.message); }
+  }
+
+  /* ----- GPS du téléphone ----- */
+  const gps = { id: null, lat: null, lng: null, cap: null, prec: null, t: 0, erreur: '' };
+  const cibleGps = { u: pos.u, v: pos.v, a: pos.a, ok: false };
+  const SIMU = location.hostname === 'localhost' && /simu/.test(location.hash); // test sur ordinateur : la voiture roule seule sur l'itinéraire
+  function demarrerGps() {
+    if (SIMU) { demarrerSimu(); return; }
+    if (gps.id != null) return;
+    if (!navigator.geolocation) { gps.erreur = 'Ce téléphone ne donne pas sa position.'; majAlerteGps(); return; }
+    gps.id = navigator.geolocation.watchPosition((p) => {
+      const k = p.coords, x = qx(k.longitude), y = qy(k.latitude), u = uDeX(x), v = vDeY(y);
+      const bouge = Math.hypot(u - cibleGps.u, v - cibleGps.v) * METRES_PAR_U;
+      let cap = k.heading != null && !Number.isNaN(k.heading) && (k.speed || 0) > 1.5 ? k.heading : null;
+      if (cap == null && gps.lat != null && bouge > 6) cap = (Math.atan2(u - cibleGps.u, -(v - cibleGps.v)) * 180 / Math.PI + 360) % 360;
+      Object.assign(gps, { lat: k.latitude, lng: k.longitude, prec: k.accuracy, t: Date.now(), erreur: '' });
+      if (cap != null) gps.cap = cap;
+      surPosition(u, v, gps.cap);
+    }, (e) => { gps.erreur = e.code === 1 ? 'Position refusée : autorisez la localisation pour BDA Chauffeur dans les réglages du téléphone.' : 'Position GPS introuvable : sortez à découvert ou vérifiez la localisation.'; majAlerteGps(); },
+    { enableHighAccuracy: true, maximumAge: 2000, timeout: 20000 });
+  }
+  function arreterGps() { if (gps.id != null && navigator.geolocation) navigator.geolocation.clearWatch(gps.id); gps.id = null; clearInterval(simu.minuteur); simu.minuteur = 0; }
+  function majAlerteGps() {
+    const el = $('#alerte-gps'), voir = REEL && (etat.enLigne || etat.course) && !!gps.erreur && etat.ecran in VUES;
+    el.hidden = !voir; if (voir) el.textContent = gps.erreur;
+  }
+  // nouvelle position : la voiture glisse jusqu'à elle, la navigation avance
+  function surPosition(u, v, cap) {
+    cibleGps.u = u; cibleGps.v = v; if (cap != null) cibleGps.a = (cap - 90) * Math.PI / 180;
+    if (!cibleGps.ok) { pos.u = u; pos.v = v; pos.a = cibleGps.a; cibleGps.ok = true; }
+    majAlerteGps();
+    const c = etat.course;
+    if (!c || !c.reel) return;
+    if (etat.ecran === 'approche') suivreTrajet(c, 'A', c.depart);
+    if (etat.ecran === 'course' && c.arrivee) suivreTrajet(c, 'C', c.arrivee);
+  }
+  function lisserPosition(dt) {
+    if (!cibleGps.ok) return;
+    const f = 1 - Math.exp(-dt / 700);
+    pos.u += (cibleGps.u - pos.u) * f; pos.v += (cibleGps.v - pos.v) * f;
+    let d = cibleGps.a - pos.a; d = Math.atan2(Math.sin(d), Math.cos(d)); pos.a += d * f;
+  }
+  // itinéraire vers le client ou la destination, recalculé si le chauffeur s'en écarte
+  function suivreTrajet(c, k, but) {
+    const tr = c['tr' + k];
+    if (tr) {
+      const p = procheSur(tr, cibleGps.u, cibleGps.v);
+      c['f' + k] = Math.max(c['f' + k] * 0.97, p.f);
+      if (p.d * METRES_PAR_U < 70 && performance.now() - (c['t' + k] || 0) < 60000) return;
+    }
+    if (c['calcul' + k] || !moteur.pret || !cibleGps.ok) return;
+    c['calcul' + k] = true;
+    demander('route', { ax: xDeU(cibleGps.u), ay: yDeV(cibleGps.v), bx: but.x, by: but.y }).then((r) => {
+      c['calcul' + k] = false; c['t' + k] = performance.now();
+      if (!r || etat.course !== c) return;
+      c['r' + k] = r; c['tr' + k] = trace(r.pts); c['nav' + k] = etapesNav(r); c['f' + k] = 0;
+    });
+  }
+  function procheSur(tr, u, v) {
+    let best = Infinity, dist = 0;
+    for (let i = 1; i < tr.n; i++) {
+      const ax = tr.U[i - 1], ay = tr.V[i - 1], dx = tr.U[i] - ax, dy = tr.V[i] - ay, l2 = dx * dx + dy * dy;
+      const t = l2 ? Math.max(0, Math.min(1, ((u - ax) * dx + (v - ay) * dy) / l2)) : 0;
+      const ex = ax + t * dx - u, ey = ay + t * dy - v, d2 = ex * ex + ey * ey;
+      if (d2 < best) { best = d2; dist = tr.cum[i - 1] + t * Math.sqrt(l2); }
+    }
+    return { f: tr.L ? dist / tr.L : 0, d: Math.sqrt(best) };
+  }
+  // simulation pour les tests sur ordinateur (adresse se terminant par #simu) : 15 m/s le long de l'itinéraire
+  const simu = { minuteur: 0, f: 0, tr: null };
+  function demarrerSimu() {
+    if (simu.minuteur) return;
+    const posDe = (u, v) => ({ lat: latDe(yDeV(v)), lng: lonDe(xDeU(u)) });
+    if (!cibleGps.ok) { surPosition(pos.u, pos.v, 90); Object.assign(gps, posDe(pos.u, pos.v), { t: Date.now(), cap: 90 }); }
+    simu.minuteur = setInterval(() => {
+      const c = etat.course, k = etat.ecran === 'approche' ? 'A' : etat.ecran === 'course' ? 'C' : '';
+      const tr = c && k ? c['tr' + k] : null;
+      if (!tr) { Object.assign(gps, { t: Date.now() }); surPosition(cibleGps.u, cibleGps.v, gps.cap); return; }
+      if (simu.tr !== tr) { simu.tr = tr; simu.f = 0; }
+      simu.f = Math.min(1, simu.f + 15 / Math.max(1, tr.L * METRES_PAR_U));
+      const p = pointSur(tr, simu.f), cap = (p.a * 180 / Math.PI + 90 + 360) % 360;
+      Object.assign(gps, posDe(p.u, p.v), { t: Date.now(), cap, prec: 5, erreur: '' });
+      surPosition(p.u, p.v, cap);
+    }, 1000);
+  }
+  // écran allumé pendant le service (si le téléphone le permet)
+  let verrouEcran = null;
+  async function garderEcran() { try { if ('wakeLock' in navigator && !verrouEcran) { verrouEcran = await navigator.wakeLock.request('screen'); verrouEcran.addEventListener('release', () => { verrouEcran = null; }); } } catch { verrouEcran = null; } }
+  function relacherEcran() { try { if (verrouEcran) verrouEcran.release(); } catch { /* déjà relâché */ } verrouEcran = null; }
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && REEL && jeton) { if (etat.enLigne || etat.course) garderEcran(); interrogerServeur(); } });
+
+  /* ----- Échange avec le serveur toutes les 3 secondes (en ligne ou en course) ----- */
+  let minuteurEtat = 0, demandeLigne;
+  const refusees = new Set();
+  const dernierMsg = () => { const cv = conv(); return cv ? cv.dernier || 0 : 0; };
+  async function interrogerServeur() {
+    clearTimeout(minuteurEtat);
+    if (!jeton) return;
+    const corps = { apres: dernierMsg() };
+    const enService = etat.enLigne || etat.course || demandeLigne;
+    if (enService && gps.lat != null && Date.now() - gps.t < 60000) Object.assign(corps, { lat: +gps.lat.toFixed(6), lng: +gps.lng.toFixed(6), cap: gps.cap, prec: gps.prec });
+    const veut = demandeLigne;
+    if (veut !== undefined) corps.enLigne = veut;
+    try {
+      const r = await api('chauffeur.etat', corps);
+      if (veut !== undefined && demandeLigne === veut) demandeLigne = undefined;
+      appliquerEtat(r);
+    } catch (e) {
+      if (veut !== undefined) { demandeLigne = undefined; etat.enLigne = false; toast(e.message); rendu(); if (!etat.course) arreterGps(); }
+    }
+    minuteurEtat = setTimeout(interrogerServeur, etat.enLigne || etat.course ? (document.hidden ? 10000 : 3000) : 20000);
+  }
+  function appliquerEtat(r) {
+    const avant = etat.enLigne;
+    etat.enLigne = r.enLigne; etat.jour = r.jour; etat.reservations = r.reservations; etat.mesReservations = r.mesReservations; etat.ouvert = r.ouvert;
+    if (r.course) {
+      if (!etat.course || etat.course.numero !== r.course.numero) prendreCourse(r.course);
+      else majCourse(r.course);
+      for (const m of r.messages || []) recevoirMessage(m);
+    } else if (etat.course && etat.course.reel && ['approche', 'attente', 'course'].includes(etat.ecran)) verifierCourse(etat.course);
+    // une course proposée (la plus proche), si on n'en a pas déjà une à l'écran
+    if (etat.offre && !r.offres.some((x) => x.numero === etat.offre.numero)) { etat.offre = null; afficherOffre(); toast('La course a été prise par un autre chauffeur ou annulée.'); }
+    if (!etat.course && etat.enLigne && !etat.offre) {
+      const o = r.offres.find((x) => !refusees.has(x.numero));
+      if (o) proposerOffreReelle(o);
+    }
+    // le panneau n'est redessiné que si ce qu'il montre a changé
+    const signature = JSON.stringify([etat.enLigne, etat.jour, etat.reservations.length, etat.mesReservations.length, etat.ouvert]);
+    if (signature !== appliquerEtat.signature) { appliquerEtat.signature = signature; if (etat.ecran === 'carte' || etat.ecran === 'fin' || avant !== etat.enLigne) rendu(); }
+    const st = $('#statut'); st.classList.toggle('en-ligne', etat.enLigne); st.querySelector('span').textContent = etat.course && etat.ecran !== 'fin' ? 'En course' : etat.enLigne ? 'En ligne' : 'Hors ligne';
+    $('#gains-jour').textContent = euros(etat.jour.total);
+  }
+  function proposerOffreReelle(s) {
+    const o = { numero: s.numero, client: s.client.prenom, note: s.client.note, depart: depuisServeur(s.depart), arrivee: depuisServeur(s.arrivee) || { titre: 'Chauffeur à disposition', sous: `${s.heures} h` }, prix: s.prix + (s.protection || 0), options: s.options, code: s.codeRequis, gammeNom: s.gammeNom, favori: s.favori, t0: performance.now(), duree: Math.max(5000, Math.min(20000, (s.expire || 20) * 1000)), rA: null, rC: null };
+    etat.offre = o; son('offre'); if (navigator.vibrate) navigator.vibrate([250, 120, 250]);
+    afficherOffre();
+    const ici = cibleGps.ok ? { x: xDeU(cibleGps.u), y: yDeV(cibleGps.v) } : posXY();
+    demander('route', { ax: ici.x, ay: ici.y, bx: o.depart.x, by: o.depart.y }).then((rA) => { if (etat.offre !== o) return; o.rA = rA; afficherOffre(); });
+    if (s.arrivee) demander('route', { ax: o.depart.x, ay: o.depart.y, bx: o.arrivee.x, by: o.arrivee.y }).then((rC) => { if (etat.offre !== o) return; o.rC = rC; afficherOffre(); });
+  }
+  function courseServeur(s) {
+    return {
+      reel: true, numero: s.numero, statut: s.statut, client: s.client.prenom || 'Client', note: s.client.note, tel: s.client.tel || '', options: s.options, code: s.codeRequis,
+      prix: s.prix, protection: s.protection || 0, pourboire: 0, depart: depuisServeur(s.depart), arrivee: depuisServeur(s.arrivee), mode: s.mode, heures: s.heures, attente: s.attente,
+      bon: s.bon, gammeNom: s.gammeNom, quand: s.quand, vol: s.vol, pancarte: s.pancarte, arret: depuisServeur(s.arret),
+      trA: null, trC: null, navA: null, navC: null, rA: null, rC: null, fA: 0, fC: 0, attente0: s.arrive ? dateServeur(s.arrive).getTime() : 0,
+    };
+  }
+  const ECRAN_DE = { acceptee: 'approche', arrivee: 'attente', en_course: 'course' };
+  function prendreCourse(s) {
+    const c = courseServeur(s);
+    etat.course = c; etat.offre = null; afficherOffre();
+    etat.conversations[c.numero] = etat.conversations[c.numero] || { messages: [], nonLus: 0, dernier: 0 };
+    demarrerGps(); garderEcran();
+    aller(ECRAN_DE[s.statut] || 'approche');
+    if (cibleGps.ok) surPosition(cibleGps.u, cibleGps.v, gps.cap);
+  }
+  function majCourse(s) {
+    const c = etat.course;
+    Object.assign(c, { statut: s.statut, tel: s.client.tel || c.tel, bon: s.bon || c.bon });
+    const ecran = ECRAN_DE[s.statut];
+    if (ecran && ecran !== etat.ecran && etat.ecran !== 'fin') { if (ecran === 'attente' && !c.attente0) c.attente0 = Date.now(); aller(ecran); }
+  }
+  // la course n'est plus en cours : annulée par le client, rendue, ou terminée depuis un autre téléphone
+  async function verifierCourse(c) {
+    try {
+      const { course: s } = await api('course', undefined, { n: c.numero });
+      if (etat.course !== c) return;
+      if (s.statut === 'annulee') { etat.course = null; fermerChat(); fermerModale(); aller('carte'); son('ding'); toast(s.statut === 'annulee' ? 'Le client a annulé la course.' : 'Course terminée.'); }
+      else if (s.statut === 'terminee' && etat.ecran !== 'fin') { aller('fin'); }
+    } catch (e) { if (e.statut === 403 || e.statut === 404) { etat.course = null; fermerChat(); aller('carte'); toast('Cette course ne vous est plus confiée.'); } }
+  }
+  // message venu du serveur : celui du client, ou l'un des nôtres (après un rechargement de l'appli)
+  function recevoirMessage(m) {
+    const cv = conv();
+    if (!cv) return;
+    cv.dernier = Math.max(cv.dernier || 0, m.id);
+    if (cv.messages.some((x) => x.id === m.id)) return;
+    const local = m.de === 'chauffeur' && cv.messages.find((x) => !x.id && x.de === 'chauffeur' && x.texte === m.texte);
+    if (local) { local.id = m.id; return; }
+    cv.messages.push({ id: m.id, de: m.de, texte: m.texte, t: dateServeur(m.t) || new Date() });
+    if (m.de === 'client') { if (!chatOuvert) cv.nonLus++; son('ding'); }
+    majChat(); majPastilles();
+  }
+  function majDirectReel() {
+    const c = etat.course, e = etat.ecran, eta = $('#eta'), barre = $('#barre'), cons = $('#consigne');
+    let f = 0, nav2 = null, r = null;
+    if (c && e === 'approche') { f = c.fA || 0; nav2 = c.navA; r = c.rA; }
+    if (c && e === 'course') { f = c.fC || 0; nav2 = c.navC; r = c.rC; }
+    if (eta) eta.textContent = r ? `${Math.max(1, Math.ceil((1 - f) * r.secondes / 60))} min` : '…';
+    if (barre) barre.style.width = `${Math.round(f * 100)}%`;
+    const k = nav2 ? consigne(nav2, f) : null;
+    cons.hidden = !k;
+    if (k) cons.innerHTML = `<span class="fleche-nav">${ic(k.fin ? 'pin' : 'fleche')}</span><span><b>${k.distance}</b><span>${k.fin ? (e === 'approche' ? 'Client à proximité' : 'Arrivée à destination') : esc(k.rue)}</span><small>Sur ${esc(k.actuelle)}</small></span>`;
+    if (c && e === 'attente') { const s = Math.max(0, (c.attente || 5) * 60 - Math.floor((Date.now() - (c.attente0 || Date.now())) / 1000)); const a = $('#attente'); if (a) a.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+    majOffreReelle();
+    majAlerteGps();
+  }
+  function majOffreReelle() {
+    const o = etat.offre;
+    if (!o) return;
+    const f = avance(o.t0, o.duree), a = $('#offre-anneau'), s = $('#offre-sec');
+    if (a) a.style.strokeDashoffset = (144.5 * f).toFixed(1);
+    if (s) s.textContent = Math.max(0, Math.ceil((1 - f) * o.duree / 1000));
+    if (f >= 1) { refusees.add(o.numero); etat.offre = null; afficherOffre(); toast('Course non acceptée : elle est proposée à un autre chauffeur.'); }
+  }
+
+  /* ----- Pages réelles : gains et profil ----- */
+  let historique = null;
+  function pageGainsReelle() {
+    if (!historique) { api('chauffeur.historique').then((r) => { historique = r.courses; if (etat.ecran === 'gains') rendu(); }).catch(() => {}); }
+    const liste = (historique || []).filter((h) => h.statut === 'terminee');
+    const jour = (d) => enDate(d), auj = new Date(), lundi = new Date(auj); lundi.setDate(auj.getDate() - ((auj.getDay() + 6) % 7)); lundi.setHours(0, 0, 0, 0);
+    const semaine = [0, 1, 2, 3, 4, 5, 6].map((i) => { const d = new Date(lundi); d.setDate(lundi.getDate() + i); return liste.filter((h) => h.fin && h.fin.slice(0, 10) === jour(d)).reduce((s, h) => s + h.prix + (h.protection || 0), 0); });
+    const max = Math.max(...semaine, 1), iAuj = (auj.getDay() + 6) % 7, jours = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+    const duJour = liste.filter((h) => h.fin && h.fin.slice(0, 10) === jour(auj));
+    return `<div class="p">
+      <h1 class="grand-titre">Gains</h1>
+      <div class="gros-gain"><small>Aujourd’hui</small><b>${euros(etat.jour.total)}</b><small>${etat.jour.courses} course${etat.jour.courses > 1 ? 's' : ''} · prix des courses encaissés à bord</small></div>
+      <div class="semaine">${semaine.map((v, i) => `<div class="${i === iAuj ? 'auj' : ''}"><i style="height:${Math.max(6, v / max * 100)}%"></i><span>${jours[i]}</span></div>`).join('')}</div>
+      <p class="petit">Cette semaine : ${euros(semaine.reduce((a, b) => a + b, 0))}. La répartition entre chauffeur et BDA suit votre contrat.</p>
+      <h2 class="sect">Courses du jour</h2>
+      <div>${historique === null ? '<p class="sous">Chargement…</p>' : duJour.length ? duJour.map((h) => `<div class="ligne"><span class="pastille">${ic('voiture', 'ic-s')}</span><span><b>${esc(h.depart ? h.depart.titre : '')} → ${esc(h.arrivee ? h.arrivee.titre : 'À disposition')}</b><small>${heure(dateServeur(h.fin))} · ${esc(h.client.prenom)} · ${esc(h.gammeNom)}</small></span><span class="droite">${euros(h.prix + (h.protection || 0))}</span></div>`).join('') : '<p class="sous">Pas encore de course aujourd’hui.</p>'}</div>
+    </div>`;
+  }
+  function pageProfilReelle() {
+    const g = CHAUFFEUR.gammes || [], liste = (etat.gammesConnues || []).filter((x) => x.cle !== 'vip');
+    return `<div class="p">
+      <h1 class="grand-titre">Profil</h1>
+      <div class="carte-pro"><div class="haut-cp"><b>BDA</b><span>Chauffeur BDA</span></div>
+        <div class="qui"><span class="avatar">${esc((CHAUFFEUR.prenom || '?')[0])}</span><span><b>${esc(CHAUFFEUR.prenom)}</b><small>${ic('etoile', 'ic-xs')} ${esc(CHAUFFEUR.note)}${CHAUFFEUR.nbNotes ? ` · ${CHAUFFEUR.nbNotes} avis` : ''}</small></span></div>
+        ${CHAUFFEUR.plaque ? `<span class="plaque">${esc(CHAUFFEUR.plaque)}</span>` : ''}<small style="color:#b9b2a3">${esc(CHAUFFEUR.voiture || 'Véhicule à renseigner')} ${esc(String(CHAUFFEUR.couleur || '').toLowerCase())}${CHAUFFEUR.gamme ? ` · ${esc(CHAUFFEUR.gamme)}` : ''}</small></div>
+      <h2 class="sect">Mon véhicule</h2>
+      <label class="champ"><span>Marque et modèle</span><input id="vh-modele" type="text" autocomplete="off" placeholder="Mercedes Classe E" value="${esc(CHAUFFEUR.voiture)}"></label>
+      <div class="duo"><label class="champ"><span>Couleur</span><input id="vh-couleur" type="text" autocomplete="off" placeholder="Noire" value="${esc(CHAUFFEUR.couleur)}"></label><label class="champ"><span>Plaque</span><input id="vh-plaque" type="text" autocomplete="off" placeholder="AB-123-CD" value="${esc(CHAUFFEUR.plaque)}" style="text-transform:uppercase"></label></div>
+      <div class="champ"><span>Gammes que je peux faire</span><div class="choix-gammes">${liste.map((x) => `<button type="button" data-a="gammeVehicule" data-v="${x.cle}" aria-pressed="${g.includes(x.cle)}">${esc(x.nom)}</button>`).join('')}</div></div>
+      ${g.includes('vip') ? '<p class="petit">VIP (avec garde du corps) : activé par la direction.</p>' : ''}
+      <button class="btn btn-principal" type="button" data-a="enregistrerVehicule">Enregistrer le véhicule</button>
+      <h2 class="sect">Documents</h2>
+      <p class="sous">Carte VTC, permis, assurance : vos documents sont dans votre Espace équipe BDA. La direction les vérifie avant de vous confier des courses.</p>
+      <a class="btn btn-second" href="/espace-equipe" target="_blank" rel="noopener">${ic('recu', 'ic-s')}Ouvrir l’Espace équipe</a>
+      <h2 class="sect">Réglages</h2>
+      <div class="ligne"><span class="pastille">${ic('cloche', 'ic-s')}</span><span><b>Notifications</b><small>${etat.pushActif ? 'Activées : nouvelles courses, messages' : 'Pour être prévenu des courses, appli en arrière-plan'}</small></span>${etat.pushActif ? '' : '<button class="btn btn-second" type="button" data-a="activerNotifs" style="width:auto;height:40px;padding:0 14px">Activer</button>'}</div>
+      <div class="ligne"><span class="pastille">${ic('soleil', 'ic-s')}</span><span><b>Mode clair</b><small>Plus lisible en plein soleil</small></span><button class="interrupteur" type="button" role="switch" aria-checked="${etat.modeAffichage === 'clair'}" data-a="basculerMode" aria-label="Mode clair"></button></div>
+      <div class="ligne"><span class="pastille">${ic('cloche', 'ic-s')}</span><span><b>Sons</b><small>Nouvelle course, client à bord</small></span><button class="interrupteur" type="button" role="switch" aria-checked="${etat.sons}" data-a="basculerSons" aria-label="Sons"></button></div>
+      <div class="numero"><span><small class="petit">Assistance chauffeurs BDA, 24 h/24</small><br><b>06 11 67 86 25</b></span>${ic('telephone')}</div>
+      <button class="btn btn-second" type="button" data-a="deconnexion">${ic('sortie')}Se déconnecter</button>
+      <p class="petit centre">Appli chauffeur BDA · v1.0 · phase privée · connecté : ${esc(CHAUFFEUR.identifiant || '')}</p>
+    </div>`;
+  }
+  const ligneBon = (t, v) => `<div><span>${t}</span><b>${v}</b></div>`;
+  function htmlBonChauffeur(c) {
+    const b = c.bon || {}, quand = dateServeur(c.quand), reserve = dateServeur(b.reserveLe);
+    const date = (d) => (d ? `${d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })} à ${heure(d)}` : '');
+    return `<div class="doc-bon"><b>Bon de réservation · ${esc(c.numero)}</b>
+      ${ligneBon('Exploitant', `${esc(LEGAL.enseigne)} · ${esc(LEGAL.exploitant)}`)}
+      ${ligneBon('SIRET', esc(LEGAL.siret))}
+      ${ligneBon('N° registre VTC', LEGAL.evtc ? esc(LEGAL.evtc) : 'à compléter')}
+      ${ligneBon('Client', `${esc(b.client || c.client)}${b.tel ? ` · ${esc(b.tel)}` : ''}`)}
+      ${b.passager ? ligneBon('Passager', `${esc(b.passager.prenom)} · ${esc(b.passager.tel)}`) : ''}
+      ${ligneBon('Réservé le', esc(date(reserve)))}
+      ${ligneBon('Prise en charge', `${esc(date(quand))}<br>${esc(c.depart.titre)}${c.depart.sous ? ', ' + esc(c.depart.sous) : ''}`)}
+      ${ligneBon(c.arrivee ? 'Destination' : 'Prestation', c.arrivee ? esc(c.arrivee.titre) : `À disposition ${esc(c.heures)} h`)}
+      ${ligneBon('Véhicule', `${esc(CHAUFFEUR.voiture)} · ${esc(CHAUFFEUR.plaque)}`)}
+      ${ligneBon('Chauffeur', esc(`${CHAUFFEUR.prenom} ${CHAUFFEUR.nom || ''}`.trim()))}
+    </div>`;
+  }
+
+  /* ----- Notifications ----- */
+  async function activerNotifications(silencieux) {
+    let vapid = '';
+    try { vapid = (await api('config')).vapid; } catch { vapid = ''; }
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !vapid) { if (!silencieux) toast('Notifications indisponibles ici. Sur iPhone : ajoutez BDA Chauffeur à l’écran d’accueil et ouvrez-la depuis l’icône.'); return; }
+    try {
+      if (silencieux && Notification.permission !== 'granted') return;
+      const reg = await navigator.serviceWorker.ready;
+      const cle = Uint8Array.from(atob((vapid + '='.repeat((4 - vapid.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/')), (ch) => ch.charCodeAt(0));
+      const abo = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: cle });
+      await api('push.abonner', abo.toJSON());
+      etat.pushActif = true; if (!silencieux) { toast('Notifications activées.'); rendu(); }
+    } catch { if (!silencieux) toast('Impossible d’activer les notifications sur ce téléphone.'); }
+  }
+
+  /* ----- Actions de la vraie appli (elles remplacent celles de la maquette) ----- */
+  const actionsReelles = {
+    async connexionReelle() {
+      const id = ($('#cx-id') || {}).value || '', mdp = ($('#cx-mdp') || {}).value || '';
+      if (!id.trim() || !mdp) { vueConnexionReelle('Saisissez votre identifiant et votre mot de passe.', id); return; }
+      const b = $('#connexion .btn'); if (b) { b.disabled = true; b.textContent = 'Un instant…'; }
+      try {
+        const r = await api('chauffeur.connexion', { identifiant: id.trim(), motdepasse: mdp });
+        jeton = r.jeton; ecrire('bda-chauffeur-jeton', jeton); etat.connecte = true;
+        $('#connexion').hidden = true; son('ok');
+        await chargerProfil(); interrogerServeur(); activerNotifications(true);
+        toast(`Bonjour ${CHAUFFEUR.prenom} ! Passez en ligne pour recevoir des courses.`);
+      } catch (e) { vueConnexionReelle(e.message, id); }
+    },
+    async deconnexion() {
+      if (etat.course) { toast('Terminez d’abord la course en cours.'); return; }
+      let endpoint = '';
+      try { const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null; const abo = reg && await reg.pushManager.getSubscription(); if (abo) { endpoint = abo.endpoint; abo.unsubscribe().catch(() => {}); } } catch { /* pas d'abonnement */ }
+      await api('chauffeur.deconnexion', { endpoint }).catch(() => {});
+      deconnexionLocale();
+    },
+    basculerLigne() {
+      if (etat.course) { toast('Terminez d’abord la course en cours.'); return; }
+      const veut = !etat.enLigne;
+      if (veut && !CHAUFFEUR.plaque) { aller('profil'); toast('Renseignez d’abord votre véhicule.'); return; }
+      son('clic'); demandeLigne = veut; etat.enLigne = veut;
+      if (veut) { demarrerGps(); garderEcran(); } else { arreterGps(); relacherEcran(); etat.offre = null; afficherOffre(); }
+      aller('carte'); interrogerServeur();
+    },
+    async accepterOffre() {
+      const o = etat.offre;
+      if (!o) return;
+      etat.offre = null; afficherOffre();
+      try { const { course } = await api('course.accepter', { numero: o.numero }); son('ok'); prendreCourse(course); }
+      catch (e) { refusees.add(o.numero); toast(e.message); }
+    },
+    refuserOffre() {
+      const o = etat.offre;
+      if (!o) return;
+      refusees.add(o.numero); etat.offre = null; afficherOffre();
+      api('course.refuser', { numero: o.numero }).catch(() => {});
+      toast('Course refusée. Une autre vous sera proposée.');
+    },
+    async arrive() {
+      const c = etat.course;
+      try { await api('course.arrivee', { numero: c.numero }); c.attente0 = Date.now(); son('ding'); aller('attente'); } catch (e) { toast(e.message); }
+    },
+    clientABord() {
+      const c = etat.course;
+      if (!c.code) { demarrerReel(''); return; }
+      modale(`<h2>Code de sécurité</h2><p>Demandez à ${esc(c.client)} son code à 4 chiffres (il le voit dans son appli).</p>
+        <input class="code-unique" id="code-saisi" inputmode="numeric" autocomplete="one-time-code" maxlength="4" placeholder="····" aria-label="Code à 4 chiffres"><p class="erreur" id="code-erreur" hidden></p>
+        <button class="btn btn-or" type="button" data-a="validerCode">Démarrer la course</button>`);
+      setTimeout(() => { const i = $('#code-saisi'); if (i) i.focus(); }, 80);
+    },
+    validerCode() {
+      const code = (($('#code-saisi') || {}).value || '').replace(/\D/g, '');
+      if (code.length !== 4) { const er = $('#code-erreur'); er.hidden = false; er.textContent = 'Le code contient 4 chiffres.'; return; }
+      demarrerReel(code);
+    },
+    clientAbsent() { modale(`<h2>Client absent ?</h2><p>Après l’attente offerte (${etat.course.attente || 5} min), vous pouvez annuler. Le client est prévenu et BDA applique les conditions d’annulation. Essayez d’abord de l’appeler.</p><button class="btn btn-principal" type="button" data-a="annulerAbsent">Annuler la course</button><button class="btn btn-second" type="button" data-a="appeler">Appeler le client</button><button class="btn btn-lien" type="button" data-a="fermerModale" data-v="ok">Continuer d’attendre</button>`); },
+    async annulerAbsent() {
+      const c = etat.course;
+      try { await api('course.absent', { numero: c.numero }); fermerModale(); etat.course = null; fermerChat(); toast('Course annulée : client absent.'); aller('carte'); }
+      catch (e) { fermerModale(); toast(e.message); }
+    },
+    async terminer() {
+      const c = etat.course;
+      try { await api('course.terminer', { numero: c.numero }); son('ok'); fermerChat(); historique = null; aller('fin'); interrogerServeur(); }
+      catch (e) { toast(e.message); }
+    },
+    noteClient(n) { const c = etat.course; c.noteClient = +n; son('clic'); rendu(); api('course.noterClient', { numero: c.numero, note: +n }).catch(() => {}); },
+    repasserEnLigne() { etat.course = null; fermerChat(); if (!etat.enLigne) { arreterGps(); relacherEcran(); } aller('carte'); interrogerServeur(); },
+    appeler() {
+      const tel = etat.course && etat.course.tel;
+      if (!tel) { toast('Numéro du client indisponible : écrivez-lui un message.'); return; }
+      location.href = `tel:${String(tel).replace(/[^\d+]/g, '')}`;
+    },
+    voirBon() { const c = etat.course; if (c) modale(`<h2>Bon de réservation</h2><p>À présenter en cas de contrôle : il prouve que la course a été réservée à l’avance.</p>${htmlBonChauffeur(c)}<button class="btn btn-second" type="button" data-a="fermerModale" data-v="ok">Fermer</button>`); },
+    abandonner() {
+      modale(`<h2>Rendre la course ?</h2><p>Elle sera proposée tout de suite à un autre chauffeur et le client sera prévenu. À utiliser seulement en cas d’imprévu (panne, accident, urgence).</p>
+        <button class="btn btn-principal" type="button" data-a="confirmerAbandon">Rendre la course</button><button class="btn btn-second" type="button" data-a="fermerModale" data-v="ok">Je continue</button>`);
+    },
+    async confirmerAbandon() {
+      const c = etat.course;
+      try { await api('course.abandonner', { numero: c.numero, motif: 'imprévu du chauffeur' }); fermerModale(); etat.course = null; fermerChat(); aller('carte'); toast('Course rendue : elle est proposée à un autre chauffeur.'); interrogerServeur(); }
+      catch (e) { fermerModale(); toast(e.message); }
+    },
+    voirReservations(v) {
+      const liste = v === 'm' ? etat.mesReservations : etat.reservations;
+      const date = (s) => { const d = dateServeur(s); return `${d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })} à ${heure(d)}`; };
+      modale(`<h2>${v === 'm' ? 'Mes réservations' : 'Réservations à accepter'}</h2>
+        ${liste.length ? liste.map((r) => `<div class="resa"><div class="haut-resa"><b>${esc(date(r.quand))}</b><span>${euros(r.prix + (r.protection || 0))}</span></div>
+          <div class="trajet"><div><span class="pt"></span><span>${esc(r.depart.titre)}<small>${esc(r.depart.sous)}</small></span></div><div><span class="pt pt-carre"></span><span>${r.arrivee ? esc(r.arrivee.titre) : `À disposition ${esc(r.heures)} h`}</span></div></div>
+          <div class="puces"><span class="puce">${esc(r.gammeNom)}</span><span class="puce">${esc(r.client.prenom)}</span>${r.options.map((x) => `<span class="puce">${esc(x)}</span>`).join('')}</div>
+          ${v === 'm' ? `<button class="btn btn-or" type="button" data-a="partir" data-v="${esc(r.numero)}">Partir chercher le client</button>` : `<button class="btn btn-or" type="button" data-a="accepterResa" data-v="${esc(r.numero)}">Accepter la réservation</button>`}</div>`).join('') : '<p>Aucune réservation pour le moment.</p>'}
+        <button class="btn btn-second" type="button" data-a="fermerModale" data-v="ok">Fermer</button>`);
+    },
+    async accepterResa(numero) {
+      try { await api('course.accepter', { numero }); fermerModale(); son('ok'); toast('Réservation acceptée : elle est dans « confirmées ». Le client est prévenu.'); interrogerServeur(); }
+      catch (e) { toast(e.message); }
+    },
+    async partir(numero) {
+      try { const { course } = await api('course.partir', { numero }); fermerModale(); prendreCourse(course); }
+      catch (e) { toast(e.message); }
+    },
+    gammeVehicule(v) {
+      const g = new Set(CHAUFFEUR.gammes || []);
+      if (g.has(v)) g.delete(v); else g.add(v);
+      CHAUFFEUR.voiture = ($('#vh-modele') || {}).value || CHAUFFEUR.voiture; CHAUFFEUR.couleur = ($('#vh-couleur') || {}).value || CHAUFFEUR.couleur; CHAUFFEUR.plaque = ($('#vh-plaque') || {}).value || CHAUFFEUR.plaque;
+      CHAUFFEUR.gammes = [...g]; rendu();
+    },
+    async enregistrerVehicule() {
+      const modele = $('#vh-modele').value.trim(), couleur = $('#vh-couleur').value.trim(), plaque = $('#vh-plaque').value.trim().toUpperCase();
+      try { await api('chauffeur.vehicule', { modele, couleur, plaque, gammes: (CHAUFFEUR.gammes || []).filter((x) => x !== 'vip') }); toast('Véhicule enregistré.'); await chargerProfil(); }
+      catch (e) { toast(e.message); }
+    },
+    activerNotifs() { activerNotifications(false); },
+  };
+  // envoi du code (ou démarrage direct) au serveur
+  async function demarrerReel(code) {
+    const c = etat.course;
+    try { await api('course.demarrer', { numero: c.numero, code }); fermerModale(); son('ok'); aller('course'); }
+    catch (e) { const er = $('#code-erreur'); if (er) { er.hidden = false; er.textContent = e.message; } else toast(e.message); }
+  }
+  // messagerie : envoi au serveur, les réponses du client arrivent avec l'échange toutes les 3 secondes
+  if (REEL) transportMessages.envoyer = (numero, m) => {
+    api('course.message', { numero, texte: m.texte, apres: dernierMsg() }).then((r) => { for (const x of r.messages) recevoirMessage(x); }).catch((e) => toast(`Message non envoyé : ${e.message}`));
+  };
+  if (REEL) Object.assign(actions, actionsReelles);
+
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-a]');
     if (!el || !actions[el.dataset.a]) return;
@@ -1633,7 +2144,12 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
     const m = /^code-(\d)$/.exec(e.target.id || '');
     if (m && e.target.value) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 1); const n = $(`#code-${+m[1] + 1}`); if (n && e.target.value) n.focus(); }
   });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.id === 'chat-texte') actions.envoyerMessage(); if (e.key === 'Escape' && couche.innerHTML) fermerModale(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.id === 'chat-texte') actions.envoyerMessage();
+    if (e.key === 'Enter' && REEL && (e.target.id === 'cx-id' || e.target.id === 'cx-mdp')) actions.connexionReelle();
+    if (e.key === 'Enter' && e.target.id === 'code-saisi') actions.validerCode();
+    if (e.key === 'Escape' && couche.innerHTML) fermerModale();
+  });
 
   /* ================= Démarrage ================= */
   if (location.hostname === 'localhost') window.__chauffeur = { etat, actions, pos, moteur };
@@ -1642,6 +2158,11 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
   requestAnimationFrame(boucle);
   demarrerMoteur();
   rendu();
+  if (REEL) {
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
+    if (jeton) { chargerProfil().then(() => interrogerServeur()); activerNotifications(true); }
+    else { vueConnexionReelle(); $('#connexion').hidden = false; }
+  }
   chargerCarte();
 })();
 </script>

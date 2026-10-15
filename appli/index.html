@@ -11,9 +11,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BDA">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest?v=20261015-1511">
-<link rel="apple-touch-icon" href="icone-180.png?v=20261015-1511">
-<link rel="icon" href="icone-192.png?v=20261015-1511" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?v=20261015-1527">
+<link rel="apple-touch-icon" href="icone-180.png?v=20261015-1527">
+<link rel="icon" href="icone-192.png?v=20261015-1527" type="image/png">
 </head>
 <body><title>Appli BDA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2548,16 +2548,16 @@ button.paiement { width: 100%; text-align: left; }
     envoyer(numero, message) {
       if (!REEL) { setTimeout(() => repondreDemo(numero, message.texte), 900 + Math.random() * 900); return; }
       const c = etat.course;
-      api('course.message', { numero, texte: message.texte, apres: c ? c.dernierMsg : 0 }).then((r) => { if (c) for (const m of r.messages) c.dernierMsg = Math.max(c.dernierMsg, m.id); }).catch((e) => toast(`Message non envoyé : ${e.message}`));
+      api('course.message', { numero, texte: message.texte, apres: c ? c.dernierMsg : 0 }).then((r) => { if (c) integrerMessages(c, r.messages); }).catch((e) => toast(`Message non envoyé : ${e.message}`));
     },
   };
   const REPONSES_RAPIDES = ['J’arrive', 'Je suis devant', 'J’ai des bagages', 'Pouvez-vous m’appeler ?', 'Merci !'];
   let chatOuvert = false;
   const conversation = () => { const c = etat.course; if (!c) return null; return (etat.conversations[c.fiche.numero] ||= { messages: [], nonLus: 0, ecrit: false }); };
-  function ajouterMessage(de, texte) {
+  function ajouterMessage(de, texte, id) {
     const cv = conversation();
     if (!cv) return;
-    cv.messages.push({ de, texte, t: new Date() }); cv.ecrit = false;
+    cv.messages.push({ de, texte, t: new Date(), id }); cv.ecrit = false;
     if (de === 'chauffeur') { son('ding'); if (!chatOuvert) cv.nonLus++; }
     majChat(); majPastilleMessages();
   }
@@ -4293,7 +4293,7 @@ button.paiement { width: 100%; text-align: left; }
       c.fiche.chauffeur = { ...c.chauffeur };
       if (ch.position) positionChauffeur(c, ch.position);
     }
-    for (const m of messages || []) { c.dernierMsg = Math.max(c.dernierMsg, m.id); if (m.de === 'chauffeur') ajouterMessage('chauffeur', m.texte); }
+    integrerMessages(c, messages);
     if (s.statut === avant) return;
     switch (s.statut) {
       case 'recherche':
@@ -4322,6 +4322,18 @@ button.paiement { width: 100%; text-align: left; }
           <button class="btn btn-second" type="button" data-a="planifier">Réserver à l’avance</button>
           <a class="btn btn-lien" href="tel:${LEGAL.tel.replace(/\s/g, '')}">Appeler BDA · ${esc(LEGAL.tel)}</a>`);
         break;
+    }
+  }
+  // messages venus du serveur : ceux du chauffeur, et les nôtres après un rechargement de l'appli
+  function integrerMessages(c, messages) {
+    for (const m of messages || []) {
+      c.dernierMsg = Math.max(c.dernierMsg, m.id);
+      const cv = conversation();
+      if (!cv || cv.messages.some((x) => x.id === m.id)) continue;
+      const local = m.de === 'client' && cv.messages.find((x) => !x.id && x.de === 'client' && x.texte === m.texte);
+      if (local) { local.id = m.id; continue; }
+      if (m.de === 'chauffeur') ajouterMessage('chauffeur', m.texte, m.id);
+      else { cv.messages.push({ de: 'client', texte: m.texte, t: dateServeur(m.t) || new Date(), id: m.id }); majChat(); }
     }
   }
   // nouvelle position envoyée par le téléphone du chauffeur
@@ -4353,6 +4365,8 @@ button.paiement { width: 100%; text-align: left; }
         demander('route', { ax: x, ay: y, bx: etat.arrivee.x, by: etat.arrivee.y }).then((r) => {
           c.calculC = false; c.tReste = performance.now();
           if (!r || etat.course !== c) return;
+          // le trajet affiché part de la vraie position de la voiture (comme dans l'appli du chauffeur)
+          c.tr = trace(r.pts); c.fC = 0;
           c.reste = Math.max(1, Math.round(r.secondes / 60)); c.arriveePrevue = new Date(Date.now() + c.reste * 60000);
         });
       }
@@ -4762,8 +4776,10 @@ button.paiement { width: 100%; text-align: left; }
     if (e.key !== 'Enter') return;
     const id = e.target.id;
     if (CHAMP_DE[id]) { const premier = $('#resultats [data-a="choisirResultat"]'); if (premier) premier.click(); }
-    if (id === 'cx-tel') actions.validerTel();
-    if (id === 'cx-email') actions.validerEmail();
+    if (id === 'cx-tel' && !REEL) actions.validerTel();
+    if (id === 'cx-email') (REEL ? actions.cxEmail : actions.validerEmail)();
+    if (id === 'cx-mdp' && REEL && etat.auth.etape === 'mdp') actions.cxConnexion();
+    if (id === 'cx-mdp' && REEL && etat.auth.etape === 'reset') actions.cxReset();
     if (id === 'chat-texte') actions.envoyerMessage();
     if (id === 'promo-code') actions.appliquerPromo();
   });

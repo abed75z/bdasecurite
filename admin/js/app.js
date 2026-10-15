@@ -31,6 +31,7 @@ const MENU = [
   { route: 'contenu', libelle: 'Contenu & tarifs', icone: 'crayon' },
   { route: 'avis', libelle: 'Avis clients', icone: 'avis', badge: 'avis' },
   { route: 'vtc', libelle: 'Réservations VTC', icone: 'voiture', badge: 'reservations' },
+  { route: 'appli', libelle: 'Appli BDA', icone: 'mobile', badge: 'appli', alerte: true },
   { groupe: 'Outils' },
   { route: 'creations', libelle: 'Cartes & flyers', icone: 'badge' },
   { route: 'notes', libelle: 'Notes', icone: 'crayon' },
@@ -224,7 +225,7 @@ export async function majCompteurs() {
       b.hidden = n === 0;
     });
     // Pastille sur l'icône de l'application installée : ce qui attend une action
-    const attente = ['demandes', 'messages', 'assistance', 'avis', 'reservations', 'candidatures', 'equipe'].reduce((s, k) => s + (compteurs[k] || 0), 0);
+    const attente = ['demandes', 'messages', 'assistance', 'avis', 'reservations', 'candidatures', 'equipe', 'appli'].reduce((s, k) => s + (compteurs[k] || 0), 0);
     if ('setAppBadge' in navigator) (attente ? navigator.setAppBadge(attente) : navigator.clearAppBadge()).catch(() => {});
   } catch (e) { /* silencieux */ }
 }

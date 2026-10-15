@@ -362,7 +362,8 @@ try {
           $dist = appli_distance($p, ['lat' => $v['lat'], 'lng' => $v['lng']]);
           if ($dist > 12000) continue;
           $gammes = json_decode((string)$v['gammes'], true) ?: [];
-          $liste[] = ['lat' => round((float)$v['lat'], 4), 'lng' => round((float)$v['lng'], 4), 'cap' => $v['cap'] === null ? null : round((float)$v['cap']), 'gammes' => $gammes];
+          // position arrondie à environ 50 m : le client voit les voitures autour de lui, pas l'adresse exacte du chauffeur
+          $liste[] = ['lat' => round((float)$v['lat'] * 2000) / 2000, 'lng' => round((float)$v['lng'] * 2000) / 2000, 'cap' => $v['cap'] === null ? null : round((float)$v['cap'] / 15) * 15, 'gammes' => $gammes];
           foreach ($gammes as $g) $proche[$g] = min($proche[$g] ?? INF, $dist);
         }
       }

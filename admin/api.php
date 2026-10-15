@@ -1741,6 +1741,7 @@ function compteurs(): array
     'assistance' => $q("SELECT COUNT(*) FROM assist_conv WHERE statut = 'attente' OR (statut = 'equipe' AND non_lu > 0)"),
     'equipe' => $q("SELECT (SELECT COUNT(*) FROM comptes_equipe WHERE statut = 'attente') + (SELECT COUNT(*) FROM absences WHERE statut = 'attente') + (SELECT COUNT(*) FROM main_courante WHERE statut = 'nouveau')"),
     'opportunites' => $q("SELECT COUNT(*) FROM opportunites WHERE statut = 'a_traiter' AND cree > COALESCE((SELECT v FROM reglages WHERE k = 'veille_vu_le'), '')"),
+    'appli' => $q("SELECT COUNT(*) FROM courses WHERE statut IN ('reservee', 'recherche')"),
   ];
 }
 /* ---------- Espace équipe ---------- */

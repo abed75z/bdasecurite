@@ -38,7 +38,7 @@ RewriteRule ^transfert-aeroport-paris(\.html)?/?$ https://bdasecurite.com/chauff
 # qui affiche la page de maintenance aux visiteurs et le site normal à l'administrateur.
 # (l'espace admin, les services et les images restent accessibles)
 RewriteCond %{DOCUMENT_ROOT}/.site-hors-ligne -f
-RewriteCond %{REQUEST_URI} !^/(admin|api|assets|app)/
+RewriteCond %{REQUEST_URI} !^/(admin|api|assets|app|appli)/
 RewriteCond %{REQUEST_URI} !^/(maintenance\.php|robots\.txt|pointage|pointage\.html|espace-equipe|espace-equipe\.html|manifest-equipe-bda\.webmanifest)$
 RewriteRule ^ maintenance.php [END]
 # Mon accès (page personnelle du gérant, protégée par la connexion admin)
@@ -82,5 +82,22 @@ RedirectMatch 404 /.site-hors-ligne
 <IfModule mod_headers.c>
   <If "%{REQUEST_URI} =~ m#^/assets/(css|js)/#">
     Header set Cache-Control "public, max-age=2592000"
+  </If>
+</IfModule>
+
+# Appli BDA (/appli/ et /appli/chauffeur/) : la page et son service worker sont toujours vérifiés
+# (une nouvelle version arrive tout de suite), les données de la carte sont gardées 7 jours.
+<IfModule mod_headers.c>
+  <If "%{REQUEST_URI} =~ m#^/appli/(chauffeur/)?(index\.html|sw\.js|manifest\.webmanifest)?$#">
+    Header set Cache-Control "no-cache"
+    Header set X-Robots-Tag "noindex, nofollow"
+  </If>
+  <If "%{REQUEST_URI} =~ m#^/appli/carte/#">
+    Header set Cache-Control "public, max-age=604800"
+  </If>
+  <If "%{REQUEST_URI} =~ m#^/appli/#">
+    Header set Permissions-Policy "geolocation=(self), camera=(), microphone=()"
+    Header set Referrer-Policy "same-origin"
+    Header set X-Content-Type-Options "nosniff"
   </If>
 </IfModule>

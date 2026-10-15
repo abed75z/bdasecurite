@@ -7,6 +7,7 @@
 /* ---------- Appels au serveur ---------- */
 let jeton = '';
 export const definirJeton = (t) => { if (t) jeton = t; };
+export const jetonCsrf = () => jeton; // pour les autres fichiers d'API de l'admin (ex. appli-api.php)
 export class ErreurApi extends Error {
   constructor(message, statut) { super(message); this.statut = statut; }
 }

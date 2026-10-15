@@ -19,6 +19,7 @@ import { pageFlyers } from './flyers.js';
 import { pageVisites } from './visites.js';
 import { pageAgents } from './agents.js';
 import { pageVtc } from './vtc.js';
+import { pageAppli } from './appli.js';
 import { pageSite } from './site.js';
 import { pageContenu } from './contenu.js';
 import { pageAssistance } from './assistance.js';
@@ -41,6 +42,7 @@ export const PAGES = {
   clients: pageClients,
   agents: pageAgents,
   vtc: pageVtc,
+  appli: pageAppli,
   site: pageSite,
   contenu: pageContenu,
   assistance: pageAssistance,

@@ -1,0 +1,389 @@
+/* =========================================================
+   MAISON — style premium et institutionnel (16/10/2026)
+   Couche finale du site public, chargée après toutes les autres.
+   - formes nettes : cartes et panneaux 4 à 6 px, boutons 4 px, plus de pilules ;
+   - icônes fines posées sur le fond, sans carré autour ;
+   - titres à empattements (Cormorant Garamond), texte en Inter ;
+   - grilles éditoriales, lignes fines, pas d'ombres lourdes ni de dégradés.
+   Couleurs et photos inchangées.
+   ========================================================= */
+
+:root {
+  --m-titre: "Cormorant Garamond", "Cormorant", Georgia, "Times New Roman", serif;
+  --m-texte: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --m-trait: rgba(11, 11, 12, 0.12);
+  --m-trait-fort: rgba(11, 11, 12, 0.28);
+  --m-encre: #0b0b0c;
+  --m-gris: #5b5b60;
+  --m-champagne: #b39a6b;
+  --radius-btn: 4px;
+  --radius-panel: 6px;
+  --radius-card: 6px;
+  --r-tuile: 6px;
+}
+
+/* ---------- 1. Typographie ---------- */
+
+.h1, h1, .ac-hero .h1, .lp-hero .h1, .rc__titre {
+  font-family: var(--m-titre) !important;
+  font-weight: 500 !important;
+  font-size: clamp(2.6rem, 1.7rem + 2.9vw, 4.3rem) !important;
+  line-height: 1.04 !important;
+  letter-spacing: -0.005em !important;
+}
+.h2, h2, .rc-titre-2 {
+  font-family: var(--m-titre) !important;
+  font-weight: 500 !important;
+  font-size: clamp(2.1rem, 1.55rem + 1.8vw, 3.15rem) !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.003em !important;
+}
+.h1 em, .h2 em, h1 em, h2 em { font-style: italic !important; font-weight: 500 !important; }
+.manifeste {
+  font-family: var(--m-titre) !important;
+  font-weight: 500 !important;
+  font-size: clamp(1.8rem, 1.3rem + 1.6vw, 2.7rem) !important;
+  line-height: 1.22 !important;
+  letter-spacing: 0 !important;
+}
+.ac-pro p, .tuile__txt b, .chiffres b, .lp-cta h2, .lp-box h3, .rv-summary b {
+  font-family: var(--m-titre) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+}
+.tuile__txt b { font-size: clamp(1.45rem, 1.25rem + 0.55vw, 1.75rem) !important; line-height: 1.15 !important; }
+.ac-pro p { font-size: clamp(1.35rem, 1.15rem + 0.7vw, 1.75rem) !important; font-weight: 500 !important; }
+.h3, h3 { font-family: var(--m-texte); font-weight: 600; letter-spacing: -0.01em; }
+
+/* Petits titres : majuscules fines et espacées */
+.kicker, .lp-crumbs, .rc__sur, .ent-bloc legend {
+  font-family: var(--m-texte) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.24em !important;
+  text-transform: uppercase !important;
+}
+.lp-crumbs { letter-spacing: 0.12em !important; }
+.lead { font-weight: 400 !important; }
+
+/* ---------- 2. Boutons : rectangulaires, majuscules discrètes ---------- */
+
+.btn, form .btn, .rappel__envoyer, .mobile-menu__foot .btn, .mobile-bar .btn, .rc-envoyer {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  font-family: var(--m-texte) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+.btn { padding: 15px 26px; }
+.btn .icon { width: 15px; height: 15px; stroke-width: 1.4; }
+.btn:hover { filter: none !important; transform: none !important; }
+.btn--outline { border-width: 1px !important; }
+
+/* ---------- 3. Formes : plus de pilules ni de grands arrondis ---------- */
+
+/* Pilules -> rectangles */
+.wa, .vtc-indispo__badge, .service-ferme__badge, .burger,
+.segment, .segment button, .segment__fond, .ac-pilule, .nav__survol,
+.nav--v2 .nav__client, .nav--v2 .nav__appeler, .nav--v2 .nav__devis, .nav--v2 .nav__tel,
+.nav--v2 .nav__col a.nav__cta, .nav--v2 .nav__espace, .nav--v2 .nav__actions .nav__tel, .nav--v2 .burger,
+.nav__tel, .nav__client, .haut-page, .rappel__x {
+  border-radius: 4px !important;
+}
+/* Étiquettes et puces de texte */
+.pill, .chips span, .shot__tag, .ref__badge, .ref__tags li, .lp-zones span, .ac-secteurs p a,
+.ac-hero__dispo, .tf-carte__badge, .recap span, .job__tags span, .pick span, .rv-card__tag, .ac-hero__sur span {
+  border-radius: 3px !important;
+}
+/* Cartes, panneaux et blocs */
+.glass, .stats, .hero__proof, .mock, .minimap, .booking__car, .trip, .driver, .timeline li, .shot,
+.ref__card, .reviews-band, .step, .perk, .cta__card, .resa-rapide, .resa-rapide label, .presta__item, .urgence,
+.lp-card, .lp-steps li, .lp-box, .lp-cta, .nav__panel, .ac-moyen, .ac-hero__badge,
+.tf-estim, .tf-calc, .tf-carte, .tf-majorations, .tf-tableau, .msg, .chiffres li, .ac-contact__carte,
+.form-card, .opt__card, .job, .summary, .next li, .ac-points li, .rv-summary, .rv-card, .rv-note, .board,
+.notif, .ac-etapes--cartes li, .ac-garanties__liste li, .ac-secteurs-bande a, dialog.rappel, .cx-pop, .cx-pop__choix,
+.ent-carte, .apply-card, .nav--v2 .nav__panel, .nav--v2 .nav__panel--large, .nav--v2 .nav__panel--petit, .nav--v2 .cx-pop,
+.quote__urgent, .opt-lien, .board__item, .rv-skeleton, .rv-empty, .legal dl, .ac-bloc, .ac-secteurs > div, .ac-points,
+.service-ferme, .vtc-indispo__boite, .feature__bg, .socials a, .nav__col a {
+  border-radius: 6px !important;
+}
+/* Photos : coins à peine adoucis */
+.ref__photo, .ref__photo::after, .lp-photo, .ref-galerie figure, .ac-hero__photo, .ac-ref__photo, .apply__photo,
+.rv-form-aside figure, .feature__bg img {
+  border-radius: 4px !important;
+}
+/* Champs */
+.input, input.input, textarea.input, select.input, .tf-champ select, .tf-champ input, .rappel__champ input,
+.rappel__champ select, .ent-form textarea, .mock__field, .as-input {
+  border-radius: 4px !important;
+}
+
+/* ---------- 4. Icônes : fines, directement sur le fond ---------- */
+
+.tuile__ico, .step__icon, .lp-list .icon, .lp-list li .icon, .perk__icon, .lp-card .ico, .opt__icon, .q-icon,
+.job__ico, .board__ico, .notif__ico, .cx-pop__ic, .glass__icon, .hero__proof-ico, .mock__ico, .presta__item > .icon,
+.ac-etapes--cartes .etape__ico, .hero__trust .tick, .ac-pilule .icon {
+  background: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+.tuile__ico, .lp-card .ico, .perk__icon, .step__icon, .job__ico, .opt__icon, .q-icon {
+  width: 30px !important;
+  height: 30px !important;
+  stroke-width: 1.15 !important;
+  color: var(--m-encre) !important;
+}
+.tuile__ico *, .lp-card .ico *, .etape__ico, .lp-list .icon, .hero__trust .icon { stroke-width: 1.2 !important; }
+.hero__trust .tick { width: auto !important; height: auto !important; }
+
+/* ---------- 5. Ombres et dégradés : supprimés ---------- */
+
+.tuile, .lp-card, .tf-carte, .tf-tableau, .tf-estim, .tf-calc, .rv-card, .rv-summary, .form-card, .ent-carte,
+.opt__card, .job, .lp-box, .lp-cta, .chiffres li, .ac-points li, .faq__item, .ac-etapes li, .apply-card,
+.lp-list li, .lp-steps li, .ac-contact__carte, .board, .wa, .mobile-bar, dialog.rappel {
+  box-shadow: none !important;
+}
+.lp-card { background-image: none !important; }
+/* Survol des cartes : pas de soulèvement, simple trait plus marqué */
+.tuile:hover, .lp-card:hover, .tf-carte:hover, .ac-etapes li:hover, .rv-card:hover, .job:hover,
+.tuile.rv.vu:hover, .lp-card.cascade.is-in:hover, .tf-carte.cascade.is-in:hover, .ac-etapes li.cascade.is-in:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ---------- 6. Services de l'accueil : grille éditoriale à traits fins ---------- */
+
+.tuiles {
+  gap: 1px !important;
+  background: var(--m-trait) !important;
+  border: 1px solid var(--m-trait) !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+}
+.tuile {
+  border-radius: 0 !important;
+  border: 0 !important;
+  background: #fbfaf7 !important;
+  padding: clamp(26px, 2.6vw, 38px) !important;
+  gap: 14px !important;
+  transition: background-color 0.25s !important;
+}
+.tuile:hover { background: #fff !important; }
+.tuile::after { display: none !important; }
+.tuile__txt span { color: var(--m-gris) !important; }
+.tuile__lien {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.18em !important;
+  text-transform: uppercase !important;
+  color: var(--m-encre) !important;
+}
+.tuile__lien .icon { width: 14px; height: 14px; stroke-width: 1.3; }
+
+/* Onglets Sécurité privée / Chauffeur privé : soulignés */
+.segment {
+  background: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--m-trait) !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  gap: 8px;
+}
+.segment button {
+  border-radius: 0 !important;
+  padding: 12px 18px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.16em !important;
+  text-transform: uppercase !important;
+  color: var(--m-gris) !important;
+  background: none !important;
+}
+.segment button[aria-selected="true"] { color: var(--m-encre) !important; }
+.segment__fond {
+  top: auto !important;
+  bottom: -1px !important;
+  height: 2px !important;
+  border-radius: 0 !important;
+  background: var(--m-encre) !important;
+  box-shadow: none !important;
+}
+
+/* ---------- 7. Étapes : frise numérotée sur une ligne ---------- */
+
+.ac-etapes {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: clamp(20px, 3vw, 44px) !important;
+}
+.ac-etapes li {
+  margin-top: 0 !important;
+  padding: 22px 0 0 !important;
+  background: none !important;
+  border: 0 !important;
+  border-top: 1px solid var(--m-encre) !important;
+  border-radius: 0 !important;
+}
+.ac-etapes li::before, .ac-etapes::before, .ac-etapes::after { display: none !important; }
+.ac-etapes li > span:first-child {
+  display: block;
+  margin-bottom: 14px;
+  font-family: var(--m-titre) !important;
+  font-size: 1.6rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: var(--m-champagne) !important;
+}
+.ac-etapes b { font-size: 16px !important; }
+.ac-etapes .etape__ico { display: none !important; }
+@media (max-width: 900px) { .ac-etapes { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; row-gap: 34px !important; } }
+@media (max-width: 520px) { .ac-etapes { grid-template-columns: 1fr !important; } }
+
+/* Étapes des pages de services */
+.lp-steps li {
+  background: none !important;
+  border: 0 !important;
+  border-top: 1px solid var(--m-trait-fort) !important;
+  border-radius: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.lp-steps li::before {
+  font-family: var(--m-titre) !important;
+  font-weight: 500 !important;
+  font-size: 1.5rem !important;
+  color: var(--m-champagne) !important;
+  background: none !important;
+}
+
+/* ---------- 8. Questions fréquentes : liste à traits fins ---------- */
+
+.faq__item {
+  background: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--m-trait) !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+.faq__item:first-child { border-top: 1px solid var(--m-trait) !important; }
+.faq__q { padding-left: 0 !important; padding-right: 0 !important; }
+.faq__plus {
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ---------- 9. Pages de services ---------- */
+
+.lp-card {
+  background: #fbfaf7 !important;
+  border: 1px solid var(--m-trait) !important;
+}
+.lp-list li {
+  background: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--m-trait) !important;
+  border-radius: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.lp-zones span { background: none !important; border: 1px solid var(--m-trait-fort) !important; }
+
+/* ---------- 10. En-tête, menus et éléments flottants ---------- */
+
+.nav--v2 .nav__espace { padding-inline: 14px !important; }
+.nav--v2 .nav__panel, .nav--v2 .cx-pop { box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.55) !important; }
+.nav--v2 .nav__col a.nav__cta::after, .ac-secteurs-bande a::after {
+  content: "" !important;
+  width: 14px;
+  height: 10px;
+  display: inline-block;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 10' fill='none' stroke='%23000' stroke-width='1.2'%3E%3Cpath d='M0 5h13M9 1l4 4-4 4'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 10' fill='none' stroke='%23000' stroke-width='1.2'%3E%3Cpath d='M0 5h13M9 1l4 4-4 4'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+.wa { box-shadow: none !important; }
+.haut-page { box-shadow: none !important; }
+.mobile-bar { box-shadow: 0 -1px 0 var(--m-trait) !important; }
+
+/* ---------- 11. Détails ---------- */
+
+/* Coches du haut des pages : plus de pastille */
+.tick, .hero__trust .tick, .lp-hero .hero__trust .tick { background: none !important; box-shadow: none !important; }
+/* Bouton « remonter » : carré discret, sans anneau */
+.haut-page {
+  width: 44px !important;
+  height: 44px !important;
+  border: 1px solid var(--m-trait-fort) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+.haut-page__anneau { display: none !important; }
+.haut-page__fleche { width: 16px !important; height: 16px !important; stroke-width: 1.4 !important; }
+/* Chiffres alignés (les chiffres anciens de la police font « o1 ») */
+.h1, .h2, h1, h2, .manifeste, .chiffres b, .ac-etapes li > span:first-child, .lp-steps li::before, .tuile__txt b {
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "lnum" 1;
+}
+/* Mention au-dessus du titre de l'accueil */
+.ac-hero__sur {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.24em !important;
+  text-transform: uppercase !important;
+}
+/* Pastilles de choix du devis : carrées */
+.opt__check { border-radius: 3px !important; }
+.stepper button i { border-radius: 3px !important; }
+/* Photos : coins à peine adoucis, y compris l'image elle-même */
+.lp-photo img, .ref-galerie img, .ac-hero__photo img, .ac-ref__photo img, .apply__photo img, .rv-form-aside img, .lp-article figure img { border-radius: 4px !important; }
+/* Cartes des pages de services : même grille à traits fins que l'accueil */
+.lp-cards {
+  gap: 1px !important;
+  background: var(--m-trait) !important;
+  border: 1px solid var(--m-trait) !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+}
+.lp-cards .lp-card { border: 0 !important; border-radius: 0 !important; background: #fbfaf7 !important; }
+.lp-cards .lp-card:hover { background: #fff !important; }
+.lp-box h3, .lp-box .h3 { font-size: clamp(1.6rem, 1.4rem + 0.6vw, 1.95rem) !important; line-height: 1.12 !important; }
+.lp-card a, .lp-card .lien { letter-spacing: 0.14em; }
+/* Tarifs : le montant garde sa taille (la règle « span = petit texte » le rétrécissait) */
+.tf-prix b { font-family: var(--m-titre) !important; font-weight: 500 !important; font-size: 42px !important; letter-spacing: 0 !important; font-variant-numeric: lining-nums tabular-nums; }
+.tf-prix b span, .tf-carte--vedette .tf-prix b span { font-size: inherit !important; color: inherit !important; }
+/* Montants modifiables depuis l'admin : toujours à la taille du texte qui les entoure */
+span[data-prix] { font-size: inherit !important; color: inherit !important; font-weight: inherit !important; }
+.ac-tarifs li b { font-family: var(--m-titre) !important; font-weight: 500 !important; font-size: 26px !important; letter-spacing: 0 !important; font-variant-numeric: lining-nums tabular-nums; }
+.ac-tarifs li b small { font-family: var(--font-body, Manrope, sans-serif); letter-spacing: 0.04em; }
+@media (max-width: 640px) {
+  .ac-tarifs__bande { display: grid !important; gap: 22px !important; }
+  .ac-tarifs ul { display: grid !important; grid-template-columns: 1fr 1fr; gap: 22px 18px !important; }
+  .ac-tarifs li b { font-size: 22px !important; white-space: nowrap; }
+  .ac-tarifs .btn { justify-self: start; }
+}
+/* Grilles à traits fins : la case reste pleine, seul son contenu apparaît
+   (sinon le fond des traits se voit en gris pendant l'animation) */
+.tuiles > .tuile.rv, .lp-cards > .lp-card.cascade { opacity: 1 !important; transform: none !important; filter: none !important; transition: background-color 0.25s !important; }
+.tuiles > .tuile.rv > *, .lp-cards > .lp-card.cascade > * { opacity: 0; translate: 0 12px; transition: opacity 0.6s var(--ease), translate 0.7s var(--ease); }
+.tuiles > .tuile.rv > * { transition-delay: var(--rd, 0s); }
+.lp-cards > .lp-card.cascade > * { transition-delay: calc(var(--c, 0) * 70ms); }
+.tuiles > .tuile.rv.vu > *, .lp-cards > .lp-card.cascade.is-in > * { opacity: 1; translate: none; }
+@media (prefers-reduced-motion: reduce) {
+  .tuiles > .tuile.rv > *, .lp-cards > .lp-card.cascade > * { opacity: 1; translate: none; transition: none; }
+}
+/* Menu mobile : page en cours signalée par la couleur, sans pavé clair */
+.mobile-menu a[aria-current="page"] { background: none !important; border-radius: 0 !important; color: #d3bc97 !important; }
+/* Photos révélées : l'ouverture garde des coins à 4 px */
+.ac-ref__photo { clip-path: inset(0 0 0 0 round 4px) !important; }
+.ac-ref__photo.rv:not(.vu) { clip-path: inset(18% 8% 18% 8% round 4px) !important; }
+.lp-photo.rv { clip-path: inset(14% 6% 14% 6% round 4px); }
+.lp-photo.rv.vu { clip-path: inset(0 round 4px); }
+.shot.is-in { clip-path: inset(0 round 4px); }
+@media (prefers-reduced-motion: reduce) { .ac-ref__photo.rv:not(.vu), .lp-photo.rv { clip-path: inset(0 round 4px) !important; } }
+/* Encadré « Nos services » (fond clair) : titre lisible */
+nav.lp-box .kicker { color: var(--m-gris) !important; }

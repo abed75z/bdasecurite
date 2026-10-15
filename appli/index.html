@@ -11,9 +11,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BDA">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest?v=20261015-1527">
-<link rel="apple-touch-icon" href="icone-180.png?v=20261015-1527">
-<link rel="icon" href="icone-192.png?v=20261015-1527" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?v=20261015-1541">
+<link rel="apple-touch-icon" href="icone-180.png?v=20261015-1541">
+<link rel="icon" href="icone-192.png?v=20261015-1541" type="image/png">
 </head>
 <body><title>Appli BDA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -928,7 +928,7 @@ button.paiement { width: 100%; text-align: left; }
     directeur: 'Abdelouahab Bouidia', evtc: null, tva: null, mediateur: null, hebergeur: null,
     // la protection rapprochée de l'option VIP est faite et facturée par la société titulaire de l'autorisation CNAPS
     protection: 'BDASECURITE, EURL au capital de 2 000 €, SIRET 109 076 463 00016', cnaps: null,
-    version: '14/10/2026',
+    version: '15/10/2026',
   };
   const aCompleter = (v) => v || '<span class="a-completer">à compléter</span>';
   const MENTION_CNAPS = 'L’autorisation d’exercice délivrée par le CNAPS ne confère aucune prérogative de puissance publique à l’entreprise ou aux personnes qui en bénéficient.';
@@ -2889,11 +2889,11 @@ button.paiement { width: 100%; text-align: left; }
       <h3>Responsable</h3>
       <p>${esc(LEGAL.exploitant)} (${esc(LEGAL.enseigne)}), ${esc(LEGAL.adresse)}. Contact : ${esc(LEGAL.email)}.</p>
       <h3>Ce que nous collectons</h3>
-      <ul><li>Votre identité et vos coordonnées : prénom, nom, téléphone, e-mail.</li><li>Vos courses : adresses, horaires, véhicule, prix, notes et pourboires.</li><li>Votre position, si vous l’autorisez : seulement pour proposer votre adresse de départ et pendant une course.</li><li>Les contacts de confiance et les passagers que vous ajoutez vous-même.</li><li>Vos préférences de course et d’accessibilité.</li><li>Le paiement est traité par notre prestataire de paiement : nous ne voyons jamais votre numéro de carte.</li></ul>
+      <ul><li>Votre identité et vos coordonnées : prénom, nom, téléphone, e-mail.</li><li>Vos courses : adresses, horaires, véhicule, prix, notes et pourboires.</li><li>Votre position, si vous l’autorisez : seulement pour proposer votre adresse de départ et pendant une course.</li><li>Les contacts de confiance et les passagers que vous ajoutez vous-même.</li><li>Vos préférences de course et d’accessibilité.</li><li>${REEL ? 'Pendant la phase de lancement, le paiement se fait à bord, auprès du chauffeur : aucune donnée bancaire ne passe par l’appli.' : 'Le paiement est traité par notre prestataire de paiement : nous ne voyons jamais votre numéro de carte.'}</li></ul>
       <h3>Pourquoi</h3>
       <ul><li>Réaliser vos courses et vous assister (exécution du contrat).</li><li>Établir les reçus, les factures et les bons de réservation (obligations légales).</li><li>Votre sécurité et la lutte contre la fraude (intérêt légitime).</li><li>Les offres et les statistiques, seulement si vous l’acceptez (consentement, retirable à tout moment).</li></ul>
       <h3>Qui les reçoit</h3>
-      <p>${REEL ? 'Votre chauffeur reçoit votre prénom, votre numéro de téléphone (pour pouvoir vous joindre pendant la course), le lieu de prise en charge et vos préférences ; avec l’option VIP, l’agent de protection aussi. Vous voyez de votre côté le prénom, la voiture, la plaque et le numéro de votre chauffeur.' : 'Votre chauffeur reçoit votre prénom, le lieu de prise en charge et vos préférences ; avec l’option VIP, l’agent de protection aussi.'} Nos prestataires techniques (hébergement, SMS, paiement) les traitent pour notre compte, dans l’Union européenne. Les autorités peuvent les obtenir si la loi l’exige. Nous ne vendons jamais vos données et ne faisons pas de publicité ciblée.</p>
+      <p>${REEL ? 'Votre chauffeur reçoit votre prénom, votre numéro de téléphone (pour pouvoir vous joindre pendant la course), le lieu de prise en charge et vos préférences ; avec l’option VIP, l’agent de protection aussi. Vous voyez de votre côté le prénom, la voiture, la plaque et le numéro de votre chauffeur.' : 'Votre chauffeur reçoit votre prénom, le lieu de prise en charge et vos préférences ; avec l’option VIP, l’agent de protection aussi.'} ${REEL ? 'Notre hébergeur (OVH, en France) les conserve pour notre compte.' : 'Nos prestataires techniques (hébergement, SMS, paiement) les traitent pour notre compte, dans l’Union européenne.'} Les autorités peuvent les obtenir si la loi l’exige. Nous ne vendons jamais vos données et ne faisons pas de publicité ciblée.</p>
       <h3>Combien de temps</h3>
       <p>Votre compte est gardé tant que vous l’utilisez, puis supprimé après 3 ans sans activité. Vos courses sont gardées 3 ans pour les réclamations. Les reçus et factures sont gardés 10 ans, comme la loi l’impose. Votre position n’est pas gardée après la course.</p>
       <h3>Vos droits</h3>
@@ -4282,7 +4282,12 @@ button.paiement { width: 100%; text-align: left; }
     if (etat.course === c && !['terminee', 'annulee', 'aucun'].includes(c.statut)) minuteurSuivi = setTimeout(() => interrogerCourse(c), c.statut === 'recherche' ? 2500 : document.hidden ? 12000 : 3000);
   }
   // le téléphone revient au premier plan : on rafraîchit tout de suite
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && REEL && etat.course && etat.course.reel) suivreCourse(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden || !REEL || !etat.user) return;
+    if (etat.course && etat.course.reel) suivreCourse(); else chargerActivite();
+  });
+  // sans course à l'écran : une réservation peut démarrer (le chauffeur part chercher le client)
+  setInterval(() => { if (REEL && etat.user && !etat.course && !document.hidden && !suiviPublic) chargerActivite(); }, 45000);
   function appliquerCourse(c, s, messages) {
     const avant = c.statut;
     c.statut = s.statut;
@@ -4718,6 +4723,14 @@ button.paiement { width: 100%; text-align: left; }
     const h = location.hash;
     let m = /^#suivi=([a-f0-9]{24})$/.exec(h);
     if (m) { modeSuiviPublic(m[1]); return; }
+    // textes légaux lisibles sans compte (adresse demandée par l'App Store et Google Play)
+    const textePublic = { '#confidentialite': 'politique', '#conditions': 'cgv', '#mentions': 'mentions' }[h];
+    if (textePublic) {
+      $('#lancement').hidden = true; connexion.hidden = true;
+      chargerConfig().then(() => { etat.pile = []; aller(textePublic); nav.hidden = true; });
+      aller(textePublic); nav.hidden = true;
+      return;
+    }
     chargerConfig().then(() => activerNotifications(true));
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
     m = /^#reset=([a-f0-9]{48})$/.exec(h);
@@ -4936,6 +4949,20 @@ button.paiement { width: 100%; text-align: left; }
     'Démo : votre position est transmise à l’assistance BDA.': 'Demo: your location is sent to BDA assistance.', 'Démo : signalement envoyé à l’assistance BDA. Réponse sous 24 h.': 'Demo: report sent to BDA assistance. Reply within 24 h.', 'Choisissez le type de problème.': 'Choose the type of problem.', 'Décrivez l’objet oublié.': 'Describe the forgotten item.',
     'Démo : votre chauffeur est prévenu. Nous vous rappelons pour la restitution.': 'Demo: your driver has been told. We’ll call you about the return.', 'Indiquez le prénom et un numéro de téléphone valide.': 'Enter the first name and a valid phone number.', 'Indiquez un nom et un numéro de téléphone valide.': 'Enter a name and a valid phone number.',
     'Choisissez un horaire au moins 30 minutes après maintenant.': 'Choose a time at least 30 minutes from now.', 'Exemple de numéro de vol : AF 1234.': 'Example flight number: AF 1234.', 'Indiquez le nom de votre société.': 'Enter your company name.', 'Démo : BDA vous rappelle sous 24 h.': 'Demo: BDA calls you back within 24 h.',
+    // vraie appli (reliée au serveur BDA)
+    'Votre adresse e-mail': 'Your email address', 'Continuer': 'Continue', 'Bon retour parmi nous': 'Welcome back', 'Votre mot de passe': 'Your password', 'Se connecter': 'Sign in', 'Mot de passe oublié ?': 'Forgot your password?',
+    'Mot de passe oublié ?': 'Forgot your password?', 'Créer mon compte': 'Create my account', 'Choisissez un mot de passe': 'Choose a password', 'Code d’accès BDA': 'BDA access code', 'Téléphone': 'Phone',
+    'Mot de passe (8 caractères, une lettre et un chiffre)': 'Password (8 characters, one letter and one number)', 'L’appli est en phase privée : le code vous est donné par BDA.': 'The app is in a private phase: BDA gives you the code.',
+    'Vérifiez vos e-mails': 'Check your email', 'Retour': 'Back', 'Choisissez un nouveau mot de passe': 'Choose a new password', 'Enregistrer et me connecter': 'Save and sign in', 'Un instant…': 'One moment…',
+    'Vos informations servent uniquement à vos courses. Elles ne sont jamais vendues.': 'Your details are only used for your rides. They are never sold.',
+    'BDA est en phase privée : la création d’un compte demande un code d’accès donné par BDA. Vos informations servent uniquement à vos courses. Elles ne sont jamais vendues.': 'BDA is in a private phase: creating an account requires an access code from BDA. Your details are only used for your rides. They are never sold.',
+    'Me prévenir par notification': 'Notify me', 'Aucun chauffeur libre': 'No driver free', 'Aucun chauffeur libre pour l’instant · réservez à l’avance': 'No driver free right now · book ahead', 'Chauffeurs BDA autour de vous': 'BDA drivers around you',
+    'À bord': 'On board', 'À régler à bord, au chauffeur': 'Pay on board, to the driver', 'Total TTC': 'Total incl. VAT', 'À bord, auprès du chauffeur': 'On board, to the driver',
+    'Votre reçu est envoyé par e-mail et reste dans Activité.': 'Your receipt is emailed and stays in Activity.', 'Aucun chauffeur disponible': 'No driver available', 'Réessayer': 'Try again',
+    'Commande impossible': 'Could not order', 'Compris': 'Got it', 'Changer mon mot de passe': 'Change my password', 'Changer de mot de passe': 'Change password', 'Mot de passe actuel': 'Current password',
+    'Votre mot de passe, pour confirmer': 'Your password, to confirm', 'Activer les notifications': 'Turn on notifications', 'Lien de suivi': 'Tracking link', 'Voir la page de suivi': 'View the tracking page',
+    'Appeler le 17': 'Call 17 (police)', 'Prévenir l’assistance BDA': 'Alert BDA assistance', 'Annuler': 'Cancel', 'Bientôt : payer dans l’appli': 'Coming soon: pay in the app', 'À bord, au chauffeur': 'On board, to the driver',
+    'Espèces ou carte bancaire, à la fin de la course': 'Cash or card, at the end of the ride', 'Suivi en direct': 'Live tracking', 'Chargement du suivi…': 'Loading tracking…',
     'Démo : choix entre compte personnel et compte entreprise.': 'Demo: choose between personal and business account.', 'Démo : le lien s’ouvrirait dans vos SMS ou WhatsApp.': 'Demo: the link would open in your texts or WhatsApp.', 'Recherche de l’adresse exacte…': 'Finding the exact address…',
   }));
   const VOITURE_EN = (t) => t.replace(/Classe ([A-Z])/g, '$1-Class').replace(/ ou similaire/g, ' or similar').replace(/\bnoire?\b/g, 'black').replace(/\bNoire?\b/g, 'Black').replace(/\bblanche?\b/g, 'white').replace(/\bBlanche?\b/g, 'White');

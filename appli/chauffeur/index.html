@@ -11,9 +11,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BDA Chauffeur">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest?v=20261015-1527">
-<link rel="apple-touch-icon" href="icone-180.png?v=20261015-1527">
-<link rel="icon" href="icone-192.png?v=20261015-1527" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?v=20261015-1541">
+<link rel="apple-touch-icon" href="icone-180.png?v=20261015-1541">
+<link rel="icon" href="icone-192.png?v=20261015-1541" type="image/png">
 </head>
 <body><title>BDA Chauffeur</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -145,7 +145,8 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
 .gros-gain b { font: 800 40px/1 var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .gros-gain small { color: var(--texte-2); font-size: 13px; }
 .semaine { display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 8px; height: 150px; padding: 14px 12px 10px; border-radius: 18px; background: var(--surface); }
-.semaine div { display: grid; justify-items: center; gap: 6px; height: 100%; align-content: end; }
+.semaine div { display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: 6px; height: 100%; min-height: 0; }
+.semaine div i { align-self: end; }
 .semaine i { display: block; width: 100%; max-width: 26px; border-radius: 7px 7px 3px 3px; background: var(--surface-3); }
 .semaine div.auj i { background: linear-gradient(to top, var(--or), var(--or-clair)); }
 .semaine span { font: 600 11px/1 var(--texte-police); color: var(--texte-3); }
@@ -1701,7 +1702,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
       <input id="cx-mdp" type="password" autocomplete="current-password" placeholder="Mot de passe">
       ${erreur ? `<p class="erreur" role="alert">${esc(erreur)}</p>` : ''}
       <button class="btn btn-or" type="button" data-a="connexionReelle">Se connecter</button>
-      <a href="/espace-equipe" target="_blank" rel="noopener">Mot de passe oublié ou pas encore de compte : Espace équipe</a>`;
+      <a href="https://bdasecurite.com/espace-equipe" target="_blank" rel="noopener">Mot de passe oublié ou pas encore de compte : Espace équipe</a>`;
   }
   function deconnexionLocale(message) {
     jeton = ''; ecrire('bda-chauffeur-jeton', '');
@@ -1960,7 +1961,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
       <button class="btn btn-principal" type="button" data-a="enregistrerVehicule">Enregistrer le véhicule</button>
       <h2 class="sect">Documents</h2>
       <p class="sous">Carte VTC, permis, assurance : vos documents sont dans votre Espace équipe BDA. La direction les vérifie avant de vous confier des courses.</p>
-      <a class="btn btn-second" href="/espace-equipe" target="_blank" rel="noopener">${ic('recu', 'ic-s')}Ouvrir l’Espace équipe</a>
+      <a class="btn btn-second" href="https://bdasecurite.com/espace-equipe" target="_blank" rel="noopener">${ic('recu', 'ic-s')}Ouvrir l’Espace équipe</a>
       <h2 class="sect">Réglages</h2>
       <div class="ligne"><span class="pastille">${ic('cloche', 'ic-s')}</span><span><b>Notifications</b><small>${etat.pushActif ? 'Activées : nouvelles courses, messages' : 'Pour être prévenu des courses, appli en arrière-plan'}</small></span>${etat.pushActif ? '' : '<button class="btn btn-second" type="button" data-a="activerNotifs" style="width:auto;height:40px;padding:0 14px">Activer</button>'}</div>
       <div class="ligne"><span class="pastille">${ic('soleil', 'ic-s')}</span><span><b>Mode clair</b><small>Plus lisible en plein soleil</small></span><button class="interrupteur" type="button" role="switch" aria-checked="${etat.modeAffichage === 'clair'}" data-a="basculerMode" aria-label="Mode clair"></button></div>

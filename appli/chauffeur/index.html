@@ -1,0 +1,1650 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Appli des chauffeurs BDA.">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BDA Chauffeur">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest?v=20261015-1511">
+<link rel="apple-touch-icon" href="icone-180.png?v=20261015-1511">
+<link rel="icon" href="icone-192.png?v=20261015-1511" type="image/png">
+</head>
+<body><title>BDA Chauffeur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
+<!-- Source de l'appli CHAUFFEUR. Ne pas publier ce fichier : lancer construire-chauffeur.ps1,
+     qui y ajoute le moteur de carte et les icônes de l'appli client, et publier appli-bda-chauffeur.html. -->
+<style>
+/* Appli chauffeur BDA : même univers noir et sobre que l'appli client, pensée pour être lue d'un coup d'œil en conduisant. */
+:root { --page: #050505; --display: "Manrope", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; --texte-police: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --ease: cubic-bezier(0.2, 0.8, 0.2, 1); color-scheme: dark; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--page); background-image: radial-gradient(800px 560px at 50% 0%, #161616 0%, rgba(5, 5, 5, 0) 70%); color: #fff; font-family: var(--texte-police); font-size: 15px; line-height: 1.45; display: grid; place-items: center; overflow: hidden; padding-inline: 16px; -webkit-font-smoothing: antialiased; }
+.appareil {
+  --fond: #000; --feuille: #101010; --surface: #161616; --surface-2: #222; --surface-3: #2e2e2e; --texte: #fff; --texte-2: #a7a7a7; --texte-3: #6f6f6f; --ligne: rgba(255, 255, 255, 0.09);
+  --principal: #fff; --sur-principal: #000; --or: #c9a66b; --or-clair: #e2cb9a; --rouge: #e5484d; --vert: #3fb27f; --ombre: 0 18px 50px rgba(0, 0, 0, 0.6); --verre: rgba(28, 28, 28, 0.86);
+  position: relative; width: min(410px, 100%); height: min(860px, calc(100% - 36px)); border-radius: 46px; overflow: hidden; background: var(--fond); color: var(--texte); isolation: isolate; container-type: size;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 0 11px #0d0d0d, 0 0 0 12px rgba(255, 255, 255, 0.07), 0 50px 120px -30px rgba(0, 0, 0, 0.95); color-scheme: dark;
+}
+.appareil[data-mode="clair"] { --fond: #fff; --feuille: #fff; --surface: #f3f3f3; --surface-2: #ebebeb; --surface-3: #dedede; --texte: #000; --texte-2: #5e5e5e; --texte-3: #8d8d8d; --ligne: rgba(0, 0, 0, 0.08); --principal: #000; --sur-principal: #fff; --or: #a8834b; --or-clair: #8a6a3a; --ombre: 0 16px 40px rgba(0, 0, 0, 0.16); --verre: rgba(255, 255, 255, 0.9); color-scheme: light; }
+@media (max-width: 520px) { body { padding-inline: 0; } .appareil { width: 100%; height: 100%; border-radius: 0; box-shadow: none; } }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-highlight-color: transparent; text-align: inherit; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--or); outline-offset: 2px; }
+.ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.ic-s { width: 18px; height: 18px; } .ic-xs { width: 15px; height: 15px; }
+#carte { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; transition: transform 0.7s var(--ease); transform-origin: 50% var(--gps-y, 60%); }
+.vue-gps #carte { transform: perspective(760px) rotateX(54deg) scale(1.6); }
+.appareil::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 46%; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 0.7s; background: linear-gradient(to bottom, var(--fond) 0%, var(--fond) 44%, color-mix(in srgb, var(--fond) 55%, transparent) 70%, transparent 100%); }
+.appareil.vue-gps::before { opacity: 1; }
+.carte-etat { position: absolute; top: 74px; left: 50%; transform: translateX(-50%); z-index: 5; height: 32px; padding: 0 14px; border-radius: 99px; display: inline-flex; align-items: center; background: var(--feuille); color: var(--texte-2); font: 600 12.5px/1 var(--texte-police); box-shadow: var(--ombre); }
+
+/* haut de l'écran : statut et gains du jour */
+.haut { position: absolute; top: 14px; left: 14px; right: 14px; z-index: 6; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.statut-pastille { display: inline-flex; align-items: center; gap: 9px; height: 44px; padding: 0 16px 0 12px; border-radius: 99px; background: var(--feuille); box-shadow: var(--ombre); font: 800 14px/1 var(--display); }
+.statut-pastille i { width: 10px; height: 10px; border-radius: 50%; background: var(--texte-3); }
+.statut-pastille.en-ligne i { background: var(--vert); box-shadow: 0 0 0 0 rgba(63, 178, 127, 0.6); animation: pouls 2s infinite; }
+@keyframes pouls { 70% { box-shadow: 0 0 0 8px rgba(63, 178, 127, 0); } 100% { box-shadow: 0 0 0 0 rgba(63, 178, 127, 0); } }
+.gains-pastille { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 99px; background: var(--principal); color: var(--sur-principal); box-shadow: var(--ombre); font: 800 15px/1 var(--display); font-variant-numeric: tabular-nums; }
+.btn-gps { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--feuille); box-shadow: var(--ombre); font: 800 13px/1 var(--display); }
+
+/* consigne de navigation */
+.consigne { position: absolute; top: 70px; left: 14px; right: 14px; z-index: 6; display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: 12px; padding: 14px 16px; border-radius: 20px; background: #0b0b0b; color: #fff; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), inset 0 0 0 1px rgba(201, 166, 107, 0.35); animation: monte-bas 0.4s var(--ease) both; }
+@keyframes monte-bas { from { transform: translateY(-14px); opacity: 0; } }
+.consigne .fleche-nav { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: var(--or); color: #000; }
+.consigne .fleche-nav .ic { width: 30px; height: 30px; stroke-width: 2.4; }
+.consigne b { display: block; font: 800 22px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.consigne span { display: block; margin-top: 3px; font: 600 15px/1.2 var(--texte-police); color: #d8d2c4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.consigne small { display: block; margin-top: 4px; color: #8f897c; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* panneau du bas */
+.feuille { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; max-height: calc(100% - 140px); overflow-y: auto; scrollbar-width: none; background: var(--feuille); border-radius: 24px 24px 0 0; box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35); padding: 10px 18px 104px; animation: monte 0.4s var(--ease) both; }
+.feuille.sans-nav { padding-bottom: 22px; }
+.feuille::-webkit-scrollbar { display: none; }
+@keyframes monte { from { transform: translateY(30px); opacity: 0.3; } }
+.poignee { width: 40px; height: 5px; border-radius: 5px; background: var(--surface-3); margin: 0 auto 14px; }
+.pile { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.titre-feuille { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.titre-feuille h2 { margin: 0; font: 800 22px/1.15 var(--display); letter-spacing: -0.02em; }
+.titre-feuille span { font: 800 17px/1 var(--display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sous { margin: 0; color: var(--texte-2); font-size: 14px; }
+.petit { margin: 0; color: var(--texte-3); font-size: 12px; }
+.centre { text-align: center; }
+.btn { width: 100%; height: 58px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font: 700 17px/1 var(--texte-police); transition: transform 0.15s; }
+.btn:active { transform: scale(0.985); }
+.btn-principal { background: var(--principal); color: var(--sur-principal); }
+.btn-second { background: var(--surface); color: var(--texte); }
+.btn-vert { background: var(--vert); color: #04140c; }
+.btn-or { background: linear-gradient(135deg, #e2cb9a, #c9a66b); color: #1a1206; }
+.btn-lien { height: 44px; color: var(--texte-2); font-weight: 600; font-size: 14.5px; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tuiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tuile { display: grid; gap: 4px; padding: 12px; border-radius: 14px; background: var(--surface); }
+.tuile b { font: 800 19px/1 var(--display); font-variant-numeric: tabular-nums; }
+.tuile small { color: var(--texte-2); font-size: 12px; }
+.client { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; background: var(--surface); }
+.avatar { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); font: 800 19px/1 var(--display); }
+.client b { display: block; font: 700 16px/1.2 var(--display); }
+.client small { display: block; color: var(--texte-2); font-size: 12.5px; margin-top: 2px; }
+.etoile { display: inline-flex; align-items: center; gap: 3px; color: var(--texte-2); font: 600 12.5px/1 var(--texte-police); }
+.etoile .ic { width: 13px; height: 13px; fill: var(--or); stroke: none; }
+.actions { display: flex; gap: 8px; }
+.rond { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); position: relative; }
+.pastille-nb { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; display: grid; place-items: center; background: var(--or); color: #000; font: 800 10.5px/1 var(--texte-police); }
+.trajet { display: grid; gap: 2px; }
+.trajet > div { display: grid; grid-template-columns: 18px 1fr; gap: 12px; align-items: start; padding: 4px 0; font-size: 14.5px; }
+.trajet small { display: block; color: var(--texte-2); font-size: 12.5px; }
+.pt { width: 10px; height: 10px; margin-top: 5px; border-radius: 50%; background: var(--texte); }
+.pt-carre { border-radius: 2px; }
+.puces { display: flex; flex-wrap: wrap; gap: 6px; }
+.puce { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px; border-radius: 99px; background: var(--surface-2); font: 600 12.5px/1 var(--texte-police); }
+.puce.or { background: rgba(201, 166, 107, 0.16); color: var(--or-clair); }
+.barre { height: 4px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.barre i { display: block; height: 100%; width: 0; background: var(--texte); border-radius: 4px; transition: width 0.25s linear; }
+.cases-code { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.cases-code input { height: 66px; width: 100%; border-radius: 14px; border: 2px solid transparent; background: var(--surface); text-align: center; font: 800 28px/1 var(--display); color: var(--texte); }
+.cases-code input:focus { outline: none; border-color: var(--or); }
+.erreur { margin: 0; color: var(--rouge); font-size: 13px; }
+
+/* offre de course */
+.offre { position: absolute; left: 12px; right: 12px; bottom: 96px; z-index: 30; display: grid; gap: 14px; padding: 18px; border-radius: 26px; background: #0b0b0b; color: #fff; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7), inset 0 0 0 1px rgba(201, 166, 107, 0.45); animation: offre-entre 0.5s var(--ease) both; }
+@keyframes offre-entre { from { transform: translateY(40px) scale(0.96); opacity: 0; } }
+.offre-haut { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.offre-haut .type { display: inline-flex; align-items: center; gap: 8px; font: 800 13px/1 var(--texte-police); letter-spacing: 0.12em; text-transform: uppercase; color: var(--or-clair); }
+.minuteur { position: relative; width: 52px; height: 52px; }
+.minuteur svg { width: 52px; height: 52px; transform: rotate(-90deg); }
+.minuteur circle { fill: none; stroke-width: 4; }
+.minuteur .f { stroke: #2a2a2a; }
+.minuteur .v { stroke: var(--or); stroke-linecap: round; stroke-dasharray: 144.5; transition: stroke-dashoffset 0.25s linear; }
+.minuteur span { position: absolute; inset: 0; display: grid; place-items: center; font: 800 17px/1 var(--display); font-variant-numeric: tabular-nums; }
+.offre-prix { font: 800 44px/1 var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.offre-prix small { display: block; margin-top: 6px; font: 600 13px/1.3 var(--texte-police); color: #a69f90; letter-spacing: 0; }
+.offre .trajet small { color: #a69f90; }
+.offre .pt { background: #fff; }
+.offre .puce { background: #1f1f1f; color: #e8e2d4; }
+.offre .duo .btn-second { background: #1c1c1c; color: #fff; }
+
+/* pages : gains, messages, profil */
+.page { position: absolute; inset: 0; z-index: 7; overflow-y: auto; scrollbar-width: none; background: var(--fond); }
+.page::-webkit-scrollbar { display: none; }
+.p { padding: 22px 18px 120px; display: grid; gap: 18px; animation: entre 0.35s var(--ease) both; }
+@keyframes entre { from { opacity: 0.4; transform: translateY(8px); } }
+.grand-titre { margin: 4px 0 0; font: 800 34px/1.05 var(--display); letter-spacing: -0.03em; }
+.sect { margin: 6px 0 -6px; font: 800 19px/1.2 var(--display); letter-spacing: -0.015em; }
+.gros-gain { display: grid; gap: 6px; padding: 18px; border-radius: 20px; background: radial-gradient(120% 120% at 100% 0%, rgba(201, 166, 107, 0.2), transparent 60%), var(--surface); }
+.gros-gain b { font: 800 40px/1 var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.gros-gain small { color: var(--texte-2); font-size: 13px; }
+.semaine { display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 8px; height: 150px; padding: 14px 12px 10px; border-radius: 18px; background: var(--surface); }
+.semaine div { display: grid; justify-items: center; gap: 6px; height: 100%; align-content: end; }
+.semaine i { display: block; width: 100%; max-width: 26px; border-radius: 7px 7px 3px 3px; background: var(--surface-3); }
+.semaine div.auj i { background: linear-gradient(to top, var(--or), var(--or-clair)); }
+.semaine span { font: 600 11px/1 var(--texte-police); color: var(--texte-3); }
+.ligne { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 0; width: 100%; text-align: left; border-bottom: 1px solid var(--ligne); }
+.ligne:last-child { border-bottom: 0; }
+.ligne .pastille { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--surface); }
+.ligne b { display: block; font: 600 15px/1.3 var(--texte-police); }
+.ligne small { display: block; color: var(--texte-2); font-size: 13px; margin-top: 2px; }
+.ligne .droite { font: 800 15px/1 var(--display); font-variant-numeric: tabular-nums; }
+.statut-doc { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 6px; font: 700 10.5px/1 var(--texte-police); letter-spacing: 0.06em; text-transform: uppercase; }
+.statut-doc.ok { background: rgba(63, 178, 127, 0.15); color: var(--vert); }
+.statut-doc.bientot { background: rgba(201, 166, 107, 0.16); color: var(--or-clair); }
+.carte-pro { position: relative; display: grid; gap: 14px; padding: 18px; border-radius: 20px; overflow: hidden; color: #f3ead6;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 3px), linear-gradient(135deg, #0a0a0a 0%, #262626 48%, #0d0d0d 100%); box-shadow: inset 0 0 0 1px rgba(201, 166, 107, 0.45); }
+.carte-pro .haut-cp { display: flex; justify-content: space-between; align-items: baseline; }
+.carte-pro .haut-cp b { font: 800 18px/1 var(--display); letter-spacing: 0.1em; }
+.carte-pro .haut-cp span { font: 600 10.5px/1 var(--texte-police); letter-spacing: 0.24em; text-transform: uppercase; color: var(--or-clair); }
+.carte-pro .qui { display: flex; align-items: center; gap: 14px; }
+.carte-pro .qui .avatar { background: #2b2b2b; box-shadow: inset 0 0 0 1px rgba(201, 166, 107, 0.5); color: #fff; }
+.carte-pro .qui b { display: block; font: 800 22px/1.1 var(--display); color: #fff; }
+.carte-pro .qui small { display: block; margin-top: 4px; color: #b9b2a3; font-size: 13px; }
+.plaque { font: 800 13px/1 var(--display); letter-spacing: 0.05em; color: #111; background: #f4f4f2; border-radius: 6px; padding: 6px 8px; border-left: 7px solid #2b4fb5; white-space: nowrap; justify-self: start; }
+.interrupteur { width: 52px; height: 32px; border-radius: 99px; background: var(--surface-3); position: relative; flex: none; transition: background 0.2s; }
+.interrupteur::after { content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; transition: transform 0.25s var(--ease); }
+.interrupteur[aria-checked="true"] { background: var(--vert); }
+.interrupteur[aria-checked="true"]::after { transform: translateX(20px); }
+.numero { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: 14px; background: var(--surface); }
+.numero b { font: 800 18px/1 var(--display); }
+
+/* messagerie */
+.chat { position: absolute; inset: 0; z-index: 45; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; background: var(--fond); animation: entre 0.3s var(--ease) both; }
+.chat-tete { display: grid; grid-template-columns: 44px 44px minmax(0, 1fr) 44px; align-items: center; gap: 10px; padding: 14px 14px 10px; border-bottom: 1px solid var(--ligne); }
+.chat-tete .avatar { width: 44px; height: 44px; font-size: 16px; }
+.chat-tete b { display: block; font: 800 16px/1.2 var(--display); }
+.chat-tete small { display: block; color: var(--texte-2); font-size: 12.5px; }
+.chat-info { margin: 0; padding: 8px; color: var(--texte-3); font-size: 11.5px; text-align: center; }
+.chat-liste { overflow-y: auto; padding: 8px 14px 14px; display: flex; flex-direction: column; gap: 8px; scrollbar-width: none; }
+.chat-vide { margin: auto; color: var(--texte-3); font-size: 13.5px; text-align: center; max-width: 26ch; }
+.bulle-msg { max-width: 78%; display: grid; gap: 3px; }
+.bulle-msg p { margin: 0; padding: 10px 13px; border-radius: 18px; font-size: 14.5px; line-height: 1.4; overflow-wrap: anywhere; }
+.bulle-msg small { font-size: 10.5px; color: var(--texte-3); padding: 0 6px; }
+.bulle-msg.chauffeur { align-self: flex-end; justify-items: end; }
+.bulle-msg.chauffeur p { background: var(--principal); color: var(--sur-principal); border-bottom-right-radius: 6px; }
+.bulle-msg.client { align-self: flex-start; }
+.bulle-msg.client p { background: var(--surface-2); border-bottom-left-radius: 6px; }
+.chat-rapides { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 6px 14px; }
+.chat-rapides button { flex: none; height: 34px; padding: 0 13px; border-radius: 99px; background: var(--surface); font: 600 13px/1 var(--texte-police); }
+.chat-saisie { display: grid; grid-template-columns: minmax(0, 1fr) 48px; gap: 8px; padding: 8px 14px 16px; }
+.chat-saisie input { height: 48px; min-width: 0; padding: 0 16px; border-radius: 99px; border: 2px solid transparent; background: var(--surface); font: 500 15.5px/1 var(--texte-police); }
+.chat-saisie input:focus { outline: none; border-color: var(--texte); }
+.chat-envoyer { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; background: var(--principal); color: var(--sur-principal); }
+.bouton-rond { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); }
+
+/* barre du bas */
+.nav { position: absolute; left: 50%; bottom: 16px; z-index: 20; transform: translateX(-50%); width: calc(100% - 28px); max-width: 360px; height: 68px; padding: 6px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; border-radius: 99px; background: var(--verre); border: 1px solid var(--ligne); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: var(--ombre); }
+.nav button { border-radius: 99px; display: grid; justify-items: center; align-content: center; gap: 4px; font: 600 11.5px/1 var(--texte-police); color: var(--texte-2); position: relative; }
+.nav button[aria-current="page"] { background: var(--surface-2); color: var(--texte); }
+.nav .point { position: absolute; top: 9px; left: calc(50% + 6px); width: 9px; height: 9px; border-radius: 50%; background: var(--or); border: 2px solid var(--fond); }
+
+/* connexion */
+.connexion { position: absolute; inset: 0; z-index: 60; display: grid; align-content: end; gap: 14px; padding: 26px 22px 34px; background: radial-gradient(90% 60% at 50% 18%, rgba(201, 166, 107, 0.18), transparent 70%), #000; color: #fff; }
+.connexion .logo { align-self: center; justify-self: center; margin-bottom: auto; margin-top: 18cqh; text-align: center; }
+.connexion .logo b { display: block; font: 800 64px/1 var(--display); letter-spacing: 4px; }
+.connexion .logo span { display: block; margin-top: 10px; font: 600 11px/1 var(--texte-police); letter-spacing: 0.42em; padding-left: 0.42em; color: var(--or-clair); }
+.connexion h1 { margin: 0; font: 800 26px/1.15 var(--display); letter-spacing: -0.02em; }
+.connexion p { margin: 0; color: #a7a7a7; font-size: 14px; }
+.connexion .champ-faux { height: 56px; border-radius: 14px; padding: 0 16px; display: flex; align-items: center; background: #161616; color: #6f6f6f; font-size: 16px; }
+
+.toast { position: absolute; left: 14px; right: 14px; top: 16px; z-index: 70; display: flex; gap: 10px; align-items: flex-start; padding: 13px 15px; border-radius: 14px; background: var(--principal); color: var(--sur-principal); font-size: 13.5px; line-height: 1.4; box-shadow: var(--ombre); opacity: 0; transform: translateY(-10px); transition: opacity 0.3s, transform 0.3s var(--ease); pointer-events: none; }
+.toast.visible { opacity: 1; transform: none; }
+.voile { position: absolute; inset: 0; z-index: 65; display: grid; align-items: end; background: rgba(0, 0, 0, 0.55); }
+.modale { display: grid; gap: 14px; padding: 12px 18px 22px; border-radius: 24px 24px 0 0; background: var(--feuille); animation: monte 0.35s var(--ease) both; }
+.modale h2 { margin: 0; font: 800 21px/1.2 var(--display); }
+.modale p { margin: 0; color: var(--texte-2); font-size: 14px; }
+.etoiles { display: flex; justify-content: center; gap: 6px; }
+.etoiles button { width: 44px; height: 44px; display: grid; place-items: center; color: var(--surface-3); }
+.etoiles button .ic { width: 30px; height: 30px; fill: currentColor; stroke: none; }
+.etoiles button[aria-pressed="true"] { color: var(--or); }
+.coche { width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; background: var(--principal); color: var(--sur-principal); justify-self: center; }
+.coche .ic { width: 30px; height: 30px; stroke-width: 2.4; }
+@media (prefers-reduced-motion: reduce) { .p, .feuille, .offre, .consigne, .modale, .chat { animation: none; } #carte { transition: none; } }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-retour" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-croix" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="i-fleche" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-bas" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-loupe" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+  <symbol id="i-horloge" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-calendrier" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-avion" viewBox="0 0 24 24"><path d="M12 2.5c.9 0 1.5.8 1.5 2v5l7 4.2v2l-7-2.2V18l2.2 1.6V21L12 20l-3.7 1v-1.4l2.2-1.6v-4.5l-7 2.2v-2l7-4.2v-5c0-1.2.6-2 1.5-2z"/></symbol>
+  <symbol id="i-train" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="14" rx="3"/><path d="M6 10h12M9.5 13.5h.01M14.5 13.5h.01M9 17l-2.5 4M15 17l2.5 4"/></symbol>
+  <symbol id="i-hotel" viewBox="0 0 24 24"><path d="M4 21V4h10v17M14 9h6v12M7.5 8h3M7.5 12h3M7.5 16h3M17 13h.01M17 17h.01M2 21h20"/></symbol>
+  <symbol id="i-voiture" viewBox="0 0 24 24"><path d="M3.5 16.5V13l2-5.2A2 2 0 0 1 7.4 6.5h9.2a2 2 0 0 1 1.9 1.3l2 5.2v3.5z"/><path d="M3.5 13h17M7 16.5V19M17 16.5V19"/></symbol>
+  <symbol id="i-van" viewBox="0 0 24 24"><path d="M2.5 17V8.5A2 2 0 0 1 4.5 6.5h10.6a2 2 0 0 1 1.5.7l4 4.6c.3.4.5.8.5 1.3V17z"/><path d="M2.5 12h19M9 6.5V12"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol>
+  <symbol id="i-luxe" viewBox="0 0 24 24"><path d="M2.5 16.5v-2.8l2.6-4.3A2.5 2.5 0 0 1 7.2 8.2h9.6a2.5 2.5 0 0 1 2.1 1.2l2.6 4.3v2.8z"/><path d="M2.5 13.6h19M6.5 16.5V19M17.5 16.5V19M12 3.5l.8 1.6 1.7.2-1.2 1.2.3 1.7-1.6-.8-1.6.8.3-1.7-1.2-1.2 1.7-.2z"/></symbol>
+  <symbol id="i-eclair" viewBox="0 0 24 24"><path d="M13.5 2.5L5 13.5h6l-1 8 8.5-11h-6z"/></symbol>
+  <symbol id="i-suv" viewBox="0 0 24 24"><path d="M3 17V12l2.4-5A2 2 0 0 1 7.2 5.8h9.6A2 2 0 0 1 18.6 7L21 12v5z"/><path d="M3 12h18M7 17v2.5M17 17v2.5"/></symbol>
+  <symbol id="i-bouclier" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-bouclier-simple" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/></symbol>
+  <symbol id="i-etoile" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/></symbol>
+  <symbol id="i-vip" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/><path d="M12 8.2l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.3-2.4 1.3.5-2.6-1.9-1.8 2.6-.4z"/></symbol>
+  <symbol id="i-utilisateur" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></symbol>
+  <symbol id="i-telephone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-message" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+  <symbol id="i-enveloppe" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M4 7.5l8 6 8-6"/></symbol>
+  <symbol id="i-partage" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></symbol>
+  <symbol id="i-alerte" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/><path d="M12 8v5M12 16v.01"/></symbol>
+  <symbol id="i-carte" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18M7 14h3"/></symbol>
+  <symbol id="i-portefeuille" viewBox="0 0 24 24"><path d="M4 7.5V18a2 2 0 0 0 2 2h13a1 1 0 0 0 1-1v-3M4 7.5A2.5 2.5 0 0 1 6.5 5H17v2.5M4 7.5h15a1 1 0 0 1 1 1V12"/><path d="M20 12h-4a2 2 0 0 0 0 4h4z"/></symbol>
+  <symbol id="i-bouee" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.8"/><path d="M5.6 5.6l3.7 3.7M14.7 14.7l3.7 3.7M18.4 5.6l-3.7 3.7M9.3 14.7l-3.7 3.7"/></symbol>
+  <symbol id="i-accueil" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20h-5.5v-5.5h-5V20H4z"/></symbol>
+  <symbol id="i-services" viewBox="0 0 24 24"><path d="M5 5h.01M12 5h.01M19 5h.01M5 12h.01M12 12h.01M19 12h.01M5 19h.01M12 19h.01M19 19h.01" stroke-width="3"/></symbol>
+  <symbol id="i-recu" viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.5-2 1.5-2-1.5-2 1.5-2-1.5L6 21z"/><path d="M9 8h6M9 12h6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-moins" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-reglages" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-mallette" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 12.5h18"/></symbol>
+  <symbol id="i-cadeau" viewBox="0 0 24 24"><rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12M12 8c-2-3.5-6-3-5-.5.6 1.4 5 .5 5 .5zM12 8c2-3.5 6-3 5-.5-.6 1.4-5 .5-5 .5z"/></symbol>
+  <symbol id="i-volant" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M3.5 10.5h6M14.5 10.5h6M12 14.5V21"/></symbol>
+  <symbol id="i-groupe" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3"/><circle cx="16.5" cy="8.5" r="2.5"/><path d="M3 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M14.5 14.2c.6-.2 1.3-.3 2-.3 2.3 0 4.1 1.5 4.5 4.6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/></symbol>
+  <symbol id="i-livre" viewBox="0 0 24 24"><path d="M4 5.5C6 4.5 9 4.5 12 6c3-1.5 6-1.5 8-.5v13c-2-1-5-1-8 .5-3-1.5-6-1.5-8-.5z"/><path d="M12 6v13"/></symbol>
+  <symbol id="i-maison" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 9.5V20h14V9.5"/></symbol>
+  <symbol id="i-cadenas" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3M12 14.5v2.5"/></symbol>
+  <symbol id="i-accessibilite" viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="1.8"/><path d="M5 8.5l7 1.5 7-1.5M12 10v4.5M12 14.5L9 21M12 14.5l3 6.5"/></symbol>
+  <symbol id="i-cloche" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-soleil" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></symbol>
+  <symbol id="i-facture" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8.5 7.5h4M8.5 11.5h7M8.5 15.5h7"/></symbol>
+  <symbol id="i-cible" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
+  <symbol id="i-epingle-carte" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><path d="M9.5 10h5"/></symbol>
+  <symbol id="i-rejouer" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5M4 4v4h4"/></symbol>
+  <symbol id="i-sortie" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l4-4-4-4M14 12H4"/></symbol>
+  <symbol id="i-echange" viewBox="0 0 24 24"><path d="M7 4L3.5 7.5 7 11M3.5 7.5H17M17 13l3.5 3.5L17 20M20.5 16.5H7"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+  <symbol id="i-musee" viewBox="0 0 24 24"><path d="M3 9.5L12 4l9 5.5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20.5h18"/></symbol>
+  <symbol id="i-lieu" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8z"/></symbol>
+  <symbol id="i-ville" viewBox="0 0 24 24"><path d="M3 21V10l5-3v14M8 21V4l7 4v13M15 21V11l6 3v7M2 21h20"/></symbol>
+  <symbol id="i-viser" viewBox="0 0 24 24"><path d="M12 2.5l1.6 7.9 7.9 1.6-7.9 1.6-1.6 7.9-1.6-7.9L2.5 12l7.9-1.6z"/></symbol>
+  <symbol id="i-oeil" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+</svg>
+
+<div class="appareil" id="appareil" data-mode="sombre">
+  <canvas id="carte" aria-label="Carte de navigation"></canvas>
+  <span class="carte-etat" id="carte-etat" hidden></span>
+  <div class="haut" id="haut">
+    <button class="statut-pastille" type="button" id="statut" data-a="basculerLigne"><i></i><span>Hors ligne</span></button>
+    <button class="btn-gps" type="button" id="btn-gps" data-a="basculerGps" aria-label="Vue 3D ou 2D" hidden>2D</button>
+    <span class="gains-pastille" id="gains-jour">0 €</span>
+  </div>
+  <div class="consigne" id="consigne" hidden></div>
+  <section class="feuille" id="feuille" aria-live="polite"></section>
+  <main class="page" id="page" hidden></main>
+  <section class="offre" id="offre" hidden aria-live="assertive"></section>
+  <section class="chat" id="chat" hidden aria-label="Messagerie avec le client"></section>
+  <nav class="nav" id="nav" aria-label="Navigation">
+    <button type="button" data-a="onglet" data-v="carte"><svg class="ic"><use href="#i-pin"/></svg>Carte</button>
+    <button type="button" data-a="onglet" data-v="gains"><svg class="ic"><use href="#i-portefeuille"/></svg>Gains</button>
+    <button type="button" data-a="onglet" data-v="messages"><svg class="ic"><use href="#i-message"/></svg>Messages<span class="point" id="point-messages" hidden></span></button>
+    <button type="button" data-a="onglet" data-v="profil"><svg class="ic"><use href="#i-utilisateur"/></svg>Profil</button>
+  </nav>
+  <div class="toast" id="toast" role="status"><span></span></div>
+  <div id="couche"></div>
+  <div class="connexion" id="connexion">
+    <div class="logo"><b>BDA</b><span>ESPACE CHAUFFEUR</span></div>
+    <h1>Bonjour, chauffeur BDA</h1>
+    <p>Connectez-vous avec votre numéro de carte professionnelle VTC.</p>
+    <div class="champ-faux">N° de carte VTC</div>
+    <button class="btn btn-or" type="button" data-a="connexionDemo">Se connecter en démo</button>
+    <p style="font-size:12px;color:#6f6f6f">Prototype : aucune donnée n’est demandée. La vraie appli vérifiera la carte VTC et les documents avant la première course.</p>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const appareil = $('#appareil'), feuille = $('#feuille'), page = $('#page'), nav = $('#nav'), couche = $('#couche'), carteEtat = $('#carte-etat');
+  // Adresse du serveur BDA. Vide dans la maquette (offres de démonstration) ; construire.ps1 la remplit pour la vraie appli.
+  const SERVEUR = '/api/appli.php'; // ⟪serveur⟫
+  const REEL = !!SERVEUR;
+  appareil.classList.add(REEL ? 'reel' : 'demo');
+
+    const ic = (n, cls = '') => `<svg class="ic ${cls}"><use href="#i-${n}"/></svg>`;
+  const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const euros = (n) => (Math.round(n * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }) + ' €';
+  const heure = (d) => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const LOC = () => (etat.langue === 'en' ? 'en-GB' : 'fr-FR'); // langue des dates
+  const enDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const km1 = (n) => n.toFixed(1).replace('.', ',');
+  const telLisible = (t) => { const d = String(t || '').replace(/\D/g, ''); return d.length === 10 ? d.replace(/(\d{2})(?=\d)/g, '$1 ') : String(t || '').trim(); };
+  const lire = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) ?? d : d; } catch { return d; } };
+  const ecrire = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* stockage indisponible : l'appli continue sans mémoire */ } };
+  const normaliser = (t) => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[-'’.,/()"«»]/g, ' ').replace(/\s+/g, ' ').trim();
+  const qx = (lon) => Math.round((lon - 1) * 1e5), qy = (lat) => Math.round((lat - 48) * 1e5);
+  const lonDe = (x) => x / 1e5 + 1, latDe = (y) => y / 1e5 + 48;
+  const MX = 0.7327, MY = 1.1057; // mètres par unité de coordonnée
+  const metres = (a, b) => Math.hypot((a.x - b.x) * MX, (a.y - b.y) * MY);
+
+  /* ================= Données de démonstration (noms fictifs) ================= */
+  const CHAUFFEUR = { prenom: 'Karim', note: '4,96', voiture: 'Mercedes Classe E', couleur: 'Noire', plaque: 'GH-482-TZ', gamme: 'Berline', courses: 1284, depuis: 'mars 2024' };
+  const lieu = (titre, sous, lon, lat) => ({ titre, sous, x: qx(lon), y: qy(lat) });
+  const OFFRES = [
+    { client: 'Sarah', note: '4,9', depart: lieu('8 Rue Scribe', '75009 Paris', 2.331232, 48.872666), arrivee: lieu('Gare de Lyon', 'Paris 12e', 2.3734, 48.8443), prix: 40, options: ['2 bagages'], code: true },
+    { client: 'Thomas', note: '5,0', depart: lieu('Hôtel Plaza Athénée', '25 avenue Montaigne, Paris 8e', 2.3040, 48.8662), arrivee: lieu('Aéroport Charles-de-Gaulle, Terminal 2E', 'Roissy', 2.5714, 49.0040), prix: 52, options: ['Prix fixe aéroport', '3 bagages'], code: false },
+    { client: 'Inès', note: '4,8', depart: lieu('Gare Saint-Lazare', 'Paris 8e', 2.3253, 48.8763), arrivee: lieu('La Défense, Grande Arche', 'Puteaux', 2.2360, 48.8925), prix: 45, options: ['Course silencieuse'], code: true },
+    { client: 'Marc', note: '4,9', depart: lieu('Opéra Garnier', 'Paris 9e', 2.3316, 48.8720), arrivee: lieu('Tour Eiffel', 'Paris 7e', 2.2945, 48.8584), prix: 40, options: ['Eau offerte'], code: false },
+  ];
+  const DEPART_DEFAUT = { x: qx(2.3365), y: qy(48.8745) };
+  const ECRANS_GPS = ['approche', 'course'];
+  const VUES_CARTE = { carte: 1, approche: 1, attente: 1, course: 1, fin: 1 };
+  const etat = {
+    ecran: 'carte', enLigne: false, gps: true, langue: 'fr', depart: DEPART_DEFAUT, modeAffichage: lire('bda-chauffeur-affichage', 'sombre'),
+    connecte: lire('bda-chauffeur-connecte', false), offre: null, course: null, indexOffre: 0, gains: { jour: 0, courses: 0, pourboires: 0, enLigneDepuis: 0, minutesEnLigne: 0 },
+    historique: [], conversations: {}, sons: true,
+  };
+  const dessinerMiniCarte = () => {}, majResultats = () => {};
+
+    /* ================= Projection (Web Mercator) ================= */
+  // Unité U : 1/2^20 du tour de la Terre ; à Paris, 1 U ≈ 25 m. Pixels par U au zoom z : 2^(z-12).
+  const W20 = 1048576;
+  const mercU = (lon) => (lon + 180) / 360 * W20;
+  const mercV = (lat) => { const s = Math.sin(lat * Math.PI / 180); return (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * W20; };
+  const U0 = mercU(2.3522), V0 = mercV(48.8566);
+  const uDeX = (x) => mercU(lonDe(x)) - U0, vDeY = (y) => mercV(latDe(y)) - V0;
+  const xDeU = (u) => qx((u + U0) / W20 * 360 - 180);
+  const yDeV = (v) => qy(Math.atan(Math.sinh(Math.PI * (1 - 2 * (v + V0) / W20))) * 180 / Math.PI);
+  const METRES_PAR_U = 25.15;
+
+  /* ================= Chargement des données de la carte ================= */
+  const DOSSIER = '../carte/';
+  const D = { monde: null, lots: [], surfaces: null, labels: null, lieux: null, noms: null, communes: null, rues: null, numeros: {}, attenteNumeros: {} };
+  const chargement = { total: 8, faits: 0, erreur: false, carte: false, recherche: false };
+  let carteVersion = 0;
+  async function degzip(buf) {
+    const u8 = new Uint8Array(buf);
+    if (u8[0] !== 0x1f || u8[1] !== 0x8b) return u8;
+    if (typeof DecompressionStream !== 'undefined') {
+      const flux = new Blob([u8]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return new Uint8Array(await new Response(flux).arrayBuffer());
+    }
+    await new Promise((ok, ko) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js'; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
+    return window.pako.ungzip(u8);
+  }
+  // les fichiers de la carte sont publiés en texte (base64 de données compressées)
+  async function telecharger(nom) {
+    const fichier = nom.replace(/\.bin$/, '.txt');
+    const r = await fetch(DOSSIER + fichier);
+    if (!r.ok) throw new Error(`${fichier} : ${r.status}`);
+    const b = atob((await r.text()).trim()), u8 = new Uint8Array(b.length);
+    for (let i = 0; i < b.length; i++) u8[i] = b.charCodeAt(i);
+    return degzip(u8.buffer);
+  }
+  function lecteur(u8, p) {
+    const o = { p };
+    o.vi = () => { let r = 0, s = 0, b; do { b = u8[o.p++]; r |= (b & 127) << s; s += 7; } while (b & 128); return r >>> 0; };
+    o.zz = () => { const v = o.vi(); return (v >>> 1) ^ -(v & 1); };
+    return o;
+  }
+  // Table de conversion latitude → V pour aller vite (une valeur par unité de Y)
+  const Y_MIN = 0, Y_MAX = 160000;
+  let tableV = null;
+  function vRapide(y) {
+    if (!tableV) { tableV = new Float64Array(Y_MAX - Y_MIN + 1); for (let i = 0; i <= Y_MAX - Y_MIN; i++) tableV[i] = vDeY(i + Y_MIN); }
+    const i = y - Y_MIN;
+    return i >= 0 && i < tableV.length ? tableV[i] : vDeY(y);
+  }
+  const KU = W20 / 360 / 1e5, CU = mercU(1) - U0;
+  const CELLULE = 64;
+
+  function grilleDe(n, bbox) {
+    let a = Infinity, b = Infinity, c = -Infinity, d = -Infinity;
+    for (let i = 0; i < n; i++) { a = Math.min(a, bbox[4 * i]); b = Math.min(b, bbox[4 * i + 1]); c = Math.max(c, bbox[4 * i + 2]); d = Math.max(d, bbox[4 * i + 3]); }
+    const g = { u0: a, v0: b, gw: Math.max(1, Math.ceil((c - a) / CELLULE) + 1), gh: Math.max(1, Math.ceil((d - b) / CELLULE) + 1) };
+    const nc = g.gw * g.gh, compte = new Int32Array(nc + 1);
+    const plage = (i) => [Math.floor((bbox[4 * i] - a) / CELLULE), Math.floor((bbox[4 * i + 1] - b) / CELLULE), Math.floor((bbox[4 * i + 2] - a) / CELLULE), Math.floor((bbox[4 * i + 3] - b) / CELLULE)];
+    for (let i = 0; i < n; i++) { const [i0, j0, i1, j1] = plage(i); for (let j = j0; j <= j1; j++) for (let k = i0; k <= i1; k++) compte[k + j * g.gw + 1]++; }
+    for (let i = 0; i < nc; i++) compte[i + 1] += compte[i];
+    const pos = compte.slice(0, nc), liste = new Int32Array(compte[nc]);
+    for (let i = 0; i < n; i++) { const [i0, j0, i1, j1] = plage(i); for (let j = j0; j <= j1; j++) for (let k = i0; k <= i1; k++) liste[pos[k + j * g.gw]++] = i; }
+    g.debut = compte; g.liste = liste;
+    return g;
+  }
+  function simplifierUV(U, V, a, b, tol, sortieU, sortieV) {
+    // Douglas-Peucker sur les points a..b-1 ; renvoie le nombre de points écrits
+    const n = b - a, garde = new Uint8Array(n); garde[0] = garde[n - 1] = 1;
+    const pile = [0, n - 1], t2 = tol * tol;
+    while (pile.length) {
+      const j = pile.pop(), i = pile.pop();
+      const ax = U[a + i], ay = V[a + i], dx = U[a + j] - ax, dy = V[a + j] - ay, l2 = dx * dx + dy * dy;
+      let max = -1, im = -1;
+      for (let k = i + 1; k < j; k++) {
+        let t = l2 > 0 ? ((U[a + k] - ax) * dx + (V[a + k] - ay) * dy) / l2 : 0; t = t < 0 ? 0 : t > 1 ? 1 : t;
+        const ex = U[a + k] - ax - t * dx, ey = V[a + k] - ay - t * dy, d = ex * ex + ey * ey;
+        if (d > max) { max = d; im = k; }
+      }
+      if (max > t2) { garde[im] = 1; pile.push(i, im, im, j); }
+    }
+    let m = 0;
+    for (let k = 0; k < n; k++) if (garde[k]) { sortieU.push(U[a + k]); sortieV.push(V[a + k]); m++; }
+    return m;
+  }
+  function lireRoutes(u8, nomLot) {
+    const L = lecteur(u8, 4), n = L.vi();
+    const deb = new Int32Array(n), fin = new Int32Array(n), fl = new Uint8Array(n), nom = new Int32Array(n);
+    let X = new Int32Array(Math.max(1024, u8.length >> 1)), Y = new Int32Array(X.length), m = 0;
+    for (let w = 0; w < n; w++) {
+      fl[w] = u8[L.p++]; nom[w] = L.vi(); const k = L.vi(); deb[w] = m;
+      let x = L.vi(), y = L.vi(); X[m] = x; Y[m] = y; m++;
+      for (let i = 1; i < k; i++) { x += L.zz(); y += L.zz(); X[m] = x; Y[m] = y; m++; }
+      fin[w] = m;
+    }
+    X = X.slice(0, m); Y = Y.slice(0, m);
+    const U = new Float32Array(m), V = new Float32Array(m), bbox = new Float32Array(4 * n);
+    for (let i = 0; i < m; i++) { U[i] = X[i] * KU + CU; V[i] = vRapide(Y[i]); }
+    for (let w = 0; w < n; w++) {
+      let a = Infinity, b = Infinity, c = -Infinity, d = -Infinity;
+      for (let i = deb[w]; i < fin[w]; i++) { const u = U[i], v = V[i]; if (u < a) a = u; if (u > c) c = u; if (v < b) b = v; if (v > d) d = v; }
+      bbox[4 * w] = a; bbox[4 * w + 1] = b; bbox[4 * w + 2] = c; bbox[4 * w + 3] = d;
+    }
+    const lot = { nom: nomLot, n, deb, fin, fl, noms: nom, X, Y, U, V, bbox, grille: grilleDe(n, bbox), vu: new Int32Array(n) };
+    // version allégée des grands axes pour les vues de loin
+    const lu = [], lv = [], ldeb = new Int32Array(n), lfin = new Int32Array(n);
+    let q = 0;
+    for (let w = 0; w < n; w++) {
+      ldeb[w] = q;
+      if ((fl[w] & 7) <= 3) q += simplifierUV(U, V, deb[w], fin[w], 1.6, lu, lv);
+      lfin[w] = q;
+    }
+    lot.bas = { U: Float32Array.from(lu), V: Float32Array.from(lv), deb: ldeb, fin: lfin };
+    return lot;
+  }
+  function lireSurfaces(u8) {
+    const L = lecteur(u8, 4), n = L.vi();
+    const genre = new Uint8Array(n), r0 = new Int32Array(n + 1), anneaux = [], uu = [], vv = [];
+    let m = 0;
+    for (let f = 0; f < n; f++) {
+      genre[f] = u8[L.p++]; const nr = L.vi(); r0[f] = anneaux.length / 2;
+      for (let r = 0; r < nr; r++) {
+        const k = L.vi(); const a = m;
+        let x = L.vi(), y = L.vi(); uu.push(x * KU + CU); vv.push(vRapide(y)); m++;
+        for (let i = 1; i < k; i++) { x += L.zz(); y += L.zz(); uu.push(x * KU + CU); vv.push(vRapide(y)); m++; }
+        anneaux.push(a, m);
+      }
+    }
+    r0[n] = anneaux.length / 2;
+    const U = Float32Array.from(uu), V = Float32Array.from(vv), A = Int32Array.from(anneaux), bbox = new Float32Array(4 * n);
+    for (let f = 0; f < n; f++) {
+      let a = Infinity, b = Infinity, c = -Infinity, d = -Infinity;
+      for (let r = r0[f]; r < r0[f + 1]; r++) for (let i = A[2 * r]; i < A[2 * r + 1]; i++) { const u = U[i], v = V[i]; if (u < a) a = u; if (u > c) c = u; if (v < b) b = v; if (v > d) d = v; }
+      bbox[4 * f] = a; bbox[4 * f + 1] = b; bbox[4 * f + 2] = c; bbox[4 * f + 3] = d;
+    }
+    return { n, genre, r0, A, U, V, bbox };
+  }
+  function lireMonde(u8) {
+    const j = JSON.parse(new TextDecoder().decode(u8));
+    const conv = (p) => { const U = new Float32Array(p.length / 2), V = new Float32Array(p.length / 2); for (let i = 0; i < U.length; i++) { U[i] = mercU(p[2 * i] / 1000 - 30) - U0; V[i] = mercV(p[2 * i + 1] / 1000 + 30) - V0; } return { U, V }; };
+    return {
+      pays: j.pays.map(([nom, iso, anneaux]) => ({ nom, iso, anneaux: anneaux.map(conv) })),
+      regions: j.regions.map(([nom, anneaux]) => ({ nom, anneaux: anneaux.map(conv) })),
+      villes: j.villes.map(([nom, x, y, pop, cap, fr]) => ({ nom, u: mercU(x / 1000 - 30) - U0, v: mercV(y / 1000 + 30) - V0, pop, cap, fr })),
+    };
+  }
+  function lireLieux(u8) {
+    const j = JSON.parse(new TextDecoder().decode(u8));
+    D.labels = j.labels.map(([nom, genre, x, y, pop]) => ({ nom, genre, u: x * KU + CU, v: vRapide(y), pop }));
+    D.labels.sort((a, b) => a.genre - b.genre || b.pop - a.pop);
+    const alias = (nom, cat) => (cat !== 'aeroport' && cat !== 'terminal' ? '' : /roissy|gaulle/i.test(nom) ? ' roissy cdg charles de gaulle aeroport' : /orly/i.test(nom) ? ' orly aeroport' : /beauvais/i.test(nom) ? ' beauvais aeroport' : ' aeroport');
+    D.lieux = j.lieux.map(([nom, cat, x, y]) => ({ nom, cat, x, y, norm: ' ' + normaliser(nom) + alias(nom, cat) }));
+  }
+  function lireCommunes(u8) {
+    D.communes = new TextDecoder().decode(u8).split('\n').map((l) => {
+      const [insee, nom, cp, x, y] = l.split('\t');
+      const court = /^Paris \d/.test(nom) ? 'Paris' : nom;
+      return { insee, nom, court, cp, x: +x, y: +y, dep: +insee.slice(0, 2), norm: normaliser(court === nom ? nom : court + ' ' + nom), normCourt: normaliser(court) };
+    });
+  }
+  function lireRues(u8) {
+    const lignes = new TextDecoder().decode(u8).split('\n'), n = lignes.length;
+    const R = { n, nom: new Array(n), texte: new Array(n), sep: new Int32Array(n), com: new Int32Array(n), cp: new Array(n), x: new Int32Array(n), y: new Int32Array(n), nb: new Int32Array(n), dep: new Uint8Array(n), debut: new Int32Array(n).fill(-1) };
+    for (let i = 0; i < n; i++) {
+      const c = lignes[i].split('\t');
+      const com = D.communes[+c[1]];
+      R.nom[i] = c[0]; R.com[i] = +c[1]; R.cp[i] = c[2] || com.cp; R.x[i] = +c[3]; R.y[i] = +c[4]; R.nb[i] = +c[5]; R.dep[i] = +c[6];
+      const nn = ' ' + normaliser(c[0]);
+      R.sep[i] = nn.length;
+      R.texte[i] = nn + ' | ' + com.norm + ' ' + R.cp[i];
+    }
+    D.rues = R;
+  }
+  function lireNumeros(dep, u8) {
+    const R = D.rues, L = lecteur(u8, 4);
+    let total = 0;
+    for (let i = 0; i < R.n; i++) if (R.dep[i] === dep && R.nb[i] > 0) total += R.nb[i];
+    const val = new Int32Array(total), ax = new Int32Array(total), ay = new Int32Array(total), rue = new Int32Array(total);
+    let k = 0;
+    for (let i = 0; i < R.n; i++) {
+      if (R.dep[i] !== dep || R.nb[i] <= 0) continue;
+      const c = L.vi(); R.debut[i] = k;
+      let v = 0, x = R.x[i], y = R.y[i];
+      for (let j = 0; j < c; j++) { v += L.vi(); x += L.zz(); y += L.zz(); val[k] = v; ax[k] = x; ay[k] = y; rue[k] = i; k++; }
+    }
+    D.numeros[dep] = { val, x: ax, y: ay, rue, n: k, grille: null };
+  }
+  function chargerNumeros(dep) {
+    if (D.numeros[dep]) return Promise.resolve(D.numeros[dep]);
+    if (!D.attenteNumeros[dep]) D.attenteNumeros[dep] = telecharger(`numeros-${dep}.bin`).then((u8) => { lireNumeros(dep, u8); return D.numeros[dep]; });
+    return D.attenteNumeros[dep];
+  }
+  function avancer() { chargement.faits++; majEtatCarte(); }
+  async function chargerCarte() {
+    const etape = (nom, fn) => telecharger(nom).then((u8) => { fn(u8); avancer(); }).catch((e) => { chargement.erreur = true; console.warn(e); avancer(); });
+    const monde = etape('monde.bin', (u8) => { D.monde = lireMonde(u8); carteVersion++; });
+    const grandes = etape('routes-grandes.bin', (u8) => { D.lots.unshift(lireRoutes(u8, 'grandes')); carteVersion++; });
+    const surfaces = etape('surfaces.bin', (u8) => { D.surfaces = lireSurfaces(u8); carteVersion++; });
+    const lieux = etape('lieux.bin', (u8) => { lireLieux(u8); carteVersion++; });
+    const communes = etape('communes.bin', lireCommunes);
+    const noms = etape('routes-noms.bin', (u8) => { D.noms = new TextDecoder().decode(u8).split('\n'); carteVersion++; });
+    await grandes;
+    const petites = etape('routes-petites.bin', (u8) => { D.lots.push(lireRoutes(u8, 'petites')); carteVersion++; });
+    await communes;
+    const rues = etape('rues.bin', lireRues);
+    await Promise.all([monde, surfaces, petites]);
+    chargement.carte = true; majEtatCarte();
+    envoyerAuMoteur();
+    if (etat.ecran === 'accueil') dessinerMiniCarte();
+    await Promise.all([lieux, noms, rues]);
+    chargement.recherche = !!D.rues; majEtatCarte();
+    if (etat.ecran === 'destination') majResultats();
+    // les numéros de Paris et de la petite couronne arrivent ensuite, sans gêner
+    for (const dep of [75, 92, 93, 94]) { try { await chargerNumeros(dep); } catch (e) { console.warn(e); } }
+    if (etat.ecran === 'destination') majResultats();
+  }
+  function majEtatCarte() {
+    const fini = chargement.carte;
+    carteEtat.hidden = fini || !VUES_CARTE[etat.ecran];
+    if (!fini) carteEtat.textContent = chargement.erreur ? 'Carte indisponible' : `Chargement de la carte… ${Math.round(chargement.faits / chargement.total * 100)} %`;
+    const etatRech = $('#etat-recherche');
+    if (etatRech) etatRech.outerHTML = htmlEtatRecherche();
+  }
+  const htmlEtatRecherche = () => (D.rues ? '<span id="etat-recherche" hidden></span>' : `<div class="etat-donnees" id="etat-recherche"><span>Chargement des adresses</span><span class="mini-barre"><i style="width:${Math.round(chargement.faits / chargement.total * 100)}%"></i></span></div>`);
+
+  /* ================= Moteur d'itinéraire (dans un Worker) ================= */
+  // Cette fonction est autonome : elle tourne dans un Worker, ou dans la page si les Workers sont bloqués.
+  function moteurRoutier(port) {
+    const MX = 0.7327, MY = 1.1057, VMAX = 22, VIT = [22, 16.7, 9.5, 8.3, 7.2, 5.0], CEL = 128;
+    let X, Y, deb, fin, fl, NW, N, nn = 0, nX, nY, ptN, ptW, ne = 0, eA, eB, eW, eP0, eP1, eL, wE0, wE1, adjS, adjN, adjE, adjC, okN;
+    let gx0, gy0, gw, gh, gS, gP, g, stamp, prev, run = 0, hpK = new Float64Array(1024), hpN = new Int32Array(1024), hpT = 0;
+    const seg = (a, b) => Math.hypot((X[b] - X[a]) * MX, (Y[b] - Y[a]) * MY);
+    const vit = (e) => { const f = fl[eW[e]]; return (f & 32) ? 11 : VIT[f & 7]; };
+    const avant = (e, libre) => libre || !(fl[eW[e]] & 16);
+    const arriere = (e, libre) => libre || !(fl[eW[e]] & 8);
+    function construire(d) {
+      const t0 = Date.now();
+      X = d.x; Y = d.y; deb = d.deb; fin = d.fin; fl = d.fl; NW = deb.length; N = X.length;
+      let cap = 1; while (cap < N * 2) cap <<= 1; const mask = cap - 1;
+      const hkey = new Float64Array(cap).fill(-1), hc = new Int32Array(cap), hnode = new Int32Array(cap).fill(-1), slot = new Int32Array(N);
+      for (let p = 0; p < N; p++) {
+        const k = X[p] * 262144 + Y[p];
+        let h = (Math.imul(X[p], 73856093) ^ Math.imul(Y[p], 19349663)) & mask;
+        while (hkey[h] !== -1 && hkey[h] !== k) h = (h + 1) & mask;
+        hkey[h] = k; hc[h]++; slot[p] = h;
+      }
+      ptN = new Int32Array(N).fill(-1); ptW = new Int32Array(N);
+      const tx = new Int32Array(N), ty = new Int32Array(N);
+      let m = 0;
+      for (let w = 0; w < NW; w++) {
+        const a = deb[w], b = fin[w];
+        for (let p = a; p < b; p++) {
+          ptW[p] = w;
+          if (p === a || p === b - 1 || hc[slot[p]] > 1) {
+            const s = slot[p];
+            if (hnode[s] < 0) { hnode[s] = nn; tx[nn] = X[p]; ty[nn] = Y[p]; nn++; }
+            ptN[p] = hnode[s]; m++;
+          }
+        }
+        m--;
+      }
+      nX = tx.slice(0, nn); nY = ty.slice(0, nn);
+      eA = new Int32Array(m); eB = new Int32Array(m); eW = new Int32Array(m); eP0 = new Int32Array(m); eP1 = new Int32Array(m); eL = new Float32Array(m);
+      wE0 = new Int32Array(NW); wE1 = new Int32Array(NW);
+      for (let w = 0; w < NW; w++) {
+        wE0[w] = ne;
+        let a = ptN[deb[w]], p0 = deb[w], L = 0;
+        for (let p = deb[w] + 1; p < fin[w]; p++) {
+          L += seg(p - 1, p);
+          if (ptN[p] >= 0) { eA[ne] = a; eB[ne] = ptN[p]; eW[ne] = w; eP0[ne] = p0; eP1[ne] = p; eL[ne] = Math.max(0.5, L); ne++; a = ptN[p]; p0 = p; L = 0; }
+        }
+        wE1[w] = ne;
+      }
+      const deg = new Int32Array(nn);
+      for (let e = 0; e < ne; e++) { deg[eA[e]]++; deg[eB[e]]++; }
+      adjS = new Int32Array(nn + 1);
+      for (let i = 0; i < nn; i++) adjS[i + 1] = adjS[i] + deg[i];
+      const pos = adjS.slice(0, nn);
+      adjN = new Int32Array(2 * ne); adjE = new Int32Array(2 * ne); adjC = new Float32Array(2 * ne);
+      for (let e = 0; e < ne; e++) {
+        const c = eL[e] / vit(e);
+        let j = pos[eA[e]]++; adjN[j] = eB[e]; adjE[j] = e * 2; adjC[j] = c;
+        j = pos[eB[e]]++; adjN[j] = eA[e]; adjE[j] = e * 2 + 1; adjC[j] = c;
+      }
+      // plus grand ensemble de rues reliées entre elles
+      const par = new Int32Array(nn); for (let i = 0; i < nn; i++) par[i] = i;
+      const racine = (i) => { while (par[i] !== i) { par[i] = par[par[i]]; i = par[i]; } return i; };
+      for (let e = 0; e < ne; e++) { const a = racine(eA[e]), b = racine(eB[e]); if (a !== b) par[a] = b; }
+      const taille = new Int32Array(nn); let max = 0, r0 = 0;
+      for (let i = 0; i < nn; i++) { const r = racine(i); if (++taille[r] > max) { max = taille[r]; r0 = r; } }
+      okN = new Uint8Array(nn); for (let i = 0; i < nn; i++) okN[i] = racine(i) === r0 ? 1 : 0;
+      // grille des points pour retrouver la rue la plus proche
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (let p = 0; p < N; p++) { if (X[p] < x0) x0 = X[p]; if (X[p] > x1) x1 = X[p]; if (Y[p] < y0) y0 = Y[p]; if (Y[p] > y1) y1 = Y[p]; }
+      gx0 = x0; gy0 = y0; gw = Math.floor((x1 - x0) / CEL) + 1; gh = Math.floor((y1 - y0) / CEL) + 1;
+      gS = new Int32Array(gw * gh + 1);
+      const cel = (p) => Math.floor((X[p] - gx0) / CEL) + Math.floor((Y[p] - gy0) / CEL) * gw;
+      for (let p = 0; p < N; p++) gS[cel(p) + 1]++;
+      for (let i = 0; i < gw * gh; i++) gS[i + 1] += gS[i];
+      const gpos = gS.slice(0, gw * gh); gP = new Int32Array(N);
+      for (let p = 0; p < N; p++) gP[gpos[cel(p)]++] = p;
+      g = new Float64Array(nn); stamp = new Int32Array(nn); prev = new Int32Array(nn);
+      return { noeuds: nn, aretes: ne, ms: Date.now() - t0 };
+    }
+    function areteDe(w, q) {
+      let lo = wE0[w], hi = wE1[w] - 1;
+      while (lo <= hi) { const m = (lo + hi) >> 1; if (eP1[m] <= q) lo = m + 1; else if (eP0[m] > q) hi = m - 1; else return m; }
+      return -1;
+    }
+    function accrocher(x, y, sansAutoroute) {
+      const cx = Math.floor((x - gx0) / CEL), cy = Math.floor((y - gy0) / CEL);
+      let best = Infinity, be = -1, bi = 0, bt = 0, bpx = 0, bpy = 0, fini = -1;
+      for (let r = 0; r <= 14; r++) {
+        for (let j = cy - r; j <= cy + r; j++) for (let i = cx - r; i <= cx + r; i++) {
+          if (Math.max(Math.abs(i - cx), Math.abs(j - cy)) !== r || i < 0 || j < 0 || i >= gw || j >= gh) continue;
+          const c = i + j * gw;
+          for (let k = gS[c]; k < gS[c + 1]; k++) {
+            const p = gP[k], w = ptW[p];
+            if (sansAutoroute && (fl[w] & 7) <= 1) continue;
+            for (let q = Math.max(deb[w], p - 1); q < Math.min(fin[w] - 1, p + 1); q++) {
+              const ax = X[q], ay = Y[q], dx = (X[q + 1] - ax) * MX, dy = (Y[q + 1] - ay) * MY, l2 = dx * dx + dy * dy;
+              let t = l2 > 0 ? (((x - ax) * MX) * dx + ((y - ay) * MY) * dy) / l2 : 0; t = t < 0 ? 0 : t > 1 ? 1 : t;
+              const px = ax + t * (X[q + 1] - ax), py = ay + t * (Y[q + 1] - ay), d = Math.hypot((x - px) * MX, (y - py) * MY);
+              if (d < best) { const e = areteDe(w, q); if (e < 0 || !okN[eA[e]]) continue; best = d; be = e; bi = q; bt = t; bpx = px; bpy = py; }
+            }
+          }
+        }
+        if (be >= 0 && fini < 0 && best < r * CEL * MX) fini = r + 1;
+        if (fini >= 0 && r >= fini) break;
+      }
+      if (be < 0) return null;
+      let dA = 0;
+      for (let q = eP0[be]; q < bi; q++) dA += seg(q, q + 1);
+      dA += bt * seg(bi, bi + 1);
+      return { e: be, d: Math.min(dA, eL[be]), i: bi, px: bpx, py: bpy, dist: best };
+    }
+    function pousser(k, n) {
+      if (hpT >= hpK.length) { const a = new Float64Array(hpK.length * 2); a.set(hpK); hpK = a; const b = new Int32Array(hpN.length * 2); b.set(hpN); hpN = b; }
+      let i = hpT++;
+      while (i > 0) { const p = (i - 1) >> 1; if (hpK[p] <= k) break; hpK[i] = hpK[p]; hpN[i] = hpN[p]; i = p; }
+      hpK[i] = k; hpN[i] = n;
+    }
+    function sortir() {
+      const k = hpK[0], n = hpN[0], dk = hpK[--hpT], dn = hpN[hpT];
+      let i = 0;
+      while (true) { let c = 2 * i + 1; if (c >= hpT) break; if (c + 1 < hpT && hpK[c + 1] < hpK[c]) c++; if (hpK[c] >= dk) break; hpK[i] = hpK[c]; hpN[i] = hpN[c]; i = c; }
+      hpK[i] = dk; hpN[i] = dn;
+      return [k, n];
+    }
+    function ajouterArete(pts, e, sens) {
+      if (sens === 0) for (let q = eP0[e] + 1; q <= eP1[e]; q++) pts.push(X[q], Y[q]);
+      else for (let q = eP1[e] - 1; q >= eP0[e]; q--) pts.push(X[q], Y[q]);
+    }
+    function itineraire(ax, ay, bx, by, libre) {
+      const S = accrocher(ax, ay, false), T = accrocher(bx, by, false);
+      if (!S || !T) return null;
+      run++; hpT = 0;
+      const tx = T.px, ty = T.py, h = (n) => Math.hypot((nX[n] - tx) * MX, (nY[n] - ty) * MY) / VMAX;
+      let best = Infinity, bestN = -1, genre = 0;
+      if (S.e === T.e) {
+        if (T.d >= S.d && avant(S.e, libre)) { best = (T.d - S.d) / vit(S.e); genre = 1; }
+        else if (T.d < S.d && arriere(S.e, libre)) { best = (S.d - T.d) / vit(S.e); genre = 1; }
+      }
+      const semer = (n, c, type) => { if (stamp[n] !== run || c < g[n]) { stamp[n] = run; g[n] = c; prev[n] = type; pousser(c + h(n), n); } };
+      if (avant(S.e, libre)) semer(eB[S.e], (eL[S.e] - S.d) / vit(S.e), -1);
+      if (arriere(S.e, libre)) semer(eA[S.e], S.d / vit(S.e), -2);
+      let iter = 0;
+      while (hpT > 0 && iter++ < 900000) {
+        const [f, u] = sortir();
+        if (f >= best) break;
+        if (f > g[u] + h(u) + 1e-6) continue;
+        if (u === eA[T.e] && avant(T.e, libre)) { const c = g[u] + T.d / vit(T.e); if (c < best) { best = c; bestN = u; genre = 2; } }
+        if (u === eB[T.e] && arriere(T.e, libre)) { const c = g[u] + (eL[T.e] - T.d) / vit(T.e); if (c < best) { best = c; bestN = u; genre = 3; } }
+        for (let j = adjS[u]; j < adjS[u + 1]; j++) {
+          const code = adjE[j], e = code >> 1;
+          if ((code & 1) ? !arriere(e, libre) : !avant(e, libre)) continue;
+          const v = adjN[j], c = g[u] + adjC[j];
+          if (stamp[v] !== run || c < g[v]) { stamp[v] = run; g[v] = c; prev[v] = j; pousser(c + h(v), v); }
+        }
+      }
+      if (best === Infinity) return null;
+      const pts = [S.px, S.py], etapes = [];
+      if (genre === 1) {
+        if (T.d >= S.d) for (let q = S.i + 1; q <= T.i; q++) pts.push(X[q], Y[q]);
+        else for (let q = S.i; q > T.i; q--) pts.push(X[q], Y[q]);
+        etapes.push(eW[S.e], Math.abs(T.d - S.d));
+      } else {
+        const chaine = []; let u = bestN, graine = -1;
+        for (let garde = 0; garde < 1e6; garde++) { const j = prev[u]; if (j < 0) { graine = j; break; } chaine.push(j); const e = adjE[j] >> 1; u = (adjE[j] & 1) ? eB[e] : eA[e]; }
+        chaine.reverse();
+        if (graine === -1) { for (let q = S.i + 1; q <= eP1[S.e]; q++) pts.push(X[q], Y[q]); etapes.push(eW[S.e], eL[S.e] - S.d); }
+        else { for (let q = S.i; q >= eP0[S.e]; q--) pts.push(X[q], Y[q]); etapes.push(eW[S.e], S.d); }
+        for (const j of chaine) { const e = adjE[j] >> 1; ajouterArete(pts, e, adjE[j] & 1); etapes.push(eW[e], eL[e]); }
+        if (genre === 2) { for (let q = eP0[T.e] + 1; q <= T.i; q++) pts.push(X[q], Y[q]); etapes.push(eW[T.e], T.d); }
+        else { for (let q = eP1[T.e] - 1; q > T.i; q--) pts.push(X[q], Y[q]); etapes.push(eW[T.e], eL[T.e] - T.d); }
+      }
+      pts.push(T.px, T.py);
+      let L = 0;
+      for (let i = 2; i < pts.length; i += 2) L += Math.hypot((pts[i] - pts[i - 2]) * MX, (pts[i + 1] - pts[i - 1]) * MY);
+      return { pts: new Float64Array(pts), metres: L, secondes: best * 1.18 + 25, etapes: new Float64Array(etapes), libre: !!libre };
+    }
+    function balade(x, y, longueur) {
+      const S = accrocher(x, y, true);
+      if (!S) return null;
+      let u = Math.random() < 0.5 ? eA[S.e] : eB[S.e], pe = S.e, L = 0;
+      const pts = [nX[u], nY[u]];
+      for (let it = 0; it < 300 && L < longueur; it++) {
+        const cand = [];
+        for (let j = adjS[u]; j < adjS[u + 1]; j++) {
+          const code = adjE[j], e = code >> 1, f = fl[eW[e]];
+          if ((code & 1) ? (f & 8) : (f & 16)) continue;
+          if (e === pe || (f & 7) <= 1) continue;
+          cand.push(j);
+        }
+        if (!cand.length) break;
+        const j = cand[Math.floor(Math.random() * cand.length)], e = adjE[j] >> 1;
+        ajouterArete(pts, e, adjE[j] & 1); L += eL[e]; pe = e; u = adjN[j];
+      }
+      return pts.length >= 4 ? { pts: new Float64Array(pts), metres: L } : null;
+    }
+    function depuisLoin(bx, by, distance) {
+      for (let essai = 0; essai < 6; essai++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = itineraire(bx + Math.cos(a) * distance / MX, by + Math.sin(a) * distance / MY, bx, by, false);
+        if (r && r.metres < distance * 3) return r;
+      }
+      return null;
+    }
+    port.onmessage = (ev) => {
+      const m = ev.data;
+      try {
+        if (m.t === 'init') { port.postMessage({ t: 'pret', id: 0, rep: construire(m) }); return; }
+        let rep = null;
+        if (m.t === 'route') rep = itineraire(m.ax, m.ay, m.bx, m.by, false) || itineraire(m.ax, m.ay, m.bx, m.by, true);
+        else if (m.t === 'balade') rep = balade(m.ax, m.ay, m.metres);
+        else if (m.t === 'loin') rep = depuisLoin(m.bx, m.by, m.metres);
+        port.postMessage({ t: m.t, id: m.id, rep });
+      } catch (err) { port.postMessage({ t: 'erreur', id: m.id, rep: null, message: String(err && err.message || err) }); }
+    };
+  }
+  const moteur = { pret: false, port: null, attente: new Map(), n: 0, file: [], init: null };
+  function demarrerMoteur() {
+    // captures des stores (en local) : le moteur tourne dans la page pour suivre l'horloge de capture
+    if (location.hostname === 'localhost' && /sans-worker/.test(location.hash)) { moteurDansLaPage(); return; }
+    try {
+      const src = '(' + moteurRoutier.toString() + ')(self);';
+      const w = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
+      w.onmessage = (ev) => recevoirMoteur(ev.data);
+      w.onerror = (e) => { e.preventDefault && e.preventDefault(); moteurDansLaPage(); };
+      moteur.port = w;
+    } catch { moteurDansLaPage(); }
+  }
+  function moteurDansLaPage() {
+    if (moteur.local) return;
+    moteur.local = true;
+    const port = { postMessage: (d) => setTimeout(() => recevoirMoteur(d), 0) };
+    moteurRoutier(port);
+    moteur.port = { postMessage: (d) => setTimeout(() => port.onmessage({ data: d }), 0) };
+    if (moteur.init) moteur.port.postMessage(moteur.init);
+  }
+  function recevoirMoteur(m) {
+    if (m.t === 'pret') {
+      moteur.pret = true; moteur.init = null;
+      moteur.file.forEach((d) => moteur.port.postMessage(d)); moteur.file = [];
+      return;
+    }
+    const cb = moteur.attente.get(m.id);
+    if (cb) { moteur.attente.delete(m.id); cb(m.rep); }
+  }
+  function demander(t, params) {
+    return new Promise((ok) => {
+      const id = ++moteur.n, d = { t, id, ...params };
+      moteur.attente.set(id, ok);
+      if (moteur.pret) moteur.port.postMessage(d); else moteur.file.push(d);
+    });
+  }
+  function envoyerAuMoteur() {
+    if (moteur.init || moteur.pret || !D.lots.length) return;
+    let N = 0, NW = 0;
+    for (const l of D.lots) { N += l.X.length; NW += l.n; }
+    const x = new Int32Array(N), y = new Int32Array(N), deb = new Int32Array(NW), fin = new Int32Array(NW), fl = new Uint8Array(NW);
+    let p = 0, w = 0;
+    for (const l of D.lots) {
+      x.set(l.X, p); y.set(l.Y, p);
+      for (let i = 0; i < l.n; i++) { deb[w + i] = l.deb[i] + p; fin[w + i] = l.fin[i] + p; fl[w + i] = l.fl[i]; }
+      l.decalage = w;
+      p += l.X.length; w += l.n;
+    }
+    moteur.init = { t: 'init', x, y, deb, fin, fl };
+    moteur.port.postMessage(moteur.init);
+    for (const l of D.lots) { l.X = null; l.Y = null; }
+  }
+  const nomDeVoie = (wGlobal) => { for (const l of D.lots) if (wGlobal >= l.decalage && wGlobal < l.decalage + l.n) return D.noms ? D.noms[l.noms[wGlobal - l.decalage]] || '' : ''; return ''; };
+    /* ================= Tracés (itinéraires) ================= */
+  function trace(pts) {
+    const n = pts.length / 2, U = new Float32Array(n), V = new Float32Array(n), cum = new Float32Array(n);
+    for (let i = 0; i < n; i++) { U[i] = pts[2 * i] * KU + CU; V[i] = vDeY(pts[2 * i + 1]); if (i) cum[i] = cum[i - 1] + Math.hypot(U[i] - U[i - 1], V[i] - V[i - 1]); }
+    return { U, V, cum, L: cum[n - 1] || 0, n };
+  }
+  function pointSur(tr, f) {
+    const d = Math.max(0, Math.min(1, f)) * tr.L;
+    let lo = 0, hi = tr.n - 1;
+    while (lo < hi - 1) { const m = (lo + hi) >> 1; if (tr.cum[m] <= d) lo = m; else hi = m; }
+    const seg = tr.cum[hi] - tr.cum[lo], t = seg > 0 ? (d - tr.cum[lo]) / seg : 0;
+    return { u: tr.U[lo] + (tr.U[hi] - tr.U[lo]) * t, v: tr.V[lo] + (tr.V[hi] - tr.V[lo]) * t, a: Math.atan2(tr.V[hi] - tr.V[lo], tr.U[hi] - tr.U[lo]), i: lo };
+  }
+  function resumeVia(etapes) {
+    const parNom = new Map();
+    for (let i = 0; i < etapes.length; i += 2) { const n = nomDeVoie(etapes[i]); if (n) parNom.set(n, (parNom.get(n) || 0) + etapes[i + 1]); }
+    return [...parNom.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2).map((e) => e[0]);
+  }
+    /* ================= Rendu de la carte ================= */
+  const carte = $('#carte'), ctx = carte.getContext('2d');
+  const fond = document.createElement('canvas'), fctx = fond.getContext('2d');
+  let cw = 1, ch = 1, dpr = 1;
+  function dimensionner() {
+    const r = appareil.getBoundingClientRect();
+    dpr = Math.min(2, window.devicePixelRatio || 1); cw = Math.max(1, r.width); ch = Math.max(1, r.height);
+    for (const c of [carte, fond]) { c.width = Math.round(cw * dpr); c.height = Math.round(ch * dpr); }
+    carteVersion++;
+  }
+  new ResizeObserver(dimensionner).observe(appareil);
+  dimensionner();
+  const PALETTES = {
+    sombre: {
+      mer: '#0b1216', terre: '#141619', autre: '#101214', frontiere: 'rgba(255,255,255,0.14)', region: 'rgba(255,255,255,0.06)',
+      eau: '#0e202b', riviere: '#11283a', parc: '#132019', bois: '#121d16', cimetiere: '#171a19', sport: '#142019',
+      routes: ['#565d66', '#4b5159', '#3f444b', '#363a40', '#2e3136', '#25282c'], bord: null,
+      ville: '#d2d5da', village: '#9599a0', quartier: '#7a7f86', rue: '#80858c', halo: '#141619',
+      bat: '#1b1e22', batMur: '#131518', batToit: '#262a30', batBord: 'rgba(255,255,255,0.06)',
+      trace: '#ffffff', traceOr: '#c9a66b', traceBord: 'rgba(0,0,0,0.55)', traceGris: 'rgba(255,255,255,0.4)', nous: '#ffffff', nousVitres: '#2b2b2b', autres: '#6b7077', autresVitres: '#1d1f22', marque: '#ffffff', centre: '#000000', bulle: '#ffffff', bulleTexte: '#000000', halo2: 'rgba(255,255,255,0.12)', onde: '255,255,255',
+    },
+    clair: {
+      mer: '#bcd5e3', terre: '#f1f1ee', autre: '#e8e8e4', frontiere: 'rgba(0,0,0,0.2)', region: 'rgba(0,0,0,0.08)',
+      eau: '#b8d3e2', riviere: '#a9cadd', parc: '#d6e8cc', bois: '#cde2c3', cimetiere: '#dfe5dc', sport: '#d6e8cc',
+      routes: ['#ffd98a', '#ffe7b0', '#ffffff', '#ffffff', '#ffffff', '#ffffff'], bord: ['#e3b45b', '#e8c27a', '#d4d4cf', '#d9d9d4', '#dddcd7', '#e2e2dd'],
+      ville: '#2b2e33', village: '#5b5f66', quartier: '#7a7e85', rue: '#6c7077', halo: '#f1f1ee',
+      bat: '#e4e1da', batMur: '#cfcbc1', batToit: '#eeece7', batBord: 'rgba(0,0,0,0.08)',
+      trace: '#000000', traceOr: '#c9a66b', traceBord: 'rgba(255,255,255,0.8)', traceGris: 'rgba(0,0,0,0.35)', nous: '#000000', nousVitres: '#5a5a5a', autres: '#8d9197', autresVitres: '#d5d7da', marque: '#000000', centre: '#ffffff', bulle: '#000000', bulleTexte: '#ffffff', halo2: 'rgba(0,0,0,0.1)', onde: '0,0,0',
+    },
+  };
+  const palette = () => PALETTES[appareil.dataset.mode === 'clair' ? 'clair' : 'sombre'];
+  const VISIBLE = [5.5, 7, 8.5, 10, 11.5, 13];
+  const LARGEUR = [10, 9, 8, 7, 6, 4.6], LARGEUR_MIN = [1.5, 1.3, 1.1, 1, 0.8, 0.6];
+
+  // caméra : centre (u, v) en U, zoom z ; cy = hauteur écran du centre (milieu de la zone visible)
+  const vue = { u: uDeX(DEPART_DEFAUT.x), v: vDeY(DEPART_DEFAUT.y), z: 14.5 };
+  const cible = { ...vue };
+  let zone = { t: 70, b: 600 }, libre = false;
+  // vue GPS en 3D pendant la course : la carte se penche et la voiture reste juste au-dessus du panneau
+  const gpsActif = () => etat.gps && ECRANS_GPS.includes(etat.ecran);
+  const cyEcran = () => (gpsActif() ? Math.max(zone.t + 140, zone.b - 70) : (zone.t + zone.b) / 2);
+  function camera(w, h, v, cy) { const k = 2 ** (v.z - 12); return { k, z: v.z, w, h, ox: w / 2 - v.u * k, oy: cy - v.v * k, u0: (0 - (w / 2 - v.u * k)) / k, u1: (w - (w / 2 - v.u * k)) / k, v0: (0 - (cy - v.v * k)) / k, v1: (h - (cy - v.v * k)) / k }; }
+
+  function dessinerBase(c, cam, P) {
+    const { k, ox, oy, w, h, z } = cam;
+    c.fillStyle = P.mer; c.fillRect(0, 0, w, h);
+    c.lineJoin = 'round'; c.lineCap = 'round';
+    // pays et régions
+    if (D.monde) {
+      for (const pays of D.monde.pays) {
+        c.beginPath();
+        for (const a of pays.anneaux) { for (let i = 0; i < a.U.length; i++) { const x = a.U[i] * k + ox, y = a.V[i] * k + oy; i ? c.lineTo(x, y) : c.moveTo(x, y); } c.closePath(); }
+        c.fillStyle = pays.iso === 'FR' ? P.terre : P.autre; c.fill();
+        if (z < 11) { c.strokeStyle = P.frontiere; c.lineWidth = 1; c.stroke(); }
+      }
+      if (z >= 4.5 && z < 10) {
+        c.beginPath();
+        for (const r of D.monde.regions) for (const a of r.anneaux) { for (let i = 0; i < a.U.length; i++) { const x = a.U[i] * k + ox, y = a.V[i] * k + oy; i ? c.lineTo(x, y) : c.moveTo(x, y); } c.closePath(); }
+        c.strokeStyle = P.region; c.lineWidth = 1; c.stroke();
+      }
+    } else { c.fillStyle = P.terre; c.fillRect(0, 0, w, h); }
+    if (z < 6.5) return;
+    // eau, parcs, bois
+    const S = D.surfaces;
+    if (S) {
+      const couleurs = [null, null, P.eau, P.parc, P.bois, P.cimetiere, P.sport];
+      for (const genre of [4, 6, 3, 5, 2]) {
+        if (genre !== 2 && z < 10) continue;
+        c.beginPath(); let rien = true;
+        for (let f = 0; f < S.n; f++) {
+          if (S.genre[f] !== genre) continue;
+          const b = 4 * f;
+          if (S.bbox[b + 2] < cam.u0 || S.bbox[b] > cam.u1 || S.bbox[b + 3] < cam.v0 || S.bbox[b + 1] > cam.v1) continue;
+          if ((S.bbox[b + 2] - S.bbox[b]) * k < 1.5 && (S.bbox[b + 3] - S.bbox[b + 1]) * k < 1.5) continue;
+          for (let r = S.r0[f]; r < S.r0[f + 1]; r++) {
+            const a = S.A[2 * r], e = S.A[2 * r + 1];
+            let px = -1e9, py = -1e9;
+            for (let i = a; i < e; i++) { const x = S.U[i] * k + ox, y = S.V[i] * k + oy; if (i > a && i < e - 1 && Math.abs(x - px) < 0.8 && Math.abs(y - py) < 0.8) continue; i === a ? c.moveTo(x, y) : c.lineTo(x, y); px = x; py = y; }
+            c.closePath(); rien = false;
+          }
+        }
+        if (!rien) { c.fillStyle = couleurs[genre]; c.fill(); }
+      }
+      // rivières et canaux en lignes
+      for (const genre of [0, 1]) {
+        if (z < 8 && genre === 1) continue;
+        c.beginPath(); let rien = true;
+        for (let f = 0; f < S.n; f++) {
+          if (S.genre[f] !== genre) continue;
+          const b = 4 * f;
+          if (S.bbox[b + 2] < cam.u0 || S.bbox[b] > cam.u1 || S.bbox[b + 3] < cam.v0 || S.bbox[b + 1] > cam.v1) continue;
+          for (let r = S.r0[f]; r < S.r0[f + 1]; r++) { const a = S.A[2 * r], e = S.A[2 * r + 1]; for (let i = a; i < e; i++) { const x = S.U[i] * k + ox, y = S.V[i] * k + oy; i === a ? c.moveTo(x, y) : c.lineTo(x, y); } rien = false; }
+        }
+        if (!rien) { c.strokeStyle = P.riviere; c.lineWidth = Math.max(genre ? 0.8 : 1.2, Math.min(6, 2 ** (z - 12) * (genre ? 0.9 : 1.6))); c.stroke(); }
+      }
+    }
+    // routes
+    const visibles = [[], [], [], [], [], []], tunnels = [[], [], [], [], [], []];
+    const tour = ++dessinerBase.tour;
+    for (const lot of D.lots) {
+      const G = lot.grille;
+      const i0 = Math.max(0, Math.floor((cam.u0 - G.u0) / CELLULE)), i1 = Math.min(G.gw - 1, Math.floor((cam.u1 - G.u0) / CELLULE));
+      const j0 = Math.max(0, Math.floor((cam.v0 - G.v0) / CELLULE)), j1 = Math.min(G.gh - 1, Math.floor((cam.v1 - G.v0) / CELLULE));
+      if (i0 > i1 || j0 > j1) continue;
+      const bas = z < 12 && lot.bas;
+      for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+        const cel = i + j * G.gw;
+        for (let q = G.debut[cel]; q < G.debut[cel + 1]; q++) {
+          const w = G.liste[q];
+          if (lot.vu[w] === tour) continue;
+          lot.vu[w] = tour;
+          const cl = lot.fl[w] & 7;
+          if (z < VISIBLE[cl]) continue;
+          const b = 4 * w;
+          if (lot.bbox[b + 2] < cam.u0 || lot.bbox[b] > cam.u1 || lot.bbox[b + 3] < cam.v0 || lot.bbox[b + 1] > cam.v1) continue;
+          (lot.fl[w] & 64 ? tunnels : visibles)[cl].push(lot, w, bas && cl <= 3 ? 1 : 0);
+        }
+      }
+    }
+    const tracer = (liste) => {
+      c.beginPath();
+      for (let i = 0; i < liste.length; i += 3) {
+        const lot = liste[i], w = liste[i + 1], bas = liste[i + 2];
+        const U = bas ? lot.bas.U : lot.U, V = bas ? lot.bas.V : lot.V, a = bas ? lot.bas.deb[w] : lot.deb[w], e = bas ? lot.bas.fin[w] : lot.fin[w];
+        let px = -1e9, py = -1e9;
+        for (let p = a; p < e; p++) { const x = U[p] * k + ox, y = V[p] * k + oy; if (p > a && p < e - 1 && Math.abs(x - px) < 0.7 && Math.abs(y - py) < 0.7) continue; p === a ? c.moveTo(x, y) : c.lineTo(x, y); px = x; py = y; }
+      }
+    };
+    const facteur = 2 ** ((z - 16) * 0.8);
+    const largeur = (cl) => Math.max(LARGEUR_MIN[cl], LARGEUR[cl] * facteur);
+    if (P.bord) for (let cl = 5; cl >= 0; cl--) { if (!visibles[cl].length) continue; tracer(visibles[cl]); c.strokeStyle = P.bord[cl]; c.lineWidth = largeur(cl) + (z > 13 ? 2 : 1); c.stroke(); }
+    for (let cl = 5; cl >= 0; cl--) {
+      if (tunnels[cl].length) { c.globalAlpha = 0.45; tracer(tunnels[cl]); c.strokeStyle = P.routes[cl]; c.lineWidth = largeur(cl); c.stroke(); c.globalAlpha = 1; }
+      if (!visibles[cl].length) continue;
+      tracer(visibles[cl]); c.strokeStyle = P.routes[cl]; c.lineWidth = largeur(cl); c.stroke();
+    }
+    dessinerBatiments(c, cam, P);
+    // noms
+    const places = [];
+    const libre = (x0, y0, x1, y1) => { for (const r of places) if (x0 < r[2] && x1 > r[0] && y0 < r[3] && y1 > r[1]) return false; places.push([x0, y0, x1, y1]); return true; };
+    c.textAlign = 'center'; c.textBaseline = 'middle'; c.lineJoin = 'round';
+    const ecrireNom = (texte, x, y, police, couleur, espace) => {
+      c.font = police;
+      const t = espace ? texte.toUpperCase().split('').join(' ') : texte;
+      const lw = c.measureText(t).width;
+      if (x < -lw || x > w + lw || y < 60 || y > h + 10) return;
+      if (!libre(x - lw / 2 - 4, y - 9, x + lw / 2 + 4, y + 9)) return;
+      c.strokeStyle = P.halo; c.lineWidth = 3.5; c.strokeText(t, x, y);
+      c.fillStyle = couleur; c.fillText(t, x, y);
+    };
+    if (z >= 15.3 && D.noms) {
+      // noms des rues, le long de leur plus long segment visible
+      const cand = [];
+      for (let cl = 0; cl <= 5; cl++) {
+        if (cl === 5 && z < 16.2) continue;
+        const liste = visibles[cl];
+        for (let i = 0; i < liste.length; i += 3) {
+          const lot = liste[i], wv = liste[i + 1], nom = D.noms[lot.noms[wv]];
+          if (!nom) continue;
+          let best = 0, bx = 0, by = 0, ba = 0;
+          for (let p = lot.deb[wv]; p < lot.fin[wv] - 1; p++) {
+            const x1 = lot.U[p] * k + ox, y1 = lot.V[p] * k + oy, x2 = lot.U[p + 1] * k + ox, y2 = lot.V[p + 1] * k + oy;
+            const l = Math.hypot(x2 - x1, y2 - y1);
+            if (l > best && x1 > 0 && x1 < w && y1 > 70 && y1 < h && x2 > 0 && x2 < w && y2 > 70 && y2 < h) { best = l; bx = (x1 + x2) / 2; by = (y1 + y2) / 2; ba = Math.atan2(y2 - y1, x2 - x1); }
+          }
+          if (best > 40) cand.push([cl, best, nom, bx, by, ba]);
+        }
+      }
+      cand.sort((a, b) => a[0] - b[0] || b[1] - a[1]);
+      c.font = '500 11px Inter, system-ui, sans-serif';
+      const dejaNom = new Set();
+      let nb = 0;
+      for (const [, l, nom, x, y, a0] of cand) {
+        if (nb > 26 || dejaNom.has(nom)) continue;
+        const lw = c.measureText(nom).width;
+        if (lw + 12 > l) continue;
+        let a = a0; if (a > Math.PI / 2) a -= Math.PI; if (a < -Math.PI / 2) a += Math.PI;
+        const dx = Math.abs(Math.cos(a)) * lw / 2 + 6, dy = Math.abs(Math.sin(a)) * lw / 2 + 7;
+        if (!libre(x - dx, y - dy, x + dx, y + dy)) continue;
+        dejaNom.add(nom); nb++;
+        c.save(); c.translate(x, y); c.rotate(a);
+        c.strokeStyle = P.halo; c.lineWidth = 3; c.strokeText(nom, 0, 0); c.fillStyle = P.rue; c.fillText(nom, 0, 0);
+        c.restore();
+      }
+    }
+    if (z < 8.6 && D.monde) {
+      for (const v of D.monde.villes) {
+        if (!(v.cap || (v.fr && z >= 5.6 && v.pop > (z < 6.6 ? 400000 : 130000)) || (!v.fr && z >= 5 && v.pop > 2000000))) continue;
+        const x = v.u * k + ox, y = v.v * k + oy;
+        if (x < 0 || x > w || y < 70 || y > h) continue;
+        const grand = v.nom === 'Paris';
+        ecrireNom(v.nom, x, y - 10, grand ? '700 14px Inter, system-ui, sans-serif' : '600 11.5px Inter, system-ui, sans-serif', grand ? P.ville : P.village, false);
+        c.fillStyle = grand ? P.ville : P.village; c.beginPath(); c.arc(x, y, grand ? 3.5 : 2.4, 0, Math.PI * 2); c.fill();
+      }
+    }
+    if (z >= 8.6 && D.labels) {
+      const regles = [[8.6, 13.2, '700 12.5px Inter, system-ui, sans-serif', P.ville, true], [9.6, 15, '600 11.5px Inter, system-ui, sans-serif', P.village, false], [11.2, 16, '500 11px Inter, system-ui, sans-serif', P.village, false], [12.6, 17, '700 10.5px Inter, system-ui, sans-serif', P.quartier, true], [14.6, 30, '500 11px Inter, system-ui, sans-serif', P.quartier, false]];
+      let nb = 0;
+      for (const l of D.labels) {
+        const r = regles[l.genre];
+        if (z < r[0] || z >= r[1]) continue;
+        if (l.genre === 1 && z < 10.6 && l.pop < 15000) continue;
+        const x = l.u * k + ox, y = l.v * k + oy;
+        if (x < -100 || x > w + 100 || y < 60 || y > h + 20) continue;
+        ecrireNom(l.nom, x, y, r[2], r[3], r[4]);
+        if (++nb > 60) break;
+      }
+    }
+  }
+  dessinerBase.tour = 0;
+
+  // Bâtiments de Paris : chargés à la demande quand on zoome, à plat d'abord puis en relief (3D légère).
+  // La hauteur vient d'une estimation par type de bâtiment (l'extrait OpenStreetMap ne la donne pas).
+  let attenteBatiments = null;
+  function chargerBatiments() {
+    attenteBatiments ||= telecharger('batiments.bin').then((u8) => { D.bat = lireBatiments(u8); carteVersion++; }).catch((e) => console.warn(e));
+  }
+  function lireBatiments(u8) {
+    const L = lecteur(u8, 4), n = L.vi();
+    // chaque point prend au moins 2 octets : on réserve la place d'un coup (bien plus rapide que des tableaux qui grandissent)
+    const deb = new Int32Array(n + 1), haut = new Uint8Array(n), max = (u8.length >> 1) + 8;
+    let U = new Float32Array(max), V = new Float32Array(max), m = 0;
+    for (let b = 0; b < n; b++) {
+      haut[b] = u8[L.p++]; const k = L.vi(); deb[b] = m;
+      let x = L.vi(), y = L.vi(); U[m] = x * KU + CU; V[m] = vRapide(y); m++;
+      for (let i = 1; i < k; i++) { x += L.zz(); y += L.zz(); U[m] = x * KU + CU; V[m] = vRapide(y); m++; }
+    }
+    deb[n] = m;
+    U = U.slice(0, m); V = V.slice(0, m);
+    const bbox = new Float32Array(4 * n);
+    for (let b = 0; b < n; b++) {
+      let a = Infinity, bb = Infinity, c = -Infinity, d = -Infinity;
+      for (let i = deb[b]; i < deb[b + 1]; i++) { const u = U[i], v = V[i]; if (u < a) a = u; if (u > c) c = u; if (v < bb) bb = v; if (v > d) d = v; }
+      bbox[4 * b] = a; bbox[4 * b + 1] = bb; bbox[4 * b + 2] = c; bbox[4 * b + 3] = d;
+    }
+    return { n, deb, haut, U, V, bbox, grille: grilleDe(n, bbox), vu: new Int32Array(n), tour: 0 };
+  }
+  function dessinerBatiments(c, cam, P) {
+    const { k, ox, oy, z } = cam;
+    if (z < 15.4) return;
+    const B = D.bat;
+    if (!B) { if (cam.u1 > -900 && cam.u0 < 900 && cam.v1 > -700 && cam.v0 < 700) chargerBatiments(); return; }
+    const G = B.grille, tour = ++B.tour, liste = [];
+    const i0 = Math.max(0, Math.floor((cam.u0 - 2 - G.u0) / CELLULE)), i1 = Math.min(G.gw - 1, Math.floor((cam.u1 + 2 - G.u0) / CELLULE));
+    const j0 = Math.max(0, Math.floor((cam.v0 - 2 - G.v0) / CELLULE)), j1 = Math.min(G.gh - 1, Math.floor((cam.v1 + 6 - G.v0) / CELLULE));
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+      const cel = i + j * G.gw;
+      for (let q = G.debut[cel]; q < G.debut[cel + 1]; q++) {
+        const b = G.liste[q];
+        if (B.vu[b] === tour) continue;
+        B.vu[b] = tour;
+        if (B.bbox[4 * b + 2] < cam.u0 || B.bbox[4 * b] > cam.u1 || B.bbox[4 * b + 3] < cam.v0 || B.bbox[4 * b + 1] > cam.v1 + 6) continue;
+        liste.push(b);
+      }
+    }
+    if (!liste.length) return;
+    const contour = (b, dy) => { const a = B.deb[b], e = B.deb[b + 1]; for (let p = a; p < e; p++) { const x = B.U[p] * k + ox, y = B.V[p] * k + oy - dy; p === a ? c.moveTo(x, y) : c.lineTo(x, y); } c.closePath(); };
+    // relief : il apparaît progressivement entre les zooms 16 et 16,8
+    const relief = Math.max(0, Math.min(1, (z - 16) / 0.8)), parMetre = k / METRES_PAR_U * 0.45 * relief;
+    c.save(); c.lineJoin = 'round';
+    if (relief > 0) {
+      c.beginPath();
+      for (const b of liste) {
+        const dy = B.haut[b] * 2 * parMetre, a = B.deb[b], e = B.deb[b + 1];
+        for (let p = a; p < e; p++) {
+          const q = p + 1 < e ? p + 1 : a, x1 = B.U[p] * k + ox, y1 = B.V[p] * k + oy, x2 = B.U[q] * k + ox, y2 = B.V[q] * k + oy;
+          c.moveTo(x1, y1); c.lineTo(x2, y2); c.lineTo(x2, y2 - dy); c.lineTo(x1, y1 - dy); c.closePath();
+        }
+      }
+      c.fillStyle = P.batMur; c.fill();
+    }
+    c.beginPath();
+    for (const b of liste) contour(b, B.haut[b] * 2 * parMetre);
+    c.fillStyle = relief > 0 ? P.batToit : P.bat; c.fill();
+    c.strokeStyle = P.batBord; c.lineWidth = 0.7; c.stroke();
+    c.restore();
+  }
+
+  // éléments animés : itinéraire, repères, voitures
+  function dessinerTrace(c, cam, tr, de, couleur, P, epais, filOr) {
+    if (!tr || tr.n < 2) return;
+    const { k, ox, oy } = cam;
+    c.beginPath();
+    const p0 = pointSur(tr, de);
+    c.moveTo(p0.u * k + ox, p0.v * k + oy);
+    for (let i = p0.i + 1; i < tr.n; i++) c.lineTo(tr.U[i] * k + ox, tr.V[i] * k + oy);
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    c.strokeStyle = P.traceBord; c.lineWidth = (epais || 5) + 3; c.stroke();
+    c.strokeStyle = couleur; c.lineWidth = epais || 5; c.stroke();
+    // la seule touche dorée de la carte : un fil fin au milieu de l'itinéraire
+    if (filOr) { c.strokeStyle = P.traceOr; c.lineWidth = 1.3; c.stroke(); }
+  }
+  function repereArret(c, cam, p, P) {
+    const x = uDeX(p.x) * cam.k + cam.ox, y = vDeY(p.y) * cam.k + cam.oy;
+    c.beginPath(); c.arc(x, y, 7, 0, Math.PI * 2); c.fillStyle = P.centre; c.fill();
+    c.lineWidth = 3; c.strokeStyle = P.marque; c.stroke();
+    return [x, y];
+  }
+  function dessinerVoiture(c, cam, p, angle, nous, P) {
+    const x = p.u * cam.k + cam.ox, y = p.v * cam.k + cam.oy, s = nous ? 1.15 : 0.95;
+    if (x < -30 || x > cam.w + 30 || y < -30 || y > cam.h + 30) return;
+    c.save(); c.translate(x, y); c.rotate(angle + Math.PI / 2); c.scale(s, s);
+    if (nous) { c.shadowColor = 'rgba(0,0,0,0.45)'; c.shadowBlur = 10; }
+    c.fillStyle = nous ? P.nous : P.autres; c.beginPath(); c.roundRect(-6.5, -12, 13, 24, 4.5); c.fill();
+    c.shadowBlur = 0; c.fillStyle = nous ? P.nousVitres : P.autresVitres;
+    c.beginPath(); c.roundRect(-4.8, -6, 9.6, 5.5, 2); c.fill();
+    c.beginPath(); c.roundRect(-4.8, 4, 9.6, 3.8, 1.5); c.fill();
+    c.restore();
+  }
+  function bulle(c, x, y, texte, sous, P) {
+    c.font = '700 12.5px Inter, system-ui, sans-serif';
+    const l1 = c.measureText(texte).width;
+    c.font = '500 11px Inter, system-ui, sans-serif';
+    const l2 = sous ? c.measureText(sous).width : 0;
+    const lw = Math.max(l1, l2) + 22, lh = sous ? 40 : 28;
+    let bx = Math.min(Math.max(8, x - lw / 2), cw - lw - 8), by = y - lh - 16;
+    if (by < 74) by = y + 16;
+    c.fillStyle = P.bulle; c.beginPath(); c.roundRect(bx, by, lw, lh, 9); c.fill();
+    c.fillStyle = P.bulleTexte; c.textAlign = 'left'; c.textBaseline = 'middle';
+    c.font = '700 12.5px Inter, system-ui, sans-serif'; c.fillText(texte, bx + 11, by + (sous ? 14 : lh / 2));
+    if (sous) { c.globalAlpha = 0.7; c.font = '500 11px Inter, system-ui, sans-serif'; c.fillText(sous, bx + 11, by + 28); c.globalAlpha = 1; }
+  }
+  function repereDepart(c, cam, p, t, P) {
+    const x = uDeX(p.x) * cam.k + cam.ox, y = vDeY(p.y) * cam.k + cam.oy, pulse = 0.5 + 0.5 * Math.sin(t / 420);
+    c.beginPath(); c.arc(x, y, 14 + pulse * 6, 0, Math.PI * 2); c.fillStyle = P.halo2; c.fill();
+    c.beginPath(); c.arc(x, y, 8, 0, Math.PI * 2); c.fillStyle = P.marque; c.fill();
+    c.beginPath(); c.arc(x, y, 3.2, 0, Math.PI * 2); c.fillStyle = P.centre; c.fill();
+    return [x, y];
+  }
+  function repereArrivee(c, cam, p, P) {
+    const x = uDeX(p.x) * cam.k + cam.ox, y = vDeY(p.y) * cam.k + cam.oy;
+    c.fillStyle = P.marque; c.fillRect(x - 8, y - 8, 16, 16);
+    c.fillStyle = P.centre; c.fillRect(x - 3, y - 3, 6, 6);
+    return [x, y];
+  }
+  function ondes(c, cam, p, t, P) {
+    const x = uDeX(p.x) * cam.k + cam.ox, y = vDeY(p.y) * cam.k + cam.oy;
+    for (let i = 0; i < 3; i++) {
+      const ph = ((t / 1700) + i / 3) % 1;
+      c.beginPath(); c.arc(x, y, 12 + ph * 110, 0, Math.PI * 2);
+      c.strokeStyle = `rgba(${P.onde},${(1 - ph) * 0.4})`; c.lineWidth = 1.5; c.stroke();
+    }
+  }
+
+  // voitures BDA autour du point de départ (elles roulent sur les vraies rues)
+  const voisins = [];
+  function majVoisins(t) {
+    if (!moteur.pret) return;
+    while (voisins.length < 7) voisins.push({ tr: null, attente: false, t0: 0, dur: 1 });
+    for (const v of voisins) {
+      const fini = v.tr && (t - v.t0) / v.dur >= 1;
+      if ((!v.tr || fini) && !v.attente) {
+        v.attente = true;
+        const base = v.tr && fini ? { x: xDeU(v.tr.U[v.tr.n - 1]), y: yDeV(v.tr.V[v.tr.n - 1]) } : null;
+        const ang = Math.random() * Math.PI * 2, r = 250 + Math.random() * 900;
+        const a = base && metres(base, etat.depart) < 1600 ? base : { x: etat.depart.x + Math.cos(ang) * r / MX, y: etat.depart.y + Math.sin(ang) * r / MY };
+        demander('balade', { ax: a.x, ay: a.y, metres: 700 + Math.random() * 600 }).then((rep) => {
+          v.attente = false;
+          if (rep) { v.tr = trace(rep.pts); v.t0 = performance.now(); v.dur = rep.metres / 9 / 3 * 1000; }
+        });
+      }
+    }
+  }
+
+  // maquette : voitures qui se baladent ; vraie appli : les chauffeurs BDA réellement en ligne (positions arrondies)
+  function dessinerVoisins(c, cam, t, P) {
+    if (REEL) { majVoisinsReels(t); for (const v of voisinsReels.liste) dessinerVoiture(c, cam, v.aff, v.aff.a, false, P); return; }
+    majVoisins(t);
+    for (const v of voisins) if (v.tr) { const p = pointSur(v.tr, (t - v.t0) / v.dur); dessinerVoiture(c, cam, p, p.a, false, P); }
+  }
+  // cadrage automatique sur des points (x, y en unités de coordonnées)
+  function cadrerSur(pts, max = 16.5, marge = 46) {
+    if (!pts.length) return;
+    let a = Infinity, b = Infinity, c = -Infinity, d = -Infinity;
+    for (const p of pts) { const u = p.u ?? uDeX(p.x), v = p.v ?? vDeY(p.y); a = Math.min(a, u); c = Math.max(c, u); b = Math.min(b, v); d = Math.max(d, v); }
+    const zw = Math.max(80, cw - 2 * marge), zh = Math.max(80, zone.b - zone.t - 2 * marge);
+    const kmax = Math.min(zw / Math.max(0.01, c - a), zh / Math.max(0.01, d - b));
+    cible.z = Math.max(3, Math.min(max, Math.log2(kmax) + 12));
+    cible.u = (a + c) / 2; cible.v = (b + d) / 2;
+  }
+  function pointsTrace(tr, de = 0) {
+    if (!tr) return [];
+    const r = [], i0 = de ? pointSur(tr, de).i : 0, pas = Math.max(1, Math.floor((tr.n - i0) / 60));
+    for (let i = i0; i < tr.n; i += pas) r.push({ u: tr.U[i], v: tr.V[i] });
+    r.push({ u: tr.U[tr.n - 1], v: tr.V[tr.n - 1] });
+    return r;
+  }
+  // Vue GPS « cap en haut » : la carte tourne autour de la voiture pour que la route monte vers le haut de l'écran.
+  // On dessine dans un carré plus grand que l'écran (sa diagonale) pour qu'aucun coin ne reste vide en tournant.
+  const gpsCap = { val: 0 };
+  function cameraGps(w, h, v, cy) {
+    const D = Math.ceil(Math.hypot(w, h) * 1.1), cam = camera(D, D, v, D / 2);
+    const poser = (c, r) => { c.setTransform(r, 0, 0, r, 0, 0); c.translate(w / 2, cy); c.rotate(gpsCap.val); c.translate(-D / 2, -D / 2); };
+    return { cam, poser };
+  }
+  function suivreCap(angleVoiture, dt) {
+    let d = -Math.PI / 2 - angleVoiture - gpsCap.val;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    gpsCap.val += d * (1 - Math.exp(-dt / 450));
+  }
+
+  const avance = (t0, duree) => Math.min(1, Math.max(0, (performance.now() - t0) / duree));
+  appareil.dataset.mode = etat.modeAffichage;
+
+  /* ================= Petites aides ================= */
+  let toastMinuteur = 0;
+  function toast(texte) { const t = $('#toast'); t.querySelector('span').textContent = texte; t.classList.add('visible'); clearTimeout(toastMinuteur); toastMinuteur = setTimeout(() => t.classList.remove('visible'), 3400); }
+  const modale = (html) => { couche.innerHTML = `<div class="voile" data-a="fermerModale"><div class="modale" role="dialog" aria-modal="true"><div class="poignee"></div>${html}</div></div>`; };
+  const fermerModale = () => { couche.innerHTML = ''; };
+  let audio = null;
+  function son(type) {
+    if (!etat.sons) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = audio.currentTime, notes = { clic: [[1400, 0, 0.035, 0.04]], offre: [[740, 0, 0.18, 0.09], [988, 0.16, 0.18, 0.09], [1318, 0.32, 0.34, 0.08]], ok: [[660, 0, 0.12, 0.07], [990, 0.09, 0.18, 0.06]], ding: [[880, 0, 0.5, 0.08], [1320, 0.12, 0.55, 0.05]] }[type] || [];
+      for (const [f, d, du, v] of notes) { const o = audio.createOscillator(), g = audio.createGain(); o.frequency.value = f; g.gain.setValueAtTime(0, t0 + d); g.gain.linearRampToValueAtTime(v, t0 + d + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + du); o.connect(g).connect(audio.destination); o.start(t0 + d); o.stop(t0 + d + du + 0.02); }
+    } catch { /* pas de son */ }
+  }
+  const pos = { u: uDeX(DEPART_DEFAUT.x), v: vDeY(DEPART_DEFAUT.y), a: -Math.PI / 2 };
+  const posXY = () => ({ x: xDeU(pos.u), y: yDeV(pos.v) });
+
+  /* ================= Déplacement de la voiture ================= */
+  // en ligne et libre : la voiture se balade dans les rues ; en course : elle suit l'itinéraire
+  const balade = { tr: null, t0: 0, dur: 1, attente: false };
+  function majBalade(t) {
+    if (!etat.enLigne || etat.course || !moteur.pret) return;
+    if (balade.tr) { const f = (t - balade.t0) / balade.dur; const p = pointSur(balade.tr, f); Object.assign(pos, p); if (f < 1) return; }
+    if (balade.attente) return;
+    balade.attente = true;
+    const { x, y } = posXY();
+    demander('balade', { ax: x, ay: y, metres: 900 + Math.random() * 700 }).then((r) => { balade.attente = false; if (r) { balade.tr = trace(r.pts); balade.t0 = performance.now(); balade.dur = r.metres / 9 * 1000 / 3; } });
+  }
+  // étapes de navigation : rue par rue, à partir des voies empruntées par l'itinéraire
+  function etapesNav(r) {
+    const l = [];
+    for (let i = 0; i < r.etapes.length; i += 2) {
+      const nom = nomDeVoie(r.etapes[i]) || 'Voie sans nom', lg = r.etapes[i + 1];
+      if (l.length && l[l.length - 1].nom === nom) l[l.length - 1].lg += lg; else l.push({ nom, lg });
+    }
+    let d = 0; for (const e of l) { e.debut = d; d += e.lg; e.fin = d; }
+    return { liste: l, total: d || 1 };
+  }
+  function consigne(nav, f) {
+    if (!nav || !nav.liste.length) return null;
+    const d = f * nav.total, i = Math.max(0, nav.liste.findIndex((e) => d < e.fin)), e = nav.liste[i === -1 ? nav.liste.length - 1 : i], suiv = nav.liste[i + 1];
+    const reste = Math.max(0, e.fin - d);
+    return { distance: reste > 1000 ? `${km1(reste / 1000)} km` : `${Math.max(10, Math.round(reste / 10) * 10)} m`, rue: suiv ? suiv.nom : e.nom, actuelle: e.nom, fin: !suiv };
+  }
+
+  /* ================= Offres et courses ================= */
+  let minuteurOffre = 0, minuteurProchaine = 0;
+  function programmerOffre() {
+    clearTimeout(minuteurProchaine);
+    if (!etat.enLigne || etat.course || etat.offre) return;
+    minuteurProchaine = setTimeout(proposerOffre, 4500 + Math.random() * 2500);
+  }
+  function proposerOffre() {
+    if (!etat.enLigne || etat.course || etat.offre || !moteur.pret) { programmerOffre(); return; }
+    const o = OFFRES[etat.indexOffre++ % OFFRES.length], { x, y } = posXY();
+    demander('route', { ax: x, ay: y, bx: o.depart.x, by: o.depart.y }).then((rA) => {
+      demander('route', { ax: o.depart.x, ay: o.depart.y, bx: o.arrivee.x, by: o.arrivee.y }).then((rC) => {
+        if (!etat.enLigne || etat.course) return;
+        etat.offre = { ...o, rA, rC, t0: performance.now(), duree: 15000 };
+        son('offre'); afficherOffre();
+      });
+    });
+  }
+  function afficherOffre() {
+    const o = etat.offre, el = $('#offre');
+    if (!o) { el.hidden = true; el.innerHTML = ''; return; }
+    const kmA = o.rA ? o.rA.metres / 1000 : 1, minA = o.rA ? Math.max(1, Math.round(o.rA.secondes / 60)) : 3;
+    const kmC = o.rC ? o.rC.metres / 1000 : 5, minC = o.rC ? Math.max(1, Math.round(o.rC.secondes / 60)) : 15;
+    el.innerHTML = `<div class="offre-haut"><span class="type">${ic('voiture', 'ic-s')}Nouvelle course · ${esc(CHAUFFEUR.gamme)}</span><span class="minuteur"><svg viewBox="0 0 52 52"><circle class="f" cx="26" cy="26" r="23"/><circle class="v" id="offre-anneau" cx="26" cy="26" r="23"/></svg><span id="offre-sec">15</span></span></div>
+      <div class="offre-prix">${euros(o.prix)}<small>${km1(kmC)} km · ${minC} min de course · prix garanti au client</small></div>
+      <div class="trajet"><div><span class="pt"></span><span>${esc(o.depart.titre)}<small>À ${minA} min · ${km1(kmA)} km de vous</small></span></div><div><span class="pt pt-carre"></span><span>${esc(o.arrivee.titre)}<small>${esc(o.arrivee.sous)}</small></span></div></div>
+      <div class="puces"><span class="puce">${ic('etoile', 'ic-xs')}${esc(o.client)} · ${esc(o.note)}</span>${o.options.map((x) => `<span class="puce">${esc(x)}</span>`).join('')}${o.code ? `<span class="puce or">${ic('cadenas', 'ic-xs')}Code de sécurité</span>` : ''}</div>
+      <div class="duo"><button class="btn btn-second" type="button" data-a="refuserOffre">Refuser</button><button class="btn btn-or" type="button" data-a="accepterOffre">Accepter</button></div>`;
+    el.hidden = false;
+  }
+  function majOffre() {
+    const o = etat.offre;
+    if (!o) return;
+    const f = avance(o.t0, o.duree), a = $('#offre-anneau'), s = $('#offre-sec');
+    if (a) a.style.strokeDashoffset = (144.5 * f).toFixed(1);
+    if (s) s.textContent = Math.max(0, Math.ceil((1 - f) * o.duree / 1000));
+    if (f >= 1) { etat.offre = null; afficherOffre(); toast('Course non acceptée : elle est proposée à un autre chauffeur.'); programmerOffre(); }
+  }
+  function demarrerApproche(o) {
+    const c = { ...o, numero: `BDA-${Date.now().toString().slice(-6)}`, rA: o.rA, rC: o.rC, trA: o.rA ? trace(o.rA.pts) : null, trC: o.rC ? trace(o.rC.pts) : null, navA: o.rA ? etapesNav(o.rA) : null, navC: o.rC ? etapesNav(o.rC) : null, tA0: performance.now(), dA: 16000, tC0: 0, dC: 22000, attente0: 0, pourboire: [0, 2, 3, 5][Math.floor(Math.random() * 4)] };
+    etat.course = c; balade.tr = null;
+    etat.conversations[c.numero] = { messages: [{ de: 'chauffeur', texte: `Bonjour ${o.client}, je suis ${CHAUFFEUR.prenom}, votre chauffeur BDA. J’arrive.`, t: new Date() }], nonLus: 0 };
+    aller('approche');
+  }
+  function arriverAuClient() { const c = etat.course; c.attente0 = performance.now(); son('ding'); aller('attente'); }
+  function demarrerCourse() { const c = etat.course; c.tC0 = performance.now(); son('ok'); aller('course'); }
+  function terminerCourse() {
+    const c = etat.course;
+    etat.gains.jour += c.prix + c.pourboire; etat.gains.pourboires += c.pourboire; etat.gains.courses++;
+    etat.historique.unshift({ client: c.client, trajet: `${c.depart.titre} → ${c.arrivee.titre}`, prix: c.prix, pourboire: c.pourboire, heure: new Date() });
+    son('ok'); aller('fin');
+  }
+
+  /* ================= Messagerie (même principe que l'appli client) ================= */
+  // À relier au serveur BDA : remplacer « transportMessages » par la connexion temps réel, salon = numéro de course.
+  const transportMessages = { envoyer(numero, m) { setTimeout(() => repondreDemo(numero, m.texte), 1100 + Math.random() * 900); } };
+  const RAPIDES = ['J’arrive dans 2 min', 'Je suis devant', 'Je ne vous trouve pas', 'Je vous attends', 'Bonne journée !'];
+  let chatOuvert = false;
+  const conv = () => (etat.course ? etat.conversations[etat.course.numero] : null);
+  function repondreDemo(numero, texte) {
+    const c = etat.course;
+    if (!c || c.numero !== numero) return;
+    const t = normaliser(texte);
+    const rep = /trouve/.test(t) ? 'Je suis devant l’entrée principale, manteau noir.' : /devant|arrive/.test(t) ? 'Super, j’arrive tout de suite.' : /attend/.test(t) ? 'Merci, j’arrive !' : 'Merci !';
+    conv().messages.push({ de: 'client', texte: rep, t: new Date() }); if (!chatOuvert) conv().nonLus++; son('ding'); majChat(); majPastilles();
+  }
+  function majChat() {
+    if (!chatOuvert) return;
+    const c = etat.course, cv = conv(), chat = $('#chat');
+    if (!c || !cv) { fermerChat(); return; }
+    chat.innerHTML = `<header class="chat-tete"><button class="bouton-rond" type="button" data-a="fermerChat" aria-label="Fermer">${ic('retour')}</button><span class="avatar">${esc(c.client[0])}</span><span><b>${esc(c.client)}</b><small>${esc(c.depart.titre)}</small></span><button class="bouton-rond" type="button" data-a="appeler" aria-label="Appeler">${ic('telephone')}</button></header>
+      <p class="chat-info">Messages transmis par BDA · numéros masqués</p>
+      <div class="chat-liste" id="chat-liste">${cv.messages.map((m) => `<div class="bulle-msg ${m.de}"><p>${esc(m.texte)}</p><small>${heure(m.t)}</small></div>`).join('') || '<p class="chat-vide">Écrivez au client.</p>'}</div>
+      <div class="chat-rapides">${RAPIDES.map((r) => `<button type="button" data-a="envoyerRapide" data-v="${esc(r)}">${esc(r)}</button>`).join('')}</div>
+      <div class="chat-saisie"><input id="chat-texte" type="text" autocomplete="off" placeholder="Votre message…" aria-label="Votre message"><button class="chat-envoyer" type="button" data-a="envoyerMessage" aria-label="Envoyer">${ic('fleche')}</button></div>`;
+    const l = $('#chat-liste'); l.scrollTop = l.scrollHeight;
+  }
+  function ouvrirChat() { const cv = conv(); if (!cv) { toast('Aucune course en cours : pas de conversation.'); return; } chatOuvert = true; cv.nonLus = 0; $('#chat').hidden = false; majChat(); majPastilles(); }
+  function fermerChat() { chatOuvert = false; const c = $('#chat'); c.hidden = true; c.innerHTML = ''; }
+  function envoyerMessage(texte) { const c = etat.course, cv = conv(); texte = String(texte || '').trim(); if (!c || !cv || !texte) return; const m = { de: 'chauffeur', texte, t: new Date() }; cv.messages.push(m); majChat(); transportMessages.envoyer(c.numero, m); }
+  function majPastilles() {
+    const n = conv() ? conv().nonLus : 0, p = $('#point-messages'), r = $('#nb-msg');
+    if (p) p.hidden = !n; if (r) { r.hidden = !n; r.textContent = n; }
+  }
+
+  /* ================= Écrans ================= */
+  const blocClient = (c) => `<div class="client"><span class="avatar">${esc(c.client[0])}</span><span><b>${esc(c.client)} <span class="etoile">${ic('etoile')}${esc(c.note)}</span></b><small>${esc(c.options.join(' · '))}</small></span><span class="actions"><button class="rond" type="button" data-a="appeler" aria-label="Appeler">${ic('telephone', 'ic-s')}</button><button class="rond" type="button" data-a="ouvrirChat" aria-label="Message">${ic('message', 'ic-s')}<span class="pastille-nb" id="nb-msg" hidden></span></button></span></div>`;
+  const VUES = {
+    carte() {
+      const g = etat.gains;
+      if (!etat.enLigne) return `<div class="poignee"></div><div class="pile">
+        <div class="titre-feuille"><h2>Vous êtes hors ligne</h2></div>
+        <p class="sous">Passez en ligne pour recevoir des courses autour de vous.</p>
+        <div class="tuiles"><div class="tuile"><b>${euros(g.jour)}</b><small>aujourd’hui</small></div><div class="tuile"><b>${g.courses}</b><small>course${g.courses > 1 ? 's' : ''}</small></div><div class="tuile"><b>${CHAUFFEUR.note}</b><small>note</small></div></div>
+        <button class="btn btn-vert" type="button" data-a="basculerLigne">${ic('volant')}Passer en ligne</button>
+        <p class="petit centre">Zones les plus demandées en ce moment : Opéra, Gare de Lyon, Saint-Lazare (démo).</p></div>`;
+      return `<div class="poignee"></div><div class="pile">
+        <div class="titre-feuille"><h2>Recherche de courses…</h2><span>${euros(g.jour)}</span></div>
+        <div class="barre"><i style="width:40%;animation:none"></i></div>
+        <p class="sous">Restez près des zones animées : la prochaine course vous sera proposée ici.</p>
+        <button class="btn btn-second" type="button" data-a="basculerLigne">Passer hors ligne</button></div>`;
+    },
+    approche() {
+      const c = etat.course;
+      return `<div class="poignee"></div><div class="pile">
+        <div class="titre-feuille"><h2>Vers ${esc(c.client)}</h2><span id="eta"></span></div>
+        <div class="barre"><i id="barre"></i></div>
+        <div class="trajet"><div><span class="pt"></span><span>${esc(c.depart.titre)}<small>${esc(c.depart.sous)}</small></span></div></div>
+        ${blocClient(c)}
+        <button class="btn btn-principal" type="button" data-a="arrive">${ic('pin')}Je suis arrivé</button>
+        <p class="petit centre">Démo : le trajet est accéléré.</p></div>`;
+    },
+    attente() {
+      const c = etat.course;
+      return `<div class="poignee"></div><div class="pile">
+        <div class="titre-feuille"><h2>En attente ${/^[aeiouyéèêàâîïôû]/i.test(c.client) ? 'd’' : 'de '}${esc(c.client)}</h2><span id="attente">5:00</span></div>
+        <p class="sous">L’attente offerte au client est de 5 minutes. Le client a été prévenu de votre arrivée.</p>
+        ${blocClient(c)}
+        ${c.code ? `<p class="sous">${ic('cadenas', 'ic-xs')} Demandez son code de sécurité à ${esc(c.client)} avant de démarrer.</p>` : ''}
+        <button class="btn btn-or" type="button" data-a="clientABord">Client à bord · démarrer</button>
+        <button class="btn btn-lien" type="button" data-a="clientAbsent">Client absent</button></div>`;
+    },
+    course() {
+      const c = etat.course;
+      return `<div class="poignee"></div><div class="pile">
+        <div class="titre-feuille"><h2>En course</h2><span id="eta"></span></div>
+        <div class="barre"><i id="barre"></i></div>
+        <div class="trajet"><div><span class="pt pt-carre"></span><span>${esc(c.arrivee.titre)}<small>${esc(c.arrivee.sous)}</small></span></div></div>
+        ${blocClient(c)}
+        <button class="btn btn-principal" type="button" data-a="terminer">${ic('check')}Terminer la course</button>
+        <p class="petit centre">Démo : le trajet est accéléré.</p></div>`;
+    },
+    fin() {
+      const c = etat.course;
+      return `<div class="poignee"></div><div class="pile">
+        <div class="coche">${ic('check')}</div>
+        <div class="titre-feuille" style="justify-content:center"><h2>Course terminée</h2></div>
+        <div class="tuiles"><div class="tuile"><b>${euros(c.prix)}</b><small>course</small></div><div class="tuile"><b>${euros(c.pourboire)}</b><small>pourboire</small></div><div class="tuile"><b>${euros(etat.gains.jour)}</b><small>aujourd’hui</small></div></div>
+        <p class="sous centre">Votre avis sur ${esc(c.client)}</p>
+        <div class="etoiles">${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-a="noteClient" data-v="${n}" aria-pressed="${n <= (c.noteClient || 5)}" aria-label="${n} étoile${n > 1 ? 's' : ''}">${ic('etoile')}</button>`).join('')}</div>
+        <button class="btn btn-vert" type="button" data-a="repasserEnLigne">Rester en ligne</button>
+        <p class="petit centre">Démo : la répartition entre chauffeur et BDA sera définie dans la vraie appli.</p></div>`;
+    },
+  };
+  const PAGES = {
+    gains() {
+      const g = etat.gains, jours = ['L', 'M', 'M', 'J', 'V', 'S', 'D'], auj = (new Date().getDay() + 6) % 7;
+      const demo = [142, 186, 98, 224, 260, 310, 120]; demo[auj] = g.jour;
+      const max = Math.max(...demo, 1);
+      return `<div class="p">
+        <h1 class="grand-titre">Gains</h1>
+        <div class="gros-gain"><small>Aujourd’hui</small><b>${euros(g.jour)}</b><small>${g.courses} course${g.courses > 1 ? 's' : ''} · dont ${euros(g.pourboires)} de pourboires</small></div>
+        <div class="semaine">${demo.map((v, i) => `<div class="${i === auj ? 'auj' : ''}"><i style="height:${Math.max(6, v / max * 100)}%"></i><span>${jours[i]}</span></div>`).join('')}</div>
+        <p class="petit">Semaine : ${euros(demo.reduce((a, b) => a + b, 0))} (les autres jours sont des exemples). Virement chaque lundi.</p>
+        <h2 class="sect">Courses du jour</h2>
+        <div>${etat.historique.length ? etat.historique.map((h) => `<div class="ligne"><span class="pastille">${ic('voiture', 'ic-s')}</span><span><b>${esc(h.trajet)}</b><small>${heure(h.heure)} · ${esc(h.client)}${h.pourboire ? ` · pourboire ${euros(h.pourboire)}` : ''}</small></span><span class="droite">${euros(h.prix + h.pourboire)}</span></div>`).join('') : '<p class="sous">Pas encore de course aujourd’hui. Passez en ligne depuis la carte.</p>'}</div>
+      </div>`;
+    },
+    messages() {
+      const c = etat.course, cv = conv();
+      return `<div class="p">
+        <h1 class="grand-titre">Messages</h1>
+        ${c && cv ? `<button class="ligne" type="button" data-a="ouvrirChat"><span class="pastille">${ic('message', 'ic-s')}</span><span><b>${esc(c.client)} · course en cours</b><small>${esc(cv.messages[cv.messages.length - 1].texte)}</small></span><span class="droite">${ic('chevron', 'ic-s')}</span></button>` : ''}
+        <div class="ligne"><span class="pastille">${ic('cloche', 'ic-s')}</span><span><b>BDA · Planning</b><small>Forte demande attendue ce soir à la Gare de Lyon (démo).</small></span><span></span></div>
+        <div class="ligne"><span class="pastille">${ic('info', 'ic-s')}</span><span><b>BDA · Rappel</b><small>Pensez à vérifier le code de sécurité quand le client l’a activé.</small></span><span></span></div>
+        <p class="petit">La messagerie avec les clients s’ouvre pendant une course. Elle sera reliée à l’appli client par le serveur BDA.</p>
+      </div>`;
+    },
+    profil() {
+      const docs = [['Carte professionnelle VTC', 'Valide jusqu’en 2029', 'ok'], ['Permis de conduire', 'Valide', 'ok'], ['Assurance VTC', 'Expire le 31/12/2026', 'bientot'], ['Contrôle technique', 'Valide jusqu’au 05/2027', 'ok'], ['Signalétique VTC (macaron)', 'Posée', 'ok']];
+      return `<div class="p">
+        <h1 class="grand-titre">Profil</h1>
+        <div class="carte-pro"><div class="haut-cp"><b>BDA</b><span>Chauffeur partenaire</span></div>
+          <div class="qui"><span class="avatar">${CHAUFFEUR.prenom[0]}</span><span><b>${CHAUFFEUR.prenom}</b><small>${ic('etoile', 'ic-xs')} ${CHAUFFEUR.note} · ${CHAUFFEUR.courses.toLocaleString('fr-FR')} courses · depuis ${CHAUFFEUR.depuis}</small></span></div>
+          <span class="plaque">${CHAUFFEUR.plaque}</span><small style="color:#b9b2a3">${CHAUFFEUR.voiture} ${CHAUFFEUR.couleur.toLowerCase()} · gamme ${CHAUFFEUR.gamme}</small></div>
+        <h2 class="sect">Documents</h2>
+        <div>${docs.map(([t, s, e]) => `<div class="ligne"><span class="pastille">${ic(e === 'ok' ? 'check' : 'horloge', 'ic-s')}</span><span><b>${t}</b><small>${s}</small></span><span class="statut-doc ${e}">${e === 'ok' ? 'OK' : 'Bientôt'}</span></div>`).join('')}</div>
+        <h2 class="sect">Réglages</h2>
+        <div class="ligne"><span class="pastille">${ic('soleil', 'ic-s')}</span><span><b>Mode clair</b><small>Plus lisible en plein soleil</small></span><button class="interrupteur" type="button" role="switch" aria-checked="${etat.modeAffichage === 'clair'}" data-a="basculerMode" aria-label="Mode clair"></button></div>
+        <div class="ligne"><span class="pastille">${ic('cloche', 'ic-s')}</span><span><b>Sons</b><small>Nouvelle course, client à bord</small></span><button class="interrupteur" type="button" role="switch" aria-checked="${etat.sons}" data-a="basculerSons" aria-label="Sons"></button></div>
+        <div class="numero"><span><small class="petit">Assistance chauffeurs BDA, 24 h/24</small><br><b>06 11 67 86 25</b></span>${ic('telephone')}</div>
+        <button class="btn btn-second" type="button" data-a="deconnexion">${ic('sortie')}Se déconnecter</button>
+        <p class="petit centre">Appli chauffeur BDA · maquette v0.1 · données de démonstration</p>
+      </div>`;
+    },
+  };
+
+  /* ================= Rendu ================= */
+  function rendu() {
+    const e = etat.ecran, surCarte = !!VUES[e];
+    page.hidden = surCarte; feuille.hidden = !surCarte;
+    $('#haut').hidden = !surCarte;
+    nav.hidden = !['carte', 'gains', 'messages', 'profil'].includes(e);
+    feuille.classList.toggle('sans-nav', nav.hidden);
+    nav.querySelectorAll('button').forEach((b) => b.setAttribute('aria-current', (b.dataset.v === e || (b.dataset.v === 'carte' && surCarte)) ? 'page' : 'false'));
+    if (surCarte) { feuille.innerHTML = VUES[e](); feuille.style.animation = 'none'; void feuille.offsetWidth; feuille.style.animation = ''; }
+    else { page.innerHTML = PAGES[e](); page.scrollTop = 0; }
+    const st = $('#statut'); st.classList.toggle('en-ligne', etat.enLigne); st.querySelector('span').textContent = etat.course ? 'En course' : etat.enLigne ? 'En ligne' : 'Hors ligne';
+    $('#gains-jour').textContent = euros(etat.gains.jour);
+    majEtatCarte(); majPastilles(); majDirect();
+  }
+  function aller(e) { etat.ecran = e; libre = false; rendu(); }
+  function majDirect() {
+    const c = etat.course, e = etat.ecran, eta = $('#eta'), barre = $('#barre'), cons = $('#consigne');
+    let f = 0, nav2 = null, minTotal = 0;
+    if (c && e === 'approche') { f = avance(c.tA0, c.dA); nav2 = c.navA; minTotal = c.rA ? c.rA.secondes / 60 : 4; if (f >= 1) { arriverAuClient(); return; } }
+    if (c && e === 'course') { f = avance(c.tC0, c.dC); nav2 = c.navC; minTotal = c.rC ? c.rC.secondes / 60 : 15; if (f >= 1) { terminerCourse(); return; } }
+    if (eta) eta.textContent = `${Math.max(1, Math.ceil((1 - f) * minTotal))} min`;
+    if (barre) barre.style.width = `${Math.round(f * 100)}%`;
+    const k = nav2 ? consigne(nav2, f) : null;
+    cons.hidden = !k;
+    if (k) cons.innerHTML = `<span class="fleche-nav">${ic(k.fin ? 'pin' : 'fleche')}</span><span><b>${k.distance}</b><span>${k.fin ? (e === 'approche' ? 'Client sur votre droite' : 'Arrivée à destination') : esc(k.rue)}</span><small>Sur ${esc(k.actuelle)}</small></span>`;
+    if (c && e === 'attente') { const s = Math.max(0, 300 - Math.floor((performance.now() - c.attente0) / 1000)); const a = $('#attente'); if (a) a.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
+    majOffre();
+  }
+
+  /* ================= Boucle de dessin de la carte ================= */
+  let cleFond = '', tPrec = 0;
+  function boucle(t) {
+    const dt = Math.min(1000, tPrec ? t - tPrec : 16); tPrec = t;
+    const e = etat.ecran, c = etat.course;
+    if (VUES[e]) {
+      zone.b = feuille.hidden ? ch : Math.max(220, feuille.getBoundingClientRect().top - appareil.getBoundingClientRect().top);
+      zone.t = 70;
+      majBalade(t);
+      if (c && e === 'approche' && c.trA) Object.assign(pos, pointSur(c.trA, avance(c.tA0, c.dA)));
+      if (c && e === 'course' && c.trC) Object.assign(pos, pointSur(c.trC, avance(c.tC0, c.dC)));
+      if (c && e === 'attente') { pos.u = uDeX(c.depart.x); pos.v = vDeY(c.depart.y); }
+      const gps = gpsActif();
+      if (gps) { cible.u = pos.u; cible.v = pos.v; cible.z = 16.9; }
+      else if (c && e === 'fin') { cible.u = pos.u; cible.v = pos.v; cible.z = 16; }
+      else { cible.u = pos.u; cible.v = pos.v; cible.z = etat.enLigne ? 15.6 : 15.2; }
+      const f = 1 - Math.exp(-dt / 160);
+      vue.u += (cible.u - vue.u) * f; vue.v += (cible.v - vue.v) * f; vue.z += (cible.z - vue.z) * f;
+      appareil.classList.toggle('vue-gps', gps);
+      if (gps) carte.style.setProperty('--gps-y', `${cyEcran().toFixed(0)}px`);
+      const bg = $('#btn-gps'); bg.hidden = !ECRANS_GPS.includes(e); bg.textContent = etat.gps ? '2D' : '3D';
+      // en navigation, la carte tourne pour que la route monte toujours vers le haut de l'écran
+      let cam, poser = null;
+      if (gps) { suivreCap(pos.a, dt); ({ cam, poser } = cameraGps(cw, ch, vue, cyEcran())); }
+      else cam = camera(cw, ch, vue, cyEcran());
+      const P = palette();
+      const cle = `${vue.u.toFixed(3)}|${vue.v.toFixed(3)}|${vue.z.toFixed(4)}|${cw}|${ch}|${zone.b | 0}|${appareil.dataset.mode}|${carteVersion}|${gps ? gpsCap.val.toFixed(3) : ''}`;
+      if (cle !== cleFond) { cleFond = cle; if (poser) poser(fctx, dpr); else fctx.setTransform(dpr, 0, 0, dpr, 0, 0); dessinerBase(fctx, cam, P); }
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(fond, 0, 0);
+      if (poser) poser(ctx, dpr); else ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (c && e === 'approche' && c.trA) { dessinerTrace(ctx, cam, c.trA, avance(c.tA0, c.dA), P.trace, P, 6, true); repereDepart(ctx, cam, c.depart, t, P); }
+      if (c && e === 'attente') repereDepart(ctx, cam, c.depart, t, P);
+      if (c && e === 'course' && c.trC) { dessinerTrace(ctx, cam, c.trC, avance(c.tC0, c.dC), P.trace, P, 6, true); repereArrivee(ctx, cam, c.arrivee, P); }
+      if (etat.offre && etat.offre.rA) { const tr = trace(etat.offre.rA.pts); dessinerTrace(ctx, cam, tr, 0, P.traceGris, P, 4); repereDepart(ctx, cam, etat.offre.depart, t, P); }
+      dessinerVoiture(ctx, cam, pos, pos.a, true, P);
+    } else appareil.classList.remove('vue-gps');
+    requestAnimationFrame(boucle);
+  }
+
+  /* ================= Actions ================= */
+  const actions = {
+    connexionDemo() { etat.connecte = true; ecrire('bda-chauffeur-connecte', true); $('#connexion').hidden = true; son('ok'); toast(`Bonjour ${CHAUFFEUR.prenom} ! Passez en ligne pour recevoir des courses.`); },
+    deconnexion() { etat.connecte = false; ecrire('bda-chauffeur-connecte', false); etat.enLigne = false; etat.offre = null; afficherOffre(); $('#connexion').hidden = false; aller('carte'); },
+    onglet(v) { aller(v); },
+    basculerLigne() {
+      if (etat.course) { toast('Terminez d’abord la course en cours.'); return; }
+      etat.enLigne = !etat.enLigne; son('clic');
+      if (!etat.enLigne) { etat.offre = null; afficherOffre(); clearTimeout(minuteurProchaine); balade.tr = null; }
+      else programmerOffre();
+      aller('carte');
+    },
+    basculerGps() { etat.gps = !etat.gps; son('clic'); },
+    accepterOffre() { const o = etat.offre; if (!o) return; etat.offre = null; afficherOffre(); son('ok'); demarrerApproche(o); },
+    refuserOffre() { etat.offre = null; afficherOffre(); toast('Course refusée. Une autre vous sera proposée.'); programmerOffre(); },
+    arrive() { arriverAuClient(); },
+    clientABord() {
+      const c = etat.course;
+      if (!c.code) { demarrerCourse(); return; }
+      modale(`<h2>Code de sécurité</h2><p>Demandez à ${esc(c.client)} son code à 4 chiffres. Démo : saisissez 4827.</p>
+        <div class="cases-code">${[0, 1, 2, 3].map((i) => `<input id="code-${i}" inputmode="numeric" maxlength="1" aria-label="Chiffre ${i + 1}">`).join('')}</div><p class="erreur" id="code-erreur" hidden>Code incorrect : vérifiez avec le client.</p>
+        <button class="btn btn-or" type="button" data-a="validerCode">Démarrer la course</button>`);
+      setTimeout(() => { const i = $('#code-0'); if (i) i.focus(); }, 80);
+    },
+    validerCode() {
+      const code = [0, 1, 2, 3].map((i) => ($(`#code-${i}`) || {}).value || '').join('');
+      if (code !== '4827') { $('#code-erreur').hidden = false; return; }
+      fermerModale(); demarrerCourse();
+    },
+    clientAbsent() { modale(`<h2>Client absent ?</h2><p>Après les 5 minutes d’attente offertes, vous pouvez annuler. Le client est prévenu et BDA applique les conditions d’annulation.</p><button class="btn btn-principal" type="button" data-a="annulerAbsent">Annuler la course</button><button class="btn btn-second" type="button" data-a="fermerModale" data-v="ok">Continuer d’attendre</button>`); },
+    annulerAbsent() { fermerModale(); etat.course = null; toast('Course annulée pour absence du client (démo).'); aller('carte'); programmerOffre(); },
+    terminer() { terminerCourse(); },
+    noteClient(n) { etat.course.noteClient = +n; son('clic'); rendu(); },
+    repasserEnLigne() { etat.course = null; fermerChat(); aller('carte'); programmerOffre(); },
+    appeler() { toast('Démo : l’appel passe par BDA, les numéros restent masqués.'); },
+    ouvrirChat() { ouvrirChat(); },
+    fermerChat() { fermerChat(); },
+    envoyerMessage() { const i = $('#chat-texte'); if (!i) return; envoyerMessage(i.value); i.value = ''; },
+    envoyerRapide(v) { envoyerMessage(v); },
+    basculerMode() { etat.modeAffichage = etat.modeAffichage === 'clair' ? 'sombre' : 'clair'; appareil.dataset.mode = etat.modeAffichage; ecrire('bda-chauffeur-affichage', etat.modeAffichage); carteVersion++; rendu(); },
+    basculerSons() { etat.sons = !etat.sons; son('clic'); rendu(); },
+    fermerModale(_, el, ev) { if (el && el.classList.contains('voile') && ev && ev.target !== el) return; fermerModale(); },
+  };
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-a]');
+    if (!el || !actions[el.dataset.a]) return;
+    if (el.dataset.a !== 'fermerModale') { e.preventDefault(); e.stopPropagation(); }
+    actions[el.dataset.a](el.dataset.v, el, e);
+  });
+  document.addEventListener('input', (e) => {
+    const m = /^code-(\d)$/.exec(e.target.id || '');
+    if (m && e.target.value) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 1); const n = $(`#code-${+m[1] + 1}`); if (n && e.target.value) n.focus(); }
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.id === 'chat-texte') actions.envoyerMessage(); if (e.key === 'Escape' && couche.innerHTML) fermerModale(); });
+
+  /* ================= Démarrage ================= */
+  if (location.hostname === 'localhost') window.__chauffeur = { etat, actions, pos, moteur };
+  if (etat.connecte) $('#connexion').hidden = true;
+  setInterval(majDirect, 200);
+  requestAnimationFrame(boucle);
+  demarrerMoteur();
+  rendu();
+  chargerCarte();
+})();
+</script>
+
+</body>
+</html>

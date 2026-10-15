@@ -19,6 +19,7 @@ const NOTIF_CATEGORIES = [
   'espace_client' => ['Activité des clients', 'Devis accepté, document ouvert, connexion à l’espace client'],
   'avis' => ['Avis clients', 'Nouvel avis à valider'],
   'vtc' => ['Réservations VTC', 'Nouvelle réservation, annulation par le client'],
+  'appli' => ['Appli BDA', 'Course demandée, réservation à attribuer, course sans chauffeur, alerte d’un client'],
   'candidatures' => ['Candidatures', 'Page Recrutement du site'],
   'equipe' => ['Espace équipe', 'Demandes d’accès, connexions, documents déposés par les agents'],
   'absences' => ['Congés et absences', 'Demandes des agents'],
@@ -174,7 +175,8 @@ function notif_total_attente(): int
       + $q("SELECT COUNT(*) FROM candidatures WHERE statut = 'nouvelle'")
       + $q("SELECT COUNT(*) FROM comptes_equipe WHERE statut = 'attente'")
       + $q("SELECT COUNT(*) FROM absences WHERE statut = 'attente'")
-      + $q("SELECT COUNT(*) FROM main_courante WHERE statut = 'nouveau'");
+      + $q("SELECT COUNT(*) FROM main_courante WHERE statut = 'nouveau'")
+      + $q("SELECT COUNT(*) FROM courses WHERE statut = 'reservee'");
   } catch (Throwable $e) {
     return 0;
   }

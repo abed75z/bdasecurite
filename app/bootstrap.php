@@ -277,6 +277,25 @@ function schema(PDO $db): void
       PRAGMA user_version = 17;
     SQL);
   }
+  if ($version < 18) {
+    // Appli BDA (chauffeur privé) : comptes des clients, jetons de connexion de l'appli (clients et chauffeurs),
+    // chauffeurs en ligne (dernière position seulement), courses, messages d'une course, notifications de l'appli
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS appli_clients (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT NOT NULL UNIQUE COLLATE NOCASE, hash TEXT NOT NULL, prenom TEXT NOT NULL, nom TEXT NOT NULL DEFAULT '', tel TEXT NOT NULL DEFAULT '', offres INTEGER NOT NULL DEFAULT 0, points INTEGER NOT NULL DEFAULT 0, echecs INTEGER NOT NULL DEFAULT 0, bloque_jusqu TEXT NOT NULL DEFAULT '', reset TEXT NOT NULL DEFAULT '', reset_expire TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL, derniere TEXT NOT NULL DEFAULT '');
+      CREATE TABLE IF NOT EXISTS appli_jetons (jeton TEXT PRIMARY KEY, role TEXT NOT NULL, compte_id INTEGER NOT NULL, appareil TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL, vu TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_appli_jetons ON appli_jetons (role, compte_id);
+      CREATE TABLE IF NOT EXISTS appli_chauffeurs (compte_id INTEGER PRIMARY KEY, autorise INTEGER NOT NULL DEFAULT 1, en_ligne INTEGER NOT NULL DEFAULT 0, lat REAL, lng REAL, cap REAL, prec REAL, position_le TEXT NOT NULL DEFAULT '', vehicule TEXT NOT NULL DEFAULT '{}', gammes TEXT NOT NULL DEFAULT '["berline"]', note REAL NOT NULL DEFAULT 0, nb_notes INTEGER NOT NULL DEFAULT 0, vu TEXT NOT NULL DEFAULT '', maj TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS courses (id INTEGER PRIMARY KEY AUTOINCREMENT, numero TEXT NOT NULL UNIQUE, suivi TEXT NOT NULL UNIQUE, client_id INTEGER NOT NULL, chauffeur_id INTEGER NOT NULL DEFAULT 0, statut TEXT NOT NULL, gamme TEXT NOT NULL, mode TEXT NOT NULL DEFAULT 'trajet', quand TEXT NOT NULL, immediate INTEGER NOT NULL DEFAULT 1, km REAL NOT NULL DEFAULT 0, minutes INTEGER NOT NULL DEFAULT 0, transport REAL NOT NULL DEFAULT 0, remise REAL NOT NULL DEFAULT 0, protection REAL NOT NULL DEFAULT 0, code TEXT NOT NULL DEFAULT '', data TEXT NOT NULL DEFAULT '{}', refus TEXT NOT NULL DEFAULT '[]', recherche TEXT NOT NULL DEFAULT '', note_client INTEGER NOT NULL DEFAULT 0, avis TEXT NOT NULL DEFAULT '', note_chauffeur INTEGER NOT NULL DEFAULT 0, cree TEXT NOT NULL, accepte TEXT NOT NULL DEFAULT '', arrive TEXT NOT NULL DEFAULT '', debut TEXT NOT NULL DEFAULT '', fin TEXT NOT NULL DEFAULT '', annule TEXT NOT NULL DEFAULT '', annule_par TEXT NOT NULL DEFAULT '', maj TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_courses_statut ON courses (statut, quand);
+      CREATE INDEX IF NOT EXISTS i_courses_client ON courses (client_id, id);
+      CREATE INDEX IF NOT EXISTS i_courses_chauffeur ON courses (chauffeur_id, id);
+      CREATE TABLE IF NOT EXISTS courses_messages (id INTEGER PRIMARY KEY, course_id INTEGER NOT NULL, auteur TEXT NOT NULL, texte TEXT NOT NULL, cree TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_courses_messages ON courses_messages (course_id, id);
+      CREATE TABLE IF NOT EXISTS appli_push (id INTEGER PRIMARY KEY, role TEXT NOT NULL, compte_id INTEGER NOT NULL, endpoint TEXT NOT NULL UNIQUE, p256dh TEXT NOT NULL, auth TEXT NOT NULL, cree TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_appli_push ON appli_push (role, compte_id);
+      PRAGMA user_version = 18;
+    SQL);
+  }
 }
 // Catégorie d'un agent : équipe principale, renfort, ou agent de secours (candidat retenu)
 function agent_categorie($c): string
@@ -445,7 +464,10 @@ function fr_vers_iso(string $s): string
 }
 function envoyer_mail(string $sujet, string $message, string $repondreA = '', string $destinataire = BDA_EMAIL): bool
 {
-  if (getenv('BDA_NO_MAIL')) return true; // tests sur ordinateur
+  if (getenv('BDA_NO_MAIL')) { // tests sur ordinateur : rien ne part (copie dans un fichier si demandé)
+    if ($journalMails = getenv('BDA_MAIL_LOG')) @file_put_contents($journalMails, "=== " . date('c') . " → $destinataire\n$sujet\n$message\n\n", FILE_APPEND);
+    return true;
+  }
   $sujet = str_replace(["\r", "\n"], ' ', $sujet);
   $entetes = ['From: BDA Security Group <noreply@bdasecurite.com>', 'MIME-Version: 1.0', 'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: 8bit'];
   if ($repondreA !== '' && filter_var($repondreA, FILTER_VALIDATE_EMAIL)) $entetes[] = 'Reply-To: ' . $repondreA;

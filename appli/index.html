@@ -11,9 +11,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BDASH">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest?v=20261016-1553">
-<link rel="apple-touch-icon" href="icone-180.png?v=20261016-1553">
-<link rel="icon" href="icone-192.png?v=20261016-1553" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?v=20261016-1619">
+<link rel="apple-touch-icon" href="icone-180.png?v=20261016-1619">
+<link rel="icon" href="icone-192.png?v=20261016-1619" type="image/png">
 </head>
 <body><title>BDASH</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -241,8 +241,8 @@ details.faq p { margin: -4px 0 16px; color: var(--texte-2); font-size: 14px; }
 /* ---------- Barre du bas flottante ---------- */
 .nav {
   position: absolute; left: 50%; bottom: 16px; z-index: 8; transform: translateX(-50%);
-  width: calc(100% - 28px); max-width: 360px; height: 68px; padding: 6px;
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+  width: calc(100% - 28px); max-width: 300px; height: 68px; padding: 6px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
   border-radius: 99px; background: var(--verre); border: 1px solid var(--ligne);
   -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
   box-shadow: var(--ombre); transition: transform 0.35s var(--ease), opacity 0.3s;
@@ -403,6 +403,11 @@ details.faq p { margin: -4px 0 16px; color: var(--texte-2); font-size: 14px; }
 
 /* ---------- v0.4 : accueil, options de course, documents, textes légaux ---------- */
 .salut { margin: 2px 0 -4px; font: 800 30px/1.1 var(--display); letter-spacing: -0.03em; text-wrap: balance; }
+/* accueil sur la carte : le panneau laisse la place au menu du bas ; baissé, il ne garde que « Où allez-vous ? » */
+.salut-f { margin: 0; font: 800 26px/1.15 var(--display); letter-spacing: -0.02em; }
+.appareil[data-ecran="accueil"] .feuille { padding-bottom: 104px; max-height: calc(100% - 110px); }
+.appareil[data-ecran="accueil"] .feuille.reduite { max-height: 200px; }
+.appareil[data-ecran="accueil"] .feuille.reduite .accueil-f > :not(.recherche) { display: none; }
 .salut span { display: block; margin-top: 6px; font: 500 14.5px/1.3 var(--texte-police); letter-spacing: 0; color: var(--texte-2); }
 .rapides { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: -6px -18px 0; padding: 0 18px; }
 .rapides::-webkit-scrollbar { display: none; }
@@ -499,6 +504,21 @@ button.activite > .ic { color: var(--texte-3); }
 .gamme:active { transform: scale(0.96); }
 .gamme[aria-pressed="true"] { border-color: var(--texte); }
 .gamme svg { width: 74px; height: 28px; }
+/* choix de la voiture : une liste légère, la ligne choisie encadrée */
+.liste-gammes { display: grid; gap: 4px; margin: 0 -6px; }
+.ligne-gamme { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; padding: 8px 10px 8px 6px; border-radius: 14px; border: 2px solid transparent; text-align: left; transition: border-color 0.2s, background 0.2s; }
+.ligne-gamme[aria-pressed="true"] { border-color: var(--texte); background: var(--surface); }
+.ligne-gamme .lg-auto svg { width: 70px; height: 27px; display: block; }
+.ligne-gamme .lg-nom { min-width: 0; }
+.ligne-gamme .lg-nom b { display: flex; align-items: center; gap: 6px; font: 700 15.5px/1.2 var(--display); white-space: nowrap; }
+.ligne-gamme .lg-nom small { display: flex; align-items: center; gap: 4px; margin-top: 3px; color: var(--texte-2); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ligne-gamme .lg-prix { display: grid; justify-items: end; }
+.ligne-gamme .lg-prix b { font: 700 15.5px/1 var(--display); font-variant-numeric: tabular-nums; }
+.ligne-gamme .lg-prix s { color: var(--texte-3); font-size: 12px; margin-bottom: 3px; }
+.lg-arrivee { display: flex; align-items: center; gap: 6px; margin: -6px 0 0; color: var(--texte-2); }
+.btn-commander[disabled] { opacity: 0.4; }
+.appareil[data-ecran="choix"] .feuille { max-height: 74%; padding-bottom: 0; }
+.appareil[data-ecran="choix"] .btn-commander { position: sticky; bottom: 0; z-index: 2; margin-bottom: 14px; box-shadow: 0 0 0 14px var(--feuille), 0 -18px 18px 6px var(--feuille); }
 .gamme b { font: 700 12.5px/1.1 var(--display); }
 .gamme span { font: 600 12px/1 var(--texte-police); color: var(--texte-2); font-variant-numeric: tabular-nums; }
 button.paiement { width: 100%; text-align: left; }
@@ -713,37 +733,27 @@ button.paiement { width: 100%; text-align: left; }
 .tk-qr.sans-qr { font-size: 9px; color: #000; padding: 4px; text-align: center; overflow-wrap: anywhere; }
 
 /* ---------- Ouverture : BDASH monte lettre par lettre (BDA en blanc, SH en or), les lettres se resserrent,
-   un trait doré se dessine, puis l'écran s'ouvre vers le haut. Ni zoom ni flou sur le logo. ---------- */
+   un trait doré se dessine, puis l'appli apparaît en fondu (comme Uber). Ni zoom ni flou sur le logo. ---------- */
 .lancement { position: absolute; inset: 0; z-index: 90; background: #000; overflow: hidden; display: grid; place-items: center; }
-.lancement::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: linear-gradient(90deg, rgba(201, 166, 107, 0), #c9a66b 25%, #e2cb9a 50%, #c9a66b 75%, rgba(201, 166, 107, 0)); opacity: 0; }
-.lancement.go { animation: l-porte 0.62s 2.05s cubic-bezier(0.76, 0, 0.24, 1) forwards; }
-.lancement.go::after { animation: l-apparait 0.2s 1.95s ease forwards; }
+.lancement.go { animation: l-sortie 0.35s 1.6s ease forwards; }
 .lancement.fini { animation: l-sortie 0.25s ease forwards; }
 .l-bloc { display: grid; justify-items: center; }
 .l-mot { display: flex; gap: 0.14em; overflow: hidden; padding: 0.06em 0.02em; font: 800 64px/1 var(--display); color: #fff; }
 .l-mot span { display: block; transform: translateY(110%); }
 .l-mot .or { color: #c9a66b; }
 .l-ligne { width: 56px; height: 1px; margin-top: 18px; background: #c9a66b; transform: scaleX(0); }
-.l-sous { margin-top: 16px; font: 600 10.5px/1 var(--texte-police); letter-spacing: 0.46em; padding-left: 0.46em; color: #8a8a8a; opacity: 0; transform: translateY(6px); }
-.go .l-mot { animation: l-serre 1.5s 0.1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.go .l-mot { animation: l-serre 1.4s 0.1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 .go .l-mot span { animation: l-monte 0.62s calc(0.15s + var(--i) * 0.07s) cubic-bezier(0.22, 1, 0.36, 1) forwards; }
 .go .l-ligne { animation: l-ligne 0.55s 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-.go .l-sous { animation: l-sous-entre 0.5s 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-.go .l-bloc { animation: l-leve 0.35s 1.9s cubic-bezier(0.55, 0, 0.75, 0) forwards; }
 @keyframes l-monte { to { transform: none; } }
 @keyframes l-serre { to { gap: 0.035em; } }
 @keyframes l-ligne { to { transform: scaleX(1); } }
-@keyframes l-sous-entre { to { opacity: 1; transform: none; } }
-@keyframes l-leve { to { opacity: 0; transform: translateY(-14px); } }
-@keyframes l-apparait { to { opacity: 1; } }
-@keyframes l-porte { to { transform: translateY(-100%); } }
 @keyframes l-sortie { to { opacity: 0; visibility: hidden; } }
 @media (prefers-reduced-motion: reduce) {
   .lancement.go { animation: l-sortie 0.3s 0.9s forwards; }
-  .lancement *, .lancement::after { animation: none !important; }
+  .lancement * { animation: none !important; }
   .l-mot { gap: 0.035em; }
-  .l-mot span, .l-ligne, .l-sous { transform: none; }
-  .l-sous { opacity: 1; }
+  .l-mot span, .l-ligne { transform: none; }
   .p, .cx, .feuille, .modale, .coche { animation: none; }
 }
 </style>
@@ -813,7 +823,7 @@ button.paiement { width: 100%; text-align: left; }
 </svg>
 <!-- ⟪/commun:icones⟫ -->
 
-<div class="appareil" id="appareil" data-mode="sombre">
+<div class="appareil" id="appareil" data-mode="clair">
   <!-- dégradés des voitures : placés dans l'appareil pour suivre le mode sombre ou clair -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
     <defs>
@@ -835,7 +845,6 @@ button.paiement { width: 100%; text-align: left; }
   <main class="page" id="page"></main>
   <nav class="nav" id="nav" aria-label="Navigation">
     <button type="button" data-a="onglet" data-v="accueil"><svg class="ic"><use href="#i-accueil"/></svg>Accueil</button>
-    <button type="button" data-a="onglet" data-v="services"><svg class="ic"><use href="#i-services"/></svg>Services</button>
     <button type="button" data-a="onglet" data-v="activite"><svg class="ic"><use href="#i-recu"/></svg>Activité</button>
     <button type="button" data-a="onglet" data-v="compte"><svg class="ic"><use href="#i-utilisateur"/></svg>Compte<span class="point" id="point-compte"></span></button>
   </nav>
@@ -848,7 +857,6 @@ button.paiement { width: 100%; text-align: left; }
     <div class="l-bloc">
       <div class="l-mot" aria-hidden="true"><span style="--i:0">B</span><span style="--i:1">D</span><span style="--i:2">A</span><span class="or" style="--i:3.6">S</span><span class="or" style="--i:4.6">H</span></div>
       <div class="l-ligne"></div>
-      <div class="l-sous">CHAUFFEUR PRIVÉ</div>
     </div>
   </div>
 </div>
@@ -938,7 +946,7 @@ button.paiement { width: 100%; text-align: left; }
   };
   const etat = {
     ecran: 'accueil', pile: [], ongletActivite: 'passees',
-    modeAffichage: lire('bda-app-affichage', 'sombre'),
+    modeAffichage: lire('bda-app-affichage', 'clair'),
     user: lire('bda-app-compte', null), auth: {},
     depart: lire('bda-app-depart', null) || DEPART_DEFAUT, arrivee: null, arret: null, champ: 'arrivee', filtre: '', filtreDepart: '', filtreArret: '',
     passager: null, vol: { numero: '', pancarte: true }, feuilleReduite: false, sensVehicule: 0, favoriDemande: null, gps: true,
@@ -1530,12 +1538,13 @@ button.paiement { width: 100%; text-align: left; }
       bat: '#1b1e22', batMur: '#131518', batToit: '#262a30', batBord: 'rgba(255,255,255,0.06)',
       trace: '#ffffff', traceOr: '#c9a66b', traceBord: 'rgba(0,0,0,0.55)', traceGris: 'rgba(255,255,255,0.4)', nous: '#ffffff', nousVitres: '#2b2b2b', autres: '#6b7077', autresVitres: '#1d1f22', marque: '#ffffff', centre: '#000000', bulle: '#ffffff', bulleTexte: '#000000', halo2: 'rgba(255,255,255,0.12)', onde: '255,255,255',
     },
+    // clair, façon Uber : gris très doux, routes blanches bordées de gris, eau et parcs pastel, peu de texte
     clair: {
-      mer: '#bcd5e3', terre: '#f1f1ee', autre: '#e8e8e4', frontiere: 'rgba(0,0,0,0.2)', region: 'rgba(0,0,0,0.08)',
-      eau: '#b8d3e2', riviere: '#a9cadd', parc: '#d6e8cc', bois: '#cde2c3', cimetiere: '#dfe5dc', sport: '#d6e8cc',
-      routes: ['#ffd98a', '#ffe7b0', '#ffffff', '#ffffff', '#ffffff', '#ffffff'], bord: ['#e3b45b', '#e8c27a', '#d4d4cf', '#d9d9d4', '#dddcd7', '#e2e2dd'],
-      ville: '#2b2e33', village: '#5b5f66', quartier: '#7a7e85', rue: '#6c7077', halo: '#f1f1ee',
-      bat: '#e4e1da', batMur: '#cfcbc1', batToit: '#eeece7', batBord: 'rgba(0,0,0,0.08)',
+      mer: '#cfe0ee', terre: '#f3f3f1', autre: '#ececea', frontiere: 'rgba(0,0,0,0.12)', region: 'rgba(0,0,0,0.05)',
+      eau: '#cfe0ee', riviere: '#c3d8ea', parc: '#deedd6', bois: '#d6e8ce', cimetiere: '#e4e9e1', sport: '#deedd6',
+      routes: ['#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff'], bord: ['#c9ccd1', '#cfd2d6', '#d9dbde', '#dfe0e2', '#e3e4e6', '#e7e8e9'],
+      ville: '#3c4043', village: '#5f6368', quartier: '#8a8f94', rue: '#8a8f94', halo: '#f3f3f1',
+      bat: '#e9e9e6', batMur: '#dadad6', batToit: '#f0f0ed', batBord: 'rgba(0,0,0,0.05)',
       trace: '#000000', traceOr: '#c9a66b', traceBord: 'rgba(255,255,255,0.8)', traceGris: 'rgba(0,0,0,0.35)', nous: '#000000', nousVitres: '#5a5a5a', autres: '#8d9197', autresVitres: '#d5d7da', marque: '#000000', centre: '#ffffff', bulle: '#000000', bulleTexte: '#ffffff', halo2: 'rgba(0,0,0,0.1)', onde: '0,0,0',
     },
   };
@@ -1917,6 +1926,7 @@ button.paiement { width: 100%; text-align: left; }
       if (etat.itin) cadrerSur(pointsTrace(etat.itin.tr).concat([etat.depart, etat.arret, etat.arrivee].filter(Boolean)));
       else cadrerSur([etat.depart, etat.arret, etat.arrivee].filter(Boolean), 15.5);
     } else if (e === 'recherche') { cible.u = uDeX(etat.depart.x); cible.v = vDeY(etat.depart.y); cible.z = 15.6; }
+    else if (e === 'accueil') { cible.u = uDeX(etat.depart.x); cible.v = vDeY(etat.depart.y); cible.z = 15.3; }
     else if (e === 'approche' && c && c.rA) cadrerSur(pointsTrace(c.rA, fApproche(c)).concat([etat.depart], c.pos ? [c.pos] : []), 16.4, 60);
     else if (e === 'approche' && c && c.pos) cadrerSur([c.pos, etat.depart], 16.4, 60);
     else if (e === 'arrive') { cible.u = uDeX(etat.depart.x); cible.v = vDeY(etat.depart.y); cible.z = 16.6; }
@@ -1976,7 +1986,8 @@ button.paiement { width: 100%; text-align: left; }
   }
   function dessinerAnime(c, cam, t, P) {
     const e = etat.ecran, cr = etat.course;
-    if (['choix', 'recherche', 'pointer'].includes(e) && cam.z >= 13.2) dessinerVoisins(c, cam, t, P);
+    if (['accueil', 'choix', 'recherche', 'pointer'].includes(e) && cam.z >= 13.2) dessinerVoisins(c, cam, t, P);
+    if (e === 'accueil') repereDepart(c, cam, etat.depart, t, P);
     if ((e === 'choix' || e === 'reservee') && etat.arrivee) {
       if (etat.itin) dessinerTrace(c, cam, etat.itin.tr, 0, P.trace, P, 5, true);
       if (etat.arret) repereArret(c, cam, etat.arret, P);
@@ -2025,6 +2036,8 @@ button.paiement { width: 100%; text-align: left; }
     geste.pts.set(e.pointerId, surCanvas(e));
     geste.actif = true; geste.vu = 0; geste.vv = 0; geste.dernier = performance.now();
     devenirLibre();
+    // accueil : toucher la carte baisse le panneau « Bonjour » pour la dégager
+    if (etat.ecran === 'accueil' && !etat.feuilleReduite) { etat.feuilleReduite = true; feuille.classList.add('reduite'); }
   });
   carte.addEventListener('pointermove', (e) => {
     if (!geste.pts.has(e.pointerId)) return;
@@ -2776,6 +2789,24 @@ button.paiement { width: 100%; text-align: left; }
       <p class="petit centre">BDA · Chauffeur privé · Paris et Île-de-France · 24 h/24</p>
     </div>`;
   }
+  // Accueil façon Uber : la carte en plein écran, le panneau « Bonjour » en bas.
+  // Toucher la carte baisse le panneau : on peut alors la déplacer et zoomer librement.
+  function vueAccueil() {
+    const pill = `<span class="plus-tard" data-a="planifier">${ic('calendrier', 'ic-xs')}${esc(etat.planif ? textePlanif(etat.planif) : 'Plus tard')}</span>`;
+    const recents = etat.recents.slice(0, 3).map((r, i) => `<button class="ligne" type="button" data-a="choisirRecent" data-v="${i}"><span class="pastille">${ic('horloge', 'ic-s')}</span><span><b>${esc(r.titre)}</b><small>${esc(r.sous)}</small></span><span class="droite">${ic('chevron', 'ic-s')}</span></button>`).join('');
+    const lp = etat.lieuxPerso;
+    const rapide = (k, icone, titre) => `<button class="rapide" type="button" data-a="lieuRapide" data-v="${k}">${ic(icone, 'ic-s')}<span>${lp[k] ? titre : `Ajouter ${titre.toLowerCase()}`}</span></button>`;
+    const prenom = etat.user && etat.user.prenom ? `, ${esc(etat.user.prenom)}` : '';
+    const h = new Date().getHours();
+    const service = (a, v, icone, nom) => `<button class="rapide" type="button" data-a="${a}"${v ? ` data-v="${v}"` : ''}>${ic(icone, 'ic-s')}<span>${nom}</span></button>`;
+    return `<div class="poignee" data-a="basculerFeuille" role="button" aria-label="Agrandir ou réduire"></div><div class="pile accueil-f">
+      <h1 class="salut-f">${h >= 5 && h < 18 ? 'Bonjour' : 'Bonsoir'}${prenom}</h1>
+      <button class="recherche" type="button" data-a="destination">${ic('loupe')}<span class="txt">Où allez-vous ?</span>${pill}</button>
+      <div class="rapides">${rapide('domicile', 'maison', 'Domicile')}${rapide('travail', 'mallette', 'Travail')}${service('destination', 'aeroport', 'avion', 'Aéroport')}</div>
+      ${recents ? `<div class="liste">${recents}</div>` : ''}
+      <div class="rapides">${service('planifier', '', 'calendrier', 'Réserver')}${service('disposition', '', 'horloge', 'À l’heure')}${service('depuisAeroport', '', 'avion', 'Depuis l’aéroport')}${service('pourProche', '', 'groupe', 'Pour un proche')}${service('destination', 'vip', 'vip', 'VIP')}</div>
+    </div>`;
+  }
   function pageServices() {
     const t = (a, v, icone, nom, badge = '') => `<button class="service" type="button" data-a="${a}" data-v="${v}">${badge ? `<span class="badge">${badge}</span>` : ''}${ic(icone)}${nom}</button>`;
     return `<div class="p">
@@ -2939,7 +2970,7 @@ button.paiement { width: 100%; text-align: left; }
     },
     affichage() {
       const r = (v, titre, sous) => `<button class="choix-radio" type="button" role="radio" aria-checked="${etat.modeAffichage === v}" data-a="affichage" data-v="${v}"><span><b>${titre}</b><small>${sous}</small></span><span class="rond-radio"></span></button>`;
-      return `<div class="p">${tete('Affichage')}<div>${r('sombre', 'Mode sombre', 'Fond noir, idéal la nuit')}${r('clair', 'Mode clair', 'Fond blanc, lisible en plein soleil')}${r('auto', 'Comme le téléphone', 'Suit le réglage de votre téléphone')}</div></div>`;
+      return `<div class="p">${tete('Affichage')}<div>${r('clair', 'Mode clair', 'Fond blanc, lisible en plein soleil')}${r('sombre', 'Mode sombre', 'Fond noir, idéal la nuit')}${r('auto', 'Comme le téléphone', 'Suit le réglage de votre téléphone')}</div></div>`;
     },
     preferences() {
       const p = etat.prefs;
@@ -3213,28 +3244,16 @@ button.paiement { width: 100%; text-align: left; }
     const f = forfaitCourse(), k = etat.vehicule, v = VEHICULES[k], remise = remisePromo();
     const prixDe = (x) => (it ? prix(x, it) : null);
     const apresRemise = (p) => (p == null ? null : Math.max(0, p - remise));
-    // sélecteur de gammes qui défile sous la vitrine
-    const gamme = (x) => `<button class="gamme" type="button" data-a="vehicule" data-v="${x}" aria-pressed="${k === x}">${silhouette(x)}<b>${VEHICULES[x].nom}</b><span>${it ? euros(apresRemise(prixDe(x))) : '—'}</span></button>`;
+    // liste des gammes, façon Uber : une ligne par voiture (dessin, nom, places et délai, prix), la choisie est encadrée
+    const gamme = (x) => {
+      const vx = VEHICULES[x], px = prixDe(x), delai = !etat.planif && vx.attente != null ? ` · à ${vx.attente} min` : '';
+      const tag = x === 'vip' ? ' <span class="cartouche or">Protection</span>' : x === 'electrique' ? ' <span class="cartouche vert">Éco</span>' : '';
+      return `<button class="ligne-gamme" type="button" data-a="vehicule" data-v="${x}" aria-pressed="${k === x}"><span class="lg-auto">${silhouette(x)}</span><span class="lg-nom"><b>${vx.nom}${tag}</b><small>${ic('utilisateur', 'ic-xs')}${vx.places}${esc(delai)}</small></span><span class="lg-prix">${remise && px != null ? `<s>${euros(px)}</s>` : ''}<b>${px != null ? euros(apresRemise(px)) : '—'}</b></span></button>`;
+    };
     const p = prixDe(k), pFinal = apresRemise(p);
     const arrivee = it ? new Date(depuis + ((etat.planif ? 0 : v.attente || 0) + it.min) * 60000) : null;
-    const etiquette = k === 'vip' ? '<span class="cartouche or">Protection</span>' : k === 'electrique' ? '<span class="cartouche vert">Éco</span>' : '';
     const sousPrix = !it ? '' : k === 'vip' ? `dont protection ${euros(AGENT_VIP)}` : f ? 'Prix fixe' : 'Prix garanti';
-    const sens = etat.sensVehicule; etat.sensVehicule = 0;
-    const anim = sens > 0 ? 'depuis-droite' : sens < 0 ? 'depuis-gauche' : '';
-    const vitrine = `<div class="showroom">
-      <div class="sr-scene" data-glisse="vehicule">
-        <span class="sr-halo"></span>
-        <div class="sr-auto ${anim}">${dessinVoiture(k)}<div class="sr-reflet" aria-hidden="true">${dessinVoiture(k)}</div></div>
-        <span class="sr-brille ${anim ? 'joue' : ''}"></span>
-        <button class="sr-fleche gauche" type="button" data-a="vehiculeVoisin" data-v="-1" aria-label="Voiture précédente">${ic('retour', 'ic-s')}</button>
-        <button class="sr-fleche droite" type="button" data-a="vehiculeVoisin" data-v="1" aria-label="Voiture suivante">${ic('fleche', 'ic-s')}</button>
-      </div>
-      <div class="sr-infos">
-        <div class="sr-nom"><b>${v.nom} ${etiquette}</b><small>${v.modele}</small></div>
-        <div class="sr-prix">${remise && p != null ? `<s>${euros(p)}</s>` : ''}<b>${pFinal != null ? euros(pFinal) : '—'}</b><small>${sousPrix}</small></div>
-      </div>
-      <div class="sr-chips"><span>${ic('utilisateur', 'ic-xs')}${v.places} places</span><span>${ic('mallette', 'ic-xs')}${v.bagages} bagages</span>${etat.planif ? '' : v.attente != null ? `<span>${ic('horloge', 'ic-xs')}À ${v.attente} min</span>` : `<span>${ic('horloge', 'ic-xs')}Aucun chauffeur libre</span>`}${arrivee ? `<span>${ic('pin', 'ic-xs')}Arrivée ${heure(arrivee)}</span>` : ''}</div>
-    </div>`;
+    etat.sensVehicule = 0;
     const ligneTrajet = it ? `${km1(it.km)} km · ${it.min} min${it.via.length ? ' · par ' + it.via.join(' et ') : ''}${etat.planif ? ` · ${textePlanif(etat.planif)}` : ''}` : 'Calcul du trajet sur les routes…';
     const ps = etat.passager, depuisAero = aeroportDe(a), fav = favoriDemande();
     const options = [
@@ -3251,13 +3270,14 @@ button.paiement { width: 100%; text-align: left; }
       <div class="resume"><div><b>${esc(b.titre)}</b><small>${esc(ligneTrajet)}</small></div><button class="lien" type="button" data-a="modifierTrajet">Modifier</button></div>
       ${etat.arret ? `<div class="arret-ligne">${ic('pin', 'ic-xs')}<span>Arrêt : ${esc(etat.arret.titre)}</span><button type="button" data-a="retirerArret" aria-label="Retirer l’arrêt">${ic('croix', 'ic-xs')}</button></div>` : ''}
       ${it ? '' : '<div class="barre-recherche"><i></i></div>'}
-      ${vitrine}
-      <div class="gammes">${ORDRE_VEHICULES.map(gamme).join('')}</div>
+      <div class="liste-gammes" role="group" aria-label="Choix de la voiture">${ORDRE_VEHICULES.map(gamme).join('')}</div>
+      ${!etat.planif && ORDRE_VEHICULES.every((x) => VEHICULES[x].attente == null) ? '<p class="petit lg-arrivee">Aucun chauffeur libre pour l’instant : vous pouvez réserver à l’avance.</p>' : ''}
+      ${arrivee ? `<p class="petit lg-arrivee">${ic('pin', 'ic-xs')}${v.nom} · arrivée vers ${heure(arrivee)}${sousPrix ? ` · ${sousPrix}` : ''}</p>` : ''}
       <div class="options">${options}</div>
       ${k === 'vip' ? `<p class="conditions mention-cnaps">Protection assurée et facturée par ${esc(LEGAL.protection)}, autorisation CNAPS n° ${aCompleter(LEGAL.cnaps)}. ${MENTION_CNAPS}</p>` : ''}
       <button class="paiement" type="button" data-a="choisirPaiement">${logoPaiement(etat.paiement)}<span class="nom-carte">${nomPaiement(etat.paiement)}</span>${ic('chevron', 'ic-s')}</button>
       <p class="conditions">${conditions} <button type="button" data-a="lireTexte" data-v="cgv">Conditions de vente</button></p>
-      ${glissiere(libelle, !!it)}
+      <button class="btn btn-principal btn-commander" type="button" data-a="commander"${it ? '' : ' disabled'}>${esc(libelle)}</button>
     </div>`;
   }
   // « Glisser pour commander » : on pousse le rond jusqu'au bout
@@ -3353,9 +3373,9 @@ button.paiement { width: 100%; text-align: left; }
   }
 
   /* ================= Rendu général ================= */
-  const ONGLETS = ['accueil', 'services', 'activite', 'compte'];
+  const ONGLETS = ['accueil', 'activite', 'compte'];
   const PAGES = { accueil: pageAccueil, services: pageServices, activite: pageActivite, compte: pageCompte, destination: pageDestination, ...SOUS_PAGES };
-  const VUES_CARTE = { choix: vueChoix, pointer: vuePointer, recherche: vueRecherche, approche: vueApproche, arrive: vueArrive, course: vueCourse, fin: vueFin, reservee: vueReservee };
+  const VUES_CARTE = { accueil: vueAccueil, choix: vueChoix, pointer: vuePointer, recherche: vueRecherche, approche: vueApproche, arrive: vueArrive, course: vueCourse, fin: vueFin, reservee: vueReservee };
   let dernierScroll = 0;
   // transitions entre pages façon iPhone : l'ancienne page (copiée) glisse pendant que la nouvelle arrive
   let sensPage = '';
@@ -3378,7 +3398,8 @@ button.paiement { width: 100%; text-align: left; }
     sensPage = '';
     page.hidden = surCarte; feuille.hidden = !surCarte;
     hautCarte.hidden = !surCarte;
-    $('#btn-retour-carte').hidden = ['recherche', 'approche', 'arrive', 'course', 'fin'].includes(e);
+    $('#btn-retour-carte').hidden = ['accueil', 'recherche', 'approche', 'arrive', 'course', 'fin'].includes(e);
+    appareil.dataset.ecran = e;
     carte.style.visibility = surCarte ? 'visible' : 'hidden';
     epingle.hidden = e !== 'pointer';
     if (!surCarte) btnRecentrer.hidden = true;
@@ -4030,7 +4051,7 @@ button.paiement { width: 100%; text-align: left; }
     confirmerSuppression() {
       try { Object.keys(localStorage).filter((k) => k.startsWith('bda-app-')).forEach((k) => localStorage.removeItem(k)); } catch { /* stockage indisponible */ }
       for (const k of Object.keys(DEFAUTS)) etat[k] = JSON.parse(JSON.stringify(DEFAUTS[k]));
-      Object.assign(etat, { user: null, depart: DEPART_DEFAUT, recents: RECENTS_DEFAUT, aVenir: [], passees: exemplesActivite(), messagesLus: false, planif: null, course: null, reservation: null, arrivee: null, itin: null, pile: [], ecran: 'accueil', modeAffichage: 'sombre',
+      Object.assign(etat, { user: null, depart: DEPART_DEFAUT, recents: RECENTS_DEFAUT, aVenir: [], passees: exemplesActivite(), messagesLus: false, planif: null, course: null, reservation: null, arrivee: null, itin: null, pile: [], ecran: 'accueil', modeAffichage: 'clair',
         paiement: 'carte', promo: null, favoris: [], favoriDemande: null, club: { points: 0 }, sons: true, conversations: {} });
       fermerChat();
       nouveauTrajet(); appliquerAffichage(); fermerModale(); rendu(); montrerConnexion();
@@ -5033,7 +5054,7 @@ button.paiement { width: 100%; text-align: left; }
   /* ================= Démarrage ================= */
   // ouverture : on attend la police du logo (0,9 s au plus) pour que BDASH ne change pas de forme en montant
   function demarrerOuverture(l) {
-    const go = () => { l.classList.add('go'); setTimeout(() => { if (l.isConnected) l.hidden = true; }, 2750); };
+    const go = () => { l.classList.add('go'); setTimeout(() => { if (l.isConnected) l.hidden = true; }, 2050); };
     const police = document.fonts && document.fonts.load ? document.fonts.load('800 64px Manrope') : Promise.resolve();
     Promise.race([police, new Promise((ok) => setTimeout(ok, 900))]).then(go, go);
   }

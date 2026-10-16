@@ -96,7 +96,7 @@
   <link rel="stylesheet" href="assets/css/blanc.css?v=34">
   <link rel="stylesheet" href="assets/css/sobre.css?v=9">
   <link rel="stylesheet" href="assets/css/entete.css?v=9">
-  <link rel="stylesheet" href="assets/css/maison.css?v=29">
+  <link rel="stylesheet" href="assets/css/maison.css?v=33">
 </head>
 <body>
 
@@ -427,28 +427,81 @@
 </main>
 
 <!-- ============ ÊTRE RAPPELÉ ============ -->
-<dialog class="rappel" aria-labelledby="rappel-titre">
-  <form class="rappel__form" novalidate>
-    <button class="rappel__x" type="button" aria-label="Fermer" data-fermer>&times;</button>
-    <p class="kicker">Être rappelé</p>
-    <h2 class="rappel__titre" id="rappel-titre">Un responsable vous rappelle.</h2>
-    <p class="rappel__texte">Laissez votre numéro : nous vous rappelons pour comprendre votre besoin, sans engagement.</p>
-    <label class="rappel__champ"><span>Nom et société</span><input name="nom" type="text" autocomplete="organization" maxlength="120" required placeholder="Ex. : Marie Durand, Hôtel Lumière"></label>
-    <label class="rappel__champ"><span>Téléphone</span><input name="tel" type="tel" autocomplete="tel" maxlength="30" required placeholder="06 12 34 56 78"></label>
-    <div class="rappel__ligne">
-      <label class="rappel__champ"><span>Secteur</span><select name="secteur"><option>Hôtel</option><option>Bureaux / entreprise</option><option>Commerce</option><option>Chantier</option><option>Événement</option><option>Institution</option><option>Résidence / copropriété</option><option>Autre</option></select></label>
-      <label class="rappel__champ"><span>Quand ?</span><select name="creneau"><option>Dès que possible</option><option>Ce matin</option><option>Cet après-midi</option><option>En fin de journée</option><option>Demain</option></select></label>
+<dialog class="rappel rappel--v2" aria-labelledby="rappel-titre">
+  <div class="rp">
+    <aside class="rp__cote">
+      <p class="rp__sur">Être rappelé</p>
+      <h2 class="rp__titre" id="rappel-titre">Un responsable vous rappelle.</h2>
+      <p class="rp__texte">Choisissez le moment qui vous convient : nous vous appelons pour comprendre votre besoin, sans engagement.</p>
+      <ul class="rp__atouts">
+        <li>Un interlocuteur unique</li>
+        <li>Disponibles 24h/24, 7j/7</li>
+        <li>Échange confidentiel</li>
+      </ul>
+      <p class="rp__direct">Ou appelez-nous directement<a href="tel:+33611678625">06 11 67 86 25</a></p>
+    </aside>
+
+    <div class="rp__corps">
+      <button class="rp__x" type="button" aria-label="Fermer" data-fermer><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+
+      <form class="rp__form" novalidate>
+        <fieldset class="rp__bloc">
+          <legend><span>01</span>Vos coordonnées</legend>
+          <div class="rp__ligne">
+            <label class="rp__champ"><span>Nom et prénom</span><input name="nom" type="text" autocomplete="name" maxlength="80" required></label>
+            <label class="rp__champ"><span>Société <small>facultatif</small></span><input name="societe" type="text" autocomplete="organization" maxlength="80"></label>
+          </div>
+          <label class="rp__champ"><span>Téléphone</span><input name="tel" type="tel" autocomplete="tel" inputmode="tel" maxlength="30" required placeholder="06 12 34 56 78"></label>
+        </fieldset>
+
+        <fieldset class="rp__bloc">
+          <legend><span>02</span>Votre besoin</legend>
+          <div class="rp__puces">
+            <label><input type="radio" name="besoin" value="Agent de sécurité" checked><span>Agent de sécurité</span></label>
+            <label><input type="radio" name="besoin" value="Sécurité incendie"><span>Sécurité incendie</span></label>
+            <label><input type="radio" name="besoin" value="Protection rapprochée"><span>Protection rapprochée</span></label>
+            <label><input type="radio" name="besoin" value="Événementiel"><span>Événementiel</span></label>
+            <label data-visible="offreVtc"><input type="radio" name="besoin" value="Chauffeur privé"><span>Chauffeur privé</span></label>
+            <label><input type="radio" name="besoin" value="Autre"><span>Autre</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="rp__bloc">
+          <legend><span>03</span>Quand vous rappeler ?</legend>
+          <div class="rp__puces rp__quand">
+            <label><input type="radio" name="quand" value="vite" checked><span>Dès que possible</span></label>
+            <label><input type="radio" name="quand" value="date"><span>Choisir un jour et une heure</span></label>
+          </div>
+          <div class="rp__agenda" aria-hidden="true">
+            <div class="rp__agenda-in">
+              <div class="rp__jours" role="radiogroup" aria-label="Jour du rappel"></div>
+              <div class="rp__creneaux" role="radiogroup" aria-label="Moment de la journée">
+                <label><input type="radio" name="creneau" value="matin" data-fin="12"><span><b>Matin</b><small>9h – 12h</small></span></label>
+                <label><input type="radio" name="creneau" value="midi" data-fin="14"><span><b>Midi</b><small>12h – 14h</small></span></label>
+                <label><input type="radio" name="creneau" value="apres-midi" data-fin="18"><span><b>Après-midi</b><small>14h – 18h</small></span></label>
+                <label><input type="radio" name="creneau" value="soir" data-fin="21"><span><b>Soirée</b><small>18h – 21h</small></span></label>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+
+        <label class="rp__champ rp__champ--texte"><span>Un mot sur votre demande <small>facultatif</small></span><textarea name="message" rows="2" maxlength="800" placeholder="Lieu, dates, nombre d’agents…"></textarea></label>
+
+        <input class="rappel__piege" name="site_web" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="rp__erreur" role="alert" hidden></p>
+        <button class="btn rp__envoyer" type="submit">Être rappelé <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+        <p class="rp__mention">Vos informations servent uniquement à vous rappeler. <a href="mentions-legales">Confidentialité</a></p>
+      </form>
+
+      <div class="rp__merci" hidden>
+        <span class="rp__coche" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <p class="rp__sur">Demande reçue</p>
+        <h2 class="rp__titre">C’est noté.</h2>
+        <p class="rp__recap"></p>
+        <p class="rp__texte">Pour une urgence : <a href="tel:+33611678625">06 11 67 86 25</a></p>
+        <button class="btn btn--outline" type="button" data-fermer>Fermer</button>
+      </div>
     </div>
-    <input class="rappel__piege" name="site_web" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-    <p class="rappel__erreur" role="alert" hidden></p>
-    <button class="btn btn--gold rappel__envoyer" type="submit">Être rappelé <svg class="icon icon--arrow" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-    <p class="rappel__mention">Vos informations servent uniquement à vous rappeler. <a href="mentions-legales">Confidentialité</a></p>
-  </form>
-  <div class="rappel__merci" hidden>
-    <span class="rappel__coche" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
-    <h2 class="rappel__titre">C'est noté.</h2>
-    <p class="rappel__texte">Un responsable vous rappelle au plus vite. Pour une urgence : <a href="tel:+33611678625">06 11 67 86 25</a>.</p>
-    <button class="btn btn--outline" type="button" data-fermer>Fermer</button>
   </div>
 </dialog>
 
@@ -536,6 +589,6 @@
 <script src="assets/js/avis-data.js?v=2"></script>
 <script src="assets/js/home.js?v=18"></script>
 <script src="assets/js/anim.js?v=21"></script>
-<script src="assets/js/rappel.js?v=10"></script>
+<script src="assets/js/rappel.js?v=11"></script>
 </body>
 </html>

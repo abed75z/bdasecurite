@@ -96,7 +96,7 @@
   <link rel="stylesheet" href="assets/css/blanc.css?v=34">
   <link rel="stylesheet" href="assets/css/sobre.css?v=9">
   <link rel="stylesheet" href="assets/css/entete.css?v=9">
-  <link rel="stylesheet" href="assets/css/maison.css?v=33">
+  <link rel="stylesheet" href="assets/css/maison.css?v=34">
 </head>
 <body>
 
@@ -446,7 +446,7 @@
 
       <form class="rp__form" novalidate>
         <fieldset class="rp__bloc">
-          <legend><span>01</span>Vos coordonnées</legend>
+          <legend>Vos coordonnées</legend>
           <div class="rp__ligne">
             <label class="rp__champ"><span>Nom et prénom</span><input name="nom" type="text" autocomplete="name" maxlength="80" required></label>
             <label class="rp__champ"><span>Société <small>facultatif</small></span><input name="societe" type="text" autocomplete="organization" maxlength="80"></label>
@@ -455,7 +455,7 @@
         </fieldset>
 
         <fieldset class="rp__bloc">
-          <legend><span>02</span>Votre besoin</legend>
+          <legend>Votre besoin</legend>
           <div class="rp__puces">
             <label><input type="radio" name="besoin" value="Agent de sécurité" checked><span>Agent de sécurité</span></label>
             <label><input type="radio" name="besoin" value="Sécurité incendie"><span>Sécurité incendie</span></label>
@@ -467,20 +467,30 @@
         </fieldset>
 
         <fieldset class="rp__bloc">
-          <legend><span>03</span>Quand vous rappeler ?</legend>
+          <legend>Quand vous rappeler ?</legend>
           <div class="rp__puces rp__quand">
             <label><input type="radio" name="quand" value="vite" checked><span>Dès que possible</span></label>
             <label><input type="radio" name="quand" value="date"><span>Choisir un jour et une heure</span></label>
           </div>
           <div class="rp__agenda" aria-hidden="true">
             <div class="rp__agenda-in">
-              <div class="rp__jours" role="radiogroup" aria-label="Jour du rappel"></div>
+              <div class="rp__cal" aria-label="Choisir le jour">
+                <div class="rp__cal-tete">
+                  <button class="rp__cal-nav" type="button" data-mois="-1" aria-label="Mois précédent"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+                  <b class="rp__cal-mois" aria-live="polite"></b>
+                  <button class="rp__cal-nav" type="button" data-mois="1" aria-label="Mois suivant"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+                </div>
+                <div class="rp__cal-sem" aria-hidden="true"><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span></div>
+                <div class="rp__cal-grille"></div>
+                <input type="hidden" name="jour">
+              </div>
               <div class="rp__creneaux" role="radiogroup" aria-label="Moment de la journée">
                 <label><input type="radio" name="creneau" value="matin" data-fin="12"><span><b>Matin</b><small>9h – 12h</small></span></label>
                 <label><input type="radio" name="creneau" value="midi" data-fin="14"><span><b>Midi</b><small>12h – 14h</small></span></label>
                 <label><input type="radio" name="creneau" value="apres-midi" data-fin="18"><span><b>Après-midi</b><small>14h – 18h</small></span></label>
                 <label><input type="radio" name="creneau" value="soir" data-fin="21"><span><b>Soirée</b><small>18h – 21h</small></span></label>
               </div>
+              <p class="rp__resume" aria-live="polite"></p>
             </div>
           </div>
         </fieldset>
@@ -589,6 +599,6 @@
 <script src="assets/js/avis-data.js?v=2"></script>
 <script src="assets/js/home.js?v=18"></script>
 <script src="assets/js/anim.js?v=21"></script>
-<script src="assets/js/rappel.js?v=11"></script>
+<script src="assets/js/rappel.js?v=12"></script>
 </body>
 </html>

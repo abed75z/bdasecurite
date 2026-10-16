@@ -44,6 +44,8 @@ function appli_reglages_defaut(): array
     'attenteAeroport' => 15,
     'promos' => [['code' => 'BIENVENUE10', 'montant' => 10, 'actif' => true]],
     'legal' => ['evtc' => '', 'tva' => '', 'mediateur' => '', 'cnaps' => '', 'hebergeur' => 'OVH SAS, 2 rue Kellermann, 59100 Roubaix, France'],
+    // connexion avec Google / Apple : identifiants PUBLICS (pas des mots de passe), vides = boutons cachés
+    'connexion' => ['googleWeb' => '', 'googleIos' => '', 'appleActif' => false, 'appleServices' => '', 'appleBundle' => 'com.bdasecurite.bdrive'],
   ];
 }
 function appli_cfg(): array
@@ -64,6 +66,7 @@ function appli_cfg(): array
     }
     if (is_array($v['promos'] ?? null)) $cfg['promos'] = $v['promos'];
     if (is_array($v['legal'] ?? null)) $cfg['legal'] = array_merge($cfg['legal'], array_intersect_key($v['legal'], $cfg['legal']));
+    if (is_array($v['connexion'] ?? null)) foreach ($cfg['connexion'] as $k => $d) if (array_key_exists($k, $v['connexion'])) $cfg['connexion'][$k] = is_bool($d) ? (bool)$v['connexion'][$k] : (string)$v['connexion'][$k];
   }
   if ($cfg['codeAcces'] === '') {
     // code d'accès de la phase privée, créé une seule fois (le gérant le donne à ses clients)
@@ -113,6 +116,20 @@ function appli_cfg_enregistrer(array $b): array
     $cfg['promos'] = array_values($promos);
   }
   if (is_array($b['legal'] ?? null)) foreach (array_keys($cfg['legal']) as $k) if (array_key_exists($k, $b['legal'])) $cfg['legal'][$k] = texte($b['legal'][$k], 300);
+  if (is_array($b['connexion'] ?? null)) {
+    $x = $b['connexion'];
+    foreach (['googleWeb' => 'Web', 'googleIos' => 'iPhone'] as $k => $libelle) if (array_key_exists($k, $x)) {
+      $id = trim((string)$x[$k]);
+      if ($id !== '' && !preg_match('/^[0-9]{6,20}-[a-z0-9]{10,64}\.apps\.googleusercontent\.com$/', $id)) echec("Identifiant Google ($libelle) invalide : il finit par « .apps.googleusercontent.com ».");
+      $cfg['connexion'][$k] = $id;
+    }
+    foreach (['appleServices', 'appleBundle'] as $k) if (array_key_exists($k, $x)) {
+      $id = trim((string)$x[$k]);
+      if ($id !== '' && !preg_match('/^[A-Za-z0-9][A-Za-z0-9.\-]{2,120}$/', $id)) echec('Identifiant Apple invalide (exemple : com.bdasecurite.bdrive.web).');
+      $cfg['connexion'][$k] = $id;
+    }
+    if (array_key_exists('appleActif', $x)) $cfg['connexion']['appleActif'] = (bool)$x['appleActif'];
+  }
   appli_cfg_ecrire($cfg);
   return $cfg;
 }
@@ -128,6 +145,11 @@ function appli_cfg_publique(): array
     'ouvert' => $cfg['ouvert'], 'prive' => $cfg['prive'], 'gammes' => $gammes, 'agentVip' => $cfg['agentVip'],
     'heuresMin' => $cfg['heuresMin'], 'heuresMax' => $cfg['heuresMax'], 'attente' => $cfg['attente'], 'attenteAeroport' => $cfg['attenteAeroport'],
     'legal' => $cfg['legal'], 'vapid' => $vapid, 'serveur' => date('c'),
+    // identifiants publics pour afficher « Continuer avec Google / Apple » (vides = boutons cachés)
+    'connexion' => [
+      'google' => $cfg['connexion']['googleWeb'], 'googleIos' => $cfg['connexion']['googleIos'],
+      'apple' => $cfg['connexion']['appleActif'] ? $cfg['connexion']['appleServices'] : '', 'appleNatif' => $cfg['connexion']['appleActif'] && $cfg['connexion']['appleBundle'] !== '',
+    ],
   ];
 }
 
@@ -245,7 +267,8 @@ function appli_client(int $id): ?array
 }
 function appli_client_public(array $c): array
 {
-  return ['id' => (int)$c['id'], 'prenom' => $c['prenom'], 'nom' => $c['nom'], 'email' => $c['email'], 'tel' => $c['tel'], 'offres' => (bool)$c['offres'], 'points' => (int)$c['points'], 'depuis' => substr((string)$c['cree'], 0, 10)];
+  return ['id' => (int)$c['id'], 'prenom' => $c['prenom'], 'nom' => $c['nom'], 'email' => $c['email'], 'tel' => $c['tel'], 'offres' => (bool)$c['offres'], 'points' => (int)$c['points'], 'depuis' => substr((string)$c['cree'], 0, 10),
+    'relie' => ['google' => ($c['google'] ?? '') !== '', 'apple' => ($c['apple'] ?? '') !== '', 'motdepasse' => (string)$c['hash'] !== '']];
 }
 // Chauffeur = compte actif de l'Espace équipe, autorisé dans l'appli (métier « chauffeur » ou autorisé par l'admin)
 function appli_chauffeur(int $compte): ?array

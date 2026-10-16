@@ -11,9 +11,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BDASH">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest?v=20261016-1619">
-<link rel="apple-touch-icon" href="icone-180.png?v=20261016-1619">
-<link rel="icon" href="icone-192.png?v=20261016-1619" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?v=20261016-1658">
+<link rel="apple-touch-icon" href="icone-180.png?v=20261016-1658">
+<link rel="icon" href="icone-192.png?v=20261016-1658" type="image/png">
 </head>
 <body><title>BDASH</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -391,6 +391,8 @@ details.faq p { margin: -4px 0 16px; color: var(--texte-2); font-size: 14px; }
 .ou::before, .ou::after { content: ""; height: 1px; background: var(--ligne); }
 .cx-social { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; height: 56px; border-radius: 14px; background: var(--surface); font: 600 16px/1 var(--texte-police); }
 .cx-social svg { width: 22px; height: 22px; }
+.cx-apple { background: var(--principal); color: var(--sur-principal); }
+.cx-google { display: flex; justify-content: center; min-height: 44px; }
 .cx-legal { margin: 4px 0 0; color: var(--texte-3); font-size: 12px; line-height: 1.5; }
 .cx-cases { position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
 .cx-cases span { height: 62px; border-radius: 12px; border: 2px solid transparent; background: var(--surface); display: grid; place-items: center; font: 800 26px/1 var(--display); font-variant-numeric: tabular-nums; transition: border-color 0.15s; }
@@ -2393,6 +2395,50 @@ button.paiement { width: 100%; text-align: left; }
   }
   // Vraie appli : compte par e-mail et mot de passe (pas de SMS payant), code d'accès pendant la phase privée
   const champMdp = (id, auto, ph) => `<div class="cx-oeil"><input class="cx-champ" id="${id}" type="password" autocomplete="${auto}" placeholder="${ph}" aria-label="Mot de passe" value="${esc(etat.auth.mdp || '')}"><button type="button" data-a="cxVoir" data-v="${id}" aria-label="Afficher le mot de passe">${ic('oeil', 'ic-s')}</button></div>`;
+  // « Continuer avec Apple / Google » : visibles dès que la direction a réglé les identifiants (Admin > Appli BDASH).
+  // Sur le site : boutons Google et Apple pour le web ; dans l'appli iPhone : connexion native (extension SocialLogin).
+  const cxSocial = () => (etat.config && etat.config.connexion) || {};
+  const pluginSocial = () => (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() ? (window.Capacitor.Plugins || {}).SocialLogin || null : undefined);
+  function sociauxDispo() {
+    const c = cxSocial(), natif = pluginSocial();
+    if (natif === null) return { apple: false, google: false };
+    return natif ? { apple: !!c.appleNatif, google: !!c.googleIos } : { apple: !!c.apple, google: !!c.google };
+  }
+  function boutonsSociaux() {
+    const s = sociauxDispo();
+    if (!s.apple && !s.google) return '';
+    return `<div class="ou">ou</div>
+      ${s.apple ? `<button class="cx-social cx-apple" type="button" data-a="cxApple">${LOGO_APPLE}Continuer avec Apple</button>` : ''}
+      ${s.google ? (pluginSocial() ? `<button class="cx-social" type="button" data-a="cxGoogle">${LOGO_GOOGLE}Continuer avec Google</button>` : '<div class="cx-google" id="cx-google"></div>') : ''}`;
+  }
+  const scripts = {};
+  const chargerScript = (src) => scripts[src] || (scripts[src] = new Promise((ok, ko) => {
+    const s = document.createElement('script'); s.src = src; s.async = true; s.onload = ok;
+    s.onerror = () => { delete scripts[src]; ko(new Error('Connexion impossible pour le moment. Vérifiez votre accès à internet.')); };
+    document.head.appendChild(s);
+  }));
+  // bouton officiel de Google (obligatoire sur le web), dessiné dans #cx-google
+  let googleInit = '';
+  async function afficherGoogle() {
+    const el = $('#cx-google'), id = cxSocial().google;
+    if (!el || !id || pluginSocial()) return;
+    try {
+      await chargerScript('https://accounts.google.com/gsi/client');
+      if (googleInit !== id) { googleInit = id; window.google.accounts.id.initialize({ client_id: id, callback: (r) => connexionSociale('google', r.credential), ux_mode: 'popup', auto_select: false, context: 'signin', itp_support: true }); }
+      window.google.accounts.id.renderButton(el, { type: 'standard', theme: appareil.dataset.mode === 'clair' ? 'outline' : 'filled_black', size: 'large', shape: 'pill', text: 'continue_with', logo_alignment: 'center', width: Math.min(400, Math.round(el.getBoundingClientRect().width) || 320), locale: etat.langue === 'en' ? 'en' : 'fr' });
+    } catch { el.hidden = true; }
+  }
+  function connexionSociale(fournisseur, jetonId, prenom, nom) {
+    if (!jetonId) { toast('Connexion annulée.'); return; }
+    const a = etat.auth;
+    envoyerCx('client.social', { fournisseur, jeton: jetonId, prenom: prenom || '', nom: nom || '' }, null, (r) => {
+      if (r.jeton) { connecte(r, false); return; }
+      // nouveau client : il reste le téléphone, le code d'accès et les conditions
+      Object.assign(a, { social: { fournisseur, jeton: jetonId }, email: r.email, prenom: r.prenom || a.prenom, nom: r.nom || a.nom, etape: 'profil', mdp: '' });
+      etat.config.prive = r.prive;
+      renduConnexion(a.prenom ? '#cx-tel' : '#cx-prenom');
+    });
+  }
   function vueConnexionReelle() {
     const a = etat.auth, occupe = a.attente ? 'disabled' : '', err = a.erreur ? `<p class="erreur" role="alert">${esc(a.erreur)}</p>` : '';
     const bouton = (action, texte) => `<button class="btn btn-principal" type="button" data-a="${action}" ${occupe}>${a.attente ? 'Un instant…' : texte}</button>`;
@@ -2407,10 +2453,10 @@ button.paiement { width: 100%; text-align: left; }
     if (a.etape === 'profil') {
       return `<div class="cx">${tete('', 'cxRetour')}
         <h1>Créez votre compte</h1>
-        <p class="sous">${esc(a.email)} · votre prénom et votre numéro sont donnés à votre chauffeur pour qu’il vous trouve.</p>
+        <p class="sous">${a.social ? `Compte ${a.social.fournisseur === 'apple' ? 'Apple' : 'Google'} : ${esc(a.email)}` : esc(a.email)} · votre prénom et votre numéro sont donnés à votre chauffeur pour qu’il vous trouve.</p>
         <div class="duo"><label class="champ"><span>Prénom</span><input id="cx-prenom" type="text" autocomplete="given-name" value="${esc(a.prenom)}"></label><label class="champ"><span>Nom</span><input id="cx-nom" type="text" autocomplete="family-name" value="${esc(a.nom)}"></label></div>
         <label class="champ"><span>Téléphone</span><input id="cx-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="06 12 34 56 78" value="${esc(a.tel)}"></label>
-        <label class="champ"><span>Mot de passe (8 caractères, une lettre et un chiffre)</span>${champMdp('cx-mdp', 'new-password', 'Choisissez un mot de passe')}</label>
+        ${a.social ? '' : `<label class="champ"><span>Mot de passe (8 caractères, une lettre et un chiffre)</span>${champMdp('cx-mdp', 'new-password', 'Choisissez un mot de passe')}</label>`}
         ${etat.config.prive ? `<label class="champ"><span>Code d’accès BDA</span><input id="cx-code-acces" type="text" autocomplete="off" autocapitalize="characters" placeholder="BDA-XXXXX" value="${esc(a.code)}" style="text-transform:uppercase"></label><p class="petit" style="margin-top:-6px">L’appli est en phase privée : le code vous est donné par BDA.</p>` : ''}
         <button class="case-cocher" type="button" role="checkbox" aria-checked="${a.cgu}" data-a="cgu"><span class="case">${ic('check')}</span><span>J’ai 18 ans ou plus et j’accepte les conditions générales et la politique de confidentialité de BDA.</span></button>
         <p class="cx-liens"><button type="button" data-a="lireTexte" data-v="cgv">Lire les conditions générales</button><button type="button" data-a="lireTexte" data-v="politique">Lire la politique de confidentialité</button></p>
@@ -2437,12 +2483,14 @@ button.paiement { width: 100%; text-align: left; }
         <h1>Votre chauffeur privé, à Paris et en Île-de-France.</h1>
         <input class="cx-champ" id="cx-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" placeholder="Votre adresse e-mail" value="${esc(a.email)}" aria-label="Adresse e-mail">
         ${err}${bouton('cxEmail', 'Continuer')}
+        ${boutonsSociaux()}
         <p class="cx-legal">${etat.config.prive ? 'BDASH est en phase privée : la création d’un compte demande un code d’accès donné par BDA. ' : ''}Vos informations servent uniquement à vos courses. Elles ne sont jamais vendues.</p>
       </div>`;
   }
   function renduConnexion(focus) {
     connexion.innerHTML = vueConnexion();
     connexion.scrollTop = 0;
+    if (REEL) afficherGoogle();
     if (focus) { const el = $(focus); if (el) setTimeout(() => el.focus({ preventScroll: true }), 80); }
   }
   function montrerConnexion() { etat.auth = nouvelleAuth(); connexion.hidden = false; renduConnexion(); }
@@ -2894,7 +2942,7 @@ button.paiement { width: 100%; text-align: left; }
       <h3>Responsable</h3>
       <p>${esc(LEGAL.exploitant)} (${esc(LEGAL.enseigne)}), ${esc(LEGAL.adresse)}. Contact : ${esc(LEGAL.email)}.</p>
       <h3>Ce que nous collectons</h3>
-      <ul><li>Votre identité et vos coordonnées : prénom, nom, téléphone, e-mail.</li><li>Vos courses : adresses, horaires, véhicule, prix, notes et pourboires.</li><li>Votre position, si vous l’autorisez : seulement pour proposer votre adresse de départ et pendant une course.</li><li>Les contacts de confiance et les passagers que vous ajoutez vous-même.</li><li>Vos préférences de course et d’accessibilité.</li><li>${REEL ? 'Pendant la phase de lancement, le paiement se fait à bord, auprès du chauffeur : aucune donnée bancaire ne passe par l’appli.' : 'Le paiement est traité par notre prestataire de paiement : nous ne voyons jamais votre numéro de carte.'}</li></ul>
+      <ul><li>Votre identité et vos coordonnées : prénom, nom, téléphone, e-mail.</li><li>Si vous vous connectez avec Apple ou Google : l’identifiant de ce compte, votre e-mail et votre nom, rien d’autre (ni vos contacts, ni votre mot de passe).</li><li>Vos courses : adresses, horaires, véhicule, prix, notes et pourboires.</li><li>Votre position, si vous l’autorisez : seulement pour proposer votre adresse de départ et pendant une course.</li><li>Les contacts de confiance et les passagers que vous ajoutez vous-même.</li><li>Vos préférences de course et d’accessibilité.</li><li>${REEL ? 'Pendant la phase de lancement, le paiement se fait à bord, auprès du chauffeur : aucune donnée bancaire ne passe par l’appli.' : 'Le paiement est traité par notre prestataire de paiement : nous ne voyons jamais votre numéro de carte.'}</li></ul>
       <h3>Pourquoi</h3>
       <ul><li>Réaliser vos courses et vous assister (exécution du contrat).</li><li>Établir les reçus, les factures et les bons de réservation (obligations légales).</li><li>Votre sécurité et la lutte contre la fraude (intérêt légitime).</li><li>Les offres et les statistiques, seulement si vous l’acceptez (consentement, retirable à tout moment).</li></ul>
       <h3>Qui les reçoit</h3>
@@ -4105,7 +4153,7 @@ button.paiement { width: 100%; text-align: left; }
   }
 
   /* ----- Compte ----- */
-  const versUser = (c) => ({ id: c.id, prenom: c.prenom, nom: c.nom, tel: c.tel, email: c.email, points: c.points || 0, offres: !!c.offres });
+  const versUser = (c) => ({ id: c.id, prenom: c.prenom, nom: c.nom, tel: c.tel, email: c.email, points: c.points || 0, offres: !!c.offres, relie: c.relie || { motdepasse: true } });
   function majCompte(c) {
     etat.user = versUser(c); ecrire('bda-app-compte', etat.user);
     etat.club.points = etat.user.points; ecrire('bda-app-club', etat.club);
@@ -4479,10 +4527,46 @@ button.paiement { width: 100%; text-align: left; }
     cxCreer() {
       const a = lireCx();
       const err = !a.prenom ? 'Indiquez votre prénom.' : a.tel.replace(/\D/g, '').length < 9 ? 'Indiquez un numéro de téléphone valide : votre chauffeur doit pouvoir vous joindre.'
-        : (a.mdp || '').length < 8 || !/\d/.test(a.mdp) || !/[a-zA-Zà-ÿ]/.test(a.mdp) ? 'Mot de passe : 8 caractères au moins, avec une lettre et un chiffre.'
+        : !a.social && ((a.mdp || '').length < 8 || !/\d/.test(a.mdp) || !/[a-zA-Zà-ÿ]/.test(a.mdp)) ? 'Mot de passe : 8 caractères au moins, avec une lettre et un chiffre.'
         : etat.config.prive && !a.code ? 'Saisissez le code d’accès donné par BDA.' : !a.cgu ? 'Il faut avoir 18 ans ou plus et accepter les conditions pour créer un compte.' : '';
       if (err) { a.erreur = err; renduConnexion(); return; }
-      envoyerCx('client.inscription', { email: a.email, motdepasse: a.mdp, prenom: a.prenom, nom: a.nom, tel: telLisible(a.tel), code: a.code, cgu: true, offres: a.offres }, null, (r) => connecte(r, true));
+      const corps = { email: a.email, prenom: a.prenom, nom: a.nom, tel: telLisible(a.tel), code: a.code, cgu: true, offres: a.offres };
+      if (a.social) corps.social = a.social; else corps.motdepasse = a.mdp;
+      envoyerCx('client.inscription', corps, null, (r) => connecte(r, true));
+    },
+    // Apple : fenêtre d'Apple sur le site, connexion native dans l'appli iPhone
+    async cxApple() {
+      try {
+        const plug = pluginSocial();
+        if (plug) {
+          await plug.initialize({ apple: { clientId: 'com.bdasecurite.bdrive' } });
+          const { result: r } = await plug.login({ provider: 'apple', options: { scopes: ['email', 'name'] } });
+          connexionSociale('apple', r && r.idToken, r && r.profile && r.profile.givenName, r && r.profile && r.profile.familyName);
+          return;
+        }
+        await chargerScript(`https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/${etat.langue === 'en' ? 'en_US' : 'fr_FR'}/appleid.auth.js`);
+        window.AppleID.auth.init({ clientId: cxSocial().apple, scope: 'name email', redirectURI: `${location.origin}/appli/`, usePopup: true });
+        const r = await window.AppleID.auth.signIn();
+        const n = (r.user && r.user.name) || {};
+        connexionSociale('apple', r.authorization && r.authorization.id_token, n.firstName, n.lastName);
+      } catch (e) {
+        const code = String((e && (e.error || e.code || e.message)) || '');
+        if (/cancel|closed|annul|1001/i.test(code)) return;
+        toast('Connexion avec Apple impossible pour le moment. Réessayez ou utilisez votre e-mail.');
+      }
+    },
+    // Google dans l'appli iPhone (sur le site, c'est le bouton officiel de Google qui appelle connexionSociale)
+    async cxGoogle() {
+      const plug = pluginSocial(), c = cxSocial();
+      if (!plug) return;
+      try {
+        await plug.initialize({ google: { iOSClientId: c.googleIos, iOSServerClientId: c.google || undefined } });
+        const { result: r } = await plug.login({ provider: 'google', options: { scopes: ['email', 'profile'] } });
+        connexionSociale('google', r && r.idToken, r && r.profile && r.profile.givenName, r && r.profile && r.profile.familyName);
+      } catch (e) {
+        if (/cancel|annul|-5/i.test(String((e && (e.code || e.message)) || ''))) return;
+        toast('Connexion avec Google impossible pour le moment. Réessayez ou utilisez votre e-mail.');
+      }
     },
     cxOubli() { const a = lireCx(); envoyerCx('client.oubli', { email: a.email }, null, () => { a.etape = 'oubli'; renduConnexion(); }); },
     cxReset() {
@@ -4491,7 +4575,7 @@ button.paiement { width: 100%; text-align: left; }
       envoyerCx('client.reset', { jeton: a.jeton, motdepasse: a.mdp }, '#cx-mdp', (r) => { connecte(r, false); toast('Mot de passe changé. Bienvenue !'); });
     },
     cxVoir(id) { const i = $('#' + id); if (i) i.type = i.type === 'password' ? 'text' : 'password'; },
-    cxRetour() { const a = etat.auth; a.erreur = ''; a.mdp = ''; a.etape = 'accueil'; renduConnexion('#cx-email'); },
+    cxRetour() { const a = etat.auth; a.erreur = ''; a.mdp = ''; a.social = null; a.etape = 'accueil'; renduConnexion('#cx-email'); },
     cgu() { const a = lireCx(); a.cgu = !a.cgu; a.erreur = ''; renduConnexion(); },
     cxOffres() { const a = lireCx(); a.offres = !a.offres; renduConnexion(); },
     position(v) {
@@ -4655,14 +4739,19 @@ button.paiement { width: 100%; text-align: left; }
       } catch (e) { toast(e.message); }
     },
     changerMdp() {
-      modale(`<h2>Changer de mot de passe</h2>
-        <label class="champ"><span>Mot de passe actuel</span><input id="mdp-actuel" type="password" autocomplete="current-password"></label>
+      // compte créé avec Google / Apple : pas encore de mot de passe, on en crée un
+      const sans = !!(etat.user && etat.user.relie && etat.user.relie.motdepasse === false);
+      modale(`<h2>${sans ? 'Créer un mot de passe' : 'Changer de mot de passe'}</h2>
+        ${sans ? '<p class="petit">Vous pourrez aussi vous connecter avec votre e-mail et ce mot de passe.</p>' : '<label class="champ"><span>Mot de passe actuel</span><input id="mdp-actuel" type="password" autocomplete="current-password"></label>'}
         <label class="champ"><span>Nouveau mot de passe (8 caractères, une lettre et un chiffre)</span><input id="mdp-nouveau" type="password" autocomplete="new-password"></label>
         <button class="btn btn-principal" type="button" data-a="validerMdp">Enregistrer</button>`);
     },
     async validerMdp() {
-      try { await api('client.motdepasse', { actuel: $('#mdp-actuel').value, nouveau: $('#mdp-nouveau').value }); fermerModale(); toast('Mot de passe changé. Vos autres téléphones sont déconnectés.'); }
-      catch (e) { toast(e.message); }
+      try {
+        await api('client.motdepasse', { actuel: $('#mdp-actuel') ? $('#mdp-actuel').value : '', nouveau: $('#mdp-nouveau').value });
+        if (etat.user && etat.user.relie) { etat.user.relie.motdepasse = true; ecrire('bda-app-compte', etat.user); }
+        fermerModale(); toast('Mot de passe enregistré. Vos autres téléphones sont déconnectés.');
+      } catch (e) { toast(e.message); }
     },
     basculer(cle) {
       const [g, k] = cle.split('.'), obj = etat[g];
@@ -4683,14 +4772,16 @@ button.paiement { width: 100%; text-align: left; }
       modale(`<div class="sos">${ic('sortie')}</div><h2>Supprimer votre compte&nbsp;?</h2>
         <p>Votre profil, vos lieux, vos contacts de confiance, vos préférences et vos messages sont supprimés définitivement. Vos réservations à venir sont annulées.</p>
         <p class="petit">Les reçus sont gardés sans votre nom ni vos coordonnées (obligation comptable de 10 ans).</p>
-        <label class="champ"><span>Votre mot de passe, pour confirmer</span><input id="sup-mdp" type="password" autocomplete="current-password"></label>
+        ${etat.user && etat.user.relie && etat.user.relie.motdepasse === false
+          ? '<label class="champ"><span>Écrivez SUPPRIMER pour confirmer</span><input id="sup-conf" type="text" autocomplete="off" autocapitalize="characters"></label>'
+          : '<label class="champ"><span>Votre mot de passe, pour confirmer</span><input id="sup-mdp" type="password" autocomplete="current-password"></label>'}
         <button class="btn btn-rouge" type="button" data-a="confirmerSuppression">Supprimer définitivement</button>
         <button class="btn btn-second" type="button" data-a="fermerModale" data-v="ok">Garder mon compte</button>`);
     },
     async confirmerSuppression() {
-      const mdp = $('#sup-mdp') ? $('#sup-mdp').value : '';
-      if (!mdp) { toast('Saisissez votre mot de passe.'); return; }
-      try { await api('client.supprimer', { motdepasse: mdp }); } catch (e) { toast(e.message); return; }
+      const mdp = $('#sup-mdp') ? $('#sup-mdp').value : '', conf = $('#sup-conf') ? $('#sup-conf').value.trim().toUpperCase() : '';
+      if ($('#sup-conf') ? conf !== 'SUPPRIMER' : !mdp) { toast($('#sup-conf') ? 'Écrivez SUPPRIMER pour confirmer.' : 'Saisissez votre mot de passe.'); return; }
+      try { await api('client.supprimer', $('#sup-conf') ? { confirmation: conf } : { motdepasse: mdp }); } catch (e) { toast(e.message); return; }
       try { Object.keys(localStorage).filter((k) => k.startsWith('bda-app-')).forEach((k) => localStorage.removeItem(k)); } catch { /* stockage indisponible */ }
       for (const k of Object.keys(DEFAUTS)) etat[k] = JSON.parse(JSON.stringify(DEFAUTS[k]));
       Object.assign(etat, { depart: DEPART_DEFAUT, recents: RECENTS_DEFAUT, messagesLus: false, planif: null, arrivee: null, itin: null, promo: null, favoris: [], favoriDemande: null, club: { points: 0 }, conversations: {} });

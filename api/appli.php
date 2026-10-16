@@ -10,6 +10,7 @@
 declare(strict_types=1);
 require __DIR__ . '/../app/bootstrap.php';
 require __DIR__ . '/../app/appli.php';
+require __DIR__ . '/../app/appli-connexion.php';
 
 entetes_securite();
 header('Cache-Control: no-store');
@@ -28,7 +29,7 @@ $action = (string)($_GET['a'] ?? '');
 $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $lectures = ['config', 'voisins', 'client.moi', 'client.donnees', 'courses', 'course', 'suivi', 'chauffeur.moi', 'chauffeur.historique'];
 $ecritures = [
-  'client.existe', 'client.inscription', 'client.connexion', 'client.oubli', 'client.reset', 'client.profil', 'client.motdepasse', 'client.deconnexion', 'client.supprimer',
+  'client.existe', 'client.inscription', 'client.connexion', 'client.social', 'client.oubli', 'client.reset', 'client.profil', 'client.motdepasse', 'client.deconnexion', 'client.supprimer',
   'push.abonner', 'push.retirer', 'promo.verifier', 'support',
   'course.creer', 'course.annuler', 'course.message', 'course.noter', 'course.alerte',
   'chauffeur.connexion', 'chauffeur.deconnexion', 'chauffeur.vehicule', 'chauffeur.etat',
@@ -164,17 +165,56 @@ try {
       $st->execute([email_valide((string)($b['email'] ?? ''))]);
       repondre(['ok' => true, 'existe' => (bool)$st->fetchColumn(), 'prive' => appli_cfg()['prive']]);
 
+    // Connexion avec Google ou Apple : compte déjà relié → connecté ; même e-mail qu'un compte existant → compte relié
+    // puis connecté ; sinon l'appli demande le téléphone, le code d'accès et les conditions, puis rappelle client.inscription
+    // avec le même jeton (Apple ne donne le nom qu'à la toute première connexion : l'appli l'envoie à part)
+    case 'client.social':
+      $b = corps();
+      if (!limiter('appli-social', 30, 600)) echec('Trop d’essais. Patientez un instant.', 429);
+      $f = (string)($b['fournisseur'] ?? '');
+      $id = appli_jeton_social($f, chaine($b['jeton'] ?? ''));
+      $col = APPLI_SOCIAL[$f]['colonne'];
+      $st = db()->prepare("SELECT * FROM appli_clients WHERE $col = ?");
+      $st->execute([$id['sub']]);
+      $c = $st->fetch();
+      if (!$c && $id['email'] !== '') {
+        $st = db()->prepare('SELECT * FROM appli_clients WHERE email = ?');
+        $st->execute([$id['email']]);
+        $c = $st->fetch();
+        if ($c) db()->prepare("UPDATE appli_clients SET $col = ? WHERE id = ?")->execute([$id['sub'], $c['id']]);
+      }
+      if ($c) {
+        db()->prepare("UPDATE appli_clients SET echecs = 0, bloque_jusqu = '', derniere = ? WHERE id = ?")->execute([maintenant(), $c['id']]);
+        repondre(['ok' => true, 'jeton' => appli_jeton_creer('client', (int)$c['id']), 'compte' => appli_client_public(appli_client((int)$c['id']))]);
+      }
+      if ($id['email'] === '') echec('Votre compte ' . ($f === 'apple' ? 'Apple' : 'Google') . ' ne donne pas d’e-mail vérifié : créez votre compte avec votre adresse e-mail.');
+      repondre(['ok' => true, 'nouveau' => true, 'email' => $id['email'], 'prenom' => $id['prenom'] ?: texte($b['prenom'] ?? '', 60), 'nom' => $id['nom'] ?: texte($b['nom'] ?? '', 60), 'prive' => appli_cfg()['prive']]);
+
     case 'client.inscription':
       $b = corps();
       if (!limiter('appli-inscription', 6, 3600)) echec('Trop de comptes créés depuis cet appareil. Réessayez dans une heure.', 429);
       $cfg = appli_cfg();
-      $email = email_valide((string)($b['email'] ?? ''));
+      // compte créé avec Google / Apple : l'e-mail vient du jeton vérifié, pas de mot de passe
+      $social = is_array($b['social'] ?? null) ? $b['social'] : null;
+      $lien = ['google' => '', 'apple' => ''];
+      if ($social) {
+        $fs = (string)($social['fournisseur'] ?? '');
+        $idSocial = appli_jeton_social($fs, chaine($social['jeton'] ?? ''));
+        if ($idSocial['email'] === '') echec('Votre compte ne donne pas d’e-mail vérifié : créez votre compte avec votre adresse e-mail.');
+        $st = db()->prepare('SELECT COUNT(*) FROM appli_clients WHERE ' . APPLI_SOCIAL[$fs]['colonne'] . ' = ?');
+        $st->execute([$idSocial['sub']]);
+        if ((int)$st->fetchColumn()) echec('Ce compte existe déjà : touchez de nouveau le bouton pour vous connecter.', 409);
+        $lien[APPLI_SOCIAL[$fs]['colonne']] = $idSocial['sub'];
+        $email = $idSocial['email'];
+      } else {
+        $email = email_valide((string)($b['email'] ?? ''));
+      }
       $prenom = texte($b['prenom'] ?? '', 60);
       $nom = texte($b['nom'] ?? '', 60);
       $tel = tel_valide((string)($b['tel'] ?? ''), true);
       $mdp = chaine($b['motdepasse'] ?? '');
       if (mb_strlen($prenom) < 2) echec('Indiquez votre prénom.');
-      appli_mdp_valide($mdp);
+      if (!$social) appli_mdp_valide($mdp);
       if (empty($b['cgu'])) echec('Il faut avoir 18 ans ou plus et accepter les conditions pour créer un compte.');
       if ($cfg['prive'] && !hash_equals(strtoupper($cfg['codeAcces']), strtoupper(trim(chaine($b['code'] ?? ''))))) {
         noter_tentative('appli-code:' . empreinte_client());
@@ -184,8 +224,8 @@ try {
       $st = db()->prepare('SELECT COUNT(*) FROM appli_clients WHERE email = ?');
       $st->execute([$email]);
       if ((int)$st->fetchColumn()) echec('Un compte existe déjà avec cet e-mail : connectez-vous.', 409);
-      db()->prepare('INSERT INTO appli_clients (email, hash, prenom, nom, tel, offres, cree, derniere) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-        ->execute([$email, password_hash($mdp, PASSWORD_DEFAULT), $prenom, $nom, $tel, empty($b['offres']) ? 0 : 1, maintenant(), maintenant()]);
+      db()->prepare('INSERT INTO appli_clients (email, hash, prenom, nom, tel, offres, cree, derniere, google, apple) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        ->execute([$email, $social ? '' : password_hash($mdp, PASSWORD_DEFAULT), $prenom, $nom, $tel, empty($b['offres']) ? 0 : 1, maintenant(), maintenant(), $lien['google'], $lien['apple']]);
       $id = (int)db()->lastInsertId();
       journal('vtc', 'Appli : nouveau compte client');
       notifier('appli', 'Nouveau client dans l’appli', 'Un client vient de créer son compte.', '/admin/#/appli/clients', 'appli-client');
@@ -199,6 +239,7 @@ try {
       $st->execute([mb_strtolower(texte($b['email'] ?? '', 160))]);
       $c = $st->fetch();
       if ($c && $c['bloque_jusqu'] > maintenant()) echec('Trop d’essais sur ce compte. Réessayez dans 15 minutes ou choisissez « Mot de passe oublié ».', 429);
+      if ($c && (string)$c['hash'] === '') echec('Ce compte se connecte avec ' . ((string)$c['apple'] !== '' ? 'Apple' : 'Google') . ' : touchez « Continuer avec ' . ((string)$c['apple'] !== '' ? 'Apple' : 'Google') . ' ». Vous pouvez aussi choisir « Mot de passe oublié » pour créer un mot de passe.', 401);
       $hash = $c ? (string)$c['hash'] : password_hash(bin2hex(random_bytes(8)), PASSWORD_DEFAULT);
       if (!password_verify(chaine($b['motdepasse'] ?? ''), $hash) || !$c) {
         noter_tentative($cle);
@@ -271,7 +312,8 @@ try {
     case 'client.motdepasse':
       $c = client_connecte();
       $b = corps();
-      if (!password_verify(chaine($b['actuel'] ?? ''), (string)$c['hash'])) { usleep(400000); echec('Mot de passe actuel incorrect.', 403); }
+      // compte créé avec Google / Apple : pas encore de mot de passe, on peut en choisir un directement
+      if ((string)$c['hash'] !== '' && !password_verify(chaine($b['actuel'] ?? ''), (string)$c['hash'])) { usleep(400000); echec('Mot de passe actuel incorrect.', 403); }
       $mdp = chaine($b['nouveau'] ?? '');
       appli_mdp_valide($mdp);
       db()->prepare('UPDATE appli_clients SET hash = ? WHERE id = ?')->execute([password_hash($mdp, PASSWORD_DEFAULT), $c['id']]);
@@ -292,7 +334,12 @@ try {
     case 'client.supprimer':
       $c = client_connecte();
       $b = corps();
-      if (!password_verify(chaine($b['motdepasse'] ?? ''), (string)$c['hash'])) { usleep(400000); echec('Mot de passe incorrect.', 403); }
+      if ((string)$c['hash'] === '') {
+        // compte sans mot de passe (Google / Apple) : le client écrit SUPPRIMER pour confirmer
+        if (strtoupper(trim(chaine($b['confirmation'] ?? ''))) !== 'SUPPRIMER') echec('Écrivez SUPPRIMER pour confirmer.', 403);
+      } elseif (!password_verify(chaine($b['motdepasse'] ?? ''), (string)$c['hash'])) { usleep(400000); echec('Mot de passe incorrect.', 403); }
+      // À faire avant la sortie publique sur l'App Store : révoquer aussi l'accès « Se connecter avec Apple »
+      // (API Apple, demande la clé « Sign in with Apple » du compte développeur).
       $st = db()->prepare("SELECT COUNT(*) FROM courses WHERE client_id = ? AND statut IN ('acceptee', 'arrivee', 'en_course')");
       $st->execute([$c['id']]);
       if ((int)$st->fetchColumn()) echec('Une course est en cours : supprimez votre compte une fois arrivé.', 409);

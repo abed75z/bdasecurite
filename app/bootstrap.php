@@ -296,6 +296,17 @@ function schema(PDO $db): void
       PRAGMA user_version = 18;
     SQL);
   }
+  if ($version < 19) {
+    // Appli BDASH : connexion avec Google ou Apple (identifiant stable du compte Google / Apple, vide si non relié ;
+    // hash vide = compte sans mot de passe)
+    $db->exec(<<<'SQL'
+      ALTER TABLE appli_clients ADD COLUMN google TEXT NOT NULL DEFAULT '';
+      ALTER TABLE appli_clients ADD COLUMN apple TEXT NOT NULL DEFAULT '';
+      CREATE INDEX IF NOT EXISTS i_appli_clients_google ON appli_clients (google) WHERE google <> '';
+      CREATE INDEX IF NOT EXISTS i_appli_clients_apple ON appli_clients (apple) WHERE apple <> '';
+      PRAGMA user_version = 19;
+    SQL);
+  }
 }
 // Catégorie d'un agent : équipe principale, renfort, ou agent de secours (candidat retenu)
 function agent_categorie($c): string

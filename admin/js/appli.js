@@ -307,6 +307,13 @@ async function pageReglages(ctx, barre) {
   };
   r.promos.forEach(ajouterPromo);
   const legal = {};
+  // connexion avec Google / Apple : identifiants publics créés par le gérant (vides = boutons cachés dans l'appli)
+  const cx = r.connexion || {};
+  const mono = 'font-family:var(--mono)';
+  const gWeb = saisie({ value: cx.googleWeb || '', placeholder: '1234567890-abc….apps.googleusercontent.com', style: mono });
+  const gIos = saisie({ value: cx.googleIos || '', placeholder: '1234567890-def….apps.googleusercontent.com', style: mono });
+  const aServ = saisie({ value: cx.appleServices || '', placeholder: 'com.bdasecurite.bdrive.web', style: mono });
+  const aActif = inter(cx.appleActif, 'Se connecter avec Apple');
   for (const [k, l, aide] of [['evtc', 'N° d’inscription au registre VTC (EVTC)', 'Obligatoire avant d’ouvrir au public. Affiché sur les bons de réservation et les reçus.'], ['tva', 'Mention TVA des reçus', 'Ex. « TVA 10 % incluse » ou « TVA non applicable, art. 293 B du CGI » (voir avec le comptable).'], ['mediateur', 'Médiateur de la consommation', 'Nom et site du médiateur choisi (obligatoire avec des particuliers).'], ['cnaps', 'N° d’autorisation CNAPS (option VIP)', 'Celui de la société qui fournit le garde du corps.'], ['hebergeur', 'Hébergeur', '']]) legal[k] = [champ(l, saisie({ value: r.legal[k] || '' }), aide), k];
   const enregistrer = h('button', { class: 'btn btn--gold', type: 'button', onclick: async () => {
     const gammes = {};
@@ -320,6 +327,7 @@ async function pageReglages(ctx, barre) {
       await apiAppli('reglages.enregistrer', {
         ouvert: ouvert.checked, prive: prive.checked, codeAcces: code.value, gammes, agentVip: agentVip.value, attente: attente.value, attenteAeroport: attenteAero.value, heuresMin: hMin.value, heuresMax: hMax.value,
         promos: [...promos.children].map((l) => l.lire()), legal: Object.fromEntries(Object.values(legal).map(([el, k]) => [k, el.querySelector('input').value])),
+        connexion: { googleWeb: gWeb.value, googleIos: gIos.value, appleServices: aServ.value, appleActif: aActif.checked },
       });
       toast('Réglages de l’appli enregistrés : ils s’appliquent tout de suite.');
       pageAppli(ctx);
@@ -340,5 +348,12 @@ async function pageReglages(ctx, barre) {
       h('div', { class: 'form-grille form-grille--2' }, champ('Attente offerte à l’aéroport (min)', attenteAero), champ('À disposition : heures minimum / maximum', h('div', { class: 'form-grille form-grille--2' }, hMin, hMax)))),
     carte('Codes promo', 'Une seule utilisation par client', promos, h('button', { class: 'btn btn--ghost btn--petit', type: 'button', onclick: () => ajouterPromo() }, icone('plus'), 'Ajouter un code')),
     carte('Mentions légales de l’appli', 'Affichées dans l’appli, les bons de réservation et les reçus', Object.values(legal).map(([el]) => el)),
+    carte('Connexion avec Google et Apple', 'Identifiants publics, ce ne sont pas des mots de passe',
+      h('div', { class: 'form-grille form-grille--2' },
+        champ('Google : identifiant client « Web »', gWeb, 'Google Cloud > Google Auth Platform > Clients. Affiche « Continuer avec Google » sur le site.'),
+        champ('Google : identifiant client « iOS »', gIos, 'Même page, client de type iOS (com.bdasecurite.bdrive). Pour l’appli iPhone.')),
+      h('div', { class: 'form-grille form-grille--2' },
+        champ('Apple : identifiant de service (site)', aServ, 'developer.apple.com > Identifiers > Services IDs.'),
+        h('label', { class: 'ap-ligne-inter', style: 'margin-top:22px' }, h('span', { class: 'interrupteur' }, aActif, h('span', { 'aria-hidden': 'true' })), h('span', null, h('b', null, '« Se connecter avec Apple »'), h('small', null, 'À activer une fois réglé chez Apple (obligatoire sur iPhone dès que Google est proposé).'))))),
     enregistrer);
 }

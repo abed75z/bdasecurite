@@ -275,8 +275,35 @@ async function pageClients(ctx, barre) {
 }
 
 /* ================= Prix & réglages ================= */
+// Connexion par SMS : les 4 clés OVH sont collées une fois, gardées dans le fichier privé du serveur, jamais réaffichées
+function carteSms(sms) {
+  const cles = sms.cles || {};
+  const secret = (cle, ph) => saisie({ type: 'password', autocomplete: 'off', placeholder: cles[cle] ? 'Déjà enregistrée (laisser vide pour garder)' : ph, style: 'font-family:var(--mono)' });
+  const ak = secret('OVH_SMS_AK', 'Application Key'), as = secret('OVH_SMS_AS', 'Application Secret'), ck = secret('OVH_SMS_CK', 'Consumer Key');
+  const service = saisie({ placeholder: cles.OVH_SMS_SERVICE ? 'Déjà enregistré (laisser vide pour garder)' : 'sms-ab12345-1', style: 'font-family:var(--mono)' });
+  const telTest = saisie({ type: 'tel', placeholder: '06 12 34 56 78' });
+  const etat = h('span', { class: `pastille ${sms.actif ? 'pastille--payee' : 'pastille--brouillon'}` }, sms.actif ? 'Active' : 'Inactive : les clients se connectent avec leur e-mail');
+  const enregistrer = h('button', { class: 'btn btn--ghost', type: 'button', onclick: async () => {
+    try {
+      const r = await apiAppli('sms.enregistrer', { ak: ak.value, as: as.value, ck: ck.value, service: service.value });
+      [ak, as, ck, service].forEach((el) => { el.value = ''; });
+      toast(r.actif ? 'Clés SMS enregistrées : la connexion par numéro est active.' : 'Clés enregistrées. Il en manque encore pour activer les SMS.');
+    } catch (e) { erreur(e); }
+  } }, icone('cle'), 'Enregistrer les clés SMS');
+  const tester = h('button', { class: 'btn btn--ghost', type: 'button', onclick: async () => {
+    try { await apiAppli('sms.tester', { tel: telTest.value }); toast('SMS de test envoyé.'); } catch (e) { erreur(e); }
+  } }, icone('envoyer'), 'Envoyer un SMS de test');
+  return carte('Connexion par numéro de téléphone (SMS)', null,
+    h('p', { class: 'modale__texte' }, 'Le client tape son numéro et reçoit un code par SMS (environ 0,07 € par SMS, crédit acheté sur votre compte OVH). Clés à créer sur eu.api.ovh.com/createToken.'),
+    h('p', null, 'État : ', etat),
+    h('div', { class: 'form-grille form-grille--2' }, champ('Application Key', ak), champ('Application Secret', as)),
+    h('div', { class: 'form-grille form-grille--2' }, champ('Consumer Key', ck), champ('Compte SMS OVH', service, 'Visible dans l’espace client OVH, rubrique Télécom > SMS.')),
+    enregistrer,
+    h('div', { class: 'form-grille form-grille--2', style: 'margin-top:14px' }, champ('Votre numéro, pour un essai', telTest), h('div', null, h('span', { style: 'display:block;height:24px' }), tester)));
+}
+
 async function pageReglages(ctx, barre) {
-  const { reglages: r, aeroports } = await apiAppli('reglages');
+  const { reglages: r, aeroports, sms = {} } = await apiAppli('reglages');
   if (!ctx.actuel()) return;
   const inter = (actif, label) => h('input', { type: 'checkbox', role: 'switch', checked: !!actif, 'aria-label': label });
   const ouvert = inter(r.ouvert, 'Appli ouverte'), prive = inter(r.prive, 'Phase privée');
@@ -355,5 +382,6 @@ async function pageReglages(ctx, barre) {
       h('div', { class: 'form-grille form-grille--2' },
         champ('Apple : identifiant de service (site)', aServ, 'developer.apple.com > Identifiers > Services IDs.'),
         h('label', { class: 'ap-ligne-inter', style: 'margin-top:22px' }, h('span', { class: 'interrupteur' }, aActif, h('span', { 'aria-hidden': 'true' })), h('span', null, h('b', null, '« Se connecter avec Apple »'), h('small', null, 'À activer une fois réglé chez Apple (obligatoire sur iPhone dès que Google est proposé).'))))),
-    enregistrer);
+    enregistrer,
+    carteSms(sms));
 }

@@ -145,6 +145,8 @@ function appli_cfg_publique(): array
     'ouvert' => $cfg['ouvert'], 'prive' => $cfg['prive'], 'gammes' => $gammes, 'agentVip' => $cfg['agentVip'],
     'heuresMin' => $cfg['heuresMin'], 'heuresMax' => $cfg['heuresMax'], 'attente' => $cfg['attente'], 'attenteAeroport' => $cfg['attenteAeroport'],
     'legal' => $cfg['legal'], 'vapid' => $vapid, 'serveur' => date('c'),
+    // connexion par numéro de téléphone (code par SMS) : active dès que les clés SMS sont réglées
+    'sms' => function_exists('appli_sms_actif') && appli_sms_actif(),
     // identifiants publics pour afficher « Continuer avec Google / Apple » (vides = boutons cachés)
     'connexion' => [
       'google' => $cfg['connexion']['googleWeb'], 'googleIos' => $cfg['connexion']['googleIos'],

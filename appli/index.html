@@ -11,9 +11,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BDASH">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest?v=20261016-1658">
-<link rel="apple-touch-icon" href="icone-180.png?v=20261016-1658">
-<link rel="icon" href="icone-192.png?v=20261016-1658" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?v=20261016-1758">
+<link rel="apple-touch-icon" href="icone-180.png?v=20261016-1758">
+<link rel="icon" href="icone-192.png?v=20261016-1758" type="image/png">
 </head>
 <body><title>BDASH</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -393,6 +393,9 @@ details.faq p { margin: -4px 0 16px; color: var(--texte-2); font-size: 14px; }
 .cx-social svg { width: 22px; height: 22px; }
 .cx-apple { background: var(--principal); color: var(--sur-principal); }
 .cx-google { display: flex; justify-content: center; min-height: 44px; }
+.cx-champ.cx-sms-code { text-align: center; font: 700 26px/1 var(--display); letter-spacing: 0.35em; }
+.cx-champ.cx-sms-code::placeholder { font: 500 16px/1 var(--texte-police); letter-spacing: 0; }
+.cx-sms { margin: -6px 0 0; color: var(--texte-3); }
 .cx-legal { margin: 4px 0 0; color: var(--texte-3); font-size: 12px; line-height: 1.5; }
 .cx-cases { position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
 .cx-cases span { height: 62px; border-radius: 12px; border: 2px solid transparent; background: var(--surface); display: grid; place-items: center; font: 800 26px/1 var(--display); font-variant-numeric: tabular-nums; transition: border-color 0.15s; }
@@ -2398,18 +2401,24 @@ button.paiement { width: 100%; text-align: left; }
   // « Continuer avec Apple / Google » : visibles dès que la direction a réglé les identifiants (Admin > Appli BDASH).
   // Sur le site : boutons Google et Apple pour le web ; dans l'appli iPhone : connexion native (extension SocialLogin).
   const cxSocial = () => (etat.config && etat.config.connexion) || {};
-  const pluginSocial = () => (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() ? (window.Capacitor.Plugins || {}).SocialLogin || null : undefined);
+  // appli iPhone : extensions natives (« Se connecter avec Apple » = feuille d'Apple avec Face ID, retour direct dans l'appli)
+  const natif = () => !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  const pluginNatif = (nom) => {
+    const C = window.Capacitor;
+    if (!natif() || (C.isPluginAvailable && !C.isPluginAvailable(nom))) return null;
+    return (C.Plugins && C.Plugins[nom]) || (C.registerPlugin ? C.registerPlugin(nom) : null);
+  };
   function sociauxDispo() {
-    const c = cxSocial(), natif = pluginSocial();
-    if (natif === null) return { apple: false, google: false };
-    return natif ? { apple: !!c.appleNatif, google: !!c.googleIos } : { apple: !!c.apple, google: !!c.google };
+    const c = cxSocial();
+    if (natif()) return { apple: !!c.appleNatif && !!pluginNatif('SignInWithApple'), google: !!c.googleIos && !!pluginNatif('SocialLogin') };
+    return { apple: !!c.apple, google: !!c.google };
   }
   function boutonsSociaux() {
     const s = sociauxDispo();
     if (!s.apple && !s.google) return '';
     return `<div class="ou">ou</div>
       ${s.apple ? `<button class="cx-social cx-apple" type="button" data-a="cxApple">${LOGO_APPLE}Continuer avec Apple</button>` : ''}
-      ${s.google ? (pluginSocial() ? `<button class="cx-social" type="button" data-a="cxGoogle">${LOGO_GOOGLE}Continuer avec Google</button>` : '<div class="cx-google" id="cx-google"></div>') : ''}`;
+      ${s.google ? (natif() ? `<button class="cx-social" type="button" data-a="cxGoogle">${LOGO_GOOGLE}Continuer avec Google</button>` : '<div class="cx-google" id="cx-google"></div>') : ''}`;
   }
   const scripts = {};
   const chargerScript = (src) => scripts[src] || (scripts[src] = new Promise((ok, ko) => {
@@ -2421,7 +2430,7 @@ button.paiement { width: 100%; text-align: left; }
   let googleInit = '';
   async function afficherGoogle() {
     const el = $('#cx-google'), id = cxSocial().google;
-    if (!el || !id || pluginSocial()) return;
+    if (!el || !id || natif()) return;
     try {
       await chargerScript('https://accounts.google.com/gsi/client');
       if (googleInit !== id) { googleInit = id; window.google.accounts.id.initialize({ client_id: id, callback: (r) => connexionSociale('google', r.credential), ux_mode: 'popup', auto_select: false, context: 'signin', itp_support: true }); }
@@ -2450,13 +2459,24 @@ button.paiement { width: 100%; text-align: left; }
         <button class="cx-lien-seul" type="button" data-a="cxOubli">Mot de passe oublié&nbsp;?</button>
       </div>`;
     }
+    // code reçu par SMS (connexion par numéro)
+    if (a.etape === 'code-sms') {
+      return `<div class="cx">${tete('', 'cxRetour')}
+        <h1>Entrez le code reçu</h1><p class="sous">Envoyé par SMS au ${esc(a.telLisible || a.telSaisi)}.</p>
+        <input class="cx-champ cx-sms-code" id="cx-code-sms" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Code à 6 chiffres" aria-label="Code reçu par SMS" value="${esc(a.codeSms || '')}">
+        ${err}${bouton('cxVerifierCode', 'Continuer')}
+        <button class="cx-lien-seul" type="button" data-a="cxRenvoyer">Je n’ai pas reçu le code</button>
+      </div>`;
+    }
     if (a.etape === 'profil') {
+      const via = a.social ? `Compte ${a.social.fournisseur === 'apple' ? 'Apple' : 'Google'} : ${esc(a.email)}` : a.telVerifie ? `Numéro confirmé : ${esc(a.tel)}` : esc(a.email);
       return `<div class="cx">${tete('', 'cxRetour')}
         <h1>Créez votre compte</h1>
-        <p class="sous">${a.social ? `Compte ${a.social.fournisseur === 'apple' ? 'Apple' : 'Google'} : ${esc(a.email)}` : esc(a.email)} · votre prénom et votre numéro sont donnés à votre chauffeur pour qu’il vous trouve.</p>
+        <p class="sous">${via} · votre prénom et votre numéro sont donnés à votre chauffeur pour qu’il vous trouve.</p>
         <div class="duo"><label class="champ"><span>Prénom</span><input id="cx-prenom" type="text" autocomplete="given-name" value="${esc(a.prenom)}"></label><label class="champ"><span>Nom</span><input id="cx-nom" type="text" autocomplete="family-name" value="${esc(a.nom)}"></label></div>
-        <label class="champ"><span>Téléphone</span><input id="cx-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="06 12 34 56 78" value="${esc(a.tel)}"></label>
-        ${a.social ? '' : `<label class="champ"><span>Mot de passe (8 caractères, une lettre et un chiffre)</span>${champMdp('cx-mdp', 'new-password', 'Choisissez un mot de passe')}</label>`}
+        ${a.telVerifie ? `<label class="champ"><span>E-mail, pour recevoir vos reçus</span><input id="cx-email-p" type="email" inputmode="email" autocomplete="email" autocapitalize="off" placeholder="nom@exemple.fr" value="${esc(a.email)}"></label>`
+          : `<label class="champ"><span>Téléphone</span><input id="cx-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="06 12 34 56 78" value="${esc(a.tel)}"></label>`}
+        ${a.social || a.telVerifie ? '' : `<label class="champ"><span>Mot de passe (8 caractères, une lettre et un chiffre)</span>${champMdp('cx-mdp', 'new-password', 'Choisissez un mot de passe')}</label>`}
         ${etat.config.prive ? `<label class="champ"><span>Code d’accès BDA</span><input id="cx-code-acces" type="text" autocomplete="off" autocapitalize="characters" placeholder="BDA-XXXXX" value="${esc(a.code)}" style="text-transform:uppercase"></label><p class="petit" style="margin-top:-6px">L’appli est en phase privée : le code vous est donné par BDA.</p>` : ''}
         <button class="case-cocher" type="button" role="checkbox" aria-checked="${a.cgu}" data-a="cgu"><span class="case">${ic('check')}</span><span>J’ai 18 ans ou plus et j’accepte les conditions générales et la politique de confidentialité de BDA.</span></button>
         <p class="cx-liens"><button type="button" data-a="lireTexte" data-v="cgv">Lire les conditions générales</button><button type="button" data-a="lireTexte" data-v="politique">Lire la politique de confidentialité</button></p>
@@ -2478,13 +2498,22 @@ button.paiement { width: 100%; text-align: left; }
         <button class="btn btn-second" type="button" data-a="cxRetour">Retour</button>
       </div>`;
     }
+    // accueil : le numéro de téléphone d'abord (code par SMS), comme Uber ; l'e-mail en dessous.
+    // Sans SMS réglés par la direction, on reste sur l'e-mail.
+    const parTel = !!etat.config.sms && a.mode !== 'email';
+    const legal = `<p class="cx-legal">${etat.config.prive ? 'BDASH est en phase privée : la création d’un compte demande un code d’accès donné par BDA. ' : ''}Vos informations servent uniquement à vos courses. Elles ne sont jamais vendues.</p>`;
     return `<div class="cx-visuel">${SCENE_CONNEXION}</div>
       <div class="cx">
         <h1>Votre chauffeur privé, à Paris et en Île-de-France.</h1>
-        <input class="cx-champ" id="cx-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" placeholder="Votre adresse e-mail" value="${esc(a.email)}" aria-label="Adresse e-mail">
-        ${err}${bouton('cxEmail', 'Continuer')}
+        ${parTel
+          ? `<input class="cx-champ" id="cx-tel1" type="tel" inputmode="tel" autocomplete="tel" placeholder="Votre numéro de téléphone" value="${esc(a.telSaisi || '')}" aria-label="Numéro de téléphone">
+            ${err}${bouton('cxTel', 'Continuer')}
+            <p class="petit cx-sms">Un code de confirmation vous est envoyé par SMS.</p>`
+          : `<input class="cx-champ" id="cx-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" placeholder="Votre adresse e-mail" value="${esc(a.email)}" aria-label="Adresse e-mail">
+            ${err}${bouton('cxEmail', 'Continuer')}`}
         ${boutonsSociaux()}
-        <p class="cx-legal">${etat.config.prive ? 'BDASH est en phase privée : la création d’un compte demande un code d’accès donné par BDA. ' : ''}Vos informations servent uniquement à vos courses. Elles ne sont jamais vendues.</p>
+        ${etat.config.sms ? `<button class="cx-lien-seul" type="button" data-a="${parTel ? 'cxModeEmail' : 'cxModeTel'}">${parTel ? 'Se connecter avec un e-mail' : 'Se connecter avec un numéro de téléphone'}</button>` : ''}
+        ${legal}
       </div>`;
   }
   function renduConnexion(focus) {
@@ -4193,7 +4222,7 @@ button.paiement { width: 100%; text-align: left; }
   }
   const lireCx = () => {
     const a = etat.auth;
-    for (const [id, k] of [['#cx-email', 'email'], ['#cx-prenom', 'prenom'], ['#cx-nom', 'nom'], ['#cx-tel', 'tel'], ['#cx-code-acces', 'code']]) if ($(id)) a[k] = val(id);
+    for (const [id, k] of [['#cx-email', 'email'], ['#cx-email-p', 'email'], ['#cx-prenom', 'prenom'], ['#cx-nom', 'nom'], ['#cx-tel', 'tel'], ['#cx-tel1', 'telSaisi'], ['#cx-code-sms', 'codeSms'], ['#cx-code-acces', 'code']]) if ($(id)) a[k] = val(id);
     if ($('#cx-mdp')) a.mdp = $('#cx-mdp').value;
     a.email = String(a.email || '').toLowerCase();
     return a;
@@ -4526,22 +4555,49 @@ button.paiement { width: 100%; text-align: left; }
     },
     cxCreer() {
       const a = lireCx();
-      const err = !a.prenom ? 'Indiquez votre prénom.' : a.tel.replace(/\D/g, '').length < 9 ? 'Indiquez un numéro de téléphone valide : votre chauffeur doit pouvoir vous joindre.'
-        : !a.social && ((a.mdp || '').length < 8 || !/\d/.test(a.mdp) || !/[a-zA-Zà-ÿ]/.test(a.mdp)) ? 'Mot de passe : 8 caractères au moins, avec une lettre et un chiffre.'
-        : etat.config.prive && !a.code ? 'Saisissez le code d’accès donné par BDA.' : !a.cgu ? 'Il faut avoir 18 ans ou plus et accepter les conditions pour créer un compte.' : '';
-      if (err) { a.erreur = err; renduConnexion(); return; }
+      const sansMdp = a.social || a.telVerifie;
+      const err = !a.prenom ? 'Indiquez votre prénom.'
+        : a.telVerifie ? (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(a.email) ? 'Indiquez votre e-mail : vos reçus y sont envoyés.' : '')
+        : a.tel.replace(/\D/g, '').length < 9 ? 'Indiquez un numéro de téléphone valide : votre chauffeur doit pouvoir vous joindre.' : '';
+      const err2 = err || (!sansMdp && ((a.mdp || '').length < 8 || !/\d/.test(a.mdp) || !/[a-zA-Zà-ÿ]/.test(a.mdp)) ? 'Mot de passe : 8 caractères au moins, avec une lettre et un chiffre.'
+        : etat.config.prive && !a.code ? 'Saisissez le code d’accès donné par BDA.' : !a.cgu ? 'Il faut avoir 18 ans ou plus et accepter les conditions pour créer un compte.' : '');
+      if (err2) { a.erreur = err2; renduConnexion(); return; }
       const corps = { email: a.email, prenom: a.prenom, nom: a.nom, tel: telLisible(a.tel), code: a.code, cgu: true, offres: a.offres };
-      if (a.social) corps.social = a.social; else corps.motdepasse = a.mdp;
+      if (a.social) corps.social = a.social; else if (a.telVerifie) corps.telVerifie = a.telVerifie; else corps.motdepasse = a.mdp;
       envoyerCx('client.inscription', corps, null, (r) => connecte(r, true));
+    },
+    // Connexion par numéro : un code part par SMS, puis on le vérifie
+    cxModeEmail() { const a = lireCx(); a.mode = 'email'; a.erreur = ''; renduConnexion('#cx-email'); },
+    cxModeTel() { const a = lireCx(); a.mode = 'tel'; a.erreur = ''; renduConnexion('#cx-tel1'); },
+    cxTel() {
+      const a = lireCx();
+      if ((a.telSaisi || '').replace(/\D/g, '').length < 9) { a.erreur = 'Saisissez votre numéro de téléphone (06 12 34 56 78).'; renduConnexion('#cx-tel1'); return; }
+      envoyerCx('client.tel.code', { tel: a.telSaisi }, '#cx-tel1', (r) => { Object.assign(a, { telLisible: r.tel, etape: 'code-sms', codeSms: '', envoiA: Date.now() }); etat.config.prive = r.prive; renduConnexion('#cx-code-sms'); });
+    },
+    cxVerifierCode() {
+      const a = lireCx();
+      if (!/^\d{6}$/.test((a.codeSms || '').trim())) { a.erreur = 'Le code fait 6 chiffres.'; renduConnexion('#cx-code-sms'); return; }
+      envoyerCx('client.tel.verifier', { tel: a.telSaisi, code: a.codeSms.trim() }, '#cx-code-sms', (r) => {
+        if (r.jeton) { connecte(r, false); return; }
+        // numéro confirmé, pas encore de compte : prénom, e-mail, code d'accès et conditions
+        Object.assign(a, { telVerifie: { tel: a.telSaisi, ticket: r.ticket }, tel: r.tel, etape: 'profil', codeSms: '' });
+        etat.config.prive = r.prive;
+        renduConnexion('#cx-prenom');
+      });
+    },
+    cxRenvoyer() {
+      const a = lireCx(), reste = Math.ceil((45000 - (Date.now() - (a.envoiA || 0))) / 1000);
+      if (reste > 0) { toast(`Le SMS peut prendre quelques secondes. Nouveau code possible dans ${reste} s.`); return; }
+      envoyerCx('client.tel.code', { tel: a.telSaisi }, '#cx-code-sms', () => { a.envoiA = Date.now(); a.codeSms = ''; renduConnexion('#cx-code-sms'); toast('Nouveau code envoyé.'); });
     },
     // Apple : fenêtre d'Apple sur le site, connexion native dans l'appli iPhone
     async cxApple() {
       try {
-        const plug = pluginSocial();
+        // iPhone : feuille native d'Apple (Face ID), on revient directement dans l'appli
+        const plug = pluginNatif('SignInWithApple');
         if (plug) {
-          await plug.initialize({ apple: { clientId: 'com.bdasecurite.bdrive' } });
-          const { result: r } = await plug.login({ provider: 'apple', options: { scopes: ['email', 'name'] } });
-          connexionSociale('apple', r && r.idToken, r && r.profile && r.profile.givenName, r && r.profile && r.profile.familyName);
+          const { response: r } = await plug.authorize({ clientId: 'com.bdasecurite.bdrive', redirectURI: 'https://bdasecurite.com/appli/', scopes: 'email name' });
+          connexionSociale('apple', r && r.identityToken, r && r.givenName, r && r.familyName);
           return;
         }
         await chargerScript(`https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/${etat.langue === 'en' ? 'en_US' : 'fr_FR'}/appleid.auth.js`);
@@ -4557,12 +4613,14 @@ button.paiement { width: 100%; text-align: left; }
     },
     // Google dans l'appli iPhone (sur le site, c'est le bouton officiel de Google qui appelle connexionSociale)
     async cxGoogle() {
-      const plug = pluginSocial(), c = cxSocial();
+      const plug = pluginNatif('SocialLogin'), c = cxSocial();
       if (!plug) return;
       try {
         await plug.initialize({ google: { iOSClientId: c.googleIos, iOSServerClientId: c.google || undefined } });
         const { result: r } = await plug.login({ provider: 'google', options: { scopes: ['email', 'profile'] } });
-        connexionSociale('google', r && r.idToken, r && r.profile && r.profile.givenName, r && r.profile && r.profile.familyName);
+        // le jeton d'identité Google (JWT) : on prend la valeur qui en a la forme
+        const jwt = [r && r.idToken, r && r.accessToken && r.accessToken.token].find((t) => /^eyJ[\w-]*\.[\w-]+\.[\w-]+$/.test(t || ''));
+        connexionSociale('google', jwt, r && r.profile && r.profile.givenName, r && r.profile && r.profile.familyName);
       } catch (e) {
         if (/cancel|annul|-5/i.test(String((e && (e.code || e.message)) || ''))) return;
         toast('Connexion avec Google impossible pour le moment. Réessayez ou utilisez votre e-mail.');
@@ -4575,7 +4633,7 @@ button.paiement { width: 100%; text-align: left; }
       envoyerCx('client.reset', { jeton: a.jeton, motdepasse: a.mdp }, '#cx-mdp', (r) => { connecte(r, false); toast('Mot de passe changé. Bienvenue !'); });
     },
     cxVoir(id) { const i = $('#' + id); if (i) i.type = i.type === 'password' ? 'text' : 'password'; },
-    cxRetour() { const a = etat.auth; a.erreur = ''; a.mdp = ''; a.social = null; a.etape = 'accueil'; renduConnexion('#cx-email'); },
+    cxRetour() { const a = etat.auth; a.erreur = ''; a.mdp = ''; a.social = null; a.telVerifie = null; a.codeSms = ''; a.etape = 'accueil'; renduConnexion(etat.config.sms && a.mode !== 'email' ? '#cx-tel1' : '#cx-email'); },
     cgu() { const a = lireCx(); a.cgu = !a.cgu; a.erreur = ''; renduConnexion(); },
     cxOffres() { const a = lireCx(); a.offres = !a.offres; renduConnexion(); },
     position(v) {
@@ -4870,6 +4928,10 @@ button.paiement { width: 100%; text-align: left; }
     champ.parentNode.querySelectorAll('span').forEach((s, i) => { s.textContent = v[i] || ''; s.classList.toggle('actif', actif && i === Math.min(v.length, 5)); });
   }
   document.addEventListener('focusout', () => setTimeout(majCases, 0));
+  // code reçu par SMS : dès les 6 chiffres saisis (ou collés par le clavier de l'iPhone), on vérifie
+  document.addEventListener('input', (e) => {
+    if (REEL && e.target.id === 'cx-code-sms' && /^\d{6}$/.test(e.target.value.trim()) && !etat.auth.attente) actions.cxVerifierCode();
+  });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && couche.innerHTML) fermerModale();
     if (e.key !== 'Enter') return;
@@ -4879,6 +4941,8 @@ button.paiement { width: 100%; text-align: left; }
     if (id === 'cx-email') (REEL ? actions.cxEmail : actions.validerEmail)();
     if (id === 'cx-mdp' && REEL && etat.auth.etape === 'mdp') actions.cxConnexion();
     if (id === 'cx-mdp' && REEL && etat.auth.etape === 'reset') actions.cxReset();
+    if (id === 'cx-tel1' && REEL) actions.cxTel();
+    if (id === 'cx-code-sms' && REEL) actions.cxVerifierCode();
     if (id === 'chat-texte') actions.envoyerMessage();
     if (id === 'promo-code') actions.appliquerPromo();
   });

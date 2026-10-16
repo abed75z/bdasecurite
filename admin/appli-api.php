@@ -8,6 +8,7 @@ declare(strict_types=1);
 require __DIR__ . '/../app/bootstrap.php';
 require __DIR__ . '/../app/auth.php';
 require __DIR__ . '/../app/appli.php';
+require __DIR__ . '/../app/appli-sms.php';
 
 entetes_securite();
 demarrer_session();
@@ -22,11 +23,11 @@ if ($methode === 'POST') {
 }
 if (!connecte() || !utilisateur_courant()) echec('Connexion requise.', 401);
 $lectures = ['tableau', 'courses', 'clients', 'chauffeurs', 'reglages'];
-$ecritures = ['reglages.enregistrer', 'course.attribuer', 'course.annuler', 'chauffeur.enregistrer', 'chauffeur.horsligne', 'client.supprimer'];
+$ecritures = ['reglages.enregistrer', 'sms.enregistrer', 'sms.tester', 'course.attribuer', 'course.annuler', 'chauffeur.enregistrer', 'chauffeur.horsligne', 'client.supprimer'];
 if (!in_array($action, array_merge($lectures, $ecritures), true)) echec('Action inconnue.', 404);
 if (in_array($action, $lectures, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 // réglages (prix, code d'accès) et suppression d'un client : administrateur seulement
-if (in_array($action, ['reglages.enregistrer', 'client.supprimer'], true) && role_courant() !== 'admin') echec('Action réservée à un administrateur.', 403);
+if (in_array($action, ['reglages.enregistrer', 'sms.enregistrer', 'sms.tester', 'client.supprimer'], true) && role_courant() !== 'admin') echec('Action réservée à un administrateur.', 403);
 
 // Une course telle que la voit la direction (tout, y compris le client et le chauffeur)
 function vue_admin(array $c, array $chauffeurs): array
@@ -110,7 +111,32 @@ try {
         ], $liste)), 'autres' => $autres, 'gammes' => array_map(fn($g) => ['cle' => $g, 'nom' => appli_cfg()['gammes'][$g]['nom']], APPLI_GAMMES)]);
 
     case 'reglages':
-      repondre(['ok' => true, 'reglages' => appli_cfg(), 'aeroports' => array_map(fn($a) => $a['nom'], APPLI_AEROPORTS)]);
+      // SMS : on dit seulement quelles clés sont présentes, jamais leur valeur
+      $sms = ['actif' => appli_sms_actif(), 'cles' => array_combine(APPLI_SMS_CLES, array_map(fn($k) => veille_env($k) !== '', APPLI_SMS_CLES))];
+      repondre(['ok' => true, 'reglages' => appli_cfg(), 'aeroports' => array_map(fn($a) => $a['nom'], APPLI_AEROPORTS), 'sms' => $sms]);
+
+    // Clés de l'API OVH pour les SMS (collées par le gérant) : gardées dans le .env privé, hors du site
+    case 'sms.enregistrer':
+      $b = corps();
+      $maj = [];
+      foreach (['ak' => 'OVH_SMS_AK', 'as' => 'OVH_SMS_AS', 'ck' => 'OVH_SMS_CK', 'service' => 'OVH_SMS_SERVICE'] as $champ => $cle) {
+        $v = trim(chaine($b[$champ] ?? ''));
+        if ($v === '') continue;
+        if (!preg_match($champ === 'service' ? '/^sms-[a-z0-9-]{3,40}$/i' : '/^[A-Za-z0-9]{8,64}$/', $v)) echec($champ === 'service' ? 'Nom du compte SMS invalide (il commence par « sms- »).' : 'Clé OVH invalide : copiez-la sans espace.');
+        $maj[$cle] = $v;
+      }
+      if (!empty($b['effacer'])) foreach (APPLI_SMS_CLES as $k) $maj[$k] = '';
+      if ($maj) veille_env_ecrire($maj);
+      journal('securite', 'Appli : clés SMS ' . (!empty($b['effacer']) ? 'effacées' : 'modifiées'));
+      repondre(['ok' => true, 'actif' => appli_sms_actif()]);
+
+    case 'sms.tester':
+      $b = corps();
+      $e164 = tel_e164(chaine($b['tel'] ?? ''));
+      if ($e164 === '') echec('Numéro de téléphone invalide.');
+      try { appli_sms_envoyer($e164, 'BDASH : SMS de test. Les codes de connexion partiront bien.'); }
+      catch (Throwable $e) { echec('Le SMS n’est pas parti : ' . $e->getMessage() . ' Vérifiez les clés OVH et le crédit SMS.', 502); }
+      repondre(['ok' => true]);
 
     case 'reglages.enregistrer':
       $cfg = appli_cfg_enregistrer(corps());

@@ -307,6 +307,16 @@ function schema(PDO $db): void
       PRAGMA user_version = 19;
     SQL);
   }
+  if ($version < 20) {
+    // Appli BDASH : connexion par numéro de téléphone (code reçu par SMS). tel_verifie = numéro international confirmé par SMS ;
+    // appli_codes = dernier code envoyé à chaque numéro (empreinte seulement), compteurs anti-abus, ticket de création de compte
+    $db->exec(<<<'SQL'
+      ALTER TABLE appli_clients ADD COLUMN tel_verifie TEXT NOT NULL DEFAULT '';
+      CREATE INDEX IF NOT EXISTS i_appli_clients_telv ON appli_clients (tel_verifie) WHERE tel_verifie <> '';
+      CREATE TABLE IF NOT EXISTS appli_codes (tel TEXT PRIMARY KEY, code TEXT NOT NULL DEFAULT '', expire TEXT NOT NULL DEFAULT '', essais INTEGER NOT NULL DEFAULT 0, envois INTEGER NOT NULL DEFAULT 0, fenetre TEXT NOT NULL DEFAULT '', dernier TEXT NOT NULL DEFAULT '', ticket TEXT NOT NULL DEFAULT '', ticket_expire TEXT NOT NULL DEFAULT '');
+      PRAGMA user_version = 20;
+    SQL);
+  }
 }
 // Catégorie d'un agent : équipe principale, renfort, ou agent de secours (candidat retenu)
 function agent_categorie($c): string

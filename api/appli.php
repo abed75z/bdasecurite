@@ -11,6 +11,7 @@ declare(strict_types=1);
 require __DIR__ . '/../app/bootstrap.php';
 require __DIR__ . '/../app/appli.php';
 require __DIR__ . '/../app/appli-connexion.php';
+require __DIR__ . '/../app/appli-sms.php';
 
 entetes_securite();
 header('Cache-Control: no-store');
@@ -29,7 +30,7 @@ $action = (string)($_GET['a'] ?? '');
 $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $lectures = ['config', 'voisins', 'client.moi', 'client.donnees', 'courses', 'course', 'suivi', 'chauffeur.moi', 'chauffeur.historique'];
 $ecritures = [
-  'client.existe', 'client.inscription', 'client.connexion', 'client.social', 'client.oubli', 'client.reset', 'client.profil', 'client.motdepasse', 'client.deconnexion', 'client.supprimer',
+  'client.existe', 'client.inscription', 'client.connexion', 'client.social', 'client.tel.code', 'client.tel.verifier', 'client.oubli', 'client.reset', 'client.profil', 'client.motdepasse', 'client.deconnexion', 'client.supprimer',
   'push.abonner', 'push.retirer', 'promo.verifier', 'support',
   'course.creer', 'course.annuler', 'course.message', 'course.noter', 'course.alerte',
   'chauffeur.connexion', 'chauffeur.deconnexion', 'chauffeur.vehicule', 'chauffeur.etat',
@@ -190,6 +191,34 @@ try {
       if ($id['email'] === '') echec('Votre compte ' . ($f === 'apple' ? 'Apple' : 'Google') . ' ne donne pas d’e-mail vérifié : créez votre compte avec votre adresse e-mail.');
       repondre(['ok' => true, 'nouveau' => true, 'email' => $id['email'], 'prenom' => $id['prenom'] ?: texte($b['prenom'] ?? '', 60), 'nom' => $id['nom'] ?: texte($b['nom'] ?? '', 60), 'prive' => appli_cfg()['prive']]);
 
+    // Connexion par numéro de téléphone : 1) un code part par SMS ; 2) code bon → connecté si le numéro a déjà un compte,
+    // sinon un ticket permet de créer le compte (client.inscription avec telVerifie)
+    case 'client.tel.code':
+      $b = corps();
+      if (!appli_sms_actif()) echec('La connexion par SMS n’est pas encore disponible : utilisez votre e-mail.', 503);
+      if (!limiter('appli-sms', 12, 3600)) echec('Trop de codes demandés depuis cet appareil. Réessayez dans une heure.', 429);
+      $e164 = tel_e164(chaine($b['tel'] ?? ''));
+      if ($e164 === '') echec('Numéro de téléphone invalide.');
+      appli_code_envoyer($e164);
+      $st = db()->prepare('SELECT COUNT(*) FROM appli_clients WHERE tel_verifie = ?');
+      $st->execute([$e164]);
+      repondre(['ok' => true, 'tel' => tel_lisible_e164($e164), 'existe' => (bool)$st->fetchColumn(), 'prive' => appli_cfg()['prive']]);
+
+    case 'client.tel.verifier':
+      $b = corps();
+      if (!limiter('appli-sms-verif', 30, 600)) echec('Trop d’essais. Patientez un instant.', 429);
+      $e164 = tel_e164(chaine($b['tel'] ?? ''));
+      if ($e164 === '') echec('Numéro de téléphone invalide.');
+      $ticket = appli_code_verifier($e164, chaine($b['code'] ?? ''));
+      $st = db()->prepare('SELECT * FROM appli_clients WHERE tel_verifie = ?');
+      $st->execute([$e164]);
+      if ($c = $st->fetch()) {
+        db()->prepare('DELETE FROM appli_codes WHERE tel = ?')->execute([$e164]);
+        db()->prepare("UPDATE appli_clients SET echecs = 0, bloque_jusqu = '', derniere = ? WHERE id = ?")->execute([maintenant(), $c['id']]);
+        repondre(['ok' => true, 'jeton' => appli_jeton_creer('client', (int)$c['id']), 'compte' => appli_client_public(appli_client((int)$c['id']))]);
+      }
+      repondre(['ok' => true, 'nouveau' => true, 'ticket' => $ticket, 'tel' => tel_lisible_e164($e164), 'prive' => appli_cfg()['prive']]);
+
     case 'client.inscription':
       $b = corps();
       if (!limiter('appli-inscription', 6, 3600)) echec('Trop de comptes créés depuis cet appareil. Réessayez dans une heure.', 429);
@@ -209,12 +238,23 @@ try {
       } else {
         $email = email_valide((string)($b['email'] ?? ''));
       }
+      // compte créé avec le numéro de téléphone : le numéro a été confirmé par SMS (ticket de client.tel.verifier), pas de mot de passe
+      $telV = is_array($b['telVerifie'] ?? null) ? $b['telVerifie'] : null;
+      $e164 = '';
+      if ($telV) {
+        $e164 = tel_e164(chaine($telV['tel'] ?? ''));
+        if ($e164 === '') echec('Numéro de téléphone invalide.');
+        appli_ticket_tel($e164, chaine($telV['ticket'] ?? ''));
+        $st = db()->prepare('SELECT COUNT(*) FROM appli_clients WHERE tel_verifie = ?');
+        $st->execute([$e164]);
+        if ((int)$st->fetchColumn()) echec('Un compte existe déjà avec ce numéro : reconnectez-vous avec votre numéro.', 409);
+      }
       $prenom = texte($b['prenom'] ?? '', 60);
       $nom = texte($b['nom'] ?? '', 60);
-      $tel = tel_valide((string)($b['tel'] ?? ''), true);
+      $tel = $telV ? tel_lisible_e164($e164) : tel_valide((string)($b['tel'] ?? ''), true);
       $mdp = chaine($b['motdepasse'] ?? '');
       if (mb_strlen($prenom) < 2) echec('Indiquez votre prénom.');
-      if (!$social) appli_mdp_valide($mdp);
+      if (!$social && !$telV) appli_mdp_valide($mdp);
       if (empty($b['cgu'])) echec('Il faut avoir 18 ans ou plus et accepter les conditions pour créer un compte.');
       if ($cfg['prive'] && !hash_equals(strtoupper($cfg['codeAcces']), strtoupper(trim(chaine($b['code'] ?? ''))))) {
         noter_tentative('appli-code:' . empreinte_client());
@@ -224,9 +264,10 @@ try {
       $st = db()->prepare('SELECT COUNT(*) FROM appli_clients WHERE email = ?');
       $st->execute([$email]);
       if ((int)$st->fetchColumn()) echec('Un compte existe déjà avec cet e-mail : connectez-vous.', 409);
-      db()->prepare('INSERT INTO appli_clients (email, hash, prenom, nom, tel, offres, cree, derniere, google, apple) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-        ->execute([$email, $social ? '' : password_hash($mdp, PASSWORD_DEFAULT), $prenom, $nom, $tel, empty($b['offres']) ? 0 : 1, maintenant(), maintenant(), $lien['google'], $lien['apple']]);
+      db()->prepare('INSERT INTO appli_clients (email, hash, prenom, nom, tel, offres, cree, derniere, google, apple, tel_verifie) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+        ->execute([$email, $social || $telV ? '' : password_hash($mdp, PASSWORD_DEFAULT), $prenom, $nom, $tel, empty($b['offres']) ? 0 : 1, maintenant(), maintenant(), $lien['google'], $lien['apple'], $e164]);
       $id = (int)db()->lastInsertId();
+      if ($telV) db()->prepare('DELETE FROM appli_codes WHERE tel = ?')->execute([$e164]);
       journal('vtc', 'Appli : nouveau compte client');
       notifier('appli', 'Nouveau client dans l’appli', 'Un client vient de créer son compte.', '/admin/#/appli/clients', 'appli-client');
       repondre(['ok' => true, 'jeton' => appli_jeton_creer('client', $id), 'compte' => appli_client_public(appli_client($id))]);

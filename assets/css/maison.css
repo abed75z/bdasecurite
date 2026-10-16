@@ -716,3 +716,17 @@ main.rc .apply-card {
   .nav--v2 .nav__droite { justify-content: flex-end !important; gap: clamp(14px, 1.6vw, 26px) !important; }
   .nav--v2 .nav__links--d { flex: 0 1 auto !important; justify-content: flex-end !important; gap: clamp(14px, 1.6vw, 26px) !important; }
 }
+/* Choix de la langue : FR | EN, tout petit, à gauche de « Mon compte » (ordinateur) et en bas du menu (téléphone) */
+.nav--v2 .nav__langue { display: none; }
+@media (min-width: 1081px) {
+  .nav--v2 .nav__langue { display: inline-flex !important; align-items: center; margin-right: 4px; font: 400 11.5px/1 var(--m-texte); letter-spacing: 0.12em; }
+  .nav--v2 .nav__langue > * { padding: 5px 8px; color: rgba(243, 239, 232, 0.5) !important; text-decoration: none !important; transition: color 0.3s ease; }
+  .nav--v2 .nav__langue > [aria-current] { color: #f3efe8 !important; }
+  .nav--v2 .nav__langue > * + * { border-left: 1px solid rgba(243, 239, 232, 0.25); }
+  .nav--v2 .nav__langue a:hover { color: #c9a874 !important; }
+}
+.mm__langue { display: flex; align-items: center; margin-top: 16px; padding-top: 18px; border-top: 1px solid rgba(243, 239, 232, 0.1); font: 400 13px/1 var(--m-texte); letter-spacing: 0.14em; }
+.mm__langue > * { padding: 6px 14px 6px 0; color: rgba(243, 239, 232, 0.5) !important; text-decoration: none !important; }
+.mm__langue > [aria-current] { color: #f3efe8 !important; }
+.mm__langue > * + * { padding-left: 14px; border-left: 1px solid rgba(243, 239, 232, 0.25); }
+@media (min-width: 1081px) { .nav--v2 .nav__langue { margin: 0 2px 0 -8px !important; } }

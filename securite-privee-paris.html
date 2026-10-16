@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Société de sécurité privée à Paris | BDA Security Group</title>
-  <meta name="description" content="Société de sécurité privée à Paris : agents de sécurité titulaires de la carte CNAPS, gardiennage, surveillance, contrôle d'accès. Devis gratuit, 24h/24 et 7j/7.">
+  <meta name="description" content="Société de sécurité privée à Paris : agents titulaires de la carte CNAPS, gardiennage, surveillance, contrôle d'accès. Devis gratuit, 24h/24 et 7j/7.">
   <link rel="canonical" href="https://bdasecurite.com/securite-privee-paris">
   <meta name="theme-color" content="#ffffff">
   <meta property="og:type" content="website">
@@ -17,18 +17,18 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="/favicon.ico" sizes="48x48">
-  <link rel="icon" href="assets/img/favicon.svg?v=4" type="image/svg+xml">
-  <link rel="icon" href="assets/img/icon-192.png?v=4" sizes="192x192" type="image/png">
-  <link rel="icon" href="assets/img/favicon-96.png?v=4" sizes="96x96" type="image/png">
-  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=4">
+  <link rel="icon" href="/favicon.ico?v=5" sizes="48x48">
+  <link rel="icon" href="assets/img/favicon.svg?v=5" type="image/svg+xml">
+  <link rel="icon" href="assets/img/icon-192.png?v=5" sizes="192x192" type="image/png">
+  <link rel="icon" href="assets/img/favicon-96.png?v=5" sizes="96x96" type="image/png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=5">
   <link rel="manifest" href="/manifest-bda.webmanifest">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="BDA Security">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://images.unsplash.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Montserrat:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=15">
   <link rel="stylesheet" href="assets/css/hero.css?v=15">
   <link rel="stylesheet" href="assets/css/sections.css?v=15">
@@ -37,6 +37,7 @@
   <link rel="stylesheet" href="assets/css/blanc.css?v=34">
   <link rel="stylesheet" href="assets/css/sobre.css?v=9">
   <link rel="stylesheet" href="assets/css/entete.css?v=9">
+  <link rel="stylesheet" href="assets/css/maison.css?v=34">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -68,6 +69,8 @@
     ]
   }
   </script>
+  <!-- Questions fréquentes (mêmes textes que la FAQ affichée sur la page) -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"fr-FR","mainEntity":[{"@type":"Question","name":"Combien coûte un agent de sécurité à Paris ?","acceptedAnswer":{"@type":"Answer","text":"Le tarif dépend de la mission : le type de poste, les horaires (jour, nuit, dimanche, jour férié), la durée et le nombre d'agents. Nous vous remettons un devis gratuit et détaillé, sans engagement, une fois votre besoin bien compris."}},{"@type":"Question","name":"Pouvez-vous intervenir en urgence ?","acceptedAnswer":{"@type":"Answer","text":"Oui, selon nos disponibilités. Pour une demande urgente, appelez-nous directement au 06 11 67 86 25, 24h/24 et 7j/7 : nous ferons le maximum pour vous trouver une solution rapidement."}},{"@type":"Question","name":"Vos agents ont-ils une carte professionnelle ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Nos agents sont titulaires de la carte professionnelle délivrée par le CNAPS, et notre entreprise dispose d'une autorisation d'exercice (n° AUT-075-2124-07-01-20250906336)."}},{"@type":"Question","name":"Proposez-vous des prestations régulières ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Nous assurons aussi bien des missions ponctuelles (une soirée, un week-end) que des prestations régulières, par exemple une présence quotidienne dans vos locaux. Le dispositif s'adapte à votre activité."}},{"@type":"Question","name":"Comment obtenir un devis ?","acceptedAnswer":{"@type":"Answer","text":"Remplissez notre formulaire en ligne en deux minutes, ou appelez-nous. Nous revenons vers vous rapidement avec une proposition adaptée à votre besoin."}}]}</script>
 </head>
 <body>
 
@@ -101,6 +104,8 @@
   <div class="nav__inner">
     <a class="nav__marque" href="/" aria-label="BDA Security Group, accueil"><b>BDA</b><small>Security Group</small></a>
     <nav class="nav__links" aria-label="Navigation principale">
+      <div class="nav__langue" role="group" aria-label="Langue"><span aria-current="true">FR</span><a href="en" hreflang="en" lang="en">EN</a></div>
+      <a class="nav__reserver-pc" href="devis">Réserver</a>
       <div class="nav__drop is-current">
         <button class="nav__drop-btn" type="button" aria-expanded="false">Sécurité privée <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav__panel nav__panel--large">
@@ -115,26 +120,27 @@
           <div class="nav__col"><a href="chauffeur-prive-vtc-paris"><b>Chauffeur privé VTC</b><small>À l’heure ou au trajet</small></a><a href="chauffeur-securite-vip-paris"><b>Chauffeur + sécurité VIP</b><small>Conduit et protégé</small></a></div>
         </div>
       </div>
-      <div class="nav__drop">
-        <button class="nav__drop-btn" type="button" aria-expanded="false">Entreprises <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-        <div class="nav__panel nav__panel--entreprise">
-          <div class="nav__col"><p class="nav__col-titre">Entreprises</p><p class="nav__texte">Hôtels, commerces, bureaux, événements : une offre sur mesure pour votre activité.</p><a class="nav__cta" href="entreprises">Contactez-nous pour votre entreprise</a></div>
-        </div>
-      </div>
     </nav>
     <div class="nav__droite">
       <nav class="nav__links nav__links--d" aria-label="Navigation principale (suite)">
-        <a href="tarifs">Tarifs</a>
+        <div class="nav__drop">
+          <button class="nav__drop-btn" type="button" aria-expanded="false">Entreprises <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="nav__panel nav__panel--entreprise">
+            <div class="nav__col"><p class="nav__col-titre">Entreprises</p><p class="nav__texte">Hôtels, commerces, bureaux, événements : une offre sur mesure pour votre activité.</p><a class="nav__cta" href="entreprises">Contactez-nous pour votre entreprise</a></div>
+          </div>
+        </div>
         <div class="nav__drop">
           <button class="nav__drop-btn" type="button" aria-expanded="false">La société <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
           <div class="nav__panel nav__panel--petit">
-            <div class="nav__col"><a href="recrutement"><b>Recrutement</b><small>Rejoindre nos équipes</small></a></div>
+            <div class="nav__col"><a href="recrutement"><b>Nous rejoindre</b><small>Agents, gardes du corps, chauffeurs</small></a></div>
           </div>
         </div>
       </nav>
       <div class="nav__actions">
+        <a class="nav__client nav__compte" href="espace-client"><span>Mon compte</span><svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
         <a class="nav__espace" href="espace-client"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg><span>Espace client</span></a>
         <a class="nav__espace" href="espace-equipe"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg><span>Espace agent</span></a>
+        <a class="nav__reserver" href="devis">Réserver</a>
         <a class="nav__tel" href="tel:+33611678625" aria-label="Appeler le 06 11 67 86 25" title="06 11 67 86 25"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg></a>
         <button class="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
       </div>
@@ -151,9 +157,10 @@
     <a href="entreprises" class="mm__lien">Entreprises</a>
     <a href="tarifs" class="mm__lien">Tarifs</a>
     <a href="avis" class="mm__lien">Avis clients</a>
-    <a href="recrutement" class="mm__lien">Recrutement</a>
+    <a href="recrutement" class="mm__lien">Nous rejoindre</a>
     <a href="espace-client" class="mm__lien">Espace client</a>
     <a href="espace-equipe" class="mm__lien">Espace agent <small>agents &amp; chauffeurs</small></a>
+    <div class="mm__langue" role="group" aria-label="Langue"><span aria-current="true">FR</span><a href="en" hreflang="en" lang="en">EN</a></div>
   </nav>
   <div class="mobile-menu__foot">
     <a class="btn btn--gold btn--block" href="devis?service=gardiennage">Demander un devis gratuit</a>
@@ -165,8 +172,8 @@
 <main>
   <!-- ============ HERO ============ -->
   <section class="lp-hero" aria-labelledby="page-title" data-anim>
-    <div class="lp-hero__photo" style="--pos: 50% 30%" aria-hidden="true">
-      <img src="https://images.unsplash.com/photo-1618371731836-2b9bff9ac72a?auto=format&amp;fit=crop&amp;w=1200&amp;q=72" srcset="https://images.unsplash.com/photo-1618371731836-2b9bff9ac72a?auto=format&amp;fit=crop&amp;w=800&amp;q=72 800w, https://images.unsplash.com/photo-1618371731836-2b9bff9ac72a?auto=format&amp;fit=crop&amp;w=1200&amp;q=72 1200w, https://images.unsplash.com/photo-1618371731836-2b9bff9ac72a?auto=format&amp;fit=crop&amp;w=1600&amp;q=72 1600w" sizes="(max-width: 1020px) 100vw, 60vw" alt="" width="1200" height="800" fetchpriority="high">
+    <div class="lp-hero__photo" style="--pos: 60% 55%" aria-hidden="true">
+      <img src="https://images.unsplash.com/photo-1587648415693-4a5362b2ce41?auto=format&amp;fit=crop&amp;w=1200&amp;q=72" srcset="https://images.unsplash.com/photo-1587648415693-4a5362b2ce41?auto=format&amp;fit=crop&amp;w=800&amp;q=72 800w, https://images.unsplash.com/photo-1587648415693-4a5362b2ce41?auto=format&amp;fit=crop&amp;w=1200&amp;q=72 1200w, https://images.unsplash.com/photo-1587648415693-4a5362b2ce41?auto=format&amp;fit=crop&amp;w=1600&amp;q=72 1600w" sizes="(max-width: 1020px) 100vw, 60vw" alt="" width="1200" height="800" fetchpriority="high">
     </div>
     <div class="container">
       <div class="lp-hero__copy">
@@ -269,9 +276,7 @@
           <p class="kicker" data-reveal="fade">Zone d'intervention</p>
           <h2 class="h2" id="t-zones" data-split>Paris et <em>toute l'Île-de-France.</em></h2>
           <p data-reveal>Basés dans le 20<sup>e</sup> arrondissement, nous intervenons dans tous les arrondissements de Paris et dans les départements voisins.</p>
-          <div class="lp-zones" data-reveal>
-            <span>Paris (75)</span><span>Hauts-de-Seine (92)</span><span>Seine-Saint-Denis (93)</span><span>Val-de-Marne (94)</span><span>Yvelines (78)</span><span>Essonne (91)</span><span>Val-d'Oise (95)</span><span>Seine-et-Marne (77)</span>
-          </div>
+          <p class="lp-zones-texte" data-reveal>Paris (75), Hauts-de-Seine (92), Seine-Saint-Denis (93), Val-de-Marne (94), Yvelines (78), Essonne (91), Val-d’Oise (95) et Seine-et-Marne (77).</p>
         </section>
 
         <section id="faq" aria-labelledby="t-faq">
@@ -411,7 +416,7 @@
   <a class="btn btn--gold" href="devis?service=gardiennage">Demander un devis</a>
 </div>
 
-<script src="assets/js/core.js?v=29"></script>
+<script src="assets/js/core.js?v=30"></script>
 <script src="assets/js/assistant.js?v=14"></script>
 <script src="assets/js/home.js?v=18"></script>
 <script src="assets/js/anim.js?v=21"></script>

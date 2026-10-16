@@ -17,18 +17,18 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="/favicon.ico" sizes="48x48">
-  <link rel="icon" href="assets/img/favicon.svg?v=4" type="image/svg+xml">
-  <link rel="icon" href="assets/img/icon-192.png?v=4" sizes="192x192" type="image/png">
-  <link rel="icon" href="assets/img/favicon-96.png?v=4" sizes="96x96" type="image/png">
-  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=4">
+  <link rel="icon" href="/favicon.ico?v=5" sizes="48x48">
+  <link rel="icon" href="assets/img/favicon.svg?v=5" type="image/svg+xml">
+  <link rel="icon" href="assets/img/icon-192.png?v=5" sizes="192x192" type="image/png">
+  <link rel="icon" href="assets/img/favicon-96.png?v=5" sizes="96x96" type="image/png">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=5">
   <link rel="manifest" href="/manifest-bda.webmanifest">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="BDA Security">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://images.unsplash.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Montserrat:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=15">
   <link rel="stylesheet" href="assets/css/hero.css?v=15">
   <link rel="stylesheet" href="assets/css/sections.css?v=15">
@@ -37,6 +37,7 @@
   <link rel="stylesheet" href="assets/css/blanc.css?v=34">
   <link rel="stylesheet" href="assets/css/sobre.css?v=9">
   <link rel="stylesheet" href="assets/css/entete.css?v=9">
+  <link rel="stylesheet" href="assets/css/maison.css?v=34">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -68,6 +69,8 @@
     ]
   }
   </script>
+  <!-- Questions fréquentes (mêmes textes que la FAQ affichée sur la page) -->
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","inLanguage":"fr-FR","mainEntity":[{"@type":"Question","name":"Quelle différence entre un VTC et un taxi ?","acceptedAnswer":{"@type":"Answer","text":"Un VTC se réserve obligatoirement à l'avance, et son tarif est convenu avec vous au moment de la réservation. Un taxi peut être hélé dans la rue et fonctionne au compteur. Avec un chauffeur privé, vous connaissez votre prix avant de partir et votre chauffeur vous attend à l'heure prévue."}},{"@type":"Question","name":"Combien coûte un chauffeur privé à Paris ?","acceptedAnswer":{"@type":"Answer","text":"Le prix dépend du trajet ou de la durée de mise à disposition, de l'horaire et du véhicule choisi. Demandez votre devis gratuit : le tarif est annoncé avant le départ, sans surprise."}},{"@type":"Question","name":"Peut-on réserver un chauffeur pour une journée entière ?","acceptedAnswer":{"@type":"Answer","text":"Oui. La mise à disposition vous permet de garder le même chauffeur et le même véhicule pendant plusieurs heures ou une journée complète, avec autant d'arrêts que nécessaire."}},{"@type":"Question","name":"Recevrai-je une facture ?","acceptedAnswer":{"@type":"Answer","text":"Oui, une facture peut vous être remise pour chaque prestation, notamment pour vos notes de frais ou la comptabilité de votre entreprise."}},{"@type":"Question","name":"Peut-on réserver à la dernière minute ?","acceptedAnswer":{"@type":"Answer","text":"Appelez-nous au 06 11 67 86 25 : selon nos disponibilités, nous faisons le maximum pour vous envoyer un chauffeur rapidement. Pour être sûr d'avoir un véhicule, réservez le plus tôt possible."}}]}</script>
 </head>
 <body>
 
@@ -104,6 +107,8 @@
   <div class="nav__inner">
     <a class="nav__marque" href="/" aria-label="BDA Security Group, accueil"><b>BDA</b><small>Security Group</small></a>
     <nav class="nav__links" aria-label="Navigation principale">
+      <div class="nav__langue" role="group" aria-label="Langue"><span aria-current="true">FR</span><a href="en" hreflang="en" lang="en">EN</a></div>
+      <a class="nav__reserver-pc" href="devis">Réserver</a>
       <div class="nav__drop">
         <button class="nav__drop-btn" type="button" aria-expanded="false">Sécurité privée <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
         <div class="nav__panel nav__panel--large">
@@ -118,26 +123,27 @@
           <div class="nav__col"><a href="chauffeur-prive-vtc-paris" aria-current="page"><b>Chauffeur privé VTC</b><small>À l’heure ou au trajet</small></a><a href="chauffeur-securite-vip-paris"><b>Chauffeur + sécurité VIP</b><small>Conduit et protégé</small></a></div>
         </div>
       </div>
-      <div class="nav__drop">
-        <button class="nav__drop-btn" type="button" aria-expanded="false">Entreprises <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-        <div class="nav__panel nav__panel--entreprise">
-          <div class="nav__col"><p class="nav__col-titre">Entreprises</p><p class="nav__texte">Hôtels, commerces, bureaux, événements : une offre sur mesure pour votre activité.</p><a class="nav__cta" href="entreprises">Contactez-nous pour votre entreprise</a></div>
-        </div>
-      </div>
     </nav>
     <div class="nav__droite">
       <nav class="nav__links nav__links--d" aria-label="Navigation principale (suite)">
-        <a href="tarifs">Tarifs</a>
+        <div class="nav__drop">
+          <button class="nav__drop-btn" type="button" aria-expanded="false">Entreprises <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="nav__panel nav__panel--entreprise">
+            <div class="nav__col"><p class="nav__col-titre">Entreprises</p><p class="nav__texte">Hôtels, commerces, bureaux, événements : une offre sur mesure pour votre activité.</p><a class="nav__cta" href="entreprises">Contactez-nous pour votre entreprise</a></div>
+          </div>
+        </div>
         <div class="nav__drop">
           <button class="nav__drop-btn" type="button" aria-expanded="false">La société <svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
           <div class="nav__panel nav__panel--petit">
-            <div class="nav__col"><a href="recrutement"><b>Recrutement</b><small>Rejoindre nos équipes</small></a></div>
+            <div class="nav__col"><a href="recrutement"><b>Nous rejoindre</b><small>Agents, gardes du corps, chauffeurs</small></a></div>
           </div>
         </div>
       </nav>
       <div class="nav__actions">
+        <a class="nav__client nav__compte" href="espace-client"><span>Mon compte</span><svg class="icon nav__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
         <a class="nav__espace" href="espace-client"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg><span>Espace client</span></a>
         <a class="nav__espace" href="espace-equipe"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg><span>Espace agent</span></a>
+        <a class="nav__reserver" href="devis">Réserver</a>
         <a class="nav__tel" href="tel:+33611678625" aria-label="Appeler le 06 11 67 86 25" title="06 11 67 86 25"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg></a>
         <button class="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
       </div>
@@ -154,9 +160,10 @@
     <a href="entreprises" class="mm__lien">Entreprises</a>
     <a href="tarifs" class="mm__lien">Tarifs</a>
     <a href="avis" class="mm__lien">Avis clients</a>
-    <a href="recrutement" class="mm__lien">Recrutement</a>
+    <a href="recrutement" class="mm__lien">Nous rejoindre</a>
     <a href="espace-client" class="mm__lien">Espace client</a>
     <a href="espace-equipe" class="mm__lien">Espace agent <small>agents &amp; chauffeurs</small></a>
+    <div class="mm__langue" role="group" aria-label="Langue"><span aria-current="true">FR</span><a href="en" hreflang="en" lang="en">EN</a></div>
   </nav>
   <div class="mobile-menu__foot">
     <a class="btn btn--gold btn--block" href="devis">Demander un devis gratuit</a>
@@ -258,9 +265,7 @@
           <p class="kicker" data-reveal="fade">Zone de service</p>
           <h2 class="h2" id="t-zones" data-split>Paris, l'Île-de-France <em>et au-delà.</em></h2>
           <p data-reveal>Nous prenons en charge nos clients dans tout Paris et en Île-de-France.</p>
-          <div class="lp-zones" data-reveal>
-            <span>Paris 1<sup>er</sup> au 20<sup>e</sup></span><span>La Défense</span><span>Neuilly-sur-Seine</span><span>Boulogne-Billancourt</span><span>Saint-Denis</span><span>Versailles</span><span>Roissy-CDG</span><span>Orly</span><span>Marne-la-Vallée</span>
-          </div>
+          <p class="lp-zones-texte" data-reveal>Tout Paris, du 1<sup>er</sup> au 20<sup>e</sup> arrondissement, La Défense, Neuilly-sur-Seine, Boulogne-Billancourt, Saint-Denis et Versailles, ainsi que les aéroports de Roissy-CDG et d’Orly et Marne-la-Vallée.</p>
         </section>
 
         <section id="faq" aria-labelledby="t-faq">
@@ -400,7 +405,7 @@
   <a class="btn btn--gold" href="reserver">Réserver mon chauffeur</a>
 </div>
 
-<script src="assets/js/core.js?v=29"></script>
+<script src="assets/js/core.js?v=30"></script>
 <script src="assets/js/assistant.js?v=14"></script>
 <script src="assets/js/home.js?v=18"></script>
 <script src="assets/js/anim.js?v=21"></script>

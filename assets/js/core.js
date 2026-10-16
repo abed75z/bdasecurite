@@ -324,7 +324,7 @@
     const en = root.lang === 'en';
     const T = en
       ? { titre: 'My account', client: 'Client area', equipe: 'Team area', dClient: 'Quotes, invoices, missions', dEquipe: 'Agents & drivers' }
-      : { titre: 'Mon espace', client: 'Espace client', equipe: 'Espace agent', dClient: 'Devis, factures, missions', dEquipe: 'Planning, pointage, documents' };
+      : { titre: 'Mon compte', client: 'Espace client', equipe: 'Espace agent', dClient: 'Devis, factures, missions', dEquipe: 'Planning, pointage, documents' };
     const ICO = {
       client: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg>',
       equipe: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>'

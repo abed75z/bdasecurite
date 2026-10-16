@@ -28,7 +28,7 @@ try {
     : ($rappel ? ['Demande de rappel', 'Un visiteur veut être rappelé.'] : ['Nouvelle demande de devis', 'Envoyée depuis le site, à traiter.']);
   notifier('demandes', $titre, $texte, '/admin/#/demandes/' . $id, 'demande-' . $id);
   if ($rappel) {
-    envoyer_mail('Demande de rappel : ' . ($data['Nom / Société'] ?? ''), "Un visiteur demande à être rappelé depuis l'accueil du site.\n\nNom / Société : " . ($data['Nom / Société'] ?? '') . "\nTéléphone : " . ($data['Téléphone'] ?? '') . "\nCréneau : " . ($data['Date souhaitée'] ?? '') . "\nSecteur : " . ($data['Secteur'] ?? '') . "\n\nVoir dans l'admin : https://bdasecurite.com/admin/#/demandes");
+    envoyer_mail('Demande de rappel : ' . ($data['Nom / Société'] ?? ''), "Un visiteur demande à être rappelé depuis l'accueil du site.\n\nNom / Société : " . ($data['Nom / Société'] ?? '') . "\nTéléphone : " . ($data['Téléphone'] ?? '') . "\nQuand rappeler : " . ($data['Date souhaitée'] ?? '') . "\nBesoin : " . ($data['Besoin'] ?? ($data['Secteur'] ?? '')) . (trim((string)($data['Message'] ?? '')) !== '' ? "\nMessage : " . $data['Message'] : '') . "\n\nVoir dans l'admin : https://bdasecurite.com/admin/#/demandes");
   }
   if ($entreprise) {
     $lignes = '';

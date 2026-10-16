@@ -1,0 +1,1005 @@
+/* =========================================================
+   MAISON — style premium et institutionnel (16/10/2026)
+   Couche finale du site public, chargée après toutes les autres.
+   - formes nettes : cartes et panneaux 4 à 6 px, boutons 4 px, plus de pilules ;
+   - icônes fines posées sur le fond, sans carré autour ;
+   - écriture Poppins comme ritzparis.com : titres fins, boutons en minuscules (17/10/2026) ;
+   - grilles éditoriales, lignes fines, pas d'ombres lourdes ni de dégradés.
+   Couleurs et photos inchangées.
+   ========================================================= */
+
+:root {
+  --m-titre: "Poppins", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --m-texte: "Poppins", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--m-titre);
+  --font-body: var(--m-texte);
+  --m-trait: rgba(11, 11, 12, 0.12);
+  --m-trait-fort: rgba(11, 11, 12, 0.28);
+  --m-encre: #0b0b0c;
+  --m-gris: #5b5b60;
+  --m-champagne: #b39a6b;
+  --radius-btn: 4px;
+  --radius-panel: 6px;
+  --radius-card: 6px;
+  --r-tuile: 6px;
+}
+
+/* ---------- 1. Typographie ---------- */
+
+.h1, h1, .ac-hero .h1, .lp-hero .h1, .rc__titre {
+  font-family: var(--m-titre) !important;
+  font-weight: 300 !important;
+  font-size: clamp(2.3rem, 1.6rem + 2.5vw, 3.9rem) !important;
+  line-height: 1.12 !important;
+  letter-spacing: -0.02em !important;
+}
+.h2, h2, .rc-titre-2 {
+  font-family: var(--m-titre) !important;
+  font-weight: 300 !important;
+  font-size: clamp(1.85rem, 1.45rem + 1.4vw, 2.7rem) !important;
+  line-height: 1.16 !important;
+  letter-spacing: -0.015em !important;
+}
+.h1 em, .h2 em, h1 em, h2 em { font-style: normal !important; font-weight: inherit !important; }
+.manifeste {
+  font-family: var(--m-titre) !important;
+  font-weight: 300 !important;
+  font-size: clamp(1.55rem, 1.2rem + 1.3vw, 2.35rem) !important;
+  line-height: 1.32 !important;
+  letter-spacing: 0 !important;
+}
+.ac-pro p, .tuile__txt b, .chiffres b, .lp-cta h2, .lp-box h3, .rv-summary b {
+  font-family: var(--m-titre) !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.01em !important;
+}
+.tuile__txt b { font-size: clamp(1.2rem, 1.1rem + 0.4vw, 1.4rem) !important; line-height: 1.25 !important; }
+.ac-pro p { font-size: clamp(1.2rem, 1.05rem + 0.6vw, 1.55rem) !important; font-weight: 300 !important; }
+.h3, h3 { font-family: var(--m-texte); font-weight: 500; letter-spacing: -0.01em; }
+
+/* Petits titres : majuscules fines et espacées */
+.kicker, .lp-crumbs, .rc__sur, .ent-bloc legend {
+  font-family: var(--m-texte) !important;
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+}
+.lp-crumbs { letter-spacing: 0.12em !important; }
+.lead { font-weight: 300 !important; }
+body, button, input, select, textarea { font-family: var(--m-texte) !important; }
+
+/* ---------- 2. Boutons : rectangulaires, écrits normalement (comme ritzparis.com) ---------- */
+
+.btn, form .btn, .rappel__envoyer, .mobile-menu__foot .btn, .mobile-bar .btn, .rc-envoyer {
+  border-radius: 4px !important;
+  box-shadow: none !important;
+  font-family: var(--m-texte) !important;
+  font-size: 14.5px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.005em !important;
+  text-transform: none !important;
+}
+.btn { padding: 15px 26px; }
+.btn .icon { width: 15px; height: 15px; stroke-width: 1.4; }
+.btn:hover { filter: none !important; transform: none !important; }
+.btn--outline { border-width: 1px !important; }
+
+/* ---------- 3. Formes : plus de pilules ni de grands arrondis ---------- */
+
+/* Pilules -> rectangles */
+.wa, .vtc-indispo__badge, .service-ferme__badge, .burger,
+.segment, .segment button, .segment__fond, .ac-pilule, .nav__survol,
+.nav--v2 .nav__client, .nav--v2 .nav__appeler, .nav--v2 .nav__devis, .nav--v2 .nav__tel,
+.nav--v2 .nav__col a.nav__cta, .nav--v2 .nav__espace, .nav--v2 .nav__actions .nav__tel, .nav--v2 .burger,
+.nav__tel, .nav__client, .haut-page, .rappel__x {
+  border-radius: 4px !important;
+}
+/* Étiquettes et puces de texte */
+.pill, .chips span, .shot__tag, .ref__badge, .ref__tags li, .lp-zones span, .ac-secteurs p a,
+.ac-hero__dispo, .tf-carte__badge, .recap span, .job__tags span, .pick span, .rv-card__tag, .ac-hero__sur span {
+  border-radius: 3px !important;
+}
+/* Cartes, panneaux et blocs */
+.glass, .stats, .hero__proof, .mock, .minimap, .booking__car, .trip, .driver, .timeline li, .shot,
+.ref__card, .reviews-band, .step, .perk, .cta__card, .resa-rapide, .resa-rapide label, .presta__item, .urgence,
+.lp-card, .lp-steps li, .lp-box, .lp-cta, .nav__panel, .ac-moyen, .ac-hero__badge,
+.tf-estim, .tf-calc, .tf-carte, .tf-majorations, .tf-tableau, .msg, .chiffres li, .ac-contact__carte,
+.form-card, .opt__card, .job, .summary, .next li, .ac-points li, .rv-summary, .rv-card, .rv-note, .board,
+.notif, .ac-etapes--cartes li, .ac-garanties__liste li, .ac-secteurs-bande a, dialog.rappel, .cx-pop, .cx-pop__choix,
+.ent-carte, .apply-card, .nav--v2 .nav__panel, .nav--v2 .nav__panel--large, .nav--v2 .nav__panel--petit, .nav--v2 .cx-pop,
+.quote__urgent, .opt-lien, .board__item, .rv-skeleton, .rv-empty, .legal dl, .ac-bloc, .ac-secteurs > div, .ac-points,
+.service-ferme, .vtc-indispo__boite, .feature__bg, .socials a, .nav__col a {
+  border-radius: 6px !important;
+}
+/* Photos : coins à peine adoucis */
+.ref__photo, .ref__photo::after, .lp-photo, .ref-galerie figure, .ac-hero__photo, .ac-ref__photo, .apply__photo,
+.rv-form-aside figure, .feature__bg img {
+  border-radius: 4px !important;
+}
+/* Champs */
+.input, input.input, textarea.input, select.input, .tf-champ select, .tf-champ input, .rappel__champ input,
+.rappel__champ select, .ent-form textarea, .mock__field, .as-input {
+  border-radius: 4px !important;
+}
+
+/* ---------- 4. Icônes : fines, directement sur le fond ---------- */
+
+.tuile__ico, .step__icon, .lp-list .icon, .lp-list li .icon, .perk__icon, .lp-card .ico, .opt__icon, .q-icon,
+.job__ico, .board__ico, .notif__ico, .cx-pop__ic, .glass__icon, .hero__proof-ico, .mock__ico, .presta__item > .icon,
+.ac-etapes--cartes .etape__ico, .hero__trust .tick, .ac-pilule .icon {
+  background: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+}
+.tuile__ico, .lp-card .ico, .perk__icon, .step__icon, .job__ico, .opt__icon, .q-icon {
+  width: 30px !important;
+  height: 30px !important;
+  stroke-width: 1.15 !important;
+  color: var(--m-encre) !important;
+}
+.tuile__ico *, .lp-card .ico *, .etape__ico, .lp-list .icon, .hero__trust .icon { stroke-width: 1.2 !important; }
+.hero__trust .tick { width: auto !important; height: auto !important; }
+
+/* ---------- 5. Ombres et dégradés : supprimés ---------- */
+
+.tuile, .lp-card, .tf-carte, .tf-tableau, .tf-estim, .tf-calc, .rv-card, .rv-summary, .form-card, .ent-carte,
+.opt__card, .job, .lp-box, .lp-cta, .chiffres li, .ac-points li, .faq__item, .ac-etapes li, .apply-card,
+.lp-list li, .lp-steps li, .ac-contact__carte, .board, .wa, .mobile-bar, dialog.rappel {
+  box-shadow: none !important;
+}
+.lp-card { background-image: none !important; }
+/* Survol des cartes : pas de soulèvement, simple trait plus marqué */
+.tuile:hover, .lp-card:hover, .tf-carte:hover, .ac-etapes li:hover, .rv-card:hover, .job:hover,
+.tuile.rv.vu:hover, .lp-card.cascade.is-in:hover, .tf-carte.cascade.is-in:hover, .ac-etapes li.cascade.is-in:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ---------- 6. Services de l'accueil : grille éditoriale à traits fins ---------- */
+
+.tuiles {
+  gap: 1px !important;
+  background: var(--m-trait) !important;
+  border: 1px solid var(--m-trait) !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+}
+.tuile {
+  border-radius: 0 !important;
+  border: 0 !important;
+  background: #fbfaf7 !important;
+  padding: clamp(26px, 2.6vw, 38px) !important;
+  gap: 14px !important;
+  transition: background-color 0.25s !important;
+}
+.tuile:hover { background: #fff !important; }
+.tuile::after { display: none !important; }
+.tuile__txt span { color: var(--m-gris) !important; }
+.tuile__lien {
+  font-size: 13.5px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--m-encre) !important;
+}
+.tuile__lien .icon { width: 14px; height: 14px; stroke-width: 1.3; }
+
+/* Onglets Sécurité privée / Chauffeur privé : soulignés */
+.segment {
+  background: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--m-trait) !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  gap: 8px;
+}
+.segment button {
+  border-radius: 0 !important;
+  padding: 12px 18px !important;
+  font-size: 14.5px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  color: var(--m-gris) !important;
+  background: none !important;
+}
+.segment button[aria-selected="true"] { color: var(--m-encre) !important; }
+.segment__fond {
+  top: auto !important;
+  bottom: -1px !important;
+  height: 2px !important;
+  border-radius: 0 !important;
+  background: var(--m-encre) !important;
+  box-shadow: none !important;
+}
+
+/* ---------- 7. Étapes : frise numérotée sur une ligne ---------- */
+
+.ac-etapes {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: clamp(20px, 3vw, 44px) !important;
+}
+.ac-etapes li {
+  margin-top: 0 !important;
+  padding: 22px 0 0 !important;
+  background: none !important;
+  border: 0 !important;
+  border-top: 1px solid var(--m-encre) !important;
+  border-radius: 0 !important;
+}
+.ac-etapes li::before, .ac-etapes::before, .ac-etapes::after { display: none !important; }
+.ac-etapes li > span:first-child {
+  display: block;
+  margin-bottom: 14px;
+  font-family: var(--m-titre) !important;
+  font-size: 1.5rem !important;
+  font-weight: 300 !important;
+  letter-spacing: 0 !important;
+  color: var(--m-champagne) !important;
+}
+.ac-etapes b { font-size: 16px !important; }
+.ac-etapes .etape__ico { display: none !important; }
+@media (max-width: 900px) { .ac-etapes { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; row-gap: 34px !important; } }
+@media (max-width: 520px) { .ac-etapes { grid-template-columns: 1fr !important; } }
+
+/* Étapes des pages de services */
+.lp-steps li {
+  background: none !important;
+  border: 0 !important;
+  border-top: 1px solid var(--m-trait-fort) !important;
+  border-radius: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.lp-steps li::before {
+  font-family: var(--m-titre) !important;
+  font-weight: 300 !important;
+  font-size: 1.5rem !important;
+  color: var(--m-champagne) !important;
+  background: none !important;
+}
+
+/* ---------- 8. Questions fréquentes : liste à traits fins ---------- */
+
+.faq__item {
+  background: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--m-trait) !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+.faq__item:first-child { border-top: 1px solid var(--m-trait) !important; }
+.faq__q { padding-left: 0 !important; padding-right: 0 !important; }
+.faq__plus {
+  background: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ---------- 9. Pages de services ---------- */
+
+.lp-card {
+  background: #fbfaf7 !important;
+  border: 1px solid var(--m-trait) !important;
+}
+.lp-list li {
+  background: none !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--m-trait) !important;
+  border-radius: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.lp-zones span { background: none !important; border: 1px solid var(--m-trait-fort) !important; }
+
+/* ---------- 10. En-tête, menus et éléments flottants ---------- */
+
+.nav--v2 .nav__espace { padding-inline: 14px !important; }
+.nav--v2 .nav__panel, .nav--v2 .cx-pop { box-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.55) !important; }
+.nav--v2 .nav__col a.nav__cta::after, .ac-secteurs-bande a::after {
+  content: "" !important;
+  width: 14px;
+  height: 10px;
+  display: inline-block;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 10' fill='none' stroke='%23000' stroke-width='1.2'%3E%3Cpath d='M0 5h13M9 1l4 4-4 4'/%3E%3C/svg%3E") no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 10' fill='none' stroke='%23000' stroke-width='1.2'%3E%3Cpath d='M0 5h13M9 1l4 4-4 4'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+.wa { box-shadow: none !important; }
+.haut-page { box-shadow: none !important; }
+.mobile-bar { box-shadow: 0 -1px 0 var(--m-trait) !important; }
+
+/* ---------- 11. Détails ---------- */
+
+/* Coches du haut des pages : plus de pastille */
+.tick, .hero__trust .tick, .lp-hero .hero__trust .tick { background: none !important; box-shadow: none !important; }
+/* Bouton « remonter » : carré discret, sans anneau */
+.haut-page {
+  width: 44px !important;
+  height: 44px !important;
+  border: 1px solid var(--m-trait-fort) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+.haut-page__anneau { display: none !important; }
+.haut-page__fleche { width: 16px !important; height: 16px !important; stroke-width: 1.4 !important; }
+/* Chiffres alignés (les chiffres anciens de la police font « o1 ») */
+.h1, .h2, h1, h2, .manifeste, .chiffres b, .ac-etapes li > span:first-child, .lp-steps li::before, .tuile__txt b {
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "lnum" 1;
+}
+/* Mention au-dessus du titre de l'accueil */
+.ac-hero__sur {
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.24em !important;
+  text-transform: uppercase !important;
+}
+/* Pastilles de choix du devis : carrées */
+.opt__check { border-radius: 3px !important; }
+.stepper button i { border-radius: 3px !important; }
+/* Photos : coins à peine adoucis, y compris l'image elle-même */
+.lp-photo img, .ref-galerie img, .ac-hero__photo img, .ac-ref__photo img, .apply__photo img, .rv-form-aside img, .lp-article figure img { border-radius: 4px !important; }
+/* Cartes des pages de services : même grille à traits fins que l'accueil */
+.lp-cards {
+  gap: 1px !important;
+  background: var(--m-trait) !important;
+  border: 1px solid var(--m-trait) !important;
+  border-radius: 6px !important;
+  overflow: hidden;
+}
+.lp-cards .lp-card { border: 0 !important; border-radius: 0 !important; background: #fbfaf7 !important; }
+.lp-cards .lp-card:hover { background: #fff !important; }
+.lp-box h3, .lp-box .h3 { font-size: clamp(1.6rem, 1.4rem + 0.6vw, 1.95rem) !important; line-height: 1.12 !important; }
+.lp-card a, .lp-card .lien { letter-spacing: 0.14em; }
+/* Tarifs : le montant garde sa taille (la règle « span = petit texte » le rétrécissait) */
+.tf-prix b { font-family: var(--m-titre) !important; font-weight: 300 !important; font-size: 42px !important; letter-spacing: 0 !important; font-variant-numeric: lining-nums tabular-nums; }
+.tf-prix b span, .tf-carte--vedette .tf-prix b span { font-size: inherit !important; color: inherit !important; }
+/* Montants modifiables depuis l'admin : toujours à la taille du texte qui les entoure */
+span[data-prix] { font-size: inherit !important; color: inherit !important; font-weight: inherit !important; }
+.ac-tarifs li b { font-family: var(--m-titre) !important; font-weight: 300 !important; font-size: 24px !important; letter-spacing: 0 !important; font-variant-numeric: lining-nums tabular-nums; }
+.ac-tarifs li b small { font-family: var(--font-body, Manrope, sans-serif); letter-spacing: 0.04em; }
+@media (max-width: 640px) {
+  .ac-tarifs__bande { display: grid !important; gap: 22px !important; }
+  .ac-tarifs ul { display: grid !important; grid-template-columns: 1fr 1fr; gap: 22px 18px !important; }
+  .ac-tarifs li b { font-size: 22px !important; white-space: nowrap; }
+  .ac-tarifs .btn { justify-self: start; }
+}
+/* Grilles à traits fins : la case reste pleine, seul son contenu apparaît
+   (sinon le fond des traits se voit en gris pendant l'animation) */
+.tuiles > .tuile.rv, .lp-cards > .lp-card.cascade { opacity: 1 !important; transform: none !important; filter: none !important; transition: background-color 0.25s !important; }
+.tuiles > .tuile.rv > *, .lp-cards > .lp-card.cascade > * { opacity: 0; translate: 0 12px; transition: opacity 0.6s var(--ease), translate 0.7s var(--ease); }
+.tuiles > .tuile.rv > * { transition-delay: var(--rd, 0s); }
+.lp-cards > .lp-card.cascade > * { transition-delay: calc(var(--c, 0) * 70ms); }
+.tuiles > .tuile.rv.vu > *, .lp-cards > .lp-card.cascade.is-in > * { opacity: 1; translate: none; }
+@media (prefers-reduced-motion: reduce) {
+  .tuiles > .tuile.rv > *, .lp-cards > .lp-card.cascade > * { opacity: 1; translate: none; transition: none; }
+}
+/* Menu mobile : page en cours signalée par la couleur, sans pavé clair */
+.mobile-menu a[aria-current="page"] { background: none !important; border-radius: 0 !important; color: #d3bc97 !important; }
+/* Photos révélées : l'ouverture garde des coins à 4 px */
+.ac-ref__photo { clip-path: inset(0 0 0 0 round 4px) !important; }
+.ac-ref__photo.rv:not(.vu) { clip-path: inset(18% 8% 18% 8% round 4px) !important; }
+.lp-photo.rv { clip-path: inset(14% 6% 14% 6% round 4px); }
+.lp-photo.rv.vu { clip-path: inset(0 round 4px); }
+.shot.is-in { clip-path: inset(0 round 4px); }
+@media (prefers-reduced-motion: reduce) { .ac-ref__photo.rv:not(.vu), .lp-photo.rv { clip-path: inset(0 round 4px) !important; } }
+/* Encadré « Nos services » (fond clair) : titre lisible */
+nav.lp-box .kicker { color: var(--m-gris) !important; }
+
+/* =========================================================
+   17/10/2026 — ÉCRITURE RITZ, ACCUEIL PHOTO, EN-TÊTE TÉLÉPHONE
+   - plus de barre « Appeler / Demander un devis » en bas du téléphone ;
+   - plus d'icône téléphone dans l'en-tête (téléphone et ordinateur) ;
+   - téléphone et tablette : menu + petit logo à gauche, « Espace client »
+     et « Réserver » à droite (comme ritzparis.com). Ordinateur : en-tête inchangé ;
+   - accueil : photo plein écran, texte centré, en-tête transparent en haut de page.
+   ========================================================= */
+
+/* --- Barre fixe du bas : retirée (l'écran reste dégagé) --- */
+.mobile-bar { display: none !important; }
+body:has(.mobile-bar) { padding-bottom: 0 !important; }
+body:has(.mobile-bar) .wa { bottom: calc(20px + env(safe-area-inset-bottom)) !important; }
+
+/* --- Plus d'icône téléphone dans l'en-tête --- */
+.nav--v2 .nav__tel, .nav--v2 .nav__actions .nav__tel, .nav--v2 .nav__appeler { display: none !important; }
+
+/* --- Bouton « Réserver » (téléphone et tablette seulement) --- */
+.nav--v2 .nav__reserver { display: none; }
+
+/* Zones d'intervention écrites en une phrase */
+.lp-zones-texte { color: var(--m-gris); }
+
+@media (max-width: 1080px) {
+  .nav--v2 .nav__inner { display: flex !important; align-items: center; gap: 0 !important; }
+  .nav--v2 .nav__droite, .nav--v2 .nav__actions { display: contents !important; }
+  /* Menu : trois traits fins, sans cadre, tout à gauche */
+  .nav--v2 .burger {
+    order: 0; position: relative !important; left: auto !important; top: auto !important; transform: none !important;
+    flex: none; width: 34px !important; height: 40px !important; margin: 0 12px 0 -6px !important;
+    border: 0 !important; border-radius: 0 !important; background: none !important;
+  }
+  .nav--v2 .burger span { left: 6px !important; right: 6px !important; height: 1.2px !important; }
+  /* Petit logo juste à côté */
+  .nav--v2 .nav__marque { order: 1; flex: none; gap: 3px !important; }
+  .nav--v2 .nav__marque b { width: 62px !important; }
+  .nav--v2 .nav__marque small { width: 106px !important; }
+  /* Deux boutons fins à droite */
+  .nav--v2 .nav__espace[href="espace-equipe"] { display: none !important; }
+  .nav--v2 .nav__espace[href="espace-client"] { order: 2; margin-left: auto !important; }
+  .nav--v2 .nav__reserver { order: 3; margin-left: 8px; }
+  .nav--v2 .nav__espace[href="espace-client"], .nav--v2 .nav__reserver {
+    display: inline-flex !important; align-items: center; justify-content: center; flex: none;
+    width: auto !important; height: 34px !important; padding: 0 12px !important;
+    border: 1px solid rgba(243, 239, 232, 0.72) !important; border-radius: 4px !important;
+    background: transparent !important; color: #f3efe8 !important; text-decoration: none !important;
+    font: 400 13.5px/1 var(--m-texte) !important; letter-spacing: 0 !important; white-space: nowrap;
+    transition: background-color 0.25s, color 0.25s;
+  }
+  .nav--v2 .nav__espace[href="espace-client"] .icon { display: none !important; }
+  .nav--v2 .nav__espace[href="espace-client"] span {
+    position: static !important; width: auto !important; height: auto !important;
+    overflow: visible !important; clip: auto !important;
+  }
+  .nav--v2 .nav__espace[href="espace-client"]:hover, .nav--v2 .nav__reserver:hover { background: #f3efe8 !important; color: #0b0b0c !important; }
+}
+@media (max-width: 360px) {
+  .nav--v2 .nav__espace[href="espace-client"] { display: none !important; }
+  .nav--v2 .nav__reserver { margin-left: auto; }
+}
+
+/* --- Accueil : en-tête transparent sur la photo, noir dès qu'on descend --- */
+.nav.nav--v2 { transition: height 0.3s cubic-bezier(0.22, 0.61, 0.36, 1), background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.3s ease !important; }
+:root:has(.ac-hero--photo) body:not(.menu-open) .nav.nav--v2:not(.is-scrolled):not(.is-compact) {
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* --- Accueil : photo plein écran, texte centré (esprit palace) --- */
+.ac-hero--photo { position: relative; min-height: 100vh; min-height: 100svh; display: grid !important; align-items: center; background: #07080a !important; overflow: hidden; }
+.ac-hero--photo::before, .ac-hero--photo::after { display: none !important; }
+.ac-hero--photo .ac-fond { background: #07080a !important; filter: none !important; transform: none !important; }
+.ac-hero--photo .ac-fond picture { position: absolute; inset: 0; }
+.ac-fond__photo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 58%;
+  filter: saturate(0.92) contrast(1.04);
+  transform: scale(1.07); animation: ac-photo-recul 9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+@keyframes ac-photo-recul { to { transform: scale(1); } }
+/* Voile : sombre en haut (en-tête) et en bas, plus léger au centre */
+.ac-hero--photo .ac-fond::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 50%, rgba(5, 6, 8, 0.18) 0%, rgba(5, 6, 8, 0) 100%),
+    linear-gradient(180deg, rgba(5, 6, 8, 0.7) 0%, rgba(5, 6, 8, 0.38) 22%, rgba(5, 6, 8, 0.42) 58%, rgba(5, 6, 8, 0.86) 100%);
+}
+.ac-hero--photo .ac-hero__grille {
+  position: relative; z-index: 1;
+  display: grid !important; grid-template-columns: minmax(0, 1fr) !important; justify-items: center;
+  padding-top: var(--nav-h, 76px) !important; padding-bottom: 72px !important;
+  text-align: center;
+}
+.ac-hero--photo .ac-hero__texte { max-width: 900px !important; margin: 0 auto !important; justify-items: center; text-align: center; }
+.ac-hero--photo .ac-hero__sur { justify-content: center; color: rgba(243, 239, 232, 0.86) !important; text-shadow: none !important; }
+.ac-hero--photo .ac-hero__sur::before, .ac-hero--photo .ac-hero__sur::after { display: none !important; }
+.ac-hero--photo .h1 {
+  color: #fff !important; text-align: center;
+  font-size: clamp(2.5rem, 1.5rem + 3.4vw, 4.7rem) !important; font-weight: 300 !important;
+  line-height: 1.08 !important; letter-spacing: -0.025em !important;
+}
+.ac-hero--photo .h1 em { color: #fff !important; }
+.ac-hero--photo .h1 em::after, .ac-hero--photo .h1 em::before { display: none !important; }
+.ac-hero--photo .lead {
+  max-width: 36em; margin-inline: auto !important; text-align: center;
+  color: rgba(243, 239, 232, 0.82) !important; font-size: clamp(15px, 0.85rem + 0.3vw, 17.5px) !important; text-shadow: none !important;
+}
+.ac-hero--photo .ac-hero__actions { justify-content: center !important; gap: 12px !important; }
+.ac-hero--photo .btn--gold { background: #fbfaf7 !important; border-color: #fbfaf7 !important; color: #0b0b0c !important; }
+.ac-hero--photo .btn--gold:hover { background: #fff !important; border-color: #fff !important; }
+.ac-hero--photo .btn--gold .icon { color: #0b0b0c !important; }
+.ac-hero--photo .btn--outline { background: transparent !important; border-color: rgba(255, 255, 255, 0.6) !important; color: #fff !important; }
+.ac-hero--photo .btn--outline:hover { background: rgba(255, 255, 255, 0.1) !important; }
+.ac-hero--photo .btn--outline .icon { color: #fff !important; }
+.ac-hero--photo .ac-preuves { justify-content: center !important; border: 0 !important; margin-inline: auto; }
+.ac-hero--photo .ac-preuves::before, .ac-hero--photo .ac-preuves::after { display: none !important; }
+.ac-hero--photo .ac-preuves b { font-weight: 400 !important; letter-spacing: 0.02em; color: rgba(243, 239, 232, 0.78) !important; text-shadow: none !important; }
+.ac-hero--photo .ac-preuves .icon { color: #c9a874 !important; }
+.ac-hero--photo .ac-defiler { z-index: 1; color: rgba(243, 239, 232, 0.7) !important; }
+@media (max-width: 720px) {
+  .ac-fond__photo { object-position: 50% 50%; }
+  .ac-hero--photo .ac-hero__grille { padding-bottom: 64px !important; }
+  .ac-hero--photo .h1 { font-size: clamp(2.3rem, 1.4rem + 4.6vw, 2.9rem) !important; }
+  .ac-hero--photo .ac-hero__actions { flex-direction: column; align-items: center !important; }
+  .ac-hero--photo .ac-hero__actions .btn { width: auto !important; min-width: 230px; }
+}
+@media (prefers-reduced-motion: reduce) { .ac-fond__photo { animation: none; transform: none; } }
+/* Menu de l'ordinateur : écriture fine */
+.nav--v2 .nav__drop-btn, .nav--v2 .nav__links--d > a, .nav--v2 .nav__espace { font-weight: 400 !important; }
+/* Titre de l'accueil : « en toute discrétion. » sur sa propre ligne */
+.ac-hero--photo .h1 em { display: block; }
+@media (max-width: 1080px) {
+  .nav--v2 .nav__marque b { width: 56px !important; }
+  .nav--v2 .nav__marque small { width: 96px !important; }
+}
+@media (max-width: 720px) {
+  .ac-hero--photo .h1 { font-size: clamp(1.8rem, 7.6vw, 2.6rem) !important; letter-spacing: -0.02em !important; }
+  .ac-hero--photo .ac-hero__actions .btn { width: 100% !important; max-width: 260px; min-width: 0; }
+  .ac-hero--photo .lead { max-width: 30em; font-size: 15px !important; }
+}
+@media (max-width: 720px) {
+  .nav--v2 .burger { margin-right: 8px !important; }
+  .nav--v2 .nav__marque b { width: 52px !important; }
+  .nav--v2 .nav__marque small { width: 88px !important; }
+  .nav--v2 .nav__espace[href="espace-client"], .nav--v2 .nav__reserver { height: 32px !important; padding: 0 9px !important; font-size: 13px !important; }
+  .nav--v2 .nav__reserver { margin-left: 6px; }
+}
+/* Pages Devis / Merci (sans menu) : logo à gauche, « Espace client » à droite */
+@media (max-width: 1080px) {
+  .nav--v2.nav--epure .nav__client {
+    order: 2; margin-left: auto !important;
+    display: inline-flex !important; align-items: center; width: auto !important; height: 32px !important; padding: 0 10px !important;
+    border: 1px solid rgba(243, 239, 232, 0.72) !important; border-radius: 4px !important; background: transparent !important;
+    color: #f3efe8 !important; font: 400 13px/1 var(--m-texte) !important; letter-spacing: 0 !important;
+  }
+  .nav--v2.nav--epure .nav__client .icon { display: none !important; }
+  .nav--v2.nav--epure .nav__client span { display: inline !important; }
+}
+@media (max-width: 1080px) { .nav--v2.nav--epure .nav__actions { order: 2; margin-left: auto !important; } }
+/* Téléphone : voile un peu plus dense derrière le texte (les reflets de la photo restent discrets) */
+@media (max-width: 720px) {
+  .ac-hero--photo .ac-fond::after { background: linear-gradient(180deg, rgba(5, 6, 8, 0.72) 0%, rgba(5, 6, 8, 0.52) 24%, rgba(5, 6, 8, 0.58) 62%, rgba(5, 6, 8, 0.9) 100%); }
+}
+
+/* =========================================================
+   17/10/2026 (2) — EN-TÊTE ORDINATEUR, ANIMATIONS, RECRUTEMENT, ENTREPRISES
+   ========================================================= */
+
+/* --- Ordinateur : « Réserver » à gauche, un seul « Mon compte » à droite --- */
+.nav--v2 .nav__reserver-pc, .nav--v2 .nav__compte { display: none; }
+@media (min-width: 1081px) {
+  .nav--v2 .nav__espace { display: none !important; }
+  .nav--v2 .nav__reserver-pc, .nav--v2 .nav__compte {
+    display: inline-flex !important; align-items: center; justify-content: center; gap: 8px; flex: none;
+    width: auto !important; height: 36px !important; padding: 0 16px !important;
+    border: 1px solid rgba(243, 239, 232, 0.55) !important; border-radius: 4px !important;
+    background: transparent !important; color: #f3efe8 !important; text-decoration: none !important;
+    font: 400 13.5px/1 var(--m-texte) !important; letter-spacing: 0 !important; white-space: nowrap; cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+  }
+  .nav--v2 .nav__reserver-pc:hover, .nav--v2 .nav__compte:hover, .nav--v2 .nav__compte[aria-expanded="true"] {
+    background: #f3efe8 !important; border-color: #f3efe8 !important; color: #0b0b0c !important;
+  }
+  .nav--v2 .nav__compte span { display: inline !important; }
+  .nav--v2 .nav__compte .nav__chev { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.5; color: inherit !important; transition: transform 0.3s ease; }
+  .nav--v2 .nav__compte[aria-expanded="true"] .nav__chev { transform: rotate(180deg); }
+  .nav--v2 .nav__compte::after { display: none !important; }
+}
+@media (max-width: 1080px) { .nav--v2 .nav__compte { display: none !important; } }
+
+/* Fenêtre « Mon compte » : espace client ou espace agent */
+.nav--v2 .cx-pop { border-radius: 6px !important; padding: 6px !important; min-width: 300px !important; }
+.nav--v2 .cx-pop__titre { padding: 10px 12px 10px !important; font: 500 11px/1 var(--m-texte) !important; letter-spacing: 0.22em !important; color: #c9a874 !important; }
+.nav--v2 .cx-pop__choix { border-radius: 4px !important; padding: 12px !important; }
+.nav--v2 .cx-pop__choix + .cx-pop__choix { border-top: 1px solid rgba(243, 239, 232, 0.08); border-radius: 0 0 4px 4px !important; }
+.nav--v2 .cx-pop__ico { width: 26px !important; height: 26px !important; background: none !important; border-radius: 0 !important; color: #c9a874 !important; }
+.nav--v2 .cx-pop__ico svg { width: 20px !important; height: 20px !important; stroke-width: 1.2 !important; }
+.nav--v2 .cx-pop__txt b { font: 400 14.5px/1.3 var(--m-texte) !important; color: #f3efe8 !important; }
+.nav--v2 .cx-pop__txt small { font-size: 12.5px !important; }
+.nav--v2 .cx-pop__fl { transition: transform 0.3s ease; }
+.nav--v2 .cx-pop__choix:hover .cx-pop__fl { transform: translateX(3px); stroke: #c9a874; }
+
+/* --- Animations : discrètes, nettes, haut de gamme --- */
+/* Reflet de lumière qui traverse les boutons au survol */
+html body .btn::after {
+  content: "" !important; display: block !important; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  border-radius: inherit; opacity: 1 !important;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.3) 50%, transparent 62%) !important;
+  transform: translateX(-115%); transition: none !important;
+}
+html body .btn:hover::after { transform: translateX(115%); transition: transform 0.85s cubic-bezier(0.22, 0.61, 0.36, 1) !important; }
+/* Flèches qui avancent d'un cran */
+.btn .icon--arrow, .tuile__lien .icon, .lp-card a .icon, .lp-list a .icon { transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) !important; }
+.btn:hover .icon--arrow, .tuile:hover .tuile__lien .icon, .lp-card:hover a .icon, .lp-list a:hover .icon { transform: translateX(4px); }
+/* Cartes : un filet champagne se trace en haut au survol, l'icône se dore */
+.tuiles > .tuile, .tuiles > .tuile.rv, .lp-cards > .lp-card, .lp-cards > .lp-card.cascade {
+  background-image: linear-gradient(var(--m-champagne), var(--m-champagne)) !important;
+  background-repeat: no-repeat !important; background-position: 0 0 !important; background-size: 0% 1px !important;
+  transition: background-color 0.3s ease, background-size 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+}
+.tuiles > .tuile:hover, .lp-cards > .lp-card:hover { background-size: 100% 1px !important; }
+.tuile__ico, .lp-card .ico, .lp-card > svg { transition: color 0.4s ease !important; }
+.tuile:hover .tuile__ico, .lp-card:hover .ico, .lp-card:hover > svg { color: var(--m-champagne) !important; }
+/* Accueil : la mention au-dessus du titre se resserre en apparaissant */
+@keyframes m-espacement { from { opacity: 0; letter-spacing: 0.62em; } to { opacity: 1; letter-spacing: 0.24em; } }
+.ac-hero--photo .ac-hero__sur { animation: m-espacement 1.8s cubic-bezier(0.22, 0.61, 0.36, 1) 0.15s both !important; }
+/* Photos des pages : léger rapprochement au survol */
+.lp-photo img { transition: transform 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) !important; }
+.lp-photo.vu:hover img { transform: scale(1.035) !important; }
+/* Liens du menu ordinateur : un trait fin se dessine sous le mot */
+@media (min-width: 1081px) {
+  .nav--v2 .nav__drop-btn, .nav--v2 .nav__links--d > a { background: linear-gradient(currentColor, currentColor) no-repeat 50% calc(100% - 4px) / 0 1px !important; transition: background-size 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), color 0.3s !important; }
+  .nav--v2 .nav__drop-btn:hover, .nav--v2 .nav__drop-btn[aria-expanded="true"], .nav--v2 .nav__links--d > a:hover { background-size: calc(100% - 20px) 1px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .btn::after { display: none !important; }
+  .ac-hero--photo .ac-hero__sur { animation: none !important; }
+  .lp-photo.vu:hover img { transform: none !important; }
+}
+
+/* --- Champs de formulaire : une ligne fine, comme sur papier --- */
+.rc .rc-champ input, .rc .rc-champ select, .ent-champ input, .ent-champ select {
+  height: 46px !important; padding: 0 2px !important;
+  border: 0 !important; border-bottom: 1px solid #cfcac1 !important; border-radius: 0 !important;
+  background-color: transparent !important; box-shadow: none !important;
+  font: 400 15px var(--m-texte) !important; color: #0b0b0c !important;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+.rc .rc-champ textarea, .ent-champ textarea { border: 1px solid #cfcac1 !important; border-radius: 4px !important; background: transparent !important; font: 400 15px var(--m-texte) !important; box-shadow: none !important; }
+.rc .rc-champ input:focus, .rc .rc-champ select:focus, .ent-champ input:focus, .ent-champ select:focus { border-bottom-color: #0b0b0c !important; box-shadow: 0 1px 0 #0b0b0c !important; outline: none !important; }
+.rc .rc-champ textarea:focus, .ent-champ textarea:focus { border-color: #0b0b0c !important; outline: none !important; }
+.rc .rc-champ > span, .ent-champ > span { font-weight: 400 !important; font-size: 13px !important; color: #5b5b60 !important; letter-spacing: 0.01em; }
+.rc .rc-cases span, .ent-cases span, .rc .rc-postes span { border-radius: 4px !important; font-weight: 400 !important; transition: border-color 0.25s, background-color 0.25s, color 0.25s !important; }
+.rc .rc-postes b { font-weight: 500 !important; }
+.rc .rc-postes input:checked + span { background: #0b0b0c !important; border-color: #0b0b0c !important; box-shadow: none !important; }
+.rc .rc-postes input:checked + span b { color: #fff !important; }
+.rc .rc-postes input:checked + span small { color: rgba(243, 239, 232, 0.7) !important; }
+.rc .rc-envoyer { border-radius: 4px !important; font: 400 15px var(--m-texte) !important; height: 54px !important; }
+
+/* --- Recrutement : bandeau photo, formulaire en carte --- */
+.rc { overflow-x: clip; padding-top: 0 !important; background: #f6f3ee !important; }
+.rc__page { max-width: 860px !important; }
+.rc__tete {
+  position: relative; isolation: isolate; text-align: center;
+  margin: 0 !important; border: 0 !important;
+  padding: calc(var(--nav-h, 76px) + clamp(54px, 7vw, 96px)) 0 calc(clamp(60px, 7vw, 96px) + 56px) !important;
+}
+.rc__tete::before {
+  content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: calc(50% - 50vw); width: 100vw;
+  background:
+    linear-gradient(180deg, rgba(5, 6, 8, 0.78) 0%, rgba(5, 6, 8, 0.55) 45%, rgba(5, 6, 8, 0.82) 100%),
+    #0e0e10 url("https://images.unsplash.com/photo-1672738187618-985c1b6b0177?auto=format&fit=crop&w=2000&q=70") 50% 45% / cover no-repeat;
+}
+.rc__sur { color: rgba(243, 239, 232, 0.82) !important; animation: m-espacement 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) 0.1s both; }
+.rc__titre { color: #fff !important; font-size: clamp(2.3rem, 1.6rem + 2.6vw, 3.8rem) !important; font-weight: 300 !important; }
+.rc__intro { max-width: 34em; margin: 16px auto 0 !important; color: rgba(243, 239, 232, 0.8) !important; font-weight: 300; }
+main.rc .apply-card {
+  position: relative; margin-top: -56px !important;
+  padding: clamp(24px, 4.5vw, 52px) !important; background: #fff !important;
+  border: 1px solid rgba(11, 11, 12, 0.1) !important; border-radius: 6px !important;
+}
+/* Étapes numérotées en continu (01, 02…), même quand une étape est masquée */
+.rc .rc-form { counter-reset: rc-etape; gap: 42px !important; }
+.rc-bloc:not([hidden]) { counter-increment: rc-etape; }
+.rc .rc-bloc legend { gap: 14px !important; padding-bottom: 14px !important; border-bottom-color: rgba(11, 11, 12, 0.12) !important; font: 400 17px/1.2 var(--m-texte) !important; letter-spacing: -0.005em; }
+.rc .rc-bloc legend > span { width: auto !important; height: auto !important; border: 0 !important; border-radius: 0 !important; font-size: 0 !important; }
+.rc .rc-bloc legend > span::before { content: counter(rc-etape, decimal-leading-zero); font: 300 17px/1 var(--m-texte); letter-spacing: 0.04em; color: var(--m-champagne); }
+@media (max-width: 640px) { main.rc .apply-card { margin-top: -40px !important; } }
+
+/* --- Entreprises : carte du formulaire plus aérée, étapes numérotées --- */
+.ent-carte { border-radius: 6px !important; box-shadow: none !important; border: 1px solid rgba(11, 11, 12, 0.1) !important; padding: clamp(24px, 3.6vw, 44px) !important; }
+.ent-form { counter-reset: ent-etape; }
+.ent-bloc { counter-increment: ent-etape; }
+.ent-bloc legend { display: flex; align-items: baseline; gap: 12px; border-bottom-color: rgba(11, 11, 12, 0.12) !important; }
+.ent-bloc legend::before { content: counter(ent-etape, decimal-leading-zero); font: 300 13px/1 var(--m-texte); letter-spacing: 0.06em; color: var(--m-champagne); }
+.ent-points li { transition: color 0.3s ease; }
+@media (min-width: 1000px) {
+  .ent-demande__texte { position: sticky; top: calc(var(--nav-h, 76px) + 40px); align-self: start; }
+}
+/* Priorité sur les règles des liens du menu */
+@media (min-width: 1081px) {
+  html body .nav.nav--v2 .nav__links > a.nav__reserver-pc, html body .nav.nav--v2 a.nav__compte {
+    display: inline-flex !important; height: 36px !important; padding: 0 16px !important;
+    border: 1px solid rgba(243, 239, 232, 0.55) !important; border-radius: 4px !important;
+    background: transparent !important; color: #f3efe8 !important; font-weight: 400 !important;
+  }
+  html body .nav.nav--v2 .nav__links > a.nav__reserver-pc:hover,
+  html body .nav.nav--v2 a.nav__compte:hover, html body .nav.nav--v2 a.nav__compte[aria-expanded="true"] {
+    background: #f3efe8 !important; border-color: #f3efe8 !important; color: #0b0b0c !important;
+  }
+  html body .nav.nav--v2 a.nav__compte:hover span, html body .nav.nav--v2 a.nav__compte[aria-expanded="true"] span,
+  html body .nav.nav--v2 a.nav__compte:hover .nav__chev, html body .nav.nav--v2 a.nav__compte[aria-expanded="true"] .nav__chev { color: #0b0b0c !important; stroke: #0b0b0c !important; }
+}
+.ent-points li { font-weight: 400 !important; }
+/* Fenêtre « Mon compte » : seulement « Espace client » et « Espace agent » */
+.nav--v2 .cx-pop__titre, .nav--v2 .cx-pop__ico, .nav--v2 .cx-pop__txt small, .nav--v2 .cx-pop__fl { display: none !important; }
+.nav--v2 .cx-pop { min-width: 200px !important; }
+.nav--v2 .cx-pop__choix { padding: 14px 16px !important; }
+/* En-tête ordinateur : écarts réguliers, rubriques regroupées vers les bords (plus de « La société » isolée) */
+@media (min-width: 1081px) {
+  .nav--v2 .nav__inner > .nav__links { justify-content: flex-start !important; gap: clamp(14px, 1.6vw, 26px) !important; }
+  .nav--v2 .nav__droite { justify-content: flex-end !important; gap: clamp(14px, 1.6vw, 26px) !important; }
+  .nav--v2 .nav__links--d { flex: 0 1 auto !important; justify-content: flex-end !important; gap: clamp(14px, 1.6vw, 26px) !important; }
+}
+/* Choix de la langue : FR | EN, tout petit, à gauche de « Mon compte » (ordinateur) et en bas du menu (téléphone) */
+.nav--v2 .nav__langue { display: none; }
+@media (min-width: 1081px) {
+  .nav--v2 .nav__langue { display: inline-flex !important; align-items: center; margin-right: 4px; font: 400 11.5px/1 var(--m-texte); letter-spacing: 0.12em; }
+  .nav--v2 .nav__langue > * { padding: 5px 8px; color: rgba(243, 239, 232, 0.5) !important; text-decoration: none !important; transition: color 0.3s ease; }
+  .nav--v2 .nav__langue > [aria-current] { color: #f3efe8 !important; }
+  .nav--v2 .nav__langue > * + * { border-left: 1px solid rgba(243, 239, 232, 0.25); }
+  .nav--v2 .nav__langue a:hover { color: #c9a874 !important; }
+}
+.mm__langue { display: flex; align-items: center; margin-top: 16px; padding-top: 18px; border-top: 1px solid rgba(243, 239, 232, 0.1); font: 400 13px/1 var(--m-texte); letter-spacing: 0.14em; }
+.mm__langue > * { padding: 6px 14px 6px 0; color: rgba(243, 239, 232, 0.5) !important; text-decoration: none !important; }
+.mm__langue > [aria-current] { color: #f3efe8 !important; }
+.mm__langue > * + * { padding-left: 14px; border-left: 1px solid rgba(243, 239, 232, 0.25); }
+@media (min-width: 1081px) { .nav--v2 .nav__langue { margin: 0 2px 0 -8px !important; } }
+
+/* =========================================================
+   17/10/2026 (3) — EN-TÊTE ORDINATEUR SUR DEUX LIGNES, SYMÉTRIQUE
+   Ligne 1 : « Réserver » à gauche · logo au centre · FR | EN + « Mon compte » à droite
+   Ligne 2 (sous un filet) : les rubriques, centrées sous le logo
+   Téléphone : « Mon compte » à la place de « Espace client »
+   ========================================================= */
+@media (min-width: 1081px) {
+  :root:has(.nav--v2:not(.nav--epure)) { --nav-h: 110px; }
+  .nav.nav--v2:not(.nav--epure) { --e-h: 110px; --l1: 64px; --l2: 45px; --pad: clamp(24px, 3vw, 48px); }
+  .nav.nav--v2:not(.nav--epure).is-scrolled, .nav.nav--v2:not(.nav--epure).is-compact { --e-h: 94px; --l1: 52px; --l2: 41px; }
+
+  .nav--v2:not(.nav--epure) .nav__inner {
+    display: flex !important; flex-wrap: wrap; align-items: center; align-content: flex-start; justify-content: center;
+    gap: 0 !important; position: relative; height: 100%; padding-inline: var(--pad) !important;
+  }
+  .nav--v2:not(.nav--epure) .nav__inner > .nav__links,
+  .nav--v2:not(.nav--epure) .nav__droite,
+  .nav--v2:not(.nav--epure) .nav__links--d,
+  .nav--v2:not(.nav--epure) .nav__actions { display: contents !important; }
+
+  /* Ligne 1 */
+  .nav--v2:not(.nav--epure) .nav__reserver-pc { order: 1; margin: 0 auto 0 0 !important; }
+  .nav--v2:not(.nav--epure) .nav__langue { order: 2; margin: 0 10px 0 0 !important; }
+  .nav--v2:not(.nav--epure) .nav__compte { order: 3; }
+  .nav--v2:not(.nav--epure) .nav__reserver-pc, .nav--v2:not(.nav--epure) .nav__langue, .nav--v2:not(.nav--epure) .nav__compte {
+    margin-top: calc((var(--l1) - 36px) / 2) !important; margin-bottom: calc((var(--l1) - 36px) / 2) !important;
+    transition: margin 0.3s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+  }
+  /* Logo exactement au centre de la ligne 1 */
+  html body .nav.nav--v2:not(.nav--epure) .nav__marque {
+    position: absolute !important; left: 50% !important; top: calc(var(--l1) / 2) !important;
+    transform: translate(-50%, -50%) !important; margin: 0 !important; z-index: 2; transition: top 0.3s ease;
+  }
+  /* Filet entre les deux lignes */
+  .nav--v2:not(.nav--epure) .nav__inner::after {
+    content: "" !important; display: block !important; order: 4; flex: 0 0 100%; height: 1px;
+    background: rgba(243, 239, 232, 0.09); position: static !important;
+  }
+  /* Ligne 2 : rubriques centrées, écarts réguliers */
+  .nav--v2:not(.nav--epure) .nav__inner > .nav__links > .nav__drop { order: 5; }
+  .nav--v2:not(.nav--epure) .nav__links--d > * { order: 6; }
+  .nav--v2:not(.nav--epure) .nav__inner > .nav__links > .nav__drop,
+  .nav--v2:not(.nav--epure) .nav__links--d > * {
+    display: flex !important; align-items: center; height: var(--l2) !important; margin: 0 clamp(10px, 1.3vw, 20px) !important;
+  }
+  .nav--v2:not(.nav--epure) .nav__links--d > a[hidden], .nav--v2:not(.nav--epure) .nav__links--d > [style*="display: none"] { display: none !important; }
+  .nav--v2:not(.nav--epure) .nav__drop-btn, .nav--v2:not(.nav--epure) .nav__links--d > a { font-size: 13.5px !important; letter-spacing: 0.01em !important; }
+  /* Éléments réservés au téléphone */
+  .nav--v2:not(.nav--epure) .nav__espace, .nav--v2:not(.nav--epure) .nav__reserver, .nav--v2:not(.nav--epure) .burger { display: none !important; }
+  /* Fenêtre « Mon compte » juste sous le bouton */
+  .nav--v2:not(.nav--epure) .cx-pop { top: calc(var(--l1) - 8px) !important; right: var(--pad) !important; }
+}
+
+/* Téléphone et tablette : « Mon compte » (espace client ou agent) à la place de « Espace client » */
+@media (max-width: 1080px) {
+  html body .nav.nav--v2 .nav__espace[href="espace-client"] { display: none !important; }
+  html body .nav.nav--v2 a.nav__compte {
+    display: inline-flex !important; order: 2; margin-left: auto !important; align-items: center; justify-content: center; flex: none;
+    width: auto !important; height: 34px !important; padding: 0 12px !important;
+    border: 1px solid rgba(243, 239, 232, 0.72) !important; border-radius: 4px !important;
+    background: transparent !important; color: #f3efe8 !important; font: 400 13.5px/1 var(--m-texte) !important; letter-spacing: 0 !important; white-space: nowrap;
+  }
+  html body .nav.nav--v2 a.nav__compte span { display: inline !important; position: static !important; width: auto !important; height: auto !important; clip: auto !important; overflow: visible !important; }
+  html body .nav.nav--v2 a.nav__compte .nav__chev { display: none !important; }
+  html body .nav.nav--v2 a.nav__compte[aria-expanded="true"] { background: #f3efe8 !important; color: #0b0b0c !important; }
+  html body .nav.nav--v2 a.nav__compte[aria-expanded="true"] span { color: #0b0b0c !important; }
+}
+@media (max-width: 720px) {
+  html body .nav.nav--v2 a.nav__compte { height: 32px !important; padding: 0 10px !important; font-size: 13px !important; }
+}
+@media (max-width: 360px) {
+  html body .nav.nav--v2 a.nav__compte { display: none !important; }
+}
+
+/* =========================================================
+   17/10/2026 (4) — FENÊTRE « ÊTRE RAPPELÉ » : panneau photo + formulaire épuré,
+   choix du jour et du créneau
+   ========================================================= */
+dialog.rappel.rappel--v2 {
+  width: min(940px, calc(100% - 32px)); max-height: min(720px, calc(100dvh - 32px));
+  padding: 0; border: 0; border-radius: 6px !important; background: #fbfaf7; color: #0b0b0c;
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.6); overflow: hidden;
+}
+dialog.rappel--v2::backdrop { background: rgba(5, 6, 8, 0.62); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+dialog.rappel--v2[open] { animation: rp-ouvre 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+@keyframes rp-ouvre { from { opacity: 0; transform: translateY(18px) scale(0.985); } to { opacity: 1; transform: none; } }
+.rp { display: grid; grid-template-columns: 0.82fr 1.18fr; height: 100%; max-height: inherit; }
+
+/* Panneau de gauche : photo de l'accueil, voile sombre */
+.rp__cote {
+  position: relative; display: flex; flex-direction: column; gap: 18px; padding: 44px 38px 36px; color: #f3efe8;
+  background:
+    linear-gradient(180deg, rgba(5, 6, 8, 0.72) 0%, rgba(5, 6, 8, 0.62) 45%, rgba(5, 6, 8, 0.9) 100%),
+    #0e0e10 url("https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&fit=crop&w=900&h=1200&q=70") 50% 50% / cover no-repeat;
+}
+.rp__sur { margin: 0; font: 500 11px/1 var(--m-texte); letter-spacing: 0.24em; text-transform: uppercase; color: #c9a874; }
+.rp__titre { margin: 0; font: 300 clamp(1.75rem, 1.4rem + 1vw, 2.3rem)/1.12 var(--m-texte) !important; letter-spacing: -0.02em; color: inherit; }
+.rp__cote .rp__titre { color: #fff; }
+.rp__texte { margin: 0; font: 300 14.5px/1.6 var(--m-texte); color: rgba(243, 239, 232, 0.78); }
+.rp__atouts { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 0; border-top: 1px solid rgba(243, 239, 232, 0.14); }
+.rp__atouts li { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid rgba(243, 239, 232, 0.14); font: 400 14px/1.3 var(--m-texte); color: #f3efe8; }
+.rp__atouts li::before { content: ""; width: 14px; height: 1px; background: #c9a874; flex: none; }
+.rp__direct { margin: auto 0 0; display: grid; gap: 6px; font: 400 12px/1.4 var(--m-texte); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(243, 239, 232, 0.6); }
+.rp__direct a { font: 300 22px/1.2 var(--m-texte); letter-spacing: 0.02em; text-transform: none; color: #fff !important; text-decoration: none; }
+.rp__direct a:hover { color: #c9a874 !important; }
+
+/* Partie droite : le formulaire */
+.rp__corps { position: relative; overflow-y: auto; overscroll-behavior: contain; }
+.rp__x {
+  position: absolute; top: 16px; right: 16px; z-index: 2; width: 40px; height: 40px; display: grid; place-items: center;
+  border: 0; background: none; color: #0b0b0c; cursor: pointer; transition: transform 0.35s ease, opacity 0.2s;
+}
+.rp__x svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; }
+.rp__x:hover { transform: rotate(90deg); }
+.rp__form { display: grid; gap: 26px; padding: 40px 40px 30px; }
+.rp__form[hidden], .rp__merci[hidden] { display: none !important; }
+.rp__bloc { display: grid; gap: 14px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.rp__bloc legend {
+  display: flex; align-items: baseline; gap: 12px; width: 100%; margin: 0 0 4px; padding: 0 0 10px;
+  border-bottom: 1px solid rgba(11, 11, 12, 0.12);
+  font: 500 11px/1 var(--m-texte); letter-spacing: 0.2em; text-transform: uppercase; color: #5b5b60;
+}
+.rp__bloc legend span { font-weight: 300; letter-spacing: 0.06em; color: var(--m-champagne, #b39a6b); }
+.rp__ligne { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.rp__champ { display: grid; gap: 4px; min-width: 0; font: 400 13px/1.3 var(--m-texte); color: #5b5b60; }
+.rp__champ small { margin-left: 4px; font-size: 11.5px; color: #9a9792; }
+.rp__champ input, .rp__champ textarea {
+  width: 100%; height: 44px; padding: 0 2px; border: 0; border-bottom: 1px solid #cfcac1; border-radius: 0; background: transparent;
+  font: 400 16px var(--m-texte); color: #0b0b0c; transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.rp__champ textarea { height: auto; min-height: 64px; padding: 10px 2px; resize: vertical; line-height: 1.5; }
+.rp__champ input::placeholder, .rp__champ textarea::placeholder { color: #b5b1aa; }
+.rp__champ input:focus, .rp__champ textarea:focus { outline: none; border-bottom-color: #0b0b0c; box-shadow: 0 1px 0 #0b0b0c; }
+
+/* Choix en puces fines */
+.rp__puces { display: flex; flex-wrap: wrap; gap: 8px; }
+.rp__puces label, .rp__jours label, .rp__creneaux label { position: relative; cursor: pointer; }
+.rp__puces input, .rp__jours input, .rp__creneaux input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.rp__puces span {
+  display: inline-block; padding: 9px 14px; border: 1px solid #d6d1c8; border-radius: 4px; background: #fff;
+  font: 400 13.5px/1.2 var(--m-texte); color: #0b0b0c; transition: border-color 0.25s, background-color 0.25s, color 0.25s;
+}
+.rp__puces label:hover span { border-color: #8f8b84; }
+.rp__puces input:checked + span { background: #0b0b0c; border-color: #0b0b0c; color: #fff; }
+.rp__puces input:focus-visible + span, .rp__jours input:focus-visible + span, .rp__creneaux input:focus-visible + span { outline: 2px solid #b39a6b; outline-offset: 2px; }
+
+/* Agenda : apparaît en douceur */
+.rp__agenda { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.35s ease; }
+.rp__agenda.is-ouvert { grid-template-rows: 1fr; opacity: 1; }
+.rp__agenda-in { min-height: 0; overflow: hidden; display: grid; gap: 12px; }
+.rp__agenda.is-ouvert .rp__agenda-in { padding-top: 4px; }
+.rp__jours { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 8px; scroll-snap-type: x proximity; scrollbar-width: thin; }
+.rp__jours span {
+  display: grid; justify-items: center; gap: 3px; width: 62px; padding: 10px 0 9px; scroll-snap-align: start;
+  border: 1px solid #d6d1c8; border-radius: 4px; background: #fff; transition: border-color 0.25s, background-color 0.25s, color 0.25s;
+}
+.rp__jours small { font: 400 10.5px/1 var(--m-texte); letter-spacing: 0.06em; text-transform: uppercase; color: #86868b; }
+.rp__jours b { font: 300 22px/1 var(--m-texte); color: #0b0b0c; }
+.rp__jours label:hover span { border-color: #8f8b84; }
+.rp__jours input:checked + span { background: #0b0b0c; border-color: #0b0b0c; }
+.rp__jours input:checked + span b { color: #fff; }
+.rp__jours input:checked + span small { color: rgba(243, 239, 232, 0.7); }
+.rp__creneaux { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.rp__creneaux span {
+  display: grid; gap: 3px; padding: 10px 12px; border: 1px solid #d6d1c8; border-radius: 4px; background: #fff;
+  transition: border-color 0.25s, background-color 0.25s, color 0.25s, opacity 0.25s;
+}
+.rp__creneaux b { font: 400 13.5px/1.2 var(--m-texte); color: #0b0b0c; }
+.rp__creneaux small { font: 400 11.5px/1.2 var(--m-texte); color: #86868b; }
+.rp__creneaux label:hover span { border-color: #8f8b84; }
+.rp__creneaux input:checked + span { background: #0b0b0c; border-color: #0b0b0c; }
+.rp__creneaux input:checked + span b { color: #fff; }
+.rp__creneaux input:checked + span small { color: rgba(243, 239, 232, 0.7); }
+.rp__creneaux input:disabled + span { opacity: 0.35; cursor: not-allowed; }
+
+.rp__erreur { margin: 0; padding: 10px 14px; border-left: 2px solid #a8443b; background: #faf4f3; color: #8a3a33; font: 400 14px/1.4 var(--m-texte); }
+.rp__envoyer { width: 100%; height: 54px; justify-content: center; background: #0b0b0c !important; border-color: #0b0b0c !important; color: #fff !important; }
+.rp__envoyer:hover { background: #222225 !important; }
+.rp__envoyer .icon { color: #fff !important; }
+.rp__envoyer:disabled { opacity: 0.6; cursor: wait; }
+.rp__mention { margin: -12px 0 0; text-align: center; font: 400 12px/1.4 var(--m-texte); color: #86868b; }
+.rp__mention a { color: inherit; text-decoration: underline; }
+
+/* Confirmation */
+.rp__merci { display: grid; justify-items: center; align-content: center; gap: 14px; min-height: 100%; padding: 56px 40px; text-align: center; }
+.rp__merci .rp__titre { color: #0b0b0c; }
+.rp__merci .rp__sur { color: #b39a6b; }
+.rp__recap { margin: 0; max-width: 30em; font: 400 16px/1.55 var(--m-texte); color: #0b0b0c; }
+.rp__merci .rp__texte { color: #5b5b60; }
+.rp__merci .rp__texte a { color: #0b0b0c; font-weight: 500; }
+.rp__coche { display: grid; place-items: center; width: 64px; height: 64px; border: 1px solid #b39a6b; border-radius: 50%; animation: pop 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+.rp__coche svg { width: 28px; height: 28px; fill: none; stroke: #b39a6b; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 30; animation: dessine-coche 0.6s 0.3s ease both; }
+
+/* Tablette et téléphone : une seule colonne, en-tête compact, plein écran sur petit téléphone */
+@media (max-width: 820px) {
+  dialog.rappel.rappel--v2 { width: min(560px, calc(100% - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; }
+  .rp { grid-template-columns: 1fr; max-height: none; position: relative; }
+  .rp__cote { padding: 30px 24px 24px; gap: 12px; }
+  .rp__atouts, .rp__direct { display: none; }
+  .rp__corps { overflow: visible; position: static; }
+  .rp__x { color: #fff; top: 12px; right: 12px; }
+  .rp__form { padding: 28px 24px 24px; gap: 22px; }
+  .rp__creneaux { grid-template-columns: 1fr 1fr; }
+  .rp__merci { padding: 44px 24px; }
+}
+@media (max-width: 520px) {
+  dialog.rappel.rappel--v2 { width: 100%; max-width: 100%; height: 100dvh; max-height: 100dvh; margin: 0; border-radius: 0 !important; }
+  .rp__ligne { grid-template-columns: 1fr; gap: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { dialog.rappel--v2[open] { animation: none; } .rp__agenda { transition: none; } }
+/* Croix toujours visible (rattachée à la fenêtre, pas au formulaire qui défile) ; jours sans barre de défilement */
+.rp { position: relative; }
+.rp__corps { position: static; }
+.rp__x { right: 14px; top: 14px; }
+.rp__jours { scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent); mask-image: linear-gradient(90deg, #000 88%, transparent); padding-right: 24px; }
+.rp__jours::-webkit-scrollbar { display: none; }
+/* Petit téléphone (fenêtre plein écran) : la croix reste en haut même en faisant défiler */
+@media (max-width: 520px) {
+  .rp__x { position: fixed !important; top: 10px !important; right: 10px !important; background: rgba(11, 11, 12, 0.55) !important; border-radius: 4px; color: #fff !important; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+}
+@keyframes rp-fondu { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 520px) { dialog.rappel--v2[open] { animation: rp-fondu 0.35s ease both; transform: none !important; } }
+
+/* =========================================================
+   17/10/2026 (5) — RAPPEL : calendrier mensuel, choix en filet champagne (plus de noir),
+   plus de numéros, défilement à la molette réparé
+   ========================================================= */
+/* La partie formulaire défile dans la fenêtre (ordinateur) */
+@media (min-width: 821px) {
+  .rp { grid-template-rows: minmax(0, 1fr); max-height: min(720px, calc(100dvh - 32px)); }
+  .rp__corps { min-height: 0; overflow-y: auto; }
+}
+.rp__bloc legend span { display: none; }
+
+/* Choix sélectionné : filet champagne et fond très clair, partout dans les formulaires */
+.rp__puces input:checked + span, .rp__creneaux input:checked + span,
+.rc .rc-postes input:checked + span, .rc .rc-cases input:checked + span, .ent-cases input:checked + span {
+  background: #f6f1e7 !important; border-color: #b39a6b !important; color: #0b0b0c !important;
+  box-shadow: inset 0 0 0 1px #b39a6b !important;
+}
+.rp__creneaux input:checked + span b, .rc .rc-postes input:checked + span b { color: #0b0b0c !important; }
+.rp__creneaux input:checked + span small, .rc .rc-postes input:checked + span small { color: #86868b !important; }
+
+/* Recrutement et Entreprises : plus de numéros devant les étapes */
+.rc .rc-bloc legend > span { display: none !important; }
+.ent-bloc legend::before { content: none !important; display: none !important; }
+
+/* Calendrier */
+.rp__cal { padding: 14px 14px 10px; border: 1px solid #e3ded4; border-radius: 4px; background: #fff; }
+.rp__cal-tete { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.rp__cal-mois { font: 400 15px/1 var(--m-texte); letter-spacing: 0.01em; color: #0b0b0c; text-transform: capitalize; }
+.rp__cal-nav {
+  width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 1px solid transparent; border-radius: 4px;
+  background: none; color: #0b0b0c; cursor: pointer; transition: border-color 0.2s ease, opacity 0.2s ease;
+}
+.rp__cal-nav svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.rp__cal-nav:hover:not(:disabled) { border-color: #d6d1c8; }
+.rp__cal-nav:disabled { opacity: 0.2; cursor: default; }
+.rp__cal-sem, .rp__cal-grille { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.rp__cal-sem span { padding: 6px 0 8px; text-align: center; font: 500 10.5px/1 var(--m-texte); letter-spacing: 0.1em; text-transform: uppercase; color: #9a9792; }
+.rp__cal-j {
+  position: relative; height: 40px; padding: 0; border: 1px solid transparent; border-radius: 4px; background: none;
+  font: 400 14px/1 var(--m-texte); color: #0b0b0c; cursor: pointer; transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.rp__cal-j:hover:not(:disabled) { border-color: #d6d1c8; }
+.rp__cal-j:disabled { color: #cdc8bf; cursor: default; }
+.rp__cal-j.is-auj::after { content: ""; position: absolute; left: 50%; bottom: 7px; width: 10px; height: 1px; background: #b39a6b; transform: translateX(-50%); }
+.rp__cal-j.is-choisi { background: #f6f1e7; border-color: #b39a6b; box-shadow: inset 0 0 0 1px #b39a6b; }
+.rp__cal-j:focus-visible { outline: 2px solid #b39a6b; outline-offset: 1px; }
+.rp__resume { margin: 2px 0 0; font: 400 13.5px/1.4 var(--m-texte); color: #5b5b60; }
+.rp__resume:empty { display: none; }
+@media (max-width: 520px) { .rp__cal { padding: 10px 8px 8px; } .rp__cal-j { height: 38px; } }

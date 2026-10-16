@@ -1,5 +1,7 @@
 # Prévient Bing (et les moteurs IndexNow : Yandex, Seznam, Naver…) à chaque mise à jour du site,
 # pour que les pages modifiées soient réindexées vite. La clé IndexNow est publique (fichier à la racine).
+# Seules les pages réellement modifiées par le push sont envoyées (Bing déconseille de renvoyer
+# tout le site à chaque fois) ; un lancement manuel envoie toutes les pages du sitemap.
 name: IndexNow
 on:
   push:
@@ -10,10 +12,30 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Attendre la mise en ligne OVH
         run: sleep 90
-      - name: Envoyer les pages du sitemap
+      - name: Envoyer les pages modifiées
+        env:
+          AVANT: ${{ github.event.before }}
+          APRES: ${{ github.sha }}
+          EVENEMENT: ${{ github.event_name }}
         run: |
-          urls=$(curl -fsS https://bdasecurite.com/sitemap.xml | grep -o '<loc>[^<]*' | sed 's/<loc>//' | jq -R . | jq -sc .)
-          body=$(jq -nc --argjson u "$urls" '{host:"bdasecurite.com",key:"e288de38da05433f999b99b796a79f6c",keyLocation:"https://bdasecurite.com/e288de38da05433f999b99b796a79f6c.txt",urlList:$u}')
+          site=https://bdasecurite.com
+          curl -fsS "$site/sitemap.xml" | grep -o '<loc>[^<]*' | sed 's/<loc>//' | sort -u > sitemap.txt
+          if [ "$EVENEMENT" = "workflow_dispatch" ] || [ -z "$AVANT" ] || ! git cat-file -e "$AVANT^{commit}" 2>/dev/null; then
+            cp sitemap.txt urls.txt
+          else
+            # Pages HTML modifiées à la racine (index.html = accueil) + pages ajoutées au sitemap
+            { git diff --name-only "$AVANT" "$APRES" -- '*.html' | grep -v / | sed 's/\.html$//; s/^index$//' | sed "s#^#$site/#"
+              git diff "$AVANT" "$APRES" -- sitemap.xml | grep '^+.*<loc>' | grep -o '<loc>[^<]*' | sed 's/<loc>//'
+            } | sort -u > modifiees.txt
+            # On ne garde que les pages du sitemap (pas les pages noindex : carte, merci, espaces…)
+            comm -12 modifiees.txt sitemap.txt > urls.txt
+          fi
+          if [ ! -s urls.txt ]; then echo "Aucune page publique modifiée : rien à envoyer."; exit 0; fi
+          echo "Pages envoyées :"; cat urls.txt
+          body=$(jq -R . urls.txt | jq -sc '{host:"bdasecurite.com",key:"e288de38da05433f999b99b796a79f6c",keyLocation:"https://bdasecurite.com/e288de38da05433f999b99b796a79f6c.txt",urlList:.}')
           curl -sS -o /dev/null -w "IndexNow : %{http_code}\n" -X POST https://api.indexnow.org/indexnow -H 'Content-Type: application/json; charset=utf-8' -d "$body"

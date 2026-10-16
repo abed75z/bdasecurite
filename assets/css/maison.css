@@ -706,3 +706,13 @@ main.rc .apply-card {
   html body .nav.nav--v2 a.nav__compte:hover .nav__chev, html body .nav.nav--v2 a.nav__compte[aria-expanded="true"] .nav__chev { color: #0b0b0c !important; stroke: #0b0b0c !important; }
 }
 .ent-points li { font-weight: 400 !important; }
+/* Fenêtre « Mon compte » : seulement « Espace client » et « Espace agent » */
+.nav--v2 .cx-pop__titre, .nav--v2 .cx-pop__ico, .nav--v2 .cx-pop__txt small, .nav--v2 .cx-pop__fl { display: none !important; }
+.nav--v2 .cx-pop { min-width: 200px !important; }
+.nav--v2 .cx-pop__choix { padding: 14px 16px !important; }
+/* En-tête ordinateur : écarts réguliers, rubriques regroupées vers les bords (plus de « La société » isolée) */
+@media (min-width: 1081px) {
+  .nav--v2 .nav__inner > .nav__links { justify-content: flex-start !important; gap: clamp(14px, 1.6vw, 26px) !important; }
+  .nav--v2 .nav__droite { justify-content: flex-end !important; gap: clamp(14px, 1.6vw, 26px) !important; }
+  .nav--v2 .nav__links--d { flex: 0 1 auto !important; justify-content: flex-end !important; gap: clamp(14px, 1.6vw, 26px) !important; }
+}

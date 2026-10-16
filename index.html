@@ -84,9 +84,11 @@
   <link rel="manifest" href="/manifest-bda.webmanifest">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="BDA Security">
+  <link rel="preload" as="image" media="(orientation: landscape)" imagesrcset="https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=1280 1280w, https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=1920 1920w, https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=2560 2560w" imagesizes="100vw" fetchpriority="high">
+  <link rel="preload" as="image" media="(orientation: portrait)" imagesrcset="https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=720&amp;h=1280 720w, https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=1080&amp;h=1920 1080w, https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=1440&amp;h=2560 1440w" imagesizes="100vw" fetchpriority="high">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Montserrat:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=Montserrat:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=15">
   <link rel="stylesheet" href="assets/css/hero.css?v=15">
   <link rel="stylesheet" href="assets/css/sections.css?v=15">
@@ -94,7 +96,7 @@
   <link rel="stylesheet" href="assets/css/blanc.css?v=34">
   <link rel="stylesheet" href="assets/css/sobre.css?v=9">
   <link rel="stylesheet" href="assets/css/entete.css?v=9">
-  <link rel="stylesheet" href="assets/css/maison.css?v=10">
+  <link rel="stylesheet" href="assets/css/maison.css?v=18">
 </head>
 <body>
 
@@ -185,6 +187,7 @@
       <div class="nav__actions">
         <a class="nav__espace" href="espace-client"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg><span>Espace client</span></a>
         <a class="nav__espace" href="espace-equipe"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg><span>Espace agent</span></a>
+        <a class="nav__reserver" href="devis">Réserver</a>
         <a class="nav__tel" href="tel:+33611678625" aria-label="Appeler le 06 11 67 86 25" title="06 11 67 86 25"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg></a>
         <button class="burger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
       </div>
@@ -215,9 +218,14 @@
 <main id="top">
 
   <!-- ============ EN-TÊTE ============ -->
-  <section class="ac-hero ac-hero--nuit ac-hero--epure ac-hero--video" aria-labelledby="hero-title">
-    <!-- Vidéo de fond (Paris de nuit) : version ordinateur ou téléphone choisie par home.js, image fixe si animations réduites -->
-    <div class="ac-fond" aria-hidden="true"><video class="ac-fond__video" muted loop playsinline preload="none" disablepictureinpicture tabindex="-1"></video></div>
+  <section class="ac-hero ac-hero--nuit ac-hero--epure ac-hero--photo" aria-labelledby="hero-title">
+    <!-- Photo de fond : arrivée de nuit devant une entrée de prestige (Unsplash, libre de droits) -->
+    <div class="ac-fond" aria-hidden="true">
+      <picture>
+        <source media="(orientation: portrait)" srcset="https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=720&amp;h=1280 720w, https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=1080&amp;h=1920 1080w, https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=1440&amp;h=2560 1440w" sizes="100vw">
+        <img class="ac-fond__photo" src="https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=1920" srcset="https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=1280 1280w, https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=1920 1920w, https://images.unsplash.com/photo-1733282015320-c09c3df8eaeb?auto=format&amp;fit=crop&amp;q=72&amp;w=2560 2560w" sizes="100vw" alt="" fetchpriority="high" decoding="async">
+      </picture>
+    </div>
     <div class="container ac-hero__grille">
       <div class="ac-hero__texte">
         <p class="ac-hero__sur">Paris &amp; Île-de-France</p>
@@ -228,8 +236,7 @@
           <button class="btn btn--outline" type="button" data-rappel><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg> Être rappelé</button>
         </div>
         <ul class="ac-preuves" aria-label="Nos garanties">
-          <li><svg class="icon" aria-hidden="true"><use href="#i-shield-check"/></svg><b>Autorisé CNAPS</b></li>
-          <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><b>24h/24h, 7j/7j</b></li>
+          <li><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg><b>24h/24 · 7j/7</b></li>
         </ul>
       </div>
     </div>

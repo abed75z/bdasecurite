@@ -3,14 +3,16 @@
    Couche finale du site public, chargée après toutes les autres.
    - formes nettes : cartes et panneaux 4 à 6 px, boutons 4 px, plus de pilules ;
    - icônes fines posées sur le fond, sans carré autour ;
-   - titres à empattements (Cormorant Garamond), texte en Inter ;
+   - écriture Poppins comme ritzparis.com : titres fins, boutons en minuscules (17/10/2026) ;
    - grilles éditoriales, lignes fines, pas d'ombres lourdes ni de dégradés.
    Couleurs et photos inchangées.
    ========================================================= */
 
 :root {
-  --m-titre: "Cormorant Garamond", "Cormorant", Georgia, "Times New Roman", serif;
-  --m-texte: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --m-titre: "Poppins", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --m-texte: "Poppins", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--m-titre);
+  --font-body: var(--m-texte);
   --m-trait: rgba(11, 11, 12, 0.12);
   --m-trait-fort: rgba(11, 11, 12, 0.28);
   --m-encre: #0b0b0c;
@@ -26,56 +28,57 @@
 
 .h1, h1, .ac-hero .h1, .lp-hero .h1, .rc__titre {
   font-family: var(--m-titre) !important;
-  font-weight: 500 !important;
-  font-size: clamp(2.6rem, 1.7rem + 2.9vw, 4.3rem) !important;
-  line-height: 1.04 !important;
-  letter-spacing: -0.005em !important;
+  font-weight: 300 !important;
+  font-size: clamp(2.3rem, 1.6rem + 2.5vw, 3.9rem) !important;
+  line-height: 1.12 !important;
+  letter-spacing: -0.02em !important;
 }
 .h2, h2, .rc-titre-2 {
   font-family: var(--m-titre) !important;
-  font-weight: 500 !important;
-  font-size: clamp(2.1rem, 1.55rem + 1.8vw, 3.15rem) !important;
-  line-height: 1.08 !important;
-  letter-spacing: -0.003em !important;
+  font-weight: 300 !important;
+  font-size: clamp(1.85rem, 1.45rem + 1.4vw, 2.7rem) !important;
+  line-height: 1.16 !important;
+  letter-spacing: -0.015em !important;
 }
-.h1 em, .h2 em, h1 em, h2 em { font-style: italic !important; font-weight: 500 !important; }
+.h1 em, .h2 em, h1 em, h2 em { font-style: normal !important; font-weight: inherit !important; }
 .manifeste {
   font-family: var(--m-titre) !important;
-  font-weight: 500 !important;
-  font-size: clamp(1.8rem, 1.3rem + 1.6vw, 2.7rem) !important;
-  line-height: 1.22 !important;
+  font-weight: 300 !important;
+  font-size: clamp(1.55rem, 1.2rem + 1.3vw, 2.35rem) !important;
+  line-height: 1.32 !important;
   letter-spacing: 0 !important;
 }
 .ac-pro p, .tuile__txt b, .chiffres b, .lp-cta h2, .lp-box h3, .rv-summary b {
   font-family: var(--m-titre) !important;
-  font-weight: 600 !important;
-  letter-spacing: 0 !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.01em !important;
 }
-.tuile__txt b { font-size: clamp(1.45rem, 1.25rem + 0.55vw, 1.75rem) !important; line-height: 1.15 !important; }
-.ac-pro p { font-size: clamp(1.35rem, 1.15rem + 0.7vw, 1.75rem) !important; font-weight: 500 !important; }
-.h3, h3 { font-family: var(--m-texte); font-weight: 600; letter-spacing: -0.01em; }
+.tuile__txt b { font-size: clamp(1.2rem, 1.1rem + 0.4vw, 1.4rem) !important; line-height: 1.25 !important; }
+.ac-pro p { font-size: clamp(1.2rem, 1.05rem + 0.6vw, 1.55rem) !important; font-weight: 300 !important; }
+.h3, h3 { font-family: var(--m-texte); font-weight: 500; letter-spacing: -0.01em; }
 
 /* Petits titres : majuscules fines et espacées */
 .kicker, .lp-crumbs, .rc__sur, .ent-bloc legend {
   font-family: var(--m-texte) !important;
-  font-size: 11px !important;
+  font-size: 11.5px !important;
   font-weight: 500 !important;
-  letter-spacing: 0.24em !important;
+  letter-spacing: 0.2em !important;
   text-transform: uppercase !important;
 }
 .lp-crumbs { letter-spacing: 0.12em !important; }
-.lead { font-weight: 400 !important; }
+.lead { font-weight: 300 !important; }
+body, button, input, select, textarea { font-family: var(--m-texte) !important; }
 
-/* ---------- 2. Boutons : rectangulaires, majuscules discrètes ---------- */
+/* ---------- 2. Boutons : rectangulaires, écrits normalement (comme ritzparis.com) ---------- */
 
 .btn, form .btn, .rappel__envoyer, .mobile-menu__foot .btn, .mobile-bar .btn, .rc-envoyer {
   border-radius: 4px !important;
   box-shadow: none !important;
   font-family: var(--m-texte) !important;
-  font-size: 12.5px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.1em !important;
-  text-transform: uppercase !important;
+  font-size: 14.5px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.005em !important;
+  text-transform: none !important;
 }
 .btn { padding: 15px 26px; }
 .btn .icon { width: 15px; height: 15px; stroke-width: 1.4; }
@@ -176,10 +179,10 @@
 .tuile::after { display: none !important; }
 .tuile__txt span { color: var(--m-gris) !important; }
 .tuile__lien {
-  font-size: 11px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.18em !important;
-  text-transform: uppercase !important;
+  font-size: 13.5px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
   color: var(--m-encre) !important;
 }
 .tuile__lien .icon { width: 14px; height: 14px; stroke-width: 1.3; }
@@ -196,10 +199,10 @@
 .segment button {
   border-radius: 0 !important;
   padding: 12px 18px !important;
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.16em !important;
-  text-transform: uppercase !important;
+  font-size: 14.5px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
   color: var(--m-gris) !important;
   background: none !important;
 }
@@ -233,8 +236,8 @@
   display: block;
   margin-bottom: 14px;
   font-family: var(--m-titre) !important;
-  font-size: 1.6rem !important;
-  font-weight: 500 !important;
+  font-size: 1.5rem !important;
+  font-weight: 300 !important;
   letter-spacing: 0 !important;
   color: var(--m-champagne) !important;
 }
@@ -254,7 +257,7 @@
 }
 .lp-steps li::before {
   font-family: var(--m-titre) !important;
-  font-weight: 500 !important;
+  font-weight: 300 !important;
   font-size: 1.5rem !important;
   color: var(--m-champagne) !important;
   background: none !important;
@@ -331,7 +334,7 @@
 }
 /* Mention au-dessus du titre de l'accueil */
 .ac-hero__sur {
-  font-size: 11px !important;
+  font-size: 11.5px !important;
   font-weight: 500 !important;
   letter-spacing: 0.24em !important;
   text-transform: uppercase !important;
@@ -354,11 +357,11 @@
 .lp-box h3, .lp-box .h3 { font-size: clamp(1.6rem, 1.4rem + 0.6vw, 1.95rem) !important; line-height: 1.12 !important; }
 .lp-card a, .lp-card .lien { letter-spacing: 0.14em; }
 /* Tarifs : le montant garde sa taille (la règle « span = petit texte » le rétrécissait) */
-.tf-prix b { font-family: var(--m-titre) !important; font-weight: 500 !important; font-size: 42px !important; letter-spacing: 0 !important; font-variant-numeric: lining-nums tabular-nums; }
+.tf-prix b { font-family: var(--m-titre) !important; font-weight: 300 !important; font-size: 42px !important; letter-spacing: 0 !important; font-variant-numeric: lining-nums tabular-nums; }
 .tf-prix b span, .tf-carte--vedette .tf-prix b span { font-size: inherit !important; color: inherit !important; }
 /* Montants modifiables depuis l'admin : toujours à la taille du texte qui les entoure */
 span[data-prix] { font-size: inherit !important; color: inherit !important; font-weight: inherit !important; }
-.ac-tarifs li b { font-family: var(--m-titre) !important; font-weight: 500 !important; font-size: 26px !important; letter-spacing: 0 !important; font-variant-numeric: lining-nums tabular-nums; }
+.ac-tarifs li b { font-family: var(--m-titre) !important; font-weight: 300 !important; font-size: 24px !important; letter-spacing: 0 !important; font-variant-numeric: lining-nums tabular-nums; }
 .ac-tarifs li b small { font-family: var(--font-body, Manrope, sans-serif); letter-spacing: 0.04em; }
 @media (max-width: 640px) {
   .ac-tarifs__bande { display: grid !important; gap: 22px !important; }
@@ -387,3 +390,168 @@ span[data-prix] { font-size: inherit !important; color: inherit !important; font
 @media (prefers-reduced-motion: reduce) { .ac-ref__photo.rv:not(.vu), .lp-photo.rv { clip-path: inset(0 round 4px) !important; } }
 /* Encadré « Nos services » (fond clair) : titre lisible */
 nav.lp-box .kicker { color: var(--m-gris) !important; }
+
+/* =========================================================
+   17/10/2026 — ÉCRITURE RITZ, ACCUEIL PHOTO, EN-TÊTE TÉLÉPHONE
+   - plus de barre « Appeler / Demander un devis » en bas du téléphone ;
+   - plus d'icône téléphone dans l'en-tête (téléphone et ordinateur) ;
+   - téléphone et tablette : menu + petit logo à gauche, « Espace client »
+     et « Réserver » à droite (comme ritzparis.com). Ordinateur : en-tête inchangé ;
+   - accueil : photo plein écran, texte centré, en-tête transparent en haut de page.
+   ========================================================= */
+
+/* --- Barre fixe du bas : retirée (l'écran reste dégagé) --- */
+.mobile-bar { display: none !important; }
+body:has(.mobile-bar) { padding-bottom: 0 !important; }
+body:has(.mobile-bar) .wa { bottom: calc(20px + env(safe-area-inset-bottom)) !important; }
+
+/* --- Plus d'icône téléphone dans l'en-tête --- */
+.nav--v2 .nav__tel, .nav--v2 .nav__actions .nav__tel, .nav--v2 .nav__appeler { display: none !important; }
+
+/* --- Bouton « Réserver » (téléphone et tablette seulement) --- */
+.nav--v2 .nav__reserver { display: none; }
+
+/* Zones d'intervention écrites en une phrase */
+.lp-zones-texte { color: var(--m-gris); }
+
+@media (max-width: 1080px) {
+  .nav--v2 .nav__inner { display: flex !important; align-items: center; gap: 0 !important; }
+  .nav--v2 .nav__droite, .nav--v2 .nav__actions { display: contents !important; }
+  /* Menu : trois traits fins, sans cadre, tout à gauche */
+  .nav--v2 .burger {
+    order: 0; position: relative !important; left: auto !important; top: auto !important; transform: none !important;
+    flex: none; width: 34px !important; height: 40px !important; margin: 0 12px 0 -6px !important;
+    border: 0 !important; border-radius: 0 !important; background: none !important;
+  }
+  .nav--v2 .burger span { left: 6px !important; right: 6px !important; height: 1.2px !important; }
+  /* Petit logo juste à côté */
+  .nav--v2 .nav__marque { order: 1; flex: none; gap: 3px !important; }
+  .nav--v2 .nav__marque b { width: 62px !important; }
+  .nav--v2 .nav__marque small { width: 106px !important; }
+  /* Deux boutons fins à droite */
+  .nav--v2 .nav__espace[href="espace-equipe"] { display: none !important; }
+  .nav--v2 .nav__espace[href="espace-client"] { order: 2; margin-left: auto !important; }
+  .nav--v2 .nav__reserver { order: 3; margin-left: 8px; }
+  .nav--v2 .nav__espace[href="espace-client"], .nav--v2 .nav__reserver {
+    display: inline-flex !important; align-items: center; justify-content: center; flex: none;
+    width: auto !important; height: 34px !important; padding: 0 12px !important;
+    border: 1px solid rgba(243, 239, 232, 0.72) !important; border-radius: 4px !important;
+    background: transparent !important; color: #f3efe8 !important; text-decoration: none !important;
+    font: 400 13.5px/1 var(--m-texte) !important; letter-spacing: 0 !important; white-space: nowrap;
+    transition: background-color 0.25s, color 0.25s;
+  }
+  .nav--v2 .nav__espace[href="espace-client"] .icon { display: none !important; }
+  .nav--v2 .nav__espace[href="espace-client"] span {
+    position: static !important; width: auto !important; height: auto !important;
+    overflow: visible !important; clip: auto !important;
+  }
+  .nav--v2 .nav__espace[href="espace-client"]:hover, .nav--v2 .nav__reserver:hover { background: #f3efe8 !important; color: #0b0b0c !important; }
+}
+@media (max-width: 360px) {
+  .nav--v2 .nav__espace[href="espace-client"] { display: none !important; }
+  .nav--v2 .nav__reserver { margin-left: auto; }
+}
+
+/* --- Accueil : en-tête transparent sur la photo, noir dès qu'on descend --- */
+.nav.nav--v2 { transition: height 0.3s cubic-bezier(0.22, 0.61, 0.36, 1), background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.3s ease !important; }
+:root:has(.ac-hero--photo) body:not(.menu-open) .nav.nav--v2:not(.is-scrolled):not(.is-compact) {
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* --- Accueil : photo plein écran, texte centré (esprit palace) --- */
+.ac-hero--photo { position: relative; min-height: 100vh; min-height: 100svh; display: grid !important; align-items: center; background: #07080a !important; overflow: hidden; }
+.ac-hero--photo::before, .ac-hero--photo::after { display: none !important; }
+.ac-hero--photo .ac-fond { background: #07080a !important; filter: none !important; transform: none !important; }
+.ac-hero--photo .ac-fond picture { position: absolute; inset: 0; }
+.ac-fond__photo {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 58%;
+  filter: saturate(0.92) contrast(1.04);
+  transform: scale(1.07); animation: ac-photo-recul 9s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+@keyframes ac-photo-recul { to { transform: scale(1); } }
+/* Voile : sombre en haut (en-tête) et en bas, plus léger au centre */
+.ac-hero--photo .ac-fond::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 50%, rgba(5, 6, 8, 0.18) 0%, rgba(5, 6, 8, 0) 100%),
+    linear-gradient(180deg, rgba(5, 6, 8, 0.7) 0%, rgba(5, 6, 8, 0.38) 22%, rgba(5, 6, 8, 0.42) 58%, rgba(5, 6, 8, 0.86) 100%);
+}
+.ac-hero--photo .ac-hero__grille {
+  position: relative; z-index: 1;
+  display: grid !important; grid-template-columns: minmax(0, 1fr) !important; justify-items: center;
+  padding-top: var(--nav-h, 76px) !important; padding-bottom: 72px !important;
+  text-align: center;
+}
+.ac-hero--photo .ac-hero__texte { max-width: 900px !important; margin: 0 auto !important; justify-items: center; text-align: center; }
+.ac-hero--photo .ac-hero__sur { justify-content: center; color: rgba(243, 239, 232, 0.86) !important; text-shadow: none !important; }
+.ac-hero--photo .ac-hero__sur::before, .ac-hero--photo .ac-hero__sur::after { display: none !important; }
+.ac-hero--photo .h1 {
+  color: #fff !important; text-align: center;
+  font-size: clamp(2.5rem, 1.5rem + 3.4vw, 4.7rem) !important; font-weight: 300 !important;
+  line-height: 1.08 !important; letter-spacing: -0.025em !important;
+}
+.ac-hero--photo .h1 em { color: #fff !important; }
+.ac-hero--photo .h1 em::after, .ac-hero--photo .h1 em::before { display: none !important; }
+.ac-hero--photo .lead {
+  max-width: 36em; margin-inline: auto !important; text-align: center;
+  color: rgba(243, 239, 232, 0.82) !important; font-size: clamp(15px, 0.85rem + 0.3vw, 17.5px) !important; text-shadow: none !important;
+}
+.ac-hero--photo .ac-hero__actions { justify-content: center !important; gap: 12px !important; }
+.ac-hero--photo .btn--gold { background: #fbfaf7 !important; border-color: #fbfaf7 !important; color: #0b0b0c !important; }
+.ac-hero--photo .btn--gold:hover { background: #fff !important; border-color: #fff !important; }
+.ac-hero--photo .btn--gold .icon { color: #0b0b0c !important; }
+.ac-hero--photo .btn--outline { background: transparent !important; border-color: rgba(255, 255, 255, 0.6) !important; color: #fff !important; }
+.ac-hero--photo .btn--outline:hover { background: rgba(255, 255, 255, 0.1) !important; }
+.ac-hero--photo .btn--outline .icon { color: #fff !important; }
+.ac-hero--photo .ac-preuves { justify-content: center !important; border: 0 !important; margin-inline: auto; }
+.ac-hero--photo .ac-preuves::before, .ac-hero--photo .ac-preuves::after { display: none !important; }
+.ac-hero--photo .ac-preuves b { font-weight: 400 !important; letter-spacing: 0.02em; color: rgba(243, 239, 232, 0.78) !important; text-shadow: none !important; }
+.ac-hero--photo .ac-preuves .icon { color: #c9a874 !important; }
+.ac-hero--photo .ac-defiler { z-index: 1; color: rgba(243, 239, 232, 0.7) !important; }
+@media (max-width: 720px) {
+  .ac-fond__photo { object-position: 50% 50%; }
+  .ac-hero--photo .ac-hero__grille { padding-bottom: 64px !important; }
+  .ac-hero--photo .h1 { font-size: clamp(2.3rem, 1.4rem + 4.6vw, 2.9rem) !important; }
+  .ac-hero--photo .ac-hero__actions { flex-direction: column; align-items: center !important; }
+  .ac-hero--photo .ac-hero__actions .btn { width: auto !important; min-width: 230px; }
+}
+@media (prefers-reduced-motion: reduce) { .ac-fond__photo { animation: none; transform: none; } }
+/* Menu de l'ordinateur : écriture fine */
+.nav--v2 .nav__drop-btn, .nav--v2 .nav__links--d > a, .nav--v2 .nav__espace { font-weight: 400 !important; }
+/* Titre de l'accueil : « en toute discrétion. » sur sa propre ligne */
+.ac-hero--photo .h1 em { display: block; }
+@media (max-width: 1080px) {
+  .nav--v2 .nav__marque b { width: 56px !important; }
+  .nav--v2 .nav__marque small { width: 96px !important; }
+}
+@media (max-width: 720px) {
+  .ac-hero--photo .h1 { font-size: clamp(1.8rem, 7.6vw, 2.6rem) !important; letter-spacing: -0.02em !important; }
+  .ac-hero--photo .ac-hero__actions .btn { width: 100% !important; max-width: 260px; min-width: 0; }
+  .ac-hero--photo .lead { max-width: 30em; font-size: 15px !important; }
+}
+@media (max-width: 720px) {
+  .nav--v2 .burger { margin-right: 8px !important; }
+  .nav--v2 .nav__marque b { width: 52px !important; }
+  .nav--v2 .nav__marque small { width: 88px !important; }
+  .nav--v2 .nav__espace[href="espace-client"], .nav--v2 .nav__reserver { height: 32px !important; padding: 0 9px !important; font-size: 13px !important; }
+  .nav--v2 .nav__reserver { margin-left: 6px; }
+}
+/* Pages Devis / Merci (sans menu) : logo à gauche, « Espace client » à droite */
+@media (max-width: 1080px) {
+  .nav--v2.nav--epure .nav__client {
+    order: 2; margin-left: auto !important;
+    display: inline-flex !important; align-items: center; width: auto !important; height: 32px !important; padding: 0 10px !important;
+    border: 1px solid rgba(243, 239, 232, 0.72) !important; border-radius: 4px !important; background: transparent !important;
+    color: #f3efe8 !important; font: 400 13px/1 var(--m-texte) !important; letter-spacing: 0 !important;
+  }
+  .nav--v2.nav--epure .nav__client .icon { display: none !important; }
+  .nav--v2.nav--epure .nav__client span { display: inline !important; }
+}
+@media (max-width: 1080px) { .nav--v2.nav--epure .nav__actions { order: 2; margin-left: auto !important; } }
+/* Téléphone : voile un peu plus dense derrière le texte (les reflets de la photo restent discrets) */
+@media (max-width: 720px) {
+  .ac-hero--photo .ac-fond::after { background: linear-gradient(180deg, rgba(5, 6, 8, 0.72) 0%, rgba(5, 6, 8, 0.52) 24%, rgba(5, 6, 8, 0.58) 62%, rgba(5, 6, 8, 0.9) 100%); }
+}

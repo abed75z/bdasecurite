@@ -1,7 +1,7 @@
 /* =========================================================
    ESPACE ADMIN BDA — Vue générale (écran de départ)
    On choisit l'espace à ouvrir : le site internet (BDA Security Group)
-   ou l'application VTC (B-Drive et B-Drive Pro), avec l'essentiel de
+   ou l'application VTC (BDASH et BDASH Pro), avec l'essentiel de
    chacun et la liste de ce qui attend une action.
    ========================================================= */
 import { api, h, cap, euroRond, isoVersFr, marqueLogo, ErreurApi } from './outils.js';
@@ -55,7 +55,7 @@ export async function pageVueGenerale(ctx) {
   const enLigne = appli ? appli.chauffeurs.filter((x) => x.enLigne).length : 0;
   const aAttribuer = appli ? appli.aVenir.filter((x) => x.statut === 'reservee').length : 0;
   const alertes = appli ? appli.enDirect.filter((x) => x.alertes && x.alertes.length).length : 0;
-  const app = espace('#/appli', '2', 'Application VTC', 'B-Drive',
+  const app = espace('#/appli', '2', 'Application VTC', 'BDASH',
     appli ? ['Clients et chauffeurs', etat(appli.ouvert, `${appli.ouvert ? 'Ouverte' : 'Fermée'}${appli.prive ? ' · phase privée' : ''}`)] : ['Données de l’appli indisponibles'],
     appli ? [chiffre(appli.enDirect.length, 'en cours'), chiffre(aAttribuer, 'à attribuer', true), chiffre(enLigne, enLigne > 1 ? 'chauffeurs en ligne' : 'chauffeur en ligne'), chiffre(euroRond.format(+appli.jour.t), 'aujourd’hui')] : [],
     'Courses en direct, utilisateurs, chauffeurs, paiements, statistiques et réglages.',

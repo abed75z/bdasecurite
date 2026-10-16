@@ -730,3 +730,77 @@ main.rc .apply-card {
 .mm__langue > [aria-current] { color: #f3efe8 !important; }
 .mm__langue > * + * { padding-left: 14px; border-left: 1px solid rgba(243, 239, 232, 0.25); }
 @media (min-width: 1081px) { .nav--v2 .nav__langue { margin: 0 2px 0 -8px !important; } }
+
+/* =========================================================
+   17/10/2026 (3) — EN-TÊTE ORDINATEUR SUR DEUX LIGNES, SYMÉTRIQUE
+   Ligne 1 : « Réserver » à gauche · logo au centre · FR | EN + « Mon compte » à droite
+   Ligne 2 (sous un filet) : les rubriques, centrées sous le logo
+   Téléphone : « Mon compte » à la place de « Espace client »
+   ========================================================= */
+@media (min-width: 1081px) {
+  :root:has(.nav--v2:not(.nav--epure)) { --nav-h: 110px; }
+  .nav.nav--v2:not(.nav--epure) { --e-h: 110px; --l1: 64px; --l2: 45px; --pad: clamp(24px, 3vw, 48px); }
+  .nav.nav--v2:not(.nav--epure).is-scrolled, .nav.nav--v2:not(.nav--epure).is-compact { --e-h: 94px; --l1: 52px; --l2: 41px; }
+
+  .nav--v2:not(.nav--epure) .nav__inner {
+    display: flex !important; flex-wrap: wrap; align-items: center; align-content: flex-start; justify-content: center;
+    gap: 0 !important; position: relative; height: 100%; padding-inline: var(--pad) !important;
+  }
+  .nav--v2:not(.nav--epure) .nav__inner > .nav__links,
+  .nav--v2:not(.nav--epure) .nav__droite,
+  .nav--v2:not(.nav--epure) .nav__links--d,
+  .nav--v2:not(.nav--epure) .nav__actions { display: contents !important; }
+
+  /* Ligne 1 */
+  .nav--v2:not(.nav--epure) .nav__reserver-pc { order: 1; margin: 0 auto 0 0 !important; }
+  .nav--v2:not(.nav--epure) .nav__langue { order: 2; margin: 0 10px 0 0 !important; }
+  .nav--v2:not(.nav--epure) .nav__compte { order: 3; }
+  .nav--v2:not(.nav--epure) .nav__reserver-pc, .nav--v2:not(.nav--epure) .nav__langue, .nav--v2:not(.nav--epure) .nav__compte {
+    margin-top: calc((var(--l1) - 36px) / 2) !important; margin-bottom: calc((var(--l1) - 36px) / 2) !important;
+    transition: margin 0.3s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+  }
+  /* Logo exactement au centre de la ligne 1 */
+  html body .nav.nav--v2:not(.nav--epure) .nav__marque {
+    position: absolute !important; left: 50% !important; top: calc(var(--l1) / 2) !important;
+    transform: translate(-50%, -50%) !important; margin: 0 !important; z-index: 2; transition: top 0.3s ease;
+  }
+  /* Filet entre les deux lignes */
+  .nav--v2:not(.nav--epure) .nav__inner::after {
+    content: "" !important; display: block !important; order: 4; flex: 0 0 100%; height: 1px;
+    background: rgba(243, 239, 232, 0.09); position: static !important;
+  }
+  /* Ligne 2 : rubriques centrées, écarts réguliers */
+  .nav--v2:not(.nav--epure) .nav__inner > .nav__links > .nav__drop { order: 5; }
+  .nav--v2:not(.nav--epure) .nav__links--d > * { order: 6; }
+  .nav--v2:not(.nav--epure) .nav__inner > .nav__links > .nav__drop,
+  .nav--v2:not(.nav--epure) .nav__links--d > * {
+    display: flex !important; align-items: center; height: var(--l2) !important; margin: 0 clamp(10px, 1.3vw, 20px) !important;
+  }
+  .nav--v2:not(.nav--epure) .nav__links--d > a[hidden], .nav--v2:not(.nav--epure) .nav__links--d > [style*="display: none"] { display: none !important; }
+  .nav--v2:not(.nav--epure) .nav__drop-btn, .nav--v2:not(.nav--epure) .nav__links--d > a { font-size: 13.5px !important; letter-spacing: 0.01em !important; }
+  /* Éléments réservés au téléphone */
+  .nav--v2:not(.nav--epure) .nav__espace, .nav--v2:not(.nav--epure) .nav__reserver, .nav--v2:not(.nav--epure) .burger { display: none !important; }
+  /* Fenêtre « Mon compte » juste sous le bouton */
+  .nav--v2:not(.nav--epure) .cx-pop { top: calc(var(--l1) - 8px) !important; right: var(--pad) !important; }
+}
+
+/* Téléphone et tablette : « Mon compte » (espace client ou agent) à la place de « Espace client » */
+@media (max-width: 1080px) {
+  html body .nav.nav--v2 .nav__espace[href="espace-client"] { display: none !important; }
+  html body .nav.nav--v2 a.nav__compte {
+    display: inline-flex !important; order: 2; margin-left: auto !important; align-items: center; justify-content: center; flex: none;
+    width: auto !important; height: 34px !important; padding: 0 12px !important;
+    border: 1px solid rgba(243, 239, 232, 0.72) !important; border-radius: 4px !important;
+    background: transparent !important; color: #f3efe8 !important; font: 400 13.5px/1 var(--m-texte) !important; letter-spacing: 0 !important; white-space: nowrap;
+  }
+  html body .nav.nav--v2 a.nav__compte span { display: inline !important; position: static !important; width: auto !important; height: auto !important; clip: auto !important; overflow: visible !important; }
+  html body .nav.nav--v2 a.nav__compte .nav__chev { display: none !important; }
+  html body .nav.nav--v2 a.nav__compte[aria-expanded="true"] { background: #f3efe8 !important; color: #0b0b0c !important; }
+  html body .nav.nav--v2 a.nav__compte[aria-expanded="true"] span { color: #0b0b0c !important; }
+}
+@media (max-width: 720px) {
+  html body .nav.nav--v2 a.nav__compte { height: 32px !important; padding: 0 10px !important; font-size: 13px !important; }
+}
+@media (max-width: 360px) {
+  html body .nav.nav--v2 a.nav__compte { display: none !important; }
+}

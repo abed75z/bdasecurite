@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="B-Drive par BDA, votre chauffeur privé à Paris et en Île-de-France.">
+<meta name="description" content="BDASH par BDA, votre chauffeur privé à Paris et en Île-de-France.">
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="B-Drive">
+<meta name="apple-mobile-web-app-title" content="BDASH">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest?v=20261016-1241">
-<link rel="apple-touch-icon" href="icone-180.png?v=20261016-1241">
-<link rel="icon" href="icone-192.png?v=20261016-1241" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?v=20261016-1553">
+<link rel="apple-touch-icon" href="icone-180.png?v=20261016-1553">
+<link rel="icon" href="icone-192.png?v=20261016-1553" type="image/png">
 </head>
-<body><title>B-Drive</title>
+<body><title>BDASH</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
@@ -94,6 +94,7 @@ a { color: inherit; text-decoration: none; }
 .haut-accueil { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .marque { display: grid; gap: 1px; }
 .marque b { font: 800 26px/1 var(--display); letter-spacing: 0.06em; }
+.marque b em { font-style: normal; color: var(--or); }
 .marque small { font: 600 10.5px/1 var(--texte-police); letter-spacing: 0.32em; text-transform: uppercase; color: var(--texte-3); }
 .avatar-btn { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); font: 800 15px/1 var(--display); }
 
@@ -711,52 +712,37 @@ button.paiement { width: 100%; text-align: left; }
 .tk-qr svg { width: 100%; height: 100%; display: block; }
 .tk-qr.sans-qr { font-size: 9px; color: #000; padding: 4px; text-align: center; overflow-wrap: anywhere; }
 
-/* ---------- Ouverture : des traînées de phares filent dans la nuit et écrivent BDA, puis l'écran s'ouvre vers le haut ---------- */
-.lancement { position: absolute; inset: 0; z-index: 90; background: #000; overflow: hidden; }
+/* ---------- Ouverture : BDASH monte lettre par lettre (BDA en blanc, SH en or), les lettres se resserrent,
+   un trait doré se dessine, puis l'écran s'ouvre vers le haut. Ni zoom ni flou sur le logo. ---------- */
+.lancement { position: absolute; inset: 0; z-index: 90; background: #000; overflow: hidden; display: grid; place-items: center; }
 .lancement::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: linear-gradient(90deg, rgba(201, 166, 107, 0), #c9a66b 25%, #e2cb9a 50%, #c9a66b 75%, rgba(201, 166, 107, 0)); opacity: 0; }
-.lancement.go { animation: l-porte 0.62s 2.95s cubic-bezier(0.76, 0, 0.24, 1) forwards; }
-.lancement.go::after { animation: l-apparait 0.2s 2.85s ease forwards; }
+.lancement.go { animation: l-porte 0.62s 2.05s cubic-bezier(0.76, 0, 0.24, 1) forwards; }
+.lancement.go::after { animation: l-apparait 0.2s 1.95s ease forwards; }
 .lancement.fini { animation: l-sortie 0.25s ease forwards; }
-.l-scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.l-trait path { fill: none; stroke: #fff; stroke-linecap: round; }
-.l-trait.or path { stroke: #e2cb9a; }
-.l-queue { stroke-width: 1.1; opacity: 0.38; stroke-dasharray: 320 1800; stroke-dashoffset: 320; }
-.l-lueur { stroke-width: 6; opacity: 0.16; stroke-dasharray: 60 1800; stroke-dashoffset: 60; }
-.l-coeur { stroke-width: 1.8; stroke-dasharray: 60 1800; stroke-dashoffset: 60; }
-.l-trait.loin path { stroke-width: 0.9; }
-.l-trait.loin { opacity: 0.55; }
-.l-faisceau { transform: translateX(0); opacity: 0; }
-.l-txt { font-family: var(--display); font-weight: 800; font-size: 104px; letter-spacing: 4px; }
-.l-contour { fill: none; stroke: #fff; stroke-width: 1.2; stroke-dasharray: 420; stroke-dashoffset: 420; }
-.l-plein { fill: #fff; }
-.l-rideau { transform-box: fill-box; transform-origin: left center; transform: scaleX(0); }
-.l-brille { transform: translateX(0) skewX(-18deg); }
-.l-sous { position: absolute; top: calc(50% + 58px); left: 0; right: 0; text-align: center; font: 600 10.5px/1 var(--texte-police); letter-spacing: 0.46em; padding-left: 0.46em; color: #9a9a9a; opacity: 0; }
-.l-ligne { position: absolute; top: calc(50% + 86px); left: 50%; width: 64px; height: 1px; margin-left: -32px; background: #c9a66b; transform: scaleX(0); }
-.go .l-trait .l-queue { animation: l-file-queue var(--d) var(--t) cubic-bezier(0.45, 0, 0.25, 1) forwards; }
-.go .l-trait .l-lueur, .go .l-trait .l-coeur { animation: l-file-tete var(--d) var(--t) cubic-bezier(0.45, 0, 0.25, 1) forwards; }
-.go .l-contour { animation: l-trace 0.9s 0.45s cubic-bezier(0.6, 0, 0.3, 1) forwards; }
-.go .l-rideau { animation: l-revele 0.6s 1.15s cubic-bezier(0.65, 0, 0.35, 1) forwards; }
-.go .l-faisceau { animation: l-balaye 0.6s 1.15s cubic-bezier(0.65, 0, 0.35, 1) forwards; }
-.go .l-brille { animation: l-reflet 0.8s 1.85s cubic-bezier(0.45, 0, 0.3, 1) forwards; }
-.go .l-sous { animation: l-sous-entre 0.7s 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-.go .l-ligne { animation: l-ligne 0.55s 1.95s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-@keyframes l-file-queue { to { stroke-dashoffset: -1000; } }
-@keyframes l-file-tete { to { stroke-dashoffset: -1260; } }
-@keyframes l-trace { to { stroke-dashoffset: 0; } }
-@keyframes l-revele { to { transform: scaleX(1); } }
-@keyframes l-balaye { 0% { opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; transform: translateX(320px); } }
-@keyframes l-reflet { to { transform: translateX(780px) skewX(-18deg); } }
-@keyframes l-sous-entre { from { opacity: 0; letter-spacing: 0.95em; } to { opacity: 1; letter-spacing: 0.46em; } }
+.l-bloc { display: grid; justify-items: center; }
+.l-mot { display: flex; gap: 0.14em; overflow: hidden; padding: 0.06em 0.02em; font: 800 64px/1 var(--display); color: #fff; }
+.l-mot span { display: block; transform: translateY(110%); }
+.l-mot .or { color: #c9a66b; }
+.l-ligne { width: 56px; height: 1px; margin-top: 18px; background: #c9a66b; transform: scaleX(0); }
+.l-sous { margin-top: 16px; font: 600 10.5px/1 var(--texte-police); letter-spacing: 0.46em; padding-left: 0.46em; color: #8a8a8a; opacity: 0; transform: translateY(6px); }
+.go .l-mot { animation: l-serre 1.5s 0.1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.go .l-mot span { animation: l-monte 0.62s calc(0.15s + var(--i) * 0.07s) cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.go .l-ligne { animation: l-ligne 0.55s 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.go .l-sous { animation: l-sous-entre 0.5s 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+.go .l-bloc { animation: l-leve 0.35s 1.9s cubic-bezier(0.55, 0, 0.75, 0) forwards; }
+@keyframes l-monte { to { transform: none; } }
+@keyframes l-serre { to { gap: 0.035em; } }
 @keyframes l-ligne { to { transform: scaleX(1); } }
+@keyframes l-sous-entre { to { opacity: 1; transform: none; } }
+@keyframes l-leve { to { opacity: 0; transform: translateY(-14px); } }
 @keyframes l-apparait { to { opacity: 1; } }
 @keyframes l-porte { to { transform: translateY(-100%); } }
 @keyframes l-sortie { to { opacity: 0; visibility: hidden; } }
 @media (prefers-reduced-motion: reduce) {
   .lancement.go { animation: l-sortie 0.3s 0.9s forwards; }
   .lancement *, .lancement::after { animation: none !important; }
-  .l-contour { stroke-dashoffset: 0; }
-  .l-rideau, .l-ligne { transform: none; }
+  .l-mot { gap: 0.035em; }
+  .l-mot span, .l-ligne, .l-sous { transform: none; }
   .l-sous { opacity: 1; }
   .p, .cx, .feuille, .modale, .coche { animation: none; }
 }
@@ -858,24 +844,12 @@ button.paiement { width: 100%; text-align: left; }
   <section class="suivi" id="suivi" hidden aria-label="Aperçu du suivi envoyé aux proches"></section>
   <div class="toast" id="toast" role="status"><svg class="ic"><use href="#i-info"/></svg><span></span></div>
   <div id="couche"></div>
-  <div class="lancement" id="lancement" data-a="passerLancement" aria-label="Ouverture de l’appli BDA">
-    <svg class="l-scene" viewBox="0 0 400 860" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <radialGradient id="l-nuit" cx=".5" cy=".5" r=".62"><stop offset="0" stop-color="#141414"/><stop offset="1" stop-color="#000"/></radialGradient>
-        <linearGradient id="l-or" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#e2cb9a" stop-opacity="0"/><stop offset=".5" stop-color="#e2cb9a"/><stop offset="1" stop-color="#e2cb9a" stop-opacity="0"/></linearGradient>
-        <linearGradient id="l-blanc" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
-        <clipPath id="l-forme"><text class="l-txt" x="200" y="466" text-anchor="middle">BDA</text></clipPath>
-        <clipPath id="l-voile"><rect class="l-rideau" x="40" y="360" width="320" height="130"/></clipPath>
-      </defs>
-      <rect width="400" height="860" fill="url(#l-nuit)"/>
-      <g id="l-traits"></g>
-      <text class="l-txt l-plein" x="200" y="466" text-anchor="middle" clip-path="url(#l-voile)">BDA</text>
-      <g clip-path="url(#l-forme)"><rect class="l-brille" x="-150" y="360" width="80" height="130" fill="url(#l-or)"/></g>
-      <text class="l-txt l-contour" x="200" y="466" text-anchor="middle">BDA</text>
-      <g class="l-faisceau"><rect x="33" y="340" width="14" height="170" fill="url(#l-blanc)" opacity=".16"/><rect x="39.2" y="340" width="1.6" height="170" fill="url(#l-blanc)"/></g>
-    </svg>
-    <div class="l-sous">B-DRIVE · CHAUFFEUR PRIVÉ</div>
-    <div class="l-ligne"></div>
+  <div class="lancement" id="lancement" data-a="passerLancement" aria-label="Ouverture de BDASH">
+    <div class="l-bloc">
+      <div class="l-mot" aria-hidden="true"><span style="--i:0">B</span><span style="--i:1">D</span><span style="--i:2">A</span><span class="or" style="--i:3.6">S</span><span class="or" style="--i:4.6">H</span></div>
+      <div class="l-ligne"></div>
+      <div class="l-sous">CHAUFFEUR PRIVÉ</div>
+    </div>
   </div>
 </div>
 
@@ -2450,7 +2424,7 @@ button.paiement { width: 100%; text-align: left; }
         <h1>Votre chauffeur privé, à Paris et en Île-de-France.</h1>
         <input class="cx-champ" id="cx-email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" placeholder="Votre adresse e-mail" value="${esc(a.email)}" aria-label="Adresse e-mail">
         ${err}${bouton('cxEmail', 'Continuer')}
-        <p class="cx-legal">${etat.config.prive ? 'BDA est en phase privée : la création d’un compte demande un code d’accès donné par BDA. ' : ''}Vos informations servent uniquement à vos courses. Elles ne sont jamais vendues.</p>
+        <p class="cx-legal">${etat.config.prive ? 'BDASH est en phase privée : la création d’un compte demande un code d’accès donné par BDA. ' : ''}Vos informations servent uniquement à vos courses. Elles ne sont jamais vendues.</p>
       </div>`;
   }
   function renduConnexion(focus) {
@@ -2767,7 +2741,7 @@ button.paiement { width: 100%; text-align: left; }
         <canvas id="heros-carte" aria-hidden="true"></canvas>
         <span class="heros-ambiance"></span><span class="heros-voile"></span>
         <span class="chargement" id="heros-chargement">Chargement de la carte…</span>
-        <div class="heros-haut"><span class="marque"><b>B-Drive</b><small>Chauffeur privé · BDA</small></span><button class="avatar-btn verre ${niv.cle}" type="button" data-a="onglet" data-v="compte" aria-label="Mon compte">${esc(initiales())}</button></div>
+        <div class="heros-haut"><span class="marque"><b>BDA<em>SH</em></b><small>Chauffeur privé</small></span><button class="avatar-btn verre ${niv.cle}" type="button" data-a="onglet" data-v="compte" aria-label="Mon compte">${esc(initiales())}</button></div>
         <button class="heros-pastille" type="button" data-a="destination"><i></i><span id="heros-dispo">${esc(texteDispo())}</span></button>
         <h1 class="salut">${h >= 5 && h < 18 ? 'Bonjour' : 'Bonsoir'}${prenom}<span>Votre chauffeur vous attend.</span></h1>
       </div>
@@ -2851,7 +2825,7 @@ button.paiement { width: 100%; text-align: left; }
         ${ligne({ icone: 'livre', titre: 'Informations légales', sous: 'Conditions, confidentialité, mentions légales', a: 'sousPage', v: 'legal' })}
         ${ligne({ icone: 'globe', titre: 'Site web BDA', href: 'https://bdasecurite.com/' })}
       </div>
-      <p class="version">${REEL ? 'B-Drive v1.0 · phase privée' : 'v0.5 · prototype · aucune course réelle'} · carte © OpenStreetMap, adresses BAN</p>
+      <p class="version">${REEL ? 'BDASH v1.0 · phase privée' : 'v0.5 · prototype · aucune course réelle'} · carte © OpenStreetMap, adresses BAN</p>
     </div>`;
   }
   /* ================= Textes légaux (lisibles dans l'appli, exigés par Apple et Google) ================= */
@@ -2859,7 +2833,7 @@ button.paiement { width: 100%; text-align: left; }
     cgv: () => ({ titre: 'Conditions générales', html: `
       <p class="petit">Conditions générales d’utilisation et de vente · version du ${LEGAL.version}</p>
       <h3>1. Qui sommes-nous</h3>
-      <p>L’appli B-Drive permet de réserver un chauffeur privé (voiture de transport avec chauffeur, VTC) à Paris et en Île-de-France. Le transport est réalisé par ${esc(LEGAL.exploitant)}, enseigne ${esc(LEGAL.enseigne)}, SIRET ${esc(LEGAL.siret)}, ${esc(LEGAL.adresse)}, inscrit au registre des exploitants VTC sous le n° ${aCompleter(LEGAL.evtc)}.</p>
+      <p>L’appli BDASH permet de réserver un chauffeur privé (voiture de transport avec chauffeur, VTC) à Paris et en Île-de-France. Le transport est réalisé par ${esc(LEGAL.exploitant)}, enseigne ${esc(LEGAL.enseigne)}, SIRET ${esc(LEGAL.siret)}, ${esc(LEGAL.adresse)}, inscrit au registre des exploitants VTC sous le n° ${aCompleter(LEGAL.evtc)}.</p>
       <h3>2. Votre compte</h3>
       <p>Il faut avoir 18 ans ou plus pour créer un compte. Un mineur ne voyage pas seul : il est accompagné, ou un adulte réserve pour lui et reste joignable. Vos informations doivent être exactes ; votre compte est personnel.</p>
       <h3>3. Réservation préalable</h3>
@@ -2904,7 +2878,7 @@ button.paiement { width: 100%; text-align: left; }
       <h3>Option VIP (protection rapprochée)</h3>
       <p>${esc(LEGAL.protection)}<br>Autorisation d’exercice CNAPS n° ${aCompleter(LEGAL.cnaps)}<br>${MENTION_CNAPS}</p>
       <h3>Marque</h3>
-      <p>B-Drive et BDA Security Group sont les marques commerciales des structures ci-dessus.</p>
+      <p>BDASH et BDA Security Group sont les marques commerciales des structures ci-dessus.</p>
       <h3>Carte et adresses</h3>
       <p>Données cartographiques © les contributeurs d’OpenStreetMap, sous licence ODbL. Adresses : Base Adresse Nationale, Licence Ouverte. Pays et villes : Natural Earth (domaine public).</p>
       <h3>Hébergement</h3>
@@ -4424,7 +4398,7 @@ button.paiement { width: 100%; text-align: left; }
   function modeSuiviPublic(j) {
     suiviPublic = { j, d: null, fini: false };
     $('#lancement').hidden = true; connexion.hidden = true; nav.hidden = true;
-    document.title = 'Suivi B-Drive en direct';
+    document.title = 'Suivi BDASH en direct';
     const s = $('#suivi');
     s.classList.add('suivi-public'); s.hidden = false;
     s.innerHTML = `<div class="suivi-navig"></div><div class="suivi-corps">
@@ -4955,7 +4929,7 @@ button.paiement { width: 100%; text-align: left; }
     'Mot de passe (8 caractères, une lettre et un chiffre)': 'Password (8 characters, one letter and one number)', 'L’appli est en phase privée : le code vous est donné par BDA.': 'The app is in a private phase: BDA gives you the code.',
     'Vérifiez vos e-mails': 'Check your email', 'Retour': 'Back', 'Choisissez un nouveau mot de passe': 'Choose a new password', 'Enregistrer et me connecter': 'Save and sign in', 'Un instant…': 'One moment…',
     'Vos informations servent uniquement à vos courses. Elles ne sont jamais vendues.': 'Your details are only used for your rides. They are never sold.',
-    'BDA est en phase privée : la création d’un compte demande un code d’accès donné par BDA. Vos informations servent uniquement à vos courses. Elles ne sont jamais vendues.': 'BDA is in a private phase: creating an account requires an access code from BDA. Your details are only used for your rides. They are never sold.',
+    'BDASH est en phase privée : la création d’un compte demande un code d’accès donné par BDA. Vos informations servent uniquement à vos courses. Elles ne sont jamais vendues.': 'BDASH is in a private phase: creating an account requires an access code from BDA. Your details are only used for your rides. They are never sold.',
     'Me prévenir par notification': 'Notify me', 'Aucun chauffeur libre': 'No driver free', 'Aucun chauffeur libre pour l’instant · réservez à l’avance': 'No driver free right now · book ahead', 'Chauffeurs BDA autour de vous': 'BDA drivers around you',
     'À bord': 'On board', 'À régler à bord, au chauffeur': 'Pay on board, to the driver', 'Total TTC': 'Total incl. VAT', 'À bord, auprès du chauffeur': 'On board, to the driver',
     'Votre reçu est envoyé par e-mail et reste dans Activité.': 'Your receipt is emailed and stays in Activity.', 'Aucun chauffeur disponible': 'No driver available', 'Réessayer': 'Try again',
@@ -4963,7 +4937,7 @@ button.paiement { width: 100%; text-align: left; }
     'Votre mot de passe, pour confirmer': 'Your password, to confirm', 'Activer les notifications': 'Turn on notifications', 'Lien de suivi': 'Tracking link', 'Voir la page de suivi': 'View the tracking page',
     'Appeler le 17': 'Call 17 (police)', 'Prévenir l’assistance BDA': 'Alert BDA assistance', 'Annuler': 'Cancel', 'Bientôt : payer dans l’appli': 'Coming soon: pay in the app', 'À bord, au chauffeur': 'On board, to the driver',
     'Espèces ou carte bancaire, à la fin de la course': 'Cash or card, at the end of the ride', 'Suivi en direct': 'Live tracking', 'Chargement du suivi…': 'Loading tracking…',
-    'B-DRIVE · CHAUFFEUR PRIVÉ': 'B-DRIVE · PRIVATE DRIVER', 'Chauffeur privé · BDA': 'Private driver · BDA',
+    
     'Démo : choix entre compte personnel et compte entreprise.': 'Demo: choose between personal and business account.', 'Démo : le lien s’ouvrirait dans vos SMS ou WhatsApp.': 'Demo: the link would open in your texts or WhatsApp.', 'Recherche de l’adresse exacte…': 'Finding the exact address…',
   }));
   const VOITURE_EN = (t) => t.replace(/Classe ([A-Z])/g, '$1-Class').replace(/ ou similaire/g, ' or similar').replace(/\bnoire?\b/g, 'black').replace(/\bNoire?\b/g, 'Black').replace(/\bblanche?\b/g, 'white').replace(/\bBlanche?\b/g, 'White');
@@ -5047,7 +5021,7 @@ button.paiement { width: 100%; text-align: left; }
   });
   observateurLangue.observe(appareil, { childList: true, subtree: true, characterData: true });
   function traduireTout() {
-    document.title = 'B-Drive';
+    document.title = 'BDASH';
     if (etat.langue === 'en') { traduireElement(appareil); return; }
     // retour au français : on remet les textes d'origine des éléments fixes, puis on redessine les écrans
     const w = document.createTreeWalker(appareil, NodeFilter.SHOW_TEXT);
@@ -5057,24 +5031,10 @@ button.paiement { width: 100%; text-align: left; }
   }
 
   /* ================= Démarrage ================= */
-  // traînées de phares de l'ouverture : tracé, départ (s), durée (s), dorée ou non
-  const TRAITS = [
-    ['M-60 610C90 560 150 470 210 452S330 400 470 330', 0, 1.1],
-    ['M470 560C330 520 250 470 200 440S70 360 -60 350', 0.12, 1.15],
-    ['M-60 500C100 480 300 470 470 430', 0.2, 0.95, 1],
-    ['M-60 740C120 640 220 520 260 470S360 320 470 260', 0.3, 1.2],
-    ['M470 700C320 620 180 520 140 460S60 300 -60 220', 0.38, 1.25],
-    ['M-60 400C120 440 280 420 470 380', 0.5, 0.9],
-    ['M470 470C300 455 120 430 -60 470', 0.6, 0.95, 1],
-    ['M-60 300C80 360 220 410 470 520', 0.68, 1],
-    ['M470 620C300 560 120 520 -60 560', 0.95, 1.1, 0, 1],
-    ['M-60 450C140 420 260 400 470 410', 1.1, 1.05, 1, 1],
-    ['M470 330C320 360 140 380 -60 420', 1.3, 1.1, 0, 1],
-  ];
-  $('#l-traits').innerHTML = TRAITS.map(([d, t, duree, or, loin]) => `<g class="l-trait${or ? ' or' : ''}${loin ? ' loin' : ''}" style="--t:${t}s;--d:${duree}s">${['queue', 'lueur', 'coeur'].map((c) => `<path class="l-${c}" pathLength="1000" d="${d}"/>`).join('')}</g>`).join('');
+  // ouverture : on attend la police du logo (0,9 s au plus) pour que BDASH ne change pas de forme en montant
   function demarrerOuverture(l) {
-    const go = () => { l.classList.add('go'); setTimeout(() => { if (l.isConnected) l.hidden = true; }, 3650); };
-    const police = document.fonts && document.fonts.load ? document.fonts.load('800 92px Manrope') : Promise.resolve();
+    const go = () => { l.classList.add('go'); setTimeout(() => { if (l.isConnected) l.hidden = true; }, 2750); };
+    const police = document.fonts && document.fonts.load ? document.fonts.load('800 64px Manrope') : Promise.resolve();
     Promise.race([police, new Promise((ok) => setTimeout(ok, 900))]).then(go, go);
   }
   function lancerOuverture() {

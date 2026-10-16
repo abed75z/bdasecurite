@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="B-Drive Pro, l’appli des chauffeurs BDA.">
+<meta name="description" content="BDASH Pro, l’appli des chauffeurs BDA.">
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="B-Drive Pro">
+<meta name="apple-mobile-web-app-title" content="BDASH Pro">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest?v=20261016-1241">
-<link rel="apple-touch-icon" href="icone-180.png?v=20261016-1241">
-<link rel="icon" href="icone-192.png?v=20261016-1241" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?v=20261016-1553">
+<link rel="apple-touch-icon" href="icone-180.png?v=20261016-1553">
+<link rel="icon" href="icone-192.png?v=20261016-1553" type="image/png">
 </head>
-<body><title>B-Drive Pro</title>
+<body><title>BDASH Pro</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
@@ -210,6 +210,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
 .connexion { position: absolute; inset: 0; z-index: 60; display: grid; align-content: end; gap: 14px; padding: 26px 22px 34px; background: radial-gradient(90% 60% at 50% 18%, rgba(201, 166, 107, 0.18), transparent 70%), #000; color: #fff; }
 .connexion .logo { align-self: center; justify-self: center; margin-bottom: auto; margin-top: 18cqh; text-align: center; }
 .connexion .logo b { display: block; font: 800 64px/1 var(--display); letter-spacing: 4px; }
+.connexion .logo b em { font-style: normal; color: var(--or); }
 .connexion .logo span { display: block; margin-top: 10px; font: 600 11px/1 var(--texte-police); letter-spacing: 0.42em; padding-left: 0.42em; color: var(--or-clair); }
 .connexion h1 { margin: 0; font: 800 26px/1.15 var(--display); letter-spacing: -0.02em; }
 .connexion p { margin: 0; color: #a7a7a7; font-size: 14px; }
@@ -339,7 +340,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
   <div class="toast" id="toast" role="status"><span></span></div>
   <div id="couche"></div>
   <div class="connexion" id="connexion">
-    <div class="logo"><b>B-Drive</b><span>PRO · CHAUFFEURS BDA</span></div>
+    <div class="logo"><b>BDA<em>SH</em></b><span>PRO · CHAUFFEURS</span></div>
     <h1>Bonjour, chauffeur BDA</h1>
     <p>Connectez-vous avec votre numéro de carte professionnelle VTC.</p>
     <div class="champ-faux">N° de carte VTC</div>
@@ -1695,7 +1696,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
 
   /* ----- Connexion ----- */
   function vueConnexionReelle(erreur = '', identifiant = '') {
-    $('#connexion').innerHTML = `<div class="logo"><b>B-Drive</b><span>PRO · CHAUFFEURS BDA</span></div>
+    $('#connexion').innerHTML = `<div class="logo"><b>BDA<em>SH</em></b><span>PRO · CHAUFFEURS</span></div>
       <h1>Bonjour, chauffeur BDA</h1>
       <p>Connectez-vous avec votre identifiant de l’Espace équipe BDA.</p>
       <input id="cx-id" type="text" autocomplete="username" autocapitalize="off" placeholder="Identifiant ou e-mail" value="${esc(identifiant)}">
@@ -1968,7 +1969,7 @@ button { cursor: pointer; background: none; border: 0; padding: 0; -webkit-tap-h
       <div class="ligne"><span class="pastille">${ic('cloche', 'ic-s')}</span><span><b>Sons</b><small>Nouvelle course, client à bord</small></span><button class="interrupteur" type="button" role="switch" aria-checked="${etat.sons}" data-a="basculerSons" aria-label="Sons"></button></div>
       <div class="numero"><span><small class="petit">Assistance chauffeurs BDA, 24 h/24</small><br><b>06 11 67 86 25</b></span>${ic('telephone')}</div>
       <button class="btn btn-second" type="button" data-a="deconnexion">${ic('sortie')}Se déconnecter</button>
-      <p class="petit centre">B-Drive Pro · v1.0 · phase privée · connecté : ${esc(CHAUFFEUR.identifiant || '')}</p>
+      <p class="petit centre">BDASH Pro · v1.0 · phase privée · connecté : ${esc(CHAUFFEUR.identifiant || '')}</p>
     </div>`;
   }
   const ligneBon = (t, v) => `<div><span>${t}</span><b>${v}</b></div>`;

@@ -448,7 +448,7 @@ function appli_recu(array $c): string
   $eur = fn(float $n) => number_format($n, $n == floor($n) ? 0 : 2, ',', ' ') . ' €';
   $lignes = [
     'Bonjour ' . ($d['client']['prenom'] ?? '') . ',', '',
-    'Merci d’avoir voyagé avec B-Drive. Voici le reçu de votre course.', '',
+    'Merci d’avoir voyagé avec BDASH. Voici le reçu de votre course.', '',
     'Course n° ' . $c['numero'],
     'Date : ' . date('d/m/Y', strtotime((string)($c['debut'] ?: $c['quand']))) . ', de ' . date('H\hi', strtotime((string)($c['debut'] ?: $c['quand']))) . ' à ' . date('H\hi', strtotime((string)($c['fin'] ?: maintenant()))),
     'Départ : ' . trim(($d['depart']['titre'] ?? '') . ', ' . ($d['depart']['sous'] ?? ''), ', '),

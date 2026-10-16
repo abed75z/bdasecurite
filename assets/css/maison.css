@@ -555,3 +555,154 @@ body:has(.mobile-bar) .wa { bottom: calc(20px + env(safe-area-inset-bottom)) !im
 @media (max-width: 720px) {
   .ac-hero--photo .ac-fond::after { background: linear-gradient(180deg, rgba(5, 6, 8, 0.72) 0%, rgba(5, 6, 8, 0.52) 24%, rgba(5, 6, 8, 0.58) 62%, rgba(5, 6, 8, 0.9) 100%); }
 }
+
+/* =========================================================
+   17/10/2026 (2) — EN-TÊTE ORDINATEUR, ANIMATIONS, RECRUTEMENT, ENTREPRISES
+   ========================================================= */
+
+/* --- Ordinateur : « Réserver » à gauche, un seul « Mon compte » à droite --- */
+.nav--v2 .nav__reserver-pc, .nav--v2 .nav__compte { display: none; }
+@media (min-width: 1081px) {
+  .nav--v2 .nav__espace { display: none !important; }
+  .nav--v2 .nav__reserver-pc, .nav--v2 .nav__compte {
+    display: inline-flex !important; align-items: center; justify-content: center; gap: 8px; flex: none;
+    width: auto !important; height: 36px !important; padding: 0 16px !important;
+    border: 1px solid rgba(243, 239, 232, 0.55) !important; border-radius: 4px !important;
+    background: transparent !important; color: #f3efe8 !important; text-decoration: none !important;
+    font: 400 13.5px/1 var(--m-texte) !important; letter-spacing: 0 !important; white-space: nowrap; cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+  }
+  .nav--v2 .nav__reserver-pc:hover, .nav--v2 .nav__compte:hover, .nav--v2 .nav__compte[aria-expanded="true"] {
+    background: #f3efe8 !important; border-color: #f3efe8 !important; color: #0b0b0c !important;
+  }
+  .nav--v2 .nav__compte span { display: inline !important; }
+  .nav--v2 .nav__compte .nav__chev { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.5; color: inherit !important; transition: transform 0.3s ease; }
+  .nav--v2 .nav__compte[aria-expanded="true"] .nav__chev { transform: rotate(180deg); }
+  .nav--v2 .nav__compte::after { display: none !important; }
+}
+@media (max-width: 1080px) { .nav--v2 .nav__compte { display: none !important; } }
+
+/* Fenêtre « Mon compte » : espace client ou espace agent */
+.nav--v2 .cx-pop { border-radius: 6px !important; padding: 6px !important; min-width: 300px !important; }
+.nav--v2 .cx-pop__titre { padding: 10px 12px 10px !important; font: 500 11px/1 var(--m-texte) !important; letter-spacing: 0.22em !important; color: #c9a874 !important; }
+.nav--v2 .cx-pop__choix { border-radius: 4px !important; padding: 12px !important; }
+.nav--v2 .cx-pop__choix + .cx-pop__choix { border-top: 1px solid rgba(243, 239, 232, 0.08); border-radius: 0 0 4px 4px !important; }
+.nav--v2 .cx-pop__ico { width: 26px !important; height: 26px !important; background: none !important; border-radius: 0 !important; color: #c9a874 !important; }
+.nav--v2 .cx-pop__ico svg { width: 20px !important; height: 20px !important; stroke-width: 1.2 !important; }
+.nav--v2 .cx-pop__txt b { font: 400 14.5px/1.3 var(--m-texte) !important; color: #f3efe8 !important; }
+.nav--v2 .cx-pop__txt small { font-size: 12.5px !important; }
+.nav--v2 .cx-pop__fl { transition: transform 0.3s ease; }
+.nav--v2 .cx-pop__choix:hover .cx-pop__fl { transform: translateX(3px); stroke: #c9a874; }
+
+/* --- Animations : discrètes, nettes, haut de gamme --- */
+/* Reflet de lumière qui traverse les boutons au survol */
+html body .btn::after {
+  content: "" !important; display: block !important; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  border-radius: inherit; opacity: 1 !important;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.3) 50%, transparent 62%) !important;
+  transform: translateX(-115%); transition: none !important;
+}
+html body .btn:hover::after { transform: translateX(115%); transition: transform 0.85s cubic-bezier(0.22, 0.61, 0.36, 1) !important; }
+/* Flèches qui avancent d'un cran */
+.btn .icon--arrow, .tuile__lien .icon, .lp-card a .icon, .lp-list a .icon { transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) !important; }
+.btn:hover .icon--arrow, .tuile:hover .tuile__lien .icon, .lp-card:hover a .icon, .lp-list a:hover .icon { transform: translateX(4px); }
+/* Cartes : un filet champagne se trace en haut au survol, l'icône se dore */
+.tuiles > .tuile, .tuiles > .tuile.rv, .lp-cards > .lp-card, .lp-cards > .lp-card.cascade {
+  background-image: linear-gradient(var(--m-champagne), var(--m-champagne)) !important;
+  background-repeat: no-repeat !important; background-position: 0 0 !important; background-size: 0% 1px !important;
+  transition: background-color 0.3s ease, background-size 0.8s cubic-bezier(0.22, 0.61, 0.36, 1) !important;
+}
+.tuiles > .tuile:hover, .lp-cards > .lp-card:hover { background-size: 100% 1px !important; }
+.tuile__ico, .lp-card .ico, .lp-card > svg { transition: color 0.4s ease !important; }
+.tuile:hover .tuile__ico, .lp-card:hover .ico, .lp-card:hover > svg { color: var(--m-champagne) !important; }
+/* Accueil : la mention au-dessus du titre se resserre en apparaissant */
+@keyframes m-espacement { from { opacity: 0; letter-spacing: 0.62em; } to { opacity: 1; letter-spacing: 0.24em; } }
+.ac-hero--photo .ac-hero__sur { animation: m-espacement 1.8s cubic-bezier(0.22, 0.61, 0.36, 1) 0.15s both !important; }
+/* Photos des pages : léger rapprochement au survol */
+.lp-photo img { transition: transform 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) !important; }
+.lp-photo.vu:hover img { transform: scale(1.035) !important; }
+/* Liens du menu ordinateur : un trait fin se dessine sous le mot */
+@media (min-width: 1081px) {
+  .nav--v2 .nav__drop-btn, .nav--v2 .nav__links--d > a { background: linear-gradient(currentColor, currentColor) no-repeat 50% calc(100% - 4px) / 0 1px !important; transition: background-size 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), color 0.3s !important; }
+  .nav--v2 .nav__drop-btn:hover, .nav--v2 .nav__drop-btn[aria-expanded="true"], .nav--v2 .nav__links--d > a:hover { background-size: calc(100% - 20px) 1px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .btn::after { display: none !important; }
+  .ac-hero--photo .ac-hero__sur { animation: none !important; }
+  .lp-photo.vu:hover img { transform: none !important; }
+}
+
+/* --- Champs de formulaire : une ligne fine, comme sur papier --- */
+.rc .rc-champ input, .rc .rc-champ select, .ent-champ input, .ent-champ select {
+  height: 46px !important; padding: 0 2px !important;
+  border: 0 !important; border-bottom: 1px solid #cfcac1 !important; border-radius: 0 !important;
+  background-color: transparent !important; box-shadow: none !important;
+  font: 400 15px var(--m-texte) !important; color: #0b0b0c !important;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+.rc .rc-champ textarea, .ent-champ textarea { border: 1px solid #cfcac1 !important; border-radius: 4px !important; background: transparent !important; font: 400 15px var(--m-texte) !important; box-shadow: none !important; }
+.rc .rc-champ input:focus, .rc .rc-champ select:focus, .ent-champ input:focus, .ent-champ select:focus { border-bottom-color: #0b0b0c !important; box-shadow: 0 1px 0 #0b0b0c !important; outline: none !important; }
+.rc .rc-champ textarea:focus, .ent-champ textarea:focus { border-color: #0b0b0c !important; outline: none !important; }
+.rc .rc-champ > span, .ent-champ > span { font-weight: 400 !important; font-size: 13px !important; color: #5b5b60 !important; letter-spacing: 0.01em; }
+.rc .rc-cases span, .ent-cases span, .rc .rc-postes span { border-radius: 4px !important; font-weight: 400 !important; transition: border-color 0.25s, background-color 0.25s, color 0.25s !important; }
+.rc .rc-postes b { font-weight: 500 !important; }
+.rc .rc-postes input:checked + span { background: #0b0b0c !important; border-color: #0b0b0c !important; box-shadow: none !important; }
+.rc .rc-postes input:checked + span b { color: #fff !important; }
+.rc .rc-postes input:checked + span small { color: rgba(243, 239, 232, 0.7) !important; }
+.rc .rc-envoyer { border-radius: 4px !important; font: 400 15px var(--m-texte) !important; height: 54px !important; }
+
+/* --- Recrutement : bandeau photo, formulaire en carte --- */
+.rc { overflow-x: clip; padding-top: 0 !important; background: #f6f3ee !important; }
+.rc__page { max-width: 860px !important; }
+.rc__tete {
+  position: relative; isolation: isolate; text-align: center;
+  margin: 0 !important; border: 0 !important;
+  padding: calc(var(--nav-h, 76px) + clamp(54px, 7vw, 96px)) 0 calc(clamp(60px, 7vw, 96px) + 56px) !important;
+}
+.rc__tete::before {
+  content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: calc(50% - 50vw); width: 100vw;
+  background:
+    linear-gradient(180deg, rgba(5, 6, 8, 0.78) 0%, rgba(5, 6, 8, 0.55) 45%, rgba(5, 6, 8, 0.82) 100%),
+    #0e0e10 url("https://images.unsplash.com/photo-1672738187618-985c1b6b0177?auto=format&fit=crop&w=2000&q=70") 50% 45% / cover no-repeat;
+}
+.rc__sur { color: rgba(243, 239, 232, 0.82) !important; animation: m-espacement 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) 0.1s both; }
+.rc__titre { color: #fff !important; font-size: clamp(2.3rem, 1.6rem + 2.6vw, 3.8rem) !important; font-weight: 300 !important; }
+.rc__intro { max-width: 34em; margin: 16px auto 0 !important; color: rgba(243, 239, 232, 0.8) !important; font-weight: 300; }
+main.rc .apply-card {
+  position: relative; margin-top: -56px !important;
+  padding: clamp(24px, 4.5vw, 52px) !important; background: #fff !important;
+  border: 1px solid rgba(11, 11, 12, 0.1) !important; border-radius: 6px !important;
+}
+/* Étapes numérotées en continu (01, 02…), même quand une étape est masquée */
+.rc .rc-form { counter-reset: rc-etape; gap: 42px !important; }
+.rc-bloc:not([hidden]) { counter-increment: rc-etape; }
+.rc .rc-bloc legend { gap: 14px !important; padding-bottom: 14px !important; border-bottom-color: rgba(11, 11, 12, 0.12) !important; font: 400 17px/1.2 var(--m-texte) !important; letter-spacing: -0.005em; }
+.rc .rc-bloc legend > span { width: auto !important; height: auto !important; border: 0 !important; border-radius: 0 !important; font-size: 0 !important; }
+.rc .rc-bloc legend > span::before { content: counter(rc-etape, decimal-leading-zero); font: 300 17px/1 var(--m-texte); letter-spacing: 0.04em; color: var(--m-champagne); }
+@media (max-width: 640px) { main.rc .apply-card { margin-top: -40px !important; } }
+
+/* --- Entreprises : carte du formulaire plus aérée, étapes numérotées --- */
+.ent-carte { border-radius: 6px !important; box-shadow: none !important; border: 1px solid rgba(11, 11, 12, 0.1) !important; padding: clamp(24px, 3.6vw, 44px) !important; }
+.ent-form { counter-reset: ent-etape; }
+.ent-bloc { counter-increment: ent-etape; }
+.ent-bloc legend { display: flex; align-items: baseline; gap: 12px; border-bottom-color: rgba(11, 11, 12, 0.12) !important; }
+.ent-bloc legend::before { content: counter(ent-etape, decimal-leading-zero); font: 300 13px/1 var(--m-texte); letter-spacing: 0.06em; color: var(--m-champagne); }
+.ent-points li { transition: color 0.3s ease; }
+@media (min-width: 1000px) {
+  .ent-demande__texte { position: sticky; top: calc(var(--nav-h, 76px) + 40px); align-self: start; }
+}
+/* Priorité sur les règles des liens du menu */
+@media (min-width: 1081px) {
+  html body .nav.nav--v2 .nav__links > a.nav__reserver-pc, html body .nav.nav--v2 a.nav__compte {
+    display: inline-flex !important; height: 36px !important; padding: 0 16px !important;
+    border: 1px solid rgba(243, 239, 232, 0.55) !important; border-radius: 4px !important;
+    background: transparent !important; color: #f3efe8 !important; font-weight: 400 !important;
+  }
+  html body .nav.nav--v2 .nav__links > a.nav__reserver-pc:hover,
+  html body .nav.nav--v2 a.nav__compte:hover, html body .nav.nav--v2 a.nav__compte[aria-expanded="true"] {
+    background: #f3efe8 !important; border-color: #f3efe8 !important; color: #0b0b0c !important;
+  }
+  html body .nav.nav--v2 a.nav__compte:hover span, html body .nav.nav--v2 a.nav__compte[aria-expanded="true"] span,
+  html body .nav.nav--v2 a.nav__compte:hover .nav__chev, html body .nav.nav--v2 a.nav__compte[aria-expanded="true"] .nav__chev { color: #0b0b0c !important; stroke: #0b0b0c !important; }
+}
+.ent-points li { font-weight: 400 !important; }

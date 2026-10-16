@@ -121,7 +121,7 @@ export function pagePaiements(ctx) {
       const num = (v) => String(Math.round(v * 100) / 100).replace('.', ',');
       const lignes = [['Date', 'Course', 'Client', 'Chauffeur', 'Gamme', 'Transport', 'Remise', 'Garde du corps', 'Total TTC', 'Paiement'].map(cel).join(';')]
         .concat(faites.slice().reverse().map((c) => [jourHeure(c.quand), c.numero, nomClient(c), c.chauffeur ? c.chauffeur.nom : '', c.gammeNom, num(c.transport), num(c.remise), num(c.protection), num(c.total), 'À bord'].map(cel).join(';')));
-      const a = h('a', { href: URL.createObjectURL(new Blob(['﻿' + lignes.join('\r\n')], { type: 'text/csv;charset=utf-8' })), download: 'Paiements appli B-Drive.csv' });
+      const a = h('a', { href: URL.createObjectURL(new Blob(['﻿' + lignes.join('\r\n')], { type: 'text/csv;charset=utf-8' })), download: 'Paiements appli BDASH.csv' });
       document.body.append(a); a.click(); a.remove();
       setTimeout(() => URL.revokeObjectURL(a.href), 3000);
     };

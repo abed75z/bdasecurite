@@ -45,7 +45,7 @@ const ESPACES = {
     ],
   },
   appli: {
-    nom: 'Application VTC', court: 'Application', accueil: 'appli', externe: ['/appli/', 'Ouvrir B-Drive'],
+    nom: 'Application VTC', court: 'Application', accueil: 'appli', externe: ['/appli/', 'Ouvrir BDASH'],
     menu: [
       { chemin: 'appli', libelle: 'En direct', badge: 'appli', alerte: true },
       { groupe: 'Activité' },

@@ -71,13 +71,13 @@ const ONGLETS = [['', 'En direct'], ['courses', 'Courses'], ['chauffeurs', 'Chau
 
 export async function pageAppli(ctx) {
   installerStyle();
-  ctx.titre('Appli BDA');
+  ctx.titre('Appli B-Drive');
   clearInterval(minuteur);
   const onglet = ctx.params[0] || '';
   const barre = h('div', { class: 'onglets' }, ONGLETS.map(([k, l]) => h('a', { class: `onglet ${k === onglet ? 'is-actif' : ''}`, href: `#/appli${k ? '/' + k : ''}` }, l)));
   ctx.actions(
-    h('a', { class: 'btn btn--ghost', href: '/appli/', target: '_blank', rel: 'noopener' }, icone('mobile'), 'Appli client'),
-    h('a', { class: 'btn btn--ghost', href: '/appli/chauffeur/', target: '_blank', rel: 'noopener' }, icone('voiture'), 'Appli chauffeur'));
+    h('a', { class: 'btn btn--ghost', href: '/appli/', target: '_blank', rel: 'noopener' }, icone('mobile'), 'B-Drive (clients)'),
+    h('a', { class: 'btn btn--ghost', href: '/appli/chauffeur/', target: '_blank', rel: 'noopener' }, icone('voiture'), 'B-Drive Pro (chauffeurs)'));
   const pages = { '': enDirect, courses: historique, chauffeurs: pageChauffeurs, clients: pageClients, reglages: pageReglages };
   await (pages[onglet] || enDirect)(ctx, barre);
 }
@@ -91,7 +91,7 @@ async function enDirect(ctx, barre) {
   const enLigne = t.chauffeurs.filter((c) => c.enLigne);
   const aAttribuer = t.aVenir.filter((c) => c.statut === 'reservee').length;
   const lienClient = `${location.origin}/appli/`;
-  const message = `Bonjour, voici l’appli BDA pour réserver votre chauffeur privé : ${lienClient}${t.prive ? `\nCode d’accès à saisir à l’inscription : ${t.codeAcces}` : ''}\nSur iPhone : ouvrez le lien dans Safari, touchez Partager puis « Sur l’écran d’accueil ».`;
+  const message = `Bonjour, voici B-Drive, l’appli BDA pour réserver votre chauffeur privé : ${lienClient}${t.prive ? `\nCode d’accès à saisir à l’inscription : ${t.codeAcces}` : ''}\nSur iPhone : ouvrez le lien dans Safari, touchez Partager puis « Sur l’écran d’accueil ».`;
   const etat = carte('L’appli', t.ouvert ? 'Ouverte' : 'Fermée',
     h('div', { class: 'ap-etat' },
       h('p', null, t.ouvert ? 'Les clients peuvent commander et réserver. ' : 'Aucune nouvelle course ne peut être commandée (réglage « Appli ouverte »). ',

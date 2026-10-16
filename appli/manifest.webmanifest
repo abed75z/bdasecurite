@@ -1,6 +1,6 @@
 {
-  "name": "BDA · Chauffeur privé",
-  "short_name": "BDA",
+  "name": "B-Drive · Chauffeur privé",
+  "short_name": "B-Drive",
   "description": "Votre chauffeur privé à Paris et en Île-de-France.",
   "lang": "fr",
   "start_url": "/appli/",
@@ -11,8 +11,8 @@
   "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
-    { "src": "icone-192.png?v=20261015-1541", "sizes": "192x192", "type": "image/png" },
-    { "src": "icone-512.png?v=20261015-1541", "sizes": "512x512", "type": "image/png" },
-    { "src": "icone-512-masque.png?v=20261015-1541", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icone-192.png?v=20261016-1241", "sizes": "192x192", "type": "image/png" },
+    { "src": "icone-512.png?v=20261016-1241", "sizes": "512x512", "type": "image/png" },
+    { "src": "icone-512-masque.png?v=20261016-1241", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

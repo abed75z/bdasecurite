@@ -222,7 +222,7 @@ try {
       if ($c) {
         $jeton = bin2hex(random_bytes(24));
         db()->prepare('UPDATE appli_clients SET reset = ?, reset_expire = ? WHERE id = ?')->execute([hash('sha256', $jeton), date('Y-m-d H:i:s', time() + 3600), $c['id']]);
-        envoyer_mail('Nouveau mot de passe — appli BDA', "Bonjour {$c['prenom']},\n\nPour choisir un nouveau mot de passe, ouvrez ce lien sur votre téléphone (valable 1 heure) :\n" . lien_appli('/appli/#reset=' . $jeton) . "\n\nSi vous n'avez rien demandé, ignorez ce message : votre mot de passe ne change pas.\n\nBDA · Chauffeur privé", '', (string)$c['email']);
+        envoyer_mail('Nouveau mot de passe — B-Drive', "Bonjour {$c['prenom']},\n\nPour choisir un nouveau mot de passe, ouvrez ce lien sur votre téléphone (valable 1 heure) :\n" . lien_appli('/appli/#reset=' . $jeton) . "\n\nSi vous n'avez rien demandé, ignorez ce message : votre mot de passe ne change pas.\n\nB-Drive · votre chauffeur privé BDA", '', (string)$c['email']);
       }
       repondre(['ok' => true]);
 
@@ -436,9 +436,9 @@ try {
           if (!(int)$v['en_ligne'] || $v['vu'] < date('Y-m-d H:i:s', time() - APPLI_EN_LIGNE)) continue;
           $dist = $v['lat'] !== null ? appli_distance($depart, ['lat' => $v['lat'], 'lng' => $v['lng']]) : null;
           if ($dist !== null && $dist > 30000) continue;
-          appli_push('chauffeur', (int)$v['compte_id'], 'Nouvelle course BDA', nom_gamme($gamme) . ($dist !== null ? ' · à ' . number_format($dist / 1000, 1, ',', '') . ' km' : '') . ' · ' . euros_txt($transport - $remise), '/appli/chauffeur/', 'offre');
+          appli_push('chauffeur', (int)$v['compte_id'], 'Nouvelle course B-Drive', nom_gamme($gamme) . ($dist !== null ? ' · à ' . number_format($dist / 1000, 1, ',', '') . ' km' : '') . ' · ' . euros_txt($transport - $remise), '/appli/chauffeur/', 'offre');
         } else {
-          appli_push('chauffeur', (int)$v['compte_id'], 'Nouvelle réservation BDA', nom_gamme($gamme) . ' · ' . date('d/m à H\hi', strtotime($quand)) . ' · à accepter', '/appli/chauffeur/', 'reservation');
+          appli_push('chauffeur', (int)$v['compte_id'], 'Nouvelle réservation B-Drive', nom_gamme($gamme) . ' · ' . date('d/m à H\hi', strtotime($quand)) . ' · à accepter', '/appli/chauffeur/', 'reservation');
         }
       }
       journal('vtc', "Appli : " . ($immediate ? 'course demandée' : 'réservation') . " $numero (" . nom_gamme($gamme) . ', ' . euros_txt($total) . ')');
@@ -715,7 +715,7 @@ try {
       // BDA Club : 1 point par euro payé
       db()->prepare('UPDATE appli_clients SET points = points + ? WHERE id = ?')->execute([(int)round(appli_total($c)), $c['client_id']]);
       $cl = appli_client((int)$c['client_id']);
-      if ($cl && $cl['email'] !== '') envoyer_mail('Votre reçu BDA — course ' . $c['numero'], appli_recu($c), BDA_EMAIL, (string)$cl['email']);
+      if ($cl && $cl['email'] !== '') envoyer_mail('Votre reçu B-Drive — course ' . $c['numero'], appli_recu($c), BDA_EMAIL, (string)$cl['email']);
       appli_push('client', (int)$c['client_id'], 'Vous êtes arrivé', 'Votre reçu est prêt dans l’appli.', '/appli/', 'course');
       journal('vtc', "Appli : course {$c['numero']} terminée (" . euros_txt(appli_total($c)) . ')');
       repondre(['ok' => true, 'course' => appli_vue_chauffeur($c, false, $ch)]);

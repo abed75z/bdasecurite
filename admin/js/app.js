@@ -31,7 +31,7 @@ const MENU = [
   { route: 'contenu', libelle: 'Contenu & tarifs', icone: 'crayon' },
   { route: 'avis', libelle: 'Avis clients', icone: 'avis', badge: 'avis' },
   { route: 'vtc', libelle: 'Réservations VTC', icone: 'voiture', badge: 'reservations' },
-  { route: 'appli', libelle: 'Appli BDA', icone: 'mobile', badge: 'appli', alerte: true },
+  { route: 'appli', libelle: 'Appli B-Drive', icone: 'mobile', badge: 'appli', alerte: true },
   { groupe: 'Outils' },
   { route: 'creations', libelle: 'Cartes & flyers', icone: 'badge' },
   { route: 'notes', libelle: 'Notes', icone: 'crayon' },

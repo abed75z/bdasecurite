@@ -4,18 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="BDA, votre chauffeur privé à Paris et en Île-de-France.">
+<meta name="description" content="B-Drive par BDA, votre chauffeur privé à Paris et en Île-de-France.">
 <meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BDA">
+<meta name="apple-mobile-web-app-title" content="B-Drive">
 <meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest?v=20261015-1541">
-<link rel="apple-touch-icon" href="icone-180.png?v=20261015-1541">
-<link rel="icon" href="icone-192.png?v=20261015-1541" type="image/png">
+<link rel="manifest" href="manifest.webmanifest?v=20261016-1241">
+<link rel="apple-touch-icon" href="icone-180.png?v=20261016-1241">
+<link rel="icon" href="icone-192.png?v=20261016-1241" type="image/png">
 </head>
-<body><title>Appli BDA</title>
+<body><title>B-Drive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap">
@@ -874,7 +874,7 @@ button.paiement { width: 100%; text-align: left; }
       <text class="l-txt l-contour" x="200" y="466" text-anchor="middle">BDA</text>
       <g class="l-faisceau"><rect x="33" y="340" width="14" height="170" fill="url(#l-blanc)" opacity=".16"/><rect x="39.2" y="340" width="1.6" height="170" fill="url(#l-blanc)"/></g>
     </svg>
-    <div class="l-sous">CHAUFFEUR PRIVÉ</div>
+    <div class="l-sous">B-DRIVE · CHAUFFEUR PRIVÉ</div>
     <div class="l-ligne"></div>
   </div>
 </div>
@@ -2767,7 +2767,7 @@ button.paiement { width: 100%; text-align: left; }
         <canvas id="heros-carte" aria-hidden="true"></canvas>
         <span class="heros-ambiance"></span><span class="heros-voile"></span>
         <span class="chargement" id="heros-chargement">Chargement de la carte…</span>
-        <div class="heros-haut"><span class="marque"><b>BDA</b><small>Chauffeur privé</small></span><button class="avatar-btn verre ${niv.cle}" type="button" data-a="onglet" data-v="compte" aria-label="Mon compte">${esc(initiales())}</button></div>
+        <div class="heros-haut"><span class="marque"><b>B-Drive</b><small>Chauffeur privé · BDA</small></span><button class="avatar-btn verre ${niv.cle}" type="button" data-a="onglet" data-v="compte" aria-label="Mon compte">${esc(initiales())}</button></div>
         <button class="heros-pastille" type="button" data-a="destination"><i></i><span id="heros-dispo">${esc(texteDispo())}</span></button>
         <h1 class="salut">${h >= 5 && h < 18 ? 'Bonjour' : 'Bonsoir'}${prenom}<span>Votre chauffeur vous attend.</span></h1>
       </div>
@@ -2851,7 +2851,7 @@ button.paiement { width: 100%; text-align: left; }
         ${ligne({ icone: 'livre', titre: 'Informations légales', sous: 'Conditions, confidentialité, mentions légales', a: 'sousPage', v: 'legal' })}
         ${ligne({ icone: 'globe', titre: 'Site web BDA', href: 'https://bdasecurite.com/' })}
       </div>
-      <p class="version">${REEL ? 'v1.0 · phase privée' : 'v0.5 · prototype · aucune course réelle'} · carte © OpenStreetMap, adresses BAN</p>
+      <p class="version">${REEL ? 'B-Drive v1.0 · phase privée' : 'v0.5 · prototype · aucune course réelle'} · carte © OpenStreetMap, adresses BAN</p>
     </div>`;
   }
   /* ================= Textes légaux (lisibles dans l'appli, exigés par Apple et Google) ================= */
@@ -2859,7 +2859,7 @@ button.paiement { width: 100%; text-align: left; }
     cgv: () => ({ titre: 'Conditions générales', html: `
       <p class="petit">Conditions générales d’utilisation et de vente · version du ${LEGAL.version}</p>
       <h3>1. Qui sommes-nous</h3>
-      <p>L’appli BDA permet de réserver un chauffeur privé (voiture de transport avec chauffeur, VTC) à Paris et en Île-de-France. Le transport est réalisé par ${esc(LEGAL.exploitant)}, enseigne ${esc(LEGAL.enseigne)}, SIRET ${esc(LEGAL.siret)}, ${esc(LEGAL.adresse)}, inscrit au registre des exploitants VTC sous le n° ${aCompleter(LEGAL.evtc)}.</p>
+      <p>L’appli B-Drive permet de réserver un chauffeur privé (voiture de transport avec chauffeur, VTC) à Paris et en Île-de-France. Le transport est réalisé par ${esc(LEGAL.exploitant)}, enseigne ${esc(LEGAL.enseigne)}, SIRET ${esc(LEGAL.siret)}, ${esc(LEGAL.adresse)}, inscrit au registre des exploitants VTC sous le n° ${aCompleter(LEGAL.evtc)}.</p>
       <h3>2. Votre compte</h3>
       <p>Il faut avoir 18 ans ou plus pour créer un compte. Un mineur ne voyage pas seul : il est accompagné, ou un adulte réserve pour lui et reste joignable. Vos informations doivent être exactes ; votre compte est personnel.</p>
       <h3>3. Réservation préalable</h3>
@@ -2904,7 +2904,7 @@ button.paiement { width: 100%; text-align: left; }
       <h3>Option VIP (protection rapprochée)</h3>
       <p>${esc(LEGAL.protection)}<br>Autorisation d’exercice CNAPS n° ${aCompleter(LEGAL.cnaps)}<br>${MENTION_CNAPS}</p>
       <h3>Marque</h3>
-      <p>BDA Security Group est la marque commerciale des structures ci-dessus.</p>
+      <p>B-Drive et BDA Security Group sont les marques commerciales des structures ci-dessus.</p>
       <h3>Carte et adresses</h3>
       <p>Données cartographiques © les contributeurs d’OpenStreetMap, sous licence ODbL. Adresses : Base Adresse Nationale, Licence Ouverte. Pays et villes : Natural Earth (domaine public).</p>
       <h3>Hébergement</h3>
@@ -4424,7 +4424,7 @@ button.paiement { width: 100%; text-align: left; }
   function modeSuiviPublic(j) {
     suiviPublic = { j, d: null, fini: false };
     $('#lancement').hidden = true; connexion.hidden = true; nav.hidden = true;
-    document.title = 'Suivi BDA en direct';
+    document.title = 'Suivi B-Drive en direct';
     const s = $('#suivi');
     s.classList.add('suivi-public'); s.hidden = false;
     s.innerHTML = `<div class="suivi-navig"></div><div class="suivi-corps">
@@ -4963,6 +4963,7 @@ button.paiement { width: 100%; text-align: left; }
     'Votre mot de passe, pour confirmer': 'Your password, to confirm', 'Activer les notifications': 'Turn on notifications', 'Lien de suivi': 'Tracking link', 'Voir la page de suivi': 'View the tracking page',
     'Appeler le 17': 'Call 17 (police)', 'Prévenir l’assistance BDA': 'Alert BDA assistance', 'Annuler': 'Cancel', 'Bientôt : payer dans l’appli': 'Coming soon: pay in the app', 'À bord, au chauffeur': 'On board, to the driver',
     'Espèces ou carte bancaire, à la fin de la course': 'Cash or card, at the end of the ride', 'Suivi en direct': 'Live tracking', 'Chargement du suivi…': 'Loading tracking…',
+    'B-DRIVE · CHAUFFEUR PRIVÉ': 'B-DRIVE · PRIVATE DRIVER', 'Chauffeur privé · BDA': 'Private driver · BDA',
     'Démo : choix entre compte personnel et compte entreprise.': 'Demo: choose between personal and business account.', 'Démo : le lien s’ouvrirait dans vos SMS ou WhatsApp.': 'Demo: the link would open in your texts or WhatsApp.', 'Recherche de l’adresse exacte…': 'Finding the exact address…',
   }));
   const VOITURE_EN = (t) => t.replace(/Classe ([A-Z])/g, '$1-Class').replace(/ ou similaire/g, ' or similar').replace(/\bnoire?\b/g, 'black').replace(/\bNoire?\b/g, 'Black').replace(/\bblanche?\b/g, 'white').replace(/\bBlanche?\b/g, 'White');
@@ -5046,7 +5047,7 @@ button.paiement { width: 100%; text-align: left; }
   });
   observateurLangue.observe(appareil, { childList: true, subtree: true, characterData: true });
   function traduireTout() {
-    document.title = etat.langue === 'en' ? 'BDA app' : 'Appli BDA';
+    document.title = 'B-Drive';
     if (etat.langue === 'en') { traduireElement(appareil); return; }
     // retour au français : on remet les textes d'origine des éléments fixes, puis on redessine les écrans
     const w = document.createTreeWalker(appareil, NodeFilter.SHOW_TEXT);

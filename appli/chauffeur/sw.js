@@ -4,9 +4,9 @@
    - les données (courses, positions, messages) ne sont JAMAIS gardées : toujours demandées au serveur
    Fichier fabriqué par construire.ps1 (modèle : site-modeles/sw.js).
    ========================================================= */
-const VERSION = '20261015-1541';
-const NOM = 'BDA Chauffeur';
-const ICONE = 'icone-192.png?v=20261015-1541';
+const VERSION = '20261016-1241';
+const NOM = 'B-Drive Pro';
+const ICONE = 'icone-192.png?v=20261016-1241';
 const PREFIXE = 'bda-page-chauffeur-'; // l'appli client et l'appli chauffeur ont chacune leur réserve
 const IGNORER = '';
 const PAGE = PREFIXE + VERSION;

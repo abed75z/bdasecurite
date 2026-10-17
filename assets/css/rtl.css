@@ -1,0 +1,66 @@
+/* =========================================================
+   VERSION ARABE (/ar/) — chargée en dernier par les pages arabes
+   (ajoutée par outils/i18n/generer.py) : lecture de droite à gauche
+   (dir="rtl" sur <html>), police arabe, flèches retournées.
+   ========================================================= */
+html[lang="ar"] {
+  --m-titre: "IBM Plex Sans Arabic", "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --m-texte: "IBM Plex Sans Arabic", "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--m-titre);
+  --font-body: var(--m-texte);
+  --font-serif: var(--m-titre);
+}
+html[lang="ar"] body { font-family: var(--m-texte); }
+
+/* L'écriture arabe est liée : pas d'espacement entre les lettres, pas de majuscules
+   (le logo et les textes en caractères latins gardent leur style) */
+html[lang="ar"] body :not(.nav__marque):not(.nav__marque *):not([lang="fr"]):not([lang="en"]):not(.bda-mono):not(.marque):not(.marque *) {
+  letter-spacing: 0 !important;
+}
+html[lang="ar"] .kicker, html[lang="ar"] .ac-hero__sur, html[lang="ar"] .nav__col-titre, html[lang="ar"] .rp__sur { text-transform: none !important; }
+
+/* Un peu plus d'interligne : l'arabe a des lettres plus hautes */
+html[lang="ar"] p, html[lang="ar"] li, html[lang="ar"] .lead { line-height: 1.75; }
+html[lang="ar"] h1, html[lang="ar"] h2, html[lang="ar"] .h1, html[lang="ar"] .h2, html[lang="ar"] .manifeste { line-height: 1.35; }
+
+/* Flèches « suivant » : vers la gauche */
+html[dir="rtl"] .icon--arrow, html[dir="rtl"] .tuile__lien .icon, html[dir="rtl"] .cx-pop__fl,
+html[dir="rtl"] [class*="__fleche"], html[dir="rtl"] .lp-aside a .icon { transform: scaleX(-1); }
+
+/* Numéros de téléphone, adresses e-mail et références : toujours de gauche à droite */
+html[dir="rtl"] a[href^="tel:"], html[dir="rtl"] a[href^="mailto:"], html[dir="rtl"] [data-ref] { direction: ltr; unicode-bidi: isolate; }
+
+/* En-tête : « Réserver » à droite, langue et « Mon compte » à gauche (miroir du français) */
+@media (min-width: 1081px) {
+  html[dir="rtl"] body .nav.nav--v2:not(.nav--epure) .nav__reserver-pc { margin-left: auto !important; margin-right: 0 !important; }
+  html[dir="rtl"] body .nav.nav--v2:not(.nav--epure) .nav__langue { margin-left: 10px !important; margin-right: 0 !important; }
+  html[dir="rtl"] body .nav.nav--v2:not(.nav--epure) .cx-pop { right: auto !important; left: var(--pad) !important; }
+}
+@media (max-width: 1080px) {
+  html[dir="rtl"] body .nav.nav--v2 a.nav__compte { margin-left: 0 !important; margin-right: auto !important; }
+}
+
+/* Champs anti-robots : cachés hors écran du côté droit (à gauche, ils feraient défiler la page de côté en arabe) */
+html[dir="rtl"] .hp, html[dir="rtl"] .rappel__piege { left: auto !important; right: -9999px !important; }
+
+/* Textes alignés à gauche dans les styles français → à droite */
+html[dir="rtl"] .faq__q, html[dir="rtl"] .stepper button, html[dir="rtl"] th, html[dir="rtl"] .summary, html[dir="rtl"] .next { text-align: right; }
+html[dir="rtl"] .summary dd { text-align: left; }
+@media (max-width: 700px) { html[dir="rtl"] .summary dd { text-align: right; } }
+@media (max-width: 520px) { html[dir="rtl"] .hero__proof { text-align: right; } }
+
+/* Boutons flottants inversés : WhatsApp à gauche (il ne cache plus le début des titres), « haut de page » à droite */
+html[dir="rtl"] .wa { right: auto !important; left: 22px; }
+html[dir="rtl"] .wa:hover span { padding-right: 0; padding-left: 10px; }
+html[dir="rtl"] .haut-page { left: auto; right: 24px; }
+@media (max-width: 640px) { html[dir="rtl"] body:has(.mobile-bar) .wa { left: 14px; } }
+
+/* Barres de progression : se remplissent depuis la droite */
+html[dir="rtl"] .form-card__progress span, html[dir="rtl"] .progression, html[dir="rtl"] .scroll-progress { transform-origin: 100% 50%; }
+html[dir="rtl"] .progression { left: auto; right: 0; }
+
+/* Choix de la langue : la liste s'ouvre sous le bouton, alignée sur son bord gauche */
+@media (min-width: 1081px) {
+  html[dir="rtl"] .nav--v2 .nav__langue { margin: 0 -8px 0 2px !important; }
+  html[dir="rtl"] .nav--v2 .nav__langue .langue__liste { right: auto; left: 0; }
+}

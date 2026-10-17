@@ -716,20 +716,35 @@ main.rc .apply-card {
   .nav--v2 .nav__droite { justify-content: flex-end !important; gap: clamp(14px, 1.6vw, 26px) !important; }
   .nav--v2 .nav__links--d { flex: 0 1 auto !important; justify-content: flex-end !important; gap: clamp(14px, 1.6vw, 26px) !important; }
 }
-/* Choix de la langue : FR | EN, tout petit, à gauche de « Mon compte » (ordinateur) et en bas du menu (téléphone) */
+/* Choix de la langue : « FR ⌄ » (langue de la page) ouvre la liste des autres langues.
+   À gauche de « Mon compte » sur ordinateur, en bas du menu sur téléphone. Ouverture : core.js */
+.langue__btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border: 0; background: none; color: #f3efe8; font: inherit; letter-spacing: inherit; cursor: pointer; transition: color 0.3s ease; }
+.langue__btn:hover, [data-langue].is-open .langue__btn { color: #c9a874; }
+.langue__chev { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; opacity: 0.9; transition: transform 0.25s ease; }
+[data-langue].is-open .langue__chev { transform: rotate(180deg); }
+.langue__liste a { display: flex; align-items: baseline; gap: 12px; padding: 10px 12px; border-radius: 8px; color: #f3efe8 !important; text-decoration: none !important; letter-spacing: 0.02em; text-transform: none !important; white-space: nowrap; transition: background-color 0.2s ease, color 0.2s ease; }
+.langue__liste a:hover, .langue__liste a:focus-visible { background: rgba(243, 239, 232, 0.06); color: #c9a874 !important; outline: none; }
+.langue__liste b { min-width: 22px; font-weight: 500; font-size: 0.85em; letter-spacing: 0.12em; color: #c9a874; }
+.langue__liste a[lang="ar"] { font-family: "IBM Plex Sans Arabic", var(--m-texte); }
+
 .nav--v2 .nav__langue { display: none; }
 @media (min-width: 1081px) {
-  .nav--v2 .nav__langue { display: inline-flex !important; align-items: center; margin-right: 4px; font: 400 11.5px/1 var(--m-texte); letter-spacing: 0.12em; }
-  .nav--v2 .nav__langue > * { padding: 5px 8px; color: rgba(243, 239, 232, 0.5) !important; text-decoration: none !important; transition: color 0.3s ease; }
-  .nav--v2 .nav__langue > [aria-current] { color: #f3efe8 !important; }
-  .nav--v2 .nav__langue > * + * { border-left: 1px solid rgba(243, 239, 232, 0.25); }
-  .nav--v2 .nav__langue a:hover { color: #c9a874 !important; }
+  .nav--v2 .nav__langue { display: inline-flex !important; align-items: center; position: relative; font: 400 11.5px/1 var(--m-texte); letter-spacing: 0.12em; margin: 0 2px 0 -8px !important; }
+  .nav--v2 .nav__langue .langue__liste {
+    position: absolute; top: calc(100% + 12px); right: 0; z-index: 60; min-width: 170px; padding: 6px;
+    display: flex; flex-direction: column; font-size: 13.5px;
+    background: var(--e-fond-2, #151517); border: 1px solid var(--e-ligne, rgba(243, 239, 232, 0.1)); border-radius: 12px; box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.6);
+    opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1), visibility 0s 0.3s;
+  }
+  .nav--v2 .nav__langue.is-open .langue__liste { opacity: 1; visibility: visible; transform: none; transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1), visibility 0s; }
 }
-.mm__langue { display: flex; align-items: center; margin-top: 16px; padding-top: 18px; border-top: 1px solid rgba(243, 239, 232, 0.1); font: 400 13px/1 var(--m-texte); letter-spacing: 0.14em; }
-.mm__langue > * { padding: 6px 14px 6px 0; color: rgba(243, 239, 232, 0.5) !important; text-decoration: none !important; }
-.mm__langue > [aria-current] { color: #f3efe8 !important; }
-.mm__langue > * + * { padding-left: 14px; border-left: 1px solid rgba(243, 239, 232, 0.25); }
-@media (min-width: 1081px) { .nav--v2 .nav__langue { margin: 0 2px 0 -8px !important; } }
+.mm__langue { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(243, 239, 232, 0.1); font: 400 13px/1 var(--m-texte); letter-spacing: 0.14em; }
+.mm__langue .langue__btn { padding: 6px 0; }
+.mm__langue .langue__liste { display: none; flex-direction: column; margin-top: 6px; font-size: 15px; }
+.mm__langue.is-open .langue__liste { display: flex; }
+.mm__langue .langue__liste a { padding: 12px 0; border-radius: 0; }
+.mm__langue .langue__liste a + a { border-top: 1px solid rgba(243, 239, 232, 0.08); }
+@media (prefers-reduced-motion: reduce) { .nav--v2 .nav__langue .langue__liste, .langue__chev { transition: none; } }
 
 /* =========================================================
    17/10/2026 (3) — EN-TÊTE ORDINATEUR SUR DEUX LIGNES, SYMÉTRIQUE

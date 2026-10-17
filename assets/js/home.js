@@ -88,7 +88,7 @@
     const moinsAnim = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (moinsAnim || eco) { v.remove(); return; }
     v.muted = true; v.defaultMuted = true;
-    v.src = 'assets/video/' + (mobile ? 'bda-fond-paris-mobile-720x1280.mp4' : 'bda-fond-paris-1920x1080.mp4') + '?v=1';
+    v.src = '/assets/video/' + (mobile ? 'bda-fond-paris-mobile-720x1280.mp4' : 'bda-fond-paris-1920x1080.mp4') + '?v=1';
     v.addEventListener('playing', () => v.classList.add('is-on'), { once: true });
     let visible = true;
     const jouer = () => { if (!visible || document.hidden || !v.paused) return; const p = v.play(); if (p && p.catch) p.catch(() => {}); };
@@ -212,8 +212,10 @@
     if (!el || typeof AvisData === 'undefined') return;
     const montrer = (avis) => {
       if (!avis || !avis.length) return;
-      const m = AvisData.moyenne(avis).toFixed(1).replace('.', ',');
-      el.textContent = `${m}/5 · ${avis.length} avis client${avis.length > 1 ? 's' : ''}`;
+      // Langue de la page (assets/js/i18n.js sur /en/ et /ar/)
+      const T = window.T || ((s, v) => s.replace(/\{(\w+)\}/g, (_, k) => v[k]));
+      const m = (window.LOCALE || 'fr-FR') === 'fr-FR' ? AvisData.moyenne(avis).toFixed(1).replace('.', ',') : AvisData.moyenne(avis).toFixed(1);
+      el.textContent = T(avis.length > 1 ? '{m}/5 · {n} avis clients' : '{m}/5 · {n} avis client', { m, n: avis.length });
       el.hidden = false;
     };
     montrer(AvisData.memoire());

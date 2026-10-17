@@ -6,7 +6,7 @@
 - E-mail : contact@bdasecurite.com
 - Site : https://bdasecurite.com
 - Autorisation CNAPS : AUT-075-2124-07-01-20250906336
-- Raison sociale : BDASECURITE (EURL), SIRET 109 076 463 00016
+- Structures légales : BDASECURITE (EURL au capital de 2 000 €, SIRET 109 076 463 00016) et Abdelouahab Bouidia EI (enseigne BDA SECURITE, SIRET 977 933 316 00019)
 - Devis gratuit : https://bdasecurite.com/devis
 
 ## Sécurité privée
@@ -25,6 +25,7 @@
 ## Par secteur
 
 - [Hôtels et palaces](https://bdasecurite.com/securite-hotels-paris)
+- [Bars, restaurants et établissements de nuit](https://bdasecurite.com/securite-bars-restaurants-paris)
 - [Commerces et boutiques](https://bdasecurite.com/securite-commerces-paris)
 - [Bureaux et entreprises](https://bdasecurite.com/securite-bureaux-entreprises-paris)
 - [Ambassades et consulats](https://bdasecurite.com/securite-ambassades-consulats-paris)
@@ -41,5 +42,6 @@
 - [BDA Sécurité devient BDA Security Group](https://bdasecurite.com/bda-securite)
 - [Avis clients](https://bdasecurite.com/avis)
 - [Recrutement](https://bdasecurite.com/recrutement)
-- [English version](https://bdasecurite.com/en)
+- [English version](https://bdasecurite.com/en/) : toutes les pages principales en anglais (/en/…)
+- [النسخة العربية](https://bdasecurite.com/ar/) : toutes les pages principales en arabe (/ar/…)
 - [Mentions légales](https://bdasecurite.com/mentions-legales)

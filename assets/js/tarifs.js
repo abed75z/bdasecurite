@@ -6,7 +6,9 @@
 (() => {
   const form = document.getElementById('calc');
   if (!form) return;
-  const euro = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' });
+  // Langue de la page (assets/js/i18n.js sur /en/ et /ar/)
+  const T = window.T || ((s, v) => (v ? s.replace(/\{(\w+)\}/g, (_, k) => (v[k] === undefined ? '' : v[k])) : s));
+  const euro = new Intl.NumberFormat(window.LOCALE || 'fr-FR', { style: 'currency', currency: 'EUR' });
   const ht = document.getElementById('calc-ht');
   const ttc = document.getElementById('calc-ttc');
   const devis = document.getElementById('calc-devis');
@@ -34,15 +36,15 @@
       const v = t[o.dataset.cle];
       if (typeof v !== 'number') return;
       o.value = String(v);
-      o.textContent = `${NOMS[o.dataset.cle]} · ${euro.format(v)} HT/h`;
+      o.textContent = T('{nom} · {prix} HT/h', { nom: T(NOMS[o.dataset.cle]), prix: euro.format(v) });
     });
     ['nuit', 'dimanche', 'ferie'].forEach((k) => { if (typeof t[k] === 'number') maj[k] = t[k]; });
     const l = form.querySelector('[name="nuit"] + span');
-    if (l) l.textContent = `De nuit (+${maj.nuit} %)`;
+    if (l) l.textContent = T('De nuit (+{n} %)', { n: maj.nuit });
     const d = form.querySelector('[name="dimanche"] + span');
-    if (d) d.textContent = `Un dimanche (+${maj.dimanche} %)`;
+    if (d) d.textContent = T('Un dimanche (+{n} %)', { n: maj.dimanche });
     const f = form.querySelector('[name="ferie"] + span');
-    if (f) f.textContent = `Un jour férié (+${maj.ferie} %)`;
+    if (f) f.textContent = T('Un jour férié (+{n} %)', { n: maj.ferie });
     calculer();
   });
   form.addEventListener('input', calculer);

@@ -5,6 +5,9 @@
 
 (() => {
   const $ = (s) => document.querySelector(s);
+  // Langue de la page (assets/js/i18n.js sur /en/ et /ar/) ; l'avis envoyé reste en français
+  const T = window.T || ((s, v) => (v ? s.replace(/\{(\w+)\}/g, (_, k) => (v[k] === undefined ? '' : v[k])) : s));
+  const LOC = window.LOCALE || 'fr-FR';
   const STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>';
   const starsHtml = (n) => Array.from({ length: 5 }, (_, i) => STAR.replace('<svg', `<svg class="${i < Math.round(n) ? '' : 'off'}"`)).join('');
   const colors = ['37, 99, 255', '232, 34, 48', '91, 140, 255', '63, 182, 255', '255, 92, 102', '29, 79, 214'];
@@ -18,9 +21,9 @@
   function resume(avis) {
     const n = avis.length;
     const moyenne = n ? avis.reduce((s, a) => s + a.note, 0) / n : 0;
-    $('[data-avg]').textContent = n ? moyenne.toFixed(1).replace('.', ',') : '—';
+    $('[data-avg]').textContent = n ? (LOC === 'fr-FR' ? moyenne.toFixed(1).replace('.', ',') : moyenne.toFixed(1)) : '—';
     $('[data-avg-stars]').innerHTML = starsHtml(moyenne);
-    $('[data-avg-count]').textContent = n ? `${n} avis publié${n > 1 ? 's' : ''}` : 'Aucun avis publié pour le moment';
+    $('[data-avg-count]').textContent = n ? T(n > 1 ? '{n} avis publiés' : '{n} avis publié', { n }) : T('Aucun avis publié pour le moment');
     document.querySelectorAll('[data-bar]').forEach((bar) => {
       const note = +bar.dataset.bar;
       const c = avis.filter((a) => a.note === note).length;
@@ -34,8 +37,8 @@
     el.className = 'rv-card';
     el.style.setProperty('--i', i % AVIS_CONFIG.parPage);
     el.style.setProperty('--c', colors[(a.nom.charCodeAt(0) || 0) % colors.length]);
-    const date = a.date ? new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(a.date)) : '';
-    el.innerHTML = `<div class="rv-card__head"><span class="rv-card__av"></span><div class="rv-card__who"><b></b><small></small></div></div><div class="stars" aria-label="${a.note} sur 5">${starsHtml(a.note)}</div><p></p>`;
+    const date = a.date ? new Intl.DateTimeFormat(LOC, { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(a.date)) : '';
+    el.innerHTML = `<div class="rv-card__head"><span class="rv-card__av"></span><div class="rv-card__who"><b></b><small></small></div></div><div class="stars" aria-label="${T('{n} sur 5', { n: a.note })}">${starsHtml(a.note)}</div><p></p>`;
     el.querySelector('.rv-card__av').textContent = (a.nom.trim()[0] || '?').toUpperCase();
     el.querySelector('b').textContent = a.nom;
     el.querySelector('small').textContent = date;
@@ -43,7 +46,7 @@
     if (a.prestation) {
       const tag = document.createElement('span');
       tag.className = 'rv-card__tag';
-      tag.textContent = a.prestation;
+      tag.textContent = T(a.prestation);
       el.appendChild(tag);
     }
     return el;
@@ -78,7 +81,7 @@
       console.error('[Avis] Chargement impossible :', err);
       if (!connus) {
         list.innerHTML = '';
-        $('[data-avg-count]').textContent = 'Avis momentanément indisponibles, réessayez dans un instant.';
+        $('[data-avg-count]').textContent = T('Avis momentanément indisponibles, réessayez dans un instant.');
       }
     }
   }
@@ -90,7 +93,7 @@
   if (!form) return;
   const card = form.closest('.apply-card');
   const f = (id) => form.querySelector(`#${id}`);
-  const libelles = ['', 'Décevant', 'Moyen', 'Bien', 'Très bien', 'Excellent !'];
+  const libelles = ['', 'Décevant', 'Moyen', 'Bien', 'Très bien', 'Excellent !'].map((x) => (x ? T(x) : x));
   const labelNote = form.querySelector('.star-label');
   const errorBox = form.querySelector('.step-error');
   const submit = form.querySelector('[type="submit"]');
@@ -117,7 +120,7 @@
     let premier = null;
     checks.forEach(([el, ok]) => { el.closest('.field, .check').classList.toggle('is-invalid', !ok); if (!ok && !premier) premier = el; });
     if (premier) {
-      errorBox.querySelector('span').textContent = 'Merci de compléter les champs indiqués en rouge.';
+      errorBox.querySelector('span').textContent = T('Merci de compléter les champs indiqués en rouge.');
       errorBox.classList.add('is-visible');
       premier.closest('.field, .check').scrollIntoView({ block: 'center', behavior: 'smooth' });
       return false;
@@ -168,7 +171,7 @@
       card.scrollIntoView({ block: 'center', behavior: 'smooth' });
     } catch (err) {
       console.error('[Avis] Échec de l\'envoi :', err);
-      errorBox.querySelector('span').textContent = 'L\'envoi a échoué. Vérifiez votre connexion et réessayez.';
+      errorBox.querySelector('span').textContent = T('L\'envoi a échoué. Vérifiez votre connexion et réessayez.');
       errorBox.classList.add('is-visible');
     } finally {
       clearTimeout(minuteur);

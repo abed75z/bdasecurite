@@ -6,6 +6,12 @@
 (() => {
   const root = document.documentElement;
   root.classList.add('js');
+  // Langue de la page : textes traduits par assets/js/i18n.js sur /en/ et /ar/, français sinon
+  const T = window.T || ((s, v) => (v ? s.replace(/\{(\w+)\}/g, (_, k) => (v[k] === undefined ? '' : v[k])) : s));
+  const LANGUE = window.LANGUE || 'fr';
+  const LOC = window.LOCALE || 'fr-FR';
+  // Nom de page d'un lien ou d'une adresse, sans langue ni .html : « /en/devis?x » -> « devis »
+  const nomPage = (href) => String(href || '').replace(/^https?:\/\/[^/]+/, '').split(/[?#]/)[0].replace(/^\/+/, '').replace(/^(en|ar)(\/|$)/, '').replace(/\.html$/, '').replace(/\/$/, '');
 
   // Site sobre (15/10/2026) : aucun effet décoratif (étoiles, parallaxe, inclinaison, compteurs, apparitions…)
   const reduced = true;
@@ -321,28 +327,25 @@
   function connexion() {
     const btn = document.querySelector('.nav__client');
     if (!btn) return;
-    const en = root.lang === 'en';
-    const T = en
-      ? { titre: 'My account', client: 'Client area', equipe: 'Team area', dClient: 'Quotes, invoices, missions', dEquipe: 'Agents & drivers' }
-      : { titre: 'Mon compte', client: 'Espace client', equipe: 'Espace agent', dClient: 'Devis, factures, missions', dEquipe: 'Planning, pointage, documents' };
+    const TX = { titre: T('Mon compte'), client: T('Espace client'), equipe: T('Espace agent'), dClient: T('Devis, factures, missions'), dEquipe: T('Planning, pointage, documents') };
     const ICO = {
       client: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4 4-6 8-6s7.2 2 8 6"/></svg>',
       equipe: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>'
     };
-    const choix = (cle, href) => `<a class="cx-pop__choix" href="${href}" role="menuitem"><span class="cx-pop__ico">${ICO[cle]}</span><span class="cx-pop__txt"><b>${T[cle]}</b><small>${cle === 'client' ? T.dClient : T.dEquipe}</small></span><svg class="cx-pop__fl" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>`;
+    const choix = (cle, href) => `<a class="cx-pop__choix" href="${href}" role="menuitem"><span class="cx-pop__ico">${ICO[cle]}</span><span class="cx-pop__txt"><b>${TX[cle]}</b><small>${cle === 'client' ? TX.dClient : TX.dEquipe}</small></span><svg class="cx-pop__fl" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></a>`;
     const pop = document.createElement('div');
     pop.className = 'cx-pop';
     pop.id = 'cx-pop';
     pop.setAttribute('role', 'menu');
-    pop.innerHTML = `<p class="cx-pop__titre">${T.titre}</p>${choix('client', 'espace-client')}${choix('equipe', 'espace-equipe')}`;
+    pop.innerHTML = `<p class="cx-pop__titre">${TX.titre}</p>${choix('client', '/espace-client')}${choix('equipe', '/espace-equipe')}`;
     btn.after(pop);
-    btn.setAttribute('aria-label', T.titre);
+    btn.setAttribute('aria-label', TX.titre);
     btn.setAttribute('aria-haspopup', 'menu');
     btn.setAttribute('aria-controls', 'cx-pop');
     btn.setAttribute('aria-expanded', 'false');
-    btn.title = T.titre;
+    btn.title = TX.titre;
     const label = btn.querySelector('span');
-    if (label) label.textContent = T.titre;
+    if (label) label.textContent = TX.titre;
     const ouvrir = (o) => {
       pop.classList.toggle('is-open', o);
       btn.setAttribute('aria-expanded', String(o));
@@ -357,6 +360,19 @@
     });
     document.addEventListener('click', (e) => { if (!e.target.closest('.cx-pop')) ouvrir(false); });
     window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && pop.classList.contains('is-open')) { ouvrir(false); btn.focus(); } });
+  }
+
+  /* ---------- Choix de la langue : « FR ⌄ » ouvre la liste des autres langues ---------- */
+  function langues() {
+    document.querySelectorAll('[data-langue]').forEach((bloc) => {
+      const btn = bloc.querySelector('.langue__btn');
+      if (!btn) return;
+      const ouvrir = (o) => { bloc.classList.toggle('is-open', o); btn.setAttribute('aria-expanded', String(o)); };
+      btn.addEventListener('click', () => ouvrir(!bloc.classList.contains('is-open')));
+      // phase de capture : se ferme aussi quand on ouvre « Mon compte » (qui arrête la propagation du clic)
+      document.addEventListener('click', (e) => { if (!bloc.contains(e.target)) ouvrir(false); }, true);
+      bloc.addEventListener('keydown', (e) => { if (e.key === 'Escape' && bloc.classList.contains('is-open')) { ouvrir(false); btn.focus(); } });
+    });
   }
 
   /* ---------- Menus déroulants du haut (Sécurité, VTC) ---------- */
@@ -451,7 +467,7 @@
         const pas = (t) => {
           const p = Math.min(1, (t - t0) / 900);
           const v = n * (1 - Math.pow(1 - p, 3));
-          el.textContent = p < 1 ? v.toLocaleString('fr-FR', { minimumFractionDigits: dec, maximumFractionDigits: dec }) : el.dataset.final || fin;
+          el.textContent = p < 1 ? v.toLocaleString(LOC, { minimumFractionDigits: dec, maximumFractionDigits: dec }) : el.dataset.final || fin;
           if (p < 1) requestAnimationFrame(pas);
         };
         requestAnimationFrame(pas);
@@ -491,25 +507,25 @@
       fenetre = document.createElement('div');
       fenetre.className = 'vtc-indispo';
       fenetre.innerHTML = `<div class="vtc-indispo__boite" role="alertdialog" aria-modal="true" aria-labelledby="vtc-indispo-titre" aria-describedby="vtc-indispo-texte">
-        <button class="vtc-indispo__x" type="button" aria-label="Fermer">&times;</button>
-        <span class="vtc-indispo__badge">Bientôt</span>
-        <h2 id="vtc-indispo-titre">Cette option n’est pas encore disponible</h2>
-        <p id="vtc-indispo-texte">La réservation de VTC en ligne arrive très bientôt. En attendant, notre équipe vous répond directement.</p>
-        <div class="vtc-indispo__actions">${tel}${s.devis ? '<a class="btn btn--outline" href="devis?service=transfert">Demander un devis</a>' : wa}</div>
+        <button class="vtc-indispo__x" type="button" aria-label="${T('Fermer')}">&times;</button>
+        <span class="vtc-indispo__badge">${T('Bientôt')}</span>
+        <h2 id="vtc-indispo-titre">${T('Cette option n’est pas encore disponible')}</h2>
+        <p id="vtc-indispo-texte">${T('La réservation de VTC en ligne arrive très bientôt. En attendant, notre équipe vous répond directement.')}</p>
+        <div class="vtc-indispo__actions">${tel}${s.devis ? `<a class="btn btn--outline" href="devis?service=transfert">${T('Demander un devis')}</a>` : wa}</div>
       </div>`;
       fenetre.addEventListener('click', (e) => { if (e.target === fenetre || e.target.closest('.vtc-indispo__x')) fermer(); });
       document.body.append(fenetre);
       fenetre.querySelector('.vtc-indispo__x').focus();
     };
     const bloquer = (e) => { if (!s.vtc) { e.preventDefault(); indisponible(); } };
-    document.addEventListener('click', (e) => { if (e.target.closest('a[href^="reserver"]')) bloquer(e); });
-    document.addEventListener('submit', (e) => { if (e.target.matches('form[action="reserver"]')) bloquer(e); });
+    document.addEventListener('click', (e) => { if (e.target.closest('a[href^="reserver"], a[href^="/reserver"]')) bloquer(e); });
+    document.addEventListener('submit', (e) => { if (e.target.matches('form[action="reserver"], form[action="/reserver"]')) bloquer(e); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fermer(); });
 
     const FERMES = {
-      devis: ['Demandes en ligne momentanément fermées', 'Pour un devis, appelez-nous ou écrivez-nous sur WhatsApp : nous vous répondons rapidement.', tel + wa],
-      recrutement: ['Les candidatures sont fermées pour le moment', 'Merci de votre intérêt pour BDA Security Group. Revenez bientôt : nos prochains postes seront publiés ici.', ''],
-      avis: ['Le dépôt d’avis est momentanément fermé', 'Merci de votre confiance ! Vous pouvez toujours lire les avis de nos clients sur cette page.', ''],
+      devis: [T('Demandes en ligne momentanément fermées'), T('Pour un devis, appelez-nous ou écrivez-nous sur WhatsApp : nous vous répondons rapidement.'), tel + wa],
+      recrutement: [T('Les candidatures sont fermées pour le moment'), T('Merci de votre intérêt pour BDA Security Group. Revenez bientôt : nos prochains postes seront publiés ici.'), ''],
+      avis: [T('Le dépôt d’avis est momentanément fermé'), T('Merci de votre confiance ! Vous pouvez toujours lire les avis de nos clients sur cette page.'), ''],
     };
     const services = () => {
       document.querySelectorAll('[data-service]').forEach((el) => {
@@ -520,7 +536,7 @@
         if (ferme && !msg) {
           msg = document.createElement('div');
           msg.className = 'service-ferme';
-          msg.innerHTML = `<span class="service-ferme__badge">Fermé</span><h3>${FERMES[k][0]}</h3><p>${FERMES[k][1]}</p>${FERMES[k][2] ? `<div class="service-ferme__actions">${FERMES[k][2]}</div>` : ''}`;
+          msg.innerHTML = `<span class="service-ferme__badge">${T('Fermé')}</span><h3>${FERMES[k][0]}</h3><p>${FERMES[k][1]}</p>${FERMES[k][2] ? `<div class="service-ferme__actions">${FERMES[k][2]}</div>` : ''}`;
           el.after(msg);
         }
         if (msg) msg.hidden = !ferme;
@@ -531,7 +547,8 @@
       const cle = b ? 'bda-annonce:' + b.texte : '';
       let masque = false;
       try { masque = !!cle && sessionStorage.getItem('bda-annonce-fermee') === cle; } catch (e) { /* stockage indisponible */ }
-      if (!b || masque) return;
+      // Bandeau écrit en français dans l'admin : pas affiché sur les versions anglaise et arabe
+      if (!b || masque || LANGUE !== 'fr') return;
       const el = document.createElement('div');
       el.className = 'annonce';
       el.setAttribute('role', 'region');
@@ -588,7 +605,7 @@
     ssiap: ['securite-incendie-ssiap-paris'],
     offreVtc: ['chauffeur-prive-vtc-paris', 'chauffeur-securite-vip-paris', 'reserver'],
   };
-  const pageCourante = location.pathname.replace(/^\/|\.html$/g, '');
+  const pageCourante = nomPage(location.pathname);
   let contenuOriginal = [];
   function contenu(c) {
     const vis = c.visible || {};
@@ -596,12 +613,14 @@
     document.querySelectorAll('[data-visible]').forEach((el) => {
       el.classList.toggle('est-masque', el.dataset.visible.split(' ').some(off));
     });
+    // Liens vers une rubrique masquée (« tarifs », « /en/tarifs », « /ar/tarifs?x »…)
+    const liens = [...document.querySelectorAll('a[href]')].filter((a) => !/^(#|tel:|mailto:|https?:)/.test(a.getAttribute('href')));
     Object.entries(PAGES_RUBRIQUE).forEach(([k, pages]) => {
-      pages.forEach((p) => document.querySelectorAll(`a[href="${p}"], a[href^="${p}?"], a[href^="${p}#"]`).forEach((a) => {
+      liens.filter((a) => pages.includes(nomPage(a.getAttribute('href')))).forEach((a) => {
         if (a.closest('main') && !a.closest('.ac-liste, .ac-secteurs, .lp-aside, .ac-ref, .tf-carte, .tuiles')) return;
         const cible = a.parentElement && a.parentElement.tagName === 'LI' ? a.parentElement : a;
         cible.classList.toggle('est-masque', off(k));
-      }));
+      });
     });
     document.querySelectorAll('.wa').forEach((el) => el.classList.toggle('est-masque', off('whatsapp')));
     // Page masquée ouverte directement : message à la place du contenu
@@ -615,19 +634,21 @@
     if (rubrique && off(rubrique) && main && !main.dataset.ferme) {
       main.dataset.ferme = '1';
       contenuOriginal = [...main.childNodes];
-      main.innerHTML ='<section class="page-fermee"><div class="container"><p class="kicker">Page indisponible</p><h1 class="h2">Cette page n’est pas disponible pour le moment.</h1><p class="lead">Notre équipe reste joignable 24h/24 pour répondre à votre demande.</p><div class="ac-hero__actions"><a class="btn btn--gold" href="devis">Demander un devis</a><a class="btn btn--outline" href="tel:+33611678625">06 11 67 86 25</a><a class="btn btn--outline" href="/">Retour à l’accueil</a></div></div></section>';
+      const accueil = LANGUE === 'fr' ? '/' : `/${LANGUE}/`;
+      main.innerHTML = `<section class="page-fermee"><div class="container"><p class="kicker">${T('Page indisponible')}</p><h1 class="h2">${T('Cette page n’est pas disponible pour le moment.')}</h1><p class="lead">${T('Notre équipe reste joignable 24h/24 pour répondre à votre demande.')}</p><div class="ac-hero__actions"><a class="btn btn--gold" href="devis">${T('Demander un devis')}</a><a class="btn btn--outline" href="tel:+33611678625">06 11 67 86 25</a><a class="btn btn--outline" href="${accueil}">${T('Retour à l’accueil')}</a></div></div></section>`;
     }
     // Prix
     const t = c.tarifs || {};
-    const fmt2 = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const fmt = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 });
+    const fmt2 = new Intl.NumberFormat(LOC, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt = new Intl.NumberFormat(LOC, { maximumFractionDigits: 2 });
     document.querySelectorAll('[data-prix]').forEach((el) => {
       const v = t[el.dataset.prix];
       if (typeof v !== 'number') return;
       el.textContent = el.dataset.dec === '2' ? fmt2.format(v) : (Number.isInteger(v) ? fmt.format(v) : fmt2.format(v));
     });
     // Accueil : textes (les [crochets] du titre sont mis en valeur) et image
-    const a = c.accueil || {};
+    // (textes saisis en français dans l'admin : seulement sur le site français)
+    const a = LANGUE === 'fr' ? (c.accueil || {}) : {};
     document.querySelectorAll('[data-accueil]').forEach((el) => {
       const v = a[el.dataset.accueil];
       if (typeof v !== 'string' || !v.trim()) return;
@@ -647,6 +668,7 @@
   navigation();
   menusDeroulants();
   connexion();
+  langues();
   // Site installable sur l'écran d'accueil (service worker sans mise en cache)
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('/sw-site.js', { scope: '/' }).catch(() => {});
   reveal();

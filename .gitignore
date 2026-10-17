@@ -13,3 +13,12 @@ bda-admin-data/
 
 # Marqueur « site hors ligne » écrit par le serveur
 .site-hors-ligne
+
+# Cache Python des outils de traduction
+__pycache__/
+
+# Cache Python des outils de traduction
+__pycache__/
+# Fichiers de travail des outils de traduction (refaits à chaque lancement)
+outils/i18n/a-traduire.txt
+outils/i18n/manquants-*.txt

@@ -27,6 +27,7 @@ function servir_page(string $chemin): void
   ];
   $rel = trim($chemin, '/');
   if ($rel === '') $rel = 'index.html';
+  elseif (is_dir(__DIR__ . '/' . $rel)) $rel .= '/index.html'; // /en/ et /ar/ : accueil de la version anglaise ou arabe
   if (pathinfo($rel, PATHINFO_EXTENSION) === '') $rel .= '.html';
   $ext = strtolower(pathinfo($rel, PATHINFO_EXTENSION));
   $racine = realpath(__DIR__);

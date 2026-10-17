@@ -1,0 +1,189 @@
+# Entreprises, Recrutement, Devis — anglais
+185|Security for Businesses in Paris | BDA Security Group
+186|Security officers for businesses in Paris and the Île-de-France region: offices, hotels, shops, construction sites. A dedicated contact and a free proposal.
+187|Private security for businesses
+188|Breadcrumb
+189|Businesses · Paris & Île-de-France
+190|Your company's security,
+191|without a second thought.
+192|A dedicated team and a single point of contact for your offices, hotels, shops, construction sites and residences.
+193|Tailored assessment
+194|Let's talk about your site.
+195|A manager reviews your request and gets back to you within one business day with a tailored offer.
+196|A dedicated contact
+197|Officers replaced in case of absence
+198|Schedule agreed with you
+199|One clear invoice per month
+200|Prefer to call?
+201|Your company
+202|Job title
+203|Business email
+204|Your site
+205|Type of premises
+206|Select
+207|Offices / head office
+208|Hotel
+209|Shop / store
+210|Restaurant / nightlife venue
+211|Construction site
+212|Residence / condominium
+213|Event
+214|City or postcode of the site
+215|Services required
+216|Reception / access control
+217|Patrols / guarding
+218|Your requirements
+219|Type of assignment
+220|Regular assignment (contract)
+221|One-off assignment
+222|Replacement / reinforcement
+223|To be defined
+224|Number of officers
+225|3 to 5
+226|6 to 10
+227|More than 10
+228|Hours
+229|Day
+230|Night
+231|Weekend
+232|24/7
+233|Preferred start
+234|Within the month
+235|Within 1 to 3 months
+236|Specific date (given below)
+237|Preferred contact method
+238|Email
+239|Further details
+240|Address, exact hours, special instructions…
+241|Send my request
+242|Your details are only used to process your request.
+243|Request sent.
+244|Thank you. A manager is reviewing your needs and will get back to you within one business day. For an emergency:
+245|Careers: Security Officers & Chauffeurs | BDA Security Group
+246|BDA Security Group is hiring in Paris: security officers (APS), SSIAP fire safety officers, close protection officers and private chauffeurs (VTC). Apply online.
+247|Join BDA Security Group
+248|Security officers, bodyguards and private chauffeurs · Paris and Île-de-France.
+249|Position sought
+250|Sites, reception, patrols, events
+251|Bodyguard
+252|VTC licence
+253|Last name
+254|First name
+255|Date of birth
+256|City or postcode
+257|Professional licence and qualifications
+258|CNAPS professional licence
+259|Yes, currently valid
+260|Application in progress
+261|No
+262|Licence number
+263|CAR-075-…
+264|Expiry date
+265|Activities listed on the licence
+266|Manned guarding / surveillance
+267|Physical protection of persons
+268|Dog handler
+269|Qualifications and training
+270|TFP / CQP APS
+271|TFP A3P
+272|SSIAP 1
+273|SSIAP 2
+274|SSIAP 3
+275|SST / PSC1 (first aid)
+276|VTC licence and vehicle
+277|VTC professional licence
+278|Driving licence (B) held for
+279|Less than 3 years
+280|3 to 5 years
+281|5 to 10 years
+282|More than 10 years
+283|Own VTC vehicle
+284|Yes
+285|Vehicle model
+286|Make, model, year
+287|Experience
+288|Experience in the profession
+289|Beginner
+290|Less than 2 years
+291|2 to 5 years
+292|More than 5 years
+293|Languages spoken
+294|French, English…
+295|Recent positions or employers
+296|Availability
+297|Type of contract sought
+298|Full time
+299|Part time
+300|One-off assignments
+301|Time slots
+302|Public holidays
+303|Available from
+304|Driving licence (B)
+305|Finally
+306|Link to your CV or LinkedIn profile
+307|https://
+308|Message
+309|I agree that my information may be used to assess my application. It is kept for a maximum of 2 years.
+310|Learn more
+311|Do not fill in
+312|Send my application
+313|Application sent.
+314|Thank you
+315|. Your application for the position of
+316|has been received. We will get back to you if your profile matches our needs.
+317|Send my CV by email
+318|Request a Quote — BDA Security Group
+319|Request your free, no-obligation quote: private security, close protection, private chauffeur or a tailored package. Fast response.
+320|Free, no-obligation quote: private security, close protection, private chauffeur or a tailored package.
+321|Free · No obligation
+322|Request your
+323|tailored quote.
+324|Answer a few questions and we will quickly get back to you with a clear, tailored proposal.
+325|2 minutes is all it takes
+326|4 simple steps, no account needed.
+327|Confidentiality guaranteed
+328|Security and transport organised by the same team.
+329|An urgent request?
+330|Progress
+331|Service
+332|Date
+333|Contact details
+334|Details
+335|What type of service are you looking for?
+336|Manned guarding & surveillance
+337|Sites, premises, construction sites
+338|Bodyguard, VIP escort
+339|Parties, trade fairs, concerts
+340|Single journey
+341|From one address to another
+342|Chauffeur at your disposal
+343|By the hour or by the day
+344|Book your chauffeur online
+345|Airports, stations, chauffeur at your disposal: price displayed in 1 minute, fast confirmation
+346|Tailored
+347|Chauffeur + security officer
+348|The duo for your evenings and VIP guests
+349|Other request
+350|Describe your needs
+351|When for?
+352|Give us your preferred date: we will confirm the exact times together.
+353|Preferred date
+354|Please enter a date from today onwards.
+355|Time
+356|My dates are flexible
+357|So we can send you your quote and call you back if needed.
+358|Name or company
+359|E.g. Jane Smith or Smith Ltd
+360|Please enter your name or your company's name.
+361|Invalid number (e.g. +33 6 12 34 56 78).
+362|Email
+363|you@example.com
+364|Invalid email address.
+365|Details of your request
+366|Summary of your request
+367|Describe your needs in a few words (at least 10 characters).
+368|I agree that my information may be used to process my quote request and to contact me. It will never be sold.
+369|Step 1 of 4
+370|Back
+371|Continue
+372|Your data remains confidential and is only used to process your request.

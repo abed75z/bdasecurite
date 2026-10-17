@@ -18,12 +18,17 @@
   const champJour = form.querySelector('input[name="jour"]');
   const navs = fenetre.querySelectorAll('.rp__cal-nav');
 
+  // Langue de la page (assets/js/i18n.js sur /en/ et /ar/) ; la demande envoyée au gérant reste en français
+  const T = window.T || ((s, v) => (v ? s.replace(/\{(\w+)\}/g, (_, k) => (v[k] === undefined ? '' : v[k])) : s));
+  const LOC = window.LOCALE || 'fr-FR';
   const JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
   const MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
   const CRENEAUX = { matin: 'le matin (9h – 12h)', midi: 'le midi (12h – 14h)', 'apres-midi': 'l’après-midi (14h – 18h)', soir: 'en soirée (18h – 21h)' };
   const CRENEAUX_COURT = { matin: 'matin, 9h – 12h', midi: 'midi, 12h – 14h', 'apres-midi': 'après-midi, 14h – 18h', soir: 'soirée, 18h – 21h' };
   const JOURS_MAX = 60; // on peut choisir un jour dans les deux prochains mois
   const jourTexte = (d) => `${JOURS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`;
+  // Même date, dans la langue de la page (affichage)
+  const jourAffiche = (d) => (LOC === 'fr-FR' ? jourTexte(d) : d.toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' }));
   const cle = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   const depuisCle = (c) => { const [a, m, j] = c.split('-').map(Number); return new Date(a, m - 1, j); };
 
@@ -39,7 +44,7 @@
 
   function dessinerMois() {
     const an = moisAffiche.getFullYear(), m = moisAffiche.getMonth();
-    titreMois.textContent = `${MOIS[m]} ${an}`;
+    titreMois.textContent = LOC === 'fr-FR' ? `${MOIS[m]} ${an}` : new Date(an, m, 1).toLocaleDateString(LOC, { month: 'long', year: 'numeric' });
     const decalage = (new Date(an, m, 1).getDay() + 6) % 7; // semaine commençant le lundi
     const nbJours = new Date(an, m + 1, 0).getDate();
     const auj = cle(new Date());
@@ -52,7 +57,7 @@
       b.className = 'rp__cal-j';
       b.textContent = String(j);
       b.dataset.jour = cle(d);
-      b.setAttribute('aria-label', jourTexte(d));
+      b.setAttribute('aria-label', jourAffiche(d));
       if (d < premier || d > dernier) b.disabled = true;
       if (cle(d) === auj) b.classList.add('is-auj');
       if (cle(d) === choisi) { b.classList.add('is-choisi'); b.setAttribute('aria-pressed', 'true'); }
@@ -100,8 +105,8 @@
   function majResume() {
     const c = form.querySelector('input[name="creneau"]:checked');
     if (!choisi || !c) { resume.textContent = ''; return; }
-    const t = jourTexte(depuisCle(choisi));
-    resume.textContent = `${t.charAt(0).toUpperCase()}${t.slice(1)} · ${CRENEAUX_COURT[c.value]}`;
+    const t = jourAffiche(depuisCle(choisi));
+    resume.textContent = `${t.charAt(0).toUpperCase()}${t.slice(1)} · ${T(CRENEAUX_COURT[c.value])}`;
   }
 
   function majAgenda() {
@@ -156,17 +161,17 @@
       erreur.textContent = msg; erreur.hidden = false;
       if (champ) form.querySelector(`[name="${champ}"]`).focus();
     };
-    if (!nom) return montrer('Indiquez votre nom.', 'nom');
-    if (tel.replace(/\D/g, '').length < 9) return montrer('Indiquez un numéro de téléphone valide.', 'tel');
+    if (!nom) return montrer(T('Indiquez votre nom.'), 'nom');
+    if (tel.replace(/\D/g, '').length < 9) return montrer(T('Indiquez un numéro de téléphone valide.'), 'tel');
 
     let quand = 'Dès que possible';
-    let phrase = 'dès que possible';
+    let phrase = T('dès que possible');
     if (d.get('quand') === 'date') {
       const c = form.querySelector('input[name="creneau"]:checked');
-      if (!choisi || !c) return montrer('Choisissez un jour et un moment.');
+      if (!choisi || !c) return montrer(T('Choisissez un jour et un moment.'));
       const t = champJour.dataset.texte;
       quand = `${t.charAt(0).toUpperCase()}${t.slice(1)}, ${CRENEAUX[c.value]}`;
-      phrase = `${t} ${CRENEAUX[c.value]}`;
+      phrase = `${jourAffiche(depuisCle(choisi))} ${T(CRENEAUX[c.value])}`;
     }
     erreur.hidden = true;
     bouton.disabled = true;
@@ -182,16 +187,17 @@
           'Date souhaitée': quand,
           'Message': message,
           'Détails': `Rappel demandé depuis l'accueil — besoin : ${besoin} — quand : ${quand}${message ? ` — message : ${message}` : ''}`,
+          ...(window.LANGUE && window.LANGUE !== 'fr' ? { 'Langue du visiteur': window.LANGUE === 'ar' ? 'Arabe' : 'Anglais' } : {}),
           site_web: String(d.get('site_web') || ''),
         }),
       });
       const j = await r.json().catch(() => ({}));
-      if (!r.ok || !j.ok) throw new Error(j.erreur || 'Envoi impossible pour le moment.');
-      recap.textContent = `Un responsable vous rappelle ${phrase} au ${tel}.`;
+      if (!r.ok || !j.ok) throw new Error(j.erreur || T('Envoi impossible pour le moment.'));
+      recap.textContent = T('Un responsable vous rappelle {quand} au {tel}.', { quand: phrase, tel });
       form.reset();
       form.hidden = true; merci.hidden = false;
     } catch (err) {
-      montrer(`${err.message} Vous pouvez aussi nous appeler au 06 11 67 86 25.`);
+      montrer(`${err.message} ${T('Vous pouvez aussi nous appeler au 06 11 67 86 25.')}`);
     }
     bouton.disabled = false;
   });

@@ -23,6 +23,8 @@ const envoyerJson = (url, payload, estOk) => fetch(url, {
   const card = document.querySelector('.apply-card');
   const form = document.getElementById('candidature-form');
   if (!form || !card) return;
+  // Langue de la page (assets/js/i18n.js sur /en/ et /ar/) ; la candidature envoyée reste en français
+  const T = window.T || ((s) => s);
   const f = (id) => form.querySelector(`#${id}`);
   const errorBox = form.querySelector('.step-error');
   const submit = form.querySelector('[type="submit"]');
@@ -70,7 +72,7 @@ const envoyerJson = (url, payload, estOk) => fetch(url, {
     let first = null;
     checks.forEach(([el, ok]) => { setError(el, !ok); if (!ok && !first) first = el; });
     if (first) {
-      showError('Merci de compléter les champs indiqués en rouge.');
+      showError(T('Merci de compléter les champs indiqués en rouge.'));
       first.focus({ preventScroll: true });
       first.closest('.rc-champ, .rc-accord, .rc-postes').scrollIntoView({ block: 'center', behavior: 'smooth' });
       return false;
@@ -116,6 +118,7 @@ const envoyerJson = (url, payload, estOk) => fetch(url, {
       'Lien CV / LinkedIn': txt('c-cv', 'Non fourni'),
       'Message': txt('c-message', '—'),
       'Consentement': 'Oui',
+      ...(window.LANGUE && window.LANGUE !== 'fr' ? { 'Langue du visiteur': window.LANGUE === 'ar' ? 'Arabe' : 'Anglais' } : {}),
       _subject: `Nouvelle candidature — ${poste()} — ${nom}`,
       _replyto: f('c-email').value.trim(),
       ...RECRUT_CONFIG.extraFields,
@@ -133,7 +136,7 @@ const envoyerJson = (url, payload, estOk) => fetch(url, {
 
       // Écran de confirmation
       card.querySelector('[data-done-name]').textContent = prenom;
-      card.querySelector('[data-done-job]').textContent = poste();
+      card.querySelector('[data-done-job]').textContent = T(poste());
       const subject = encodeURIComponent(`CV — ${poste()} — ${nom}`);
       card.querySelector('[data-cv-link]').href = `mailto:${RECRUT_CONFIG.cvEmail}?subject=${subject}`;
       card.classList.add('is-done');
@@ -141,8 +144,8 @@ const envoyerJson = (url, payload, estOk) => fetch(url, {
     } catch (err) {
       console.error('[Recrutement] Échec de l\'envoi :', err);
       showError(/activat/i.test(err.message)
-        ? 'Le formulaire doit d\'abord être activé : cliquez sur « Activate Form » dans l\'email reçu de FormSubmit, puis renvoyez la candidature.'
-        : 'L\'envoi a échoué. Vérifiez votre connexion et réessayez, ou appelez-nous au 06 11 67 86 25.');
+        ? T('Le formulaire doit d\'abord être activé : cliquez sur « Activate Form » dans l\'email reçu de FormSubmit, puis renvoyez la demande.')
+        : T('L\'envoi a échoué. Vérifiez votre connexion et réessayez, ou appelez-nous au 06 11 67 86 25.'));
     } finally {
       setLoading(false);
     }

@@ -40,13 +40,16 @@ function envoyerAdmin(url, payload) {
   const service = new URLSearchParams(location.search).get('service');
   if (!['transfert', 'disposition', 'evenement'].includes(service)) return;
   fetch('/api/reservation.php?tarifs=1').then((r) => r.json()).then((j) => {
-    if (j && j.tarifs && j.tarifs.ouvert) location.replace(service === 'disposition' ? 'reserver?mode=dispo' : 'reserver');
+    if (j && j.tarifs && j.tarifs.ouvert) location.replace(service === 'disposition' ? '/reserver?mode=dispo' : '/reserver');
   }).catch(() => {});
 })();
 
 (() => {
   const form = document.getElementById('devis-form');
   if (!form) return;
+  // Langue de la page (assets/js/i18n.js sur /en/ et /ar/) ; la demande envoyée au gérant reste en français
+  const T = window.T || ((s, v) => (v ? s.replace(/\{(\w+)\}/g, (_, k) => (v[k] === undefined ? '' : v[k])) : s));
+  const LOC = window.LOCALE || 'fr-FR';
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   const card = form.closest('.form-card');
   const body = form.querySelector('.form-card__body');
@@ -65,7 +68,7 @@ function envoyerAdmin(url, payload) {
   const pad = (n) => String(n).padStart(2, '0');
   const isoDay = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const parseDay = (v) => { const [y, m, d] = v.split('-').map(Number); return new Date(y, m - 1, d); };
-  const fmtDay = (v) => new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(parseDay(v));
+  const fmtDay = (v) => new Intl.DateTimeFormat(LOC, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(parseDay(v));
   f('f-date').min = isoDay(new Date());
 
   /* ---------- Exemples adaptés à la prestation choisie ---------- */
@@ -75,7 +78,7 @@ function envoyerAdmin(url, payload) {
     surmesure: 'Ex. : programme de la journée ou de la soirée, lieux, nombre de personnes à accompagner, niveau de discrétion souhaité…',
   };
   const selected = () => form.querySelector('input[name="prestation"]:checked');
-  const updateExample = () => { f('f-details').placeholder = examples[selected()?.dataset.group] || examples.surmesure; };
+  const updateExample = () => { f('f-details').placeholder = T(examples[selected()?.dataset.group] || examples.surmesure); };
 
   /* ---------- Erreurs ---------- */
   const fieldOf = (el) => el.closest('.field, .check');
@@ -94,7 +97,7 @@ function envoyerAdmin(url, payload) {
     const fail = (el) => { setError(el); if (!firstBad) firstBad = el; };
     stepError(i, '');
     if (i === 0 && !selected()) {
-      stepError(0, 'Choisissez une prestation pour continuer.');
+      stepError(0, T('Choisissez une prestation pour continuer.'));
       firstBad = form.querySelector('input[name="prestation"]');
     }
     if (i === 1) {
@@ -110,7 +113,7 @@ function envoyerAdmin(url, payload) {
     if (i === 3) {
       const det = f('f-details'), ok = f('f-consent');
       if (det.value.trim().length < 10) fail(det);
-      if (!ok.checked) { fail(ok); stepError(3, 'Merci de cocher la case d\'accord pour envoyer votre demande.'); }
+      if (!ok.checked) { fail(ok); stepError(3, T('Merci de cocher la case d\'accord pour envoyer votre demande.')); }
     }
     if (firstBad) { firstBad.focus({ preventScroll: true }); firstBad.closest('.field, .check, .step-panel')?.scrollIntoView({ block: 'center', behavior: 'smooth' }); return false; }
     return true;
@@ -142,7 +145,7 @@ function envoyerAdmin(url, payload) {
     btnPrev.hidden = current === 0;
     btnNext.hidden = last;
     btnSubmit.hidden = !last;
-    counter.textContent = `Étape ${current + 1} sur ${steps.length}`;
+    counter.textContent = T('Étape {n} sur {t}', { n: current + 1, t: steps.length });
     bar.style.transform = `scaleX(${(current + 1) / steps.length})`;
     stepper.forEach((b, i) => {
       b.classList.toggle('is-current', i === current);
@@ -164,7 +167,7 @@ function envoyerAdmin(url, payload) {
       span.append(txt);
       recap.appendChild(span);
     };
-    chip('star', s?.value);
+    chip('star', s ? T(s.value) : '');
     chip('calendar', d ? fmtDay(d) + (h ? ` · ${h}` : '') : '');
     chip('user', nom);
   }
@@ -233,6 +236,7 @@ function envoyerAdmin(url, payload) {
       'Email': summary.email,
       'Détails': f('f-details').value.trim(),
       'Consentement': 'Oui',
+      ...(window.LANGUE && window.LANGUE !== 'fr' ? { 'Langue du visiteur': window.LANGUE === 'ar' ? 'Arabe' : 'Anglais' } : {}),
       _subject: `Nouvelle demande de devis ${ref} — ${summary.prestation}`,
       _replyto: summary.email,
       ...DEVIS_CONFIG.extraFields,
@@ -262,9 +266,9 @@ function envoyerAdmin(url, payload) {
     } catch (err) {
       console.error('[Devis] Échec de l\'envoi :', err);
       setLoading(false);
-      stepError(3, /activat/i.test(err.message)
+      stepError(3, T(/activat/i.test(err.message)
         ? 'Le formulaire doit d\'abord être activé : cliquez sur « Activate Form » dans l\'email reçu de FormSubmit, puis renvoyez la demande.'
-        : 'L\'envoi a échoué. Vérifiez votre connexion et réessayez, ou appelez-nous directement.');
+        : 'L\'envoi a échoué. Vérifiez votre connexion et réessayez, ou appelez-nous directement.'));
     }
   });
 

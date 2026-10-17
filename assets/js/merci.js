@@ -7,9 +7,12 @@
   try { data = JSON.parse(sessionStorage.getItem('devis') || 'null'); } catch (_) { data = null; }
 
   const $ = (s) => document.querySelector(s);
+  // Langue de la page (assets/js/i18n.js sur /en/ et /ar/)
+  const T = window.T || ((s, v) => (v ? s.replace(/\{(\w+)\}/g, (_, k) => (v[k] === undefined ? '' : v[k])) : s));
+  const LOC = window.LOCALE || 'fr-FR';
   const fmtDay = (v) => {
     const [y, m, d] = v.split('-').map(Number);
-    return new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(y, m - 1, d));
+    return new Intl.DateTimeFormat(LOC, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(y, m - 1, d));
   };
 
   const title = $('[data-thanks-title]');
@@ -21,16 +24,20 @@
     name.className = 'name';
     name.textContent = data.nom;
     title.textContent = '';
-    title.append('Merci, ', name, ' !');
+    // « Merci, {nom} ! » : le nom est inséré à sa place dans la phrase traduite
+    const [avantNom, apresNom] = T('Merci, {nom} !').split('{nom}');
+    title.append(avantNom, name, apresNom || '');
 
-    const when = data.date ? ` pour le ${fmtDay(data.date)}${data.heure ? ` à ${data.heure.replace(':', 'h')}` : ''}` : '';
+    const heure = data.heure ? (LOC === 'fr-FR' ? data.heure.replace(':', 'h') : data.heure) : '';
+    const when = data.date ? T(' pour le {date}', { date: fmtDay(data.date) }) + (heure ? T(' à {heure}', { heure }) : '') : '';
     const strong = document.createElement('strong');
-    strong.textContent = `« ${data.prestation} »`;
+    strong.textContent = T('« {texte} »', { texte: T(data.prestation) });
     lead.textContent = '';
-    lead.append('Votre demande de devis ', strong, `${when} a bien été transmise à notre équipe. Nous l'étudions et revenons vers vous très rapidement, par téléphone ou par email.`);
+    const [avant, apres] = T('Votre demande de devis {prestation}{quand} a bien été transmise à notre équipe. Nous l\'étudions et revenons vers vous très rapidement, par téléphone ou par email.').split('{prestation}');
+    lead.append(avant, strong, (apres || '').replace('{quand}', when));
 
     $('[data-ref]').textContent = data.ref;
-    $('[data-prestation]').textContent = data.prestation;
+    $('[data-prestation]').textContent = T(data.prestation);
     $('[data-date]').textContent = data.date ? fmtDay(data.date) + (data.heure ? ` · ${data.heure}` : '') : '—';
     $('[data-email]').textContent = data.email || '—';
     summary.hidden = false;
@@ -40,8 +47,8 @@
       try {
         await navigator.clipboard.writeText(data.ref);
         copy.classList.add('is-copied');
-        copy.setAttribute('aria-label', 'Référence copiée');
-        setTimeout(() => { copy.classList.remove('is-copied'); copy.setAttribute('aria-label', 'Copier la référence'); }, 1800);
+        copy.setAttribute('aria-label', T('Référence copiée'));
+        setTimeout(() => { copy.classList.remove('is-copied'); copy.setAttribute('aria-label', T('Copier la référence')); }, 1800);
       } catch (_) { /* presse-papiers indisponible */ }
     });
   }

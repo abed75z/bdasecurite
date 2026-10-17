@@ -19,9 +19,11 @@ RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\s(/\S*)
 RewriteRule ^ https://bdasecurite.com%1 [R=301,L,NE]
 
 # Adresses propres, sans « .html » (ex. https://bdasecurite.com/devis)
-# 1. /index.html ou /index -> page d'accueil
-RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\s/+index(\.html)?[\s?] [NC]
-RewriteRule ^ https://bdasecurite.com/ [R=301,L]
+# 1. /index.html ou /index -> page d'accueil (idem /en/index -> /en/ et /ar/index -> /ar/)
+RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\s/+((?:en|ar)/)?/*index(\.html)?[\s?] [NC]
+RewriteRule ^ https://bdasecurite.com/%1 [R=301,L]
+# Versions anglaise et arabe : /en, /en.html, /ar… -> /en/ et /ar/ (l'ancienne page en.html est remplacée par /en/)
+RewriteRule ^(en|ar)(\.html)?$ https://bdasecurite.com/$1/ [R=301,L]
 # 2. /page.html -> /page (anciens liens et Google redirigés définitivement)
 RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\s/+([^\s?]+?)\.html[\s?] [NC]
 RewriteRule ^ https://bdasecurite.com/%1 [R=301,L]
@@ -56,6 +58,8 @@ Options -Indexes
   Require all denied
 </FilesMatch>
 RedirectMatch 404 /\.git
+# Outils de traduction (outils/i18n) et scripts internes
+RedirectMatch 404 ^/outils/
 RedirectMatch 404 /.site-hors-ligne
 
 # Compression des pages, styles et scripts (chargement plus rapide)

@@ -6,7 +6,7 @@
 const RECRUT_CONFIG = {
   endpoint: 'https://formsubmit.co/ajax/bdasecurite@gmail.com',
   extraFields: { _template: 'table', _captcha: 'false' },
-  cvEmail: 'contact@bdasecurite.com',
+  cvEmail: 'recrutement@bdasecurite.com',
   admin: '/api/candidature.php', // copie de chaque candidature dans l'espace admin
 };
 

@@ -11,8 +11,8 @@ self.addEventListener('push', (e) => {
   try { d = e.data ? e.data.json() : {}; } catch (err) { d = { title: 'BDA Admin', body: e.data ? e.data.text() : '' }; }
   const taches = [self.registration.showNotification(d.title || 'BDA Security Group', {
     body: d.body || '',
-    icon: '/admin/icone-admin-192.png?v=1',
-    badge: '/admin/favicon-admin-96.png?v=1',
+    icon: '/admin/icone-admin-192.png?v=3',
+    badge: '/admin/favicon-admin-96.png?v=3',
     tag: d.tag || 'bda-admin',
     renotify: true,
     data: { url: d.url || '/admin/' },

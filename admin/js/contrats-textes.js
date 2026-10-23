@@ -9,26 +9,46 @@ import { h, isoVersFr, marqueLogo } from './outils.js';
 /* ---------- Règles de la convention collective et de la loi utilisées par les modèles ---------- */
 export const CCN = {
   secu: 'convention collective nationale des entreprises de prévention et de sécurité du 15 février 1985 (IDCC 1351)',
+  // Chauffeur VTC salarié : aucune convention ne couvre les VTC (IDCC 16 = autocars, IDCC 2219 = taxis) : Code du travail seul
   vtc: '',
-  smic: 12.02,
+  smic: 12.31, // SMIC horaire brut depuis le 1er juin 2026
   minimumPartiel: 24,
   zone: 'Paris et les départements d’Île-de-France (75, 77, 78, 91, 92, 93, 94 et 95)',
   casModification: 'Absence d’un salarié à remplacer, surcroît d’activité, demande d’un client (nouvel horaire, nouvelle mission, événement), modification du planning du site. La modification peut porter sur les jours travaillés et sur les horaires de chaque journée.',
   prevenancePartiel: 7,
   delaiPlanning: 7,
-  aideTaux: 'Au moins le minimum de la grille pour ce coefficient.',
+  aideTaux: 'Au moins le minimum de la convention pour ce coefficient.',
   tarifsDefaut: 'Agent de sécurité (ADS) : 25,00 € HT de l’heure\nAgent SSIAP 1 : 26,00 € HT de l’heure\nAgent SSIAP 2 : 28,00 € HT de l’heure\nAgent SSIAP 3 : 34,00 € HT de l’heure\nAgent de sécurité événementielle : 30,00 € HT de l’heure',
+  // Classification de l'accord du 26 septembre 2016 (emplois repères)
   qualifs: {
-    ads: 'Niveau III, échelon 2, coefficient 140', adsConfirme: 'Niveau III, échelon 3, coefficient 150', cynophile: 'Niveau III, échelon 2, coefficient 140',
-    video: 'Niveau III, échelon 2, coefficient 140', chefPoste: 'Niveau IV, échelon 1, coefficient 160', chefEquipe: 'Niveau IV, échelon 2, coefficient 170',
-    ssiap1: 'Niveau III, échelon 2, coefficient 140', ssiap2: 'Niveau IV, échelon 2, coefficient 160', ssiap3: 'Agent de maîtrise, niveau … , coefficient …',
-    apr: 'Coefficient …', aprChef: 'Coefficient …', assistant: 'Niveau III, échelon 1, coefficient 130', secretaire: 'Niveau III, échelon 1, coefficient 130', planning: 'Niveau IV, échelon 1, coefficient 160',
+    ads: 'Agent d’exploitation, coefficient 120 (porté à 130 après 6 mois d’ancienneté dans la branche)', adsConfirme: 'Agent d’exploitation, coefficient 130',
+    cynophile: 'Agent d’exploitation, coefficient 140', video: 'Agent d’exploitation, coefficient …', chefPoste: 'Agent d’exploitation, coefficient 140', chefEquipe: 'Coefficient …',
+    ssiap1: 'Agent d’exploitation, coefficient 140', ssiap2: 'Agent de maîtrise, coefficient 150', ssiap3: 'Agent de maîtrise, coefficient 235',
+    apr: 'Coefficient … (selon les critères de classification de la convention)', aprChef: 'Coefficient … (selon les critères de classification de la convention)',
+    assistant: 'Employé administratif, coefficient …', secretaire: 'Employé administratif, coefficient …', planning: 'Employé administratif, coefficient …',
   },
-  // Période d'essai d'un CDI selon le statut
-  essai: { Employé: '…', 'Agent de maîtrise': '…', Cadre: '…' },
-  essaiRenouvellement: '',
-  preavis: '',
+  // Salaires minima mensuels pour 151,67 h (accord salarial du 25 septembre 2023, étendu : +2,8 % au 1er janvier 2026)
+  grille: {
+    annee: 2026,
+    exploitation: { 120: 1883.85, 130: 1908.54, 140: 1965.78, 150: 2039.33, 160: 2152.09, 175: 2327.04, 190: 2502.06 },
+    maitrise: { 150: 2234.30, 235: 3282.88 },
+    cadre: { 300: 2968.47, 400: 3756.63 },
+  },
+  // Période d'essai d'un CDI (article 6.02) : [durée, renouvellement au plus]
+  essai: { Employé: ['2 mois', '1 mois'], 'Agent de maîtrise': ['3 mois', '3 mois'], Cadre: ['4 mois', '4 mois'] },
+  essaiLegal: { Employé: '2 mois', 'Agent de maîtrise': '3 mois', Cadre: '4 mois' },
+  panier: '4,48 €',
+  chienHeure: '1,41 €',
 };
+// Minimum de la convention pour le coefficient du poste (null si inconnu ou sans convention)
+export function minimumConventionnel(d) {
+  if (d.metier === 'vtc') return null;
+  const m = String(d.poste?.qualif || '').match(/coefficient\s*(\d{3})/i);
+  if (!m) return null;
+  const famille = d.poste.statut === 'Cadre' ? 'cadre' : d.poste.statut === 'Agent de maîtrise' ? 'maitrise' : 'exploitation';
+  const mensuel = CCN.grille[famille][+m[1]];
+  return mensuel ? { coef: +m[1], mensuel, horaire: Math.ceil(mensuel / 151.67 * 100) / 100 } : null;
+}
 
 /* ---------- Petits outils de texte ---------- */
 const V = (v, ph = '') => ({ v: v == null ? '' : String(v).trim(), ph });
@@ -238,14 +258,15 @@ function contratTravail(d) {
     d.metier === 'ssiap' ? P`L’embauche est subordonnée à la détention du diplôme ${B(d.posteCle.replace('ssiap', 'SSIAP '))} (${V(S.ssiapDiplome, 'n° et date du diplôme')}), à jour de son recyclage ou de sa remise à niveau, et d’une attestation de secourisme en cours de validité (SST ou PSC1)${S.secourisme ? P` jusqu’au ${D(S.secourisme)}` : ''}, conformément à l’arrêté du 2 mai 2005 relatif aux missions, à l’emploi et à la qualification du personnel permanent des services de sécurité incendie.` : null,
     d.metier === 'vtc' ? P`L’embauche est subordonnée à la détention par le Salarié d’une carte professionnelle de conducteur de VTC en cours de validité (n° ${V(S.carteVtc, 'n° de carte VTC')}, valable jusqu’au ${D(S.carteVtcFin)}) et d’un permis de conduire de catégorie B en cours de validité (n° ${V(S.permis, 'n° de permis')}, délivré le ${D(S.permisDate)}).` : null,
     S.ue === false ? P`Le Salarié déclare être titulaire d’un titre de séjour l’autorisant à travailler en France, dont l’Employeur a vérifié l’existence auprès de la préfecture avant l’embauche (article L5221-8 du Code du travail). Il s’engage à en demander le renouvellement en temps utile et à en remettre une copie à l’Employeur.` : null,
-    P`Le Salarié certifie l’exactitude des informations et des documents qu’il a remis lors de son embauche (identité, diplômes, titres et cartes professionnelles). Toute déclaration inexacte pourra entraîner une sanction pouvant aller jusqu’au licenciement.`,
-    P`Le Salarié bénéficiera d’une visite d’information et de prévention auprès du service de prévention et de santé au travail${d.org.sante ? P` (${V(uneLigne(d.org.sante))})` : ''}${T.nuit && d.metier !== 'bureau' ? ', avec le suivi individuel renforcé prévu pour les travailleurs de nuit lorsqu’il en a la qualité' : ''}.`,
+    P`Le Salarié certifie l’exactitude des informations et des documents qu’il a remis lors de son embauche (identité, diplômes, titres et cartes professionnelles${conv ? ', ainsi que les pièces prévues par la convention collective, notamment son dernier certificat de travail et une déclaration sur l’honneur relative aux condamnations' : ''}). Toute déclaration inexacte pourra entraîner une sanction pouvant aller jusqu’au licenciement.`,
+    d.metier === 'vtc' ? P`L’Employeur déclare le Salarié au registre des exploitants de voitures de transport avec chauffeur, avec le numéro de sa carte professionnelle et l’immatriculation des véhicules qu’il conduit.` : null,
+    P`Le Salarié bénéficiera d’une visite d’information et de prévention auprès du service de prévention et de santé au travail${d.org.sante ? P` (${V(uneLigne(d.org.sante))})` : ''}${T.nuit && d.metier !== 'bureau' ? ' ; s’il a la qualité de travailleur de nuit, cette visite a lieu avant sa prise de poste et il bénéficie d’un suivi adapté (article R4624-18 du Code du travail)' : ''}.`,
   ], { obligatoire: true });
 
   /* ----- Convention collective ----- */
   const statut = art('convention', 'Convention collective', [
     conv ? P`Le présent contrat est régi par les dispositions du Code du travail et par la ${conv}, ainsi que par ses avenants et accords. Un exemplaire de la convention collective est tenu à la disposition du Salarié ; elle peut aussi être consultée sur le site Légifrance.`
-      : P`Le présent contrat est régi par les dispositions du Code du travail. ${V('', 'convention collective applicable, ou « Aucune convention collective n’est applicable »')}`,
+      : P`Le présent contrat est régi par les dispositions du Code du travail. À la date de sa signature, aucune convention collective n’est applicable à l’entreprise ; si une convention devenait applicable, le Salarié en serait informé par écrit.`,
   ], { obligatoire: true });
 
   /* ----- Durée (CDD) ----- */
@@ -277,9 +298,12 @@ function contratTravail(d) {
       P`Le contrat comporte une période d’essai de ${V(essaiTexte || jours, 'durée')}${essaiTexte ? '' : ' (un jour par semaine de contrat, dans la limite de deux semaines pour un contrat de six mois au plus et d’un mois au-delà, article L1242-10 du Code du travail)'}. Pendant cette période, chaque partie peut rompre le contrat sans indemnité, en respectant le délai de prévenance prévu par la loi.`,
     ]);
   } else {
-    const duree = essaiTexte || CCN.essai[d.poste.statut] || '';
+    const [dureeConv, renouv] = CCN.essai[d.poste.statut] || CCN.essai.Employé;
+    const duree = essaiTexte || (conv ? dureeConv : CCN.essaiLegal[d.poste.statut] || '2 mois');
     essai = art('essai', 'Période d’essai', [
-      P`Le présent contrat ne deviendra définitif qu’à l’issue d’une période d’essai de ${V(duree, 'durée de l’essai')} de travail effectif${CCN.essaiRenouvellement ? `, ${CCN.essaiRenouvellement}` : ''}.`,
+      P`Le présent contrat ne deviendra définitif qu’à l’issue d’une période d’essai de ${V(duree, 'durée de l’essai')} de travail effectif.`,
+      conv ? P`Elle pourra être renouvelée une fois, pour ${renouv} au plus, par accord écrit des deux parties conclu avant son terme, si les aptitudes professionnelles du Salarié n’ont pu être appréciées, conformément à l’article 6.02 de la convention collective. Elle est prolongée de la durée des absences du Salarié et, le cas échéant, de la formation nécessaire à son emploi, dans la limite d’un mois.`
+        : P`Elle n’est pas renouvelable.`,
       P`Pendant la période d’essai, chaque partie peut rompre le contrat en respectant un délai de prévenance : pour l’Employeur, 24 heures en deçà de 8 jours de présence, 48 heures entre 8 jours et 1 mois, 2 semaines après 1 mois et 1 mois après 3 mois de présence ; pour le Salarié, 48 heures, ramenées à 24 heures si sa présence est inférieure à 8 jours (articles L1221-25 et L1221-26 du Code du travail).`,
     ]);
   }
@@ -289,7 +313,7 @@ function contratTravail(d) {
     P`Le Salarié exerce les fonctions de ${B(d.poste.intitule || '')}. À ce titre, il est notamment chargé de :`,
     ...missions(d).map(L),
     P`Cette liste n’est pas limitative : le Salarié accomplira toute tâche se rattachant à sa qualification et à ses fonctions.`,
-    secu || d.metier === 'ssiap' ? P`Il exerce ses missions dans le respect des consignes de l’Employeur et du client, ainsi que du code de déontologie des personnes exerçant des activités privées de sécurité (articles R631-1 et suivants du Code de la sécurité intérieure). Il ne dispose d’aucune prérogative de puissance publique (article L612-14 du Code de la sécurité intérieure) : il ne peut ni contrôler l’identité, ni fouiller, ni retenir une personne, sauf dans les cas où la loi le permet à tout citoyen (article 73 du Code de procédure pénale) ; l’inspection visuelle des bagages et la palpation de sécurité ne se font qu’avec le consentement de la personne et dans les conditions de l’article L613-2 du Code de la sécurité intérieure.` : null,
+    secu || d.metier === 'ssiap' ? P`Il exerce ses missions dans le respect des consignes de l’Employeur et du client, ainsi que du code de déontologie des personnes exerçant des activités privées de sécurité (articles R631-1 et suivants du Code de la sécurité intérieure). Il ne dispose d’aucune prérogative de puissance publique (article L612-14 du Code de la sécurité intérieure) : il ne peut ni contrôler l’identité, ni fouiller, ni retenir une personne, sauf dans les cas où la loi le permet à tout citoyen (article 73 du Code de procédure pénale) ; l’inspection visuelle des bagages et la palpation de sécurité ne se font qu’avec le consentement de la personne et dans les conditions de l’article L613-2 du Code de la sécurité intérieure. Un exemplaire du code de déontologie lui est remis à l’embauche (article R631-3 du même code).` : null,
   ]);
 
   /* ----- Lieu de travail ----- */
@@ -305,13 +329,21 @@ function contratTravail(d) {
     lieu = art('lieu', 'Lieu de travail et mobilité', [
       P`L’activité de l’Employeur s’exerce par nature sur les sites de ses clients. Le Salarié est affecté ${d.poste.lieu ? P`en premier lieu sur le site suivant : ${V(d.poste.lieu)}, cette affectation étant donnée à titre indicatif` : 'sur les sites qui lui sont désignés par son planning'}.`,
       d.clauses.mobilite ? P`Le Salarié accepte d’être affecté sur tout site situé dans la zone suivante : ${V(d.poste.zone, 'zone géographique')}. Ces changements d’affectation, qui découlent de la nature même des missions de prévention et de sécurité, constituent un simple changement de ses conditions de travail. Ils lui sont notifiés en respectant un délai de prévenance raisonnable, sauf urgence.` : null,
-      d.clauses.reprise && d.metier !== 'bureau' ? P`En cas de perte du marché du site sur lequel il est affecté, le contrat du Salarié pourra être transféré à l’entreprise entrante, dans les conditions prévues par l’accord relatif à la reprise du personnel annexé à la convention collective.` : null,
+      d.clauses.reprise && d.metier !== 'bureau' ? P`En cas de perte du marché du site sur lequel il est affecté, le contrat du Salarié pourra être transféré à l’entreprise entrante, dans les conditions prévues par l’accord du 28 janvier 2011 relatif à la reprise du personnel, annexé à la convention collective (notamment carte professionnelle valide et temps de présence suffisant sur le site).` : null,
     ]);
   }
 
   /* ----- Durée du travail ----- */
-  const horaires = d.metier === 'bureau' ? null
-    : P`Compte tenu de la continuité de service exigée par les clients, le Salarié pourra être amené à travailler selon un planning variable${T.nuit ? ', de jour comme de nuit, les samedis, dimanches et jours fériés' : ''}, par vacations dont la durée respecte les limites prévues par la loi et par la convention collective. Le planning est communiqué au Salarié par écrit (remise en main propre, message ou Espace équipe) au moins ${V(heuresFr(T.planning), 'nombre')} jours à l’avance, sauf circonstances exceptionnelles.`;
+  const regles = d.metier === 'bureau' ? []
+    : d.metier === 'vtc' ? [
+      P`Le Salarié travaille selon un planning variable${T.nuit ? ', de jour comme de nuit, les samedis, dimanches et jours fériés (les entreprises de transport bénéficient d’une dérogation au repos dominical, article R3132-5 du Code du travail)' : ''}, communiqué par écrit au moins ${V(heuresFr(T.planning), 'nombre')} jours à l’avance. La durée du travail ne peut dépasser 10 heures par jour, 48 heures sur une semaine et 44 heures en moyenne sur 12 semaines ; une pause d’au moins 20 minutes est prise dès 6 heures de travail.`,
+    ] : [
+      P`Compte tenu de la continuité de service exigée par les clients, le Salarié pourra être amené à travailler selon un planning variable${T.nuit ? ', de jour comme de nuit, les samedis, dimanches et jours fériés' : ''}, par vacations de 12 heures au plus, dans la limite de 48 heures sur une semaine et de 46 heures en moyenne sur 12 semaines (44 heures pour un travailleur de nuit).`,
+      P`Le planning est communiqué au Salarié par écrit (remise en main propre, message ou Espace équipe) au moins ${V(heuresFr(T.planning), 'nombre')} jours à l’avance. Toute modification lui est notifiée par écrit au moins 7 jours à l’avance, ou 48 heures avant pour un simple ajustement ponctuel, sauf accord du Salarié pour un délai plus court. Le refus d’un service supplémentaire ne peut pas être sanctionné.`,
+      T.nuit ? P`Le Salarié bénéficie en moyenne de deux dimanches de repos par mois sur trois mois, accolés à un samedi ou à un lundi de repos.` : null,
+      conv ? P`Conformément à l’accord de branche applicable depuis le 1er juillet 2026, chaque période de travail est rémunérée sur la base du temps réellement travaillé, avec un minimum de 6 heures, dans les conditions et sous les exceptions prévues par cet accord.` : null,
+    ];
+  const horaires = regles.filter(Boolean);
   let temps;
   if (partiel) {
     const t24 = +T.hebdo > 0 && +T.hebdo < CCN.minimumPartiel;
@@ -325,11 +357,12 @@ function contratTravail(d) {
       t24 ? P`La durée de travail est inférieure à ${CCN.minimumPartiel} heures par semaine à la demande écrite et motivée du Salarié en date du ${D(T.demande24)}, ${motif24} (article L3123-7 du Code du travail). Ses horaires sont regroupés sur des journées ou des demi-journées régulières ou complètes.` : null,
       P`Le Salarié à temps partiel bénéficie des mêmes droits que les salariés à temps complet (article L3123-5 du Code du travail) et d’une priorité pour l’attribution d’un emploi à temps complet ressortissant à sa catégorie professionnelle (article L3123-3).`,
       T.nuit && d.metier !== 'bureau' ? P`Le Salarié pourra être amené à travailler de nuit, les samedis, dimanches et jours fériés, dans le respect de la répartition ci-dessus.` : null,
+      conv && d.metier !== 'bureau' ? P`Conformément à l’accord de branche applicable depuis le 1er juillet 2026, chaque période de travail est rémunérée sur la base du temps réellement travaillé, avec un minimum de 6 heures, dans les conditions et sous les exceptions prévues par cet accord.` : null,
     ], { obligatoire: true });
   } else {
     temps = art('temps', 'Durée du travail', [
       P`La durée du travail du Salarié est fixée à 35 heures par semaine, soit 151,67 heures par mois.`,
-      horaires,
+      ...horaires,
       d.metier === 'bureau' ? P`Ses horaires de travail sont ceux affichés dans l’entreprise : ${V('', 'ex. du lundi au vendredi, de 9 h à 17 h, avec une heure de pause')}.` : null,
       P`Le Salarié pourra être amené à effectuer des heures supplémentaires à la demande de l’Employeur. Elles sont rémunérées avec une majoration de 25 % pour les huit premières heures au-delà de 35 heures et de 50 % au-delà (article L3121-36 du Code du travail), dans les limites légales et conventionnelles.`,
       P`Le Salarié bénéficie d’un repos quotidien d’au moins 11 heures consécutives et d’un repos hebdomadaire d’au moins 35 heures consécutives, sauf dérogations prévues par la loi et la convention collective.`,
@@ -341,8 +374,16 @@ function contratTravail(d) {
   const primes = lignes(R.primes);
   const remuneration = art('remuneration', 'Rémunération', [
     P`En contrepartie de son travail, le Salarié percevra une rémunération mensuelle brute de ${V(brut ? `${nombreFr(brut)} €` : '', 'montant')} pour ${V(heuresFr(mensuel), 'nombre')} heures de travail, soit un taux horaire brut de ${V(+R.taux > 0 ? `${nombreFr(R.taux)} €` : '', 'taux horaire')}.`,
-    d.metier !== 'bureau' && d.metier !== 'vtc' ? P`S’y ajoutent, dans les conditions et aux taux prévus par la convention collective, les majorations pour heures de nuit, de dimanche et de jours fériés, la prime de panier, la prime d’habillage et de déshabillage lorsque le port de la tenue est imposé, et la prime d’ancienneté.` : null,
-    d.metier === 'vtc' ? P`S’y ajoutent, le cas échéant, les majorations pour heures de nuit, de dimanche et de jours fériés et les indemnités de repas prévues par la loi et par la convention collective applicable.` : null,
+    ...(conv && d.metier !== 'bureau' ? [
+      P`S’y ajoutent, dans les conditions prévues par la convention collective :`,
+      L('une majoration de 10 % du taux horaire minimum conventionnel pour chaque heure de nuit (entre 21 h et 6 h), ainsi qu’un repos compensateur de 1 % par heure de nuit ;'),
+      L('une majoration de 10 % du taux horaire minimum conventionnel pour chaque heure travaillée le dimanche ;'),
+      L('pour un jour férié travaillé, une indemnité égale au salaire de ces heures, qui peut être remplacée par un repos équivalent pris dans le mois suivant ; le travail du 1er mai est payé double ;'),
+      L(`une prime de panier pour toute vacation d’au moins 6 heures de travail effectif (${CCN.panier} en ${CCN.grille.annee}, une seule par vacation de 12 heures) ;`),
+      L('une prime d’habillage et de déshabillage lorsque le port de la tenue est imposé ;'),
+      d.poste.statut === 'Cadre' ? null : L('une prime d’ancienneté calculée sur le salaire minimum de l’emploi : 2 % après 4 ans, 5 % après 7 ans, 8 % après 10 ans, 10 % après 12 ans et 12 % après 15 ans.'),
+    ] : []),
+    conv && d.metier === 'bureau' && d.poste.statut !== 'Cadre' ? P`S’y ajoute la prime d’ancienneté prévue par la convention collective : 2 % après 4 ans, 5 % après 7 ans, 8 % après 10 ans, 10 % après 12 ans et 12 % après 15 ans, calculée sur le salaire minimum de l’emploi.` : null,
     ...primes.map((p) => P`${p}`),
     P`La rémunération est versée chaque mois par virement bancaire${R.jour ? P`, au plus tard le ${V(R.jour)}` : ''}, et accompagnée d’un bulletin de paie.`,
     R.navigo ? P`L’Employeur prend en charge 50 % du prix de l’abonnement de transports publics du Salarié pour ses trajets entre son domicile et son lieu de travail, sur présentation des justificatifs (article L3261-2 du Code du travail).` : null,
@@ -356,30 +397,33 @@ function contratTravail(d) {
   /* ----- Tenue, carte, obligations du métier ----- */
   let tenue = null, metier = null, vehicule = null, chien = null;
   if (secu || d.metier === 'ssiap') {
-    tenue = art('tenue', 'Tenue et équipements', [
-      P`L’Employeur fournit gratuitement au Salarié la tenue de travail et les équipements nécessaires à ses missions. Leur port est obligatoire pendant le service. Ils restent la propriété de l’Employeur et devront être restitués en bon état à la fin du contrat.`,
+    tenue = art('tenue', d.metier === 'protection' ? 'Tenue, carte et équipements' : 'Tenue et équipements', d.metier === 'protection' ? [
+      P`Le Salarié porte une tenue civile correcte, adaptée à chaque mission et qui ne prête à aucune confusion avec celle des forces de l’ordre. Il a sur lui sa carte professionnelle, qu’il présente à toute demande des autorités. Les équipements remis par l’Employeur restent sa propriété et sont restitués à la fin du contrat.`,
+      P`Le Salarié n’est pas armé. Il ne peut détenir ni porter aucune arme pendant son service, sauf autorisation prévue par la loi et équipement remis par l’Employeur.`,
+    ] : [
+      P`L’Employeur fournit gratuitement au Salarié la tenue de travail et les équipements nécessaires à ses missions. Leur port est obligatoire pendant le service et interdit en dehors des heures de service. Ils restent la propriété de l’Employeur et devront être restitués en bon état à la fin du contrat.`,
       d.metier !== 'ssiap' || d.ssiapSurveillance ? P`Pendant son service, le Salarié porte une tenue qui ne prête à aucune confusion avec celle des forces de l’ordre, avec les insignes et mentions prévus par la réglementation, et a sur lui sa carte professionnelle, qu’il présente à toute demande des autorités.` : null,
       P`Le Salarié n’est pas armé. Il ne peut détenir ni porter aucune arme pendant son service, sauf autorisation prévue par la loi et équipement remis par l’Employeur.`,
     ]);
     metier = art('obligations', 'Obligations professionnelles', [
       P`Le Salarié s’engage notamment à :`,
-      carteCnaps ? L('conserver une carte professionnelle valide pendant toute la durée du contrat, en demander le renouvellement au plus tard trois mois avant son expiration et suivre à cette fin le stage de maintien et d’actualisation des compétences (MAC) ;') : null,
+      carteCnaps ? L('conserver une carte professionnelle valide pendant toute la durée du contrat, en demander le renouvellement entre six et trois mois avant son expiration et suivre à cette fin le stage de maintien et d’actualisation des compétences (MAC) ;') : null,
       d.metier === 'ssiap' ? L('maintenir la validité de son diplôme SSIAP (recyclage tous les trois ans) et de son attestation de secourisme ;') : null,
-      carteCnaps ? L('informer sans délai l’Employeur de toute suspension, de tout retrait de sa carte professionnelle, et de toute procédure ou condamnation susceptible de l’entraîner ;') : null,
+      carteCnaps ? L('informer sans délai l’Employeur de toute suspension ou de tout retrait de sa carte professionnelle, de toute condamnation et de tout changement de sa situation (titre de séjour, permis de conduire) ;') : null,
       L('respecter les consignes de chaque site, ne jamais quitter son poste sans avoir été relevé, et rendre compte de tout incident ;'),
       L('ne consommer ni alcool ni stupéfiant avant ou pendant le service, et limiter l’usage de son téléphone personnel aux nécessités du service ;'),
       L('se présenter à l’heure, en tenue, et prévenir l’Employeur au plus tôt de toute absence ou de tout retard.'),
-      carteCnaps ? P`Le Salarié est informé que l’exercice de ses fonctions est impossible sans carte professionnelle valide. Conformément à l’article L612-20 du Code de la sécurité intérieure, le contrat du salarié qui cesse de remplir les conditions exigées pour exercer, notamment en cas de retrait de sa carte professionnelle, est rompu de plein droit.` : null,
+      carteCnaps ? P`Le Salarié est informé que l’exercice de ses fonctions est impossible sans carte professionnelle valide (ou récépissé de renouvellement). Conformément à l’article L612-21 du Code de la sécurité intérieure, le contrat du salarié qui cesse de remplir les conditions exigées pour exercer est rompu de plein droit ; l’indemnité légale de licenciement lui reste due.` : null,
     ].filter(Boolean));
   } else if (d.metier === 'vtc') {
     metier = art('obligations', 'Obligations professionnelles', [
       P`Le Salarié s’engage notamment à :`,
-      L('conserver une carte professionnelle VTC et un permis de conduire valides pendant toute la durée du contrat, suivre la formation continue obligatoire et passer la visite médicale demandée par la préfecture en temps utile ;'),
+      L('conserver une carte professionnelle VTC et un permis de conduire valides pendant toute la durée du contrat, suivre la formation continue obligatoire avant chaque renouvellement de sa carte (tous les cinq ans) et passer la visite médicale d’aptitude à la conduite à chaque échéance (tous les cinq ans avant 60 ans, tous les deux ans de 60 à 76 ans, chaque année au-delà) ;'),
       L('informer sans délai l’Employeur de toute suspension ou annulation de son permis, de toute perte de points importante, et de tout retrait de sa carte professionnelle ;'),
       L('ne prendre en charge que des clients ayant réservé à l’avance, ne pas stationner sur la voie publique en attente de clients et, après chaque course, revenir au lieu de prise de service ou dans un parc de stationnement hors de la voie publique, sauf nouvelle réservation (articles L3120-2 et L3122-9 du Code des transports) ;'),
       L('ne consommer ni alcool ni stupéfiant avant ou pendant le service, ne pas fumer ni téléphoner en conduisant ;'),
       L('adopter une tenue correcte et un comportement courtois et discret avec les clients.'),
-      P`Les contraventions au Code de la route commises par le Salarié pendant la conduite restent à sa charge : l’Employeur est tenu de communiquer son identité aux autorités (article L121-6 du Code de la route). Aucune amende ni sanction pécuniaire ne sera retenue sur son salaire (article L1331-2 du Code du travail).`,
+      P`Les contraventions au Code de la route commises par le Salarié pendant la conduite restent à sa charge : l’Employeur communique son identité aux autorités (désignation du conducteur prévue par le Code de la route). Aucune amende ni sanction pécuniaire ne sera retenue sur son salaire (article L1331-2 du Code du travail), et le Salarié ne supporte ni la franchise d’assurance ni le coût des dommages causés au véhicule, sauf faute lourde.`,
       P`L’exercice des fonctions est impossible sans carte professionnelle et permis valides ; leur perte pourra entraîner la rupture du contrat dans les conditions prévues par la loi.`,
     ]);
     if (d.clauses.vehicule) {
@@ -389,6 +433,7 @@ function contratTravail(d) {
         Vh.personnel ? P`Le Salarié est autorisé à utiliser le véhicule pour ses trajets personnels en dehors du service ; cet usage constitue un avantage en nature qui figure sur son bulletin de paie.`
           : P`Le véhicule est réservé à un usage professionnel : il ne peut être utilisé à des fins personnelles ni transporter d’autres personnes que les clients. Il est restitué à la fin de chaque service au lieu indiqué par l’Employeur.`,
         P`Le Salarié en prend soin, le maintient propre, signale toute anomalie et déclare tout accident ou incident à l’Employeur dans les 24 heures, avec un constat amiable lorsqu’un tiers est en cause. Il est interdit de fumer dans le véhicule.`,
+        P`Si le véhicule est équipé d’un système de géolocalisation, celui-ci ne sert qu’à la gestion des courses et à la sécurité ; il n’est pas utilisé pendant les pauses ni en dehors du service, et ses données sont conservées deux mois au plus, sauf lorsqu’elles servent de preuve d’une prestation.`,
       ]);
     }
   } else if (d.metier === 'bureau') {
@@ -401,7 +446,7 @@ function contratTravail(d) {
     chien = art('chien', 'Chien', [
       P`Le Salarié exerce ses missions avec le chien ${V(C.nom, 'nom du chien')}, de race ${V(C.race, 'race')}, identifié sous le n° ${V(C.puce, 'n° d’identification')}, ${C.proprietaire === 'employeur' ? 'appartenant à l’Employeur et confié au Salarié pour la durée du contrat' : 'dont le Salarié est propriétaire'}.`,
       P`Le chien doit être identifié, vacciné (notamment contre la rage), en bonne santé, dressé à la garde et assuré en responsabilité civile${C.proprietaire === 'employeur' ? ' par l’Employeur' : ' par son propriétaire'}. Le Salarié en garde la maîtrise permanente pendant le service, dans le respect de la réglementation sur les chiens.`,
-      C.proprietaire === 'employeur' ? P`Les frais de nourriture et de soins vétérinaires sont pris en charge par l’Employeur.` : P`L’entretien du chien utilisé pour le service donne lieu au versement de l’indemnité prévue par la convention collective.`,
+      C.proprietaire === 'employeur' ? P`Les frais de nourriture et de soins vétérinaires sont pris en charge par l’Employeur.` : P`Le Salarié perçoit l’indemnité d’entretien du chien prévue par la convention collective (${CCN.chienHeure} par heure de travail effectif du binôme en ${CCN.grille.annee}), ainsi que l’indemnité de transport du chien selon la distance parcourue.`,
     ]);
   }
 
@@ -415,6 +460,7 @@ function contratTravail(d) {
   /* ----- Formation ----- */
   const formation = d.clauses.formation ? art('formation', 'Formation', [
     P`L’Employeur assure l’adaptation du Salarié à son poste. Les formations obligatoires au maintien des titres nécessaires à l’emploi (${{ securite: 'maintien et actualisation des compétences, secourisme', protection: 'maintien et actualisation des compétences, secourisme', ssiap: 'recyclage SSIAP, secourisme', vtc: 'formation continue des conducteurs VTC', bureau: 'formations utiles au poste' }[d.metier] || 'formations utiles au poste'}) suivies à la demande de l’Employeur sont prises en charge par lui et constituent du temps de travail effectif.`,
+    P`Le Salarié bénéficie de son compte personnel de formation et d’un entretien professionnel tous les deux ans, consacré à ses perspectives d’évolution (article L6315-1 du Code du travail).`,
   ]) : null;
 
   /* ----- Confidentialité, loyauté ----- */
@@ -438,7 +484,7 @@ function contratTravail(d) {
   /* ----- Fin du contrat ----- */
   const fin = art('fin', 'Fin du contrat', [
     cdd ? P`Le contrat ne peut être rompu avant son terme qu’en cas d’accord des parties, de faute grave, de force majeure, d’inaptitude constatée par le médecin du travail, ou à l’initiative du Salarié qui justifie d’une embauche en contrat à durée indéterminée ; il respecte alors un préavis d’un jour par semaine de contrat, dans la limite de deux semaines (articles L1243-1 et L1243-2 du Code du travail).`
-      : P`Après la période d’essai, le contrat peut être rompu par chacune des parties dans les conditions prévues par la loi et par la convention collective${CCN.preavis ? `, notamment en respectant ${CCN.preavis}` : ', notamment en respectant le préavis qu’elle prévoit (sauf faute grave ou dispense)'}.`,
+      : preavisCdi(d, conv),
     P`À la fin du contrat, le Salarié restitue sans délai tout ce qui lui a été confié : tenue, badges, clés, cartes d’accès, téléphone, documents${d.metier === 'vtc' ? ', véhicule et carte carburant' : ''}.`,
   ], { obligatoire: cdd });
 
@@ -446,6 +492,15 @@ function contratTravail(d) {
   const articles = [engagement, statut, duree, essai, fonctions, lieu, temps, remuneration, conges, tenue, metier, vehicule, chien, sociale, formation, confid, donnees, nc, fin];
   const apres = [signatures(d, ['L’Employeur', `${E.representant || ''}${E.qualite ? `, ${E.qualite.toLowerCase()}` : ''}`, 'Signature et cachet'], ['Le Salarié', nomComplet(S) || ' ']), d.metier === 'vtc' ? null : mentionCnaps(E)];
   return finaliser(d, avant, articles, apres);
+}
+// Préavis d'un CDI : convention collective (selon la catégorie) ou, sans convention, la loi
+function preavisCdi(d, conv) {
+  const tete = 'Après la période d’essai, le contrat peut être rompu par chacune des parties dans les conditions prévues par la loi';
+  if (!conv) return P`${tete}. Sauf faute grave ou lourde, le préavis est, en cas de licenciement, d’un mois entre 6 mois et 2 ans d’ancienneté et de deux mois au-delà (article L1234-1 du Code du travail) ; en cas de démission, de 15 jours avant 6 mois d’ancienneté et d’un mois au-delà.`;
+  const coef = +(String(d.poste.qualif || '').match(/coefficient\s*(\d{3})/i) || [])[1] || 0;
+  if (d.poste.statut === 'Cadre') return P`${tete} et la convention collective. Sauf faute grave ou lourde, le préavis prévu pour les cadres est de 7 jours entre 15 jours et 1 mois d’ancienneté, 14 jours entre 1 et 3 mois, 1 mois entre 3 et 6 mois, 2 mois entre 6 et 12 mois et 3 mois au-delà d’un an.`;
+  if (d.poste.statut === 'Agent de maîtrise' || coef > 150) return P`${tete} et la convention collective, notamment en respectant le préavis prévu par ses annexes pour la catégorie du Salarié (sauf faute grave ou lourde).`;
+  return P`${tete} et la convention collective. Sauf faute grave ou lourde, le préavis est de : 1 jour ouvré entre 15 jours et 1 mois d’ancienneté, 2 jours ouvrés entre 1 et 2 mois, 7 jours calendaires entre 2 et 6 mois et 1 mois entre 6 mois et 2 ans ; au-delà de 2 ans, 1 mois en cas de démission et 2 mois en cas de licenciement.`;
 }
 function dureeEssaiCdd(d) {
   const a = d.duree.debut && /^\d{4}-\d{2}-\d{2}$/.test(d.duree.debut) ? new Date(`${d.duree.debut}T12:00:00`) : null;
@@ -510,7 +565,7 @@ function offre(d) {
   const cdd = d.nature === 'CDD';
   const mensuel = heuresMois(d);
   const brut = +R.taux > 0 && mensuel ? Math.round(+R.taux * mensuel * 100) / 100 : 0;
-  const essai = String(Du.essai || '').trim() || (cdd ? dureeEssaiCdd(d) : CCN.essai[d.poste.statut] || '');
+  const essai = String(Du.essai || '').trim() || (cdd ? dureeEssaiCdd(d) : convention(d) ? (CCN.essai[d.poste.statut] || CCN.essai.Employé)[0] : CCN.essaiLegal[d.poste.statut] || '2 mois');
   const motif = { accroissement: 'accroissement temporaire d’activité', saisonnier: 'emploi saisonnier', remplacement: 'remplacement d’un salarié absent', attente: 'attente de l’arrivée d’un salarié en CDI' }[Du.motif];
   const blocs = [
     ...enTete(d, 'Promesse d’embauche', 'Offre de contrat de travail'),
@@ -563,10 +618,10 @@ function prestation(d) {
     ], { obligatoire: true }),
     art('p-moyens', 'Moyens mis en place', [
       P`Le Prestataire affecte au site ${V(Pr.agents, 'nombre')} agent(s) aux horaires suivants : ${V(uneLigne(Pr.horaires), 'jours et horaires')}. Toute modification durable de ces horaires fait l’objet d’un accord écrit, par simple email.`,
-      P`Les agents sont salariés du Prestataire, qui reste seul juge de leur affectation, les encadre et exerce seul l’autorité hiérarchique et le pouvoir disciplinaire à leur égard. Ils sont titulaires d’une carte professionnelle en cours de validité${Pr.activite === 'ssiap' ? ' ou du diplôme SSIAP requis' : ''}, portent une tenue distinctive et sont remplacés en cas d’absence.`,
+      P`Les agents sont salariés du Prestataire, qui reste seul juge de leur affectation, les encadre et exerce seul l’autorité hiérarchique et le pouvoir disciplinaire à leur égard. Ils sont titulaires d’une carte professionnelle en cours de validité${Pr.activite === 'ssiap' ? ' ou du diplôme SSIAP requis' : ''}, portent une tenue distinctive et sont remplacés en cas d’absence. Le Client peut demander à tout moment les références des cartes professionnelles des agents affectés, qui lui sont communiquées sans délai (article L612-15 du Code de la sécurité intérieure).`,
     ]),
     art('p-consignes', 'Consignes', [
-      Pr.consignes ? P`Les consignes particulières du site (missions, rondes, accès, numéros d’urgence, conduite à tenir) sont définies avec le Client et annexées au présent contrat. Elles ne peuvent conduire les agents à exercer des missions sortant du cadre légal des activités privées de sécurité.` : P`Les consignes du site sont définies d’un commun accord avant le début de la mission.`,
+      Pr.consignes ? P`Les consignes particulières du site (missions, rondes, accès, numéros d’urgence, conduite à tenir) sont définies avec le Client et annexées au présent contrat. Elles ne peuvent conduire les agents à exercer des missions sortant du cadre légal des activités privées de sécurité, ni des tâches étrangères au présent contrat.` : P`Les consignes du site sont définies d’un commun accord avant le début de la mission. Les agents ne peuvent être employés à des tâches étrangères au présent contrat.`,
       P`Les agents tiennent une main courante et le Prestataire informe le Client de tout incident significatif.`,
     ]),
     art('p-client', 'Obligations du Client', [
@@ -595,9 +650,16 @@ function prestation(d) {
     Pr.nonSollicitation ? art('p-sollicitation', 'Non-sollicitation du personnel', [
       P`Pendant la durée du contrat et douze mois après sa fin, le Client s’interdit d’employer directement ou de faire travailler par une autre entreprise un agent du Prestataire affecté à son site, sauf accord écrit du Prestataire ou application de l’accord de branche relatif à la reprise du personnel. En cas de manquement, il versera une indemnité égale à six mois du salaire brut de l’agent concerné.`,
     ]) : null,
-    art('p-soustraitance', 'Sous-traitance', [
-      P`Le Prestataire ne peut sous-traiter tout ou partie de la mission qu’après accord écrit du Client, à une entreprise elle-même autorisée par le CNAPS, et dans les limites prévues par le Code de la sécurité intérieure.`,
-    ]),
+    art('p-soustraitance', 'Sous-traitance', Pr.sousTraitance ? [
+      P`Le Prestataire prévoit de confier une partie de la mission à ${V(Pr.stNom, 'nom du sous-traitant')}, titulaire de l’autorisation d’exercer n° ${V(Pr.stCnaps, 'n° CNAPS du sous-traitant')} délivrée par le CNAPS. Seule une partie des prestations peut être sous-traitée, et au plus à deux rangs de sous-traitants (article L612-5-1 du Code de la sécurité intérieure) ; le Prestataire vérifie l’autorisation du sous-traitant, l’agrément de ses dirigeants et les cartes professionnelles de ses agents.`,
+      P`Conformément à l’article R631-23 du Code de la sécurité intérieure, les articles 1, 2, 3 et 5 de la loi n° 75-1334 du 31 décembre 1975 relative à la sous-traitance sont reproduits ci-dessous :`,
+      Object.assign(P`Article 1 : « Au sens de la présente loi, la sous-traitance est l’opération par laquelle un entrepreneur confie par un sous-traité, et sous sa responsabilité, à une autre personne appelée sous-traitant l’exécution de tout ou partie du contrat d’entreprise ou d’une partie du marché public conclu avec le maître de l’ouvrage. »`, { note: true }),
+      Object.assign(P`Article 2 : « Le sous-traitant est considéré comme entrepreneur principal à l’égard de ses propres sous-traitants. »`, { note: true }),
+      Object.assign(P`Article 3 : « L’entrepreneur qui entend exécuter un contrat ou un marché en recourant à un ou plusieurs sous-traitants doit, au moment de la conclusion et pendant toute la durée du contrat ou du marché, faire accepter chaque sous-traitant et agréer les conditions de paiement de chaque contrat de sous-traitance par le maître de l’ouvrage ; l’entrepreneur principal est tenu de communiquer le ou les contrats de sous-traitance au maître de l’ouvrage lorsque celui-ci en fait la demande. Lorsque le sous-traitant n’aura pas été accepté ni les conditions de paiement agréées par le maître de l’ouvrage dans les conditions prévues à l’alinéa précédent, l’entrepreneur principal sera néanmoins tenu envers le sous-traitant mais ne pourra invoquer le contrat de sous-traitance à l’encontre du sous-traitant. »`, { note: true }),
+      Object.assign(P`Article 5 : « Sans préjudice de l’acceptation prévue à l’article 3, l’entrepreneur principal doit, lors de la soumission, indiquer au maître de l’ouvrage la nature et le montant de chacune des prestations qu’il envisage de sous-traiter, ainsi que les sous-traitants auxquels il envisage de faire appel. En cours d’exécution du marché, l’entrepreneur principal peut faire appel à de nouveaux sous-traitants, à la condition de les avoir déclarés préalablement au maître de l’ouvrage. »`, { note: true }),
+    ] : [
+      P`Aucune sous-traitance n’est prévue à la date de signature. Le Prestataire ne pourra confier une partie de la mission à une autre entreprise qu’avec l’accord écrit préalable du Client, à une entreprise elle-même autorisée par le CNAPS, et seulement pour une partie des prestations (articles L612-5-1 et R631-23 du Code de la sécurité intérieure).`,
+    ], { obligatoire: true }),
     art('p-resiliation', 'Résiliation', [
       P`En cas de manquement grave de l’une des parties à ses obligations, l’autre partie peut résilier le contrat de plein droit, par lettre recommandée avec accusé de réception, 15 jours après une mise en demeure restée sans effet.`,
     ]),
@@ -626,7 +688,8 @@ function sousTraitance(d) {
     art('s-duree', 'Durée', [St.fin ? P`La mission commence le ${D(St.debut)} et prend fin le ${D(St.fin)}.` : P`La mission commence le ${D(St.debut)} pour une durée indéterminée ; chaque partie peut y mettre fin par écrit avec un préavis d’un mois.`]),
     art('s-reglementation', 'Autorisations et conformité', [
       P`Chaque partie déclare être titulaire d’une autorisation d’exercer en cours de validité délivrée par le CNAPS, dont le numéro figure au présent contrat. Le Sous-traitant affecte à la mission uniquement des salariés titulaires d’une carte professionnelle valide pour l’activité concernée${St.activite === 'ssiap' ? ' ou du diplôme SSIAP requis' : ''} ; il communique avant le début de la mission la liste des agents et leur n° de carte, et signale tout changement.`,
-      P`Le Sous-traitant ne peut lui-même sous-traiter tout ou partie de la mission sans l’accord écrit préalable du Donneur d’ordre, et dans les limites prévues par le Code de la sécurité intérieure.`,
+      P`Le présent contrat ne porte que sur une partie des prestations confiées au Donneur d’ordre par le client final (article L612-5-1 du Code de la sécurité intérieure). Le Sous-traitant ne peut lui-même sous-traiter qu’à titre exceptionnel, pour un défaut ponctuel de savoir-faire ou de moyens ou une insuffisance temporaire d’effectifs, avec l’accord écrit préalable du Donneur d’ordre, et jamais au-delà du second rang.`,
+      P`Avant le début de la mission, le Donneur d’ordre vérifie l’autorisation d’exercer du Sous-traitant, l’agrément de ses dirigeants et les cartes professionnelles des agents affectés (article R631-23 du Code de la sécurité intérieure).`,
       P`Le Sous-traitant remet au Donneur d’ordre, à la signature puis tous les six mois, une attestation de vigilance de l’URSSAF et un extrait d’immatriculation (articles L8222-1 et D8222-5 du Code du travail), ainsi que la liste nominative de ses salariés étrangers soumis à autorisation de travail lorsque la loi l’exige.`,
     ], { obligatoire: true }),
     art('s-autorite', 'Personnel', [

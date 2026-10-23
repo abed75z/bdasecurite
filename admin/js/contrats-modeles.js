@@ -3,7 +3,7 @@
    les contrôles (ce qui manque, ce qui est interdit).
    Les textes des articles sont dans contrats-textes.js.
    ========================================================= */
-import { construire, texteDe, heuresMois, CCN } from './contrats-textes.js';
+import { construire, texteDe, heuresMois, CCN, minimumConventionnel } from './contrats-textes.js';
 
 export { construire, texteDe };
 
@@ -15,7 +15,7 @@ export const FAMILLES = [
   { cle: 'bureau', titre: 'Bureau', texte: 'Administratif, planning, accueil.' },
   { cle: 'autres', titre: 'Autres documents', texte: 'Modifier un contrat, proposer un poste, travailler avec un client ou une autre société.' },
 ];
-const ATT_PROTECTION = 'Autorisation CNAPS « protection physique des personnes » nécessaire (BDA n’a que la surveillance).';
+const ATT_PROTECTION = 'Activité exclusive : société à part, autorisée par le CNAPS pour la protection physique des personnes.';
 const ATT_VTC = 'Pas dans une société de sécurité : uniquement l’EI une fois son activité sécurité arrêtée.';
 export const MODELES = [
   { id: 'cdi-securite', famille: 'securite', titre: 'Agent de sécurité', texte: 'CDI à temps plein, agent de prévention et de sécurité.', tags: ['CDI', 'Temps plein'], base: { genre: 'travail', metier: 'securite', nature: 'CDI', temps: 'plein', posteCle: 'ads' } },
@@ -114,7 +114,7 @@ const VIDE = () => ({
   av: { numero: '1', contratDate: '', contratNature: 'CDI', objets: ['remuneration'], effet: '', hebdo: '', repartition: '', taux: '', intitule: '', qualif: '', lieu: '', zone: '', complHeures: '', complDebut: '', complFin: '', complMotif: '', nouvelleFin: '', autre: '' },
   of: { validite: '', entretien: '', conditions: '' },
   cli: { nom: '', forme: '', siret: '', adresse: '', representant: '', qualite: '', email: '' },
-  pr: { activite: 'surveillance', site: '', debut: '', type: 'indeterminee', fin: '', preavis: '1 mois', agents: '1', horaires: '', tarifs: CCN.tarifsDefaut, majorations: 'Nuit (21 h – 6 h), dimanches : + 10 %. Jours fériés : + 100 %.', tva: '', paiement: 30, assurance: '', consignes: true, nonSollicitation: true, revision: true },
+  pr: { activite: 'surveillance', site: '', debut: '', type: 'indeterminee', fin: '', preavis: '1 mois', agents: '1', horaires: '', tarifs: CCN.tarifsDefaut, sousTraitance: false, stNom: '', stCnaps: '', majorations: 'Nuit (21 h – 6 h), dimanches : + 10 %. Jours fériés : + 100 %.', tva: '', paiement: 30, assurance: '', consignes: true, nonSollicitation: true, revision: true },
   st: { role: 'sous-traitant', nom: '', forme: '', siret: '', adresse: '', cnaps: '', representant: '', qualite: '', client: '', site: '', activite: 'surveillance', debut: '', fin: '', agents: '', horaires: '', tarif: '', paiement: 30 },
   masques: [], textes: {}, titres: {}, ajouts: [], titreDoc: '', sousDoc: '',
   fait: { ville: 'Paris', date: '', exemplaires: 2 },
@@ -289,9 +289,12 @@ function champsTemps(d) {
 }
 function champsRemuneration(d) {
   const mensuel = heuresMois(d);
-  const brut = +d.rem.taux > 0 && mensuel ? (Math.round(+d.rem.taux * mensuel * 100) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) : '';
+  const fr2 = (n) => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const brut = +d.rem.taux > 0 && mensuel ? fr2(Math.round(+d.rem.taux * mensuel * 100) / 100) : '';
+  const min = minimumConventionnel(d);
+  const aideMin = min ? `Minimum ${CCN.grille.annee} de la convention pour le coefficient ${min.coef} : ${fr2(min.horaire)} € de l’heure (${fr2(min.mensuel)} € par mois à temps plein).` : `SMIC : ${fr2(CCN.smic)} € de l’heure.`;
   return [
-    { k: 'rem.taux', l: 'Taux horaire brut (€)', t: 'nombre', demi: true, refait: true, aide: brut ? `Salaire de base : ${brut} € brut par mois.` : CCN.aideTaux },
+    { k: 'rem.taux', l: 'Taux horaire brut (€)', t: 'nombre', demi: true, refait: true, aide: [brut ? `Salaire de base : ${brut} € brut par mois.` : '', aideMin].filter(Boolean).join(' ') },
     { k: 'rem.jour', l: 'Payé au plus tard le', ph: 'ex. 5 du mois suivant', demi: true },
     { k: 'rem.primes', l: 'Primes ou avantages en plus', t: 'zone', lignes: 2, ph: 'ex. prime de chef de poste de 100 € brut par mois' },
     { k: 'rem.navigo', l: 'Remboursement de 50 % du Navigo', t: 'case' },
@@ -421,7 +424,10 @@ function sectionsPrestation(d, R) {
       { k: 'pr.assurance', l: 'Assurance RC Pro (assureur, n°)', demi: true, ph: 'ex. Hiscox (Orus) n° …' },
       { k: 'pr.revision', l: 'Révision des prix chaque année', t: 'case' },
       { k: 'pr.consignes', l: 'Consignes du site en annexe', t: 'case' },
-      { k: 'pr.nonSollicitation', l: 'Le client n’embauche pas nos agents', t: 'case' }] },
+      { k: 'pr.nonSollicitation', l: 'Le client n’embauche pas nos agents', t: 'case' },
+      { k: 'pr.sousTraitance', l: 'Une partie de la mission sera sous-traitée', t: 'case', refait: true, aide: 'Le contrat reproduit alors les articles 1, 2, 3 et 5 de la loi du 31 décembre 1975 (obligatoire, art. R631-23 du CSI).' },
+      { k: 'pr.stNom', l: 'Sous-traitant', si: (x) => x.pr.sousTraitance, demi: true },
+      { k: 'pr.stCnaps', l: 'Son autorisation CNAPS', si: (x) => x.pr.sousTraitance, demi: true }] },
     { cle: 'fait', titre: 'Titre, lieu et date', champs: champsFait() },
   ];
 }
@@ -464,9 +470,10 @@ export function alertes(d) {
   }
   const metierSecu = d.metier === 'securite' || d.metier === 'protection' || (d.metier === 'ssiap' && d.ssiapSurveillance);
   if (metierSecu && !E.cnaps) A.push(['danger', `${E.nom || 'Cet employeur'} n’a pas d’autorisation d’exercer du CNAPS : il ne peut pas employer d’agent de sécurité (art. L612-9 du Code de la sécurité intérieure).`]);
-  if (d.metier === 'protection') A.push(['danger', 'L’autorisation de BDA SECURITE couvre seulement la surveillance et le gardiennage. Ce contrat n’est utilisable qu’après une autorisation CNAPS « protection physique des personnes », avec un agent titulaire de la carte correspondante.']);
+  if (d.metier === 'protection') A.push(['danger', 'La protection rapprochée est une activité exclusive (art. L612-2 du Code de la sécurité intérieure) : BDA SECURITE ne peut ni l’exercer ni l’ajouter à son autorisation de surveillance. Ce contrat n’est utilisable que par une société distincte, autorisée par le CNAPS pour la « protection physique des personnes », avec des agents titulaires de la carte correspondante.']);
   if (d.metier === 'vtc' && E.cnaps) A.push(['danger', 'Une entreprise de sécurité privée ne peut exercer aucune autre activité (art. L612-2 du Code de la sécurité intérieure). Le chauffeur VTC doit être employé par une structure sans activité de sécurité : l’EI, une fois son autorisation CNAPS rendue.']);
   if (d.metier === 'vtc' && !E.evtc) A.push(['alerte', 'L’employeur doit être inscrit au registre des VTC : ajoutez son n° EVTC dans Employeurs & organismes.']);
+  if (d.metier === 'vtc') A.push(['info', 'Depuis le 27 juin 2026, l’exploitant déclare au registre VTC chaque chauffeur salarié, son n° de carte et les immatriculations utilisées.']);
   if (d.genre === 'offre') {
     if (+d.rem.taux > 0 && +d.rem.taux < CCN.smic) A.push(['danger', `Le taux horaire est sous le SMIC (${String(CCN.smic).replace('.', ',')} € brut de l’heure).`]);
     A.push(['info', 'Une fois signée « bon pour accord » par le candidat, cette promesse vaut contrat de travail : l’employeur ne peut plus revenir dessus sans le licencier.']);
@@ -491,7 +498,10 @@ export function alertes(d) {
     if (!String(d.org.retraite || '').trim() || !String(d.org.prevoyance || '').trim()) A.push(['alerte', 'CDD : le nom et l’adresse de la caisse de retraite complémentaire et de l’organisme de prévoyance sont obligatoires.']);
     A.push(['info', 'Le CDD signé doit être remis au salarié dans les 2 jours ouvrables qui suivent l’embauche (art. L1242-13 du Code du travail).']);
   }
+  const min = minimumConventionnel(d);
   if (!(+d.rem.taux > 0)) A.push(['alerte', 'Taux horaire à indiquer.']);
   else if (+d.rem.taux < CCN.smic) A.push(['danger', `Le taux horaire est sous le SMIC (${String(CCN.smic).replace('.', ',')} € brut de l’heure).`]);
+  else if (min && +d.rem.taux < min.horaire) A.push(['danger', `Le taux horaire est sous le minimum de la convention collective pour le coefficient ${min.coef} : ${String(min.horaire).replace('.', ',')} € brut de l’heure en ${CCN.grille.annee}.`]);
+  if (min && min.coef === 120 && d.poste.statut !== 'Agent de maîtrise') A.push(['info', 'Coefficient 120 : 6 mois au plus. Ensuite, passage au coefficient 130 (avenant avec le nouveau salaire).']);
   return A;
 }

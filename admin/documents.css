@@ -98,6 +98,10 @@
 
 /* ---------- Planning (paysage) ---------- */
 .plan-entete { display: flex; flex-wrap: wrap; align-items: center; gap: 4mm 7mm; margin-bottom: 5mm; }
+/* Logo BDA (noir) / SECURITY GROUP (doré) */
+.plan-marque { gap: 1.4mm; }
+.plan-marque .marque-logo__bda { width: 25mm; aspect-ratio: 798 / 216; }
+.plan-marque .marque-logo__sg { width: 43.9mm; aspect-ratio: 1402 / 74; }
 .plan-titre { margin: 0; font: 700 17pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.16em; text-transform: uppercase; }
 .plan-mois { margin-top: 1.5mm; font: 600 12pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.06em; color: var(--or-fonce); }
 .plan-info { margin-left: auto; display: grid; grid-template-columns: repeat(3, auto); border: 1px solid var(--trait); border-radius: 6px; overflow: hidden; }

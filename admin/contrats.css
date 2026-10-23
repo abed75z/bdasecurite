@@ -1,0 +1,160 @@
+/* =========================================================
+   ESPACE ADMIN BDA — contrats : modèles, éditeur, pages A4
+   Style carré, noir & or, sans arrondi.
+   ========================================================= */
+.page[data-route="contrats"] { --ct-or: #a98449; --ct-or-clair: #e7dcc6; --ct-encre: #111114; }
+.ct-intro { margin: 0 0 22px; max-width: 760px; color: var(--text-2); font-size: 13.5px; line-height: 1.6; }
+
+/* ---------- Les modèles (cases) ---------- */
+.ct-famille { margin-bottom: 26px; }
+.ct-famille__tete { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--ct-or-clair); }
+.ct-famille__tete h2 { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ct-encre); }
+.ct-famille__tete h2::before { content: ""; display: inline-block; width: 14px; height: 2px; margin: 0 10px 3px 0; background: var(--ct-or); }
+.ct-famille__tete p { margin: 0; color: var(--muted); font-size: 12.5px; }
+.ct-modeles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.ct-modele { position: relative; display: grid; align-content: start; gap: 6px; padding: 16px 16px 15px; border: 1px solid #e4ded3; border-radius: 0 !important; background: #fff; color: inherit; text-decoration: none; transition: border-color 0.12s, box-shadow 0.12s; }
+.ct-modele::before { content: ""; position: absolute; left: -1px; right: -1px; top: -1px; height: 2px; background: var(--ct-encre); transition: background-color 0.12s; }
+.ct-modele:hover { border-color: var(--ct-or); box-shadow: 0 10px 24px -18px rgba(17, 17, 20, 0.45); }
+.ct-modele:hover::before { background: var(--ct-or); }
+.ct-modele b { font-size: 14px; letter-spacing: 0.01em; color: var(--ct-encre); }
+.ct-modele small { color: var(--muted); font-size: 12px; line-height: 1.45; }
+.ct-modele__tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.ct-modele__tags em { font-style: normal; font-size: 9.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 2px 6px; border: 1px solid var(--ct-or-clair); color: #7a5f33; background: #fbf8f2; }
+.ct-modele__alerte { display: flex; gap: 6px; align-items: flex-start; margin-top: 4px; font-size: 11.5px; line-height: 1.4; color: #9a5b0b; }
+.ct-modele__alerte .ic { display: inline-block !important; width: 14px; height: 14px; flex: none; margin-top: 1px; }
+.ct-modele--attention::before { background: #c9862b; }
+
+/* ---------- Contrats enregistrés ---------- */
+.ct-mes { border-radius: 0 !important; }
+.ct-mes__tete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.ct-recherche { max-width: 320px; border-radius: 0 !important; }
+.ct-enregistres { display: grid; }
+.ct-ligne { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 11px 4px; border-top: 1px solid var(--line); color: inherit; text-decoration: none; }
+.ct-ligne:first-child { border-top: 0; }
+.ct-ligne:hover b { text-decoration: underline; text-decoration-color: var(--ct-or); }
+.ct-ligne__ic .ic { display: inline-block !important; width: 18px; height: 18px; color: var(--ct-or); }
+.ct-ligne__txt { display: grid; min-width: 0; }
+.ct-ligne__txt b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ct-ligne__txt small, .ct-ligne__date { color: var(--muted); font-size: 12px; }
+.ct-statut { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; border: 1px solid #dfe2e7; color: #4a5060; white-space: nowrap; }
+.ct-statut--signer { border-color: #ecd3a6; color: #8a5a10; background: #fdf6ea; }
+.ct-statut--signe { border-color: #bfe0c9; color: #1f6b3a; background: #eef8f1; }
+.ct-vide { margin: 0; padding: 18px 4px; color: var(--muted); }
+@media (max-width: 640px) { .ct-ligne { grid-template-columns: auto minmax(0, 1fr) auto; } .ct-ligne__date { display: none; } }
+
+/* ---------- Éditeur ---------- */
+.editeur--contrat { grid-template-columns: minmax(0, 1fr) 400px; }
+.ct-gauche { display: grid; gap: 10px; min-width: 0; align-content: start; }
+.ct-astuce { display: flex; gap: 8px; align-items: center; margin: 0; font-size: 12.5px; color: var(--muted); }
+.ct-astuce .ic { display: inline-block !important; width: 15px; height: 15px; flex: none; color: var(--ct-or); }
+.ct-apercu { min-width: 0; overflow: hidden; padding: 14px; background: #ecebe8; }
+.ct-pages { display: grid; gap: 14px; justify-content: start; }
+.ct-pages .ct-page { box-shadow: 0 1px 2px rgba(15, 20, 30, 0.1), 0 14px 34px -16px rgba(15, 20, 30, 0.35); }
+/* Ce qui se modifie au clic */
+.ct-pages [data-cle], .ct-pages [data-section] { cursor: pointer; transition: background-color 0.12s, box-shadow 0.12s; }
+.ct-pages [data-cle]:hover, .ct-pages [data-section]:hover { background-color: rgba(169, 132, 73, 0.07); box-shadow: 0 0 0 1.5mm rgba(169, 132, 73, 0.07), 0 0 0 calc(1.5mm + 1px) rgba(169, 132, 73, 0.45); }
+.ct-panneau { max-height: calc(100vh - 110px); overflow: auto; padding-right: 2px; }
+.ct-form { display: grid; gap: 10px; }
+.ct-form .panneau__bloc { border-radius: 0 !important; }
+.ct-section > summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; font-weight: 700; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; list-style: none; }
+.ct-section > summary::-webkit-details-marker { display: none; }
+.ct-section > summary::after { content: "▾"; color: var(--ct-or); font-size: 12px; margin-left: auto; transition: transform 0.12s; }
+.ct-section:not([open]) > summary::after { transform: rotate(-90deg); }
+.ct-section[open] { box-shadow: inset 2px 0 0 var(--ct-or) !important; }
+.ct-point { width: 7px; height: 7px; background: var(--amber, #d38a12); flex: none; }
+.ct-champs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ct-champs > * { grid-column: 1 / -1; min-width: 0; }
+.ct-champs > .ct-demi { grid-column: auto; }
+.ct-form .input { border-radius: 0 !important; }
+.ct-choix { display: flex; flex-wrap: wrap; gap: 6px; }
+.ct-choix .chip { border-radius: 0 !important; }
+.ct-case { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; }
+.ct-case input { margin-top: 2px; accent-color: var(--ct-encre); }
+.ct-case small { display: block; color: var(--muted); font-size: 11.5px; line-height: 1.4; }
+.ct-form .btn { border-radius: 0 !important; }
+.ct-agent { margin-bottom: 2px; }
+.ct-arts { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.ct-arts li { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 12.5px; border-bottom: 1px solid var(--line); }
+.ct-arts li label { display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0; }
+.ct-arts li > span { flex: 1; }
+.ct-arts li.is-masque label span { color: var(--muted); text-decoration: line-through; }
+.ct-modifie { font-style: normal; font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #8a5a10; border: 1px solid #ecd3a6; padding: 1px 5px; }
+.ct-zone-article { min-height: 300px; font: 13px/1.55 Georgia, "Times New Roman", serif; border-radius: 0 !important; }
+.ct-alertes { display: grid; gap: 6px; }
+.ct-alertes:empty { display: none; }
+.ct-alerte { display: flex; gap: 8px; align-items: flex-start; margin: 0; padding: 9px 12px; font-size: 12.5px; line-height: 1.5; background: #fdf6ea; color: #6e4a0e; border: 1px solid #f1d9ad; border-left-width: 3px; }
+.ct-alerte .ic { display: inline-block !important; width: 15px; height: 15px; flex: none; margin-top: 2px; }
+.ct-alerte--danger { background: #fdf0f0; color: #8c1d1d; border-color: #f4c4c4; }
+.ct-alerte--info { background: #f3f6fb; color: #23406e; border-color: #d3e0f3; }
+@media (max-width: 1100px) {
+  .editeur--contrat { grid-template-columns: 1fr; }
+  .ct-panneau { max-height: none; overflow: visible; order: -1; position: static; }
+  .ct-apercu { padding: 8px; }
+}
+
+/* ---------- Réglages ---------- */
+.ct-reglages { display: grid; gap: 14px; max-width: 980px; }
+.ct-reglage { border-radius: 0 !important; }
+.ct-reglage .form-grille { margin-top: 6px; }
+.ct-reglage .input { border-radius: 0 !important; }
+
+/* =========================================================
+   PAGE A4 DU CONTRAT
+   ========================================================= */
+.ct-scene { position: fixed; left: -30000px; top: 0; pointer-events: none; }
+.ct-page {
+  --or: #a98449; --or-clair: #e2d5bd; --encre: #111114; --encre-2: #45454f; --gris: #7b7b85; --creme: #fbf9f4;
+  box-sizing: border-box; position: relative; display: flex; flex-direction: column;
+  width: 210mm; height: 297mm; padding: 14mm 18mm 10mm; overflow: hidden;
+  background: #fff; color: var(--encre);
+  font: 9.6pt/1.5 Georgia, "Times New Roman", serif;
+}
+/* Fin liseré doré autour de la page */
+.ct-page::before { content: ""; position: absolute; top: 6mm; right: 6mm; bottom: 6mm; left: 6mm; border: 0.25mm solid var(--or-clair); pointer-events: none; }
+.ct-corps { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.ct-pied { position: relative; flex: none; display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; margin-top: 4mm; padding-top: 2.5mm; border-top: 0.25mm solid var(--or-clair); font: 6.8pt/1.3 Inter, "Segoe UI", Arial, sans-serif; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gris); }
+.ct-paraphes { display: inline-flex; align-items: flex-end; gap: 2.5mm; }
+.ct-paraphes i { display: inline-block; width: 14mm; height: 6mm; border: 0.25mm solid var(--or-clair); }
+
+/* En-tête : logo BDA (noir) / SECURITY GROUP (doré) et l'employeur */
+.ct-tete { display: flex; justify-content: space-between; align-items: center; gap: 8mm; padding-bottom: 4mm; border-bottom: 0.5mm solid var(--encre); }
+.ct-marque { gap: 1.3mm; }
+.ct-marque .marque-logo__bda { width: 22mm; aspect-ratio: 798 / 216; }
+.ct-marque .marque-logo__sg { width: 38.6mm; aspect-ratio: 1402 / 74; }
+.ct-tete__emp { text-align: right; font: 7.2pt/1.5 Inter, "Segoe UI", Arial, sans-serif; color: var(--encre-2); }
+.ct-tete__emp b { display: block; font-size: 8.6pt; letter-spacing: 0.14em; text-transform: uppercase; color: var(--encre); }
+.ct-entete-titre { position: relative; padding: 7mm 0 5mm; text-align: center; }
+.ct-entete-titre::before { content: ""; position: absolute; left: 0; right: 0; top: 0.6mm; border-top: 0.2mm solid var(--or); }
+.ct-titre { margin: 0 0 1.6mm; font: 400 14pt/1.3 Georgia, "Times New Roman", serif; letter-spacing: 0.16em; text-transform: uppercase; color: var(--encre); }
+.ct-sous { margin: 0; font: 7.8pt/1.4 Inter, "Segoe UI", Arial, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--or); }
+.ct-filet { display: block; width: 16mm; height: 0.5mm; margin: 3.5mm auto 0; background: var(--or); }
+.ct-parties { display: grid; gap: 2.2mm; margin-bottom: 3mm; }
+.ct-parties .ct-p { margin: 0; }
+.ct-partie { padding: 3mm 4mm; background: var(--creme); border: 0.25mm solid var(--or-clair); border-left: 0.8mm solid var(--or); }
+.ct-entre { margin: 0; font: 700 7.6pt/1.4 Inter, "Segoe UI", Arial, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; }
+.ct-art { margin: 0 0 2.4mm; }
+.ct-art h3 { display: flex; align-items: baseline; gap: 2.2mm; margin: 3.4mm 0 1.4mm; padding-bottom: 1mm; border-bottom: 0.2mm solid var(--or-clair); font: 700 8.2pt/1.35 Inter, "Segoe UI", Arial, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--encre); }
+.ct-art h3 span { color: var(--or); font-weight: 600; white-space: nowrap; }
+.ct-p { margin: 0 0 1.5mm; text-align: justify; hyphens: auto; -webkit-hyphens: auto; }
+.ct-p--puce { padding-left: 5mm; text-indent: -3.2mm; margin-bottom: 0.8mm; }
+.ct-p--note { font-size: 8.4pt; color: var(--encre-2); font-style: italic; }
+.ct-p b { font-weight: 700; }
+.ct-blanc { color: #6f5530; }
+.ct-page .ct-blanc--vide { display: inline-block; min-width: 24mm; border-bottom: 0.25mm dotted #8a7a60; color: transparent; line-height: 1.1; }
+.ct-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm; margin-top: 4mm; break-inside: avoid; }
+.ct-signe { display: grid; gap: 1.2mm; align-content: start; font-size: 9pt; }
+.ct-signe b { font: 700 7.8pt Inter, "Segoe UI", Arial, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; }
+.ct-signe small { font-size: 7.8pt; color: var(--encre-2); font-style: italic; }
+.ct-signe__zone { height: 30mm; border: 0.25mm solid var(--or-clair); border-top: 0.6mm solid var(--or); }
+.ct-mention { margin-top: 5mm; font-size: 7pt; line-height: 1.45; color: var(--gris); text-align: center; font-family: Inter, "Segoe UI", Arial, sans-serif; }
+.ct-lettre-dest { margin: 6mm 0 8mm auto; width: 80mm; }
+.ct-objet { margin: 0 0 5mm; font: 700 8.2pt/1.4 Inter, "Segoe UI", Arial, sans-serif; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* Impression et PDF : les blancs restent des pointillés, rien de coloré */
+.ct-page + .ct-page { break-before: page; }
+@media print {
+  .impression .ct-page { box-shadow: none !important; }
+  .ct-blanc { color: inherit; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+.capture-pdf .ct-blanc { color: inherit; }

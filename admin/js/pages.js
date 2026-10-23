@@ -9,6 +9,7 @@ import {
 import { listeDocuments, editeurDocument } from './documents.js';
 import { pagePlanning } from './planning.js';
 import { pagePaie } from './paie.js';
+import { pageContrats } from './contrats.js';
 import { pageEnvois } from './envois.js';
 import { pagePointage } from './pointage.js';
 import { pageEquipe } from './equipe.js';
@@ -39,6 +40,7 @@ export const PAGES = {
   opportunites: pageOpportunites,
   notifications: pageNotifications,
   paie: pagePaie,
+  contrats: pageContrats,
   pdf: pageEnvois,
   clients: pageClients,
   agents: pageAgents,

@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord', 'contrats.reglages'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -311,8 +311,10 @@ try {
 
     /* ================= Cartes agents et flyers ================= */
     case 'creations':
+      $type = type_creation((string)($_GET['type'] ?? ''));
+      creation_reservee($type);
       $st = db()->prepare('SELECT id, type, titre, data, maj FROM creations WHERE type = ? ORDER BY maj DESC');
-      $st->execute([type_creation((string)($_GET['type'] ?? ''))]);
+      $st->execute([$type]);
       $lignes = $st->fetchAll();
       foreach ($lignes as &$l) $l['data'] = json_decode((string)$l['data'], true) ?: [];
       repondre(['ok' => true, 'creations' => $lignes]);
@@ -322,12 +324,14 @@ try {
       $st->execute([(int)($_GET['id'] ?? 0)]);
       $c = $st->fetch();
       if (!$c) echec('Élément introuvable.', 404);
+      creation_reservee((string)$c['type']);
       $c['data'] = json_decode((string)$c['data'], true) ?: [];
       repondre(['ok' => true, 'creation' => $c]);
 
     case 'creation.enregistrer':
       $b = corps();
       $type = type_creation(chaine($b['type'] ?? ''));
+      creation_reservee($type);
       if (!is_array($b['data'] ?? null)) echec('Contenu vide.');
       $json = json_encode($b['data'], JSON_UNESCAPED_UNICODE);
       if ($json === false || strlen($json) > 1200000) echec('Trop volumineux : choisissez une photo plus légère.');
@@ -340,12 +344,28 @@ try {
       } else {
         db()->prepare('INSERT INTO creations (type, titre, data, cree, maj) VALUES (?, ?, ?, ?, ?)')->execute([$type, $titre, $json, maintenant(), maintenant()]);
         $id = (int)db()->lastInsertId();
-        journal('document', (['carte' => 'Carte agent', 'flyer' => 'Flyer', 'visite' => 'Carte de visite'][$type] ?? 'Création') . ' créé' . ($type === 'carte' || $type === 'visite' ? 'e' : '') . ($titre !== '' ? " : $titre" : ''));
+        // Contrat : pas de nom dans le journal (visible aussi par les managers)
+        journal('document', (['carte' => 'Carte agent créée', 'flyer' => 'Flyer créé', 'visite' => 'Carte de visite créée', 'contrat' => 'Contrat créé'][$type] ?? 'Création') . ($titre !== '' && $type !== 'contrat' ? " : $titre" : ''));
       }
       repondre(['ok' => true, 'id' => $id]);
 
     case 'creation.supprimer':
-      supprimer_ligne('creations', (int)(corps()['id'] ?? 0));
+      $id = (int)(corps()['id'] ?? 0);
+      $st = db()->prepare('SELECT type FROM creations WHERE id = ?');
+      $st->execute([$id]);
+      creation_reservee((string)$st->fetchColumn());
+      supprimer_ligne('creations', $id);
+
+    /* ================= Contrats : informations communes (employeurs, organismes) ================= */
+    case 'contrats.reglages':
+      repondre(['ok' => true, 'reglages' => (object)reglage_json('contrats')]);
+
+    case 'contrats.reglages.enregistrer':
+      $json = json_encode(corps()['reglages'] ?? null, JSON_UNESCAPED_UNICODE);
+      if ($json === false || $json === 'null' || $json[0] !== '{' || strlen($json) > 60000) echec('Réglages invalides.');
+      db()->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v')->execute(['contrats', $json]);
+      journal('systeme', 'Réglages des contrats modifiés');
+      repondre(['ok' => true]);
 
     /* ================= VTC : réservations et tarifs ================= */
     case 'reservations':
@@ -1605,8 +1625,13 @@ function type_document(string $t): string
 }
 function type_creation(string $t): string
 {
-  if (!in_array($t, ['carte', 'flyer', 'visite'], true)) echec('Type inconnu.');
+  if (!in_array($t, ['carte', 'flyer', 'visite', 'contrat'], true)) echec('Type inconnu.');
   return $t;
+}
+// Les contrats de travail (salaires, n° de sécurité sociale) sont réservés aux administrateurs
+function creation_reservee(string $type): void
+{
+  if ($type === 'contrat' && role_courant() !== 'admin') echec('Action réservée à un administrateur.', 403);
 }
 function mois_valide(string $m): string
 {
@@ -1770,7 +1795,7 @@ function accueil(): array
   };
   $recents = array_merge(
     $tous("SELECT id, type, numero AS titre, client AS sous, statut, maj FROM documents ORDER BY maj DESC LIMIT 6"),
-    $tous("SELECT id, type, titre, '' AS sous, '' AS statut, maj FROM creations ORDER BY maj DESC LIMIT 6")
+    $tous("SELECT id, type, titre, '' AS sous, '' AS statut, maj FROM creations WHERE type <> 'contrat' ORDER BY maj DESC LIMIT 6")
   );
   usort($recents, fn($a, $b) => strcmp((string)$b['maj'], (string)$a['maj']));
   return [

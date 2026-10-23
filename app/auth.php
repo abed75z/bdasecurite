@@ -65,6 +65,8 @@ const ACTIONS_ADMIN = [
   'notif.prefs', 'notif.prefs.enregistrer', 'notif.tester', 'notif.appareil.retirer',
   // Serveur Discord de la direction : jeton du bot, installation, synchronisation
   'discord', 'discord.jeton', 'discord.installer', 'discord.sync',
+  // Contrats de travail : réglages communs (les contrats eux-mêmes sont protégés dans api.php)
+  'contrats.reglages', 'contrats.reglages.enregistrer',
 ];
 function utilisateur_courant(): ?array
 {

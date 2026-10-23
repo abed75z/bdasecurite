@@ -58,7 +58,7 @@ const METIERS = {
   ssiap: ['Agent SSIAP', 'Sécurité incendie, ERP, IGH', 'feu'],
   chauffeur: ['Chauffeur VTC', 'Transferts, mise à disposition', 'voiture'],
 };
-const CODES = { R: 'Repos', CP: 'Congés payés', M: 'Maladie', AT: 'Accident du travail', F: 'Formation', ABS: 'Absence' };
+const CODES = { R: 'Repos', CP: 'Congés payés', M: 'Maladie', AT: 'Accident du travail', F: 'Formation', ABS: 'Absence', MAP: 'Mise à pied conservatoire' };
 const ABSENCES = {
   conges: ['Congés payés', 'Vacances, jours posés', 'soleil'],
   maladie: ['Arrêt maladie', 'Avec arrêt de travail', 'coeur'],

@@ -82,7 +82,7 @@ export function variablesDepuisPlanning(planning, mois, nomAgent, profil) {
   return {
     heuresTravaillees: r2(heures), heuresNuit: r2(T.nuit / 60), heuresDimanche: r2(T.dim / 60), heuresFerie: r2(T.fer / 60),
     hs25, hs50: r2(hs - hs25), joursTravailles: jours,
-    joursCP: codes.CP || 0, joursMaladie: (codes.M || 0) + (codes.AT || 0), joursAbsence: codes.ABS || 0, paniers,
+    joursCP: codes.CP || 0, joursMaladie: (codes.M || 0) + (codes.AT || 0), joursAbsence: (codes.ABS || 0) + (codes.MAP || 0), paniers,
   };
 }
 

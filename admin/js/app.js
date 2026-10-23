@@ -35,6 +35,7 @@ const ESPACES = {
       { chemin: 'pointage', libelle: 'Pointage' },
       { chemin: 'equipe', libelle: 'Espace équipe', badge: 'equipe' },
       { chemin: 'paie', libelle: 'Fiches de paie', admin: true },
+      { chemin: 'contrats', libelle: 'Contrats', admin: true },
       { groupe: 'Site web' },
       { chemin: 'site', libelle: 'Contrôle du site' },
       { chemin: 'contenu', libelle: 'Contenu & tarifs' },

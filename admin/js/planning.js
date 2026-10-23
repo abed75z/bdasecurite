@@ -1,9 +1,9 @@
 /* =========================================================
    ESPACE ADMIN BDA — planning mensuel des agents
-   Saisie : 12h-19h · 7h30-19h · 19h-7h (nuit) · 8 · R / CP / M
+   Saisie : 12h-19h · 7h30-19h · 19h-7h (nuit) · 8 · R / CP / M / MAP
    Calcul automatique : heures totales, de nuit, du dimanche, fériées.
    ========================================================= */
-import { api, apiFichier, h, $, $$, icone, toast, erreur, modale, confirmer, champ, saisie, attendre, MOIS, cap, pad, iso, fr, fmtHeures, lireHeures } from './outils.js';
+import { api, apiFichier, h, $, $$, icone, marqueLogo, toast, erreur, modale, confirmer, champ, saisie, attendre, MOIS, cap, pad, iso, fr, fmtHeures, lireHeures } from './outils.js';
 import { telechargerPdf, pdfFeuille } from './pdf.js';
 
 const JOURS = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
@@ -146,16 +146,18 @@ export async function pagePlanning(ctx) {
     return h('div', null, h('span', { class: 'f-label' }, label), el);
   };
   const nuitTxt = h('b');
+  // « MAP » n'apparaît dans la légende que si le mois en contient
+  const legendeMap = h('span', { hidden: true }, h('b', null, 'MAP'), ' Mise à pied conservatoire');
   const feuille = h('div', { class: 'feuille feuille--paysage' },
     h('div', { class: 'plan-entete' },
-      h('img', { class: 'f-logo f-logo--mini', src: 'logo-document.jpg?v=3', alt: '' }),
+      marqueLogo('plan-marque'),
       h('div', null, h('h2', { class: 'plan-titre' }, 'Planning des agents'), h('div', { class: 'plan-mois' }, libelle)),
       h('div', { class: 'plan-info' }, infos('client', 'Client', 'Client'), infos('site', 'Site', 'Adresse du site'), infos('mission', 'Mission', 'Type de mission'))),
     table,
     h('div', { class: 'plan-legende' },
       h('span', null, h('i', { class: 'lg-has' }), 'Jour travaillé'), h('span', null, h('i', { class: 'lg-we' }), 'Week-end'), h('span', null, h('i', { class: 'lg-ho' }), 'Jour férié'),
       h('span', null, 'Heures de nuit : ', nuitTxt),
-      h('span', null, h('b', null, 'R'), ' Repos · ', h('b', null, 'CP'), ' Congés payés · ', h('b', null, 'M'), ' Maladie · ', h('b', null, 'AT'), ' Accident du travail · ', h('b', null, 'F'), ' Formation · ', h('b', null, 'ABS'), ' Absence')),
+      h('span', null, h('b', null, 'R'), ' Repos · ', h('b', null, 'CP'), ' Congés payés · ', h('b', null, 'M'), ' Maladie · ', h('b', null, 'AT'), ' Accident du travail · ', h('b', null, 'F'), ' Formation · ', h('b', null, 'ABS'), ' Absence'), legendeMap),
     h('div', { class: 'f-espace' }),
     h('div', { class: 'f-pied' }, reglages.pied));
 
@@ -215,6 +217,7 @@ export async function pagePlanning(ctx) {
   }
   const hm = (min) => (min ? fmtHeures(min / 60, true) : '–');
   function calculer() {
+    legendeMap.hidden = !p.agents.some((a) => Object.values(a.jours || {}).some((v) => String(v).trim().toUpperCase() === 'MAP'));
     const G = totauxDuMois(p, mois, (ai, T) => {
       const tr = $(`tr[data-a="${ai}"]`, table);
       if (!tr) return;

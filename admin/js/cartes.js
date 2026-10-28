@@ -12,6 +12,7 @@ import { qrSvg } from './qr.js';
 
 const FONCTIONS = ['Agent de sécurité privée', 'Agent de sécurité (ADS)', "Chef d'équipe sécurité", 'Agent de protection rapprochée', 'Agent événementiel', 'Agent SSIAP', 'Chauffeur VTC'];
 const estVtc = (f) => /vtc|chauffeur/i.test(f || '');
+const DIRIGEANT = /g[ée]rant|dirigeant|pr[ée]sident|directeur|fondateur/i;
 const LIEN_CNAPS = 'https://espace-consultation.cnaps.interieur.gouv.fr/annuaire/app';
 
 export const CARTE_DEFAUT = {
@@ -78,7 +79,7 @@ export function verso(d) {
       marque(),
       h('p', { class: 'ca-v-texte' }, String(d.texteVerso || '').replace(/BDA S[ée]curit[ée](?: (?:&|et) VTC Premium)?/g, 'BDA Security Group (BDASECURITE)')),
       h('div', { class: 'ca-v-bloc' },
-        h('span', null, 'Employeur'), h('b', null, d.employeur || 'BDA SECURITE'), h('small', null, d.autorisation)),
+        h('span', null, DIRIGEANT.test(d.fonction) ? 'Société' : 'Employeur'), h('b', null, d.employeur || 'BDA SECURITE'), h('small', null, d.autorisation)),
       qr,
       h('p', { class: 'ca-v-legal' }, d.legal),
       h('div', { class: 'ca-v-pied' }, h('span', null, d.contact), h('span', { class: 'ca-signature' }, 'Signature du titulaire'))));

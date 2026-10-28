@@ -52,42 +52,7 @@
 .vide-grand__visuel--flyer { height: 300px; overflow: hidden; border-radius: 10px; }
 .vide-grand__visuel--flyer .fl { zoom: 0.3; }
 
-/* =========================================================
-   CARTE AGENT — 85,6 × 54 mm
-   ========================================================= */
-.cp { position: relative; width: 85.6mm; height: 54mm; border-radius: 3.2mm; overflow: hidden; display: flex; flex-direction: column; background: #fff; color: #111; font-family: "Poppins", Arial, sans-serif; line-height: 1.2; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-.cp__haut { height: 13mm; flex: none; display: flex; align-items: center; gap: 2.6mm; padding: 0 4mm; background: #181612; }
-.cp__logo { width: 10.5mm; height: 10.8mm; }
-.cp__marque b { display: block; font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 4.5mm; letter-spacing: 0.03em; color: #fff; line-height: 1; }
-.cp__marque small { display: block; margin-top: 1mm; font-size: 1.5mm; font-weight: 600; letter-spacing: 0.32em; text-transform: uppercase; color: #c4a676; }
-.cp__type { margin-left: auto; text-align: right; }
-.cp__type small { display: block; font-size: 1.5mm; letter-spacing: 0.3em; text-transform: uppercase; color: #c4a676; }
-.cp__type b { display: block; font-size: 2.8mm; font-weight: 700; letter-spacing: 0.06em; color: #fff; }
-.cp__filet { height: 0.8mm; flex: none; background: linear-gradient(90deg, #aa8549, #e5d8c3 50%, #aa8549); }
-.cp__corps { flex: 1; min-height: 0; display: flex; align-items: center; gap: 3.6mm; padding: 2.2mm 4mm 1.8mm; }
-.cp__photo { position: relative; width: 20.5mm; height: 26.5mm; flex: none; display: grid; place-items: center; border: 0.45mm solid #c4a676; border-radius: 1.4mm; background: #f8f5ee; overflow: hidden; }
-.cp__photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.cp__sans-photo { display: grid; justify-items: center; gap: 1.2mm; color: #b9ab8c; font-size: 1.6mm; letter-spacing: 0.25em; }
-.cp__sans-photo .ic { width: 9mm; height: 9mm; stroke-width: 1.2; }
-.cp__champs { flex: 1; min-width: 0; margin: 0; display: grid; gap: 1.1mm; }
-.cp__champ { padding-bottom: 0.5mm; border-bottom: 0.25mm solid #ddd3bf; min-width: 0; }
-.cp__champ dt { font-size: 1.5mm; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: #c1a16d; }
-.cp__champ dd { margin: 0.3mm 0 0; min-height: 3.3mm; font-size: 2.55mm; font-weight: 500; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cp__pied { height: 5.6mm; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 2mm; padding: 0 4mm; background: #f8f5ee; border-top: 0.25mm solid #e3dac8; border-bottom: 0.8mm solid #181612; font-size: 1.75mm; color: #5d5a54; white-space: nowrap; }
-.cp__pied b { color: #111; font-weight: 700; }
-
-/* Verso */
-.cp--verso { padding: 2.2mm; background: #181612; color: #dcd8cf; }
-.cp__cadre { height: 100%; display: flex; flex-direction: column; gap: 1.5mm; padding: 2.8mm 3.8mm 2.6mm; border: 0.3mm solid rgba(196, 166, 118, 0.55); border-radius: 2mm; }
-.cp__verso-marque { display: flex; align-items: center; gap: 2.4mm; margin-bottom: 0.6mm; }
-.cp__verso-marque .cp__logo { width: 6.8mm; height: 7.5mm; }
-.cp__verso-marque b { display: block; font-family: "Playfair Display", Georgia, serif; font-weight: 500; font-size: 3.5mm; color: #fff; line-height: 1; }
-.cp__verso-marque small { display: block; margin-top: 0.7mm; font-size: 1.3mm; letter-spacing: 0.3em; text-transform: uppercase; color: #c4a676; font-weight: 600; }
-.cp__verso-texte { margin: 0; font-size: 1.85mm; line-height: 1.45; color: #ebe7de; }
-.cp__verso-aut { margin: 0; font-size: 1.7mm; font-weight: 600; color: #c4a676; }
-.cp__verso-legal { margin: 0; font-size: 1.4mm; line-height: 1.4; font-style: italic; color: #8b96b3; }
-.cp__verso-pied { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 3mm; font-size: 1.75mm; color: #fff; }
-.cp__signature { min-width: 24mm; padding-top: 0.7mm; border-top: 0.25mm solid #6a7593; text-align: center; font-size: 1.35mm; color: #8b96b3; }
+/* Carte agent (badge) : voir carte-agent.css */
 
 /* =========================================================
    FLYER — A4 (210 × 297 mm), réduit à 70,7 % pour l'A5

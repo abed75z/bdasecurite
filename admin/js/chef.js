@@ -133,7 +133,7 @@ function choisirCarte(session, cartes) {
     h('h1', null, 'Quelle carte est ', h('em', null, 'la vôtre ?')),
     h('p', { class: 'moi-verrou__texte' }, 'Touchez votre carte : elle sera retenue sur cet appareil.'),
     h('div', { class: 'moi-choix__liste' }, cartes.map((c) => h('button', { type: 'button', class: 'moi-choix__item', onclick: () => { ecrire(CLE_CARTE, String(c.id)); ouvrir(session); } },
-      h('div', { class: 'moi-choix__visuel' }, recto(c.data)),
+      h('div', { class: 'moi-choix__visuel' }, recto({ ...c.data, format: 'horizontal' })),
       h('span', null, [c.data.prenom, (c.data.nom || '').toUpperCase()].filter(Boolean).join(' ') || 'Sans nom', h('small', null, c.data.fonction)))))));
 }
 
@@ -147,7 +147,8 @@ function afficher(acces, carte, cartes, nbAgents) {
   /* ----- La carte en 3D ----- */
   const face = (contenu, dos) => h('div', { class: `carte3d__face ${dos ? 'carte3d__face--dos' : ''}` },
     h('div', { class: 'carte3d__echelle' }, contenu), h('div', { class: 'carte3d__reflet', 'aria-hidden': 'true' }), h('div', { class: 'carte3d__eclat', 'aria-hidden': 'true' }));
-  const tourne = h('div', { class: 'carte3d__tourne' }, face(recto(d)), face(verso(d), true));
+  const dh = { ...d, format: 'horizontal' }; // la carte 3D est toujours affichée à l'horizontale
+  const tourne = h('div', { class: 'carte3d__tourne' }, face(recto(dh)), face(verso(dh), true));
   const pivot = h('div', { class: 'carte3d', role: 'button', tabindex: '0', 'aria-label': 'Retourner la carte', 'aria-pressed': 'false', onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pivot.click(); } } }, tourne);
   const ombre = h('div', { class: 'carte3d__ombre', 'aria-hidden': 'true' });
   const scene = h('section', { class: 'moi-scene' }, h('div', { class: 'moi-scene__halo', 'aria-hidden': 'true' }), pivot, ombre);

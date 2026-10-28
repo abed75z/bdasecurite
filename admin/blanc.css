@@ -181,26 +181,6 @@ code { background: rgba(0, 0, 0, 0.04); }
 .galerie__visuel { background: radial-gradient(80% 90% at 50% 0%, rgba(0, 0, 0, 0.04), transparent 70%), #ffffff; }
 .galerie__visuel--carte .cp { box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.22); }
 .vide-grand__visuel .cp { box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.22); }
-.cp__haut { background: #ffffff; }
-.cp__marque b { color: #0b0b0c; }
-.cp__marque small { color: #0b0b0c; }
-.cp__type small { color: #0b0b0c; }
-.cp__type b { color: #0b0b0c; }
-.cp__filet { background: linear-gradient(90deg, #0b0b0c, #e5d8c3 50%, #0b0b0c); }
-.cp__photo { border: 0.45mm solid rgba(0, 0, 0, 0.5); }
-.cp__sans-photo { color: #3a3a3f; }
-.cp__champ { border-bottom: 0.25mm solid rgba(0, 0, 0, 0.14); }
-.cp__champ dt { color: #0b0b0c; }
-.cp__pied { border-top: 0.25mm solid rgba(0, 0, 0, 0.14); border-bottom: 0.8mm solid rgba(0, 0, 0, 0.08); }
-.cp--verso { background: #ffffff; color: #3a3a3f; }
-.cp__cadre { border: 0.3mm solid rgba(0, 0, 0, 0.275); }
-.cp__verso-marque b { color: #0b0b0c; }
-.cp__verso-marque small { color: #0b0b0c; }
-.cp__verso-texte { color: #0b0b0c; }
-.cp__verso-aut { color: #0b0b0c; }
-.cp__verso-legal { color: #6e6e73; }
-.cp__verso-pied { color: #0b0b0c; }
-.cp__signature { color: #6e6e73; }
 .fl__hero { color: #0b0b0c; background: radial-gradient(130mm 90mm at 100% 0%, rgba(0, 0, 0, 0.09), transparent 62%), #ffffff; }
 .fl__marque b { color: #0b0b0c; }
 .fl__marque small { color: #0b0b0c; }
@@ -377,14 +357,6 @@ table th { color: var(--muted) !important; }
    ========================================================= */
 .marque-logo { display: inline-flex; flex-direction: column; align-items: center; line-height: 0; }
 .marque-logo img { display: block; height: auto; max-width: none; }
-/* carte agent : bandeau du recto */
-.cp__marque .marque-logo { gap: 0.9mm; }
-.cp__marque .marque-logo__bda { width: 15mm; }
-.cp__marque .marque-logo__sg { width: 26.4mm; }
-/* carte agent : verso */
-.cp__verso-marque .marque-logo { gap: 0.7mm; }
-.cp__verso-marque .marque-logo__bda { width: 11.5mm; }
-.cp__verso-marque .marque-logo__sg { width: 20.2mm; }
 /* carte de visite : recto */
 .cv__marque-logo { gap: 1.5mm; margin-top: 0.6mm; }
 .cv__marque-logo .marque-logo__bda { width: 27mm; }
@@ -398,11 +370,6 @@ table th { color: var(--muted) !important; }
 .fl__t1, .fl__t2 { color: #0b0b0c; white-space: nowrap; }
 
 /* ---------- Zones de la marque en noir, comme le haut du site ---------- */
-/* carte agent : bandeau du haut */
-.cp__haut { background: radial-gradient(40mm 20mm at 85% 0%, rgba(201, 173, 122, 0.16), transparent 70%), #0b0b0c; }
-.cp__type small { color: #a7a39b; }
-.cp__type b { color: #f6f2ea; }
-.cp__filet { background: linear-gradient(90deg, #8a6c3c, #dcc391 50%, #8a6c3c); }
 /* carte de visite : recto noir, liseré doré */
 .cv--recto { color: #f6f2ea; background: radial-gradient(60mm 40mm at 50% 0%, rgba(201, 173, 122, 0.2), transparent 65%), #0b0b0c; }
 .cv--recto::after { border: 0.25mm solid rgba(201, 173, 122, 0.5); }

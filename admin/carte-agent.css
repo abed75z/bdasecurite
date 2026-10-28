@@ -1,0 +1,114 @@
+/* =========================================================
+   ESPACE ADMIN BDA — carte agent (badge)
+   Vertical 54 × 85,6 mm (tour de cou) ou horizontal 85,6 × 54 mm.
+   Noir, ivoire et or ; dimensions réelles en millimètres.
+   ========================================================= */
+.cp {
+  --ca-noir: #0b0b0c; --ca-ivoire: #fbf8f2; --ca-or: #c9a45c; --ca-or-fonce: #96773c; --ca-gris: #8a8478; --ca-trait: #e4ddcf;
+  position: relative; width: 85.6mm; height: 54mm; flex: none; border-radius: 3.2mm; overflow: hidden;
+  background: var(--ca-ivoire); color: var(--ca-noir); font-family: "Inter", Arial, sans-serif; line-height: 1.2; text-align: left;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.cp--v { width: 54mm; height: 85.6mm; }
+.cp p { margin: 0; }
+
+/* ---------- Marque : écusson B doré + BDA / SECURITY GROUP ---------- */
+.ca-marque { display: flex; align-items: center; justify-content: center; gap: 2.2mm; }
+.ca-blason { width: 6.6mm; height: 8.3mm; }
+.ca-marque .marque-logo { gap: 0.8mm; }
+.ca-marque .marque-logo__bda { width: 13.2mm; }
+.ca-marque .marque-logo__sg { width: 23.2mm; }
+
+/* ---------- Recto ---------- */
+.ca-tete { position: absolute; left: 0; right: 0; top: 0; background: radial-gradient(44mm 26mm at 50% 0%, rgba(201, 164, 92, 0.22), transparent 70%), var(--ca-noir); }
+.ca-filet { position: absolute; left: 0; right: 0; height: 0.6mm; background: linear-gradient(90deg, #8a6c3c, #e6d3a6 50%, #8a6c3c); }
+.ca-photo { position: absolute; box-sizing: border-box; display: grid; place-items: center; overflow: hidden; border: 0.55mm solid var(--ca-or); border-radius: 1.8mm; background: #efe9dd; box-shadow: 0 1.4mm 3.2mm rgba(0, 0, 0, 0.28); }
+.ca-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ca-photo__vide { display: grid; justify-items: center; gap: 1.2mm; color: #b3a684; font-size: 1.5mm; font-weight: 600; letter-spacing: 0.28em; }
+.ca-photo__vide .ic { width: 9mm; height: 9mm; stroke-width: 1.1; }
+.ca-corps { position: absolute; display: flex; flex-direction: column; min-width: 0; }
+.ca-prenom { font-size: 2.55mm; font-weight: 500; color: #45413a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.ca-nom { margin-top: 0.2mm !important; font-family: "Manrope", "Inter", Arial, sans-serif; font-weight: 800; line-height: 1.05; letter-spacing: 0.015em; color: var(--ca-noir); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.ca-fonction { margin-top: 1.3mm !important; font-size: 1.5mm; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ca-or-fonce); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.ca-infos { width: 100%; display: grid; grid-template-columns: 1fr 1fr; row-gap: 1.6mm; border-top: 0.25mm solid var(--ca-trait); padding-top: 1.7mm; }
+.ca-info { display: grid; gap: 0.5mm; align-content: start; min-width: 0; }
+.ca-info + .ca-info { border-left: 0.25mm solid var(--ca-trait); }
+.ca-info span, .ca-numero span { font-size: 1.15mm; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ca-gris); white-space: nowrap; }
+.ca-info b { font-family: "Manrope", "Inter", Arial, sans-serif; font-weight: 800; font-size: 2.5mm; letter-spacing: 0.03em; color: var(--ca-noir); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-info--nub b { font-size: 3.3mm; letter-spacing: 0.08em; }
+.ca-info--long b { font-size: 2.2mm; }
+.ca-numero { grid-column: 1 / -1; display: grid; gap: 0.4mm; padding-top: 1.5mm; border-top: 0.25mm solid var(--ca-trait); min-width: 0; }
+.ca-numero b { font-family: "JetBrains Mono", "Consolas", monospace; font-size: 1.6mm; font-weight: 600; letter-spacing: 0.02em; color: #2e2b26; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-bande { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; background: var(--ca-noir); color: #fff; border-top: 0.55mm solid var(--ca-or); }
+.ca-bande b { font-family: "Manrope", "Inter", Arial, sans-serif; font-weight: 800; letter-spacing: 0.3em; }
+
+/* Vertical : photo centrée qui déborde sur le bandeau noir */
+.cp--v .ca-tete { height: 24mm; padding-top: 3.8mm; }
+.cp--v .ca-filet { top: 24mm; }
+.cp--v .ca-photo { left: 14mm; top: 13.2mm; width: 26mm; height: 31.5mm; }
+.cp--v .ca-corps { left: 3.6mm; right: 3.6mm; top: 47.2mm; align-items: center; text-align: center; }
+.cp--v .ca-infos { margin-top: 2.6mm; }
+.cp--v .ca-info { justify-items: center; }
+.cp--v .ca-numero { justify-items: center; }
+.cp--v .ca-bande { height: 7mm; justify-content: center; }
+.cp--v .ca-bande b { font-size: 2.15mm; padding-left: 0.3em; }
+
+/* Horizontal : bandeau en haut, photo à gauche */
+.cp--h .ca-tete { height: 12mm; display: flex; align-items: center; justify-content: space-between; padding: 0 4mm; background: radial-gradient(40mm 20mm at 85% 0%, rgba(201, 164, 92, 0.2), transparent 70%), var(--ca-noir); }
+.cp--h .ca-blason { width: 5.6mm; height: 7mm; }
+.cp--h .ca-marque { gap: 1.8mm; }
+.cp--h .ca-marque .marque-logo__bda { width: 11mm; }
+.cp--h .ca-marque .marque-logo__sg { width: 19.4mm; }
+.ca-titre { text-align: right; }
+.ca-titre small { display: block; font-size: 1.2mm; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase; color: var(--ca-or); }
+.ca-titre b { display: block; margin-top: 0.4mm; font-family: "Manrope", "Inter", Arial, sans-serif; font-size: 2.6mm; font-weight: 800; letter-spacing: 0.08em; color: #f6f2ea; }
+.cp--h .ca-filet { top: 12mm; }
+.ca-milieu { position: absolute; left: 0; right: 0; top: 12.6mm; bottom: 6mm; display: flex; align-items: center; gap: 3.8mm; padding: 0 4mm; }
+.cp--h .ca-photo { position: relative; width: 20.5mm; height: 25.5mm; flex: none; }
+.cp--h .ca-corps { position: static; flex: 1; align-self: stretch; justify-content: center; }
+.cp--h .ca-infos { margin-top: 2mm; }
+.cp--h .ca-info + .ca-info { padding-left: 2.2mm; }
+.cp--h .ca-bande { height: 6mm; justify-content: space-between; padding: 0 4mm; }
+.cp--h .ca-bande b { font-size: 1.75mm; }
+.cp--h .ca-bande span { font-size: 1.5mm; letter-spacing: 0.08em; color: var(--ca-or); }
+
+/* ---------- Verso ---------- */
+.cp--verso { padding: 2.2mm; background: radial-gradient(60mm 40mm at 50% 0%, rgba(201, 164, 92, 0.14), transparent 70%), var(--ca-noir); color: #d9d4c9; }
+.ca-cadre { height: 100%; display: flex; flex-direction: column; gap: 1.6mm; padding: 3mm 3.4mm 2.6mm; border: 0.3mm solid rgba(201, 164, 92, 0.55); border-radius: 2mm; }
+.cp--verso .ca-marque { margin-bottom: 0.6mm; }
+.cp--verso .ca-blason { width: 5.4mm; height: 6.8mm; }
+.cp--verso .ca-marque .marque-logo__bda { width: 10.6mm; }
+.cp--verso .ca-marque .marque-logo__sg { width: 18.6mm; }
+.ca-v-texte { font-size: 1.68mm; line-height: 1.45; color: #ece8df; }
+.ca-v-bloc { display: grid; gap: 0.4mm; padding: 1.4mm 0; border-top: 0.25mm solid rgba(201, 164, 92, 0.35); border-bottom: 0.25mm solid rgba(201, 164, 92, 0.35); }
+.ca-v-bloc span { font-size: 1.15mm; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ca-or); }
+.ca-v-bloc b { font-family: "Manrope", "Inter", Arial, sans-serif; font-size: 2.2mm; font-weight: 800; letter-spacing: 0.06em; color: #fff; }
+.ca-v-bloc small { font-size: 1.4mm; line-height: 1.35; color: #c9c3b6; }
+.ca-qr { display: flex; align-items: center; gap: 2mm; }
+.ca-qr__code { width: 11mm; height: 11mm; flex: none; border-radius: 0.8mm; overflow: hidden; background: #fff; }
+.ca-qr__code svg { display: block; width: 100%; height: 100%; }
+.ca-qr small { font-size: 1.35mm; line-height: 1.35; color: #c9c3b6; }
+.ca-v-legal { font-size: 1.25mm; line-height: 1.4; font-style: italic; color: #8e887c; }
+.ca-v-pied { margin-top: auto; display: flex; align-items: flex-end; justify-content: space-between; gap: 2.4mm; font-size: 1.5mm; color: #fff; }
+.ca-signature { min-width: 18mm; padding-top: 0.7mm; border-top: 0.25mm solid rgba(201, 164, 92, 0.6); text-align: center; font-size: 1.2mm; color: #8e887c; white-space: nowrap; }
+/* Verso vertical : tout centré, QR code plus grand */
+.cp--v .ca-cadre { gap: 2.3mm; padding: 3.8mm 3.6mm 3mm; text-align: center; }
+.cp--v .ca-v-texte { font-size: 1.78mm; }
+.cp--v .ca-v-bloc { justify-items: center; padding: 1.8mm 0; }
+.cp--v .ca-qr { flex-direction: column; gap: 1.2mm; }
+.cp--v .ca-qr__code { width: 15mm; height: 15mm; }
+.cp--v .ca-qr small { max-width: 34mm; }
+.cp--v .ca-v-pied { flex-direction: column; align-items: stretch; gap: 3.2mm; }
+.cp--v .ca-signature { align-self: center; min-width: 26mm; }
+.cp--h .ca-cadre { gap: 1.1mm; padding: 2.4mm 3.6mm 2.2mm; }
+.cp--h.cp--verso .ca-marque { justify-content: flex-start; }
+.cp--h .ca-qr__code { width: 8.5mm; height: 8.5mm; }
+
+/* ---------- Aperçu, galerie, impression ---------- */
+.apercu--duo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.galerie__visuel--v .cp { zoom: 0.62; }
+.page-carte--v { width: 54mm; height: 85.6mm; }
+.vide-grand__visuel .cp--v { zoom: 0.8; }
+@media (max-width: 760px) {
+  .apercu--duo { grid-template-columns: 1fr; }
+}

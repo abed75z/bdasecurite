@@ -150,7 +150,7 @@ export function marqueLogo(cls = '', sombre = false) {
 }
 export function ecusson(cls = '') {
   const img = document.createElement('img');
-  img.src = '/assets/img/embleme-hd.png?v=3';
+  img.src = '/assets/img/blason.svg?v=1'; // écusson « B » doré du site (plus l'ancien emblème avec le garde)
   img.alt = '';
   img.className = `ecusson ${cls}`.trim();
   img.setAttribute('aria-hidden', 'true');

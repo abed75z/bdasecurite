@@ -58,6 +58,7 @@ export function ajusterEchelle(zone, el, max = 1.6) {
   };
   maj();
   new ResizeObserver(maj).observe(zone);
+  return maj; // à rappeler quand le contenu change de taille (ex. format de carte)
 }
 
 // Impression dédiée : seules les pages fournies sortent, au format voulu

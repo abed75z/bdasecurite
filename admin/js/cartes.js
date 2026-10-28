@@ -39,10 +39,13 @@ function marque() {
   return h('div', { class: 'ca-marque' }, ecusson('ca-blason'), marqueLogo('', true));
 }
 function photoDe(d) {
-  return h('div', { class: 'ca-photo' }, d.photo
+  return h('div', { class: 'ca-photo' }, h('div', { class: 'ca-photo__int' }, d.photo
     ? h('img', { src: d.photo, alt: '', style: { objectPosition: `${d.px}% ${d.py}%`, transform: `scale(${d.zoom})`, transformOrigin: `${d.px}% ${d.py}%` } })
-    : h('span', { class: 'ca-photo__vide' }, icone('personne'), 'PHOTO'));
+    : h('span', { class: 'ca-photo__vide' }, icone('personne'), 'PHOTO')));
 }
+// Micro-texte doré au-dessus du bandeau (comme sur les documents officiels)
+const microTexte = () => h('div', { class: 'ca-micro', 'aria-hidden': 'true' }, 'BDA SECURITY GROUP · SÉCURITÉ PRIVÉE · '.repeat(8));
+const filigrane = () => ecusson('ca-filigrane');
 function identite(d, base, largeur) {
   const nom = (d.nom || '').toUpperCase();
   const vtc = estVtc(d.fonction);
@@ -61,19 +64,30 @@ export function recto(d) {
     return h('div', { class: 'cp cp--v cp--recto' },
       h('div', { class: 'ca-tete' }, marque()),
       h('div', { class: 'ca-filet' }),
+      filigrane(),
       photoDe(d),
       identite(d, 4.4, 46),
+      microTexte(),
       h('div', { class: 'ca-bande' }, h('b', null, bandeauDe(d))));
   }
   return h('div', { class: 'cp cp--h cp--recto' },
     h('div', { class: 'ca-tete' }, marque(), h('div', { class: 'ca-titre' }, h('small', null, 'Carte professionnelle'), h('b', null, d.type || 'AGENT'))),
     h('div', { class: 'ca-filet' }),
+    filigrane(),
     h('div', { class: 'ca-milieu' }, photoDe(d), identite(d, 4, 52)),
+    microTexte(),
     h('div', { class: 'ca-bande' }, h('b', null, bandeauDe(d)), h('span', null, [d.zone, d.dispo].filter(Boolean).join(' · '))));
 }
 export function verso(d) {
   let qr = null;
-  if (d.qr && d.lienQr) { try { qr = h('div', { class: 'ca-qr' }, h('div', { class: 'ca-qr__code' }, qrSvg(d.lienQr, '#0b0b0c')), d.texteQr ? h('small', null, d.texteQr) : null); } catch (e) { qr = null; } }
+  // Sous le QR code : nom + n° d'identification, les deux infos à saisir sur le registre du CNAPS
+  const verif = !estVtc(d.fonction) && d.nom && d.nub ? `${d.nom.toUpperCase()} · ${d.nub}` : '';
+  if (d.qr && d.lienQr) {
+    try {
+      qr = h('div', { class: 'ca-qr' }, h('div', { class: 'ca-qr__code' }, qrSvg(d.lienQr, '#0b0b0c')),
+        h('div', { class: 'ca-qr__txt' }, d.texteQr ? h('small', null, d.texteQr) : null, verif ? h('b', null, verif) : null));
+    } catch (e) { qr = null; }
+  }
   return h('div', { class: `cp ${estVertical(d) ? 'cp--v' : 'cp--h'} cp--verso` },
     h('div', { class: 'ca-cadre' },
       marque(),
@@ -82,7 +96,7 @@ export function verso(d) {
         h('span', null, DIRIGEANT.test(d.fonction) ? 'Société' : 'Employeur'), h('b', null, d.employeur || 'BDA SECURITE'), h('small', null, d.autorisation)),
       qr,
       h('p', { class: 'ca-v-legal' }, d.legal),
-      h('div', { class: 'ca-v-pied' }, h('span', null, d.contact), h('span', { class: 'ca-signature' }, 'Signature du titulaire'))));
+      h('div', { class: 'ca-v-pied' }, h('span', null, d.contact))));
 }
 
 /* ---------- Impression ---------- */

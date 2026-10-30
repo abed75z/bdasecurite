@@ -366,40 +366,58 @@
 .feuille--compacte .f-regle { margin: 2mm 0; }
 
 /* =========================================================
-   DEVIS & FACTURES — présentation haut de gamme (noir, ivoire, or)
-   Bandeau noir guilloché avec l'écusson B, filet doré, filigrane B.
+   DEVIS & FACTURES — présentation haut de gamme, claire et épurée
+   Fond blanc, filets dorés fins, titres en Cormorant Garamond, aucun aplat de couleur.
    ========================================================= */
-.feuille--lux { z-index: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-.fx-tete { position: relative; flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10mm; margin: -11mm -15mm 0; padding: 9.5mm 15mm 8.5mm; border-radius: 4px 4px 0 0; color: #f6f2ea; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 80' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23c9a45c' stroke-opacity='.18' stroke-width='.35'%3E%3Cpath d='M0 2 Q12.5 -4 25 2 T50 2 T75 2 T100 2 T125 2 T150 2 T175 2 T200 2'/%3E%3Cpath d='M0 2 Q12.5 8 25 2 T50 2 T75 2 T100 2 T125 2 T150 2 T175 2 T200 2'/%3E%3Cpath d='M0 7 Q12.5 1 25 7 T50 7 T75 7 T100 7 T125 7 T150 7 T175 7 T200 7'/%3E%3Cpath d='M0 7 Q12.5 13 25 7 T50 7 T75 7 T100 7 T125 7 T150 7 T175 7 T200 7'/%3E%3Cpath d='M0 12 Q12.5 6 25 12 T50 12 T75 12 T100 12 T125 12 T150 12 T175 12 T200 12'/%3E%3Cpath d='M0 12 Q12.5 18 25 12 T50 12 T75 12 T100 12 T125 12 T150 12 T175 12 T200 12'/%3E%3Cpath d='M0 17 Q12.5 11 25 17 T50 17 T75 17 T100 17 T125 17 T150 17 T175 17 T200 17'/%3E%3Cpath d='M0 17 Q12.5 23 25 17 T50 17 T75 17 T100 17 T125 17 T150 17 T175 17 T200 17'/%3E%3Cpath d='M0 22 Q12.5 16 25 22 T50 22 T75 22 T100 22 T125 22 T150 22 T175 22 T200 22'/%3E%3Cpath d='M0 22 Q12.5 28 25 22 T50 22 T75 22 T100 22 T125 22 T150 22 T175 22 T200 22'/%3E%3Cpath d='M0 27 Q12.5 21 25 27 T50 27 T75 27 T100 27 T125 27 T150 27 T175 27 T200 27'/%3E%3Cpath d='M0 27 Q12.5 33 25 27 T50 27 T75 27 T100 27 T125 27 T150 27 T175 27 T200 27'/%3E%3Cpath d='M0 32 Q12.5 26 25 32 T50 32 T75 32 T100 32 T125 32 T150 32 T175 32 T200 32'/%3E%3Cpath d='M0 32 Q12.5 38 25 32 T50 32 T75 32 T100 32 T125 32 T150 32 T175 32 T200 32'/%3E%3Cpath d='M0 37 Q12.5 31 25 37 T50 37 T75 37 T100 37 T125 37 T150 37 T175 37 T200 37'/%3E%3Cpath d='M0 37 Q12.5 43 25 37 T50 37 T75 37 T100 37 T125 37 T150 37 T175 37 T200 37'/%3E%3Cpath d='M0 42 Q12.5 36 25 42 T50 42 T75 42 T100 42 T125 42 T150 42 T175 42 T200 42'/%3E%3Cpath d='M0 42 Q12.5 48 25 42 T50 42 T75 42 T100 42 T125 42 T150 42 T175 42 T200 42'/%3E%3Cpath d='M0 47 Q12.5 41 25 47 T50 47 T75 47 T100 47 T125 47 T150 47 T175 47 T200 47'/%3E%3Cpath d='M0 47 Q12.5 53 25 47 T50 47 T75 47 T100 47 T125 47 T150 47 T175 47 T200 47'/%3E%3Cpath d='M0 52 Q12.5 46 25 52 T50 52 T75 52 T100 52 T125 52 T150 52 T175 52 T200 52'/%3E%3Cpath d='M0 52 Q12.5 58 25 52 T50 52 T75 52 T100 52 T125 52 T150 52 T175 52 T200 52'/%3E%3Cpath d='M0 57 Q12.5 51 25 57 T50 57 T75 57 T100 57 T125 57 T150 57 T175 57 T200 57'/%3E%3Cpath d='M0 57 Q12.5 63 25 57 T50 57 T75 57 T100 57 T125 57 T150 57 T175 57 T200 57'/%3E%3Cpath d='M0 62 Q12.5 56 25 62 T50 62 T75 62 T100 62 T125 62 T150 62 T175 62 T200 62'/%3E%3Cpath d='M0 62 Q12.5 68 25 62 T50 62 T75 62 T100 62 T125 62 T150 62 T175 62 T200 62'/%3E%3Cpath d='M0 67 Q12.5 61 25 67 T50 67 T75 67 T100 67 T125 67 T150 67 T175 67 T200 67'/%3E%3Cpath d='M0 67 Q12.5 73 25 67 T50 67 T75 67 T100 67 T125 67 T150 67 T175 67 T200 67'/%3E%3Cpath d='M0 72 Q12.5 66 25 72 T50 72 T75 72 T100 72 T125 72 T150 72 T175 72 T200 72'/%3E%3Cpath d='M0 72 Q12.5 78 25 72 T50 72 T75 72 T100 72 T125 72 T150 72 T175 72 T200 72'/%3E%3Cpath d='M0 77 Q12.5 71 25 77 T50 77 T75 77 T100 77 T125 77 T150 77 T175 77 T200 77'/%3E%3Cpath d='M0 77 Q12.5 83 25 77 T50 77 T75 77 T100 77 T125 77 T150 77 T175 77 T200 77'/%3E%3C/g%3E%3C/svg%3E") center / 100% 100% no-repeat, radial-gradient(130mm 70mm at 88% 0%, rgba(201, 164, 92, 0.24), transparent 70%), #0b0b0c; }
-.fx-filet { flex: none; height: 1.1mm; margin: 0 -15mm 8mm; background: linear-gradient(90deg, #8a6c3c, #e6d3a6 50%, #8a6c3c); }
-.fx-marque { display: flex; align-items: center; gap: 4.5mm; }
-.fx-blason { width: 12.5mm; height: 15.7mm; }
-.fx-marque .marque-logo { gap: 1.5mm; }
-.fx-marque .marque-logo__bda { width: 30mm; }
-.fx-marque .marque-logo__sg { width: 52mm; }
-.fx-doc { display: grid; justify-items: end; gap: 1mm; text-align: right; }
-.fx-doc__type { font: 800 21pt/1 "Manrope", "Inter", "Segoe UI", sans-serif; letter-spacing: 0.3em; text-transform: uppercase; color: #f6f2ea; margin-right: -0.3em; }
-.fx-doc__label { margin-top: 2.6mm; font: 600 6.4pt "Inter", "Segoe UI", sans-serif; letter-spacing: 0.3em; text-transform: uppercase; color: #c9a45c; }
-.fx-doc__num { font: 700 12.5pt "Manrope", "Inter", "Segoe UI", sans-serif; letter-spacing: 0.08em; color: #e6d3a6; }
-.fx-tete .f-dates { margin-top: 1.6mm; font-size: 8pt; color: #b9b2a5; }
-.fx-tete .f-inline { color: #f6f2ea; }
-.fx-tete [contenteditable]:empty::before { color: #8e887c; }
-.fx-filigrane { position: absolute; z-index: -1; left: 50%; top: 112mm; width: 118mm; height: 148mm; transform: translateX(-50%); opacity: 0.035; pointer-events: none; }
-.feuille--lux .f-label { font-family: "Inter", "Segoe UI", sans-serif; color: #96773c; }
-.feuille--lux .f-nom { font-family: "Manrope", "Inter", "Segoe UI", sans-serif; font-weight: 800; letter-spacing: 0.04em; }
-.feuille--lux .f-partie--client { border: 1px solid #ece2d0; border-left: 3px solid #c9a45c; border-radius: 0 8px 8px 0; background: #faf7f1; }
-.feuille--lux .f-meta { margin: 7mm 0 6mm; border-color: #ece2d0; border-radius: 8px; }
-.feuille--lux .f-meta > div { border-left-color: #ece2d0; }
-.feuille--lux .f-meta__val { font-family: "Manrope", "Inter", "Segoe UI", sans-serif; font-weight: 700; }
-.feuille--lux .f-table th { background: #0b0b0c; color: #d9be88; font-family: "Inter", "Segoe UI", sans-serif; }
-.feuille--lux:not(.feuille--compacte) .f-table td { padding: 2.8mm 3mm; }
-.feuille--lux .f-desc { font-weight: 600; }
-.feuille--lux .f-totaux .grand { border-left: 1.4mm solid #c9a45c; border-radius: 4px; background: #0b0b0c; color: #f6f2ea; font-family: "Manrope", "Inter", "Segoe UI", sans-serif; }
-.feuille--lux .f-totaux .grand b { color: #e6d3a6; }
-.feuille--lux .f-paiement { border: 1px solid #e3d5bc; background: #faf7f1; }
-.feuille--lux .f-paiement h3 { font-family: "Inter", "Segoe UI", sans-serif; color: #96773c; }
-.feuille--lux .f-paiement__main { font-family: "Manrope", "Inter", "Segoe UI", sans-serif; font-weight: 700; }
-.feuille--lux .f-pied { border-top-color: #e3d5bc; }
-.feuille--lux.feuille--compacte .fx-tete { margin: -8mm -13mm 0; padding: 6.5mm 13mm 6mm; }
-.feuille--lux.feuille--compacte .fx-filet { margin: 0 -13mm 5mm; }
-.feuille--lux.feuille--compacte .f-meta { margin: 4mm 0 3mm; }
+.feuille--lux { --lx-or: #b08d55; --lx-trait: #e9e3d8; --lx-gris: #7a766e; --lx-noir: #121212; padding: 14mm 17mm 10mm; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.fx-tete { flex: none; display: flex; align-items: flex-end; justify-content: space-between; gap: 10mm; }
+.fx-marque { display: flex; align-items: center; gap: 3.6mm; }
+.fx-blason { width: 10.4mm; height: 13mm; }
+.fx-marque .marque-logo { gap: 1.2mm; }
+.fx-marque .marque-logo__bda { width: 25mm; }
+.fx-marque .marque-logo__sg { width: 43mm; }
+.fx-doc { display: grid; justify-items: end; gap: 2mm; text-align: right; }
+.fx-doc__type { font: 500 32pt/0.85 "Cormorant Garamond", Georgia, "Times New Roman", serif; letter-spacing: 0.03em; color: var(--lx-noir); }
+.fx-doc__num { display: flex; align-items: baseline; gap: 2.6mm; }
+.fx-doc__label { font: 600 6.2pt "Inter", "Segoe UI", sans-serif; letter-spacing: 0.28em; text-transform: uppercase; color: var(--lx-or); }
+.fx-doc__val { font: 600 10pt "Inter", "Segoe UI", sans-serif; letter-spacing: 0.06em; color: var(--lx-noir); }
+.fx-tete .f-dates { gap: 4mm; font-size: 8pt; color: var(--lx-gris); }
+.fx-tete .f-inline { color: var(--lx-noir); }
+.fx-filet { flex: none; height: 0.3mm; margin: 7mm 0 9mm; background: linear-gradient(90deg, var(--lx-or), #dcc79d 60%, rgba(176, 141, 85, 0.15)); }
+.feuille--lux .f-parties { gap: 14mm; }
+.feuille--lux .f-label { margin-bottom: 1.8mm; font: 600 6.2pt "Inter", "Segoe UI", sans-serif; letter-spacing: 0.26em; color: var(--lx-or); }
+.feuille--lux .f-nom { font: 600 13.5pt/1.2 "Cormorant Garamond", Georgia, "Times New Roman", serif; letter-spacing: 0.02em; color: var(--lx-noir); }
+.feuille--lux .f-lignes { font-size: 8.8pt; line-height: 1.55; color: #55524c; }
+.feuille--lux .f-partie--client { padding: 0 0 0 6mm; border: 0; border-left: 0.3mm solid var(--lx-or); border-radius: 0; background: none; }
+.feuille--lux .f-meta { margin: 10mm 0 8mm; border: 0; border-top: 0.25mm solid var(--lx-trait); border-bottom: 0.25mm solid var(--lx-trait); border-radius: 0; overflow: visible; }
+.feuille--lux .f-meta > div { padding: 3.2mm 0 3.2mm 6mm; border-left: 0.25mm solid var(--lx-trait); }
+.feuille--lux .f-meta > div:first-child { padding-left: 0; border-left: 0; }
+.feuille--lux .f-meta__val { font: 600 10pt "Inter", "Segoe UI", sans-serif; color: var(--lx-noir); }
+.feuille--lux .f-table th { padding: 0 3mm 2.6mm; border-bottom: 0.3mm solid var(--lx-noir); border-radius: 0 !important; background: none; color: var(--lx-gris); font: 600 6.2pt "Inter", "Segoe UI", sans-serif; letter-spacing: 0.24em; }
+.feuille--lux .f-table th:first-child, .feuille--lux .f-table td:first-child { padding-left: 0; }
+.feuille--lux .f-table th:last-child, .feuille--lux .f-table td:last-child { padding-right: 0; }
+.feuille--lux .f-table td { border-bottom: 0.25mm solid var(--lx-trait); background: none !important; }
+.feuille--lux:not(.feuille--compacte) .f-table td { padding-top: 3.6mm; padding-bottom: 3.6mm; }
+.feuille--lux .f-desc { font-weight: 600; color: var(--lx-noir); }
+.feuille--lux .f-detail { color: var(--lx-gris); }
+.feuille--lux .f-totaux { width: 82mm; margin-top: 7mm; }
+.feuille--lux .f-totaux > div { padding: 2.3mm 0; border-bottom: 0.25mm solid var(--lx-trait); color: #45423c; }
+.feuille--lux .f-totaux .grand { margin-top: 2.5mm; padding: 3.6mm 0 0; border: 0; border-top: 0.3mm solid var(--lx-or); border-radius: 0; background: none; color: var(--lx-noir); font: 600 7pt "Inter", "Segoe UI", sans-serif; letter-spacing: 0.24em; text-transform: uppercase; }
+.feuille--lux .f-totaux .grand b { font: 600 21pt/1 "Cormorant Garamond", Georgia, "Times New Roman", serif; letter-spacing: 0.01em; text-transform: none; color: var(--lx-noir); }
+.feuille--lux .f-totaux .sub { color: var(--lx-gris); }
+.feuille--lux .f-paiement { margin-top: 10mm; padding: 5mm 6mm; border: 0.25mm solid var(--lx-trait); border-radius: 0; background: #fcfbf8; }
+.feuille--lux .f-paiement h3 { margin-bottom: 2.4mm; font: 600 6.2pt "Inter", "Segoe UI", sans-serif; letter-spacing: 0.26em; color: var(--lx-or); }
+.feuille--lux .f-paiement__main { font: 600 10pt/1.5 "Inter", "Segoe UI", sans-serif; letter-spacing: 0.03em; color: var(--lx-noir); }
+.feuille--lux .f-petit { color: var(--lx-gris); }
+.feuille--lux .f-objet__titre { font: 600 14pt/1.25 "Cormorant Garamond", Georgia, "Times New Roman", serif; color: var(--lx-noir); }
+.feuille--lux .f-mission { border: 0; border-top: 0.25mm solid var(--lx-trait); border-bottom: 0.25mm solid var(--lx-trait); border-radius: 0; overflow: visible; }
+.feuille--lux .f-mission > div { border-left-color: var(--lx-trait); }
+.feuille--lux .f-mission > div:first-child { padding-left: 0; }
+.feuille--lux .f-signe { border: 0.25mm solid var(--lx-trait); border-radius: 0; }
+.feuille--lux .f-pied { padding-top: 3.4mm; border-top: 0.25mm solid var(--lx-trait); font-size: 6.4pt; color: #8d8981; }
+.feuille--lux.feuille--compacte { padding: 9mm 14mm 7mm; }
+.feuille--lux.feuille--compacte .fx-filet { margin: 4mm 0 5mm; }
+.feuille--lux.feuille--compacte .fx-doc__type { font-size: 24pt; }
+.feuille--lux.feuille--compacte .f-meta { margin: 5mm 0 4mm; }
+.feuille--lux.feuille--compacte .f-meta > div { padding-top: 1.6mm; padding-bottom: 1.6mm; }
+.feuille--lux.feuille--compacte .f-paiement { margin-top: 4mm; padding: 3mm 4mm; }

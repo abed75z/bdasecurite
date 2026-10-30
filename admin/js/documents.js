@@ -390,13 +390,12 @@ function construireFeuille(type, data, change, r = {}) {
     champs.push({ el, chemin });
     return el;
   };
-  // Bandeau noir et or : écusson B + BDA / SECURITY GROUP à gauche, type et numéro du document à droite
+  // En-tête clair : écusson B + BDA / SECURITY GROUP à gauche, type et numéro du document à droite, filet doré
   const bandeau = (titre, libelleNumero, ...plus) => [
-    ecusson('fx-filigrane'),
     h('header', { class: 'fx-tete' },
-      h('div', { class: 'fx-marque' }, ecusson('fx-blason'), marqueLogo('', true)),
+      h('div', { class: 'fx-marque' }, ecusson('fx-blason'), marqueLogo()),
       h('div', { class: 'fx-doc' }, h('span', { class: 'fx-doc__type' }, titre),
-        h('span', { class: 'fx-doc__label' }, libelleNumero), T('numero', 'fx-doc__num', 'Numéro', true), ...plus)),
+        h('div', { class: 'fx-doc__num' }, h('span', { class: 'fx-doc__label' }, libelleNumero), T('numero', 'fx-doc__val', 'Numéro', true)), ...plus)),
     h('div', { class: 'fx-filet' })];
   const corps = h('tbody');
   const totaux = h('div', { class: 'f-totaux' });

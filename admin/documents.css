@@ -421,7 +421,7 @@
 .feuille--lux.feuille--compacte .f-meta > div { padding-top: 1.6mm; padding-bottom: 1.6mm; }
 .feuille--lux.feuille--compacte .f-paiement { margin-top: 4mm; padding: 3mm 4mm; }
 /* Montant final en chiffres droits (lisibles), libellé doré */
-.feuille--lux .f-totaux .grand b { font: 600 17pt/1 "Inter", "Segoe UI", sans-serif; letter-spacing: 0.01em; text-transform: none; color: var(--lx-noir); }
+.feuille--lux .f-totaux .grand b { font: 500 13.5pt/1 "Inter", "Segoe UI", sans-serif; letter-spacing: 0.02em; text-transform: none; color: var(--lx-noir); }
 .feuille--lux .f-detail { margin-top: 0.8mm; font-size: 7.8pt; line-height: 1.35; color: var(--lx-gris); }
 .feuille--lux .f-detail:empty { margin: 0; }
 .fx-merci { flex: none; margin: 0 0 6mm; text-align: center; font: italic 500 15pt/1.2 "Cormorant Garamond", Georgia, "Times New Roman", serif; letter-spacing: 0.02em; color: #2a2824; }

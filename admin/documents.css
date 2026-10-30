@@ -403,7 +403,6 @@
 .feuille--lux .f-totaux { width: 82mm; margin-top: 7mm; }
 .feuille--lux .f-totaux > div { padding: 2.3mm 0; border-bottom: 0.25mm solid var(--lx-trait); color: #45423c; }
 .feuille--lux .f-totaux .grand { margin-top: 2.5mm; padding: 3.6mm 0 0; border: 0; border-top: 0.3mm solid var(--lx-or); border-radius: 0; background: none; color: var(--lx-noir); font: 600 7pt "Inter", "Segoe UI", sans-serif; letter-spacing: 0.24em; text-transform: uppercase; }
-.feuille--lux .f-totaux .grand b { font: 600 21pt/1 "Cormorant Garamond", Georgia, "Times New Roman", serif; letter-spacing: 0.01em; text-transform: none; color: var(--lx-noir); }
 .feuille--lux .f-totaux .sub { color: var(--lx-gris); }
 .feuille--lux .f-paiement { margin-top: 10mm; padding: 5mm 6mm; border: 0.25mm solid var(--lx-trait); border-radius: 0; background: #fcfbf8; }
 .feuille--lux .f-paiement h3 { margin-bottom: 2.4mm; font: 600 6.2pt "Inter", "Segoe UI", sans-serif; letter-spacing: 0.26em; color: var(--lx-or); }
@@ -421,3 +420,25 @@
 .feuille--lux.feuille--compacte .f-meta { margin: 5mm 0 4mm; }
 .feuille--lux.feuille--compacte .f-meta > div { padding-top: 1.6mm; padding-bottom: 1.6mm; }
 .feuille--lux.feuille--compacte .f-paiement { margin-top: 4mm; padding: 3mm 4mm; }
+/* Montant final en chiffres droits (lisibles), libellé doré */
+.feuille--lux .f-totaux .grand b { font: 600 17pt/1 "Inter", "Segoe UI", sans-serif; letter-spacing: 0.01em; text-transform: none; color: var(--lx-noir); }
+.feuille--lux .f-detail { margin-top: 0.8mm; font-size: 7.8pt; line-height: 1.35; color: var(--lx-gris); }
+.feuille--lux .f-detail:empty { margin: 0; }
+.fx-merci { flex: none; margin: 0 0 6mm; text-align: center; font: italic 500 15pt/1.2 "Cormorant Garamond", Georgia, "Times New Roman", serif; letter-spacing: 0.02em; color: #2a2824; }
+
+/* Relevé d'heures (annexe de la facture, page 2) */
+.feuille-zone .feuille + .feuille { margin-top: 10mm; }
+.feuille--releve .fx-doc__type { font-size: 27pt; }
+.fx-releve-infos { display: grid; grid-template-columns: 1fr 1fr; gap: 14mm; margin-bottom: 6mm; }
+.fx-releve-infos b { font: 600 13.5pt/1.2 "Cormorant Garamond", Georgia, "Times New Roman", serif; letter-spacing: 0.02em; color: var(--lx-noir); }
+.fx-releve col.c-t { width: 26mm; }
+.feuille--lux.feuille--releve .f-table.fx-releve td { padding-top: 1.25mm; padding-bottom: 1.25mm; }
+.feuille--lux.feuille--releve.feuille--compacte .f-table.fx-releve td { padding-top: 0.55mm; padding-bottom: 0.55mm; font-size: 8.4pt; }
+.fx-jour { display: inline-block; width: 9mm; color: var(--lx-gris); font-size: 8pt; }
+.fx-cell { display: inline-block; min-width: 18mm; }
+.fx-h { font-weight: 600; color: var(--lx-noir); }
+.fx-releve-total { width: 82mm; }
+@media print {
+  .feuille + .feuille { break-before: page; }
+  .feuille[hidden] { display: none !important; }
+}

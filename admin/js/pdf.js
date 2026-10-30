@@ -76,6 +76,21 @@ export async function pdfFeuille(feuille, { paysage = false } = {}) {
   return fabriquerPdf(await Promise.all(decouper(canvas, H / W).map(enJpeg)), W, H);
 }
 
+// Plusieurs feuilles A4 portrait dans un même PDF (ex. facture + relevé d'heures en annexe)
+export async function telechargerFeuilles(feuilles, nomFichier) {
+  const attente = toast('Préparation du PDF…', 'ok');
+  try {
+    const images = [];
+    for (const f of feuilles) images.push(...await Promise.all(decouper(await capturer(f, 2.5), A4.h / A4.l).map(enJpeg)));
+    enregistrer(fabriquerPdf(images, A4.l, A4.h), nomFichier);
+    toast('PDF téléchargé.');
+  } catch (e) {
+    erreur(e);
+  } finally {
+    attente?.remove?.();
+  }
+}
+
 // Pages déjà mises en forme (planches de cartes, flyer…) : une page PDF par élément
 // taille en millimètres, ex. { l: 210, h: 297 }
 export async function telechargerPages(pages, nomFichier, tailleMm, scale = 2.5) {

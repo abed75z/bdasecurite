@@ -8,7 +8,7 @@ import {
   euro, nombre, arrondi, fmtHeures, lireHeures, lireNombre, fr, frVersDate, isoVersFr, cap, MOIS, pad, iso,
 } from './outils.js';
 import { totauxDuMois } from './planning.js';
-import { telechargerPdf } from './pdf.js';
+import { telechargerPdf, telechargerFeuilles } from './pdf.js';
 
 const CONFIG = {
   devis: { route: 'devis', titre: 'Devis', nouveau: 'Nouveau devis', un: 'le devis', statuts: ['brouillon', 'envoye', 'accepte', 'refuse'] },
@@ -187,12 +187,24 @@ export async function editeurDocument(ctx, type, param) {
 
   const nomFichier = () => `${type === 'facture' ? 'Facture' : 'Devis'} ${data.numero} - ${data.client.nom || 'client'}`;
   const imprimer = () => { plusTard.annuler(); enregistrer().then(() => imprimerFeuille(nomFichier())); };
-  const pdf = async () => { plusTard.annuler(); await enregistrer(); await telechargerPdf(feuille.el, nomFichier()); };
+  // Relevé d'heures en annexe (factures) : deuxième page du même PDF
+  const pdf = async () => {
+    plusTard.annuler(); await enregistrer();
+    if (feuille.releve && !feuille.releve.hidden) await telechargerFeuilles([feuille.el, feuille.releve], nomFichier());
+    else await telechargerPdf(feuille.el, nomFichier());
+  };
+  const btnReleve = type === 'facture' ? h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => {
+    if (data.releve?.lignes?.length) { delete data.releve; } else { data.releve = { lignes: [{ date: '', matin: '', apm: '' }] }; }
+    feuille.majReleve(); majBtnReleve(); change();
+  } }) : null;
+  const majBtnReleve = () => { if (btnReleve) btnReleve.replaceChildren(icone('planning'), data.releve?.lignes?.length ? 'Retirer le relevé d’heures' : 'Ajouter un relevé d’heures (page 2)'); };
+  majBtnReleve();
   const actions = [
     h('button', { class: 'btn btn--gold btn--bloc', type: 'button', onclick: pdf }, icone('telecharger'), 'Télécharger en PDF'),
     h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: imprimer }, icone('imprimer'), 'Imprimer'),
     type === 'devis' ? h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => versFacture() }, icone('facture'), 'Transformer en facture') : null,
     type === 'facture' ? h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => importerPlanning() }, icone('planning'), 'Importer les heures du planning') : null,
+    btnReleve,
     h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => dupliquer() }, icone('copier'), 'Dupliquer'),
     h('button', { class: 'btn btn--danger-ghost btn--bloc', type: 'button', onclick: () => supprimer() }, icone('poubelle'), 'Supprimer'),
   ];
@@ -269,9 +281,10 @@ export async function editeurDocument(ctx, type, param) {
   ctx.titre(`${type === 'devis' ? 'Devis' : 'Facture'} ${data.numero}`);
   ctx.actions(h('a', { class: 'btn btn--ghost', href: `#/${C.route}` }, icone('retour'), h('span', null, C.titre)), indicateur,
     h('button', { class: 'btn btn--gold', type: 'button', onclick: pdf }, icone('telecharger'), h('span', null, 'Télécharger PDF')));
-  const zone = h('div', { class: 'feuille-zone' }, feuille.el);
+  const zone = h('div', { class: 'feuille-zone' }, feuille.el, feuille.releve);
   ctx.afficher(h('div', { class: 'editeur' }, zone, panneau));
   ajusterZoom(zone, feuille.el);
+  if (feuille.releve) ajusterZoom(zone, feuille.releve);
   if (!id) { if (prerempli) enregistrer(); else marquer('Nouveau'); }
   else marquer('✓ À jour', 'is-ok');
 
@@ -419,6 +432,7 @@ function construireFeuille(type, data, change, r = {}) {
       totaux,
       h('div', { class: 'f-paiement' }, h('h3', null, 'Règlement par virement bancaire'), T('paiement', 'f-paiement__main'), T('conditions', 'f-petit')),
       h('div', { class: 'f-espace' }),
+      h('p', { class: 'fx-merci' }, 'Merci de votre confiance.'),
       T('pied', 'f-pied'));
   } else {
     const acompte = h('input', { class: 'f-pct', inputmode: 'decimal', value: nombre.format(data.acompte || 0), 'aria-label': 'Pourcentage d\'acompte', oninput: (e) => { const n = lireNombre(e.target.value); if (Number.isFinite(n) && n >= 0 && n <= 100) { data.acompte = n; change(); } } });
@@ -462,7 +476,7 @@ function construireFeuille(type, data, change, r = {}) {
       const desc = h('div', { class: 'f-desc', contenteditable: 'plaintext-only', spellcheck: 'false', 'data-ph': 'Description' });
       desc.textContent = l.designation || '';
       desc.addEventListener('input', () => { l.designation = texteDe(desc); change(); });
-      const detail = type === 'devis' ? h('div', { class: 'f-detail', contenteditable: 'plaintext-only', spellcheck: 'false', 'data-ph': 'Détail (ex. 2 agents × 7 h × 5 jours)' }) : null;
+      const detail = h('div', { class: 'f-detail', contenteditable: 'plaintext-only', spellcheck: 'false', 'data-ph': type === 'devis' ? 'Détail (ex. 2 agents × 7 h × 5 jours)' : 'Détail (facultatif)' });
       if (detail) { detail.textContent = l.detail || ''; detail.addEventListener('input', () => { l.detail = texteDe(detail); change(); }); }
       const q = champNombre(fmtQte(l), (v) => { const n = l.unite === 'h' ? lireHeures(v) : lireNombre(v); if (!Number.isFinite(n)) return false; l.qte = n; return true; }, () => fmtQte(l));
       const pu = champNombre(euro.format(+l.pu || 0), (v) => { const n = lireNombre(v); if (!Number.isFinite(n)) return false; l.pu = n; return true; }, () => euro.format(+l.pu || 0));
@@ -514,6 +528,7 @@ function construireFeuille(type, data, change, r = {}) {
     ligneTva.classList.toggle('f-ligne-tva--zero', !(t.taux > 0));
     v.netLib.textContent = type === 'facture' ? (t.taux > 0 ? 'Net à payer TTC' : 'Net à payer') : (t.taux > 0 ? 'Total TTC' : 'Total à payer');
     v.net.textContent = euro.format(t.ttc);
+    majEnteteReleve(); // n° de facture, client et période repris sur le relevé d'heures
     if (type === 'devis') {
       const ac = arrondi((t.ttc * (+data.acompte || 0)) / 100);
       v.pct.textContent = nombre.format(+data.acompte || 0);
@@ -522,10 +537,83 @@ function construireFeuille(type, data, change, r = {}) {
     }
   }
 
+  /* ----- Relevé d'heures (factures) : deuxième page A4, en annexe ----- */
+  const JOURS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
+  // « 08:30 - 13:45 », « 8h30-13h45 », plusieurs plages possibles : durée totale en minutes
+  const minutesPlages = (txt) => [...String(txt || '').matchAll(/(\d{1,2})\s*[:hH]\s*(\d{2})\s*(?:-|–|à)\s*(\d{1,2})\s*[:hH]\s*(\d{2})/g)]
+    .reduce((s, m) => { const d = (+m[3] * 60 + +m[4]) - (+m[1] * 60 + +m[2]); return s + (d > 0 ? d : d + 1440); }, 0);
+  let releve = null, majReleve = () => {}, majEnteteReleve = () => {};
+  if (type === 'facture') {
+    const rCorps = h('tbody'), rNumero = h('span', { class: 'fx-doc__val' }), rInfos = h('div', { class: 'fx-releve-infos' });
+    const rTotal = h('b'), rJours = h('b'), rPied = h('div', { class: 'f-pied' });
+    const cellule = (l, k, ph) => {
+      const c = h('div', { class: 'fx-cell', contenteditable: 'plaintext-only', spellcheck: 'false', 'data-ph': ph });
+      c.textContent = l[k] || '';
+      c.addEventListener('input', () => { l[k] = texteDe(c); calculer(); change(); });
+      c.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); c.blur(); } });
+      return c;
+    };
+    const calculer = () => {
+      let total = 0, jours = 0;
+      (data.releve?.lignes || []).forEach((l, i) => {
+        const m = minutesPlages(l.matin) + minutesPlages(l.apm);
+        total += m;
+        if (m > 0) jours++;
+        const c = $(`.fx-h[data-i="${i}"]`, rCorps);
+        if (c) c.textContent = m ? fmtHeures(m / 60) : '—';
+        const j = $(`.fx-jour[data-i="${i}"]`, rCorps);
+        const d = /^\d{2}\/\d{2}\/\d{4}$/.test(l.date || '') ? frVersDate(l.date) : null;
+        if (j) j.textContent = d && !Number.isNaN(+d) ? JOURS[d.getDay()] : '';
+      });
+      rTotal.textContent = fmtHeures(total / 60);
+      rJours.textContent = String(jours);
+    };
+    const majEntete = () => {
+      rNumero.textContent = data.numero || '';
+      rPied.textContent = data.pied || '';
+      rInfos.replaceChildren(
+        h('div', null, h('span', { class: 'f-label' }, 'Client'), h('b', null, data.client?.nom || '—')),
+        h('div', null, h('span', { class: 'f-label' }, 'Période'), h('b', null, data.periode || '—')));
+    };
+    const dessinerReleve = () => {
+      const L = data.releve?.lignes || [];
+      releve.hidden = !L.length;
+      releve.classList.toggle('feuille--compacte', L.length > 24);
+      rCorps.replaceChildren(...L.map((l, i) => h('tr', null,
+        h('td', null, h('span', { class: 'fx-jour', dataset: { i } }), cellule(l, 'date', 'JJ/MM/AAAA')),
+        h('td', null, cellule(l, 'matin', '08:30 - 13:30')),
+        h('td', null, cellule(l, 'apm', '—')),
+        h('td', { class: 'r' }, h('span', { class: 'fx-h', dataset: { i } }),
+          h('div', { class: 'f-outils' }, h('button', { type: 'button', class: 'del', title: 'Supprimer ce jour', onclick: () => { L.splice(i, 1); dessinerReleve(); change(); } }, '×'))))));
+      majEntete();
+      calculer();
+    };
+    releve = h('div', { class: 'feuille feuille--lux feuille--releve' },
+      h('header', { class: 'fx-tete' },
+        h('div', { class: 'fx-marque' }, ecusson('fx-blason'), marqueLogo()),
+        h('div', { class: 'fx-doc' }, h('span', { class: 'fx-doc__type' }, 'Relevé d’heures'),
+          h('div', { class: 'fx-doc__num' }, h('span', { class: 'fx-doc__label' }, 'Annexe à la facture n°'), rNumero))),
+      h('div', { class: 'fx-filet' }),
+      rInfos,
+      h('table', { class: 'f-table fx-releve' },
+        h('colgroup', null, h('col'), h('col'), h('col'), h('col', { class: 'c-t' })),
+        h('thead', null, h('tr', null, h('th', null, 'Date'), h('th', null, 'Matin'), h('th', null, 'Après-midi'), h('th', { class: 'r' }, 'Heures'))),
+        rCorps),
+      h('button', { class: 'f-ajout', type: 'button', onclick: () => { data.releve.lignes.push({ date: '', matin: '', apm: '' }); dessinerReleve(); change(); $$('.fx-cell', rCorps).at(-3)?.focus(); } }, '+ Ajouter un jour'),
+      h('div', { class: 'f-totaux fx-releve-total' }, h('div', null, h('span', null, 'Jours travaillés'), rJours), h('div', { class: 'grand' }, h('span', null, 'Total du mois'), rTotal)),
+      h('div', { class: 'f-espace' }),
+      rPied);
+    majReleve = dessinerReleve;
+    majEnteteReleve = majEntete;
+    dessinerReleve();
+  }
+
   lignes();
   return {
     el,
+    releve,
+    majReleve,
     majTotaux,
-    rafraichir() { champs.forEach(({ el: c, chemin }) => { if (document.activeElement !== c) c.textContent = lire(data, chemin) ?? ''; }); lignes(); },
+    rafraichir() { champs.forEach(({ el: c, chemin }) => { if (document.activeElement !== c) c.textContent = lire(data, chemin) ?? ''; }); lignes(); majReleve(); },
   };
 }

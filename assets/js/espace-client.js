@@ -258,7 +258,7 @@ async function vueDocument(id) {
     accepter);
   const feuille = h('article', { class: 'ec-feuille' },
     h('header', { class: 'ec-feuille__tete' },
-      h('img', { src: '/admin/logo-document.jpg?v=3', alt: 'BDA Security Group', class: 'ec-feuille__logo' }),
+      h('img', { src: '/admin/logo-document.jpg?v=4', alt: 'BDA Security Group', class: 'ec-feuille__logo' }),
       h('div', { class: 'ec-feuille__titre' }, h('h2', null, estFacture ? 'Facture' : 'Devis'), h('b', null, `N° ${doc.numero}`), pastille(doc.type, doc.statut))),
     h('div', { class: 'ec-feuille__parties' },
       h('div', null, h('small', null, 'Émetteur'), h('b', null, d.emetteurNom || 'BDA SECURITE'), h('p', null, texte(d.emetteur))),

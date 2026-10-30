@@ -4,7 +4,7 @@
    transformation devis -> facture, report des heures du planning.
    ========================================================= */
 import {
-  api, apiFichier, h, $, $$, icone, toast, erreur, modale, confirmer, champ, saisie, zoneTexte, statutPastille, attendre,
+  api, apiFichier, h, $, $$, icone, ecusson, marqueLogo, toast, erreur, modale, confirmer, champ, saisie, zoneTexte, statutPastille, attendre,
   euro, nombre, arrondi, fmtHeures, lireHeures, lireNombre, fr, frVersDate, isoVersFr, cap, MOIS, pad, iso,
 } from './outils.js';
 import { totauxDuMois } from './planning.js';
@@ -390,7 +390,14 @@ function construireFeuille(type, data, change, r = {}) {
     champs.push({ el, chemin });
     return el;
   };
-  const logo = h('img', { class: type === 'facture' ? 'f-logo' : 'f-logo f-logo--petit', src: 'logo-document.jpg?v=3', alt: 'BDA Security Group' });
+  // Bandeau noir et or : écusson B + BDA / SECURITY GROUP à gauche, type et numéro du document à droite
+  const bandeau = (titre, libelleNumero, ...plus) => [
+    ecusson('fx-filigrane'),
+    h('header', { class: 'fx-tete' },
+      h('div', { class: 'fx-marque' }, ecusson('fx-blason'), marqueLogo('', true)),
+      h('div', { class: 'fx-doc' }, h('span', { class: 'fx-doc__type' }, titre),
+        h('span', { class: 'fx-doc__label' }, libelleNumero), T('numero', 'fx-doc__num', 'Numéro', true), ...plus)),
+    h('div', { class: 'fx-filet' })];
   const corps = h('tbody');
   const totaux = h('div', { class: 'f-totaux' });
 
@@ -403,8 +410,7 @@ function construireFeuille(type, data, change, r = {}) {
 
   let el;
   if (type === 'facture') {
-    el = h('div', { class: 'feuille' }, logo, h('div', { class: 'f-regle' }), h('div', { class: 'f-parties' }, emetteur, client),
-      h('div', { class: 'f-titre' }, h('h2', null, 'Facture'), h('div', { class: 'f-num' }, h('span', { class: 'f-label' }, 'Facture n°'), T('numero', 'f-num__val', 'Numéro', true))),
+    el = h('div', { class: 'feuille feuille--lux' }, ...bandeau('Facture', 'Facture n°'), h('div', { class: 'f-parties' }, emetteur, client),
       h('div', { class: 'f-meta' },
         h('div', null, h('span', { class: 'f-label' }, 'Date de facture'), T('date', 'f-meta__val', 'JJ/MM/AAAA', true)),
         h('div', null, h('span', { class: 'f-label' }, 'Échéance du paiement'), T('echeance', 'f-meta__val', 'JJ/MM/AAAA', true)),
@@ -417,11 +423,9 @@ function construireFeuille(type, data, change, r = {}) {
       T('pied', 'f-pied'));
   } else {
     const acompte = h('input', { class: 'f-pct', inputmode: 'decimal', value: nombre.format(data.acompte || 0), 'aria-label': 'Pourcentage d\'acompte', oninput: (e) => { const n = lireNombre(e.target.value); if (Number.isFinite(n) && n >= 0 && n <= 100) { data.acompte = n; change(); } } });
-    el = h('div', { class: 'feuille' },
-      h('div', { class: 'f-entete' }, logo, h('div', { class: 'f-titre f-titre--droite' }, h('h2', null, 'Devis'),
-        h('div', { class: 'f-num' }, h('span', { class: 'f-label' }, 'Devis n°'), T('numero', 'f-num__val', 'Numéro', true)),
-        h('div', { class: 'f-dates' }, h('span', null, 'Date : ', T('date', 'f-inline', 'JJ/MM/AAAA', true)), h('span', null, 'Validité : ', T('validite', 'f-inline', '30 jours', true))))),
-      h('div', { class: 'f-regle' }),
+    el = h('div', { class: 'feuille feuille--lux' },
+      ...bandeau('Devis', 'Devis n°',
+        h('div', { class: 'f-dates' }, h('span', null, 'Date : ', T('date', 'f-inline', 'JJ/MM/AAAA', true)), h('span', null, 'Validité : ', T('validite', 'f-inline', '30 jours', true)))),
       h('div', { class: 'f-parties' }, emetteur, client),
       h('div', { class: 'f-objet' }, h('span', { class: 'f-label' }, 'Objet'), T('objet', 'f-objet__titre', 'Objet de la mission'), T('description', 'f-objet__texte', 'Description de la prestation')),
       h('div', { class: 'f-mission' },

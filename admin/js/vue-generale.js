@@ -4,7 +4,7 @@
    ou l'application VTC (BDASH et BDASH Pro), avec l'essentiel de
    chacun et la liste de ce qui attend une action.
    ========================================================= */
-import { api, h, cap, euroRond, isoVersFr, marqueLogo, ErreurApi } from './outils.js';
+import { api, h, cap, euroRond, isoVersFr, icone, ErreurApi } from './outils.js';
 import { ligneJournal } from './securite.js';
 
 async function tableauAppli() {
@@ -22,24 +22,19 @@ export async function pageVueGenerale(ctx) {
   const auj = new Date();
   const pluriel = (n, un, plusieurs) => `${n} ${n > 1 ? plusieurs : un}`;
 
-  /* ----- En-tête : logo, compte ----- */
-  const barre = h('header', { class: 'lc-barre' },
-    h('a', { href: '#/', class: 'lc-barre__marque', 'aria-label': 'Vue générale' }, marqueLogo('lc-logo')),
-    h('div', { class: 'lc-barre__compte' },
-      h('span', { class: 'lc-barre__nom' }, cap(String(session.utilisateur || '')), h('small', null, session.role === 'manager' ? 'Manager' : 'Administrateur')),
-      h('a', { class: 'btn btn--ghost btn--petit', href: '#/parametres' }, 'Paramètres'),
-      h('button', { class: 'btn btn--ghost btn--petit', type: 'button', onclick: () => ctx.deconnexion() }, 'Se déconnecter')));
-
-  const accueil = h('div', { class: 'lc-intro' },
-    h('p', { class: 'lc-intro__date' }, cap(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(auj))),
-    h('h1', null, `${auj.getHours() < 18 ? 'Bonjour' : 'Bonsoir'}${session.utilisateur ? `, ${cap(session.utilisateur)}` : ''}`),
-    h('p', { class: 'lc-intro__texte' }, 'Choisissez l’espace à ouvrir.'));
+  /* ----- En-tête de page : salutation, date, accès rapides ----- */
+  ctx.titre(`${auj.getHours() >= 5 && auj.getHours() < 18 ? 'Bonjour' : 'Bonsoir'}${session.utilisateur ? `, ${cap(session.utilisateur)}` : ''}`);
+  document.title = 'Vue générale — Admin BDA';
+  ctx.actions(
+    h('span', { class: 'lc-date' }, icone('planning'), cap(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(auj))),
+    h('a', { class: 'btn', href: '#/devis/nouveau' }, icone('plus'), 'Nouveau devis'),
+    h('a', { class: 'btn btn--gold', href: '#/demandes' }, 'Voir les demandes'));
 
   /* ----- Les deux espaces ----- */
   const chiffre = (valeur, libelle, alerte) => h('div', { class: `lc-chiffre ${alerte && valeur ? 'is-alerte' : ''}` }, h('b', null, String(valeur)), h('span', null, libelle));
   const etat = (ok, texte) => h('span', { class: `lc-etat ${ok ? 'is-ok' : 'is-off'}` }, h('i', { 'aria-hidden': 'true' }), texte);
   const espace = (href, touche, type, titre, sous, chiffres, contenu, entrer) => h('a', { class: 'lc-espace', href },
-    h('div', { class: 'lc-espace__tete' }, h('span', { class: 'lc-espace__type' }, type), h('kbd', { title: `Touche ${touche}` }, touche)),
+    h('div', { class: 'lc-espace__tete' }, h('span', { class: 'lc-espace__type' }, icone(touche === '1' ? 'site' : 'voiture'), type), h('kbd', { title: `Touche ${touche}` }, touche)),
     h('h2', null, titre),
     h('p', { class: 'lc-espace__sous' }, sous),
     h('div', { class: 'lc-chiffres' }, chiffres),
@@ -85,14 +80,23 @@ export async function pageVueGenerale(ctx) {
 
   const journal = a.journal.length ? h('ul', { class: 'console lc-journal' }, a.journal.map((j) => ligneJournal(j))) : h('p', { class: 'lc-vide' }, 'Aucune activité enregistrée.');
 
+  /* ----- Chiffres clés des deux espaces ----- */
+  const metrique = (href, libelle, valeur, sous, classe = '') => h('a', { class: `metrique ${classe}`.trim(), href },
+    h('span', { class: 'metrique__libelle' }, libelle), h('b', { class: 'metrique__valeur' }, String(valeur)), h('span', { class: 'metrique__sous' }, sous));
+  const chiffresCles = h('div', { class: 'metriques' },
+    metrique('#/site', 'Site internet', c.horsLigne ? 'Hors ligne' : 'En ligne', 'bdasecurite.com', c.horsLigne ? 'metrique--alerte' : 'metrique--ok'),
+    metrique('#/demandes', 'Demandes de devis', c.demandes, 'en attente'),
+    metrique('#/messages', 'Messages clients', c.messages, 'en attente'),
+    metrique('#/candidatures', 'Candidatures', c.candidatures, 'nouvelles'),
+    metrique('#/factures', 'Factures en retard', c.retards, 'échéance dépassée', c.retards ? 'metrique--alerte' : ''),
+    appli ? metrique('#/appli', 'Courses en cours', appli.enDirect.length, pluriel(aAttribuer, 'réservation à attribuer', 'réservations à attribuer'), alertes ? 'metrique--alerte' : '') : null);
+
   ctx.afficher(h('div', { class: 'lanceur' },
-    barre,
-    h('main', { class: 'lc-corps' },
-      accueil,
-      h('div', { class: 'lc-espaces' }, site, app),
-      h('div', { class: 'lc-bas' },
-        h('section', { class: 'carte' }, h('header', { class: 'carte__tete' }, h('h2', null, 'À traiter'), h('small', null, taches.length ? pluriel(taches.length, 'élément', 'éléments') : '')), liste),
-        h('section', { class: 'carte' }, h('header', { class: 'carte__tete' }, h('h2', null, 'Activité récente'), h('a', { class: 'lien-btn', href: '#/securite' }, 'Tout le journal')), journal)))));
+    chiffresCles,
+    h('div', { class: 'lc-espaces' }, site, app),
+    h('div', { class: 'lc-bas' },
+      h('section', { class: 'carte' }, h('header', { class: 'carte__tete' }, h('h2', null, 'À traiter'), h('small', null, taches.length ? pluriel(taches.length, 'élément', 'éléments') : '')), liste),
+      h('section', { class: 'carte' }, h('header', { class: 'carte__tete' }, h('h2', null, 'Activité récente'), h('a', { class: 'lien-btn', href: '#/securite' }, 'Tout le journal')), journal))));
 
   // Raccourcis clavier : 1 = Site, 2 = Application
   const touches = (e) => {

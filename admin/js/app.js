@@ -15,57 +15,69 @@ const etat = { session: null, compteurs: {} };
    L'écran de départ (#/) est la Vue générale, qui propose l'un ou l'autre. */
 const ESPACES = {
   site: {
-    nom: 'Site internet', court: 'Site', accueil: 'tableau', externe: ['/', 'Voir le site'],
+    nom: 'Site internet', court: 'Site', ic: 'site', accueil: 'tableau', externe: ['/', 'Voir le site'],
     menu: [
-      { chemin: 'tableau', libelle: 'Vue d’ensemble' },
+      { chemin: 'tableau', libelle: 'Vue d’ensemble', ic: 'tableau' },
       { groupe: 'Clients' },
-      { chemin: 'demandes', libelle: 'Demandes reçues', badge: 'demandes' },
-      { chemin: 'messages', libelle: 'Messages', badge: 'messages' },
-      { chemin: 'assistance', libelle: 'Assistance du site', badge: 'assistance', alerte: true },
-      { chemin: 'clients', libelle: 'Fiches clients' },
-      { chemin: 'opportunites', libelle: 'Opportunités', badge: 'opportunites', admin: true },
+      { chemin: 'demandes', libelle: 'Demandes reçues', ic: 'demande', badge: 'demandes' },
+      { chemin: 'messages', libelle: 'Messages', ic: 'message', badge: 'messages' },
+      { chemin: 'assistance', libelle: 'Assistance du site', ic: 'bouee', badge: 'assistance', alerte: true },
+      { chemin: 'clients', libelle: 'Fiches clients', ic: 'clients' },
+      { chemin: 'opportunites', libelle: 'Opportunités', ic: 'cible', badge: 'opportunites', admin: true },
       { groupe: 'Facturation' },
-      { chemin: 'devis', libelle: 'Devis' },
-      { chemin: 'factures', libelle: 'Factures', badge: 'retards', alerte: true },
-      { chemin: 'pdf', libelle: 'PDF clients' },
+      { chemin: 'devis', libelle: 'Devis', ic: 'devis' },
+      { chemin: 'factures', libelle: 'Factures', ic: 'facture', badge: 'retards', alerte: true },
+      { chemin: 'pdf', libelle: 'PDF clients', ic: 'dossier' },
       { groupe: 'Équipe' },
-      { chemin: 'agents', libelle: 'Agents' },
-      { chemin: 'candidatures', libelle: 'Candidatures', badge: 'candidatures' },
-      { chemin: 'planning', libelle: 'Planning' },
-      { chemin: 'pointage', libelle: 'Pointage' },
-      { chemin: 'equipe', libelle: 'Espace équipe', badge: 'equipe' },
-      { chemin: 'paie', libelle: 'Fiches de paie', admin: true },
-      { chemin: 'contrats', libelle: 'Contrats', admin: true },
+      { chemin: 'agents', libelle: 'Agents', ic: 'agents' },
+      { chemin: 'candidatures', libelle: 'Candidatures', ic: 'candidature', badge: 'candidatures' },
+      { chemin: 'planning', libelle: 'Planning', ic: 'planning' },
+      { chemin: 'pointage', libelle: 'Pointage', ic: 'horloge' },
+      { chemin: 'equipe', libelle: 'Espace équipe', ic: 'equipe', badge: 'equipe' },
+      { chemin: 'paie', libelle: 'Fiches de paie', ic: 'paie', admin: true },
+      { chemin: 'contrats', libelle: 'Contrats', ic: 'contrat', admin: true },
       { groupe: 'Site web' },
-      { chemin: 'site', libelle: 'Contrôle du site' },
-      { chemin: 'contenu', libelle: 'Contenu & tarifs' },
-      { chemin: 'avis', libelle: 'Avis clients', badge: 'avis' },
+      { chemin: 'site', libelle: 'Contrôle du site', ic: 'site' },
+      { chemin: 'contenu', libelle: 'Contenu & tarifs', ic: 'contenu' },
+      { chemin: 'avis', libelle: 'Avis clients', ic: 'avis', badge: 'avis' },
       { groupe: 'Outils' },
-      { chemin: 'creations', libelle: 'Cartes & flyers' },
-      { chemin: 'notes', libelle: 'Notes' },
+      { chemin: 'creations', libelle: 'Cartes & flyers', ic: 'calques' },
+      { chemin: 'notes', libelle: 'Notes', ic: 'note' },
     ],
   },
   appli: {
-    nom: 'Application VTC', court: 'Application', accueil: 'appli', externe: ['/appli/', 'Ouvrir BDASH'],
+    nom: 'Application VTC', court: 'Application', ic: 'voiture', accueil: 'appli', externe: ['/appli/', 'Ouvrir BDASH'],
     menu: [
-      { chemin: 'appli', libelle: 'En direct', badge: 'appli', alerte: true },
+      { chemin: 'appli', libelle: 'En direct', ic: 'direct', badge: 'appli', alerte: true },
       { groupe: 'Activité' },
-      { chemin: 'appli/courses', libelle: 'Courses' },
-      { chemin: 'appli/paiements', libelle: 'Paiements' },
-      { chemin: 'appli/statistiques', libelle: 'Statistiques' },
-      { chemin: 'vtc', libelle: 'Réservations du site', badge: 'reservations' },
+      { chemin: 'appli/courses', libelle: 'Courses', ic: 'trajet' },
+      { chemin: 'appli/paiements', libelle: 'Paiements', ic: 'carteBancaire' },
+      { chemin: 'appli/statistiques', libelle: 'Statistiques', ic: 'graphique' },
+      { chemin: 'vtc', libelle: 'Réservations du site', ic: 'planning', badge: 'reservations' },
       { groupe: 'Comptes' },
-      { chemin: 'appli/clients', libelle: 'Utilisateurs' },
-      { chemin: 'appli/chauffeurs', libelle: 'Chauffeurs' },
+      { chemin: 'appli/clients', libelle: 'Utilisateurs', ic: 'clients' },
+      { chemin: 'appli/chauffeurs', libelle: 'Chauffeurs', ic: 'volant' },
       { groupe: 'Configuration' },
-      { chemin: 'appli/reglages', libelle: 'Paramètres de l’appli' },
+      { chemin: 'appli/reglages', libelle: 'Paramètres de l’appli', ic: 'curseurs' },
     ],
   },
 };
 const COMPTE = [
-  { chemin: 'notifications', libelle: 'Notifications', admin: true },
-  { chemin: 'parametres', libelle: 'Paramètres' },
-  { chemin: 'securite', libelle: 'Accès & sécurité' },
+  { chemin: 'notifications', libelle: 'Notifications', ic: 'cloche', admin: true },
+  { chemin: 'parametres', libelle: 'Paramètres', ic: 'reglages' },
+  { chemin: 'securite', libelle: 'Accès & sécurité', ic: 'cadenas' },
+];
+// Ce qui attend une action : cloche de la barre du haut et pastille de l'application installée
+const A_TRAITER = [
+  { cle: 'appli', libelle: 'Courses en direct à surveiller', href: '#/appli', ic: 'direct', alerte: true },
+  { cle: 'assistance', libelle: 'Assistance du site', href: '#/assistance', ic: 'bouee', alerte: true },
+  { cle: 'demandes', libelle: 'Demandes de devis', href: '#/demandes', ic: 'demande' },
+  { cle: 'messages', libelle: 'Messages clients', href: '#/messages', ic: 'message' },
+  { cle: 'candidatures', libelle: 'Nouvelles candidatures', href: '#/candidatures', ic: 'candidature' },
+  { cle: 'equipe', libelle: 'Espace équipe', href: '#/equipe', ic: 'equipe' },
+  { cle: 'avis', libelle: 'Avis à valider', href: '#/avis', ic: 'avis' },
+  { cle: 'reservations', libelle: 'Réservations du site', href: '#/vtc', ic: 'planning' },
+  { cle: 'retards', libelle: 'Factures en retard', href: '#/factures', ic: 'facture', alerte: true },
 ];
 // Pages communes aux deux espaces : elles restent dans l'espace ouvert
 const COMMUNES = ['parametres', 'securite', 'notifications'];
@@ -199,17 +211,19 @@ export const ouvrirPalette = (texte) => palette?.ouvrir(texte);
 const fermerMenu = () => document.body.classList.remove('menu-ouvert');
 const visible = (m) => !m.admin || etat.session.role === 'admin';
 
-// Menu de l'espace ouvert (texte seul, pastille du nombre en attente)
+// Menu de l'espace ouvert (icône, libellé, pastille du nombre en attente)
 function dessinerMenu() {
   const E = ESPACES[espaceCourant];
-  const lien = (m) => h('a', { href: `#/${m.chemin}`, class: 'nav__item', dataset: { chemin: m.chemin }, onclick: fermerMenu },
-    h('span', null, m.libelle), m.badge ? h('b', { class: `nav__badge ${m.alerte ? 'nav__badge--alerte' : ''}`, dataset: { badge: m.badge }, hidden: true }) : null);
+  const lien = (m) => h('a', { href: `#/${m.chemin}`, class: 'nav__item', title: m.libelle, dataset: { chemin: m.chemin }, onclick: fermerMenu },
+    icone(m.ic, 'nav__ic'), h('span', { class: 'nav__txt' }, m.libelle),
+    m.badge ? h('b', { class: `nav__badge ${m.alerte ? 'nav__badge--alerte' : ''}`, dataset: { badge: m.badge }, hidden: true }) : null);
   menuEl.replaceChildren(
+    lien({ chemin: '', libelle: 'Vue générale', ic: 'grille' }),
     ...E.menu.filter(visible).map((m) => (m.groupe ? h('p', { class: 'nav__groupe' }, m.groupe) : lien(m))),
     h('p', { class: 'nav__groupe' }, 'Compte'),
     ...COMPTE.filter(visible).map(lien),
-    h('a', { class: 'nav__item', href: '/admin/moi' }, h('span', null, 'Mon accès chef')),
-    h('a', { class: 'nav__item nav__item--externe', href: E.externe[0], target: '_blank', rel: 'noopener' }, h('span', null, E.externe[1]), h('span', { class: 'nav__fleche', 'aria-hidden': 'true' }, '↗')));
+    h('a', { class: 'nav__item', href: '/admin/moi', title: 'Mon accès chef' }, icone('couronne', 'nav__ic'), h('span', { class: 'nav__txt' }, 'Mon accès chef')),
+    h('a', { class: 'nav__item nav__item--externe', href: E.externe[0], target: '_blank', rel: 'noopener', title: E.externe[1] }, icone('externe', 'nav__ic'), h('span', { class: 'nav__txt' }, E.externe[1])));
   coteEl.querySelectorAll('.espaces__btn').forEach((b) => {
     const oui = b.dataset.espace === espaceCourant;
     b.classList.toggle('is-actif', oui);
@@ -218,20 +232,98 @@ function dessinerMenu() {
   majBadges();
 }
 
+/* ---------- Menus déroulants de la barre du haut (à traiter, compte) ---------- */
+let deroulant = null;
+function fermerDeroulant() {
+  if (!deroulant) return;
+  deroulant.el.remove();
+  deroulant.btn.setAttribute('aria-expanded', 'false');
+  document.removeEventListener('pointerdown', clicDehors, true);
+  document.removeEventListener('keydown', toucheEchap);
+  deroulant = null;
+}
+function clicDehors(e) {
+  if (deroulant && !deroulant.el.contains(e.target) && !deroulant.btn.contains(e.target)) fermerDeroulant();
+}
+function toucheEchap(e) {
+  if (e.key !== 'Escape') return;
+  const btn = deroulant?.btn;
+  fermerDeroulant();
+  btn?.focus();
+}
+function ouvrirDeroulant(btn, contenu) {
+  const memeBouton = deroulant?.btn === btn;
+  fermerDeroulant();
+  if (memeBouton) return;
+  const el = h('div', { class: 'deroulant', role: 'menu' }, contenu());
+  el.addEventListener('click', (e) => { if (e.target.closest('a')) fermerDeroulant(); });
+  document.body.append(el);
+  const r = btn.getBoundingClientRect();
+  el.style.top = `${Math.round(r.bottom + 8)}px`;
+  el.style.right = `${Math.max(8, Math.round(window.innerWidth - r.right))}px`;
+  btn.setAttribute('aria-expanded', 'true');
+  deroulant = { el, btn };
+  document.addEventListener('pointerdown', clicDehors, true);
+  document.addEventListener('keydown', toucheEchap);
+}
+const aTraiter = () => A_TRAITER.filter((t) => (etat.compteurs || {})[t.cle]);
+function panneauTaches() {
+  const liste = aTraiter();
+  const total = liste.reduce((s, t) => s + etat.compteurs[t.cle], 0);
+  return [
+    h('header', { class: 'deroulant__tete' }, h('b', null, 'À traiter'), total ? h('small', null, `${total} en attente`) : null),
+    liste.length
+      ? h('ul', { class: 'deroulant__liste' }, liste.map((t) => h('li', null, h('a', { href: t.href },
+        icone(t.ic), h('span', null, t.libelle), h('b', { class: `deroulant__n ${t.alerte ? 'is-alerte' : ''}` }, String(etat.compteurs[t.cle]))))))
+      : h('p', { class: 'deroulant__vide' }, icone('coche'), 'Rien n’attend d’action. Tout est à jour.'),
+    etat.session.role === 'admin' ? h('a', { class: 'deroulant__pied', href: '#/notifications' }, 'Réglages des notifications', icone('suivant')) : null,
+  ];
+}
+function panneauCompte() {
+  const nom = cap(String(etat.session.utilisateur || '')) || 'Administrateur';
+  const role = etat.session.role === 'manager' ? 'Manager' : 'Administrateur';
+  const lien = (href, libelle, ic, externe) => h('li', null, h('a', { href, ...(externe ? { target: '_blank', rel: 'noopener' } : {}) }, icone(ic), h('span', null, libelle)));
+  return [
+    h('header', { class: 'deroulant__tete deroulant__tete--compte' },
+      h('span', { class: 'avatar', 'aria-hidden': 'true' }, nom.charAt(0).toUpperCase()),
+      h('div', null, h('b', null, nom), h('small', null, `${role} · BDA Security Group`))),
+    h('ul', { class: 'deroulant__liste' },
+      lien('#/parametres', 'Paramètres', 'reglages'),
+      lien('#/securite', 'Accès & sécurité', 'cadenas'),
+      lien('/admin/moi', 'Mon accès chef', 'couronne'),
+      lien('/', 'Voir le site', 'externe', true)),
+    h('button', { class: 'deroulant__sortie', type: 'button', onclick: () => { fermerDeroulant(); deconnexion(); } }, icone('sortie'), 'Se déconnecter'),
+  ];
+}
+
+// Menu réduit (icônes seules), mémorisé sur cet appareil
+function menuReduit(v) {
+  try { if (v !== undefined) localStorage.setItem('bda-menu-reduit', v ? '1' : '0'); return localStorage.getItem('bda-menu-reduit') === '1'; } catch (e) { return Boolean(v); }
+}
+function basculerMenuReduit() {
+  const oui = !document.body.classList.contains('cote-reduite');
+  document.body.classList.toggle('cote-reduite', oui);
+  menuReduit(oui);
+}
+
 function lancerApplication() {
   const utilisateur = String(etat.session.utilisateur || '');
+  const nom = cap(utilisateur) || 'Administrateur';
+  document.body.classList.toggle('cote-reduite', menuReduit());
   menuEl = h('nav', { class: 'nav', 'aria-label': 'Menu de l’espace' });
   coteEl = h('aside', { class: 'cote' },
     h('div', { class: 'cote__tete' },
-      h('a', { href: '#/', class: 'cote__marque', title: 'Vue générale', onclick: fermerMenu }, marqueLogo('cote__logo')),
+      h('a', { href: '#/', class: 'cote__marque', title: 'Vue générale', onclick: fermerMenu },
+        h('img', { class: 'cote__ecusson', src: '/admin/icone-admin-192.png?v=3', alt: '' }),
+        h('span', { class: 'cote__nom' }, h('b', null, 'BDA Security Group'), h('small', null, 'Console d’administration'))),
       // Choix de l'espace : site internet ou application VTC
       h('div', { class: 'espaces', role: 'group', 'aria-label': 'Espace' },
-        Object.entries(ESPACES).map(([cle, E]) => h('a', { class: 'espaces__btn', href: `#/${E.accueil}`, dataset: { espace: cle }, onclick: fermerMenu }, E.court)))),
+        Object.entries(ESPACES).map(([cle, E]) => h('a', { class: 'espaces__btn', href: `#/${E.accueil}`, title: E.nom, dataset: { espace: cle }, onclick: fermerMenu },
+          icone(E.ic, 'espaces__ic'), h('span', null, E.court))))),
     menuEl,
     h('div', { class: 'cote__bas' },
-      h('div', { class: 'profil' }, h('span', { class: 'profil__avatar', 'aria-hidden': 'true' }, (utilisateur.charAt(0) || 'A').toUpperCase()),
-        h('div', null, h('b', null, cap(utilisateur)), h('small', null, etat.session.role === 'manager' ? 'Manager' : 'Administrateur')),
-        h('button', { class: 'icon-btn', type: 'button', title: 'Se déconnecter', 'aria-label': 'Se déconnecter', onclick: deconnexion }, icone('sortie')))));
+      h('button', { class: 'cote__reduire', type: 'button', title: 'Réduire ou agrandir le menu', onclick: basculerMenuReduit }, icone('panneau'), h('span', null, 'Réduire le menu')),
+      h('p', { class: 'cote__version' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'Console BDA · v4.0'))));
 
   filEl = h('nav', { class: 'ariane', 'aria-label': 'Vous êtes ici' });
   titrePage = h('h1', { class: 'entete-page__titre' });
@@ -240,9 +332,16 @@ function lancerApplication() {
   const haut = h('header', { class: 'haut' },
     h('button', { class: 'icon-btn haut__menu', type: 'button', 'aria-label': 'Ouvrir le menu', onclick: () => document.body.classList.toggle('menu-ouvert') }, icone('menu')),
     filEl,
-    h('a', { class: 'hors-ligne', href: '#/site', id: 'hors-ligne', hidden: true, title: 'Les visiteurs voient la page Maintenance' }, h('i', { 'aria-hidden': 'true' }), 'Site hors ligne'),
+    h('a', { class: 'temoin-site', href: '#/site', id: 'temoin-site', title: 'Contrôle du site' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'Site en ligne')),
     h('button', { class: 'cmd-btn', type: 'button', 'aria-label': 'Rechercher ou lancer une commande (Ctrl + K)', onclick: () => palette.ouvrir() },
-      icone('recherche'), h('span', null, 'Rechercher…'), h('kbd', null, 'Ctrl K')));
+      icone('recherche'), h('span', null, 'Rechercher une page, un client…'), h('kbd', null, 'Ctrl K')),
+    h('button', { class: 'haut-btn', type: 'button', title: 'À traiter', 'aria-label': 'À traiter', 'aria-haspopup': 'menu', 'aria-expanded': 'false', onclick: (e) => ouvrirDeroulant(e.currentTarget, panneauTaches) },
+      icone('cloche'), h('b', { class: 'haut-btn__n', id: 'cloche-n', hidden: true })),
+    h('span', { class: 'haut__sep', 'aria-hidden': 'true' }),
+    h('button', { class: 'haut-compte', type: 'button', 'aria-label': 'Mon compte', 'aria-haspopup': 'menu', 'aria-expanded': 'false', onclick: (e) => ouvrirDeroulant(e.currentTarget, panneauCompte) },
+      h('span', { class: 'avatar', 'aria-hidden': 'true' }, nom.charAt(0).toUpperCase()),
+      h('span', { class: 'haut-compte__nom' }, h('b', null, nom), h('small', null, etat.session.role === 'manager' ? 'Manager' : 'Administrateur')),
+      icone('chevronBas', 'haut-compte__chevron')));
 
   appliEl = h('div', { class: 'appli' },
     coteEl,
@@ -280,17 +379,30 @@ function majBadges() {
   // Pastille sur le bouton de l'autre espace quand il attend une action
   const attente = { site: ['demandes', 'messages', 'assistance', 'avis', 'candidatures', 'equipe', 'retards'], appli: ['appli', 'reservations'] };
   coteEl?.querySelectorAll('.espaces__btn').forEach((b) => b.classList.toggle('a-traiter', attente[b.dataset.espace].some((k) => compteurs[k])));
+  // Cloche de la barre du haut : total de ce qui attend une action
+  const cloche = document.getElementById('cloche-n');
+  if (cloche) {
+    const total = aTraiter().reduce((s, t) => s + compteurs[t.cle], 0);
+    cloche.textContent = total > 99 ? '99+' : total;
+    cloche.hidden = total === 0;
+    cloche.classList.toggle('is-alerte', aTraiter().some((t) => t.alerte));
+  }
 }
 
 export async function majCompteurs() {
   try {
     const { compteurs } = await api('compteurs');
     etat.compteurs = compteurs;
-    const pastille = document.getElementById('hors-ligne');
-    if (pastille) pastille.hidden = !compteurs.horsLigne;
+    // Témoin du site dans la barre du haut : en ligne ou en maintenance
+    const temoin = document.getElementById('temoin-site');
+    if (temoin) {
+      temoin.classList.toggle('is-off', Boolean(compteurs.horsLigne));
+      temoin.title = compteurs.horsLigne ? 'Les visiteurs voient la page Maintenance' : 'Contrôle du site';
+      temoin.querySelector('span').textContent = compteurs.horsLigne ? 'Site hors ligne' : 'Site en ligne';
+    }
     majBadges();
     // Pastille sur l'icône de l'application installée : ce qui attend une action
-    const attente = ['demandes', 'messages', 'assistance', 'avis', 'reservations', 'candidatures', 'equipe', 'appli'].reduce((s, k) => s + (compteurs[k] || 0), 0);
+    const attente = aTraiter().reduce((s, t) => s + compteurs[t.cle], 0);
     if ('setAppBadge' in navigator) (attente ? navigator.setAppBadge(attente) : navigator.clearAppBadge()).catch(() => {});
   } catch (e) { /* silencieux */ }
 }
@@ -309,8 +421,9 @@ async function router() {
   const [route = '', ...params] = location.hash.replace(/^#\/?/, '').split('/').map(decodeURIComponent);
   const connue = route === '' || PAGES[route];
   const lanceur = !connue || route === '';
-  appliEl.classList.toggle('appli--lanceur', lanceur);
+  appliEl.classList.toggle('appli--accueil', lanceur);
   fermerMenu();
+  fermerDeroulant();
 
   // Espace de la page : on change de menu si besoin
   if (!lanceur) {
@@ -322,18 +435,20 @@ async function router() {
   // Rubrique active : le chemin le plus précis présent dans le menu (ex. appli/courses), sinon la page
   const chemins = $$('.cote .nav__item[data-chemin]').map((a) => a.dataset.chemin);
   const complet = params[0] ? `${route}/${params[0]}` : route;
-  const actif = chemins.includes(complet) ? complet : chemins.includes(PARENT[route] || route) ? (PARENT[route] || route) : '';
+  const actif = lanceur ? '' : chemins.includes(complet) ? complet : chemins.includes(PARENT[route] || route) ? (PARENT[route] || route) : null;
   $$('.cote .nav__item[data-chemin]').forEach((a) => { const oui = a.dataset.chemin === actif; a.classList.toggle('is-actif', oui); if (oui) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
-  const libelleActif = [...E.menu, ...COMPTE].find((m) => m.chemin === actif)?.libelle || '';
+  const libelleActif = actif ? [...E.menu, ...COMPTE].find((m) => m.chemin === actif)?.libelle || '' : '';
   montrerRubrique();
 
-  // Fil d'Ariane : Vue générale / Espace / Rubrique
+  // Fil d'Ariane : Vue générale / Espace / Rubrique / Page
   const rubrique = RUBRIQUE[actif] || RUBRIQUE[route] || '';
-  filEl.replaceChildren(
-    h('a', { href: '#/' }, 'Vue générale'),
-    h('span', { class: 'ariane__sep', 'aria-hidden': 'true' }, '/'),
+  const sep = () => h('span', { class: 'ariane__sep', 'aria-hidden': 'true' }, '/');
+  filEl.replaceChildren(...(lanceur ? [h('span', null, 'Vue générale')] : [
+    h('a', { href: '#/' }, 'Vue générale'), sep(),
     h('a', { href: `#/${E.accueil}` }, E.nom),
-    ...(rubrique ? [h('span', { class: 'ariane__sep', 'aria-hidden': 'true' }, '/'), h('span', null, rubrique)] : []));
+    ...(rubrique ? [sep(), h('span', null, rubrique)] : []),
+    ...(libelleActif && libelleActif !== rubrique ? [sep(), h('span', null, libelleActif)] : []),
+  ]));
 
   let page = lanceur ? pageVueGenerale : PAGES[route];
   if (route === 'appli' && PAGES_APPLI[params[0]]) page = PAGES_APPLI[params[0]];

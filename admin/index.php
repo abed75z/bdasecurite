@@ -31,7 +31,7 @@ $v = '42';
 <meta name="twitter:image" content="https://bdasecurite.com/admin/apercu-admin.jpg?v=1">
 <link rel="icon" href="/admin/favicon-admin-96.png?v=3" type="image/png" sizes="96x96">
 <link rel="apple-touch-icon" href="/admin/icone-admin-180.png?v=3">
-<link rel="manifest" href="manifest.webmanifest?v=3">
+<link rel="manifest" href="manifest.webmanifest?v=4">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">

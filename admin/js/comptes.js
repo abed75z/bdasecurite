@@ -65,7 +65,7 @@ export async function pageComptes(ctx) {
       h('div', { class: 'ag-kpi' }, h('span', { class: 'ag-kpi__libelle' }, 'Administrateurs'), h('b', { class: 'metrique__valeur' }, String(admins)), h('small', null, 'accès complet')),
       h('div', { class: 'ag-kpi' }, h('span', { class: 'ag-kpi__libelle' }, 'Managers'), h('b', { class: 'metrique__valeur' }, String(utilisateurs.length - admins)), h('small', null, 'le quotidien, sans les réglages sensibles'))),
     h('div', { class: 'cpt-grille' }, utilisateurs.map(carte)),
-    h('p', { class: 'encart' }, h('b', null, 'Bon à savoir : '), 'chacun a son propre identifiant et son mot de passe. Ne partagez jamais le vôtre. Un mot de passe provisoire se change dès la première connexion, dans Compte › Paramètres. Toutes les connexions sont notées dans le journal.'));
+    h('p', { class: 'encart' }, h('b', null, 'Bon à savoir : '), 'chacun a son propre identifiant et son mot de passe. Ne partagez jamais le vôtre. Un mot de passe provisoire se change dès la première connexion, dans le menu sous votre initiale (en haut à droite) › Paramètres. Toutes les connexions sont notées dans le journal.'));
 }
 
 async function creer(ctx) {

@@ -27,6 +27,7 @@ import { pageAssistance } from './assistance.js';
 import { pageMessages } from './messages.js';
 import { pageNotes } from './notes.js';
 import { pageSecurite, ligneJournal } from './securite.js';
+import { pageComptes } from './comptes.js';
 import { metriques, segments, barres } from './graphiques.js';
 
 export const PAGES = {
@@ -53,6 +54,7 @@ export const PAGES = {
   notes: pageNotes,
   creations: pageCreations,
   securite: pageSecurite,
+  comptes: pageComptes,
   cartes: pageCartes,
   flyers: pageFlyers,
   visites: pageVisites,

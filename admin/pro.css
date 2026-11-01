@@ -76,13 +76,13 @@ code { background: var(--surface-3) !important; color: var(--text) !important; b
 kbd { height: 20px; border-radius: 4px; border: 1px solid var(--line-2); border-bottom-width: 1px; background: #fff; color: var(--muted); font: 500 10.5px/1 var(--font); box-shadow: 0 1px 0 var(--line-2); }
 
 /* Mouvements : seulement de courtes transitions utiles, aucune animation décorative */
-*, *::before, *::after { animation: none !important; transition-duration: var(--t) !important; transition-timing-function: var(--ease) !important; }
+/* (01/11/2026) Ancienne règle « aucune animation » retirée : les animations dépendent maintenant du réglage Animations de BDA Admin (html[data-mouvement]) */
 .chargement span { animation: pt-attente 1s ease-in-out infinite !important; }
 .chargement span:nth-child(2) { animation-delay: 0.15s !important; }
 .chargement span:nth-child(3) { animation-delay: 0.3s !important; }
 .btn.is-loading::after { animation: tourne 0.7s linear infinite !important; }
 @keyframes pt-attente { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) {
+:root[data-mouvement="reduit"] {
   *, *::before, *::after { transition-duration: 0s !important; }
   .chargement span, .btn.is-loading::after { animation-duration: 2s !important; }
 }

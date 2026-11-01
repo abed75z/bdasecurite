@@ -343,7 +343,7 @@ table th { color: var(--muted) !important; }
 .page > :nth-child(n + 4), .actions > :nth-child(n + 4) { animation-delay: 0.15s; }
 .toast { border-radius: 999px !important; background: #0b0b0c !important; color: #fff !important; border: 0 !important; }
 .modale { border-radius: 24px !important; }
-@media (prefers-reduced-motion: reduce) { .page > *, .contenu > .carte, .actions > *, .auth__carte { animation: none !important; } }
+:root[data-mouvement="reduit"] { .page > *, .contenu > .carte, .actions > *, .auth__carte { animation: none !important; } }
 
 /* ---------- Couleurs de l'ancien thème, éclaircies automatiquement ---------- */
 

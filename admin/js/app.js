@@ -66,6 +66,7 @@ const COMPTE = [
   { chemin: 'notifications', libelle: 'Notifications', ic: 'cloche', admin: true },
   { chemin: 'parametres', libelle: 'Paramètres', ic: 'reglages' },
   { chemin: 'securite', libelle: 'Accès & sécurité', ic: 'cadenas' },
+  { chemin: 'comptes', libelle: 'Comptes & accès', ic: 'cle', admin: true },
 ];
 // Ce qui attend une action : cloche de la barre du haut et pastille de l'application installée
 const A_TRAITER = [
@@ -80,7 +81,7 @@ const A_TRAITER = [
   { cle: 'retards', libelle: 'Factures en retard', href: '#/factures', ic: 'facture', alerte: true },
 ];
 // Pages communes aux deux espaces : elles restent dans l'espace ouvert
-const COMMUNES = ['parametres', 'securite', 'notifications'];
+const COMMUNES = ['parametres', 'securite', 'notifications', 'comptes'];
 // Pages rangées dans une rubrique du menu sans y figurer elles-mêmes
 const PARENT = { cartes: 'creations', visites: 'creations', flyers: 'creations' };
 // Pages de l'espace Application gérées ici (les autres onglets de #/appli sont dans appli.js)
@@ -239,8 +240,10 @@ function dessinerMenu() {
         icone('chevronBas', 'nav__chevron')),
       h('div', { class: 'nav__tiroir' }, h('div', { class: 'nav__tiroir-int' }, pages.map(lien))));
   };
+  favorisEl = h('div', { class: 'nav__favoris' });
   menuEl.replaceChildren(
     h('div', { class: 'nav__principales' }, principales),
+    favorisEl,
     ...rubriques.map(rubrique),
     h('a', { class: 'nav__item nav__item--externe', href: E.externe[0], target: '_blank', rel: 'noopener', title: E.externe[1] }, icone('externe', 'nav__ic'), h('span', { class: 'nav__txt' }, E.externe[1])));
   coteEl.querySelectorAll('.espaces__btn').forEach((b) => {
@@ -249,6 +252,57 @@ function dessinerMenu() {
     b.setAttribute('aria-current', oui ? 'true' : 'false');
   });
   ouvrirRubrique(groupeOuvert);
+  dessinerFavoris();
+}
+
+/* ---------- Favoris : une étoile dans l'en-tête épingle la page en haut du menu ---------- */
+let favorisEl = null, etoileEl = null, pageCourante = null;
+function favoris(liste) {
+  try {
+    if (liste) localStorage.setItem('bda-favoris', JSON.stringify(liste));
+    const l = JSON.parse(localStorage.getItem('bda-favoris') || '[]');
+    return Array.isArray(l) ? l.filter((f) => f && typeof f.hash === 'string' && f.hash.startsWith('#/')).slice(0, 8) : [];
+  } catch (e) { return []; }
+}
+function dessinerFavoris() {
+  if (!favorisEl) return;
+  const l = favoris();
+  favorisEl.hidden = !l.length;
+  favorisEl.replaceChildren(...(l.length ? [h('p', { class: 'nav__favoris-titre' }, icone('etoile'), 'Favoris'),
+    ...l.map((f) => h('a', { href: f.hash, class: `nav__item nav__item--favori ${location.hash === f.hash ? 'is-actif' : ''}`, title: f.libelle, onclick: fermerMenu },
+      icone(f.ic || 'etoile', 'nav__ic'), h('span', { class: 'nav__txt' }, f.libelle)))] : []));
+  if (etoileEl && pageCourante) {
+    const oui = l.some((f) => f.hash === pageCourante.hash);
+    etoileEl.classList.toggle('is-actif', oui);
+    etoileEl.title = oui ? 'Retirer des favoris' : 'Ajouter aux favoris (en haut du menu)';
+    etoileEl.setAttribute('aria-pressed', String(oui));
+  }
+}
+function basculerFavori() {
+  if (!pageCourante) return;
+  const l = favoris();
+  const deja = l.some((f) => f.hash === pageCourante.hash);
+  const libelle = titrePage.textContent || pageCourante.libelle;
+  favoris(deja ? l.filter((f) => f.hash !== pageCourante.hash) : [...l, { hash: pageCourante.hash, libelle, ic: pageCourante.ic }]);
+  dessinerFavoris();
+  etoileEl.classList.remove('vient-de-changer');
+  void etoileEl.offsetWidth;
+  etoileEl.classList.add('vient-de-changer');
+  toast(deja ? `« ${libelle} » retiré des favoris.` : `« ${libelle} » ajouté aux favoris, en haut du menu.`);
+}
+
+/* ---------- Écran d'ouverture : l'écusson apparaît, puis l'admin (une fois par session) ---------- */
+function ecranOuverture() {
+  try { if (sessionStorage.getItem('bda-intro')) return; sessionStorage.setItem('bda-intro', '1'); } catch (e) { return; }
+  if (sansMouvement()) return;
+  const intro = h('div', { class: 'intro', 'aria-hidden': 'true' },
+    h('div', { class: 'intro__centre' },
+      h('img', { class: 'intro__ecusson', src: '/admin/icone-admin-512.png?v=3', alt: '' }),
+      h('p', { class: 'intro__nom' }, 'BDA Admin'),
+      h('span', { class: 'intro__ligne' })));
+  document.body.append(intro);
+  setTimeout(() => intro.classList.add('is-fin'), 1250);
+  setTimeout(() => intro.remove(), 1900);
 }
 function ouvrirRubrique(nom) {
   groupeOuvert = nom;
@@ -271,7 +325,13 @@ function appliquerTheme(t) {
 appliquerTheme(themeMemo());
 
 /* ---------- Animations : chiffres qui défilent, cloche qui sonne ---------- */
-const sansMouvement = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Animations : réglage de l'admin (activées par défaut), indépendant de Windows
+function mouvementMemo(v) {
+  try { if (v) localStorage.setItem('bda-animations', v); return localStorage.getItem('bda-animations') === 'reduites' ? 'reduites' : 'activees'; } catch (e) { return v || 'activees'; }
+}
+function appliquerMouvement(m) { document.documentElement.dataset.mouvement = m === 'reduites' ? 'reduit' : 'plein'; }
+appliquerMouvement(mouvementMemo());
+const sansMouvement = () => document.documentElement.dataset.mouvement === 'reduit';
 function animerChiffres(zone) {
   if (sansMouvement()) return;
   zone.querySelectorAll('.metrique__valeur, .tuile b, .acc-module__n, .lc-chiffre b').forEach((el) => {
@@ -346,6 +406,7 @@ function panneauCompte() {
     h('ul', { class: 'deroulant__liste' },
       lien('#/parametres', 'Paramètres', 'reglages'),
       lien('#/securite', 'Accès & sécurité', 'cadenas'),
+      etat.session.role === 'admin' ? lien('#/comptes', 'Comptes & accès', 'cle') : null,
       lien('/admin/moi', 'Mon accès chef', 'couronne'),
       lien('/', 'Voir le site', 'externe', true)),
     h('div', { class: 'deroulant__theme' },
@@ -355,6 +416,16 @@ function panneauCompte() {
           type: 'button', class: `segments__btn ${themeMemo() === t ? 'is-actif' : ''}`, 'aria-pressed': String(themeMemo() === t),
           onclick: (e) => {
             themeMemo(t); appliquerTheme(t);
+            e.currentTarget.parentNode.querySelectorAll('.segments__btn').forEach((b) => { const oui = b === e.currentTarget; b.classList.toggle('is-actif', oui); b.setAttribute('aria-pressed', String(oui)); });
+          },
+        }, icone(ic), libelle)))),
+    h('div', { class: 'deroulant__theme deroulant__theme--suite' },
+      h('span', null, 'Animations'),
+      h('div', { class: 'segments', role: 'group', 'aria-label': 'Animations' },
+        [['activees', 'Activées', 'eclair'], ['reduites', 'Réduites', 'pause']].map(([m, libelle, ic]) => h('button', {
+          type: 'button', class: `segments__btn ${mouvementMemo() === m ? 'is-actif' : ''}`, 'aria-pressed': String(mouvementMemo() === m),
+          onclick: (e) => {
+            mouvementMemo(m); appliquerMouvement(m);
             e.currentTarget.parentNode.querySelectorAll('.segments__btn').forEach((b) => { const oui = b === e.currentTarget; b.classList.toggle('is-actif', oui); b.setAttribute('aria-pressed', String(oui)); });
           },
         }, icone(ic), libelle)))),
@@ -376,6 +447,7 @@ function lancerApplication() {
   const utilisateur = String(etat.session.utilisateur || '');
   const nom = cap(utilisateur) || 'Administrateur';
   document.body.classList.toggle('cote-reduite', menuReduit());
+  ecranOuverture();
   menuEl = h('nav', { class: 'nav', 'aria-label': 'Menu de l’espace' });
   coteEl = h('aside', { class: 'cote' },
     h('div', { class: 'cote__tete' },
@@ -389,12 +461,13 @@ function lancerApplication() {
     menuEl,
     h('div', { class: 'cote__bas' },
       h('button', { class: 'cote__reduire', type: 'button', title: 'Réduire ou agrandir le menu', onclick: basculerMenuReduit }, icone('panneau'), h('span', null, 'Réduire le menu')),
-      h('p', { class: 'cote__version', title: 'Les compteurs se mettent à jour toutes les minutes' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'BDA Admin · v7.0 · ', h('span', { id: 'synchro' }, 'à jour')))));
+      h('p', { class: 'cote__version', title: 'Les compteurs se mettent à jour toutes les minutes' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'BDA Admin · v8.0 · ', h('span', { id: 'synchro' }, 'à jour')))));
 
   filEl = h('nav', { class: 'ariane', 'aria-label': 'Vous êtes ici' });
   titrePage = h('h1', { class: 'entete-page__titre' });
   iconePage = h('span', { class: 'entete-page__ic', 'aria-hidden': 'true' });
   surtitrePage = h('span', { class: 'entete-page__surtitre' });
+  etoileEl = h('button', { class: 'fav-btn', type: 'button', 'aria-label': 'Favori', 'aria-pressed': 'false', onclick: basculerFavori }, icone('etoile'));
   actionsPage = h('div', { class: 'entete-page__actions haut__actions' });
   zonePage = h('div', { class: 'page', id: 'page' });
   const haut = h('header', { class: 'haut' },
@@ -418,7 +491,7 @@ function lancerApplication() {
     h('div', { class: 'voile', onclick: fermerMenu }),
     h('div', { class: 'principal' }, haut,
       h('div', { class: 'cadre-page' },
-        h('div', { class: 'entete-page' }, h('div', { class: 'entete-page__gauche' }, iconePage, h('div', { class: 'entete-page__textes' }, surtitrePage, titrePage)), actionsPage),
+        h('div', { class: 'entete-page' }, h('div', { class: 'entete-page__gauche' }, iconePage, h('div', { class: 'entete-page__textes' }, surtitrePage, titrePage), etoileEl), actionsPage),
         zonePage)));
   racine.replaceChildren(appliEl);
   dessinerMenu();
@@ -455,6 +528,7 @@ function panneauCreer() {
     [`#/planning/${mois}`, 'Planning du mois', 'Organiser les vacations', 'planning', 'equipe'],
     ['#/notes/nouvelle', 'Note', 'Une idée, un rappel', 'note', 'outils'],
     ['#/pdf', 'PDF pour un client', 'Déposer dans son espace', 'dossier', 'clients'],
+    ...(etat.session.role === 'admin' ? [['#/comptes', 'Accès à l’admin', 'Pour un proche ou un manager', 'cle', 'securite']] : []),
   ];
   return [
     h('header', { class: 'deroulant__tete' }, h('b', null, 'Créer'), h('small', null, 'touche C')),
@@ -501,19 +575,19 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '7';
+const VERSION = '8';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 7 : plus rapide à utiliser, au clavier comme à la souris.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 8 : toute l’équipe dans BDA Admin, et vos pages préférées à portée de main.'),
       h('ul', null,
-        point('plus', 'facturation', 'Bouton « Créer »', 'En haut de chaque page : devis, facture, agent, planning, note. Ou la touche C.'),
-        point('commande', 'clients', 'Raccourcis clavier', 'G puis A pour les agents, G puis D pour les devis… Touche ? pour tout voir.'),
-        point('agents', 'equipe', 'Rubrique Agents', 'Chiffres de l’équipe, filtres, vue en cartes, appel et WhatsApp en un clic.'),
-        point('eclair', 'appli', 'Animations', 'Pages qui glissent, graphiques qui se dessinent, notifications plus claires.'))),
+        point('cle', 'securite', 'Comptes & accès', 'Créez un accès pour un proche ou un manager, choisissez son rôle, changez son mot de passe. Compte › Comptes & accès.'),
+        point('etoile', 'equipe', 'Favoris', 'L’étoile à côté du titre épingle la page en haut du menu.'),
+        point('plus', 'facturation', 'Bouton « Créer »', 'Devis, facture, agent, planning, note, accès. Ou la touche C. Touche ? pour tous les raccourcis.'),
+        point('eclair', 'appli', 'Effets', 'Écran d’ouverture, connexion animée, pages qui glissent, chiffres qui défilent.'))),
     actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
   }), 900);
 }
@@ -633,6 +707,9 @@ async function router() {
   iconePage.dataset.dom = DOM_RUBRIQUE[rubrique] || (route === 'appli' || route === 'vtc' ? 'appli' : route === 'tableau' ? 'stats' : 'securite');
   iconePage.hidden = !avecIcone;
   surtitrePage.textContent = lanceur ? '' : (rubrique || E.nom);
+  pageCourante = lanceur ? null : { hash: location.hash, libelle: libelleActif || rubrique || E.nom, ic: entree?.ic };
+  etoileEl.hidden = lanceur;
+  dessinerFavoris();
   iconePage.classList.remove('is-in');
   void iconePage.offsetWidth;
   iconePage.classList.add('is-in');
@@ -655,8 +732,14 @@ async function router() {
     // Première pose du contenu : transition fluide (le squelette laisse la place à la page)
     afficher: (...n) => {
       if (jeton !== jetonNavigation) return;
-      const poser = () => { zonePage.replaceChildren(...n.flat().filter(Boolean)); animerChiffres(zonePage); };
-      if (document.startViewTransition && !sansMouvement() && zonePage.querySelector(':scope > .chargement')) document.startViewTransition(poser);
+      const poser = () => { if (jeton !== jetonNavigation) return; zonePage.replaceChildren(...n.flat().filter(Boolean)); animerChiffres(zonePage); };
+      if (document.startViewTransition && !sansMouvement() && zonePage.querySelector(':scope > .chargement')) {
+        // Filet de sécurité : si la fenêtre ne se redessine pas (cachée), la page s'affiche quand même
+        let pose = false;
+        const uneFois = () => { if (!pose) { pose = true; poser(); } };
+        try { document.startViewTransition(uneFois); } catch (e) { uneFois(); }
+        setTimeout(uneFois, 700);
+      }
       else poser();
     },
     actuel: () => jeton === jetonNavigation,

@@ -328,8 +328,9 @@ a.metrique:hover { background: var(--surface-2) !important; }
    11. TABLETTE ET TÉLÉPHONE
    ========================================================= */
 @media (max-width: 1180px) {
-  .cmd-btn { width: 240px; }
-  .haut-compte__nom { display: none; }
+  .cmd-btn { width: auto; flex: none; }
+  .cmd-btn span, .haut-compte__nom { display: none; }
+  .ariane > :nth-child(-n + 2) { display: none; }
 }
 @media (max-width: 900px) {
   .appli { grid-template-columns: minmax(0, 1fr) !important; }

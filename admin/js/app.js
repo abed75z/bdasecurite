@@ -260,13 +260,13 @@ function ouvrirRubrique(nom) {
   majBadges();
 }
 
-/* ---------- Thème : sombre (par défaut) ou clair, mémorisé sur l'appareil ---------- */
+/* ---------- Thème : clair « ivoire » (par défaut) ou sombre, mémorisé sur l'appareil ---------- */
 function themeMemo(v) {
-  try { if (v) localStorage.setItem('bda-theme', v); return localStorage.getItem('bda-theme') === 'jour' ? 'jour' : 'nuit'; } catch (e) { return v || 'nuit'; }
+  try { if (v) localStorage.setItem('bda-theme-v6', v); return localStorage.getItem('bda-theme-v6') === 'nuit' ? 'nuit' : 'jour'; } catch (e) { return v || 'jour'; }
 }
 function appliquerTheme(t) {
   document.documentElement.dataset.theme = t;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', t === 'jour' ? '#111114' : '#0a0a0c');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', t === 'jour' ? '#f6f5f2' : '#0a0a0c');
 }
 appliquerTheme(themeMemo());
 
@@ -351,7 +351,7 @@ function panneauCompte() {
     h('div', { class: 'deroulant__theme' },
       h('span', null, 'Apparence'),
       h('div', { class: 'segments', role: 'group', 'aria-label': 'Apparence' },
-        [['nuit', 'Sombre', 'lune'], ['jour', 'Clair', 'soleil']].map(([t, libelle, ic]) => h('button', {
+        [['jour', 'Clair', 'soleil'], ['nuit', 'Sombre', 'lune']].map(([t, libelle, ic]) => h('button', {
           type: 'button', class: `segments__btn ${themeMemo() === t ? 'is-actif' : ''}`, 'aria-pressed': String(themeMemo() === t),
           onclick: (e) => {
             themeMemo(t); appliquerTheme(t);
@@ -389,7 +389,7 @@ function lancerApplication() {
     menuEl,
     h('div', { class: 'cote__bas' },
       h('button', { class: 'cote__reduire', type: 'button', title: 'Réduire ou agrandir le menu', onclick: basculerMenuReduit }, icone('panneau'), h('span', null, 'Réduire le menu')),
-      h('p', { class: 'cote__version' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'BDA Admin · v5.0'))));
+      h('p', { class: 'cote__version' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'BDA Admin · v6.0'))));
 
   filEl = h('nav', { class: 'ariane', 'aria-label': 'Vous êtes ici' });
   titrePage = h('h1', { class: 'entete-page__titre' });

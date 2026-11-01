@@ -5,14 +5,14 @@ require __DIR__ . '/../app/bootstrap.php';
 entetes_securite();
 header('Cache-Control: no-store');
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'");
-$v = '42';
+$v = '43';
 ?><!doctype html>
-<html lang="fr" data-theme="nuit">
+<html lang="fr" data-theme="jour">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0a0a0c">
+<meta name="theme-color" content="#f6f5f2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="BDA Admin">
 <title>BDA Admin</title>
@@ -45,6 +45,7 @@ $v = '42';
 <link rel="stylesheet" href="carte-agent.css?v=<?= $v ?>">
 <link rel="stylesheet" href="entreprise.css?v=<?= $v ?>">
 <link rel="stylesheet" href="nuit.css?v=<?= $v ?>">
+<link rel="stylesheet" href="ivoire.css?v=<?= $v ?>">
 <style id="format-page">@page { size: A4 portrait; margin: 0; }</style>
 </head>
 <body>

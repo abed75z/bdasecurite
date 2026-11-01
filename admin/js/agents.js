@@ -71,6 +71,36 @@ const infosDe = (a) => { try { return typeof a.infos === 'string' ? JSON.parse(a
 const EQUIPE = { primaire: 'Principale', secondaire: 'Renfort', secours: 'Secours' };
 const falsifiee = (a) => /falsifi/i.test(a.carte || '');
 
+/* ---------- Petits éléments communs : avatar, dossier, actions rapides ---------- */
+const TEINTES = ['#6366f1', '#0891b2', '#059669', '#d97706', '#dc2626', '#7c3aed', '#db2777', '#0d9488', '#ea580c', '#4f46e5'];
+function teinteDe(nom) {
+  let s = 0;
+  for (const c of String(nom || '')) s = (s * 31 + c.charCodeAt(0)) >>> 0;
+  return TEINTES[s % TEINTES.length];
+}
+function initiales(nom) {
+  const mots = String(nom || '').trim().split(/\s+/).filter(Boolean);
+  return ((mots[0]?.[0] || '') + (mots[1]?.[0] || '')).toUpperCase() || '?';
+}
+const avatar = (a, cls = '') => h('span', { class: `ag-avatar ${cls}`.trim(), style: `--ag: ${teinteDe(a.nom)}`, 'aria-hidden': 'true' }, initiales(a.nom));
+const docsOk = (a) => etatDocs(a.docs || {}).filter((e) => e.etat === 'ok').length;
+// Jauge du dossier : un segment par document obligatoire
+const jaugeDocs = (n) => h('span', { class: `ag-docs ${n === OBLIGATOIRES.length ? 'is-complet' : ''}`, title: `${n} document${n > 1 ? 's' : ''} obligatoire${n > 1 ? 's' : ''} sur ${OBLIGATOIRES.length}` },
+  h('span', { class: 'ag-docs__barre' }, OBLIGATOIRES.map((_, k) => h('i', { class: k < n ? 'is-ok' : '' }))),
+  h('small', null, n === OBLIGATOIRES.length ? 'Dossier complet' : `${n}/${OBLIGATOIRES.length} documents`));
+const telInternational = (t) => { const d = String(t || '').replace(/\D/g, ''); return d.startsWith('0') ? `33${d.slice(1)}` : d; };
+function actionsRapides(a, i, grand = false) {
+  const stop = (e) => e.stopPropagation();
+  const bouton = (href, ic, titre, externe) => h('a', { class: 'ag-action', href, title: titre, 'aria-label': titre, onclick: stop, ...(externe ? { target: '_blank', rel: 'noopener' } : {}) }, icone(ic), grand ? h('span', null, titre) : null);
+  return h('span', { class: `ag-actions ${grand ? 'ag-actions--grand' : ''}` },
+    a.tel ? bouton(`tel:${a.tel.replace(/[^\d+]/g, '')}`, 'telephone', 'Appeler') : null,
+    a.tel ? bouton(`https://wa.me/${telInternational(a.tel)}`, 'message', 'WhatsApp', true) : null,
+    i.mail ? bouton(`mailto:${i.mail}`, 'mail', 'Écrire un mail') : null);
+}
+function vueMemo(v) {
+  try { if (v) localStorage.setItem('bda-agents-vue', v); return localStorage.getItem('bda-agents-vue') === 'cartes' ? 'cartes' : 'tableau'; } catch (e) { return v || 'tableau'; }
+}
+
 async function listeAgents(ctx) {
   ctx.titre('Agents');
   const { agents, dracar } = await api('agents');
@@ -84,12 +114,14 @@ async function listeAgents(ctx) {
   const etatCarte = (a) => { const e = etatTitre(a); return e.code === 'a-verifier' && !/CAR-/i.test(a.carte || '') ? null : e; };
   const enAlerte = (a) => mien(a) && !!etatCarte(a)?.grave;
   const mien = (a) => (a.categorie || 'primaire') !== 'secours';
+  const aSurveiller = (a) => enAlerte(a) || (mien(a) && docsOk(a) < OBLIGATOIRES.length);
   const ORDRE = ['primaire', 'secondaire', 'secours'];
   const lignesTexte = (...v) => v.filter((x) => x && String(x).trim()).map((x) => h('span', { class: 'cell-ligne' }, x));
 
   // Colonnes : [titre, clé de tri, contenu de la cellule]
   const COLS = [
-    ['Nom', (a) => a.nom, (a, i) => [h('b', null, a.nom), ...lignesTexte(i.ville), +a.actif || !mien(a) ? null : h('span', { class: 'cell-ligne muet' }, 'inactif')]],
+    ['Nom', (a) => a.nom, (a, i) => h('span', { class: 'ag-identite' }, avatar(a),
+      h('span', { class: 'ag-identite__txt' }, h('b', null, a.nom), ...lignesTexte(i.ville), +a.actif || !mien(a) ? null : h('span', { class: 'cell-ligne muet' }, 'inactif')))],
     ['Équipe', (a) => ORDRE.indexOf(a.categorie || 'primaire') + a.poste, (a) => [h('span', { class: `cat-pastille cat-pastille--${a.categorie || 'primaire'}` }, EQUIPE[a.categorie || 'primaire']), ...lignesTexte(a.poste)]],
     ['Contact', (a) => a.tel, (a, i) => [
       a.tel ? h('a', { class: 'cell-ligne', href: `tel:${a.tel.replace(/[^\d+]/g, '')}`, onclick: (e) => e.stopPropagation() }, a.tel) : null,
@@ -101,17 +133,29 @@ async function listeAgents(ctx) {
         i.dracar ? h('span', { class: `cell-ligne cell-dracar cell-dracar--${i.dracar}`, title: 'Résultat noté depuis DRACAR' }, `${i.dracar === 'actif' ? '✔' : '✖'} DRACAR ${isoVersFr(i.dracar_le)}`) : null];
     }],
     ['Qualifications', (a, i) => i.qualifs, (a, i) => lignesTexte(i.qualifs, i.langues, i.vehicule)],
-    ['Documents', (a, i) => i.docs, (a, i) => {
-      const n = Object.values(a.docs || {}).reduce((s, x) => s + +x, 0);
-      return lignesTexte(n ? `${n} fichier${n > 1 ? 's' : ''} dans l'admin` : '', i.docs);
-    }],
+    ['Dossier', (a) => String(docsOk(a)), (a, i) => [jaugeDocs(docsOk(a)), ...lignesTexte(i.docs)]],
     ['Notes', (a) => a.notes, (a) => lignesTexte(a.notes)],
+    ['', () => '', (a, i) => actionsRapides(a, i)],
   ];
 
-  let recherche = '', tri = null, sens = 1;
+  let recherche = '', tri = null, sens = 1, filtre = 'tous', vue = vueMemo();
   const tete = h('thead');
   const corpsT = h('tbody');
   const table = h('table', { class: 'tableau tableau--agents' }, tete, corpsT);
+  const zoneTableau = h('div', { class: 'tableau-agents' }, table);
+  const grille = h('div', { class: 'ag-grille' });
+
+  // Vue « cartes » : une fiche visuelle par agent
+  function carteAgent(a) {
+    const i = infosDe(a), e = etatCarte(a), cat = a.categorie || 'primaire';
+    const ouvrir = () => ctx.aller(`#/agents/${a.id}`);
+    return h('article', { class: `ag-carte ${enAlerte(a) ? 'is-alerte' : ''} ${+a.actif || !mien(a) ? '' : 'is-inactif'}`.trim(), style: `--ag: ${teinteDe(a.nom)}`, tabindex: 0, title: 'Ouvrir la fiche', onclick: ouvrir, onkeydown: (ev) => { if (ev.key === 'Enter') ouvrir(); } },
+      h('div', { class: 'ag-carte__tete' }, avatar(a, 'ag-avatar--grand'), h('span', { class: `cat-pastille cat-pastille--${cat}` }, EQUIPE[cat])),
+      h('b', { class: 'ag-carte__nom' }, a.nom),
+      h('small', { class: 'ag-carte__poste' }, [a.poste, i.ville].filter(Boolean).join(' · ') || ' '),
+      e ? h('span', { class: `etat-carte etat-carte--${e.code}` }, e.libelle + (e.fin ? ` · ${isoVersFr(e.fin)}` : '')) : h('span', { class: 'ag-carte__sans' }, 'Carte pro non renseignée'),
+      h('div', { class: 'ag-carte__pied' }, jaugeDocs(docsOk(a)), actionsRapides(a, i)));
+  }
 
   function ligne(a) {
     const i = infosDe(a);
@@ -122,32 +166,77 @@ async function listeAgents(ctx) {
   const section = (titre, n) => h('tr', { class: 'ligne--section' }, h('td', { colspan: COLS.length }, titre, h('span', null, ` · ${n}`)));
 
   function dessinerTete() {
-    tete.replaceChildren(h('tr', null, COLS.map(([t], n) => h('th', {
+    tete.replaceChildren(h('tr', null, COLS.map(([t], n) => (t ? h('th', {
       class: tri === n ? 'is-trie' : '', title: 'Trier', onclick: () => { sens = tri === n ? -sens : 1; tri = n; dessinerTete(); dessiner(); },
-    }, t, h('span', { class: 'tri' }, tri === n ? (sens > 0 ? '▲' : '▼') : '')))));
+    }, t, h('span', { class: 'tri' }, tri === n ? (sens > 0 ? '▲' : '▼') : '')) : h('th', { class: 'ag-col-actions', 'aria-label': 'Actions' })))));
   }
+  const FILTRES = {
+    tous: ['Tous', () => true],
+    primaire: ['Principale', (a) => (a.categorie || 'primaire') === 'primaire'],
+    secondaire: ['Renfort', (a) => a.categorie === 'secondaire'],
+    secours: ['Secours', (a) => a.categorie === 'secours'],
+    surveiller: ['À surveiller', aSurveiller],
+  };
   function dessiner() {
     const q = sansAccents(recherche).trim();
     const texteDe = (a) => sansAccents([a.nom, a.poste, a.tel, a.carte, a.notes, EQUIPE[a.categorie || 'primaire'], ...Object.values(infosDe(a))].join(' '));
-    const vis = agents.filter((a) => !q || q.split(/\s+/).every((m) => texteDe(a).includes(m)));
+    const vis = agents.filter(FILTRES[filtre][1]).filter((a) => !q || q.split(/\s+/).every((m) => texteDe(a).includes(m)));
     const cle = (a) => sansAccents(String((tri === null ? a.nom : COLS[tri][1](a, infosDe(a))) ?? ''));
     vis.sort((x, y) => { const a = cle(x), b = cle(y); return (!a) - (!b) || a.localeCompare(b, 'fr', { numeric: true }) * sens; });
     const mes = vis.filter(mien), sec = vis.filter((a) => !mien(a));
     if (tri === null) mes.sort((x, y) => ORDRE.indexOf(x.categorie || 'primaire') - ORDRE.indexOf(y.categorie || 'primaire'));
+    const vide = agents.length ? 'Aucun agent ne correspond à ce filtre ou à la recherche.' : 'Aucun agent pour le moment. Utilisez « Mettre à jour depuis le registre » ou « Nouvel agent ».';
+    zoneTableau.hidden = vue !== 'tableau';
+    grille.hidden = vue !== 'cartes';
+    if (vue === 'cartes') {
+      const groupe = (titre, liste) => (liste.length ? [h('p', { class: 'ag-grille__titre' }, titre, h('span', null, String(liste.length))), ...liste.map(carteAgent)] : []);
+      grille.replaceChildren(...(vis.length ? [...groupe('Mes agents', mes), ...groupe('Agents de secours', sec)] : [h('p', { class: 'vide' }, vide)]));
+      return;
+    }
     const lignes = [];
     if (mes.length) lignes.push(section('Mes agents', mes.length), ...mes.map(ligne));
     if (sec.length) lignes.push(section('Agents de secours', sec.length), ...sec.map(ligne));
-    corpsT.replaceChildren(...(lignes.length ? lignes : [h('tr', null, h('td', { colspan: COLS.length, class: 'muet' }, agents.length ? 'Aucun agent ne correspond à la recherche.' : 'Aucun agent pour le moment. Utilisez « Mettre à jour depuis le registre » ou « Nouvel agent ».'))]));
+    corpsT.replaceChildren(...(lignes.length ? lignes : [h('tr', null, h('td', { colspan: COLS.length, class: 'muet' }, vide))]));
   }
   const rech = saisie({ type: 'search', class: 'input input--recherche', placeholder: 'Rechercher (nom, ville, SSIAP, espagnol…)', oninput: (e) => { recherche = e.target.value; dessiner(); } });
+
+  /* ----- Chiffres de l'équipe ----- */
   const nbAlertes = agents.filter(enAlerte).length;
+  const mesAgents = agents.filter(mien);
+  const complets = mesAgents.filter((a) => docsOk(a) === OBLIGATOIRES.length).length;
+  const pourcent = mesAgents.length ? Math.round((complets / mesAgents.length) * 100) : 0;
+  const tuile = (cle, libelle, valeur, sous, classe = '') => h('button', { type: 'button', class: `ag-kpi ${classe}`.trim(), dataset: { filtre: cle }, onclick: () => choisirFiltre(cle) },
+    h('span', { class: 'ag-kpi__libelle' }, libelle), h('b', { class: 'metrique__valeur' }, String(valeur)), h('small', null, sous));
+  const anneau = h('span', { class: 'ag-anneau', style: `--p: ${pourcent}`, 'aria-hidden': 'true' }, h('b', null, `${pourcent} %`));
+  const kpis = h('div', { class: 'ag-kpis' },
+    tuile('tous', 'Effectif', mesAgents.length, `${agents.length - mesAgents.length} agent${agents.length - mesAgents.length > 1 ? 's' : ''} de secours en plus`),
+    tuile('primaire', 'Équipe principale', agents.filter(FILTRES.primaire[1]).length, 'agents réguliers'),
+    tuile('secondaire', 'Renfort', agents.filter(FILTRES.secondaire[1]).length, 'en appoint'),
+    tuile('surveiller', 'À surveiller', agents.filter(aSurveiller).length, nbAlertes ? `dont ${nbAlertes} carte${nbAlertes > 1 ? 's' : ''} pro en alerte` : 'cartes pro ou dossiers', nbAlertes ? 'is-alerte' : ''),
+    h('div', { class: 'ag-kpi ag-kpi--anneau' }, anneau, h('span', null, h('span', { class: 'ag-kpi__libelle' }, 'Dossiers complets'), h('b', { class: 'ag-kpi__petit' }, `${complets} sur ${mesAgents.length}`))));
+
+  /* ----- Filtres et choix de la vue ----- */
+  const barreFiltres = h('div', { class: 'segments ag-filtres', role: 'group', 'aria-label': 'Filtrer' });
+  function choisirFiltre(cle) {
+    filtre = cle;
+    barreFiltres.querySelectorAll('button').forEach((b) => b.classList.toggle('is-actif', b.dataset.cle === cle));
+    kpis.querySelectorAll('[data-filtre]').forEach((b) => b.classList.toggle('is-actif', b.dataset.filtre === cle && cle !== 'tous'));
+    dessiner();
+  }
+  barreFiltres.append(...Object.entries(FILTRES).map(([cle, [libelle, test]]) => h('button', { type: 'button', class: `segments__btn ${cle === filtre ? 'is-actif' : ''}`, dataset: { cle }, onclick: () => choisirFiltre(cle) },
+    libelle, h('span', { class: 'ag-filtres__n' }, String(agents.filter(test).length)))));
+  const choixVue = h('div', { class: 'segments ag-vues', role: 'group', 'aria-label': 'Affichage' },
+    [['tableau', 'Tableau', 'tableau'], ['cartes', 'Cartes', 'grille']].map(([cle, libelle, ic]) => h('button', { type: 'button', class: `segments__btn ${vue === cle ? 'is-actif' : ''}`, dataset: { vue: cle }, title: libelle, onclick: (e) => {
+      vue = vueMemo(cle);
+      e.currentTarget.parentNode.querySelectorAll('button').forEach((b) => b.classList.toggle('is-actif', b.dataset.vue === cle));
+      dessiner();
+    } }, icone(ic), h('span', null, libelle))));
+
   ctx.afficher(
-    h('div', { class: 'carte__outils agents-outils' },
-      h('p', { class: 'agents-resume' }, h('b', null, agents.length), ` personnes · ${agents.filter(mien).length} agents · ${agents.filter((a) => !mien(a)).length} agents de secours`,
-        nbAlertes ? h('span', { class: 'agents-resume__alerte' }, ` · ${nbAlertes} carte${nbAlertes > 1 ? 's' : ''} pro expirée${nbAlertes > 1 ? 's' : ''} ou refusée${nbAlertes > 1 ? 's' : ''}`) : null),
-      h('div', { class: 'recherche' }, icone('recherche'), rech)),
-    h('div', { class: 'tableau-agents' }, table),
-    h('p', { class: 'legende-docs' }, h('span', null, 'Cliquez sur une ligne pour ouvrir la fiche.'), h('span', null, 'Cliquez sur un titre de colonne pour trier.'), h('span', null, 'En rouge : carte pro expirée, falsifiée ou refusée sur DRACAR.')));
+    kpis,
+    h('div', { class: 'ag-barre' }, barreFiltres, h('div', { class: 'ag-barre__droite' }, h('div', { class: 'recherche' }, icone('recherche'), rech), choixVue)),
+    zoneTableau, grille,
+    h('p', { class: 'legende-docs' }, h('span', null, 'Cliquez sur un agent pour ouvrir sa fiche.'), h('span', null, 'Cliquez sur un titre de colonne pour trier.'), h('span', null, 'En rouge : carte pro expirée, falsifiée ou refusée sur DRACAR.')));
   dessinerTete();
   dessiner();
 }
@@ -368,7 +457,18 @@ async function ficheAgent(ctx, id) {
     if (!blocDocs.hidden) { dessinerDocs(); blocDocs.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   } }, icone('oeil'), h('span', null, 'Voir ses documents'));
 
-  ctx.afficher(h('div', { class: 'agent-page' }, h('section', { class: 'carte' }, form), h('div', { class: 'agent-page__docs' }, boutonDocs), blocDocs));
+  // Bandeau de profil : qui, quel poste, carte pro, dossier, contact en un clic
+  const cat = a.categorie || 'primaire';
+  const profil = h('section', { class: 'ag-profil', style: `--ag: ${teinteDe(a.nom)}` },
+    avatar(a, 'ag-avatar--xl'),
+    h('div', { class: 'ag-profil__txt' },
+      h('span', { class: `cat-pastille cat-pastille--${cat}` }, CATEGORIES[cat]),
+      h('h2', null, a.nom),
+      h('p', null, [a.poste, infos.ville, cat === 'secours' ? '' : +a.actif ? 'Actif dans le planning' : 'Inactif'].filter(Boolean).join(' · '))),
+    h('div', { class: 'ag-profil__etat' }, etatFiche(a) || h('span', { class: 'ag-carte__sans' }, 'Carte pro non renseignée'), jaugeDocs(docsOk(a))),
+    actionsRapides(a, infos, true));
+
+  ctx.afficher(h('div', { class: 'agent-page' }, profil, h('section', { class: 'carte' }, form), h('div', { class: 'agent-page__docs' }, boutonDocs), blocDocs));
 }
 
 /* ---------- Envoi d'un fichier (photo allégée si elle dépasse la limite de l'hébergement) ---------- */

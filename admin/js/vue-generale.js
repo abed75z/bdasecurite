@@ -48,28 +48,32 @@ export async function pageVueGenerale(ctx) {
       points ? h('button', { class: 'btn btn--gold acc-voir', type: 'button', onclick: () => document.querySelector('.haut-btn')?.click() }, icone('cloche'), 'Voir ce qui attend') : null));
 
   /* ----- Une tuile par domaine ----- */
-  const module = ({ href, ic, titre, info, n = 0, alerte = false, raccourci }) => h('a', { class: `acc-module ${n ? 'a-traiter' : ''}`, href },
+  // Tuiles de tailles différentes (les grandes montent leurs chiffres), une couleur par domaine
+  const module = ({ href, dom, ic, titre, info, n = 0, alerte = false, grand = false, details = [] }) => h('a', { class: `acc-module ${grand ? 'acc-module--grand' : ''} ${n ? 'a-traiter' : ''}`.trim(), href, dataset: { dom } },
     h('span', { class: 'acc-module__ic' }, icone(ic)),
     h('span', { class: 'acc-module__txt' }, h('b', null, titre), h('small', null, info)),
+    grand && details.length ? h('span', { class: 'acc-module__details' }, details.map(([libelle, v]) => h('span', { class: Number(v) ? 'is-plein' : '' }, h('b', null, String(v)), libelle))) : null,
     n ? h('em', { class: `acc-module__n ${alerte ? 'is-alerte' : ''}` }, String(n)) : null,
-    raccourci ? h('kbd', { class: 'acc-module__kbd' }, raccourci) : null,
     icone('fleche', 'acc-module__fleche'));
   const modules = [
-    { href: '#/demandes', ic: 'clients', titre: 'Clients', n: c.demandes + c.messages + c.assistance, alerte: Boolean(c.assistance),
-      info: c.demandes ? pluriel(c.demandes, 'nouvelle demande de devis', 'nouvelles demandes de devis') : c.messages ? pluriel(c.messages, 'message client', 'messages clients') : 'Demandes, messages, fiches clients' },
-    { href: '#/devis', ic: 'facture', titre: 'Facturation', n: c.retards, alerte: true,
+    { href: '#/demandes', dom: 'clients', ic: 'clients', titre: 'Clients', grand: true, n: c.demandes + c.messages + c.assistance, alerte: Boolean(c.assistance),
+      info: c.demandes ? pluriel(c.demandes, 'nouvelle demande de devis', 'nouvelles demandes de devis') : c.messages ? pluriel(c.messages, 'message client', 'messages clients') : 'Demandes, messages, fiches clients',
+      details: [['demandes', c.demandes], ['messages', c.messages], ['assistance', c.assistance]] },
+    { href: '#/devis', dom: 'facturation', ic: 'facture', titre: 'Facturation', n: c.retards, alerte: true,
       info: c.retards ? pluriel(c.retards, 'facture à relancer', 'factures à relancer') : 'Devis, factures, PDF clients' },
-    { href: '#/agents', ic: 'agents', titre: 'Équipe', n: c.candidatures + c.equipe + cartes, alerte: cartes > 0,
-      info: c.candidatures ? pluriel(c.candidatures, 'nouvelle candidature', 'nouvelles candidatures') : cartes ? pluriel(cartes, 'carte pro à surveiller', 'cartes pro à surveiller') : 'Agents, planning, paie, contrats' },
-    { href: '#/site', ic: 'site', titre: 'Site web', n: c.avis + (c.horsLigne ? 1 : 0), alerte: Boolean(c.horsLigne),
+    { href: '#/site', dom: 'site', ic: 'site', titre: 'Site web', n: c.avis + (c.horsLigne ? 1 : 0), alerte: Boolean(c.horsLigne),
       info: c.horsLigne ? 'Hors ligne · maintenance' : c.avis ? pluriel(c.avis, 'avis à valider', 'avis à valider') : 'En ligne · bdasecurite.com' },
-    { href: '#/appli', ic: 'voiture', titre: 'Application VTC', n: alertes + aAttribuer + c.reservations, alerte: alertes > 0,
-      info: appli ? (enCours ? pluriel(enCours, 'course en cours', 'courses en cours') : aAttribuer ? pluriel(aAttribuer, 'réservation à attribuer', 'réservations à attribuer') : 'BDASH et BDASH Pro') : 'BDASH et BDASH Pro' },
-    { href: '#/tableau', ic: 'graphique', titre: 'Statistiques', info: 'Activité du site, documents récents' },
-    { href: '#/creations', ic: 'calques', titre: 'Outils', info: 'Cartes agents, flyers, notes' },
-    { href: '#/securite', ic: 'bouclier', titre: 'Sécurité', n: a.alertes, alerte: true,
+    { href: '#/agents', dom: 'equipe', ic: 'agents', titre: 'Équipe', grand: true, n: c.candidatures + c.equipe + cartes, alerte: cartes > 0,
+      info: c.candidatures ? pluriel(c.candidatures, 'nouvelle candidature', 'nouvelles candidatures') : cartes ? pluriel(cartes, 'carte pro à surveiller', 'cartes pro à surveiller') : 'Agents, planning, paie, contrats',
+      details: [['candidatures', c.candidatures], ['espace équipe', c.equipe], ['cartes pro', cartes]] },
+    { href: '#/appli', dom: 'appli', ic: 'voiture', titre: 'Application VTC', grand: true, n: alertes + aAttribuer + c.reservations, alerte: alertes > 0,
+      info: appli ? (appli.ouvert ? 'Ouverte · BDASH et BDASH Pro' : 'Fermée · BDASH et BDASH Pro') : 'BDASH et BDASH Pro',
+      details: [['en cours', enCours], ['à attribuer', aAttribuer], ['réservations', c.reservations]] },
+    { href: '#/tableau', dom: 'stats', ic: 'graphique', titre: 'Statistiques', grand: true, info: 'Activité du site sur 30 jours, documents récents, journal' },
+    { href: '#/creations', dom: 'outils', ic: 'calques', titre: 'Outils', info: 'Cartes agents, flyers, notes' },
+    { href: '#/securite', dom: 'securite', ic: 'bouclier', titre: 'Sécurité', n: a.alertes, alerte: true,
       info: a.alertes ? pluriel(a.alertes, 'connexion refusée', 'connexions refusées') : 'Accès, appareils, journal' },
-  ].map((m, i) => module({ ...m, raccourci: String(i + 1) }));
+  ].map(module);
 
   ctx.afficher(h('div', { class: 'accueil' }, entete, h('nav', { class: 'acc-modules', 'aria-label': 'Domaines' }, modules)));
 

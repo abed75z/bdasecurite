@@ -3,7 +3,7 @@
    les contrôles (ce qui manque, ce qui est interdit).
    Les textes des articles sont dans contrats-textes.js.
    ========================================================= */
-import { construire, texteDe, heuresMois, CCN, minimumConventionnel } from './contrats-textes.js';
+import { construire, texteDe, heuresMois, heuresExtra, heuresVacations, joursExtra, hebdoExtra, CCN, minimumConventionnel } from './contrats-textes.js';
 
 export { construire, texteDe };
 
@@ -25,6 +25,8 @@ export const MODELES = [
   { id: 'cdd-ssiap', famille: 'securite', titre: 'Agent SSIAP', texte: 'CDD sécurité incendie.', tags: ['CDD', 'SSIAP'], base: { genre: 'travail', metier: 'ssiap', nature: 'CDD', temps: 'plein', posteCle: 'ssiap1' } },
   { id: 'cdi-cynophile', famille: 'securite', titre: 'Agent cynophile', texte: 'CDI maître-chien : clause sur le chien et son entretien.', tags: ['CDI', 'Chien'], base: { genre: 'travail', metier: 'securite', nature: 'CDI', temps: 'plein', posteCle: 'cynophile', clauses: { chien: true } } },
   { id: 'cdd-evenementiel', famille: 'securite', titre: 'Agent événementiel', texte: 'CDD pour un événement (salon, concert, soirée).', tags: ['CDD', 'Événement'], base: { genre: 'travail', metier: 'securite', nature: 'CDD', temps: 'partiel', posteCle: 'evenementiel', duree: { motif: 'accroissement' } } },
+  // « Extra » : le CDD d'usage est interdit dans la sécurité privée (art. D1242-1, réponse ministérielle du 14/05/2019) → CDD court pour surcroît d'activité
+  { id: 'extra', famille: 'securite', titre: 'Extra (vacation)', texte: 'Une soirée, un week-end, un renfort au pied levé : contrat court à dates fixes, rapide à remplir.', tags: ['Extra', 'CDD court'], base: { genre: 'travail', metier: 'securite', nature: 'CDD', temps: 'partiel', posteCle: 'ads', extra: true, duree: { motif: 'accroissement', essai: 'aucune', renouvelable: false }, rem: { navigo: false }, clauses: { mobilite: false, reprise: false, formation: false } } },
   { id: 'cdi-chef-poste', famille: 'securite', titre: 'Chef de poste', texte: 'CDI chef de poste ou chef d’équipe sécurité.', tags: ['CDI'], base: { genre: 'travail', metier: 'securite', nature: 'CDI', temps: 'plein', posteCle: 'chef-poste' } },
   { id: 'cdi-protection', famille: 'protection', titre: 'Garde du corps', texte: 'CDI agent de protection rapprochée.', tags: ['CDI'], attention: ATT_PROTECTION, base: { genre: 'travail', metier: 'protection', nature: 'CDI', temps: 'plein', posteCle: 'apr' } },
   { id: 'cdd-protection', famille: 'protection', titre: 'Garde du corps', texte: 'CDD pour une mission de protection (séjour, événement).', tags: ['CDD'], attention: ATT_PROTECTION, base: { genre: 'travail', metier: 'protection', nature: 'CDD', temps: 'plein', posteCle: 'apr' } },
@@ -99,8 +101,9 @@ export function reglagesComplets(r) {
 
 /* ---------- Données d'un contrat ---------- */
 const VIDE = () => ({
-  modele: '', genre: 'travail', metier: 'securite', nature: 'CDI', temps: 'plein', posteCle: 'ads', statut: 'brouillon',
+  modele: '', genre: 'travail', metier: 'securite', nature: 'CDI', temps: 'plein', posteCle: 'ads', statut: 'brouillon', extra: false,
   emp: {}, empCle: 'ei',
+  ex: { vacations: '', heures: '' },
   sal: { civ: '', nom: '', prenom: '', naissance: '', lieuNaissance: '', nationalite: 'française', ue: true, titreSejour: '', titreFin: '', adresse: '', nir: '', tel: '', email: '',
     carte: '', carteFin: '', ssiapDiplome: '', ssiapDate: '', secourisme: '', carteVtc: '', carteVtcFin: '', prefecture: '', permis: '', permisDate: '', agentId: 0 },
   poste: { intitule: '', qualif: '', statut: 'Employé', lieu: '', zone: CCN.zone, base: '' },
@@ -139,7 +142,7 @@ export function nouveauContrat(modeleId, R) {
   d.poste.lieu = d.metier === 'bureau' ? R.siege : '';
   d.poste.base = R.siege;
   appliquerPoste(d);
-  if (d.temps === 'partiel') d.tps.hebdo = d.posteCle === 'evenementiel' ? '' : 24;
+  if (d.temps === 'partiel') d.tps.hebdo = d.posteCle === 'evenementiel' || d.extra ? '' : 24;
   if (d.metier === 'bureau' || d.metier === 'vtc') d.tps.nuit = false;
   if (d.metier === 'vtc') { d.clauses.reprise = false; d.poste.zone = 'Paris et Île-de-France, ainsi que tout trajet demandé par un client au départ de cette zone'; }
   if (d.metier === 'bureau') { d.clauses.reprise = false; d.clauses.mobilite = false; }
@@ -185,6 +188,7 @@ export function titreContrat(d, court) {
   if (d.genre === 'avenant') return court ? `Avenant n° ${d.av?.numero || '…'} · ${qui}` : `Avenant n° ${d.av?.numero || '…'} · ${qui || 'salarié'}`;
   if (d.genre === 'offre') return court ? `Offre d’emploi · ${qui}` : `Promesse d’embauche · ${qui || 'candidat'}`;
   const poste = (d.poste?.intitule || '').replace(/\s*\(.*\)$/, '');
+  if (d.extra) return court ? `Contrat extra · ${qui}` : ['Extra', poste, qui || 'nouvel agent'].join(' · ');
   return court ? `Contrat de travail ${d.nature} · ${qui}` : [`${d.nature}${d.temps === 'partiel' ? ' temps partiel' : ''}`, poste, qui || 'nouveau salarié'].join(' · ');
 }
 export function nomFichier(d) {
@@ -193,6 +197,7 @@ export function nomFichier(d) {
   if (d.genre === 'soustraitance') return `Contrat de sous-traitance - ${d.st?.nom || 'BDA'}`;
   if (d.genre === 'avenant') return `Avenant ${d.av?.numero || ''} - ${qui}`;
   if (d.genre === 'offre') return `Promesse d'embauche - ${qui}`;
+  if (d.extra) return `Contrat extra - ${qui || 'BDA'}`;
   return `Contrat ${d.nature}${d.temps === 'partiel' ? ' temps partiel' : ''} - ${qui || 'BDA'}`;
 }
 
@@ -293,8 +298,12 @@ function champsRemuneration(d) {
   const brut = +d.rem.taux > 0 && mensuel ? fr2(Math.round(+d.rem.taux * mensuel * 100) / 100) : '';
   const min = minimumConventionnel(d);
   const aideMin = min ? `Minimum ${CCN.grille.annee} de la convention pour le coefficient ${min.coef} : ${fr2(min.horaire)} € de l’heure (${fr2(min.mensuel)} € par mois à temps plein).` : `SMIC : ${fr2(CCN.smic)} € de l’heure.`;
+  // Extra : ce que touche l'agent pour la mission (base + 10 % fin de contrat + 10 % congés)
+  const hx = d.extra ? heuresExtra(d) : 0;
+  const baseExtra = +d.rem.taux > 0 && hx ? Math.round(+d.rem.taux * hx * 100) / 100 : 0;
+  const aideExtra = baseExtra ? `Pour ${String(hx).replace('.', ',')} h : ${fr2(baseExtra)} € + 10 % de fin de contrat + 10 % de congés = ${fr2(Math.round(baseExtra * 1.21 * 100) / 100)} € brut, sans les majorations de nuit, de dimanche et le panier.` : '';
   return [
-    { k: 'rem.taux', l: 'Taux horaire brut (€)', t: 'nombre', demi: true, refait: true, aide: [brut ? `Salaire de base : ${brut} € brut par mois.` : '', aideMin].filter(Boolean).join(' ') },
+    { k: 'rem.taux', l: 'Taux horaire brut (€)', t: 'nombre', demi: true, refait: true, aide: [brut ? `Salaire de base : ${brut} € brut par mois.` : '', aideExtra, aideMin].filter(Boolean).join(' ') },
     { k: 'rem.jour', l: 'Payé au plus tard le', ph: 'ex. 5 du mois suivant', demi: true },
     { k: 'rem.primes', l: 'Primes ou avantages en plus', t: 'zone', lignes: 2, ph: 'ex. prime de chef de poste de 100 € brut par mois' },
     { k: 'rem.navigo', l: 'Remboursement de 50 % du Navigo', t: 'case' },
@@ -330,6 +339,20 @@ function champsClauses(d) {
     { k: 'clauses.ncZone', l: 'Zone', si: (x) => x.clauses.nonConcurrence },
   ];
 }
+// Extra : la mission en une seule rubrique (motif, lieu, dates, horaires)
+function champsExtra(d) {
+  const calcul = heuresVacations(d.ex.vacations);
+  const fr = (n) => String(n).replace('.', ',');
+  return [
+    { k: 'metier', l: 'Métier', t: 'choix', o: [['securite', 'Agent de sécurité'], ['ssiap', 'Agent SSIAP']], refait: true, apres: (x) => { x.posteCle = postesDe(x.metier)[0][0]; appliquerPoste(x); } },
+    { k: 'duree.motifDetail', l: 'Pourquoi cet extra ?', t: 'zone', lignes: 2, ph: 'ex. renfort de la sécurité de la soirée du 7 novembre 2026 au bar Le …', aide: 'Obligatoire et précis : un motif vague peut transformer le contrat en CDI.' },
+    { k: 'poste.lieu', l: 'Lieu de la mission', ph: 'ex. Le Pub Saint-Michel, 19 quai Saint-Michel, 75005 Paris' },
+    { k: 'duree.debut', l: 'Premier jour', t: 'date', demi: true, refait: true },
+    { k: 'duree.fin', l: 'Dernier jour', t: 'date', demi: true, refait: true, aide: 'Le même jour s’il n’y a qu’une vacation.' },
+    { k: 'ex.vacations', l: 'Jours et horaires (une ligne par vacation)', t: 'zone', lignes: 3, refait: true, ph: 'ex. Samedi 7 novembre 2026, de 22 h à 5 h' },
+    { k: 'ex.heures', l: 'Total des heures', t: 'nombre', demi: true, refait: true, ph: calcul ? fr(calcul) : '', aide: calcul ? `Calculé depuis les horaires : ${fr(calcul)} h. Écrivez un autre total seulement s’il le faut.` : 'Calculé tout seul depuis les horaires.' },
+  ];
+}
 const champsFait = () => [
   { k: 'titreDoc', l: 'Titre en haut du document', ph: 'Laissez vide pour le titre automatique' },
   { k: 'sousDoc', l: 'Sous-titre', ph: 'Laissez vide pour le sous-titre automatique' },
@@ -353,6 +376,18 @@ export function sections(d, R) {
         { k: 'of.validite', l: 'Réponse attendue avant le', t: 'date', demi: true, aide: 'Après cette date, l’offre tombe.' },
         { k: 'of.conditions', l: 'Conditions à remplir', t: 'zone', lignes: 3, ph: 'ex. présenter sa carte professionnelle en cours de validité et ses diplômes' },
         ...champsFait()] },
+    ];
+  }
+  if (d.extra) {
+    return [
+      { cle: 'modele', titre: 'Le contrat', champs: champsEmployeur(R) },
+      { cle: 'salarie', titre: 'L’agent', manque: (x) => !x.sal.nom || !x.sal.naissance || !x.sal.adresse || !x.sal.nir, champs: champsSalarie(d, 'agent') },
+      { cle: 'mission', titre: 'La mission', manque: (x) => !x.duree.debut || !x.duree.fin || !x.ex.vacations.trim() || !String(x.duree.motifDetail || '').trim() || !x.poste.lieu.trim(), champs: champsExtra(d) },
+      { cle: 'poste', titre: 'Le poste', champs: champsPoste(d).filter((c) => !['poste.lieu', 'poste.base', 'poste.zone'].includes(c.k)) },
+      { cle: 'remuneration', titre: 'Salaire', manque: (x) => !(+x.rem.taux > 0), champs: champsRemuneration(d) },
+      { cle: 'organismes', titre: 'Retraite, prévoyance, mutuelle', manque: (x) => !x.org.retraite.trim() || !x.org.prevoyance.trim(), intro: 'Repris des réglages (Contrats > Employeurs & organismes). Obligatoires dans un CDD.', champs: champsOrganismes() },
+      { cle: 'clauses', titre: 'Clauses', champs: champsClauses(d).filter((c) => ['clauses.confidentialite', 'clauses.pointage'].includes(c.k)) },
+      { cle: 'fait', titre: 'Titre, lieu et date', champs: champsFait() },
     ];
   }
   return [
@@ -488,20 +523,28 @@ export function alertes(d) {
   if (d.sal.ue === false && !d.sal.titreSejour) A.push(['alerte', 'Salarié étranger : indiquez son titre de séjour et demandez sa vérification à la préfecture au moins 2 jours ouvrables avant l’embauche.']);
   const sejour = jour(d.sal.titreFin);
   if (d.sal.ue === false && sejour && sejour < (debut || new Date())) A.push(['danger', 'Le titre de séjour est expiré à la date d’embauche.']);
-  if (d.temps === 'partiel' && +d.tps.hebdo > 0 && +d.tps.hebdo < CCN.minimumPartiel && !d.tps.demande24 && d.posteCle !== 'evenementiel') A.push(['alerte', `Moins de ${CCN.minimumPartiel} h par semaine : il faut une demande écrite et motivée du salarié (art. L3123-7 du Code du travail), à garder avec le contrat.`]);
-  if (d.temps === 'partiel' && !String(d.tps.repartition || '').trim()) A.push(['alerte', 'Temps partiel : la répartition des heures (jours de la semaine) est obligatoire.']);
+  if (d.extra) {
+    if (!String(d.ex.vacations || '').trim()) A.push(['alerte', 'Indiquez les jours et horaires de chaque vacation : ils sont obligatoires.']);
+    else if (!heuresExtra(d)) A.push(['alerte', 'Total des heures à indiquer (les horaires n’ont pas pu être lus).']);
+    if (String(d.ex.vacations || '').split('\n').some((l) => heuresVacations(l) > 12)) A.push(['danger', 'Une vacation dépasse 12 heures : c’est le maximum de la convention.']);
+    if (joursExtra(d) > 7 && hebdoExtra(d) < CCN.minimumPartiel) A.push(['alerte', `Plus de 7 jours avec moins de ${CCN.minimumPartiel} h par semaine : il faut une demande écrite et motivée de l’agent (art. L3123-7 du Code du travail).`]);
+    A.push(['info', 'Avant chaque extra : déclaration préalable à l’embauche (DPAE) à l’URSSAF, puis contrat signé par l’agent avant le début de la vacation. Sans contrat écrit et signé, l’extra peut être requalifié en CDI.']);
+    A.push(['info', 'Un extra sert à un besoin ponctuel. Si un client a besoin de quelqu’un toutes les semaines, il faut un CDI à temps partiel. Entre deux extras sur le même poste, il faut aussi respecter un délai de carence (la moitié de la durée du contrat s’il dure moins de 14 jours).']);
+  }
+  if (!d.extra && d.temps === 'partiel' && +d.tps.hebdo > 0 && +d.tps.hebdo < CCN.minimumPartiel && !d.tps.demande24 && d.posteCle !== 'evenementiel') A.push(['alerte', `Moins de ${CCN.minimumPartiel} h par semaine : il faut une demande écrite et motivée du salarié (art. L3123-7 du Code du travail), à garder avec le contrat.`]);
+  if (!d.extra && d.temps === 'partiel' && !String(d.tps.repartition || '').trim()) A.push(['alerte', 'Temps partiel : la répartition des heures (jours de la semaine) est obligatoire.']);
   if (d.nature === 'CDD') {
     if (d.duree.motif !== 'accroissement' && d.duree.motif !== 'saisonnier' && !d.duree.remplace) A.push(['alerte', 'CDD de remplacement : le nom et le poste du salarié remplacé sont obligatoires.']);
     if ((d.duree.motif === 'accroissement' || d.duree.motif === 'saisonnier') && !String(d.duree.motifDetail || '').trim()) A.push(['alerte', 'Précisez le surcroît d’activité : un motif vague peut faire requalifier le CDD en CDI.']);
     const fin = jour(d.duree.fin);
     if (debut && fin && (fin - debut) / 86400000 > 548) A.push(['danger', 'Un CDD ne peut pas dépasser 18 mois, renouvellements compris.']);
     if (!String(d.org.retraite || '').trim() || !String(d.org.prevoyance || '').trim()) A.push(['alerte', 'CDD : le nom et l’adresse de la caisse de retraite complémentaire et de l’organisme de prévoyance sont obligatoires.']);
-    A.push(['info', 'Le CDD signé doit être remis au salarié dans les 2 jours ouvrables qui suivent l’embauche (art. L1242-13 du Code du travail).']);
+    if (!d.extra) A.push(['info', 'Le CDD signé doit être remis au salarié dans les 2 jours ouvrables qui suivent l’embauche (art. L1242-13 du Code du travail).']);
   }
   const min = minimumConventionnel(d);
   if (!(+d.rem.taux > 0)) A.push(['alerte', 'Taux horaire à indiquer.']);
   else if (+d.rem.taux < CCN.smic) A.push(['danger', `Le taux horaire est sous le SMIC (${String(CCN.smic).replace('.', ',')} € brut de l’heure).`]);
   else if (min && +d.rem.taux < min.horaire) A.push(['danger', `Le taux horaire est sous le minimum de la convention collective pour le coefficient ${min.coef} : ${String(min.horaire).replace('.', ',')} € brut de l’heure en ${CCN.grille.annee}.`]);
-  if (min && min.coef === 120 && d.poste.statut !== 'Agent de maîtrise') A.push(['info', 'Coefficient 120 : 6 mois au plus. Ensuite, passage au coefficient 130 (avenant avec le nouveau salaire).']);
+  if (min && min.coef === 120 && d.poste.statut !== 'Agent de maîtrise' && !d.extra) A.push(['info', 'Coefficient 120 : 6 mois au plus. Ensuite, passage au coefficient 130 (avenant avec le nouveau salaire).']);
   return A;
 }

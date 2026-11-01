@@ -76,6 +76,25 @@ export function heuresMois(d) {
   if (!(hebdo > 0)) return 0;
   return d.temps === 'partiel' ? Math.round(hebdo * 52 / 12 * 100) / 100 : 151.67;
 }
+// Extra : heures écrites dans les horaires (« de 22 h à 5 h », « 8h30-12h », « 20:00 – 02:00 »), nuit comprise
+export function heuresVacations(t) {
+  let minutes = 0;
+  for (const m of String(t || '').matchAll(/(\d{1,2})\s*(?:h|:)\s*(\d{2})?\s*(?:-|–|—|à|a)\s*(\d{1,2})\s*(?:h|:)\s*(\d{2})?/gi)) {
+    const debut = +m[1] * 60 + (+m[2] || 0);
+    let fin = +m[3] * 60 + (+m[4] || 0);
+    if (fin <= debut) fin += 1440;
+    minutes += fin - debut;
+  }
+  return Math.round(minutes / 60 * 100) / 100;
+}
+export const heuresExtra = (d) => (+d.ex?.heures > 0 ? +d.ex.heures : heuresVacations(d.ex?.vacations));
+// Nombre de jours du contrat (premier et dernier jour compris)
+export function joursExtra(d) {
+  const [a, b] = [d.duree.debut, d.duree.fin].map((s) => (/^\d{4}-\d{2}-\d{2}/.test(s || '') ? new Date(`${s.slice(0, 10)}T12:00:00`) : null));
+  return a && b && b >= a ? Math.round((b - a) / 86400000) + 1 : 0;
+}
+// Heures par semaine d'un extra (pour savoir s'il est à temps partiel)
+export const hebdoExtra = (d) => heuresExtra(d) / Math.max(1, Math.ceil(joursExtra(d) / 7));
 const g = (d) => {
   const c = d.sal?.civ;
   return { e: c === 'Mme' ? 'e' : c === 'M.' ? '' : '(e)', civ: c === 'Mme' ? 'Madame' : c === 'M.' ? 'Monsieur' : 'Monsieur / Madame' };
@@ -242,12 +261,15 @@ const convention = (d) => (d.metier === 'vtc' ? CCN.vtc : CCN.secu);
 
 function contratTravail(d) {
   const S = d.sal, E = d.emp, Du = d.duree, T = d.tps, R = d.rem;
-  const cdd = d.nature === 'CDD', partiel = d.temps === 'partiel';
+  const cdd = d.nature === 'CDD';
+  // Extra : CDD court à dates fixes ; à temps partiel s'il fait moins de 35 heures par semaine
+  const extra = cdd && !!d.extra;
+  const partiel = extra ? hebdoExtra(d) < 35 : d.temps === 'partiel';
   const secu = d.metier === 'securite' || d.metier === 'protection';
   const carteCnaps = secu || (d.metier === 'ssiap' && d.ssiapSurveillance);
   const mensuel = heuresMois(d);
   const titre = `Contrat de travail à durée ${cdd ? 'déterminée' : 'indéterminée'}${partiel ? ' à temps partiel' : ''}`;
-  const sous = [d.poste.intitule, cdd ? `Code du travail, articles L1242-1 et suivants` : ''].filter(Boolean).join(' · ');
+  const sous = [d.poste.intitule, extra ? 'Vacation ponctuelle (extra)' : '', cdd ? `Code du travail, articles L1242-1 et suivants` : ''].filter(Boolean).join(' · ');
   const conv = convention(d);
 
   /* ----- Engagement ----- */
@@ -279,9 +301,12 @@ function contratTravail(d) {
       attente: P`Le présent contrat est conclu dans l’attente de l’entrée en service effective du salarié recruté par contrat à durée indéterminée pour remplacer ${V(Du.remplace, 'nom du salarié')}, ${V(Du.remplaceQualif, 'qualification')} (article L1242-2, 1° du Code du travail).`,
     };
     const precis = Du.terme === 'precis' || Du.motif === 'accroissement';
+    const unJour = extra && Du.debut && Du.debut === Du.fin;
     duree = art('duree', 'Motif et durée du contrat', [
       motifs[Du.motif] || motifs.accroissement,
-      precis ? P`Il est conclu pour une durée déterminée du ${D(Du.debut)} au ${D(Du.fin)} inclus. Il prendra fin de plein droit à cette date.`
+      unJour ? P`Il est conclu pour la seule journée du ${D(Du.debut)}, pour la vacation prévue à l’article « Horaires de travail ». Il prendra fin de plein droit à l’issue de cette vacation.`
+        : extra ? P`Il est conclu pour une durée déterminée du ${D(Du.debut)} au ${D(Du.fin)} inclus, pour les vacations prévues à l’article « Horaires de travail ». Il prendra fin de plein droit à l’issue de la dernière vacation.`
+        : precis ? P`Il est conclu pour une durée déterminée du ${D(Du.debut)} au ${D(Du.fin)} inclus. Il prendra fin de plein droit à cette date.`
         : P`Il prend effet le ${D(Du.debut)} pour une durée minimale de ${V(Du.dureeMin, 'durée minimale')}. Il prendra fin au retour de ${V(Du.remplace, 'nom du salarié remplacé')}${Du.motif === 'attente' ? ' ou à l’entrée en service du salarié recruté' : ''}, ou à la fin de l’absence si elle intervient après cette durée minimale.`,
       precis && Du.renouvelable ? P`Il pourra être renouvelé deux fois au plus, par avenant signé avant son terme, sans que sa durée totale, renouvellements compris, puisse dépasser dix-huit mois (articles L1242-8-1 et L1243-13-1 du Code du travail).` : null,
       P`À l’échéance du contrat, le Salarié percevra, sauf dans les cas prévus par la loi (notamment refus d’un contrat à durée indéterminée pour un emploi similaire, rupture anticipée à son initiative, faute grave ou force majeure${Du.motif === 'saisonnier' ? ', emploi saisonnier' : ''}), une indemnité de fin de contrat égale à 10 % de la rémunération brute totale perçue (article L1243-8 du Code du travail), ainsi qu’une indemnité compensatrice pour les congés payés non pris.`,
@@ -318,7 +343,11 @@ function contratTravail(d) {
 
   /* ----- Lieu de travail ----- */
   let lieu;
-  if (d.metier === 'vtc') {
+  if (extra) {
+    lieu = art('lieu', 'Lieu de travail', [
+      P`La mission se déroule sur le site suivant : ${V(d.poste.lieu, 'nom et adresse du site')}. Le Salarié s’y présente à l’heure prévue, en tenue, et se met à la disposition du responsable du site ou du chef de poste.`,
+    ]);
+  } else if (d.metier === 'vtc') {
     lieu = art('lieu', 'Lieu de travail', [
       P`Le Salarié prend son service à ${V(d.poste.base, 'lieu de prise de service')}. Les courses ont lieu principalement dans la zone suivante : ${V(d.poste.zone, 'zone')}. Des déplacements plus lointains peuvent être demandés pour une course réservée ; les frais de repas et d’hébergement qu’ils occasionnent sont alors pris en charge par l’Employeur sur justificatifs.`,
     ]);
@@ -344,8 +373,22 @@ function contratTravail(d) {
       conv ? P`Conformément à l’accord de branche applicable depuis le 1er juillet 2026, chaque période de travail est rémunérée sur la base du temps réellement travaillé, avec un minimum de 6 heures, dans les conditions et sous les exceptions prévues par cet accord.` : null,
     ];
   const horaires = regles.filter(Boolean);
+  const sixHeures = conv ? P`Conformément à l’accord de branche applicable depuis le 1er juillet 2026, chaque période de travail est rémunérée sur la base du temps réellement travaillé, avec un minimum de 6 heures, dans les conditions et sous les exceptions prévues par cet accord.` : null;
   let temps;
-  if (partiel) {
+  if (extra) {
+    const total = heuresExtra(d);
+    const vacations = lignes(d.ex.vacations);
+    temps = art('temps', 'Horaires de travail', [
+      P`Le Salarié travaille selon les horaires suivants :`,
+      ...(vacations.length ? vacations.map(L) : [P`${V('', 'jours et horaires de chaque vacation')}`]),
+      P`soit une durée totale de ${V(heuresFr(total), 'nombre')} heures de travail.`,
+      partiel ? P`Ces horaires ne peuvent être modifiés qu’avec l’accord du Salarié. Les heures faites en plus, à sa demande ou avec son accord, sont des heures complémentaires : elles ne peuvent dépasser le dixième de la durée prévue ci-dessus et sont majorées de 10 % (articles L3123-8, L3123-28 et L3123-29 du Code du travail).`
+        : P`Ces horaires ne peuvent être modifiés qu’avec l’accord du Salarié. Les heures faites au-delà de 35 heures par semaine sont des heures supplémentaires, majorées de 25 % pour les huit premières et de 50 % au-delà (article L3121-36 du Code du travail).`,
+      partiel && joursExtra(d) > 0 && joursExtra(d) <= 7 ? P`Le contrat durant au plus sept jours, la durée minimale de 24 heures par semaine prévue pour le temps partiel ne s’applique pas (article L3123-7 du Code du travail).` : null,
+      P`Une vacation ne peut dépasser 12 heures. Le Salarié bénéficie d’une pause d’au moins 20 minutes dès 6 heures de travail, et d’un repos d’au moins 11 heures consécutives entre deux vacations.`,
+      sixHeures,
+    ], { obligatoire: true });
+  } else if (partiel) {
     const t24 = +T.hebdo > 0 && +T.hebdo < CCN.minimumPartiel;
     const motif24 = { personnel: 'pour faire face à des contraintes personnelles', cumul: 'pour lui permettre de cumuler plusieurs activités', etudiant: 'en raison de la poursuite de ses études' }[T.motif24] || 'pour des raisons personnelles';
     temps = art('temps', 'Durée et répartition du travail à temps partiel', [
@@ -357,7 +400,7 @@ function contratTravail(d) {
       t24 ? P`La durée de travail est inférieure à ${CCN.minimumPartiel} heures par semaine à la demande écrite et motivée du Salarié en date du ${D(T.demande24)}, ${motif24} (article L3123-7 du Code du travail). Ses horaires sont regroupés sur des journées ou des demi-journées régulières ou complètes.` : null,
       P`Le Salarié à temps partiel bénéficie des mêmes droits que les salariés à temps complet (article L3123-5 du Code du travail) et d’une priorité pour l’attribution d’un emploi à temps complet ressortissant à sa catégorie professionnelle (article L3123-3).`,
       T.nuit && d.metier !== 'bureau' ? P`Le Salarié pourra être amené à travailler de nuit, les samedis, dimanches et jours fériés, dans le respect de la répartition ci-dessus.` : null,
-      conv && d.metier !== 'bureau' ? P`Conformément à l’accord de branche applicable depuis le 1er juillet 2026, chaque période de travail est rémunérée sur la base du temps réellement travaillé, avec un minimum de 6 heures, dans les conditions et sous les exceptions prévues par cet accord.` : null,
+      d.metier !== 'bureau' ? sixHeures : null,
     ], { obligatoire: true });
   } else {
     temps = art('temps', 'Durée du travail', [
@@ -372,25 +415,30 @@ function contratTravail(d) {
   /* ----- Rémunération ----- */
   const brut = +R.taux > 0 && mensuel ? Math.round(+R.taux * mensuel * 100) / 100 : 0;
   const primes = lignes(R.primes);
+  const totalExtra = extra ? heuresExtra(d) : 0;
+  const brutExtra = +R.taux > 0 && totalExtra ? Math.round(+R.taux * totalExtra * 100) / 100 : 0;
   const remuneration = art('remuneration', 'Rémunération', [
-    P`En contrepartie de son travail, le Salarié percevra une rémunération mensuelle brute de ${V(brut ? `${nombreFr(brut)} €` : '', 'montant')} pour ${V(heuresFr(mensuel), 'nombre')} heures de travail, soit un taux horaire brut de ${V(+R.taux > 0 ? `${nombreFr(R.taux)} €` : '', 'taux horaire')}.`,
+    extra ? P`En contrepartie de son travail, le Salarié percevra un salaire horaire brut de ${V(+R.taux > 0 ? `${nombreFr(R.taux)} €` : '', 'taux horaire')}, soit ${V(brutExtra ? `${nombreFr(brutExtra)} €` : '', 'montant')} brut pour les ${V(heuresFr(totalExtra), 'nombre')} heures prévues.`
+      : P`En contrepartie de son travail, le Salarié percevra une rémunération mensuelle brute de ${V(brut ? `${nombreFr(brut)} €` : '', 'montant')} pour ${V(heuresFr(mensuel), 'nombre')} heures de travail, soit un taux horaire brut de ${V(+R.taux > 0 ? `${nombreFr(R.taux)} €` : '', 'taux horaire')}.`,
     ...(conv && d.metier !== 'bureau' ? [
       P`S’y ajoutent, dans les conditions prévues par la convention collective :`,
       L('une majoration de 10 % du taux horaire minimum conventionnel pour chaque heure de nuit (entre 21 h et 6 h), ainsi qu’un repos compensateur de 1 % par heure de nuit ;'),
       L('une majoration de 10 % du taux horaire minimum conventionnel pour chaque heure travaillée le dimanche ;'),
       L('pour un jour férié travaillé, une indemnité égale au salaire de ces heures, qui peut être remplacée par un repos équivalent pris dans le mois suivant ; le travail du 1er mai est payé double ;'),
       L(`une prime de panier pour toute vacation d’au moins 6 heures de travail effectif (${CCN.panier} en ${CCN.grille.annee}, une seule par vacation de 12 heures) ;`),
-      L('une prime d’habillage et de déshabillage lorsque le port de la tenue est imposé ;'),
-      d.poste.statut === 'Cadre' ? null : L('une prime d’ancienneté calculée sur le salaire minimum de l’emploi : 2 % après 4 ans, 5 % après 7 ans, 8 % après 10 ans, 10 % après 12 ans et 12 % après 15 ans.'),
+      L(`une prime d’habillage et de déshabillage lorsque le port de la tenue est imposé${d.poste.statut === 'Cadre' || extra ? '.' : ' ;'}`),
+      d.poste.statut === 'Cadre' || extra ? null : L('une prime d’ancienneté calculée sur le salaire minimum de l’emploi : 2 % après 4 ans, 5 % après 7 ans, 8 % après 10 ans, 10 % après 12 ans et 12 % après 15 ans.'),
     ] : []),
     conv && d.metier === 'bureau' && d.poste.statut !== 'Cadre' ? P`S’y ajoute la prime d’ancienneté prévue par la convention collective : 2 % après 4 ans, 5 % après 7 ans, 8 % après 10 ans, 10 % après 12 ans et 12 % après 15 ans, calculée sur le salaire minimum de l’emploi.` : null,
     ...primes.map((p) => P`${p}`),
-    P`La rémunération est versée chaque mois par virement bancaire${R.jour ? P`, au plus tard le ${V(R.jour)}` : ''}, et accompagnée d’un bulletin de paie.`,
+    extra ? P`À la fin du contrat s’ajoutent, sauf dans les cas où la loi les exclut, l’indemnité de fin de contrat (10 % de la rémunération brute totale) et l’indemnité compensatrice de congés payés (10 % de la rémunération brute totale, indemnité de fin de contrat comprise).` : null,
+    P`La rémunération est versée ${extra ? '' : 'chaque mois '}par virement bancaire${R.jour ? P`, au plus tard le ${V(R.jour)}` : ''}, et accompagnée d’un bulletin de paie.`,
     R.navigo ? P`L’Employeur prend en charge 50 % du prix de l’abonnement de transports publics du Salarié pour ses trajets entre son domicile et son lieu de travail, sur présentation des justificatifs (article L3261-2 du Code du travail).` : null,
   ], { obligatoire: true });
 
   /* ----- Congés ----- */
-  const conges = art('conges', 'Congés payés', [
+  // Extra : les congés sont payés en fin de contrat (indemnité de 10 %, article Rémunération)
+  const conges = extra ? null : art('conges', 'Congés payés', [
     P`Le Salarié a droit à des congés payés de deux jours et demi ouvrables par mois de travail effectif, soit trente jours ouvrables pour une année complète (article L3141-3 du Code du travail). Les dates de congés sont fixées par l’Employeur, après demande du Salarié, en tenant compte des nécessités du service${d.clauses.pointage ? ' ; les demandes se font depuis l’Espace équipe' : ''}.`,
   ]);
 

@@ -57,9 +57,15 @@ export function etatDocs(docs) {
 /* =========================================================
    PAGE
    ========================================================= */
-export function pageAgents(ctx) {
+export async function pageAgents(ctx) {
   const [p0] = ctx.params;
   if (/^\d+$/.test(p0 || '')) return ficheAgent(ctx, +p0);
+  // #/agents/nouveau (bouton « Créer » de la barre du haut) : la liste, puis la fenêtre de création
+  if (p0 === 'nouveau') {
+    await listeAgents(ctx);
+    history.replaceState(null, '', '#/agents');
+    return nouvelAgent(ctx);
+  }
   return listeAgents(ctx);
 }
 

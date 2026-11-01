@@ -1,7 +1,7 @@
 /* =========================================================
    ESPACE ADMIN BDA — démarrage, connexion, menu et navigation
    ========================================================= */
-import { api, quandDeconnecte, h, $, $$, icone, marqueLogo, toast, erreur, champ, saisie, cap } from './outils.js';
+import { api, quandDeconnecte, h, $, $$, icone, marqueLogo, toast, erreur, champ, saisie, cap, modale } from './outils.js';
 import { PAGES } from './pages.js';
 import { pageVueGenerale } from './vue-generale.js';
 import { pagePaiements, pageStatistiques } from './appli-stats.js';
@@ -204,7 +204,7 @@ function ecranSecours() {
 }
 
 /* ---------- Application ---------- */
-let zonePage, titrePage, actionsPage, menuEl, filEl, coteEl, appliEl;
+let zonePage, titrePage, actionsPage, menuEl, filEl, coteEl, appliEl, iconePage, surtitrePage;
 let espaceCourant = espaceMemo();
 let palette = null;
 export const ouvrirPalette = (texte) => palette?.ouvrir(texte);
@@ -389,16 +389,20 @@ function lancerApplication() {
     menuEl,
     h('div', { class: 'cote__bas' },
       h('button', { class: 'cote__reduire', type: 'button', title: 'Réduire ou agrandir le menu', onclick: basculerMenuReduit }, icone('panneau'), h('span', null, 'Réduire le menu')),
-      h('p', { class: 'cote__version' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'BDA Admin · v6.0'))));
+      h('p', { class: 'cote__version', title: 'Les compteurs se mettent à jour toutes les minutes' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'BDA Admin · v7.0 · ', h('span', { id: 'synchro' }, 'à jour')))));
 
   filEl = h('nav', { class: 'ariane', 'aria-label': 'Vous êtes ici' });
   titrePage = h('h1', { class: 'entete-page__titre' });
+  iconePage = h('span', { class: 'entete-page__ic', 'aria-hidden': 'true' });
+  surtitrePage = h('span', { class: 'entete-page__surtitre' });
   actionsPage = h('div', { class: 'entete-page__actions haut__actions' });
   zonePage = h('div', { class: 'page', id: 'page' });
   const haut = h('header', { class: 'haut' },
     h('button', { class: 'icon-btn haut__menu', type: 'button', 'aria-label': 'Ouvrir le menu', onclick: () => document.body.classList.toggle('menu-ouvert') }, icone('menu')),
     filEl,
     h('a', { class: 'temoin-site', href: '#/site', id: 'temoin-site', title: 'Contrôle du site' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'Site en ligne')),
+    h('button', { class: 'creer-btn', type: 'button', title: 'Créer (touche C)', 'aria-haspopup': 'menu', 'aria-expanded': 'false', onclick: (e) => ouvrirDeroulant(e.currentTarget, panneauCreer) },
+      icone('plus'), h('span', null, 'Créer')),
     h('button', { class: 'cmd-btn', type: 'button', 'aria-label': 'Rechercher ou lancer une commande (Ctrl + K)', onclick: () => palette.ouvrir() },
       icone('recherche'), h('span', null, 'Rechercher une page, un client…'), h('kbd', null, 'Ctrl K')),
     h('button', { class: 'haut-btn', type: 'button', title: 'À traiter', 'aria-label': 'À traiter', 'aria-haspopup': 'menu', 'aria-expanded': 'false', onclick: (e) => ouvrirDeroulant(e.currentTarget, panneauTaches) },
@@ -413,7 +417,9 @@ function lancerApplication() {
     coteEl,
     h('div', { class: 'voile', onclick: fermerMenu }),
     h('div', { class: 'principal' }, haut,
-      h('div', { class: 'cadre-page' }, h('div', { class: 'entete-page' }, titrePage, actionsPage), zonePage)));
+      h('div', { class: 'cadre-page' },
+        h('div', { class: 'entete-page' }, h('div', { class: 'entete-page__gauche' }, iconePage, h('div', { class: 'entete-page__textes' }, surtitrePage, titrePage)), actionsPage),
+        zonePage)));
   racine.replaceChildren(appliEl);
   dessinerMenu();
 
@@ -426,6 +432,90 @@ function lancerApplication() {
   majCompteurs();
   clearInterval(lancerApplication.minuteur);
   lancerApplication.minuteur = setInterval(majCompteurs, 60000);
+  // Témoin de synchronisation en bas du menu
+  clearInterval(lancerApplication.synchro);
+  lancerApplication.synchro = setInterval(() => {
+    const el = document.getElementById('synchro');
+    if (!el || !etat.majLe) return;
+    const s = Math.round((Date.now() - etat.majLe) / 1000);
+    el.textContent = s < 10 ? 'à jour' : s < 60 ? `il y a ${s} s` : `il y a ${Math.round(s / 60)} min`;
+  }, 5000);
+  installerRaccourcis();
+  montrerNouveautes();
+}
+
+/* ---------- Bouton « Créer » de la barre du haut ---------- */
+function panneauCreer() {
+  const auj = new Date();
+  const mois = `${auj.getFullYear()}-${String(auj.getMonth() + 1).padStart(2, '0')}`;
+  const choix = [
+    ['#/devis/nouveau', 'Devis', 'Pour un client ou un prospect', 'devis', 'facturation'],
+    ['#/factures/nouveau', 'Facture', 'À envoyer ou à imprimer', 'facture', 'facturation'],
+    ['#/agents/nouveau', 'Agent', 'Ajouter quelqu’un à l’équipe', 'agents', 'equipe'],
+    [`#/planning/${mois}`, 'Planning du mois', 'Organiser les vacations', 'planning', 'equipe'],
+    ['#/notes/nouvelle', 'Note', 'Une idée, un rappel', 'note', 'outils'],
+    ['#/pdf', 'PDF pour un client', 'Déposer dans son espace', 'dossier', 'clients'],
+  ];
+  return [
+    h('header', { class: 'deroulant__tete' }, h('b', null, 'Créer'), h('small', null, 'touche C')),
+    h('ul', { class: 'deroulant__liste creer-liste' }, choix.map(([href, titre, sous, ic, dom]) => h('li', null, h('a', { href },
+      h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)),
+      h('span', { class: 'creer-liste__txt' }, h('b', null, titre), h('small', null, sous)))))),
+  ];
+}
+
+/* ---------- Raccourcis clavier façon Linear : C, ?, G puis une lettre ---------- */
+const ALLER = { v: '#/', t: '#/tableau', d: '#/devis', f: '#/factures', c: '#/demandes', m: '#/messages', a: '#/agents', p: '#/planning', s: '#/site', l: '#/appli', n: '#/notes', r: '#/candidatures' };
+function aideRaccourcis() {
+  const ligne = (touches, texte) => h('li', null, h('span', { class: 'aide-touches' }, touches.map((t) => h('kbd', null, t))), h('span', null, texte));
+  modale({
+    titre: 'Raccourcis clavier',
+    contenu: h('div', { class: 'aide-raccourcis' },
+      h('ul', null,
+        ligne(['Ctrl', 'K'], 'Rechercher une page, un client, une commande'),
+        ligne(['C'], 'Créer : devis, facture, agent, note…'),
+        ligne(['1', '…', '8'], 'Ouvrir une tuile de la Vue générale'),
+        ligne(['?'], 'Afficher cette aide'),
+        ligne(['Échap'], 'Fermer une fenêtre ou un menu')),
+      h('p', { class: 'aide-raccourcis__titre' }, 'Aller directement : G puis…'),
+      h('ul', { class: 'aide-raccourcis__grille' },
+        [['V', 'Vue générale'], ['T', 'Vue d’ensemble'], ['C', 'Demandes clients'], ['M', 'Messages'], ['D', 'Devis'], ['F', 'Factures'], ['A', 'Agents'], ['R', 'Candidatures'], ['P', 'Planning'], ['S', 'Contrôle du site'], ['L', 'Appli en direct'], ['N', 'Notes']]
+          .map(([t, texte]) => ligne(['G', t], texte)))),
+    actions: [{ libelle: 'Compris', classe: 'btn--gold', submit: true }],
+  });
+}
+function installerRaccourcis() {
+  if (installerRaccourcis.fait) return;
+  installerRaccourcis.fait = true;
+  let attenteG = 0;
+  document.addEventListener('keydown', (e) => {
+    if (!document.querySelector('.appli') || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.target.closest?.('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
+    if (document.querySelector('.modale-fond, .palette-fond')) return;
+    const k = e.key.toLowerCase();
+    if (Date.now() - attenteG < 1200 && ALLER[k]) { e.preventDefault(); attenteG = 0; location.hash = ALLER[k]; return; }
+    if (k === 'g') { attenteG = Date.now(); return; }
+    if (e.key === '?') { e.preventDefault(); fermerDeroulant(); aideRaccourcis(); return; }
+    if (k === 'c' && !deroulant) { e.preventDefault(); const b = document.querySelector('.creer-btn'); if (b) ouvrirDeroulant(b, panneauCreer); }
+  });
+}
+
+/* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
+const VERSION = '7';
+function montrerNouveautes() {
+  try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
+  const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
+  setTimeout(() => modale({
+    titre: 'Nouveautés de BDA Admin',
+    contenu: h('div', { class: 'nouveautes' },
+      h('p', { class: 'nouveautes__intro' }, 'Version 7 : plus rapide à utiliser, au clavier comme à la souris.'),
+      h('ul', null,
+        point('plus', 'facturation', 'Bouton « Créer »', 'En haut de chaque page : devis, facture, agent, planning, note. Ou la touche C.'),
+        point('commande', 'clients', 'Raccourcis clavier', 'G puis A pour les agents, G puis D pour les devis… Touche ? pour tout voir.'),
+        point('agents', 'equipe', 'Rubrique Agents', 'Chiffres de l’équipe, filtres, vue en cartes, appel et WhatsApp en un clic.'),
+        point('eclair', 'appli', 'Animations', 'Pages qui glissent, graphiques qui se dessinent, notifications plus claires.'))),
+    actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
+  }), 900);
 }
 
 async function deconnexion() {
@@ -474,6 +564,7 @@ export async function majCompteurs() {
   try {
     const { compteurs } = await api('compteurs');
     etat.compteurs = compteurs;
+    etat.majLe = Date.now();
     // Témoin du site dans la barre du haut : en ligne ou en maintenance
     const temoin = document.getElementById('temoin-site');
     if (temoin) {
@@ -534,6 +625,18 @@ async function router() {
     ...(libelleActif && libelleActif !== rubrique ? [sep(), h('span', null, libelleActif)] : []),
   ]));
 
+  // En-tête de page : l'icône de la rubrique dans sa couleur, et le nom de la rubrique au-dessus du titre
+  const entree = actif ? [...E.menu, ...COMPTE].find((m) => m.chemin === actif) : null;
+  const DOM_RUBRIQUE = { Clients: 'clients', Facturation: 'facturation', 'Équipe': 'equipe', 'Site web': 'site', Outils: 'outils', 'Activité': 'appli', Comptes: 'appli', Configuration: 'appli', Compte: 'securite' };
+  const avecIcone = Boolean(entree?.ic) && !lanceur;
+  iconePage.replaceChildren(...(avecIcone ? [icone(entree.ic)] : []));
+  iconePage.dataset.dom = DOM_RUBRIQUE[rubrique] || (route === 'appli' || route === 'vtc' ? 'appli' : route === 'tableau' ? 'stats' : 'securite');
+  iconePage.hidden = !avecIcone;
+  surtitrePage.textContent = lanceur ? '' : (rubrique || E.nom);
+  iconePage.classList.remove('is-in');
+  void iconePage.offsetWidth;
+  iconePage.classList.add('is-in');
+
   let page = lanceur ? pageVueGenerale : PAGES[route];
   if (route === 'appli' && PAGES_APPLI[params[0]]) page = PAGES_APPLI[params[0]];
 
@@ -549,7 +652,13 @@ async function router() {
     // Dans l'espace Application, le titre suit la rubrique du menu (Courses, Chauffeurs…)
     titre: (t) => { const titre = route === 'appli' && libelleActif ? libelleActif : t; titrePage.textContent = titre; document.title = `${titre} — BDA Admin`; },
     actions: (...n) => actionsPage.replaceChildren(...n.flat().filter(Boolean)),
-    afficher: (...n) => { if (jeton === jetonNavigation) zonePage.replaceChildren(...n.flat().filter(Boolean)); },
+    // Première pose du contenu : transition fluide (le squelette laisse la place à la page)
+    afficher: (...n) => {
+      if (jeton !== jetonNavigation) return;
+      const poser = () => { zonePage.replaceChildren(...n.flat().filter(Boolean)); animerChiffres(zonePage); };
+      if (document.startViewTransition && !sansMouvement() && zonePage.querySelector(':scope > .chargement')) document.startViewTransition(poser);
+      else poser();
+    },
     actuel: () => jeton === jetonNavigation,
     compteurs: majCompteurs,
     aller: (hash) => { location.hash = hash; },
@@ -557,7 +666,7 @@ async function router() {
   };
   try {
     await page(ctx);
-    if (jeton === jetonNavigation) animerChiffres(zonePage);
+
   } catch (e) {
     if (e.statut === 401) return;
     if (jeton !== jetonNavigation) return;

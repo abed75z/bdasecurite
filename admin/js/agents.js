@@ -238,11 +238,14 @@ async function listeAgents(ctx) {
       dessiner();
     } }, icone(ic), h('span', null, libelle))));
 
+  // Les compteurs sont sur les filtres : en haut, juste l'état des dossiers
+  const resumeDossiers = h('div', { class: 'ag-resume', title: `${complets} dossier${complets > 1 ? 's' : ''} complet${complets > 1 ? 's' : ''} sur ${mesAgents.length}` },
+    h('span', { class: 'ag-anneau ag-anneau--petit', style: `--p: ${pourcent}`, 'aria-hidden': 'true' }),
+    h('span', null, h('b', null, `${complets}/${mesAgents.length}`), ' dossiers complets'));
   ctx.afficher(
-    kpis,
-    h('div', { class: 'ag-barre' }, barreFiltres, h('div', { class: 'ag-barre__droite' }, h('div', { class: 'recherche' }, icone('recherche'), rech), choixVue)),
+    h('div', { class: 'ag-barre' }, barreFiltres, h('div', { class: 'ag-barre__droite' }, resumeDossiers, h('div', { class: 'recherche' }, icone('recherche'), rech), choixVue)),
     zoneTableau, grille,
-    h('p', { class: 'legende-docs' }, h('span', null, 'Cliquez sur un agent pour ouvrir sa fiche.'), h('span', null, 'Cliquez sur un titre de colonne pour trier.'), h('span', null, 'En rouge : carte pro expirée, falsifiée ou refusée sur DRACAR.')));
+    nbAlertes ? h('p', { class: 'legende-docs' }, h('span', null, 'En rouge : carte pro expirée, falsifiée ou refusée sur DRACAR.')) : null);
   dessinerTete();
   dessiner();
 }

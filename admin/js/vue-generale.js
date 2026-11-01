@@ -34,18 +34,15 @@ export async function pageVueGenerale(ctx) {
   const majHeure = () => { heure.textContent = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date()); };
   majHeure();
   const minuteur = setInterval(() => { if (!document.body.contains(heure)) { clearInterval(minuteur); return; } majHeure(); }, 10000);
-  const temoin = (ok, texte, href) => h('a', { class: `acc-temoin ${ok ? 'is-ok' : 'is-off'}`, href }, h('i', { 'aria-hidden': 'true' }), texte);
 
   const entete = h('section', { class: 'acc-entete' },
     h('div', { class: 'acc-entete__txt' },
       h('p', { class: 'acc-date' }, cap(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(auj)), h('span', { 'aria-hidden': 'true' }, '·'), heure),
       h('h1', { class: 'acc-titre' }, `${auj.getHours() >= 5 && auj.getHours() < 18 ? 'Bonjour' : 'Bonsoir'}${session.utilisateur ? `, ${cap(session.utilisateur)}` : ''}`),
       h('p', { class: 'acc-sous' }, points ? `${pluriel(points, 'point demande', 'points demandent')} votre attention.` : 'Tout est en ordre. Rien n’attend d’action.')),
-    h('div', { class: 'acc-entete__droite' },
-      h('div', { class: 'acc-temoins' },
-        temoin(!c.horsLigne, c.horsLigne ? 'Site hors ligne' : 'Site en ligne', '#/site'),
-        appli ? temoin(appli.ouvert, appli.ouvert ? 'Appli ouverte' : 'Appli fermée', '#/appli') : null),
-      points ? h('button', { class: 'btn btn--gold acc-voir', type: 'button', onclick: () => document.querySelector('.haut-btn')?.click() }, icone('cloche'), 'Voir ce qui attend') : null));
+    // L'état du site est déjà en haut de l'écran : ici, seulement ce qui attend une action
+    points ? h('div', { class: 'acc-entete__droite' },
+      h('button', { class: 'btn btn--gold acc-voir', type: 'button', onclick: () => document.querySelector('.haut-btn')?.click() }, icone('cloche'), 'Voir ce qui attend')) : null);
 
   /* ----- Une tuile par domaine ----- */
   // Tuiles de tailles différentes (les grandes montent leurs chiffres), une couleur par domaine

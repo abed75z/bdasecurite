@@ -17,7 +17,7 @@ const ESPACES = {
   site: {
     nom: 'Site internet', court: 'Site', ic: 'site', accueil: 'tableau', externe: ['/', 'Voir le site'],
     menu: [
-      { chemin: 'tableau', libelle: 'Vue d’ensemble', ic: 'tableau' },
+      { chemin: 'tableau', libelle: 'Statistiques', ic: 'graphique' },
       { groupe: 'Clients' },
       { chemin: 'demandes', libelle: 'Demandes reçues', ic: 'demande', badge: 'demandes' },
       { chemin: 'messages', libelle: 'Messages', ic: 'message', badge: 'messages' },
@@ -230,7 +230,7 @@ function dessinerMenu() {
     else if (rubriques.length) rubriques.at(-1).pages.push(m);
     else principales.push(lien(m));
   }
-  rubriques.push({ nom: 'Compte', pages: [...COMPTE.filter(visible), { href: '/admin/moi', libelle: 'Mon accès chef', ic: 'couronne' }] });
+  // Les pages du compte (paramètres, sécurité, accès…) sont dans le menu sous l'initiale, en haut à droite
   const rubrique = ({ nom, pages }) => {
     const avecBadge = pages.filter((m) => m.badge);
     return h('div', { class: 'nav__section', dataset: { groupe: nom } },
@@ -407,8 +407,9 @@ function panneauCompte() {
       lien('#/parametres', 'Paramètres', 'reglages'),
       lien('#/securite', 'Accès & sécurité', 'cadenas'),
       etat.session.role === 'admin' ? lien('#/comptes', 'Comptes & accès', 'cle') : null,
-      lien('/admin/moi', 'Mon accès chef', 'couronne'),
-      lien('/', 'Voir le site', 'externe', true)),
+      etat.session.role === 'admin' ? lien('#/notifications', 'Notifications', 'cloche') : null,
+      lien('/admin/moi', 'Mon accès chef', 'couronne')),
+    h('button', { class: 'deroulant__lien', type: 'button', onclick: () => { fermerDeroulant(); aideRaccourcis(); } }, icone('commande'), h('span', null, 'Raccourcis clavier'), h('kbd', null, '?')),
     h('div', { class: 'deroulant__theme' },
       h('span', null, 'Apparence'),
       h('div', { class: 'segments', role: 'group', 'aria-label': 'Apparence' },
@@ -553,7 +554,7 @@ function aideRaccourcis() {
         ligne(['Échap'], 'Fermer une fenêtre ou un menu')),
       h('p', { class: 'aide-raccourcis__titre' }, 'Aller directement : G puis…'),
       h('ul', { class: 'aide-raccourcis__grille' },
-        [['V', 'Vue générale'], ['T', 'Vue d’ensemble'], ['C', 'Demandes clients'], ['M', 'Messages'], ['D', 'Devis'], ['F', 'Factures'], ['A', 'Agents'], ['R', 'Candidatures'], ['P', 'Planning'], ['S', 'Contrôle du site'], ['L', 'Appli en direct'], ['N', 'Notes']]
+        [['V', 'Vue générale'], ['T', 'Statistiques'], ['C', 'Demandes clients'], ['M', 'Messages'], ['D', 'Devis'], ['F', 'Factures'], ['A', 'Agents'], ['R', 'Candidatures'], ['P', 'Planning'], ['S', 'Contrôle du site'], ['L', 'Appli en direct'], ['N', 'Notes']]
           .map(([t, texte]) => ligne(['G', t], texte)))),
     actions: [{ libelle: 'Compris', classe: 'btn--gold', submit: true }],
   });

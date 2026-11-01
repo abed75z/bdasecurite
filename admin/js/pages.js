@@ -84,7 +84,7 @@ function filtres(options, actif, surChoix) {
    ce qui attend une action, derniers documents, activité
    ========================================================= */
 async function pageAccueil(ctx) {
-  ctx.titre('Vue d’ensemble');
+  ctx.titre('Statistiques');
   const auj = new Date();
   const moisCourant = `${auj.getFullYear()}-${pad(auj.getMonth() + 1)}`;
   ctx.actions(

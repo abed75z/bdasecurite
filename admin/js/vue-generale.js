@@ -1,11 +1,10 @@
 /* =========================================================
    ESPACE ADMIN BDA — Vue générale (écran de départ)
-   On choisit l'espace à ouvrir : le site internet (BDA Security Group)
-   ou l'application VTC (BDASH et BDASH Pro), avec l'essentiel de
-   chacun et la liste de ce qui attend une action.
+   Écran calme : la salutation, l'état du site et de l'appli,
+   puis une tuile par grand domaine (Clients, Facturation, Équipe…).
+   Le détail de ce qui attend une action est dans la cloche du haut.
    ========================================================= */
-import { api, h, cap, euroRond, isoVersFr, icone, ErreurApi } from './outils.js';
-import { ligneJournal } from './securite.js';
+import { api, h, cap, icone, ErreurApi } from './outils.js';
 
 async function tableauAppli() {
   const res = await fetch('appli-api.php?a=tableau', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
@@ -18,92 +17,68 @@ export async function pageVueGenerale(ctx) {
   ctx.titre('Vue générale');
   const [{ accueil: a }, session, appli] = await Promise.all([api('accueil'), api('session'), tableauAppli().catch(() => null)]);
   if (!ctx.actuel()) return;
-  const c = a.compteurs;
+  const c = { demandes: 0, messages: 0, assistance: 0, candidatures: 0, equipe: 0, avis: 0, retards: 0, reservations: 0, ...a.compteurs };
   const auj = new Date();
   const pluriel = (n, un, plusieurs) => `${n} ${n > 1 ? plusieurs : un}`;
-
-  /* ----- En-tête de page : salutation, date, accès rapides ----- */
-  ctx.titre(`${auj.getHours() >= 5 && auj.getHours() < 18 ? 'Bonjour' : 'Bonsoir'}${session.utilisateur ? `, ${cap(session.utilisateur)}` : ''}`);
-  document.title = 'Vue générale — Admin BDA';
-  ctx.actions(
-    h('span', { class: 'lc-date' }, icone('planning'), cap(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(auj))),
-    h('a', { class: 'btn', href: '#/devis/nouveau' }, icone('plus'), 'Nouveau devis'),
-    h('a', { class: 'btn btn--gold', href: '#/demandes' }, 'Voir les demandes'));
-
-  /* ----- Les deux espaces ----- */
-  const chiffre = (valeur, libelle, alerte) => h('div', { class: `lc-chiffre ${alerte && valeur ? 'is-alerte' : ''}` }, h('b', null, String(valeur)), h('span', null, libelle));
-  const etat = (ok, texte) => h('span', { class: `lc-etat ${ok ? 'is-ok' : 'is-off'}` }, h('i', { 'aria-hidden': 'true' }), texte);
-  const espace = (href, touche, type, titre, sous, chiffres, contenu, entrer) => h('a', { class: 'lc-espace', href },
-    h('div', { class: 'lc-espace__tete' }, h('span', { class: 'lc-espace__type' }, icone(touche === '1' ? 'site' : 'voiture'), type), h('kbd', { title: `Touche ${touche}` }, touche)),
-    h('h2', null, titre),
-    h('p', { class: 'lc-espace__sous' }, sous),
-    h('div', { class: 'lc-chiffres' }, chiffres),
-    h('p', { class: 'lc-espace__contenu' }, contenu),
-    h('span', { class: 'lc-espace__entrer' }, entrer, h('span', { 'aria-hidden': 'true' }, '→')));
-
-  const site = espace('#/tableau', '1', 'Site internet', 'BDA Security Group',
-    ['bdasecurite.com', etat(!c.horsLigne, c.horsLigne ? 'Hors ligne' : 'En ligne')],
-    [chiffre(c.demandes, c.demandes > 1 ? 'demandes' : 'demande'), chiffre(c.messages, c.messages > 1 ? 'messages' : 'message'), chiffre(c.candidatures, c.candidatures > 1 ? 'candidatures' : 'candidature'), chiffre(c.retards, 'factures en retard', true)],
-    'Demandes et clients, devis et factures, agents et planning, contenu du site.',
-    'Ouvrir l’espace Site');
-
-  const enLigne = appli ? appli.chauffeurs.filter((x) => x.enLigne).length : 0;
+  const enCours = appli ? appli.enDirect.length : 0;
   const aAttribuer = appli ? appli.aVenir.filter((x) => x.statut === 'reservee').length : 0;
   const alertes = appli ? appli.enDirect.filter((x) => x.alertes && x.alertes.length).length : 0;
-  const app = espace('#/appli', '2', 'Application VTC', 'BDASH',
-    appli ? ['Clients et chauffeurs', etat(appli.ouvert, `${appli.ouvert ? 'Ouverte' : 'Fermée'}${appli.prive ? ' · phase privée' : ''}`)] : ['Données de l’appli indisponibles'],
-    appli ? [chiffre(appli.enDirect.length, 'en cours'), chiffre(aAttribuer, 'à attribuer', true), chiffre(enLigne, enLigne > 1 ? 'chauffeurs en ligne' : 'chauffeur en ligne'), chiffre(euroRond.format(+appli.jour.t), 'aujourd’hui')] : [],
-    'Courses en direct, utilisateurs, chauffeurs, paiements, statistiques et réglages.',
-    'Ouvrir l’espace Application');
+  const cartes = a.agentsAlerte.length;
 
-  /* ----- Ce qui attend une action, dans les deux espaces ----- */
-  const taches = [
-    alertes && { esp: 'Appli', n: alertes, href: '#/appli', titre: pluriel(alertes, 'alerte en cours de course', 'alertes en cours de course'), sous: 'Bouton d’urgence déclenché', alerte: true },
-    c.horsLigne && { esp: 'Site', n: '!', href: '#/site', titre: 'Le site est hors ligne', sous: 'Les visiteurs voient la page de maintenance', alerte: true },
-    aAttribuer && { esp: 'Appli', n: aAttribuer, href: '#/appli', titre: pluriel(aAttribuer, 'réservation à attribuer', 'réservations à attribuer'), sous: 'Choisir le chauffeur' },
-    c.messages && { esp: 'Site', n: c.messages, href: '#/messages', titre: pluriel(c.messages, 'message client', 'messages clients'), sous: 'Espace client' },
-    c.demandes && { esp: 'Site', n: c.demandes, href: '#/demandes', titre: pluriel(c.demandes, 'demande de devis', 'demandes de devis'), sous: 'Reçues depuis le site' },
-    c.retards && { esp: 'Site', n: c.retards, href: '#/factures', titre: pluriel(c.retards, 'facture à relancer', 'factures à relancer'), sous: 'Échéance dépassée', alerte: true },
-    c.candidatures && { esp: 'Site', n: c.candidatures, href: '#/candidatures', titre: pluriel(c.candidatures, 'nouvelle candidature', 'nouvelles candidatures'), sous: 'Page Recrutement' },
-    c.avis && { esp: 'Site', n: c.avis, href: '#/avis', titre: pluriel(c.avis, 'avis à valider', 'avis à valider'), sous: 'Avant publication sur le site' },
-    c.equipe && { esp: 'Site', n: c.equipe, href: '#/equipe', titre: pluriel(c.equipe, 'élément de l’Espace équipe', 'éléments de l’Espace équipe'), sous: 'Inscriptions, absences, main courante' },
-    c.reservations && { esp: 'Appli', n: c.reservations, href: '#/vtc', titre: pluriel(c.reservations, 'réservation du site à confirmer', 'réservations du site à confirmer'), sous: 'Page de réservation du site' },
-    a.alertes && { esp: 'Compte', n: a.alertes, href: '#/securite', titre: pluriel(a.alertes, 'connexion refusée', 'connexions refusées'), sous: '7 derniers jours', alerte: true },
-    ...a.agentsAlerte.map((ag) => ({ esp: 'Site', n: '!', href: `#/agents/${ag.id}`, titre: `Carte pro de ${ag.nom}`, sous: `${ag.validite < a.aujourdhui ? 'Expirée le' : 'Expire le'} ${isoVersFr(ag.validite)}`, alerte: ag.validite < a.aujourdhui })),
-  ].filter(Boolean);
+  // Nombre de points qui attendent une action (même liste que la cloche, plus la sécurité et les cartes pro)
+  const points = [c.demandes, c.messages, c.assistance, c.candidatures, c.equipe, c.avis, c.retards, c.reservations, alertes, aAttribuer, a.alertes, cartes, c.horsLigne ? 1 : 0]
+    .reduce((s, n) => s + (Number(n) || 0), 0);
 
-  const liste = taches.length ? h('ul', { class: 'lc-taches' }, taches.map((t) => h('li', null, h('a', { href: t.href },
-    h('span', { class: 'lc-taches__esp' }, t.esp),
-    h('span', { class: 'lc-taches__txt' }, h('b', null, t.titre), h('small', null, t.sous)),
-    h('span', { class: `lc-taches__n ${t.alerte ? 'is-alerte' : ''}` }, String(t.n))))))
-    : h('p', { class: 'lc-vide' }, 'Rien n’attend d’action. Tout est à jour.');
+  /* ----- En-tête : salutation, heure, état du site et de l'appli ----- */
+  const heure = h('span', { class: 'acc-heure' });
+  const majHeure = () => { heure.textContent = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date()); };
+  majHeure();
+  const minuteur = setInterval(() => { if (!document.body.contains(heure)) { clearInterval(minuteur); return; } majHeure(); }, 10000);
+  const temoin = (ok, texte, href) => h('a', { class: `acc-temoin ${ok ? 'is-ok' : 'is-off'}`, href }, h('i', { 'aria-hidden': 'true' }), texte);
 
-  const journal = a.journal.length ? h('ul', { class: 'console lc-journal' }, a.journal.map((j) => ligneJournal(j))) : h('p', { class: 'lc-vide' }, 'Aucune activité enregistrée.');
+  const entete = h('section', { class: 'acc-entete' },
+    h('div', { class: 'acc-entete__txt' },
+      h('p', { class: 'acc-date' }, cap(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(auj)), h('span', { 'aria-hidden': 'true' }, '·'), heure),
+      h('h1', { class: 'acc-titre' }, `${auj.getHours() >= 5 && auj.getHours() < 18 ? 'Bonjour' : 'Bonsoir'}${session.utilisateur ? `, ${cap(session.utilisateur)}` : ''}`),
+      h('p', { class: 'acc-sous' }, points ? `${pluriel(points, 'point demande', 'points demandent')} votre attention.` : 'Tout est en ordre. Rien n’attend d’action.')),
+    h('div', { class: 'acc-entete__droite' },
+      h('div', { class: 'acc-temoins' },
+        temoin(!c.horsLigne, c.horsLigne ? 'Site hors ligne' : 'Site en ligne', '#/site'),
+        appli ? temoin(appli.ouvert, appli.ouvert ? 'Appli ouverte' : 'Appli fermée', '#/appli') : null),
+      points ? h('button', { class: 'btn btn--gold acc-voir', type: 'button', onclick: () => document.querySelector('.haut-btn')?.click() }, icone('cloche'), 'Voir ce qui attend') : null));
 
-  /* ----- Chiffres clés des deux espaces ----- */
-  const metrique = (href, libelle, valeur, sous, classe = '') => h('a', { class: `metrique ${classe}`.trim(), href },
-    h('span', { class: 'metrique__libelle' }, libelle), h('b', { class: 'metrique__valeur' }, String(valeur)), h('span', { class: 'metrique__sous' }, sous));
-  const chiffresCles = h('div', { class: 'metriques' },
-    metrique('#/site', 'Site internet', c.horsLigne ? 'Hors ligne' : 'En ligne', 'bdasecurite.com', c.horsLigne ? 'metrique--alerte' : 'metrique--ok'),
-    metrique('#/demandes', 'Demandes de devis', c.demandes, 'en attente'),
-    metrique('#/messages', 'Messages clients', c.messages, 'en attente'),
-    metrique('#/candidatures', 'Candidatures', c.candidatures, 'nouvelles'),
-    metrique('#/factures', 'Factures en retard', c.retards, 'échéance dépassée', c.retards ? 'metrique--alerte' : ''),
-    appli ? metrique('#/appli', 'Courses en cours', appli.enDirect.length, pluriel(aAttribuer, 'réservation à attribuer', 'réservations à attribuer'), alertes ? 'metrique--alerte' : '') : null);
+  /* ----- Une tuile par domaine ----- */
+  const module = ({ href, ic, titre, info, n = 0, alerte = false, raccourci }) => h('a', { class: `acc-module ${n ? 'a-traiter' : ''}`, href },
+    h('span', { class: 'acc-module__ic' }, icone(ic)),
+    h('span', { class: 'acc-module__txt' }, h('b', null, titre), h('small', null, info)),
+    n ? h('em', { class: `acc-module__n ${alerte ? 'is-alerte' : ''}` }, String(n)) : null,
+    raccourci ? h('kbd', { class: 'acc-module__kbd' }, raccourci) : null,
+    icone('fleche', 'acc-module__fleche'));
+  const modules = [
+    { href: '#/demandes', ic: 'clients', titre: 'Clients', n: c.demandes + c.messages + c.assistance, alerte: Boolean(c.assistance),
+      info: c.demandes ? pluriel(c.demandes, 'nouvelle demande de devis', 'nouvelles demandes de devis') : c.messages ? pluriel(c.messages, 'message client', 'messages clients') : 'Demandes, messages, fiches clients' },
+    { href: '#/devis', ic: 'facture', titre: 'Facturation', n: c.retards, alerte: true,
+      info: c.retards ? pluriel(c.retards, 'facture à relancer', 'factures à relancer') : 'Devis, factures, PDF clients' },
+    { href: '#/agents', ic: 'agents', titre: 'Équipe', n: c.candidatures + c.equipe + cartes, alerte: cartes > 0,
+      info: c.candidatures ? pluriel(c.candidatures, 'nouvelle candidature', 'nouvelles candidatures') : cartes ? pluriel(cartes, 'carte pro à surveiller', 'cartes pro à surveiller') : 'Agents, planning, paie, contrats' },
+    { href: '#/site', ic: 'site', titre: 'Site web', n: c.avis + (c.horsLigne ? 1 : 0), alerte: Boolean(c.horsLigne),
+      info: c.horsLigne ? 'Hors ligne · maintenance' : c.avis ? pluriel(c.avis, 'avis à valider', 'avis à valider') : 'En ligne · bdasecurite.com' },
+    { href: '#/appli', ic: 'voiture', titre: 'Application VTC', n: alertes + aAttribuer + c.reservations, alerte: alertes > 0,
+      info: appli ? (enCours ? pluriel(enCours, 'course en cours', 'courses en cours') : aAttribuer ? pluriel(aAttribuer, 'réservation à attribuer', 'réservations à attribuer') : 'BDASH et BDASH Pro') : 'BDASH et BDASH Pro' },
+    { href: '#/tableau', ic: 'graphique', titre: 'Statistiques', info: 'Activité du site, documents récents' },
+    { href: '#/creations', ic: 'calques', titre: 'Outils', info: 'Cartes agents, flyers, notes' },
+    { href: '#/securite', ic: 'bouclier', titre: 'Sécurité', n: a.alertes, alerte: true,
+      info: a.alertes ? pluriel(a.alertes, 'connexion refusée', 'connexions refusées') : 'Accès, appareils, journal' },
+  ].map((m, i) => module({ ...m, raccourci: String(i + 1) }));
 
-  ctx.afficher(h('div', { class: 'lanceur' },
-    chiffresCles,
-    h('div', { class: 'lc-espaces' }, site, app),
-    h('div', { class: 'lc-bas' },
-      h('section', { class: 'carte' }, h('header', { class: 'carte__tete' }, h('h2', null, 'À traiter'), h('small', null, taches.length ? pluriel(taches.length, 'élément', 'éléments') : '')), liste),
-      h('section', { class: 'carte' }, h('header', { class: 'carte__tete' }, h('h2', null, 'Activité récente'), h('a', { class: 'lien-btn', href: '#/securite' }, 'Tout le journal')), journal))));
+  ctx.afficher(h('div', { class: 'accueil' }, entete, h('nav', { class: 'acc-modules', 'aria-label': 'Domaines' }, modules)));
 
-  // Raccourcis clavier : 1 = Site, 2 = Application
+  // Raccourcis clavier : 1 à 8 ouvrent les tuiles
   const touches = (e) => {
-    if (!document.body.contains(site)) { document.removeEventListener('keydown', touches); return; }
-    if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input, textarea, select, [contenteditable="true"]') || document.querySelector('.modale-fond, .palette-fond')) return;
-    if (e.key === '1') location.hash = '#/tableau';
-    if (e.key === '2') location.hash = '#/appli';
+    if (!document.body.contains(modules[0])) { document.removeEventListener('keydown', touches); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input, textarea, select, [contenteditable="true"]') || document.querySelector('.modale-fond, .palette-fond, .deroulant')) return;
+    const i = Number(e.key) - 1;
+    if (i >= 0 && i < modules.length) location.hash = modules[i].getAttribute('href');
   };
   document.addEventListener('keydown', touches);
 }

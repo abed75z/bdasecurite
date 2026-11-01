@@ -5,17 +5,17 @@ require __DIR__ . '/../app/bootstrap.php';
 entetes_securite();
 header('Cache-Control: no-store');
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'");
-$v = '41';
+$v = '42';
 ?><!doctype html>
-<html lang="fr">
+<html lang="fr" data-theme="nuit">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0b1220">
+<meta name="theme-color" content="#0a0a0c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="BDA Admin">
-<title>Espace admin — BDA Security Group</title>
+<title>BDA Admin</title>
 <meta name="description" content="Espace d’administration BDA Security Group. Accès réservé, connexion sécurisée.">
 <!-- Aperçu quand le lien est partagé (WhatsApp, iMessage, Discord…) -->
 <meta property="og:type" content="website">
@@ -44,6 +44,7 @@ $v = '41';
 <link rel="stylesheet" href="contrats.css?v=<?= $v ?>">
 <link rel="stylesheet" href="carte-agent.css?v=<?= $v ?>">
 <link rel="stylesheet" href="entreprise.css?v=<?= $v ?>">
+<link rel="stylesheet" href="nuit.css?v=<?= $v ?>">
 <style id="format-page">@page { size: A4 portrait; margin: 0; }</style>
 </head>
 <body>

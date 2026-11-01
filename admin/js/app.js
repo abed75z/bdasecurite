@@ -211,25 +211,81 @@ export const ouvrirPalette = (texte) => palette?.ouvrir(texte);
 const fermerMenu = () => document.body.classList.remove('menu-ouvert');
 const visible = (m) => !m.admin || etat.session.role === 'admin';
 
-// Menu de l'espace ouvert (icône, libellé, pastille du nombre en attente)
+// Icône de chaque rubrique du menu
+const GROUPE_IC = { Clients: 'clients', Facturation: 'facture', 'Équipe': 'agents', 'Site web': 'site', Outils: 'calques', 'Activité': 'activite', Comptes: 'personne', Configuration: 'curseurs', Compte: 'reglages' };
+let groupeOuvert = null;
+
+// Menu de l'espace ouvert : les pages principales, puis des rubriques qui se déplient au clic
+// (une seule ouverte à la fois ; celle de la page affichée s'ouvre toute seule)
 function dessinerMenu() {
   const E = ESPACES[espaceCourant];
-  const lien = (m) => h('a', { href: `#/${m.chemin}`, class: 'nav__item', title: m.libelle, dataset: { chemin: m.chemin }, onclick: fermerMenu },
+  const lien = (m) => h('a', { href: m.href || `#/${m.chemin}`, class: 'nav__item', title: m.libelle, dataset: m.href ? {} : { chemin: m.chemin }, onclick: fermerMenu },
     icone(m.ic, 'nav__ic'), h('span', { class: 'nav__txt' }, m.libelle),
     m.badge ? h('b', { class: `nav__badge ${m.alerte ? 'nav__badge--alerte' : ''}`, dataset: { badge: m.badge }, hidden: true }) : null);
+  const principales = [lien({ chemin: '', libelle: 'Vue générale', ic: 'grille' })];
+  const rubriques = [];
+  for (const m of E.menu.filter(visible)) {
+    if (m.groupe) rubriques.push({ nom: m.groupe, pages: [] });
+    else if (rubriques.length) rubriques.at(-1).pages.push(m);
+    else principales.push(lien(m));
+  }
+  rubriques.push({ nom: 'Compte', pages: [...COMPTE.filter(visible), { href: '/admin/moi', libelle: 'Mon accès chef', ic: 'couronne' }] });
+  const rubrique = ({ nom, pages }) => {
+    const avecBadge = pages.filter((m) => m.badge);
+    return h('div', { class: 'nav__section', dataset: { groupe: nom } },
+      h('button', { class: 'nav__groupe-btn', type: 'button', title: nom, 'aria-expanded': 'false', onclick: () => ouvrirRubrique(groupeOuvert === nom ? null : nom) },
+        icone(GROUPE_IC[nom] || 'suivant', 'nav__ic'), h('span', { class: 'nav__txt' }, nom),
+        avecBadge.length ? h('b', { class: 'nav__somme', hidden: true, dataset: { somme: avecBadge.map((m) => m.badge).join(' '), alerte: avecBadge.filter((m) => m.alerte).map((m) => m.badge).join(' ') } }) : null,
+        icone('chevronBas', 'nav__chevron')),
+      h('div', { class: 'nav__tiroir' }, h('div', { class: 'nav__tiroir-int' }, pages.map(lien))));
+  };
   menuEl.replaceChildren(
-    lien({ chemin: '', libelle: 'Vue générale', ic: 'grille' }),
-    ...E.menu.filter(visible).map((m) => (m.groupe ? h('p', { class: 'nav__groupe' }, m.groupe) : lien(m))),
-    h('p', { class: 'nav__groupe' }, 'Compte'),
-    ...COMPTE.filter(visible).map(lien),
-    h('a', { class: 'nav__item', href: '/admin/moi', title: 'Mon accès chef' }, icone('couronne', 'nav__ic'), h('span', { class: 'nav__txt' }, 'Mon accès chef')),
+    h('div', { class: 'nav__principales' }, principales),
+    ...rubriques.map(rubrique),
     h('a', { class: 'nav__item nav__item--externe', href: E.externe[0], target: '_blank', rel: 'noopener', title: E.externe[1] }, icone('externe', 'nav__ic'), h('span', { class: 'nav__txt' }, E.externe[1])));
   coteEl.querySelectorAll('.espaces__btn').forEach((b) => {
     const oui = b.dataset.espace === espaceCourant;
     b.classList.toggle('is-actif', oui);
     b.setAttribute('aria-current', oui ? 'true' : 'false');
   });
+  ouvrirRubrique(groupeOuvert);
+}
+function ouvrirRubrique(nom) {
+  groupeOuvert = nom;
+  menuEl?.querySelectorAll('.nav__section').forEach((s) => {
+    const oui = s.dataset.groupe === nom;
+    s.classList.toggle('is-ouvert', oui);
+    s.querySelector('.nav__groupe-btn').setAttribute('aria-expanded', String(oui));
+  });
   majBadges();
+}
+
+/* ---------- Thème : sombre (par défaut) ou clair, mémorisé sur l'appareil ---------- */
+function themeMemo(v) {
+  try { if (v) localStorage.setItem('bda-theme', v); return localStorage.getItem('bda-theme') === 'jour' ? 'jour' : 'nuit'; } catch (e) { return v || 'nuit'; }
+}
+function appliquerTheme(t) {
+  document.documentElement.dataset.theme = t;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', t === 'jour' ? '#111114' : '#0a0a0c');
+}
+appliquerTheme(themeMemo());
+
+/* ---------- Animations : chiffres qui défilent, cloche qui sonne ---------- */
+const sansMouvement = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function animerChiffres(zone) {
+  if (sansMouvement()) return;
+  zone.querySelectorAll('.metrique__valeur, .tuile b, .acc-module__n, .lc-chiffre b').forEach((el) => {
+    const fin = /^\d{1,5}$/.test(el.textContent.trim()) ? Number(el.textContent.trim()) : 0;
+    if (fin < 2) return;
+    const debut = performance.now();
+    const pas = (t) => {
+      const p = Math.min(1, (t - debut) / 650);
+      el.textContent = String(Math.round(fin * (1 - (1 - p) ** 3)));
+      if (p < 1) requestAnimationFrame(pas);
+    };
+    el.textContent = '0';
+    requestAnimationFrame(pas);
+  });
 }
 
 /* ---------- Menus déroulants de la barre du haut (à traiter, compte) ---------- */
@@ -292,6 +348,16 @@ function panneauCompte() {
       lien('#/securite', 'Accès & sécurité', 'cadenas'),
       lien('/admin/moi', 'Mon accès chef', 'couronne'),
       lien('/', 'Voir le site', 'externe', true)),
+    h('div', { class: 'deroulant__theme' },
+      h('span', null, 'Apparence'),
+      h('div', { class: 'segments', role: 'group', 'aria-label': 'Apparence' },
+        [['nuit', 'Sombre', 'lune'], ['jour', 'Clair', 'soleil']].map(([t, libelle, ic]) => h('button', {
+          type: 'button', class: `segments__btn ${themeMemo() === t ? 'is-actif' : ''}`, 'aria-pressed': String(themeMemo() === t),
+          onclick: (e) => {
+            themeMemo(t); appliquerTheme(t);
+            e.currentTarget.parentNode.querySelectorAll('.segments__btn').forEach((b) => { const oui = b === e.currentTarget; b.classList.toggle('is-actif', oui); b.setAttribute('aria-pressed', String(oui)); });
+          },
+        }, icone(ic), libelle)))),
     h('button', { class: 'deroulant__sortie', type: 'button', onclick: () => { fermerDeroulant(); deconnexion(); } }, icone('sortie'), 'Se déconnecter'),
   ];
 }
@@ -315,7 +381,7 @@ function lancerApplication() {
     h('div', { class: 'cote__tete' },
       h('a', { href: '#/', class: 'cote__marque', title: 'Vue générale', onclick: fermerMenu },
         h('img', { class: 'cote__ecusson', src: '/admin/icone-admin-192.png?v=3', alt: '' }),
-        h('span', { class: 'cote__nom' }, h('b', null, 'BDA Security Group'), h('small', null, 'Console d’administration'))),
+        h('span', { class: 'cote__nom' }, h('b', null, 'BDA Admin'), h('small', null, 'BDA Security Group'))),
       // Choix de l'espace : site internet ou application VTC
       h('div', { class: 'espaces', role: 'group', 'aria-label': 'Espace' },
         Object.entries(ESPACES).map(([cle, E]) => h('a', { class: 'espaces__btn', href: `#/${E.accueil}`, title: E.nom, dataset: { espace: cle }, onclick: fermerMenu },
@@ -323,7 +389,7 @@ function lancerApplication() {
     menuEl,
     h('div', { class: 'cote__bas' },
       h('button', { class: 'cote__reduire', type: 'button', title: 'Réduire ou agrandir le menu', onclick: basculerMenuReduit }, icone('panneau'), h('span', null, 'Réduire le menu')),
-      h('p', { class: 'cote__version' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'Console BDA · v4.0'))));
+      h('p', { class: 'cote__version' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'BDA Admin · v5.0'))));
 
   filEl = h('nav', { class: 'ariane', 'aria-label': 'Vous êtes ici' });
   titrePage = h('h1', { class: 'entete-page__titre' });
@@ -379,13 +445,28 @@ function majBadges() {
   // Pastille sur le bouton de l'autre espace quand il attend une action
   const attente = { site: ['demandes', 'messages', 'assistance', 'avis', 'candidatures', 'equipe', 'retards'], appli: ['appli', 'reservations'] };
   coteEl?.querySelectorAll('.espaces__btn').forEach((b) => b.classList.toggle('a-traiter', attente[b.dataset.espace].some((k) => compteurs[k])));
-  // Cloche de la barre du haut : total de ce qui attend une action
+  // Rubrique fermée : total de ses pages en attente
+  menuEl?.querySelectorAll('[data-somme]').forEach((b) => {
+    const n = b.dataset.somme.split(' ').reduce((s, k) => s + (compteurs[k] || 0), 0);
+    b.textContent = n > 99 ? '99+' : n;
+    b.hidden = n === 0;
+    b.classList.toggle('is-alerte', b.dataset.alerte.split(' ').some((k) => k && compteurs[k]));
+  });
+  // Cloche de la barre du haut : total de ce qui attend une action (elle sonne quand il augmente)
   const cloche = document.getElementById('cloche-n');
   if (cloche) {
     const total = aTraiter().reduce((s, t) => s + compteurs[t.cle], 0);
+    const avant = Number(cloche.dataset.total ?? total);
+    cloche.dataset.total = total;
     cloche.textContent = total > 99 ? '99+' : total;
     cloche.hidden = total === 0;
     cloche.classList.toggle('is-alerte', aTraiter().some((t) => t.alerte));
+    if (total > avant && !sansMouvement()) {
+      const btn = cloche.parentNode;
+      btn.classList.remove('sonne');
+      void btn.offsetWidth;
+      btn.classList.add('sonne');
+    }
   }
 }
 
@@ -438,6 +519,9 @@ async function router() {
   const actif = lanceur ? '' : chemins.includes(complet) ? complet : chemins.includes(PARENT[route] || route) ? (PARENT[route] || route) : null;
   $$('.cote .nav__item[data-chemin]').forEach((a) => { const oui = a.dataset.chemin === actif; a.classList.toggle('is-actif', oui); if (oui) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   const libelleActif = actif ? [...E.menu, ...COMPTE].find((m) => m.chemin === actif)?.libelle || '' : '';
+  // La rubrique de la page affichée s'ouvre dans le menu
+  const sectionActive = menuEl.querySelector('.nav__item.is-actif')?.closest('.nav__section');
+  if (sectionActive && sectionActive.dataset.groupe !== groupeOuvert) ouvrirRubrique(sectionActive.dataset.groupe);
   montrerRubrique();
 
   // Fil d'Ariane : Vue générale / Espace / Rubrique / Page
@@ -456,13 +540,14 @@ async function router() {
   const jeton = ++jetonNavigation;
   zonePage.replaceChildren(h('div', { class: 'chargement' }, h('span'), h('span'), h('span')));
   zonePage.dataset.route = route;
+  document.body.classList.add('page-en-charge');
   actionsPage.replaceChildren();
   titrePage.textContent = '';
   window.scrollTo(0, 0);
   const ctx = {
     params,
     // Dans l'espace Application, le titre suit la rubrique du menu (Courses, Chauffeurs…)
-    titre: (t) => { const titre = route === 'appli' && libelleActif ? libelleActif : t; titrePage.textContent = titre; document.title = `${titre} — Admin BDA`; },
+    titre: (t) => { const titre = route === 'appli' && libelleActif ? libelleActif : t; titrePage.textContent = titre; document.title = `${titre} — BDA Admin`; },
     actions: (...n) => actionsPage.replaceChildren(...n.flat().filter(Boolean)),
     afficher: (...n) => { if (jeton === jetonNavigation) zonePage.replaceChildren(...n.flat().filter(Boolean)); },
     actuel: () => jeton === jetonNavigation,
@@ -470,11 +555,16 @@ async function router() {
     aller: (hash) => { location.hash = hash; },
     deconnexion,
   };
-  try { await page(ctx); } catch (e) {
+  try {
+    await page(ctx);
+    if (jeton === jetonNavigation) animerChiffres(zonePage);
+  } catch (e) {
     if (e.statut === 401) return;
     if (jeton !== jetonNavigation) return;
     zonePage.replaceChildren(h('div', { class: 'vide' }, icone('alerte'), h('p', null, e.message), h('button', { class: 'btn btn--ghost', onclick: router }, 'Réessayer')));
     erreur(e);
+  } finally {
+    if (jeton === jetonNavigation) document.body.classList.remove('page-en-charge');
   }
 }
 

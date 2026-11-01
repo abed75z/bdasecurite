@@ -126,9 +126,9 @@ async function pageAccueil(ctx) {
     resume.replaceChildren(h('b', null, String(s.total)), ` ${cle === 'demandes' ? (s.total > 1 ? 'demandes reçues' : 'demande reçue') : (s.total > 1 ? 'candidatures reçues' : 'candidature reçue')} · ${evolution(s)}`);
     zoneGraph.replaceChildren(barres(s.points, { titre: `${cap(cle)} reçues par jour` }));
   };
-  const graphique = h('section', { class: 'carte' },
-    h('header', { class: 'carte__tete' }, h('h2', null, 'Reçu depuis le site'), segments([['demandes', 'Demandes'], ['candidatures', 'Candidatures']], 'demandes', montrer, 'Série affichée')),
-    resume, zoneGraph);
+  const graphique = h('div', { class: 'pile' },
+    h('div', { class: 'carte__barre carte__barre--entre' }, resume, segments([['demandes', 'Demandes'], ['candidatures', 'Candidatures']], 'demandes', montrer, 'Série affichée')),
+    zoneGraph);
   montrer('demandes');
 
   const installation = a.installation ? h('section', { class: 'carte installation' },
@@ -170,13 +170,30 @@ async function pageAccueil(ctx) {
       .map(([href, t]) => h('li', null, h('a', { href }, t, h('span', { 'aria-hidden': 'true' }, '→')))));
   const activite = a.journal.length ? h('ul', { class: 'console' }, a.journal.map((j) => ligneJournal(j))) : h('p', { class: 'gr-vide' }, 'Aucune activité enregistrée.');
 
-  ctx.afficher(installation, chiffres, graphique,
-    h('div', { class: 'grille-2' },
-      carte([h('h2', null, 'À traiter'), h('small', null, taches.length ? pluriel(taches.length, 'élément', 'éléments') : '')], aFaire),
-      carte([h('h2', null, 'Derniers documents')], recents)),
-    h('div', { class: 'grille-2' },
-      carte([h('h2', null, 'Accès rapide')], rapides),
-      carte([h('h2', null, 'Activité récente'), h('a', { class: 'lien-btn', href: '#/securite' }, 'Tout le journal')], activite)));
+  /* ----- Un seul bloc à onglets : on ne voit qu'une chose à la fois ----- */
+  const ONGLETS = [
+    ['activite', 'Reçu depuis le site', null, graphique],
+    ['taches', 'À traiter', taches.length, aFaire],
+    ['documents', 'Documents récents', null, recents],
+    ['rapide', 'Accès rapide', null, rapides],
+    ['journal', 'Journal', null, h('div', { class: 'pile' }, activite, h('a', { class: 'lien-btn', href: '#/securite' }, 'Tout le journal'))],
+  ];
+  let ongletActif = 'activite';
+  try { ongletActif = sessionStorage.getItem('bda-onglet-ensemble') || 'activite'; } catch (e) { /* stockage indisponible */ }
+  if (!ONGLETS.some(([cle]) => cle === ongletActif)) ongletActif = 'activite';
+  const corps = h('div', { class: 'carte-onglets__corps' });
+  const barreOnglets = h('div', { class: 'carte-onglets__barre', role: 'tablist' });
+  const montrerOnglet = (cle) => {
+    ongletActif = cle;
+    try { sessionStorage.setItem('bda-onglet-ensemble', cle); } catch (e) { /* stockage indisponible */ }
+    barreOnglets.querySelectorAll('button').forEach((b) => { const oui = b.dataset.cle === cle; b.classList.toggle('is-actif', oui); b.setAttribute('aria-selected', String(oui)); });
+    corps.replaceChildren(h('div', { class: 'carte-onglets__panneau', role: 'tabpanel' }, ONGLETS.find(([k]) => k === cle)[3]));
+  };
+  barreOnglets.append(...ONGLETS.map(([cle, libelle, n]) => h('button', { type: 'button', role: 'tab', class: 'carte-onglets__btn', dataset: { cle }, onclick: () => montrerOnglet(cle) },
+    libelle, n ? h('span', null, String(n)) : null)));
+  montrerOnglet(ongletActif);
+
+  ctx.afficher(installation, chiffres, h('section', { class: 'carte carte-onglets' }, barreOnglets, corps));
 }
 
 /* ---------- Cartes & flyers : les 3 outils de création au même endroit ---------- */

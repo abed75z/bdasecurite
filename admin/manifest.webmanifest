@@ -1,6 +1,6 @@
 {
   "id": "/admin/",
-  "name": "BDA Security Group — Admin",
+  "name": "BDA Admin",
   "short_name": "BDA Admin",
   "description": "Espace de gestion BDA Security Group : demandes, opportunités, équipe, planning.",
   "lang": "fr",
@@ -8,8 +8,8 @@
   "scope": "/admin/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0b1220",
-  "theme_color": "#0b1220",
+  "background_color": "#0a0a0c",
+  "theme_color": "#0a0a0c",
   "icons": [
     { "src": "/admin/icone-admin-180.png?v=3", "sizes": "180x180", "type": "image/png" },
     { "src": "/admin/icone-admin-192.png?v=3", "sizes": "192x192", "type": "image/png", "purpose": "any" },

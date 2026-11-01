@@ -1,0 +1,86 @@
+/* =========================================================
+   ESPACE ADMIN BDA — FINITION « SOBRE » (1er novembre 2026)
+   Chargée en tout dernier. Demande : « moins enfantin, j'ai pas
+   8 ans, un truc pro ». Inspiration : Stripe, Linear, Vercel.
+   - plus d'arc-en-ciel : icônes monochromes dans des carrés neutres ;
+   - la couleur ne sert qu'aux états (vert = OK, rouge = alerte) ;
+   - mouvements courts et doux : opacité et petits déplacements,
+     jamais de rebond ni de rotation ;
+   - une seule touche champagne, très discrète.
+   ========================================================= */
+
+/* ---------- 1. Une seule teinte pour tous les domaines ---------- */
+[data-dom], .nav__section[data-groupe] { --dom: var(--text); --dom2: var(--text); }
+.acc-module::before { display: none !important; }
+.acc-module__ic, .entete-page__ic, .creer-liste__ic,
+[data-theme="jour"] .acc-module__ic, [data-theme="jour"] .acc-module:hover .acc-module__ic {
+  border: 0 !important; background: var(--surface-3) !important; color: var(--text) !important; box-shadow: inset 0 0 0 1px var(--line) !important; transform: none !important;
+}
+.creer-liste__ic .ic, .deroulant__liste .creer-liste__ic .ic { color: var(--text) !important; }
+.acc-module:hover .acc-module__ic, [data-theme="jour"] .acc-module:hover .acc-module__ic { background: var(--action) !important; color: var(--action-texte) !important; box-shadow: none !important; }
+.acc-module:hover, [data-theme="jour"] .acc-module:hover { transform: translateY(-1px) !important; border-color: var(--line-3) !important; box-shadow: var(--shadow-md) !important; }
+.acc-module__n:not(.is-alerte), [data-theme="jour"] .acc-module__n:not(.is-alerte) { background: var(--action) !important; color: var(--action-texte) !important; }
+.acc-module__details .is-plein b { color: var(--text) !important; }
+.acc-module--grand .acc-module__ic { width: 46px !important; height: 46px !important; border-radius: 12px !important; }
+.acc-module__ic { border-radius: 12px !important; }
+.entete-page__ic { width: 42px !important; height: 42px !important; border-radius: 12px !important; }
+.entete-page__ic .ic { width: 20px !important; height: 20px !important; }
+.creer-liste__ic { width: 32px !important; height: 32px !important; border-radius: 9px !important; }
+[data-theme="jour"] .nav__groupe-btn .nav__ic, [data-theme="jour"] .nav__item.is-actif .nav__ic { color: currentColor !important; }
+[data-theme="jour"] .nav__item.is-actif::before { background: var(--text) !important; }
+.nav__favoris-titre .ic, .nav__item--favori .nav__ic { color: var(--muted) !important; fill: none !important; }
+.fav-btn.is-actif, .fav-btn:hover { color: var(--champagne) !important; }
+.fav-btn.is-actif .ic { fill: var(--champagne) !important; }
+
+/* Avatars : graphite, sans couleurs vives */
+.ag-avatar { background: linear-gradient(145deg, #3a3a44, #18181f) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12) !important; }
+[data-theme="nuit"] .ag-avatar { background: linear-gradient(145deg, #2c2c33, #1b1b20) !important; color: #f2efe8 !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important; }
+.ag-carte::before, .cpt-carte::before { background: linear-gradient(180deg, var(--surface-2), transparent) !important; }
+.ag-profil::before { background: radial-gradient(40% 50% at 8% 40%, rgba(184, 149, 90, 0.1), transparent 70%) !important; }
+
+/* Graphiques : graphite (ivoire en sombre) */
+[data-theme="jour"] .gr-col i { background: #2a2a31 !important; border-radius: 3px 3px 1px 1px !important; }
+[data-theme="jour"] .gr-cols:hover .gr-col i { opacity: 0.25; }
+[data-theme="jour"] .gr-cols .gr-col:hover i { opacity: 1; }
+[data-theme="jour"] .gr-aire { fill: rgba(24, 24, 27, 0.06) !important; }
+[data-theme="jour"] .gr-trait, [data-theme="jour"] .gr-repere i { stroke: #18181b !important; border-color: #18181b !important; }
+[data-theme="jour"] .gr-repartition__piste i { background: #2a2a31 !important; }
+[data-theme="jour"] .pastille--nouvelle { background: var(--surface-3) !important; border-color: var(--line-2) !important; color: var(--text) !important; }
+[data-theme="jour"] .fiche--nouvelle { box-shadow: inset 3px 0 0 var(--champagne), var(--shadow-sm) !important; }
+
+/* ---------- 2. Fonds : plus de pastel, une lumière chaude à peine visible ---------- */
+:root[data-theme="jour"] { --lueur-1: rgba(184, 149, 90, 0.12); --lueur-2: rgba(20, 20, 30, 0.04); --lueur-3: transparent; }
+[data-theme="jour"] body { background: radial-gradient(1000px 640px at 0% -10%, rgba(184, 149, 90, 0.07), transparent 62%), var(--bg) !important; background-attachment: fixed !important; }
+.acc-entete::before { opacity: 0.7; animation-duration: 40s !important; }
+.acc-titre, [data-theme="jour"] .acc-titre, [data-theme="nuit"] .acc-titre { background: none !important; color: var(--text) !important; -webkit-text-fill-color: currentColor; animation: none !important; font-size: 32px !important; letter-spacing: -0.03em !important; }
+[data-theme="jour"] .auth { background: radial-gradient(60% 50% at 50% -10%, rgba(184, 149, 90, 0.12), transparent 70%), var(--bg) !important; }
+.auth::before { background: radial-gradient(circle, rgba(184, 149, 90, 0.35), transparent 65%) !important; opacity: 0.35 !important; }
+.auth::after { background: radial-gradient(circle, rgba(120, 120, 135, 0.3), transparent 65%) !important; opacity: 0.3 !important; }
+
+/* ---------- 3. Mouvements : courts, doux, sans rebond ni rotation ---------- */
+@keyframes ent-pop { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: none; } }
+@keyframes ent-modale { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: none; } }
+@keyframes ent-etoile { 0% { transform: scale(0.85); } 100% { transform: none; } }
+@keyframes ent-sonne { 0%, 100% { transform: none; } 30% { transform: translateY(-1px); } 60% { transform: translateY(1px); } }
+@keyframes vt-entree { from { opacity: 0; transform: translateY(8px); } }
+@keyframes vt-sortie { to { opacity: 0; } }
+@keyframes ent-ecusson { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes ent-nom { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ent-monte { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.entete-page__ic.is-in, .modale-fond.is-in .modale, .palette, .auth__carte, .intro__ecusson, .fav-btn.vient-de-changer .ic {
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1) !important; animation-duration: 0.28s !important;
+}
+.creer-btn .ic, .creer-liste__ic, .palette__ic, .nav__item .nav__ic, .nav__groupe-btn .nav__ic, .fav-btn .ic, .acc-module__ic, .toast {
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1) !important;
+}
+.toast { transform: translateY(8px) !important; transition-duration: 0.25s !important; }
+.toast.is-in { transform: none !important; }
+.nav__item:hover .nav__ic, .nav__groupe-btn:hover .nav__ic, .creer-liste a:hover .creer-liste__ic, .palette__item.is-choisi .palette__ic { transform: none !important; }
+.creer-btn::after { display: none !important; }
+.creer-btn[aria-expanded="true"] .ic { transform: rotate(45deg) !important; }
+.vide .ic { animation: none !important; }
+.intro__nom { letter-spacing: 0.24em !important; text-indent: 0.24em; font-size: 18px !important; }
+.intro__ligne { width: 120px !important; }
+.intro.is-fin { transform: none !important; filter: none !important; }
+.ag-kpi:hover, button.ag-kpi:hover, .ag-carte:hover, .cpt-carte:hover { transform: translateY(-1px) !important; }
+[data-theme="jour"] .btn:hover { transform: none !important; }

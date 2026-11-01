@@ -5,7 +5,7 @@ require __DIR__ . '/../app/bootstrap.php';
 entetes_securite();
 header('Cache-Control: no-store');
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'");
-$v = '47';
+$v = '48';
 ?><!doctype html>
 <html lang="fr" data-theme="jour">
 <head>
@@ -46,6 +46,7 @@ $v = '47';
 <link rel="stylesheet" href="entreprise.css?v=<?= $v ?>">
 <link rel="stylesheet" href="nuit.css?v=<?= $v ?>">
 <link rel="stylesheet" href="ivoire.css?v=<?= $v ?>">
+<link rel="stylesheet" href="sobre.css?v=<?= $v ?>">
 <style id="format-page">@page { size: A4 portrait; margin: 0; }</style>
 </head>
 <body>

@@ -743,7 +743,6 @@ button.ag-kpi:hover { transform: translateY(-2px); box-shadow: var(--shadow-md);
 /* Transitions entre les pages : le contenu monte en sortant d'un léger flou */
 ::view-transition-image-pair(root) { isolation: auto; }
 ::view-transition-old(root), ::view-transition-new(root) { display: block; animation: none; mix-blend-mode: normal; }
-.page { view-transition-name: contenu; }
 ::view-transition-old(contenu) { animation: vt-sortie 0.16s ease-in both; }
 ::view-transition-new(contenu) { animation: vt-entree 0.42s cubic-bezier(0.2, 0, 0, 1) both; }
 @keyframes vt-sortie { to { opacity: 0; transform: translateY(-6px); filter: blur(2px); } }

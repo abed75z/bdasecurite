@@ -729,18 +729,11 @@ async function router() {
     // Dans l'espace Application, le titre suit la rubrique du menu (Courses, Chauffeurs…)
     titre: (t) => { const titre = route === 'appli' && libelleActif ? libelleActif : t; titrePage.textContent = titre; document.title = `${titre} — BDA Admin`; },
     actions: (...n) => actionsPage.replaceChildren(...n.flat().filter(Boolean)),
-    // Première pose du contenu : transition fluide (le squelette laisse la place à la page)
+    // Pose du contenu de la page (les blocs apparaissent en fondu, voir entreprise.css)
     afficher: (...n) => {
       if (jeton !== jetonNavigation) return;
       const poser = () => { if (jeton !== jetonNavigation) return; zonePage.replaceChildren(...n.flat().filter(Boolean)); animerChiffres(zonePage); };
-      if (document.startViewTransition && !sansMouvement() && zonePage.querySelector(':scope > .chargement')) {
-        // Filet de sécurité : si la fenêtre ne se redessine pas (cachée), la page s'affiche quand même
-        let pose = false;
-        const uneFois = () => { if (!pose) { pose = true; poser(); } };
-        try { document.startViewTransition(uneFois); } catch (e) { uneFois(); }
-        setTimeout(uneFois, 700);
-      }
-      else poser();
+      poser();
     },
     actuel: () => jeton === jetonNavigation,
     compteurs: majCompteurs,

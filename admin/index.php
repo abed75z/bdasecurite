@@ -49,6 +49,9 @@ $v = '54';
 <link rel="stylesheet" href="sobre.css?v=<?= $v ?>">
 <link rel="stylesheet" href="prospection.css?v=<?= $v ?>">
 <link rel="stylesheet" href="exploitation.css?v=<?= $v ?>">
+<?php // styles des modules (admin/ds/modules/<nom>.css), ajoutés automatiquement
+foreach (glob(__DIR__ . '/ds/modules/*.css') ?: [] as $f) echo '<link rel="stylesheet" href="ds/modules/' . htmlspecialchars(basename($f), ENT_QUOTES) . '?v=' . $v . "\">
+"; ?>
 <style id="format-page">@page { size: A4 portrait; margin: 0; }</style>
 </head>
 <body>

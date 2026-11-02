@@ -29,6 +29,13 @@ const NOTIF_CATEGORIES = [
   'veille' => ['Veille commerciale', 'Appels d’offres, recrutements, rappels J-3'],
   'rappels' => ['Rappels du matin', 'Factures en retard, cartes pro qui expirent, demandes en attente'],
   'securite' => ['Sécurité', 'Connexions à l’admin, tentatives refusées'],
+  // apportées par les modules (app/modules/<nom>.php)
+  'mails' => ['Messagerie', 'Réponse d’un client, facture ou devis ouvert par le client'],
+  'bourse' => ['Bourse aux postes', 'Un agent prend un poste libre ou propose un échange'],
+  'qualite' => ['Terrain', 'Contrôle qualité, consignes lues, matériel à récupérer'],
+  'presence' => ['Contrôle de présence', 'Un agent de nuit ne répond pas au « Tout va bien ? »'],
+  'matin' => ['Résumé du matin', 'L’essentiel de la journée, chaque matin'],
+  'systeme' => ['Système', 'Sauvegarde de la nuit, problème technique détecté'],
 ];
 
 function notif_prefs(): array

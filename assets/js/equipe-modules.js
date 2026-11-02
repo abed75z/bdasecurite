@@ -7,8 +7,13 @@
    La liste des modules vient du serveur ; tout est versionné avec le ?v= du HTML.
    ========================================================= */
 const V = new URL(import.meta.url).searchParams.get('v') || '1';
-const noms = await fetch('/api/equipe.php?a=modules.ui', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
-  .then((r) => r.json()).then((j) => (Array.isArray(j.noms) ? j.noms : [])).catch(() => []);
+const liste = await fetch('/api/equipe.php?a=modules.ui', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+  .then((r) => r.json()).catch(() => ({}));
+const noms = Array.isArray(liste.noms) ? liste.noms : [];
+// feuilles de style des modules : assets/css/equipe/<nom>.css
+for (const n of Array.isArray(liste.css) ? liste.css : []) {
+  document.head.append(Object.assign(document.createElement('link'), { rel: 'stylesheet', href: `/assets/css/equipe/${n}.css?v=${V}` }));
+}
 const mods = await Promise.all(noms.map((n) => import(`./equipe/${n}.js?v=${V}`).catch((e) => { console.error(`Module ${n}`, e); return {}; })));
 export const PAGES = Object.assign({}, ...mods.map((m) => m.PAGES || {}));
 export const CARTES = mods.flatMap((m) => m.CARTES || []);

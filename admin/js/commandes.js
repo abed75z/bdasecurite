@@ -10,7 +10,7 @@
      site off / site on                  → met le site hors ligne / le remet en ligne
    ========================================================= */
 import { api, h, icone, toast, erreur, confirmer, modale } from './outils.js';
-import { COMMANDES_MODULES } from './modules/index.js';
+import { COMMANDES_MODULES, commandesLibres } from './modules/index.js';
 
 const sansAccent = (s) => String(s || '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
 const SERVICES = { devis: 'devis', vtc: 'vtc', recrutement: 'recrutement', candidature: 'recrutement', candidatures: 'recrutement', avis: 'avis' };
@@ -148,7 +148,9 @@ export function installerPalette({ menu, aller, deconnexion, compteurs }) {
     // Regroupe par rubrique en gardant l'ordre de pertinence des rubriques
     const groupes = new Map();
     trouve.forEach((it) => { if (!groupes.has(it.groupe)) groupes.set(it.groupe, []); if (groupes.get(it.groupe).length < 6) groupes.get(it.groupe).push(it); });
-    return [...tapees, ...[...groupes.values()].flat()].slice(0, 40);
+    // phrase libre : les modules peuvent proposer de la traiter (ex. « Demander à l'assistant »), toujours en dernier
+    const libres = q.trim().length >= 3 ? commandesLibres(q.trim(), aller).map((c) => ({ ...c, groupe: c.groupe || 'Assistant' })) : [];
+    return [...tapees, ...[...groupes.values()].flat().slice(0, 40 - libres.length), ...libres];
   }
 
   /* ----- Affichage ----- */

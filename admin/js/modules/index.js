@@ -55,3 +55,25 @@ export const COMMANDES_MODULES = (aller) => MODULES.flatMap((m) => (m.commandes 
   ic: c.ic || m.menu?.ic || 'suivant', titre: c.titre, mots: c.mots || '', danger: c.danger,
   run: c.run || (() => aller(c.href || `#/${m.route}`)),
 })));
+
+// Phrase libre tapée dans Ctrl K : { libre: { titre: 'Demander à l’assistant : « {q} »', ic: 'eclair' } } ouvre #/<route>/demander/<texte>
+export const commandesLibres = (q, aller) => MODULES.filter((m) => m.libre && m.route).map((m) => ({
+  ic: m.libre.ic || 'eclair', titre: (m.libre.titre || '{q}').replace('{q}', q), mots: q, groupe: m.libre.groupe,
+  run: () => aller(`#/${m.route}/demander/${encodeURIComponent(q)}`),
+}));
+
+// Au démarrage de l'application (après connexion) : { demarrage: 'nomDeFonction' } dans le fichier du module.
+// Sert aux modules qui écoutent des événements (ex. « bda:annulable » → bouton Annuler).
+export function demarrerModules(ctx) {
+  for (const m of MODULES.filter((x) => x.demarrage && x.charger)) {
+    m.charger().then((mod) => mod[m.demarrage]?.(ctx)).catch((e) => console.error(`Module ${m.route || ''}`, e));
+  }
+}
+
+// Écran de connexion : { connexion: 'nomDeFonction' } ajoute une autre façon de se connecter
+// (reçoit { zone, login, connecte(session) }).
+export function extensionsConnexion(ctx) {
+  for (const m of MODULES.filter((x) => x.connexion && x.charger)) {
+    m.charger().then((mod) => mod[m.connexion]?.(ctx)).catch((e) => console.error(`Module ${m.route || ''}`, e));
+  }
+}

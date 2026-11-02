@@ -31,7 +31,7 @@ if (connecte() && !utilisateur_courant()) {
   if (!in_array($action, $libres, true)) echec('Connexion requise.', 401);
 }
 // Actions réservées aux administrateurs (un manager gère le quotidien)
-if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== 'admin') echec('Action réservée à un administrateur.', 403);
+if (connecte() && !action_autorisee($action)) echec('Action réservée à un administrateur.', 403);
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 // Modules isolés (app/modules/<nom>.php) : actions « mod.<nom>.<verbe> », méthode et rôles déclarés par le module

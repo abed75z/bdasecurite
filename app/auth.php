@@ -74,6 +74,15 @@ const ACTIONS_ADMIN = [
   // Contrats de travail : réglages communs (les contrats eux-mêmes sont protégés dans api.php)
   'contrats.reglages', 'contrats.reglages.enregistrer',
 ];
+// Une action de l'API admin est-elle permise au rôle connecté ? (admin : tout ; manager : tout sauf ACTIONS_ADMIN)
+// Les actions des modules (mod.*) passent ici puis sont filtrées par les rôles qu'elles déclarent (app/modules.php).
+function action_autorisee(string $action): bool
+{
+  $role = role_courant();
+  if ($role === 'admin') return true;
+  if ($role === 'manager') return !in_array($action, ACTIONS_ADMIN, true);
+  return false;
+}
 function utilisateur_courant(): ?array
 {
   if (!connecte()) return null;

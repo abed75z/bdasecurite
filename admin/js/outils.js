@@ -30,6 +30,8 @@ export async function api(action, donnees, params = {}) {
   if (json.csrf) definirJeton(json.csrf);
   if (res.status === 401 && !['connexion', 'session'].includes(action)) { surDeconnexion(); }
   if (!res.ok || json.ok === false) throw new ErreurApi(json.erreur || `Erreur ${res.status}`, res.status);
+  // une suppression qu'on peut encore annuler : le module « accès » propose le bouton Annuler
+  if (json.annulable) document.dispatchEvent(new CustomEvent('bda:annulable', { detail: json.annulable }));
   return json;
 }
 

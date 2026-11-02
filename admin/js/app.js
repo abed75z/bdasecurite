@@ -6,7 +6,8 @@ import { PAGES } from './pages.js';
 import { pageVueGenerale } from './vue-generale.js';
 import { pagePaiements, pageStatistiques } from './appli-stats.js';
 import { installerPalette } from './commandes.js';
-import { insererMenus, CLOCHE_MODULES } from './modules/index.js';
+import { insererMenus, CLOCHE_MODULES, extensionsConnexion, demarrerModules } from './modules/index.js';
+import { menuVisible } from './roles.js';
 
 const racine = document.getElementById('app');
 const etat = { session: null, compteurs: {} };
@@ -165,11 +166,15 @@ function ecranConnexion(message) {
     etat.session = await api('connexion', { login: login.value.trim(), motdepasse: mdp.querySelector('input').value });
     lancerApplication();
   });
+  const extensions = h('div', { class: 'auth__extensions' });
   racine.replaceChildren(ecranAccueil('Espace administrateur',
     h('p', { class: 'auth__texte' }, message || 'Connectez-vous pour gérer vos devis, factures, plannings et votre site.'),
     form,
+    extensions,
     h('button', { type: 'button', class: 'auth__lien', onclick: ecranSecours }, 'Mot de passe oublié ?')));
   login.focus();
+  // autres façons de se connecter apportées par les modules (ex. Face ID / empreinte)
+  extensionsConnexion({ zone: extensions, login, connecte: (session) => { etat.session = session; lancerApplication(); } });
 }
 
 function ecranActivation() {
@@ -223,7 +228,7 @@ let espaceCourant = espaceMemo();
 let palette = null;
 export const ouvrirPalette = (texte) => palette?.ouvrir(texte);
 const fermerMenu = () => document.body.classList.remove('menu-ouvert');
-const visible = (m) => !m.admin || etat.session.role === 'admin';
+const visible = (m) => menuVisible(m, etat.session.role);
 
 // Icône de chaque rubrique du menu
 const GROUPE_IC = { Exploitation: 'planning', Clients: 'clients', Facturation: 'facture', 'Équipe': 'agents', 'Site web': 'site', Outils: 'calques', 'Activité': 'activite', Comptes: 'personne', Configuration: 'curseurs', Compte: 'reglages' };
@@ -458,6 +463,7 @@ function basculerMenuReduit() {
 }
 
 function lancerApplication() {
+  demarrerModules({ session: etat.session });
   const utilisateur = String(etat.session.utilisateur || '');
   const nom = cap(utilisateur) || 'Administrateur';
   document.body.classList.toggle('cote-reduite', menuReduit());

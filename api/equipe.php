@@ -38,8 +38,10 @@ $lectures = ['session', 'identifiant.libre', 'reset.verifier', 'accueil', 'plann
 $ecritures = ['inscription', 'connexion', 'deconnexion', 'oubli', 'reset', 'motdepasse', 'absence.demander', 'absence.annuler', 'incident.signaler', 'profil.enregistrer', 'document.envoyer', 'document.supprimer', 'pointer.debut', 'pointer.fin', 'appareil.retirer', 'poste.confirmer', 'sos', 'ronde'];
 // Fichiers d'interface des modules présents sur le serveur (assets/js/equipe/<nom>.js), lus par equipe-modules.js
 if ($action === 'modules.ui' && $methode === 'GET') {
+  $valide = fn ($n) => (bool)preg_match('/^[a-z][a-z0-9_-]{1,30}$/', $n);
   $noms = array_map(fn ($f) => basename($f, '.js'), glob(__DIR__ . '/../assets/js/equipe/*.js') ?: []);
-  repondre(['ok' => true, 'noms' => array_values(array_filter($noms, fn ($n) => (bool)preg_match('/^[a-z][a-z0-9_-]{1,30}$/', $n)))]);
+  $css = array_map(fn ($f) => basename($f, '.css'), glob(__DIR__ . '/../assets/css/equipe/*.css') ?: []);
+  repondre(['ok' => true, 'noms' => array_values(array_filter($noms, $valide)), 'css' => array_values(array_filter($css, $valide))]);
 }
 $module = str_starts_with($action, 'mod.'); // actions des modules (app/modules/<nom>.php), méthode contrôlée par le module
 if (!$module && !in_array($action, array_merge($lectures, $ecritures), true)) echec('Action inconnue.', 404);

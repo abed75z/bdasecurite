@@ -65,6 +65,8 @@ const ACTIONS_ADMIN = [
   'prospects', 'prospect.maj', 'robot.lancer',
   // Pilotage : chiffre d'affaires et encaissements
   'pilotage',
+  // Compte Google relié (Gmail, agenda) : codes secrets et connexion
+  'google', 'google.enregistrer', 'google.connecter', 'google.tester', 'google.deconnecter',
   // Notifications sur les appareils de la direction
   'notif.prefs', 'notif.prefs.enregistrer', 'notif.tester', 'notif.appareil.retirer',
   // Serveur Discord de la direction : jeton du bot, installation, synchronisation

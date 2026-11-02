@@ -493,6 +493,60 @@ async function accesClient(c) {
 /* =========================================================
    PARAMÈTRES
    ========================================================= */
+// Messagerie Google (administrateurs) : relier le compte Gmail de l'entreprise pour envoyer
+// factures, devis et relances depuis la vraie adresse. Codes secrets gardés dans le .env privé.
+async function carteGoogle() {
+  let g;
+  try { g = await api('google'); } catch (e) { return null; } // manager : carte masquée
+  const zone = h('div', { class: 'google' });
+  const titre = [h('h2', null, 'Messagerie Google'), h('small', null, 'Envoyer factures, devis et relances depuis votre vraie adresse (ex. contact@bdasecurite.com)')];
+  const occupe = async (bouton, fn) => { bouton.disabled = true; try { await fn(); } catch (e) { erreur(e); } bouton.disabled = false; };
+
+  const afficher = () => {
+    if (g.relie) {
+      const essai = h('button', { class: 'btn btn--gold', type: 'button' }, icone('envoyer'), 'Envoyer un mail d’essai');
+      essai.onclick = () => occupe(essai, async () => { const r = await api('google.tester', {}); toast(`Mail d’essai envoyé à ${r.compte} : regardez sa boîte de réception.`); });
+      const couper = h('button', { class: 'btn btn--ghost', type: 'button' }, 'Déconnecter');
+      couper.onclick = async () => {
+        if (!(await confirmer('L’admin ne pourra plus envoyer de mails depuis ce compte. Vous pourrez le relier de nouveau à tout moment.', { titre: 'Déconnecter Google ?', ok: 'Déconnecter', danger: true }))) return;
+        await occupe(couper, async () => { g = await api('google.deconnecter', {}); afficher(); toast('Compte Google déconnecté.'); });
+      };
+      zone.replaceChildren(
+        h('div', { class: 'google__etat' }, statutPastille('payee', 'Relié'), h('b', null, g.compte), g.depuis ? h('small', { class: 'muet' }, `depuis le ${dateLisible(g.depuis)}`) : ''),
+        h('p', { class: 'muet' }, 'Les mails envoyés depuis l’admin partent de cette adresse, signés par Google, et apparaissent dans « Messages envoyés » de Gmail. Les réponses des clients arrivent dans cette boîte.'),
+        h('div', { class: 'google__actions' }, essai, couper));
+      return;
+    }
+    if (g.pret) {
+      const relier = h('button', { class: 'btn btn--gold', type: 'button' }, icone('mail'), 'Connecter mon compte Google');
+      relier.onclick = () => occupe(relier, async () => { const r = await api('google.connecter', {}); location.href = r.url; });
+      const changer = h('button', { class: 'lien-btn', type: 'button', onclick: () => { g = { ...g, pret: false, modifier: true }; afficher(); } }, 'Changer les codes');
+      zone.replaceChildren(
+        h('div', { class: 'google__etat' }, statutPastille('attente', 'Codes enregistrés'), h('small', { class: 'muet' }, `Identifiant ${g.idClient}`)),
+        h('p', { class: 'muet' }, 'Dernière étape : connectez le compte. Google vous demandera de choisir l’adresse puis de cliquer sur « Autoriser ».'),
+        h('div', { class: 'google__actions' }, relier, changer));
+      return;
+    }
+    // Étape 1 : codes du projet Google Cloud
+    const idClient = saisie({ placeholder: '123456789-abc….apps.googleusercontent.com', autocomplete: 'off', spellcheck: 'false' });
+    const secret = saisie({ type: 'password', placeholder: 'GOCSPX-…', autocomplete: 'new-password' });
+    const retour = saisie({ value: g.retour, readonly: true, spellcheck: 'false' });
+    const copier = h('button', { class: 'btn btn--ghost btn--petit', type: 'button', onclick: async () => { try { await navigator.clipboard.writeText(g.retour); toast('Adresse de retour copiée.'); } catch (e) { retour.select(); } } }, icone('copier'), 'Copier');
+    const enregistrer = h('button', { class: 'btn btn--gold', type: 'submit' }, icone('coche'), 'Enregistrer les codes');
+    zone.replaceChildren(h('form', { class: 'form-grille', onsubmit: (e) => {
+      e.preventDefault();
+      occupe(enregistrer, async () => { g = await api('google.enregistrer', { idClient: idClient.value.trim(), secret: secret.value.trim() }); afficher(); toast('Codes enregistrés. Connectez maintenant le compte.'); });
+    } },
+    h('p', { class: 'muet' }, g.modifier ? 'Collez les nouveaux codes : la connexion actuelle sera remplacée.' : 'Étape 1 : créez les codes dans Google Cloud (je vous guide), puis collez-les ici. Ils restent dans le fichier privé du serveur, jamais sur le site.'),
+    champ('Adresse de retour à donner à Google', h('div', { class: 'google__copie' }, retour, copier)),
+    champ('Identifiant client', idClient),
+    champ('Code secret du client', secret),
+    h('div', null, enregistrer)));
+  };
+  afficher();
+  return carte(titre, zone);
+}
+
 async function pageParametres(ctx) {
   ctx.titre('Paramètres');
   const { reglages: r } = await api('reglages');
@@ -541,6 +595,7 @@ async function pageParametres(ctx) {
       boutonImport(() => ctx.aller('#/tableau'))));
 
   ctx.afficher(form,
+    await carteGoogle(),
     carte([h('h2', null, 'Sécurité'), h('small', null, 'Mot de passe oublié ? Utilisez votre code de secours sur l\'écran de connexion.')], formMdp),
     carte([h('h2', null, 'Sauvegarde et import')], sauvegarde));
 }

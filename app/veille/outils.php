@@ -7,7 +7,9 @@ declare(strict_types=1);
 
 const VEILLE_ENV_CLES = ['DISCORD_WEBHOOK_URL', 'FT_CLIENT_ID', 'FT_CLIENT_SECRET', 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT', 'VEILLE_CRON_KEY', 'DISCORD_BOT_TOKEN', 'DISCORD_ADMIN_IDS', 'COFFRE_CLE',
   // appli BDASH : envoi des codes de connexion par SMS (API OVH)
-  'OVH_SMS_AK', 'OVH_SMS_AS', 'OVH_SMS_CK', 'OVH_SMS_SERVICE'];
+  'OVH_SMS_AK', 'OVH_SMS_AS', 'OVH_SMS_CK', 'OVH_SMS_SERVICE',
+  // compte Google relié à l'admin (Gmail, agenda) : voir app/google.php
+  'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REFRESH_TOKEN', 'GOOGLE_COMPTE'];
 
 function veille_env_chemin(): string
 {

@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord', 'contrats.reglages', 'prospects', 'exploitation', 'controle', 'pilotage'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord', 'contrats.reglages', 'prospects', 'exploitation', 'controle', 'pilotage', 'google'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -1275,6 +1275,54 @@ try {
       ]], '🧪 Message de test');
       $p = webpush_tous(['title' => 'Test BDA Veille', 'body' => 'Les notifications fonctionnent ✅', 'url' => '/admin/#/opportunites', 'tag' => 'veille-test']);
       repondre(['ok' => true, 'discord' => $d, 'push' => $p]);
+
+    /* ================= Messagerie Google (Gmail et agenda reliés à l'admin) ================= */
+    case 'google':
+      require_once __DIR__ . '/../app/google.php';
+      repondre(['ok' => true] + google_etat());
+
+    case 'google.enregistrer':
+      require_once __DIR__ . '/../app/google.php';
+      $b = corps();
+      $maj = [];
+      $id = trim(chaine($b['idClient'] ?? ''));
+      if ($id !== '') {
+        if (!preg_match('/^[\w-]{6,120}\.apps\.googleusercontent\.com$/', $id)) echec('Identifiant client invalide : il se termine par « .apps.googleusercontent.com ».');
+        $maj['GOOGLE_CLIENT_ID'] = $id;
+      }
+      $sec = trim(chaine($b['secret'] ?? ''));
+      if ($sec !== '') {
+        if (!preg_match('/^[\w-]{10,120}$/', $sec)) echec('Code secret invalide : copiez-le tel quel depuis Google (il commence souvent par « GOCSPX- »).');
+        $maj['GOOGLE_CLIENT_SECRET'] = $sec;
+      }
+      if (!$maj) echec('Rien à enregistrer.');
+      // Nouveaux codes : l'ancienne connexion ne vaut plus
+      if (veille_env('GOOGLE_REFRESH_TOKEN') !== '') google_deconnecter();
+      veille_env_ecrire($maj);
+      journal('securite', 'Codes de connexion Google enregistrés (' . implode(', ', array_keys($maj)) . ')');
+      repondre(['ok' => true] + google_etat());
+
+    case 'google.connecter':
+      require_once __DIR__ . '/../app/google.php';
+      try { $url = google_url_connexion((string)($_SESSION['login'] ?? '')); } catch (RuntimeException $e) { echec($e->getMessage()); }
+      repondre(['ok' => true, 'url' => $url]);
+
+    case 'google.tester':
+      require_once __DIR__ . '/../app/google.php';
+      $compte = google_compte();
+      // Les erreurs de Google (codes refusés, connexion expirée…) sont montrées telles quelles au gérant
+      try {
+        $r = google_envoyer($compte, 'Test : l’admin BDA est relié à Gmail', "Bonjour,\n\nCe message a été envoyé depuis l’admin BDA Security Group, avec le compte $compte.\nSi vous le lisez, la messagerie est bien reliée : les factures, devis et relances pourront partir directement de l’admin.\n\nIl apparaît aussi dans « Messages envoyés » de Gmail.\n\nBDA Admin");
+      } catch (RuntimeException $e) { echec($e->getMessage(), 502); }
+      journal('securite', "Mail d’essai envoyé par Gmail ($compte)");
+      repondre(['ok' => true, 'compte' => $r['de']]);
+
+    case 'google.deconnecter':
+      require_once __DIR__ . '/../app/google.php';
+      $compte = google_compte();
+      google_deconnecter();
+      journal('securite', 'Compte Google ' . ($compte ?: '') . ' déconnecté de l’admin');
+      repondre(['ok' => true] + google_etat());
 
     case 'push.abonner':
       $b = corps();

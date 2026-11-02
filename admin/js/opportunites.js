@@ -177,10 +177,11 @@ function vuePistes(zone, d0, ch) {
     if (ajout) liste.append(...cartes);
     else liste.replaceChildren(...(cartes.length ? cartes : [videPistes()]));
     resume.textContent = charge.total ? `${pluriel(charge.total, 'piste', 'pistes')}${f.statut === 'a_contacter' ? ' à contacter' : f.statut === 'rappels' ? ' à rappeler' : ''}${f.dep ? ` · ${DEPS.find(([v]) => v === f.dep)[1]}` : ''}` : '';
-    pied.replaceChildren(page < charge.pages ? h('button', { class: 'btn btn--ghost', type: 'button', onclick: async (e) => {
+    // replaceChildren écrirait « null » : on passe une liste vide quand il n'y a plus rien à voir
+    pied.replaceChildren(...(page < charge.pages ? [h('button', { class: 'btn btn--ghost', type: 'button', onclick: async (e) => {
       e.currentTarget.disabled = true;
       try { page++; charge = await api('prospects', undefined, { ...requete(), page }); dessiner(true); } catch (err) { erreur(err); }
-    } }, `Voir ${Math.min(40, charge.total - page * 40)} pistes de plus`) : null);
+    } }, `Voir ${Math.min(40, charge.total - page * 40)} pistes de plus`)] : []));
   }
   function videPistes() {
     const vide = !Object.values(ch.categories || {}).some((c) => c.total);
@@ -351,7 +352,7 @@ async function vueVeille(zone, type, cible, recharger) {
       && (!q || sansAccents(`${o.titre} ${o.acheteur} ${o.lieu} ${o.extrait}`).includes(q)));
     zoneListe.replaceChildren(...(vis.length ? vis.map((o) => carteVeille(o, vuAvant, o.id === cible, dessiner)) : [h('div', { class: 'vide' }, icone('recherche'), h('p', null, liste.length ? 'Rien avec ces filtres.' : 'Rien pour le moment : la veille vérifie toutes les 30 minutes.'))]));
   }
-  zone.replaceChildren(bandeau, h('div', { class: 'op-filtres' }, zoneStatuts, h('div', { class: 'op-filtres__ligne' }, h('div', { class: 'recherche' }, icone('recherche'), recherche), faibles)), zoneListe);
+  zone.replaceChildren(bandeau, h('div', { class: 'op-filtres' }, zoneStatuts, h('div', { class: 'op-filtres__ligne' }, ...[h('div', { class: 'recherche' }, icone('recherche'), recherche), faibles].filter(Boolean))), zoneListe);
   dessiner();
   if (cible) setTimeout(() => { const el = document.getElementById(`opp-${cible}`); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('is-cible'); } }, 150);
 }

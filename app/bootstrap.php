@@ -352,6 +352,22 @@ function schema(PDO $db): void
       PRAGMA user_version = 22;
     SQL);
   }
+  if ($version < 23) {
+    // Centre de contrôle, suite : position des sites (carte), confirmation des postes par l'agent,
+    // passages de ronde (QR codes collés sur le site : sites.qr = [{id, nom, jeton}]) et alertes des agents (SOS)
+    $db->exec(<<<'SQL'
+      ALTER TABLE sites ADD COLUMN lat REAL;
+      ALTER TABLE sites ADD COLUMN lon REAL;
+      ALTER TABLE vacations ADD COLUMN confirme TEXT NOT NULL DEFAULT '';
+      CREATE TABLE IF NOT EXISTS rondes_passages (id INTEGER PRIMARY KEY, site_id INTEGER NOT NULL, point TEXT NOT NULL, agent_id INTEGER NOT NULL,
+        quand TEXT NOT NULL, lat REAL, lon REAL, prec REAL, note TEXT NOT NULL DEFAULT '');
+      CREATE INDEX IF NOT EXISTS i_rondes_site ON rondes_passages (site_id, quand);
+      CREATE TABLE IF NOT EXISTS alertes_agents (id INTEGER PRIMARY KEY, agent_id INTEGER NOT NULL, type TEXT NOT NULL DEFAULT 'sos', quand TEXT NOT NULL,
+        lat REAL, lon REAL, prec REAL, message TEXT NOT NULL DEFAULT '', statut TEXT NOT NULL DEFAULT 'ouverte', pris_par TEXT NOT NULL DEFAULT '', pris_le TEXT NOT NULL DEFAULT '');
+      CREATE INDEX IF NOT EXISTS i_alertes_statut ON alertes_agents (statut, quand);
+      PRAGMA user_version = 23;
+    SQL);
+  }
 }
 // Catégorie d'un agent : équipe principale, renfort, ou agent de secours (candidat retenu)
 function agent_categorie($c): string

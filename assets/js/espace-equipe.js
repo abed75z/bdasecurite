@@ -150,6 +150,12 @@ const simplifier = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '
 function lireCreneau(txt) {
   const t = String(txt || '').trim().toLowerCase().replace(/\s+/g, '').replace(/[–—à]/g, '-');
   if (!t) return null;
+  // plusieurs postes le même jour (planning des sites)
+  if (t.includes('+')) {
+    const parts = t.split('+').filter(Boolean).map(lireCreneau);
+    if (parts.some((p) => !p || p.code)) return null;
+    return { min: parts.reduce((s, p) => s + (p.min || 0), 0), nuit: parts.some((p) => p.nuit), plages: parts };
+  }
   if (/^[a-zéè]+$/.test(t)) return { code: t.toUpperCase() };
   const m = t.match(/^(\d{1,2})(?:[h:](\d{2})?)?-(\d{1,2})(?:[h:](\d{2})?)?h?$/);
   if (m) {
@@ -237,6 +243,8 @@ async function demarrer() {
   try { s = await api('session'); } catch (e) { return racine.replaceChildren(h('p', { class: 'eq-vide' }, e.message)); }
   const reset = (location.hash.match(/reset=([a-f0-9]{48})/) || [])[1];
   if (reset) return ecranReset(reset);
+  const ronde = (location.hash.match(/ronde=([a-f0-9]{24})/) || [])[1];
+  if (ronde) { try { sessionStorage.setItem('eq-ronde', ronde); } catch (e) { /* navigation privée */ } history.replaceState(null, '', location.pathname); }
   if (location.hash === '#inscription') return ecranInscription();
   if (!s.connecte) return ecranConnexion();
   moi = { prenom: s.prenom, nom: s.nom, metier: s.metier };
@@ -503,6 +511,55 @@ function ouvrirApplication() {
   ouvrirApplication.menus = dessinerMenus;
   window.onhashchange = naviguer;
   naviguer();
+  if (moi.metier !== 'chauffeur') boutonSos();
+  let ronde = null;
+  try { ronde = sessionStorage.getItem('eq-ronde'); sessionStorage.removeItem('eq-ronde'); } catch (e) { /* navigation privée */ }
+  if (ronde) validerRonde(ronde);
+}
+
+/* ---------- Ronde : passage enregistré quand l'agent scanne le QR code collé sur le site ---------- */
+async function validerRonde(jeton) {
+  const corps = h('div', { class: 'eq-ronde' }, h('div', { class: 'eq-ronde__ic' }, ic('pin')), h('b', null, 'Enregistrement du passage…'));
+  tiroir('Point de ronde', corps);
+  try {
+    const r = await api('ronde', { jeton, ...(await position()) });
+    corps.replaceChildren(h('div', { class: 'eq-ronde__ic is-ok' }, ic('coche')), h('b', null, r.point), h('span', null, `${r.site} · ${r.heure.replace(':', 'h')}`),
+      h('small', null, r.deja ? 'Passage déjà enregistré il y a un instant.' : 'Passage enregistré. Continuez votre ronde.'));
+  } catch (e) {
+    corps.replaceChildren(h('div', { class: 'eq-ronde__ic is-non' }, ic('alerte')), h('b', null, 'Passage non enregistré'), h('small', null, e.message));
+  }
+}
+
+/* ---------- Bouton d'alerte : maintenir 2 s ; la direction est prévenue avec la position ---------- */
+function boutonSos() {
+  if (document.querySelector('.eq-sos')) return;
+  let minuteur = null;
+  const bouton = h('button', { class: 'eq-sos', type: 'button', 'aria-label': 'Alerte : maintenez 2 secondes pour prévenir la direction' }, h('i', { class: 'eq-sos__anneau' }), h('b', null, 'SOS'));
+  const arreter = () => { clearTimeout(minuteur); bouton.classList.remove('is-appui'); };
+  const declencher = async () => {
+    bouton.classList.remove('is-appui');
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    const etat = h('p', { class: 'eq-sos-etat' }, 'Envoi de l’alerte…');
+    tiroir('Alerte', h('div', { class: 'eq-sos-fenetre' }, etat,
+      h('p', null, 'En cas de danger immédiat, appelez aussi les secours :'),
+      h('div', { class: 'eq-sos-numeros' },
+        h('a', { class: 'eq-btn eq-btn--rouge', href: 'tel:17' }, 'Police · 17'),
+        h('a', { class: 'eq-btn eq-btn--rouge', href: 'tel:15' }, 'SAMU · 15'),
+        h('a', { class: 'eq-btn eq-btn--rouge', href: 'tel:18' }, 'Pompiers · 18'),
+        h('a', { class: 'eq-btn eq-btn--ghost', href: 'tel:112' }, 'Urgences · 112'))));
+    try {
+      await api('sos', { ...(await position()) });
+      etat.textContent = 'Alerte envoyée : la direction est prévenue avec votre position.';
+      etat.classList.add('is-ok');
+    } catch (e) {
+      etat.textContent = `L’alerte n’est pas partie (${e.message}). Appelez la direction.`;
+      etat.classList.add('is-non');
+    }
+  };
+  bouton.addEventListener('pointerdown', (e) => { e.preventDefault(); bouton.classList.add('is-appui'); minuteur = setTimeout(declencher, 2000); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => bouton.addEventListener(ev, arreter));
+  bouton.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.body.append(bouton);
 }
 function menuPlus() {
   const lien = (r) => { const p = PAGES[r]; return h('a', { href: `#/${r}`, onclick: () => fermer() }, ic(p.icone), p.titre, p.badge && compteurs[p.badge] ? h('i', { class: 'eq-badge' }, compteurs[p.badge]) : null); };
@@ -538,7 +595,7 @@ const enTete = (surtitre, titre, texte, ...actions) => h('div', { class: 'eq-tit
 
 /* ----- Accueil ----- */
 async function pageAccueil() {
-  const d = await api('accueil');
+  const [d, mesPostes] = await Promise.all([api('accueil'), api('postes').then((r) => r.postes).catch(() => [])]);
   Object.assign(moi, { prenom: d.moi.prenom, nom: d.moi.nom, metier: d.moi.metier });
   compteurs = { fichesNonVues: d.fichesNonVues, absencesAttente: d.absencesAttente };
   ouvrirApplication.menus?.();
@@ -602,12 +659,30 @@ async function pageAccueil() {
     h('div', { class: 'eq-carte__tete' }, h('h2', null, ic('voiture'), 'Prochaines courses'), h('a', { href: '#/courses' }, 'Toutes →')),
     h('div', { class: 'eq-liste' }, d.courses.map(carteCourse))) : null;
 
+  // postes du planning des sites : où aller, quand, et les consignes du site
+  const postes = mesPostes.length ? h('section', { class: 'eq-carte' },
+    h('div', { class: 'eq-carte__tete' }, h('h2', null, ic('pin'), 'Mes prochains postes')),
+    h('div', { class: 'eq-liste' }, mesPostes.slice(0, 8).map((p) => {
+      const conf = h('button', { class: 'eq-btn eq-btn--petit', type: 'button', onclick: async () => {
+        conf.disabled = true;
+        try { await api('poste.confirmer', { id: p.id }); conf.replaceWith(pastille('ok', 'Confirmé')); toast('Merci, la direction voit que vous avez confirmé.'); } catch (e) { toast(e.message, true); conf.disabled = false; }
+      } }, ic('coche'), 'Je confirme');
+      return h('div', { class: 'eq-poste' },
+        h('div', { class: 'eq-poste__tete' }, h('b', null, `${dateLongue(p.jour)} · ${p.debut.replace(':', 'h')} – ${p.fin.replace(':', 'h')}`), p.confirme ? pastille('ok', 'Confirmé') : conf),
+        h('div', { class: 'eq-poste__site' }, h('span', { class: 'eq-or-texte' }, p.site),
+          p.adresse ? h('a', { href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.adresse)}`, target: '_blank', rel: 'noopener' }, ic('pin'), p.adresse) : null),
+        p.note ? h('p', { class: 'eq-poste__note' }, p.note) : null,
+        p.consignes || p.contact ? h('details', { class: 'eq-poste__consignes' }, h('summary', null, 'Consignes du site'),
+          p.contact ? h('p', null, h('b', null, 'Contact : '), p.contact) : null, p.consignes ? h('p', null, p.consignes) : null) : null);
+    }))) : null;
+
   return h('div', null,
     enTete(dateLongue(iso(new Date())), h('span', null, `${salut}, `, h('span', { class: 'eq-or-texte' }, d.moi.prenom)), d.moi.metierLibelle),
     d.alertes.length ? h('div', { class: 'eq-liste', style: 'margin-bottom:1rem' }, d.alertes.map((a) => h('div', { class: `eq-alerte eq-alerte--${a.niveau}` }, ic('alerte'), a.texte))) : null,
     h('div', { class: 'eq-grille' },
       h('div', { class: 'eq-g-7' }, service, h('div', { class: 'eq-mt' }, stats)),
       h('div', { class: 'eq-g-5' }, semaine),
+      postes ? h('div', null, postes) : null,
       h('div', null, raccourcis),
       consignes ? h('div', { class: courses ? 'eq-g-6' : '' }, consignes) : null,
       courses ? h('div', { class: consignes ? 'eq-g-6' : '' }, courses) : null));

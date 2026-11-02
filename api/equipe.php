@@ -34,8 +34,8 @@ if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
 
 $action = (string)($_GET['a'] ?? '');
 $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-$lectures = ['session', 'identifiant.libre', 'reset.verifier', 'accueil', 'planning', 'fiches', 'fiche', 'documents', 'document', 'absences', 'main_courante', 'photo', 'profil', 'courses', 'appareils'];
-$ecritures = ['inscription', 'connexion', 'deconnexion', 'oubli', 'reset', 'motdepasse', 'absence.demander', 'absence.annuler', 'incident.signaler', 'profil.enregistrer', 'document.envoyer', 'document.supprimer', 'pointer.debut', 'pointer.fin', 'appareil.retirer'];
+$lectures = ['session', 'identifiant.libre', 'reset.verifier', 'accueil', 'planning', 'fiches', 'fiche', 'documents', 'document', 'absences', 'main_courante', 'photo', 'profil', 'courses', 'appareils', 'postes'];
+$ecritures = ['inscription', 'connexion', 'deconnexion', 'oubli', 'reset', 'motdepasse', 'absence.demander', 'absence.annuler', 'incident.signaler', 'profil.enregistrer', 'document.envoyer', 'document.supprimer', 'pointer.debut', 'pointer.fin', 'appareil.retirer', 'poste.confirmer', 'sos', 'ronde'];
 if (!in_array($action, array_merge($lectures, $ecritures), true)) echec('Action inconnue.', 404);
 if (in_array($action, $lectures, true) !== ($methode === 'GET')) echec('Méthode non autorisée.', 405);
 if ($methode === 'POST') {
@@ -591,6 +591,55 @@ try {
       db()->prepare('DELETE FROM equipe_appareils WHERE id = ? AND compte_id = ?')->execute([(int)(corps()['id'] ?? 0), $c['id']]);
       repondre(['ok' => true]);
 
+    /* ================= Planning des sites : mes postes, confirmation, alerte SOS, passage de ronde ================= */
+    case 'postes':
+      $c = eq_exiger();
+      require_once __DIR__ . '/../app/exploitation.php';
+      $st = db()->prepare("SELECT v.id, v.jour, v.debut, v.fin, v.qualif, v.note, v.confirme, s.nom AS site, s.adresse, s.consignes, s.contact
+        FROM vacations v JOIN sites s ON s.id = v.site_id WHERE v.agent_id = ? AND v.statut <> 'annulee' AND v.jour >= ? AND v.jour <= ? ORDER BY v.jour, v.debut LIMIT 60");
+      $st->execute([(int)$c['agent_id'], date('Y-m-d', time() - 86400), date('Y-m-d', time() + 21 * 86400)]);
+      // les postes déjà terminés ne sont plus montrés
+      $postes = array_values(array_filter($st->fetchAll(), fn($v) => exp_bornes($v)[1] > time()));
+      repondre(['ok' => true, 'postes' => $postes, 'qualifs' => EXP_QUALIFS]);
+
+    case 'poste.confirmer':
+      $c = eq_exiger();
+      db()->prepare("UPDATE vacations SET confirme = ? WHERE id = ? AND agent_id = ? AND confirme = ''")->execute([maintenant(), (int)(corps()['id'] ?? 0), (int)$c['agent_id']]);
+      repondre(['ok' => true]);
+
+    // Alerte de l'agent (agression, malaise, danger) : la direction est prévenue tout de suite, avec la position
+    case 'sos':
+      $c = eq_exiger();
+      $b = corps();
+      if (!limiter('sos:' . $c['agent_id'], 6, 600)) echec('Alerte déjà envoyée : la direction est prévenue.', 429);
+      [$lat, $lng, $prec] = position_gps($b);
+      db()->prepare('INSERT INTO alertes_agents (agent_id, type, quand, lat, lon, prec, message) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        ->execute([(int)$c['agent_id'], 'sos', maintenant(), $lat, $lng, $prec, texte($b['message'] ?? '', 500)]);
+      journal('alerte', "ALERTE envoyée par {$c['agent_nom']}" . ($lat !== null ? ' (position jointe)' : ''));
+      // jamais de nom ni de position dans la notification : le détail est dans le centre de contrôle
+      notifier('incidents', 'ALERTE d’un agent', 'Un agent demande de l’aide maintenant. Ouvrez le centre de contrôle.', '/admin/#/controle', 'sos-' . time());
+      repondre(['ok' => true]);
+
+    // QR code de ronde scanné sur le site (lien bdasecurite.com/espace-equipe#ronde=JETON)
+    case 'ronde':
+      $c = eq_exiger();
+      $b = corps();
+      $jeton = (string)($b['jeton'] ?? '');
+      if (!preg_match('/^[a-f0-9]{24}$/', $jeton)) echec('QR code inconnu.');
+      $trouve = null;
+      $st = db()->prepare("SELECT id, nom, qr FROM sites WHERE qr LIKE ?");
+      $st->execute(['%' . $jeton . '%']);
+      foreach ($st as $s) foreach ((array)json_decode((string)$s['qr'], true) as $pt) if (hash_equals((string)($pt['jeton'] ?? ''), $jeton)) $trouve = [$s, $pt];
+      if (!$trouve) echec('Ce QR code n’est plus valable. Prévenez la direction.', 404);
+      [$s, $pt] = $trouve;
+      $der = db()->prepare('SELECT quand FROM rondes_passages WHERE site_id = ? AND point = ? AND agent_id = ? ORDER BY quand DESC LIMIT 1');
+      $der->execute([(int)$s['id'], (string)$pt['id'], (int)$c['agent_id']]);
+      if ((string)$der->fetchColumn() > date('Y-m-d H:i:s', time() - 120)) repondre(['ok' => true, 'site' => $s['nom'], 'point' => $pt['nom'], 'heure' => date('H:i'), 'deja' => true]);
+      [$lat, $lng, $prec] = position_gps($b);
+      db()->prepare('INSERT INTO rondes_passages (site_id, point, agent_id, quand, lat, lon, prec) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        ->execute([(int)$s['id'], (string)$pt['id'], (int)$c['agent_id'], maintenant(), $lat, $lng, $prec]);
+      repondre(['ok' => true, 'site' => $s['nom'], 'point' => $pt['nom'], 'heure' => date('H:i')]);
+
     /* ================= Pointage depuis l'espace ================= */
     case 'pointer.debut':
       $c = eq_exiger();
@@ -601,6 +650,11 @@ try {
       if ((string)$der->fetchColumn() > date('Y-m-d H:i:s', time() - 60)) echec('Pointage déjà enregistré il y a moins d’une minute.', 409);
       [$lat, $lng, $prec] = position_gps(corps());
       $p = eq_planning_mois($c, date('Y-m'));
+      // le pointage prend le nom du site du poste qui commence (ou a commencé) maintenant dans le planning des sites
+      foreach (exp_vacations(date('Y-m-d', time() - 86400), date('Y-m-d'), $aid) as $v) {
+        [$vd, $vf] = exp_bornes($v);
+        if (time() >= $vd - 5400 && time() <= $vf) { $p['client'] = (string)$v['site_nom']; break; }
+      }
       db()->prepare('INSERT INTO pointages (agent_id, debut, site, lat_debut, lng_debut, prec_debut, cree) VALUES (?, ?, ?, ?, ?, ?, ?)')
         ->execute([$aid, maintenant(), $p['client'], $lat, $lng, $prec, maintenant()]);
       journal('equipe', "Prise de service : {$c['agent_nom']}" . ($p['client'] !== '' ? " ({$p['client']})" : '') . ' — espace équipe');

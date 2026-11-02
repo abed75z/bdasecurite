@@ -494,3 +494,42 @@ input[type="date"].eq-input, input[type="datetime-local"].eq-input, input[type="
 .eq-squelette + .eq-squelette { margin-top: 1rem; }
 .eq-mt { margin-top: 1rem; }
 .eq-mt2 { margin-top: 1.6rem; }
+
+/* ---------- Planning des sites : mes prochains postes (02/11/2026) ---------- */
+.eq-poste { display: flex; flex-direction: column; gap: .35rem; padding: .85rem .9rem; border: 1px solid var(--ligne); border-radius: 14px; background: var(--carte-2); }
+.eq-poste__tete { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; }
+.eq-poste__tete b { font-size: .95rem; }
+.eq-poste__site { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .8rem; font-size: .88rem; }
+.eq-poste__site a { display: inline-flex; align-items: center; gap: .3rem; color: var(--doux); }
+.eq-poste__site .eq-ic { width: 14px; height: 14px; }
+.eq-poste__note { margin: 0; font-size: .85rem; color: var(--doux); }
+.eq-poste__consignes summary { cursor: pointer; font-size: .85rem; color: var(--or-clair); }
+.eq-poste__consignes p { margin: .4rem 0 0; font-size: .85rem; white-space: pre-line; color: var(--texte); }
+
+/* ---------- Bouton SOS : maintenir 2 secondes ---------- */
+.eq-sos { position: fixed; right: 16px; bottom: calc(84px + env(safe-area-inset-bottom)); z-index: 60; display: grid; place-items: center; width: 58px; height: 58px; padding: 0; border: 2px solid rgba(255, 255, 255, .85); border-radius: 50%; background: #c62f24; color: #fff; box-shadow: 0 10px 26px -8px rgba(198, 47, 36, .8); cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.eq-sos b { position: relative; font-size: .85rem; font-weight: 800; letter-spacing: .06em; }
+.eq-sos__anneau { position: absolute; inset: -6px; border-radius: 50%; background: conic-gradient(#fff calc(var(--p, 0) * 1%), transparent 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px)); opacity: 0; }
+.eq-sos.is-appui .eq-sos__anneau { opacity: 1; animation: eq-sos-charge 2s linear forwards; }
+@property --p { syntax: '<number>'; inherits: false; initial-value: 0; }
+@keyframes eq-sos-charge { from { --p: 0; } to { --p: 100; } }
+@media (min-width: 900px) { .eq-sos { bottom: 24px; right: 24px; } }
+.eq-sos-fenetre { display: flex; flex-direction: column; gap: .8rem; }
+.eq-sos-etat { margin: 0; padding: .8rem 1rem; border-radius: 12px; background: var(--carte-2); font-weight: 600; }
+.eq-sos-etat.is-ok { background: rgba(92, 200, 149, .14); color: #8fe0b8; }
+.eq-sos-etat.is-non { background: rgba(236, 107, 97, .14); color: #ff9d94; }
+.eq-sos-fenetre p { margin: 0; }
+.eq-sos-numeros { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.eq-sos-numeros .eq-btn { justify-content: center; }
+
+/* ---------- Passage de ronde ---------- */
+.eq-ronde { display: flex; flex-direction: column; align-items: center; gap: .5rem; padding: 1rem 0 .5rem; text-align: center; }
+.eq-ronde b { font-size: 1.2rem; }
+.eq-ronde span { color: var(--doux); }
+.eq-ronde small { color: var(--doux); }
+.eq-ronde__ic { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: var(--carte-3); color: var(--or-clair); }
+.eq-ronde__ic .eq-ic { width: 30px; height: 30px; }
+.eq-ronde__ic.is-ok { background: rgba(92, 200, 149, .16); color: #8fe0b8; }
+.eq-ronde__ic.is-non { background: rgba(236, 107, 97, .16); color: #ff9d94; }
+/* une fenêtre ouverte passe devant le bouton SOS */
+body:has(.eq-voile) .eq-sos { display: none; }

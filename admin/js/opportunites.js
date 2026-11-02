@@ -249,7 +249,7 @@ function cartePiste(p, apres) {
         p.tel ? h('a', { class: 'btn btn--gold tc-appel', href: `tel:${p.tel.replace(/\s/g, '')}` }, icone('telephone'), p.tel)
           : h('a', { class: 'btn btn--ghost tc-appel', href: chercherNum, target: '_blank', rel: 'noopener' }, icone('recherche'), 'Trouver le numéro'),
         p.site ? h('a', { class: 'btn btn--ghost btn--petit', href: p.site, target: '_blank', rel: 'noopener' }, icone('site'), 'Site internet') : null,
-        p.mail ? h('a', { class: 'btn btn--ghost btn--petit', href: `mailto:${p.mail}` }, icone('mail'), 'E-mail') : null,
+        h('button', { class: 'btn btn--ghost btn--petit', type: 'button', onclick: () => preparerMail(p, () => { if (p.statut === 'a_contacter') { statut.value = 'contacte'; statut.dispatchEvent(new Event('change')); } }) }, icone('mail'), p.mail ? 'Écrire un mail' : 'Préparer un mail'),
         societe ? h('a', { class: 'btn btn--ghost btn--petit', href: societe, target: '_blank', rel: 'noopener', title: 'Dirigeants, adresse du siège, effectif' }, icone('dossier'), 'Fiche société') : null)),
     h('div', { class: 'tc-piste__suivi' },
       h('label', { class: 'tc-champ' }, h('span', null, 'Où en êtes-vous ?'), statut),
@@ -260,6 +260,45 @@ function cartePiste(p, apres) {
       } }, 'Ne plus afficher')),
     h('details', { class: 'tc-note', open: p.note ? true : null }, h('summary', null, p.note ? 'Note' : 'Ajouter une note'), note, enreg));
   return art;
+}
+
+/* ----- Mail de présentation prêt à envoyer, adapté au type de lieu et à ce qui vient de se passer ----- */
+const PHRASES_MAIL = {
+  bar: 'Nous accompagnons les bars et les établissements de nuit : agent à l’entrée, gestion de la clientèle et des incidents, renforts les soirs d’affluence et de match.',
+  club: 'Nous accompagnons les établissements de nuit : contrôle à l’entrée, sécurité en salle, renforts pour vos soirées.',
+  hotel: 'Nous intervenons auprès des hôtels : agent de sécurité de nuit, agents SSIAP, renforts pour vos événements.',
+  magasin: 'Nous intervenons en magasin : agents de prévention contre les vols, renforts pour les périodes d’affluence (fêtes de fin d’année, soldes).',
+  restaurant: 'Nous intervenons auprès des restaurants : un agent les soirs de forte affluence et lors de vos événements privés.',
+  chantier: 'Nous assurons le gardiennage de chantiers : surveillance de nuit et du week-end, rondes, contrôle d’accès à la base vie.',
+};
+const SIGNATURE = 'Mr BOUIDIA - Gérant\nBDA Security Group\nTél : 07 84 73 90 70\nE-mail : bdasecurite@gmail.com\nWeb : bdasecurite.com';
+function preparerMail(p, apresEnvoi) {
+  const s = String(p.signal || '');
+  const accroche = /Nouveau propriétaire/.test(s) ? 'Félicitations pour la reprise de votre établissement.\n\n'
+    : /Nouvel établissement/.test(s) ? 'Félicitations pour l’ouverture de votre établissement.\n\n'
+      : p.categorie === 'chantier' && /Chantier|Permis/.test(s) ? `J’ai appris le lancement de votre projet${p.adresse ? ` ${p.adresse}` : ''}${p.ville ? ` à ${p.ville}` : ''}.\n\n` : '';
+  const sujets = { chantier: 'Gardiennage de votre chantier', bar: 'Sécurité de votre établissement', club: 'Sécurité de votre établissement', hotel: 'Sécurité de votre hôtel', magasin: 'Sécurité de votre magasin', restaurant: 'Sécurité de votre restaurant' };
+  const objet = saisie({ value: `${sujets[p.categorie] || 'Sécurité de votre établissement'} — BDA Security Group` });
+  const corps = zoneTexte({ rows: 13, value: `Bonjour,\n\n${accroche}Je me permets de vous présenter BDA Security Group, société de sécurité privée basée à Paris.\n\n${PHRASES_MAIL[p.categorie] || ''}\n\nNos agents sont disponibles pour des missions ponctuelles comme régulières, de jour comme de nuit. Je serais ravi d’échanger avec vous pour étudier vos besoins.\n\nBien cordialement,\n\n${SIGNATURE}` });
+  const dest = saisie({ type: 'email', value: p.mail || '', placeholder: 'Adresse de contact (contact@…, info@…)' });
+  modale({
+    titre: `Mail pour ${p.nom}`,
+    large: true,
+    contenu: h('div', { class: 'form-grille' },
+      champ('À', dest, p.mail ? 'Adresse publique trouvée par le robot.' : 'Cherchez l’adresse de contact sur leur site ou leur fiche Google.'),
+      champ('Objet', objet), champ('Message', corps, 'Relisez et ajustez avant d’envoyer. Si votre messagerie ajoute déjà votre signature, retirez celle du texte.')),
+    actions: [
+      { libelle: 'Copier le texte', classe: 'btn--ghost', action: async () => {
+        try { await navigator.clipboard.writeText(`${objet.value}\n\n${corps.value}`); toast('Texte copié.'); } catch (e) { toast('Copie impossible : sélectionnez le texte.', 'erreur'); }
+        return false;
+      } },
+      { libelle: 'Ouvrir dans ma messagerie', classe: 'btn--gold', submit: true, action: () => {
+        location.href = `mailto:${encodeURIComponent(dest.value.trim())}?subject=${encodeURIComponent(objet.value)}&body=${encodeURIComponent(corps.value)}`;
+        apresEnvoi?.();
+        return true;
+      } },
+    ],
+  });
 }
 
 /* ----- « Chercher maintenant » : la recherche tourne sur le serveur, la page suit son avancement ----- */

@@ -18,8 +18,9 @@ const ESPACES = {
     nom: 'Site internet', court: 'Site', ic: 'site', accueil: 'tableau', externe: ['/', 'Voir le site'],
     menu: [
       // En haut : la journée en direct, puis le robot de prospection (trouver du travail passe avant le reste)
-      { chemin: 'controle', libelle: 'Centre de contrôle', ic: 'direct' },
+      { chemin: 'controle', libelle: 'Centre de contrôle', ic: 'direct', badge: 'sos', alerte: true },
       { chemin: 'opportunites', libelle: 'Trouver des clients', ic: 'cible', badge: 'opportunites', admin: true },
+      { chemin: 'pilotage', libelle: 'Pilotage', ic: 'euro', admin: true },
       { chemin: 'tableau', libelle: 'Statistiques', ic: 'graphique' },
       { groupe: 'Exploitation' },
       { chemin: 'exploitation', libelle: 'Planning des sites', ic: 'planning', badge: 'nonpourvus', alerte: true },
@@ -83,6 +84,7 @@ const A_TRAITER = [
   { cle: 'avis', libelle: 'Avis à valider', href: '#/avis', ic: 'avis' },
   { cle: 'reservations', libelle: 'Réservations du site', href: '#/vtc', ic: 'planning' },
   { cle: 'retards', libelle: 'Factures en retard', href: '#/factures', ic: 'facture', alerte: true },
+  { cle: 'sos', libelle: 'ALERTE d’un agent', href: '#/controle', ic: 'alerte', alerte: true },
   { cle: 'nonpourvus', libelle: 'Postes non pourvus (48 h)', href: '#/exploitation', ic: 'planning', alerte: true },
   { cle: 'rappels', libelle: 'Clients à rappeler aujourd’hui', href: '#/opportunites/rappels', ic: 'telephone' },
 ];
@@ -582,19 +584,21 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '10';
+const VERSION = '11';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 10 : le centre de contrôle de votre société.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 11 : tout le terrain dans votre admin.'),
       h('ul', null,
-        point('direct', 'equipe', 'Centre de contrôle', 'En haut du menu. Qui est en poste, qui n’est pas arrivé, les postes à pourvoir, la main courante, les cartes pro. Se met à jour tout seul.'),
-        point('planning', 'equipe', 'Planning des sites', 'Tous vos sites sur la semaine. Glissez un agent sur un poste : le repos de 11 h, les 48 h, la carte pro et les absences sont vérifiés.'),
-        point('alerte', 'facturation', 'Alertes', 'Un poste sans agent dans les 48 h ou un agent pas arrivé 15 min après sa prise de poste : vous êtes prévenu sur votre téléphone.'),
-        point('paie', 'outils', 'Paie', 'Les heures du planning des sites sont reprises dans les fiches de paie et dans l’Espace équipe des agents.'))),
+        point('lieu', 'equipe', 'Carte des opérations', 'Dans le centre de contrôle : vos sites et les agents en poste sur la carte, en direct.'),
+        point('alerte', 'facturation', 'Alerte SOS des agents', 'Un bouton SOS dans l’Espace équipe (maintenir 2 s). Vous recevez l’alerte avec sa position, l’écran sonne et passe au rouge.'),
+        point('cible', 'equipe', 'Rondes avec QR codes', 'Dans la fiche d’un site : ajoutez des points de ronde, imprimez les QR codes. L’agent les scanne avec son téléphone.'),
+        point('facture', 'facturation', 'Facture en un clic', 'Planning des sites › Facturer : la facture du mois d’un client avec le relevé d’heures, prête à vérifier.'),
+        point('euro', 'clients', 'Pilotage', 'Chiffre d’affaires, encaissements, heures vendues, remplissage du planning, meilleurs clients.'),
+        point('mail', 'clients', 'Mails tout prêts', 'Trouver des clients › Préparer un mail : un texte adapté au lieu (ouverture, reprise, chantier).'))),
     actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
   }), 900);
 }

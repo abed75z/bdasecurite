@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord', 'contrats.reglages', 'prospects', 'exploitation', 'controle'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord', 'contrats.reglages', 'prospects', 'exploitation', 'controle', 'pilotage'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -331,6 +331,43 @@ try {
       require_once __DIR__ . '/../app/exploitation.php';
       repondre(['ok' => true] + exp_controle());
 
+    // Pilotage (administrateurs) : chiffre d'affaires, encaissements, heures vendues, remplissage, prospection
+    case 'pilotage':
+      require_once __DIR__ . '/../app/exploitation.php';
+      $db = db();
+      $auj = date('Y-m-d');
+      $debut12 = date('Y-m-01', strtotime('first day of -11 month'));
+      $mois = [];
+      for ($i = 11; $i >= -2; $i--) $mois[] = date('Y-m', strtotime("first day of -$i month"));
+      $ca = array_fill_keys($mois, 0.0);
+      $st = $db->prepare("SELECT substr(date, 1, 7) m, SUM(total) t FROM documents WHERE type = 'facture' AND statut IN ('envoyee', 'payee') AND date >= ? GROUP BY m");
+      $st->execute([$debut12]);
+      foreach ($st as $r) if (isset($ca[$r['m']])) $ca[$r['m']] = round((float)$r['t'], 2);
+      $f = $db->prepare("SELECT SUM(CASE WHEN statut = 'payee' THEN total ELSE 0 END) payee, SUM(CASE WHEN statut = 'envoyee' THEN total ELSE 0 END) attente,
+        SUM(CASE WHEN statut = 'envoyee' AND echeance <> '' AND echeance < ? THEN total ELSE 0 END) retard, SUM(CASE WHEN statut = 'brouillon' THEN 1 ELSE 0 END) brouillons
+        FROM documents WHERE type = 'facture' AND (date >= ? OR statut = 'envoyee')");
+      $f->execute([$auj, $debut12]);
+      $fac = array_map('floatval', $f->fetch() ?: []);
+      $dv = $db->query("SELECT COUNT(*) n, COALESCE(SUM(total), 0) t FROM documents WHERE type = 'devis' AND statut = 'envoye'")->fetch();
+      // heures planifiées (planning des sites) par mois, des 12 derniers mois aux 2 prochains
+      $heures = array_fill_keys($mois, 0.0);
+      foreach (exp_vacations($debut12, date('Y-m-t', strtotime('first day of +2 month'))) as $v) {
+        $k = substr($v['jour'], 0, 7);
+        if (isset($heures[$k]) && $v['agent_id']) $heures[$k] += exp_minutes($v) / 60;
+      }
+      $a30 = exp_vacations($auj, date('Y-m-d', time() + 30 * 86400));
+      $top = $db->prepare("SELECT client, SUM(total) t, COUNT(*) n FROM documents WHERE type = 'facture' AND statut IN ('envoyee', 'payee') AND date >= ? AND client <> '' GROUP BY client ORDER BY t DESC LIMIT 6");
+      $top->execute([$debut12]);
+      $pistes = [];
+      foreach ($db->query("SELECT statut, COUNT(*) n FROM prospects WHERE actif = 1 GROUP BY statut") as $r) $pistes[$r['statut']] = (int)$r['n'];
+      $q = fn(string $sql, array $p = []) => (function () use ($db, $sql, $p) { $s = $db->prepare($sql); $s->execute($p); return (int)$s->fetchColumn(); })();
+      repondre(['ok' => true, 'mois' => $mois, 'ca' => array_values($ca), 'heures' => array_map(fn($h) => round($h, 1), array_values($heures)), 'factures' => $fac,
+        'devis' => ['n' => (int)$dv['n'], 't' => (float)$dv['t']], 'top' => $top->fetchAll(),
+        'remplissage' => ['postes' => count($a30), 'pourvus' => count(array_filter($a30, fn($v) => $v['agent_id'] > 0))],
+        'pistes' => $pistes, 'ao' => $q("SELECT COUNT(*) FROM opportunites WHERE source = 'boamp' AND statut <> 'ignore' AND (date_limite = '' OR date_limite >= ?)", [maintenant()]),
+        'equipe' => ['actifs' => $q("SELECT COUNT(*) FROM agents WHERE actif = 1 AND categorie IN ('primaire', 'secondaire')"), 'secours' => $q("SELECT COUNT(*) FROM agents WHERE categorie = 'secours'"),
+          'enPoste' => $q("SELECT COUNT(*) FROM pointages WHERE fin = ''"), 'cartes' => $q("SELECT COUNT(*) FROM agents WHERE actif = 1 AND validite <> '' AND validite <= ?", [date('Y-m-d', time() + 45 * 86400)])]]);
+
     case 'site.enregistrer':
       require_once __DIR__ . '/../app/exploitation.php';
       $b = corps();
@@ -338,15 +375,38 @@ try {
       if ($nom === '') echec('Donnez un nom au site.');
       $v = [$nom, (int)($b['client_id'] ?? 0), texte($b['adresse'] ?? '', 250), texte($b['consignes'] ?? '', 4000), texte($b['contact'] ?? '', 250), preg_match('/^#[0-9a-f]{6}$/i', (string)($b['couleur'] ?? '')) ? (string)$b['couleur'] : '', maintenant()];
       $id = (int)($b['id'] ?? 0);
+      $avant = null;
       if ($id) {
+        $st = db()->prepare('SELECT adresse, lat, qr FROM sites WHERE id = ?');
+        $st->execute([$id]);
+        $avant = $st->fetch() ?: null;
         db()->prepare('UPDATE sites SET nom = ?, client_id = ?, adresse = ?, consignes = ?, contact = ?, couleur = ?, maj = ? WHERE id = ?')->execute([...$v, $id]);
         if (array_key_exists('actif', $b)) db()->prepare('UPDATE sites SET actif = ? WHERE id = ?')->execute([empty($b['actif']) ? 0 : 1, $id]);
       } else {
         db()->prepare('INSERT INTO sites (nom, client_id, adresse, consignes, contact, couleur, maj, cree, ordre) VALUES (?, ?, ?, ?, ?, ?, ?, ?, (SELECT COALESCE(MAX(ordre), 0) + 1 FROM sites))')->execute([...$v, maintenant()]);
         $id = (int)db()->lastInsertId();
       }
+      // position sur la carte du centre de contrôle : retrouvée quand l'adresse change
+      if ($v[2] !== '' && (!$avant || $avant['adresse'] !== $v[2] || $avant['lat'] === null)) {
+        $pos = exp_geocoder($v[2]);
+        db()->prepare('UPDATE sites SET lat = ?, lon = ? WHERE id = ?')->execute([$pos[0] ?? null, $pos[1] ?? null, $id]);
+      }
+      // points de ronde (QR codes) : les points gardés conservent leur jeton
+      if (array_key_exists('points', $b)) {
+        $pts = exp_points((array)json_decode((string)($avant['qr'] ?? '[]'), true), (array)$b['points']);
+        db()->prepare('UPDATE sites SET qr = ? WHERE id = ?')->execute([json_encode($pts, JSON_UNESCAPED_UNICODE), $id]);
+      }
       journal('equipe', "Site « $nom » enregistré");
       repondre(['ok' => true, 'id' => $id, 'sites' => exp_sites()]);
+
+    // Alerte d'un agent : « je m'en occupe » puis « réglée »
+    case 'alerte.traiter':
+      $b = corps();
+      $statut = in_array($b['statut'] ?? '', ['prise', 'close'], true) ? (string)$b['statut'] : 'prise';
+      db()->prepare('UPDATE alertes_agents SET statut = ?, pris_par = CASE WHEN pris_par = \'\' THEN ? ELSE pris_par END, pris_le = CASE WHEN pris_le = \'\' THEN ? ELSE pris_le END WHERE id = ?')
+        ->execute([$statut, (string)($_SESSION['login'] ?? ''), maintenant(), (int)($b['id'] ?? 0)]);
+      journal('alerte', 'Alerte d’un agent ' . ($statut === 'close' ? 'réglée' : 'prise en charge') . ' par ' . ($_SESSION['login'] ?? ''));
+      repondre(['ok' => true]);
 
     case 'vacation.enregistrer':
       require_once __DIR__ . '/../app/exploitation.php';
@@ -1949,6 +2009,8 @@ function compteurs(): array
     // appels d'offres arrivés depuis la dernière visite + pistes du robot pas encore vues
     'opportunites' => $q("SELECT COUNT(*) FROM opportunites WHERE statut = 'a_traiter' AND cree > COALESCE((SELECT v FROM reglages WHERE k = 'veille_vu_le'), '')")
       + $q("SELECT COUNT(*) FROM prospects WHERE actif = 1 AND statut <> 'ignore' AND nouveau_le > COALESCE((SELECT v FROM reglages WHERE k = 'robot_vu_le'), '')"),
+    // alertes SOS des agents pas encore prises en charge
+    'sos' => $q("SELECT COUNT(*) FROM alertes_agents WHERE statut = 'ouverte'"),
     // postes du planning des sites sans agent qui commencent dans les 48 h
     'nonpourvus' => $q("SELECT COUNT(*) FROM vacations WHERE agent_id = 0 AND statut <> 'annulee' AND jour >= '" . date('Y-m-d') . "' AND jour <= '" . date('Y-m-d', time() + 2 * 86400) . "'"),
     'rappels' => $q("SELECT COUNT(*) FROM prospects WHERE relance <> '' AND relance <= '" . date('Y-m-d') . "' AND statut NOT IN ('client','refus','ignore')"),

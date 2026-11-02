@@ -76,8 +76,13 @@ function robot_etat_enregistrer(array $e): void
 function robot_lancer(string $origine = 'auto', array $forcer = [], int $budget = 200): array
 {
   @set_time_limit($budget + 80);
-  $verrou = fopen(dossier_donnees() . '/robot.lock', 'c');
-  if (!$verrou || !flock($verrou, LOCK_EX | LOCK_NB)) return ['ok' => false, 'message' => 'Le robot est déjà en train de chercher.'];
+  // Verrou dans la base (le verrou de fichier ne tient pas sur le disque partagé d'OVH) : un seul passage à la fois ;
+  // un passage coupé par le serveur libère la place au bout de 10 minutes
+  $db = db();
+  $db->exec("INSERT OR IGNORE INTO reglages (k, v) VALUES ('robot_verrou', '')");
+  $st = $db->prepare("UPDATE reglages SET v = ? WHERE k = 'robot_verrou' AND (v = '' OR v < ?)");
+  $st->execute([veille_maintenant(), date('Y-m-d H:i:s', time() - 600)]);
+  if ($st->rowCount() !== 1) return ['ok' => false, 'message' => 'Le robot est déjà en train de chercher.'];
   $debut = microtime(true);
   $faites = [];
   $nouveaux = [];
@@ -127,8 +132,7 @@ function robot_lancer(string $origine = 'auto', array $forcer = [], int $budget 
     }
     return ['ok' => true, 'taches' => $faites, 'nouvelles' => count(array_unique($nouveaux)), 'etat' => $etat];
   } finally {
-    flock($verrou, LOCK_UN);
-    fclose($verrou);
+    $db->exec("UPDATE reglages SET v = '' WHERE k = 'robot_verrou'");
   }
 }
 function robot_tache(string $cle, bool $premiere, array &$journal): array

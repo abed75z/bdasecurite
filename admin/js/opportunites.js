@@ -284,7 +284,7 @@ function commentCaMarche(d) {
     const e = t.etat;
     return h('tr', null,
       h('td', null, h('b', null, t.libelle), h('small', null, t.source)),
-      h('td', null, !e ? 'Pas encore lancé' : e.ok === false ? h('span', { class: 'tc-ko' }, 'Erreur, nouvel essai bientôt') : `${nb.format(e.trouves || 0)} trouvés`),
+      h('td', null, !e ? 'Pas encore lancé' : e.en_cours && !e.ok_le ? 'En cours…' : e.ok === false ? h('span', { class: 'tc-ko' }, 'Erreur, nouvel essai bientôt') : `${nb.format(e.trouves || 0)} trouvés`),
       h('td', null, e?.ok_le ? ilYa(e.ok_le) : '—'));
   });
   modale({

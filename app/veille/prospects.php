@@ -51,15 +51,15 @@ const ROBOT_MAGASINS = [
 function robot_taches(): array
 {
   return [
-    // l'annuaire d'abord : les ouvertures du BODACC viennent ensuite s'y accrocher
+    // les recherches rapides d'abord ; l'annuaire (plus lent) complète ensuite les ouvertures déjà trouvées
+    'paris' => ['libelle' => 'Chantiers de Paris', 'source' => 'Ville de Paris', 'heures' => 24],
+    'bodacc' => ['libelle' => 'Ouvertures et reprises', 'source' => 'BODACC (journal officiel)', 'heures' => 12],
+    'sitadel' => ['libelle' => 'Gros chantiers', 'source' => 'Permis de construire (Sitadel)', 'heures' => 72],
     'osm:club' => ['libelle' => 'Boîtes de nuit', 'source' => 'Annuaire OpenStreetMap', 'heures' => 168],
     'osm:bar' => ['libelle' => 'Bars', 'source' => 'Annuaire OpenStreetMap', 'heures' => 168],
     'osm:hotel' => ['libelle' => 'Hôtels', 'source' => 'Annuaire OpenStreetMap', 'heures' => 168],
     'osm:magasin' => ['libelle' => 'Magasins', 'source' => 'Annuaire OpenStreetMap', 'heures' => 168],
     'osm:restaurant' => ['libelle' => 'Restaurants', 'source' => 'Annuaire OpenStreetMap', 'heures' => 168],
-    'bodacc' => ['libelle' => 'Ouvertures et reprises', 'source' => 'BODACC (journal officiel)', 'heures' => 12],
-    'sitadel' => ['libelle' => 'Gros chantiers', 'source' => 'Permis de construire (Sitadel)', 'heures' => 72],
-    'paris' => ['libelle' => 'Chantiers de Paris', 'source' => 'Ville de Paris', 'heures' => 24],
   ];
 }
 function robot_etat(): array
@@ -84,6 +84,12 @@ function robot_lancer(string $origine = 'auto', array $forcer = [], int $budget 
   try {
     $etat = robot_etat();
     foreach (robot_taches() as $cle => $t) {
+      // tâche commencée il y a plus de 15 min sans résultat : le serveur l'a coupée (trop longue) → comptée en erreur
+      $commence = (string)($etat['taches'][$cle]['en_cours'] ?? '');
+      if ($commence !== '' && strtotime($commence) < time() - 900) {
+        $etat['taches'][$cle] = array_merge($etat['taches'][$cle], ['ok' => false, 'quand' => $commence, 'echec_le' => $commence, 'en_cours' => '', 'message' => 'Recherche coupée par le serveur (trop longue). Nouvel essai plus tard.']);
+        robot_etat_enregistrer($etat);
+      }
       if ($forcer && !in_array($cle, $forcer, true)) continue;
       $derniere = (string)($etat['taches'][$cle]['ok_le'] ?? '');
       $enRetard = $derniere === '' || strtotime($derniere) < time() - $t['heures'] * 3600;
@@ -94,23 +100,28 @@ function robot_lancer(string $origine = 'auto', array $forcer = [], int $budget 
       if (microtime(true) - $debut > $budget) break;
       $journal = [];
       $t0 = microtime(true);
+      $etat['taches'][$cle] = array_merge($etat['taches'][$cle] ?? [], ['en_cours' => veille_maintenant()]);
+      robot_etat_enregistrer($etat);
       try {
         $r = robot_tache($cle, empty($etat['taches'][$cle]['ok_le']), $journal);
         $etat['taches'][$cle] = ['ok' => true, 'ok_le' => veille_maintenant(), 'quand' => veille_maintenant(), 'message' => implode(' ', $journal),
           'trouves' => $r['trouves'], 'nouveaux' => $r['nouveaux'], 'signaux' => $r['signaux'], 'duree' => round(microtime(true) - $t0, 1)];
-        foreach ($r['ids'] as $id) $nouveaux[] = $id;
+        // gardées dans l'état : si le serveur coupe la suite, la notification partira au passage suivant
+        $etat['a_notifier'] = array_values(array_unique(array_merge($etat['a_notifier'] ?? [], $r['ids'])));
       } catch (Throwable $e) {
         error_log("[BDA robot $cle] " . $e->getMessage());
-        $etat['taches'][$cle] = array_merge($etat['taches'][$cle] ?? [], ['ok' => false, 'quand' => veille_maintenant(), 'echec_le' => veille_maintenant(), 'message' => $e->getMessage()]);
+        $etat['taches'][$cle] = array_merge($etat['taches'][$cle] ?? [], ['ok' => false, 'quand' => veille_maintenant(), 'echec_le' => veille_maintenant(), 'en_cours' => '', 'message' => $e->getMessage()]);
       }
       $faites[] = $cle;
       robot_etat_enregistrer($etat);
     }
+    $nouveaux = array_values(array_unique(array_map('intval', $etat['a_notifier'] ?? [])));
+    $etat['a_notifier'] = [];
     $etat['derniere'] = ['quand' => veille_maintenant(), 'origine' => $origine, 'taches' => $faites, 'duree' => round(microtime(true) - $debut, 1)];
     robot_etat_enregistrer($etat);
     if ($nouveaux) {
       journal('site', 'Robot de prospection : ' . count($nouveaux) . ' nouvelle(s) piste(s)');
-      robot_notifier(array_values(array_unique($nouveaux)));
+      robot_notifier($nouveaux);
     }
     return ['ok' => true, 'taches' => $faites, 'nouvelles' => count(array_unique($nouveaux)), 'etat' => $etat];
   } finally {
@@ -312,10 +323,10 @@ function robot_overpass(string $requete): array
   $err = '';
   $debut = microtime(true);
   foreach (ROBOT_OVERPASS as $url) {
-    $reste = 230 - (int)(microtime(true) - $debut);
+    $reste = 170 - (int)(microtime(true) - $debut);
     if ($reste < 30) break;
     try {
-      $r = veille_http('POST', $url, ['Content-Type: application/x-www-form-urlencoded'], http_build_query(['data' => $q]), min(160, $reste));
+      $r = veille_http('POST', $url, ['Content-Type: application/x-www-form-urlencoded'], http_build_query(['data' => $q]), min(110, $reste));
       if ($r['code'] === 200) {
         $j = json_decode($r['corps'], true);
         if (is_array($j) && isset($j['elements'])) return $j['elements'];

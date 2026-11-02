@@ -14,6 +14,8 @@ import { pageEnvois } from './envois.js';
 import { pagePointage } from './pointage.js';
 import { pageEquipe } from './equipe.js';
 import { pageOpportunites } from './opportunites.js';
+import { pageExploitation } from './exploitation.js';
+import { pageControle } from './controle.js';
 import { pageNotifications } from './notifications.js';
 import { pageCartes } from './cartes.js';
 import { pageFlyers } from './flyers.js';
@@ -39,6 +41,8 @@ export const PAGES = {
   pointage: pagePointage,
   equipe: pageEquipe,
   opportunites: pageOpportunites,
+  exploitation: pageExploitation,
+  controle: pageControle,
   notifications: pageNotifications,
   paie: pagePaie,
   contrats: pageContrats,

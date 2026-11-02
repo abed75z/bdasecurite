@@ -28,6 +28,8 @@ function veille_cron_discord(): void
 
 if (PHP_SAPI === 'cli') {
   $r = veille_lancer('cron');
+  require_once __DIR__ . '/../app/exploitation.php';
+  exp_alertes();
   robot_lancer('cron', [], 600);
   veille_cron_discord();
   echo json_encode(['ok' => $r['ok'], 'nouveaux' => $r['nouveaux'] ?? null, 'message' => $r['message'] ?? ''], JSON_UNESCAPED_UNICODE), "\n";
@@ -55,6 +57,8 @@ try {
   if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
   else { @ob_end_flush(); flush(); }
   veille_lancer('auto');
+  // planning des sites : postes non pourvus à 48 h, agents pas arrivés
+  try { require_once __DIR__ . '/../app/exploitation.php'; exp_alertes(); } catch (Throwable $e) { error_log('[BDA planning] ' . $e->getMessage()); }
   // robot de prospection : les tâches en retard (annuaire, ouvertures, chantiers), dans le temps qui reste
   try { robot_lancer('auto', [], 180); } catch (Throwable $e) { error_log('[BDA robot] ' . $e->getMessage()); }
   veille_cron_discord();

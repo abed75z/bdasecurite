@@ -155,6 +155,9 @@ function eq_planning_mois(array $c, string $mois): array
   $st = db()->prepare('SELECT data FROM plannings WHERE mois = ?');
   $st->execute([$mois]);
   $p = json_decode((string)$st->fetchColumn(), true);
+  // vacations du planning des sites ajoutées à la lecture
+  require_once __DIR__ . '/../app/exploitation.php';
+  $p = planning_fusion($mois, is_array($p) ? $p : null);
   if (!is_array($p)) return ['jours' => (object)[], 'client' => '', 'site' => '', 'mission' => ''];
   $l = ligne_planning($p, ['id' => $c['agent_id'], 'nom' => $c['agent_nom']]);
   return ['jours' => (object)($l['jours'] ?? []), 'client' => trim((string)($p['client'] ?? '')), 'site' => trim((string)($p['site'] ?? '')), 'mission' => trim((string)($p['mission'] ?? ''))];

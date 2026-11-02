@@ -30,6 +30,12 @@ const estFerie = (d) => feries(d.getFullYear()).has(iso(d));
 export function lireCreneau(txt) {
   const t = String(txt || '').trim().toLowerCase().replace(/\s+/g, '').replace(/[–—à]/g, '-');
   if (!t) return null;
+  // plusieurs créneaux le même jour (« 8h-13h + 16h-21h », ajoutés par le planning des sites)
+  if (t.includes('+')) {
+    const plages = t.split('+').filter(Boolean).map(lireCreneau);
+    if (plages.some((p) => !p || p.err || p.code || p.plages)) return { err: true };
+    return { plages, duree: plages.reduce((s, p) => s + (p.duree != null ? p.duree : p.fin - p.debut), 0) };
+  }
   if (/^[a-zéè]+$/.test(t)) return { code: t.toUpperCase() };
   const m = t.match(/^(\d{1,2})(?:[h:](\d{2})?)?-(\d{1,2})(?:[h:](\d{2})?)?h?$/);
   if (m) {
@@ -62,6 +68,10 @@ const minutes = (hhmm, def) => { const m = String(hhmm || '').match(/^(\d{1,2}):
 function compter(date, c, nuit) {
   const r = { total: 0, nuit: 0, dim: 0, fer: 0 };
   if (!c || c.code || c.err) return r;
+  if (c.plages) {
+    for (const p of c.plages) { const x = compter(date, p, nuit); r.total += x.total; r.nuit += x.nuit; r.dim += x.dim; r.fer += x.fer; }
+    return r;
+  }
   const jour = (dec) => { const d = new Date(date.getFullYear(), date.getMonth(), date.getDate() + dec); return { dim: d.getDay() === 0, fer: estFerie(d) }; };
   if (c.duree != null) {
     const j = jour(0);

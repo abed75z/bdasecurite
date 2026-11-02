@@ -29,7 +29,7 @@ export async function assistantDeclaration(ctx, id) {
   const agent = res.agent || { nom: data.profil?.nom || 'Agent supprimé', poste: '' };
   const profil = { ...PROFIL_DEFAUT, ...(res.profil || {}) };
   const P = parametresComplets(res.parametres, res.entreprise);
-  const { planning } = await api('planning', undefined, { mois });
+  const { planning } = await api('planning', undefined, { mois, fusion: 1 });
   const PL = variablesDepuisPlanning(planning, mois, agent.nom, profil);
   let etape = Math.min(Math.max(+data.etape || 0, 0), 5);
   let R;

@@ -336,6 +336,22 @@ function schema(PDO $db): void
       PRAGMA user_version = 21;
     SQL);
   }
+  if ($version < 22) {
+    // Planning des sites (app/exploitation.php) : sites surveillés (client, consignes, points de ronde en JSON)
+    // et vacations (un créneau sur un site ; agent_id = 0 : poste non pourvu ; alerte = bits déjà envoyés : 1 non pourvu 48 h, 2 retard)
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS sites (id INTEGER PRIMARY KEY, client_id INTEGER NOT NULL DEFAULT 0, nom TEXT NOT NULL, adresse TEXT NOT NULL DEFAULT '',
+        consignes TEXT NOT NULL DEFAULT '', contact TEXT NOT NULL DEFAULT '', couleur TEXT NOT NULL DEFAULT '', ordre INTEGER NOT NULL DEFAULT 0,
+        qr TEXT NOT NULL DEFAULT '[]', actif INTEGER NOT NULL DEFAULT 1, cree TEXT NOT NULL, maj TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS vacations (id INTEGER PRIMARY KEY, site_id INTEGER NOT NULL, jour TEXT NOT NULL, debut TEXT NOT NULL, fin TEXT NOT NULL,
+        agent_id INTEGER NOT NULL DEFAULT 0, qualif TEXT NOT NULL DEFAULT 'ADS', pause INTEGER NOT NULL DEFAULT 0, note TEXT NOT NULL DEFAULT '',
+        statut TEXT NOT NULL DEFAULT 'prevue', serie TEXT NOT NULL DEFAULT '', alerte INTEGER NOT NULL DEFAULT 0, cree TEXT NOT NULL, maj TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_vacations_jour ON vacations (jour);
+      CREATE INDEX IF NOT EXISTS i_vacations_agent ON vacations (agent_id, jour);
+      CREATE INDEX IF NOT EXISTS i_vacations_site ON vacations (site_id, jour);
+      PRAGMA user_version = 22;
+    SQL);
+  }
 }
 // Catégorie d'un agent : équipe principale, renfort, ou agent de secours (candidat retenu)
 function agent_categorie($c): string

@@ -17,9 +17,16 @@ const ESPACES = {
   site: {
     nom: 'Site internet', court: 'Site', ic: 'site', accueil: 'tableau', externe: ['/', 'Voir le site'],
     menu: [
-      // Le robot de prospection, en haut du menu : trouver du travail passe avant le reste
+      // En haut : la journée en direct, puis le robot de prospection (trouver du travail passe avant le reste)
+      { chemin: 'controle', libelle: 'Centre de contrôle', ic: 'direct' },
       { chemin: 'opportunites', libelle: 'Trouver des clients', ic: 'cible', badge: 'opportunites', admin: true },
       { chemin: 'tableau', libelle: 'Statistiques', ic: 'graphique' },
+      { groupe: 'Exploitation' },
+      { chemin: 'exploitation', libelle: 'Planning des sites', ic: 'planning', badge: 'nonpourvus', alerte: true },
+      { chemin: 'agents', libelle: 'Agents', ic: 'agents' },
+      { chemin: 'pointage', libelle: 'Pointage', ic: 'horloge' },
+      { chemin: 'equipe', libelle: 'Espace équipe', ic: 'equipe', badge: 'equipe' },
+      { chemin: 'planning', libelle: 'Feuille mensuelle', ic: 'tableau' },
       { groupe: 'Clients' },
       { chemin: 'demandes', libelle: 'Demandes reçues', ic: 'demande', badge: 'demandes' },
       { chemin: 'messages', libelle: 'Messages', ic: 'message', badge: 'messages' },
@@ -30,11 +37,7 @@ const ESPACES = {
       { chemin: 'factures', libelle: 'Factures', ic: 'facture', badge: 'retards', alerte: true },
       { chemin: 'pdf', libelle: 'PDF clients', ic: 'dossier' },
       { groupe: 'Équipe' },
-      { chemin: 'agents', libelle: 'Agents', ic: 'agents' },
       { chemin: 'candidatures', libelle: 'Candidatures', ic: 'candidature', badge: 'candidatures' },
-      { chemin: 'planning', libelle: 'Planning', ic: 'planning' },
-      { chemin: 'pointage', libelle: 'Pointage', ic: 'horloge' },
-      { chemin: 'equipe', libelle: 'Espace équipe', ic: 'equipe', badge: 'equipe' },
       { chemin: 'paie', libelle: 'Fiches de paie', ic: 'paie', admin: true },
       { chemin: 'contrats', libelle: 'Contrats', ic: 'contrat', admin: true },
       { groupe: 'Site web' },
@@ -80,6 +83,7 @@ const A_TRAITER = [
   { cle: 'avis', libelle: 'Avis à valider', href: '#/avis', ic: 'avis' },
   { cle: 'reservations', libelle: 'Réservations du site', href: '#/vtc', ic: 'planning' },
   { cle: 'retards', libelle: 'Factures en retard', href: '#/factures', ic: 'facture', alerte: true },
+  { cle: 'nonpourvus', libelle: 'Postes non pourvus (48 h)', href: '#/exploitation', ic: 'planning', alerte: true },
   { cle: 'rappels', libelle: 'Clients à rappeler aujourd’hui', href: '#/opportunites/rappels', ic: 'telephone' },
 ];
 // Pages communes aux deux espaces : elles restent dans l'espace ouvert
@@ -215,7 +219,7 @@ const fermerMenu = () => document.body.classList.remove('menu-ouvert');
 const visible = (m) => !m.admin || etat.session.role === 'admin';
 
 // Icône de chaque rubrique du menu
-const GROUPE_IC = { Clients: 'clients', Facturation: 'facture', 'Équipe': 'agents', 'Site web': 'site', Outils: 'calques', 'Activité': 'activite', Comptes: 'personne', Configuration: 'curseurs', Compte: 'reglages' };
+const GROUPE_IC = { Exploitation: 'planning', Clients: 'clients', Facturation: 'facture', 'Équipe': 'agents', 'Site web': 'site', Outils: 'calques', 'Activité': 'activite', Comptes: 'personne', Configuration: 'curseurs', Compte: 'reglages' };
 let groupeOuvert = null;
 
 // Menu de l'espace ouvert : les pages principales, puis des rubriques qui se déplient au clic
@@ -578,19 +582,19 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '9';
+const VERSION = '10';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 9 : un robot qui vous trouve du travail.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 10 : le centre de contrôle de votre société.'),
       h('ul', null,
-        point('cible', 'clients', 'Trouver des clients', 'En haut du menu. Le robot cherche tout seul les chantiers, bars, boîtes de nuit, magasins, hôtels et restaurants d’Île-de-France, plus les appels d’offres.'),
-        point('eclair', 'clients', 'Ouvertures et reprises', 'Les lieux qui viennent d’ouvrir ou de changer de patron remontent en tête : c’est le meilleur moment pour appeler.'),
-        point('telephone', 'equipe', 'Suivi et rappels', 'Après un appel : « Contacté », « Intéressé », « Devis envoyé »… et une date de rappel. La cloche vous prévient le jour venu.'),
-        point('recherche', 'outils', 'Recherche rapide', 'Ctrl K retrouve aussi les pistes que vous avez déjà appelées.'))),
+        point('direct', 'equipe', 'Centre de contrôle', 'En haut du menu. Qui est en poste, qui n’est pas arrivé, les postes à pourvoir, la main courante, les cartes pro. Se met à jour tout seul.'),
+        point('planning', 'equipe', 'Planning des sites', 'Tous vos sites sur la semaine. Glissez un agent sur un poste : le repos de 11 h, les 48 h, la carte pro et les absences sont vérifiés.'),
+        point('alerte', 'facturation', 'Alertes', 'Un poste sans agent dans les 48 h ou un agent pas arrivé 15 min après sa prise de poste : vous êtes prévenu sur votre téléphone.'),
+        point('paie', 'outils', 'Paie', 'Les heures du planning des sites sont reprises dans les fiches de paie et dans l’Espace équipe des agents.'))),
     actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
   }), 900);
 }
@@ -704,7 +708,7 @@ async function router() {
 
   // En-tête de page : l'icône de la rubrique dans sa couleur, et le nom de la rubrique au-dessus du titre
   const entree = actif ? [...E.menu, ...COMPTE].find((m) => m.chemin === actif) : null;
-  const DOM_RUBRIQUE = { Clients: 'clients', Facturation: 'facturation', 'Équipe': 'equipe', 'Site web': 'site', Outils: 'outils', 'Activité': 'appli', Comptes: 'appli', Configuration: 'appli', Compte: 'securite' };
+  const DOM_RUBRIQUE = { Exploitation: 'equipe', Clients: 'clients', Facturation: 'facturation', 'Équipe': 'equipe', 'Site web': 'site', Outils: 'outils', 'Activité': 'appli', Comptes: 'appli', Configuration: 'appli', Compte: 'securite' };
   const avecIcone = Boolean(entree?.ic) && !lanceur;
   iconePage.replaceChildren(...(avecIcone ? [icone(entree.ic)] : []));
   iconePage.dataset.dom = DOM_RUBRIQUE[rubrique] || (route === 'appli' || route === 'vtc' ? 'appli' : route === 'tableau' ? 'stats' : 'securite');

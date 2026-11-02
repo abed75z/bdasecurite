@@ -36,7 +36,7 @@ export async function pagePaie(ctx) {
 async function tableauDeBord(ctx, mois) {
   ctx.titre('Fiches de paie');
   const [{ bulletins }, { agents }, { planning }, prm] = await Promise.all([
-    api('paie.bulletins', undefined, { mois, complet: 1 }), api('paie.salaries'), api('planning', undefined, { mois }), api('paie.parametres'),
+    api('paie.bulletins', undefined, { mois, complet: 1 }), api('paie.salaries'), api('planning', undefined, { mois, fusion: 1 }), api('paie.parametres'),
   ]);
   const P = parametresComplets(prm.parametres, prm.entreprise);
   const lignesPlanning = planning?.agents || [];
@@ -284,7 +284,7 @@ async function editeurBulletin(ctx, id) {
   function imprimer() { plusTard.annuler(); enregistrer().then(() => imprimerFeuille(nomFichier())); }
   async function reprendrePlanning() {
     try {
-      const { planning } = await api('planning', undefined, { mois });
+      const { planning } = await api('planning', undefined, { mois, fusion: 1 });
       const v = variablesDepuisPlanning(planning, mois, agent.nom, profilCourant);
       if (!v) return toast(`${agent.nom} n’apparaît pas dans le planning de ${libelleMois(mois)}.`, 'erreur');
       if (!(await confirmer(`Remplacer les lignes de rémunération par les heures du planning (${fmtHeures(v.heuresTravaillees)}) ? Les primes ajoutées à la main seront retirées.`, { ok: 'Reprendre le planning' }))) return;

@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord', 'contrats.reglages', 'prospects'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord', 'contrats.reglages', 'prospects', 'exploitation', 'controle'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -299,7 +299,119 @@ try {
       $st = db()->prepare('SELECT data FROM plannings WHERE mois = ?');
       $st->execute([$mois]);
       $data = json_decode((string)$st->fetchColumn(), true);
+      // fusion=1 (paie) : les vacations du planning des sites sont ajoutées ; jamais pour la feuille éditable
+      if (!empty($_GET['fusion'])) {
+        require_once __DIR__ . '/../app/exploitation.php';
+        $data = planning_fusion($mois, is_array($data) ? $data : null);
+      }
       repondre(['ok' => true, 'mois' => $mois, 'planning' => is_array($data) ? $data : null]);
+
+    /* ================= Planning des sites (vacations) et centre de contrôle ================= */
+    case 'exploitation':
+      require_once __DIR__ . '/../app/exploitation.php';
+      $du = exp_jour((string)($_GET['du'] ?? '')) ?: date('Y-m-d', strtotime('monday this week'));
+      $au = exp_jour((string)($_GET['au'] ?? '')) ?: date('Y-m-d', strtotime($du . ' +6 days'));
+      if ($au < $du || strtotime($au) - strtotime($du) > 42 * 86400) echec('Période trop longue.');
+      // la veille et le lendemain servent au contrôle des 11 h de repos ; le mois entier aux compteurs d'heures
+      $moisDu = substr($du, 0, 7) . '-01';
+      $moisAu = date('Y-m-t', strtotime($au));
+      $agents = db()->query("SELECT id, nom, poste, categorie, tel, validite, carte, infos, profil FROM agents WHERE actif = 1 OR categorie = 'secours' ORDER BY nom COLLATE NOCASE")->fetchAll();
+      foreach ($agents as &$a) {
+        $i = json_decode((string)$a['infos'], true) ?: [];
+        $a = ['id' => (int)$a['id'], 'nom' => $a['nom'], 'poste' => $a['poste'], 'categorie' => $a['categorie'], 'tel' => $a['tel'], 'validite' => $a['validite'],
+          'qualifs' => (string)($i['qualifs'] ?? ''), 'langues' => (string)($i['langues'] ?? ''), 'ville' => (string)($i['ville'] ?? ''), 'dracar' => (string)($i['dracar'] ?? '')];
+      }
+      unset($a);
+      $st = db()->prepare("SELECT agent_id, type, du, au FROM absences WHERE statut = 'acceptee' AND du <= ? AND au >= ?");
+      $st->execute([$au, $du]);
+      repondre(['ok' => true, 'du' => $du, 'au' => $au, 'sites' => exp_sites(), 'vacations' => exp_vacations(min($moisDu, date('Y-m-d', strtotime($du . ' -1 day'))), max($moisAu, date('Y-m-d', strtotime($au . ' +1 day')))),
+        'agents' => $agents, 'absences' => $st->fetchAll(), 'clients' => db()->query('SELECT id, nom FROM clients ORDER BY nom COLLATE NOCASE')->fetchAll(), 'qualifs' => EXP_QUALIFS]);
+
+    case 'controle':
+      require_once __DIR__ . '/../app/exploitation.php';
+      repondre(['ok' => true] + exp_controle());
+
+    case 'site.enregistrer':
+      require_once __DIR__ . '/../app/exploitation.php';
+      $b = corps();
+      $nom = texte($b['nom'] ?? '', 120);
+      if ($nom === '') echec('Donnez un nom au site.');
+      $v = [$nom, (int)($b['client_id'] ?? 0), texte($b['adresse'] ?? '', 250), texte($b['consignes'] ?? '', 4000), texte($b['contact'] ?? '', 250), preg_match('/^#[0-9a-f]{6}$/i', (string)($b['couleur'] ?? '')) ? (string)$b['couleur'] : '', maintenant()];
+      $id = (int)($b['id'] ?? 0);
+      if ($id) {
+        db()->prepare('UPDATE sites SET nom = ?, client_id = ?, adresse = ?, consignes = ?, contact = ?, couleur = ?, maj = ? WHERE id = ?')->execute([...$v, $id]);
+        if (array_key_exists('actif', $b)) db()->prepare('UPDATE sites SET actif = ? WHERE id = ?')->execute([empty($b['actif']) ? 0 : 1, $id]);
+      } else {
+        db()->prepare('INSERT INTO sites (nom, client_id, adresse, consignes, contact, couleur, maj, cree, ordre) VALUES (?, ?, ?, ?, ?, ?, ?, ?, (SELECT COALESCE(MAX(ordre), 0) + 1 FROM sites))')->execute([...$v, maintenant()]);
+        $id = (int)db()->lastInsertId();
+      }
+      journal('equipe', "Site « $nom » enregistré");
+      repondre(['ok' => true, 'id' => $id, 'sites' => exp_sites()]);
+
+    case 'vacation.enregistrer':
+      require_once __DIR__ . '/../app/exploitation.php';
+      $b = corps();
+      $debut = exp_heure((string)($b['debut'] ?? ''));
+      $fin = exp_heure((string)($b['fin'] ?? ''));
+      if ($debut === '' || $fin === '') echec('Heures de début et de fin au format 08:00.');
+      $qualif = isset(EXP_QUALIFS[$b['qualif'] ?? '']) ? (string)$b['qualif'] : 'ADS';
+      $agent = max(0, (int)($b['agent_id'] ?? 0));
+      $champs = [$debut, $fin, $agent, $qualif, max(0, min(240, (int)($b['pause'] ?? 0))), texte($b['note'] ?? '', 500)];
+      $id = (int)($b['id'] ?? 0);
+      if ($id) {
+        db()->prepare('UPDATE vacations SET debut = ?, fin = ?, agent_id = ?, qualif = ?, pause = ?, note = ?, alerte = 0, maj = ? WHERE id = ?')->execute([...$champs, maintenant(), $id]);
+        repondre(['ok' => true, 'ids' => [$id]]);
+      }
+      $site = (int)($b['site_id'] ?? 0);
+      $st = db()->prepare('SELECT COUNT(*) FROM sites WHERE id = ?');
+      $st->execute([$site]);
+      if (!(int)$st->fetchColumn()) echec('Choisissez un site.');
+      $jours = array_values(array_unique(array_filter(array_map(fn($j) => exp_jour((string)$j), (array)($b['jours'] ?? [$b['jour'] ?? ''])))));
+      if (!$jours) echec('Choisissez au moins un jour.');
+      if (count($jours) > 62) echec('62 jours au maximum en une fois.');
+      $nb = max(1, min(10, (int)($b['nombre'] ?? 1)));
+      $serie = count($jours) * $nb > 1 ? bin2hex(random_bytes(6)) : '';
+      $ins = db()->prepare('INSERT INTO vacations (site_id, jour, debut, fin, agent_id, qualif, pause, note, serie, cree, maj) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+      $ids = [];
+      foreach ($jours as $j) for ($i = 0; $i < $nb; $i++) {
+        $ins->execute([$site, $j, $debut, $fin, $i === 0 ? $agent : 0, $qualif, $champs[4], $champs[5], $serie, maintenant(), maintenant()]);
+        $ids[] = (int)db()->lastInsertId();
+      }
+      repondre(['ok' => true, 'ids' => $ids]);
+
+    case 'vacation.affecter':
+      $b = corps();
+      db()->prepare('UPDATE vacations SET agent_id = ?, alerte = 0, maj = ? WHERE id = ?')->execute([max(0, (int)($b['agent_id'] ?? 0)), maintenant(), (int)($b['id'] ?? 0)]);
+      repondre(['ok' => true]);
+
+    case 'vacation.supprimer':
+      $b = corps();
+      $ids = array_values(array_filter(array_map('intval', (array)($b['ids'] ?? [$b['id'] ?? 0]))));
+      if (!$ids) echec('Rien à supprimer.');
+      db()->exec('DELETE FROM vacations WHERE id IN (' . implode(',', $ids) . ')');
+      repondre(['ok' => true, 'supprimees' => count($ids)]);
+
+    // Copie d'une semaine (lundi → lundi), avec ou sans les agents, éventuellement sur plusieurs semaines
+    case 'vacations.copier':
+      require_once __DIR__ . '/../app/exploitation.php';
+      $b = corps();
+      $de = exp_jour((string)($b['de'] ?? ''));
+      $vers = exp_jour((string)($b['vers'] ?? ''));
+      if ($de === '' || $vers === '') echec('Semaine inconnue.');
+      $semaines = max(1, min(8, (int)($b['semaines'] ?? 1)));
+      $site = (int)($b['site_id'] ?? 0);
+      $source = array_filter(exp_vacations($de, date('Y-m-d', strtotime($de . ' +6 days'))), fn($v) => !$site || $v['site_id'] === $site);
+      $ins = db()->prepare('INSERT INTO vacations (site_id, jour, debut, fin, agent_id, qualif, pause, note, serie, cree, maj) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+      $n = 0;
+      for ($s = 0; $s < $semaines; $s++) {
+        $decal = (int)round((strtotime($vers) - strtotime($de)) / 86400) + 7 * $s;
+        foreach ($source as $v) {
+          $ins->execute([$v['site_id'], date('Y-m-d', strtotime($v['jour'] . " +$decal days")), $v['debut'], $v['fin'], empty($b['avecAgents']) ? 0 : $v['agent_id'], $v['qualif'], $v['pause'], $v['note'], $v['serie'], maintenant(), maintenant()]);
+          $n++;
+        }
+      }
+      journal('equipe', "Planning des sites : $n vacation(s) copiée(s)");
+      repondre(['ok' => true, 'copiees' => $n]);
 
     case 'planning.enregistrer':
       $b = corps();
@@ -1837,6 +1949,8 @@ function compteurs(): array
     // appels d'offres arrivés depuis la dernière visite + pistes du robot pas encore vues
     'opportunites' => $q("SELECT COUNT(*) FROM opportunites WHERE statut = 'a_traiter' AND cree > COALESCE((SELECT v FROM reglages WHERE k = 'veille_vu_le'), '')")
       + $q("SELECT COUNT(*) FROM prospects WHERE actif = 1 AND statut <> 'ignore' AND nouveau_le > COALESCE((SELECT v FROM reglages WHERE k = 'robot_vu_le'), '')"),
+    // postes du planning des sites sans agent qui commencent dans les 48 h
+    'nonpourvus' => $q("SELECT COUNT(*) FROM vacations WHERE agent_id = 0 AND statut <> 'annulee' AND jour >= '" . date('Y-m-d') . "' AND jour <= '" . date('Y-m-d', time() + 2 * 86400) . "'"),
     'rappels' => $q("SELECT COUNT(*) FROM prospects WHERE relance <> '' AND relance <= '" . date('Y-m-d') . "' AND statut NOT IN ('client','refus','ignore')"),
     'appli' => $q("SELECT COUNT(*) FROM courses WHERE statut IN ('reservee', 'recherche')"),
   ];

@@ -26,7 +26,7 @@ export async function pageVueGenerale(ctx) {
   const cartes = a.agentsAlerte.length;
 
   // Nombre de points qui attendent une action (même liste que la cloche, plus la sécurité et les cartes pro)
-  const points = [c.demandes, c.messages, c.assistance, c.candidatures, c.equipe, c.avis, c.retards, c.reservations, alertes, aAttribuer, a.alertes, cartes, c.horsLigne ? 1 : 0]
+  const points = [c.demandes, c.messages, c.assistance, c.candidatures, c.equipe, c.avis, c.retards, c.reservations, alertes, aAttribuer, a.alertes, cartes, c.horsLigne ? 1 : 0, c.nonpourvus]
     .reduce((s, n) => s + (Number(n) || 0), 0);
 
   /* ----- En-tête : salutation, heure, état du site et de l'appli ----- */
@@ -64,9 +64,13 @@ export async function pageVueGenerale(ctx) {
       info: c.retards ? pluriel(c.retards, 'facture à relancer', 'factures à relancer') : 'Devis, factures, PDF clients' },
     { href: '#/site', dom: 'site', ic: 'site', titre: 'Site web', n: c.avis + (c.horsLigne ? 1 : 0), alerte: Boolean(c.horsLigne),
       info: c.horsLigne ? 'Hors ligne · maintenance' : c.avis ? pluriel(c.avis, 'avis à valider', 'avis à valider') : 'En ligne · bdasecurite.com' },
-    { href: '#/agents', dom: 'equipe', ic: 'agents', titre: 'Équipe', grand: true, n: c.candidatures + c.equipe + cartes, alerte: cartes > 0,
-      info: c.candidatures ? pluriel(c.candidatures, 'nouvelle candidature', 'nouvelles candidatures') : cartes ? pluriel(cartes, 'carte pro à surveiller', 'cartes pro à surveiller') : 'Agents, planning, paie, contrats',
-      details: [['candidatures', c.candidatures], ['espace équipe', c.equipe], ['cartes pro', cartes]] },
+    // Exploitation : la journée en direct et les postes à pourvoir
+    { href: c.nonpourvus ? '#/exploitation' : '#/controle', dom: 'equipe', ic: 'direct', titre: 'Centre de contrôle', grand: true, n: c.nonpourvus || 0, alerte: Boolean(c.nonpourvus),
+      info: c.nonpourvus ? pluriel(c.nonpourvus, 'poste non pourvu dans les 48 h', 'postes non pourvus dans les 48 h') : 'Qui est en poste, planning des sites, alertes',
+      details: [['non pourvus', c.nonpourvus || 0], ['cartes pro', cartes]] },
+    { href: '#/agents', dom: 'equipe', ic: 'agents', titre: 'Équipe', grand: true, n: c.candidatures + c.equipe, alerte: false,
+      info: c.candidatures ? pluriel(c.candidatures, 'nouvelle candidature', 'nouvelles candidatures') : 'Agents, candidatures, paie, contrats',
+      details: [['candidatures', c.candidatures], ['espace équipe', c.equipe]] },
     { href: '#/appli', dom: 'appli', ic: 'voiture', titre: 'Application VTC', grand: true, n: alertes + aAttribuer + c.reservations, alerte: alertes > 0,
       info: appli ? (appli.ouvert ? 'Ouverte · BDASH et BDASH Pro' : 'Fermée · BDASH et BDASH Pro') : 'BDASH et BDASH Pro',
       details: [['en cours', enCours], ['à attribuer', aAttribuer], ['réservations', c.reservations]] },

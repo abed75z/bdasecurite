@@ -25,6 +25,7 @@ const NOTIF_CATEGORIES = [
   'absences' => ['Congés et absences', 'Demandes des agents'],
   'incidents' => ['Main courante', 'Incidents signalés (les urgents en priorité)'],
   'pointages' => ['Prises et fins de service', 'Pointage des agents'],
+  'planning' => ['Planning des sites', 'Poste non pourvu dans les 48 h, agent pas arrivé à sa prise de poste'],
   'veille' => ['Veille commerciale', 'Appels d’offres, recrutements, rappels J-3'],
   'rappels' => ['Rappels du matin', 'Factures en retard, cartes pro qui expirent, demandes en attente'],
   'securite' => ['Sécurité', 'Connexions à l’admin, tentatives refusées'],

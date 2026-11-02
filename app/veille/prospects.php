@@ -54,7 +54,7 @@ function robot_taches(): array
     // les recherches rapides d'abord ; l'annuaire (plus lent) complète ensuite les ouvertures déjà trouvées
     'paris' => ['libelle' => 'Chantiers de Paris', 'source' => 'Ville de Paris', 'heures' => 24],
     'bodacc' => ['libelle' => 'Ouvertures et reprises', 'source' => 'BODACC (journal officiel)', 'heures' => 12],
-    'sitadel' => ['libelle' => 'Gros chantiers', 'source' => 'Permis de construire (Sitadel)', 'heures' => 72],
+    'sitadel' => ['libelle' => 'Gros chantiers', 'source' => 'Permis de construire (Sitadel)', 'heures' => 24],
     'osm:club' => ['libelle' => 'Boîtes de nuit', 'source' => 'Annuaire OpenStreetMap', 'heures' => 168],
     'osm:bar' => ['libelle' => 'Bars', 'source' => 'Annuaire OpenStreetMap', 'heures' => 168],
     'osm:hotel' => ['libelle' => 'Hôtels', 'source' => 'Annuaire OpenStreetMap', 'heures' => 168],
@@ -93,9 +93,9 @@ function robot_lancer(string $origine = 'auto', array $forcer = [], int $budget 
       if ($forcer && !in_array($cle, $forcer, true)) continue;
       $derniere = (string)($etat['taches'][$cle]['ok_le'] ?? '');
       $enRetard = $derniere === '' || strtotime($derniere) < time() - $t['heures'] * 3600;
-      // après une erreur, on attend 2 h avant de réessayer (sauf demande manuelle)
+      // après une erreur (serveur saturé), on attend 45 min avant de réessayer (sauf demande manuelle)
       $echec = (string)($etat['taches'][$cle]['echec_le'] ?? '');
-      if (!$forcer && $echec !== '' && strtotime($echec) > time() - 7200) $enRetard = false;
+      if (!$forcer && $echec !== '' && strtotime($echec) > time() - 2700) $enRetard = false;
       if (!$enRetard && !$forcer) continue;
       if (microtime(true) - $debut > $budget) break;
       $journal = [];
@@ -588,13 +588,27 @@ function robot_sitadel(array &$journal): array
   $accordes = 'in:' . implode(',', robot_mois(4));  // permis accordés ces 4 derniers mois
   $base = ['NUM_DAU', 'DEP_CODE', 'DPC_AUT', 'DPC_DOC', 'DENOM_DEM', 'SIREN_DEM', 'ADR_NUM_TER', 'ADR_LIBVOIE_TER', 'ADR_LOCALITE_TER', 'ADR_CODPOST_TER', 'DATE_REELLE_DOC', 'DATE_REELLE_AUTORISATION'];
   $lignes = [];
+  // une recherche par type de projet : si le site des permis tarde sur l'une, les autres sont gardées
+  $recherches = [];
   foreach (['DPC_DOC' => $ouverts, 'DPC_AUT' => $accordes] as $champDate => $mois) {
-    foreach (robot_dido(ROBOT_SITADEL_LOGEMENTS, ['DEP_CODE' => $deps, 'NB_LGT_TOT_CREES' => 'gte:30', $champDate => $mois], array_merge($base, ['NB_LGT_TOT_CREES'])) as $r) $lignes[$r['NUM_DAU']] = ($lignes[$r['NUM_DAU']] ?? []) + $r;
+    $recherches[] = [ROBOT_SITADEL_LOGEMENTS, ['DEP_CODE' => $deps, 'NB_LGT_TOT_CREES' => 'gte:30', $champDate => $mois], array_merge($base, ['NB_LGT_TOT_CREES'])];
     // locaux : un seuil par type de surface créée
     foreach (['SURF_BUR_CREEE' => 2000, 'SURF_COM_CREEE' => 1000, 'SURF_HEB_CREEE' => 800, 'SURF_ENT_CREEE' => 5000, 'SURF_PUB_CREEE' => 2000, 'SURF_IND_CREEE' => 5000] as $surf => $min) {
-      foreach (robot_dido(ROBOT_SITADEL_LOCAUX, ['DEP_CODE' => $deps, $surf => "gte:$min", $champDate => $mois], array_merge($base, ['SURF_BUR_CREEE', 'SURF_COM_CREEE', 'SURF_HEB_CREEE', 'SURF_ENT_CREEE', 'SURF_PUB_CREEE', 'SURF_IND_CREEE', 'NB_CHAMBRES'])) as $r) $lignes[$r['NUM_DAU']] = ($lignes[$r['NUM_DAU']] ?? []) + $r;
+      $recherches[] = [ROBOT_SITADEL_LOCAUX, ['DEP_CODE' => $deps, $surf => "gte:$min", $champDate => $mois], array_merge($base, ['SURF_BUR_CREEE', 'SURF_COM_CREEE', 'SURF_HEB_CREEE', 'SURF_ENT_CREEE', 'SURF_PUB_CREEE', 'SURF_IND_CREEE', 'NB_CHAMBRES'])];
     }
   }
+  $ratees = 0;
+  $erreur = '';
+  foreach ($recherches as [$fichier, $filtres, $colonnes]) {
+    try {
+      foreach (robot_dido($fichier, $filtres, $colonnes) as $r) $lignes[$r['NUM_DAU']] = ($lignes[$r['NUM_DAU']] ?? []) + $r;
+    } catch (Throwable $e) {
+      $ratees++;
+      $erreur = $e->getMessage();
+    }
+  }
+  if ($ratees === count($recherches)) throw new RuntimeException("Le site des permis de construire ne répond pas ($erreur).");
+  if ($ratees) $journal[] = "$ratees recherche(s) sur " . count($recherches) . ' sans réponse (refaites au prochain passage).';
   $ids = [];
   $nouveaux = 0;
   $signaux = 0;

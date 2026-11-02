@@ -368,7 +368,7 @@ try {
         'equipe' => ['actifs' => $q("SELECT COUNT(*) FROM agents WHERE actif = 1 AND categorie IN ('primaire', 'secondaire')"), 'secours' => $q("SELECT COUNT(*) FROM agents WHERE categorie = 'secours'"),
           'enPoste' => $q("SELECT COUNT(*) FROM pointages WHERE fin = ''"), 'cartes' => $q("SELECT COUNT(*) FROM agents WHERE actif = 1 AND validite <> '' AND validite <= ?", [date('Y-m-d', time() + 45 * 86400)])]]);
 
-    case 'site.enregistrer':
+    case 'exp.site.enregistrer': // sites surveillés du planning (à ne pas confondre avec « site.enregistrer » = Contrôle du site)
       require_once __DIR__ . '/../app/exploitation.php';
       $b = corps();
       $nom = texte($b['nom'] ?? '', 120);

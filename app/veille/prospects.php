@@ -106,6 +106,8 @@ function robot_lancer(string $origine = 'auto', array $forcer = [], int $budget 
         $r = robot_tache($cle, empty($etat['taches'][$cle]['ok_le']), $journal);
         $etat['taches'][$cle] = ['ok' => true, 'ok_le' => veille_maintenant(), 'quand' => veille_maintenant(), 'message' => implode(' ', $journal),
           'trouves' => $r['trouves'], 'nouveaux' => $r['nouveaux'], 'signaux' => $r['signaux'], 'duree' => round(microtime(true) - $t0, 1)];
+        // copie de départ utilisée : on redemandera la carte dans 2 h au lieu d'une semaine
+        if (!empty($r['amorce'])) $etat['taches'][$cle]['ok_le'] = date('Y-m-d H:i:s', time() - ($t['heures'] - 2) * 3600);
         // gardées dans l'état : si le serveur coupe la suite, la notification partira au passage suivant
         $etat['a_notifier'] = array_values(array_unique(array_merge($etat['a_notifier'] ?? [], $r['ids'])));
       } catch (Throwable $e) {
@@ -319,6 +321,9 @@ function robot_adresses(array $points): array
 // sont écartés ensuite grâce au code postal. Plusieurs serveurs, car ils sont souvent saturés.
 function robot_overpass(string $requete): array
 {
+  // déjà en panne pendant ce passage : on n'attend pas encore 3 minutes pour la catégorie suivante
+  static $enPanne = '';
+  if ($enPanne !== '') throw new RuntimeException($enPanne);
   $q = '[out:json][timeout:150][bbox:' . ROBOT_CADRE_IDF . "];($requete);out center tags;";
   $err = '';
   $debut = microtime(true);
@@ -338,7 +343,8 @@ function robot_overpass(string $requete): array
       $err = $e->getMessage();
     }
   }
-  throw new RuntimeException("L'annuaire OpenStreetMap ne répond pas ($err). Nouvel essai plus tard.");
+  $enPanne = "L'annuaire OpenStreetMap ne répond pas ($err). Nouvel essai plus tard.";
+  throw new RuntimeException($enPanne);
 }
 function robot_activite(string $cat, array $t): string
 {
@@ -360,7 +366,6 @@ function robot_activite(string $cat, array $t): string
 function robot_osm(string $cat, array &$journal): array
 {
   if (!isset(ROBOT_OSM[$cat])) throw new RuntimeException('Catégorie inconnue.');
-  $elements = robot_overpass(ROBOT_OSM[$cat]);
   $db = db();
   $mtn = veille_maintenant();
   // adresses déjà connues (pour ne pas les redemander)
@@ -376,6 +381,17 @@ function robot_osm(string $cat, array &$journal): array
 
   $pistes = [];
   $manque = [];
+  $amorce = [];
+  try {
+    $elements = robot_overpass(ROBOT_OSM[$cat]);
+  } catch (Throwable $e) {
+    // Carte saturée (ou qui refuse le serveur OVH) et catégorie encore vide : on part de la copie
+    // de l'annuaire livrée avec le site (app/veille/amorce), remplacée dès que la carte répond
+    $amorce = $connues ? [] : robot_amorce($cat);
+    if (!$amorce) throw $e;
+    $elements = [];
+    foreach ($amorce as $p) $pistes[$p['cle']] = $p;
+  }
   foreach ($elements as $e) {
     $t = $e['tags'] ?? [];
     $nom = trim((string)($t['name'] ?? ''));
@@ -441,9 +457,24 @@ function robot_osm(string $cat, array &$journal): array
     $db->rollBack();
     throw $e;
   }
-  $journal[] = "$gardes lieux en Île-de-France dans l’annuaire, $nouveaux nouveaux" . ($fusions ? ", $fusions complétés" : '') . ($manque ? ', ' . count($manque) . ' adresses retrouvées par la carte.' : '.');
+  $journal[] = $amorce ? "La carte ne répond pas : $gardes lieux repris de la copie de l’annuaire du " . robot_amorce_date() . ', mise à jour dès qu’elle répond.'
+    : "$gardes lieux en Île-de-France dans l’annuaire, $nouveaux nouveaux" . ($fusions ? ", $fusions complétés" : '') . ($manque ? ', ' . count($manque) . ' adresses retrouvées par la carte.' : '.');
   // le premier remplissage de l'annuaire n'est pas une « nouveauté » à signaler
-  return ['trouves' => $gardes, 'nouveaux' => $nouveaux, 'signaux' => 0, 'ids' => []];
+  return ['trouves' => $gardes, 'nouveaux' => $nouveaux, 'signaux' => 0, 'ids' => [], 'amorce' => (bool)$amorce];
+}
+// Copie de départ de l'annuaire, une par catégorie (fichiers JSON compressés, lieux publics d'OpenStreetMap)
+function robot_amorce(string $cat): array
+{
+  $f = __DIR__ . "/amorce/$cat.json.gz";
+  if (!is_file($f)) return [];
+  $lignes = json_decode((string)gzdecode((string)file_get_contents($f)), true);
+  if (!is_array($lignes)) return [];
+  return array_map(fn($p) => $p + ['categorie' => $cat, 'source' => 'osm'], $lignes);
+}
+function robot_amorce_date(): string
+{
+  $f = __DIR__ . '/amorce/date.txt';
+  return is_file($f) ? trim((string)file_get_contents($f)) : 'départ';
 }
 
 /* ---------- BODACC : ouvertures et reprises de fonds de commerce ---------- */

@@ -26,7 +26,14 @@ function veille_cron_discord(): void
   }
 }
 
+// Tâches planifiées des modules (rapports, relances, sauvegarde…), chacune isolée, avant la veille qui peut être longue
+function veille_cron_modules(string $origine): void
+{
+  try { require_once __DIR__ . '/../app/modules.php'; modules_cron($origine); } catch (Throwable $e) { error_log('[BDA modules cron] ' . $e->getMessage()); }
+}
+
 if (PHP_SAPI === 'cli') {
+  veille_cron_modules('cron');
   $r = veille_lancer('cron');
   require_once __DIR__ . '/../app/exploitation.php';
   exp_alertes();
@@ -56,6 +63,7 @@ try {
   echo $reponse;
   if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
   else { @ob_end_flush(); flush(); }
+  veille_cron_modules('auto');
   veille_lancer('auto');
   // planning des sites : postes non pourvus à 48 h, agents pas arrivés
   try { require_once __DIR__ . '/../app/exploitation.php'; exp_alertes(); } catch (Throwable $e) { error_log('[BDA planning] ' . $e->getMessage()); }

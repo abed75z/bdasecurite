@@ -36,11 +36,21 @@ $action = (string)($_GET['a'] ?? '');
 $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $lectures = ['session', 'identifiant.libre', 'reset.verifier', 'accueil', 'planning', 'fiches', 'fiche', 'documents', 'document', 'absences', 'main_courante', 'photo', 'profil', 'courses', 'appareils', 'postes'];
 $ecritures = ['inscription', 'connexion', 'deconnexion', 'oubli', 'reset', 'motdepasse', 'absence.demander', 'absence.annuler', 'incident.signaler', 'profil.enregistrer', 'document.envoyer', 'document.supprimer', 'pointer.debut', 'pointer.fin', 'appareil.retirer', 'poste.confirmer', 'sos', 'ronde'];
-if (!in_array($action, array_merge($lectures, $ecritures), true)) echec('Action inconnue.', 404);
-if (in_array($action, $lectures, true) !== ($methode === 'GET')) echec('Méthode non autorisée.', 405);
+// Fichiers d'interface des modules présents sur le serveur (assets/js/equipe/<nom>.js), lus par equipe-modules.js
+if ($action === 'modules.ui' && $methode === 'GET') {
+  $noms = array_map(fn ($f) => basename($f, '.js'), glob(__DIR__ . '/../assets/js/equipe/*.js') ?: []);
+  repondre(['ok' => true, 'noms' => array_values(array_filter($noms, fn ($n) => (bool)preg_match('/^[a-z][a-z0-9_-]{1,30}$/', $n)))]);
+}
+$module = str_starts_with($action, 'mod.'); // actions des modules (app/modules/<nom>.php), méthode contrôlée par le module
+if (!$module && !in_array($action, array_merge($lectures, $ecritures), true)) echec('Action inconnue.', 404);
+if (!$module && in_array($action, $lectures, true) !== ($methode === 'GET')) echec('Méthode non autorisée.', 405);
 if ($methode === 'POST') {
   if (!origine_ok()) echec('Origine refusée.', 403);
   if (!hash_equals((string)$_SESSION['csrf'], (string)($_SERVER['HTTP_X_CSRF'] ?? ''))) echec('Session expirée : rechargez la page.', 419);
+}
+if ($module) {
+  require_once __DIR__ . '/../app/modules.php';
+  modules_api('equipe', $action, $methode); // l'action appelle elle-même eq_exiger()
 }
 
 /* ---------- Compte connecté ---------- */

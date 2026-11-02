@@ -368,6 +368,13 @@ function schema(PDO $db): void
       PRAGMA user_version = 23;
     SQL);
   }
+  if ($version < 24) {
+    // Modules isolés (app/modules/<nom>.php) : chaque module tient sa propre version de schéma (app/modules.php)
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS modules_schema (module TEXT PRIMARY KEY, version INTEGER NOT NULL DEFAULT 0, maj TEXT NOT NULL DEFAULT '');
+      PRAGMA user_version = 24;
+    SQL);
+  }
 }
 // Catégorie d'un agent : équipe principale, renfort, ou agent de secours (candidat retenu)
 function agent_categorie($c): string

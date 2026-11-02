@@ -32,6 +32,7 @@ import { pageNotes } from './notes.js';
 import { pageSecurite, ligneJournal } from './securite.js';
 import { pageComptes } from './comptes.js';
 import { metriques, segments, barres } from './graphiques.js';
+import { PAGES_MODULES } from './modules/index.js';
 
 export const PAGES = {
   tableau: pageAccueil,
@@ -67,6 +68,8 @@ export const PAGES = {
   avis: pageAvis,
   candidatures: pageCandidatures,
   parametres: pageParametres,
+  // pages apportées par les modules (admin/js/modules/index.js), chargées à la demande
+  ...PAGES_MODULES,
 };
 
 const carte = (titre, ...contenu) => h('section', { class: 'carte' }, titre ? h('header', { class: 'carte__tete' }, titre) : null, contenu);

@@ -6,6 +6,7 @@ import { PAGES } from './pages.js';
 import { pageVueGenerale } from './vue-generale.js';
 import { pagePaiements, pageStatistiques } from './appli-stats.js';
 import { installerPalette } from './commandes.js';
+import { insererMenus, CLOCHE_MODULES } from './modules/index.js';
 
 const racine = document.getElementById('app');
 const etat = { session: null, compteurs: {} };
@@ -87,7 +88,11 @@ const A_TRAITER = [
   { cle: 'sos', libelle: 'ALERTE d’un agent', href: '#/controle', ic: 'alerte', alerte: true },
   { cle: 'nonpourvus', libelle: 'Postes non pourvus (48 h)', href: '#/exploitation', ic: 'planning', alerte: true },
   { cle: 'rappels', libelle: 'Clients à rappeler aujourd’hui', href: '#/opportunites/rappels', ic: 'telephone' },
+  // ce que les modules signalent (admin/js/modules/index.js)
+  ...CLOCHE_MODULES,
 ];
+// Entrées de menu apportées par les modules, rangées dans leur rubrique
+insererMenus(ESPACES.site.menu);
 // Pages communes aux deux espaces : elles restent dans l'espace ouvert
 const COMMUNES = ['parametres', 'securite', 'notifications', 'comptes'];
 // Pages rangées dans une rubrique du menu sans y figurer elles-mêmes

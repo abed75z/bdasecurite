@@ -8,6 +8,9 @@
    ========================================================= */
 const racine = document.getElementById('eq');
 const API = '/api/equipe.php';
+// Modules (assets/js/equipe/<nom>.js) : pages et cartes d'accueil en plus, versionnés comme ce fichier (?v= du HTML)
+const VERSION = new URL(import.meta.url).searchParams.get('v') || '1';
+const MODULES = await import(`./equipe-modules.js?v=${VERSION}`).catch((e) => { console.error(e); return {}; });
 const ICONES = {
   accueil: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   planning: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h2M14 14h2M8 18h2"/>',
@@ -471,6 +474,12 @@ const PAGES = {
   documents: { titre: 'Mes documents', icone: 'documents', rendu: pageDocuments },
   profil: { titre: 'Mon profil', icone: 'profil', rendu: pageProfil },
 };
+// Pages des modules : leur rendu reçoit les outils de l'espace (h, api, tiroir, toast…)
+Object.assign(ICONES, MODULES.ICONES || {});
+for (const [r, p] of Object.entries(MODULES.PAGES || {})) if (!PAGES[r]) PAGES[r] = { ...p, rendu: () => p.rendu(outilsModules()) };
+function outilsModules() {
+  return { h, api, apiForm, toast, tiroir, enTete, ic, vide, anim, recharger, iso, dateLongue, lireCreneau, initiales, moi, compteurs, VERSION };
+}
 const pagesVisibles = () => Object.entries(PAGES).filter(([, p]) => !p.chauffeur || moi.metier === 'chauffeur');
 let principal = null;
 function ouvrirApplication() {
@@ -563,7 +572,8 @@ function boutonSos() {
 }
 function menuPlus() {
   const lien = (r) => { const p = PAGES[r]; return h('a', { href: `#/${r}`, onclick: () => fermer() }, ic(p.icone), p.titre, p.badge && compteurs[p.badge] ? h('i', { class: 'eq-badge' }, compteurs[p.badge]) : null); };
-  const routes = ['main-courante', 'absences', 'documents', moi.metier === 'chauffeur' ? 'paie' : null, 'profil'].filter(Boolean);
+  const routes = ['main-courante', 'absences', 'documents', moi.metier === 'chauffeur' ? 'paie' : null,
+    ...Object.entries(MODULES.PAGES || {}).filter(([, p]) => p.plus !== false && (!p.chauffeur || moi.metier === 'chauffeur')).map(([r]) => r), 'profil'].filter(Boolean);
   const fermer = tiroir('Plus', h('div', { class: 'eq-menu-plus' }, routes.map(lien),
     h('button', { type: 'button', class: 'is-rouge', onclick: () => { fermer(); deconnexion(); } }, ic('sortie'), 'Se déconnecter')));
 }
@@ -595,7 +605,8 @@ const enTete = (surtitre, titre, texte, ...actions) => h('div', { class: 'eq-tit
 
 /* ----- Accueil ----- */
 async function pageAccueil() {
-  const [d, mesPostes] = await Promise.all([api('accueil'), api('postes').then((r) => r.postes).catch(() => [])]);
+  const [d, mesPostes, cartesModules] = await Promise.all([api('accueil'), api('postes').then((r) => r.postes).catch(() => []),
+    Promise.all((MODULES.CARTES || []).map((f) => Promise.resolve().then(() => f(outilsModules())).catch((e) => { console.error(e); return null; })))]);
   Object.assign(moi, { prenom: d.moi.prenom, nom: d.moi.nom, metier: d.moi.metier });
   compteurs = { fichesNonVues: d.fichesNonVues, absencesAttente: d.absencesAttente };
   ouvrirApplication.menus?.();
@@ -683,6 +694,7 @@ async function pageAccueil() {
       h('div', { class: 'eq-g-7' }, service, h('div', { class: 'eq-mt' }, stats)),
       h('div', { class: 'eq-g-5' }, semaine),
       postes ? h('div', null, postes) : null,
+      ...cartesModules.filter(Boolean).map((el) => h('div', null, el)),
       h('div', null, raccourcis),
       consignes ? h('div', { class: courses ? 'eq-g-6' : '' }, consignes) : null,
       courses ? h('div', { class: consignes ? 'eq-g-6' : '' }, courses) : null));

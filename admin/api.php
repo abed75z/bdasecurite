@@ -34,6 +34,11 @@ if (connecte() && !utilisateur_courant()) {
 if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== 'admin') echec('Action réservée à un administrateur.', 403);
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
+// Modules isolés (app/modules/<nom>.php) : actions « mod.<nom>.<verbe> », méthode et rôles déclarés par le module
+if (str_starts_with($action, 'mod.')) {
+  require_once __DIR__ . '/../app/modules.php';
+  modules_api('admin', $action, $methode);
+}
 
 $lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord', 'contrats.reglages', 'prospects', 'exploitation', 'controle', 'pilotage', 'google'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
@@ -199,7 +204,8 @@ try {
 
     /* ================= Tableau de bord ================= */
     case 'compteurs':
-      repondre(['ok' => true, 'compteurs' => compteurs()]);
+      require_once __DIR__ . '/../app/modules.php';
+      repondre(['ok' => true, 'compteurs' => compteurs() + modules_compteurs()]);
 
     case 'accueil':
       repondre(['ok' => true, 'accueil' => accueil()]);
@@ -1890,6 +1896,8 @@ try {
         'documents' => db()->query('SELECT id, type, numero, client, statut, total FROM documents ORDER BY maj DESC LIMIT 400')->fetchAll(),
         'clients' => db()->query('SELECT id, nom, tel FROM clients ORDER BY nom COLLATE NOCASE LIMIT 400')->fetchAll(),
         'agents' => db()->query('SELECT id, nom, poste, categorie FROM agents ORDER BY nom COLLATE NOCASE LIMIT 400')->fetchAll(),
+        // entrées apportées par les modules (app/modules/<nom>.php) : [{titre, sous, href, ic}]
+        'modules' => (function (): array { require_once __DIR__ . '/../app/modules.php'; return modules_recherche(); })(),
         'notes' => db()->query("SELECT id, substr(texte, 1, 140) AS texte FROM notes WHERE texte <> '' ORDER BY maj DESC LIMIT 200")->fetchAll(),
         'reservations' => db()->query('SELECT id, ref, statut, date_course, data FROM reservations ORDER BY date_course DESC LIMIT 100')->fetchAll(),
         // pistes du robot déjà travaillées (appelées, intéressées, clients…) : on les retrouve par leur nom

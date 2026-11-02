@@ -1,0 +1,57 @@
+/* =========================================================
+   ESPACE ADMIN BDA — registre des modules
+   Chaque module apporte ses fichiers (app/modules/<nom>.php côté serveur,
+   admin/js/modules/<nom>.js ici) et se déclare dans la liste ci-dessous :
+   sa page (chargée à la demande), son entrée de menu, son badge dans la cloche,
+   ses commandes de la palette Ctrl K. Les pages et le menu du cœur ne bougent pas.
+
+   { route: 'messagerie',                         → #/messagerie (sous-chemins : ctx.params)
+     charger: () => import('./messagerie.js'),     → le fichier du module
+     page: 'pageMessagerie',                       → la fonction exportée qui affiche la page (ctx)
+     menu: { groupe: 'Clients', apres: 'messages', libelle: 'Messagerie', ic: 'mail', badge: 'mails', admin: true },
+       (groupe = rubrique du menu ; apres = chemin après lequel s'insérer, sinon en fin de rubrique ;
+        sans groupe = en haut, avec les entrées principales)
+     cloche: { cle: 'mails', libelle: 'Mails à traiter', ic: 'mail', alerte: false },
+     commandes: [{ ic: 'mail', titre: 'Écrire un mail', mots: 'mail email envoyer', href: '#/messagerie/nouveau' }] }
+   ========================================================= */
+export const MODULES = [];
+
+// Pages des modules, au format de PAGES (pages.js)
+export const PAGES_MODULES = Object.fromEntries(MODULES.filter((m) => m.route && m.charger).map((m) => [m.route, async (ctx) => {
+  const mod = await m.charger();
+  const page = mod[m.page || 'page'];
+  if (typeof page !== 'function') throw new Error(`Page introuvable dans le module ${m.route}.`);
+  return page(ctx);
+}]));
+
+// Insère les entrées de menu des modules dans un menu d'espace (ESPACES.site.menu)
+export function insererMenus(menu) {
+  for (const m of MODULES) {
+    if (!m.menu || !m.route) continue;
+    const { groupe, apres, ...entree } = m.menu;
+    const item = { chemin: m.route, ...entree };
+    if (menu.some((x) => x.chemin === item.chemin)) continue;
+    let i = apres ? menu.findIndex((x) => x.chemin === apres) : -1;
+    if (i >= 0) { menu.splice(i + 1, 0, item); continue; }
+    if (!groupe) { // en haut, après la dernière entrée principale
+      const premierGroupe = menu.findIndex((x) => x.groupe);
+      menu.splice(premierGroupe < 0 ? menu.length : premierGroupe, 0, item);
+      continue;
+    }
+    i = menu.findIndex((x) => x.groupe === groupe);
+    if (i < 0) { menu.push({ groupe }, item); continue; }
+    let fin = i + 1;
+    while (fin < menu.length && !menu[fin].groupe) fin++;
+    menu.splice(fin, 0, item);
+  }
+  return menu;
+}
+
+// Ce qui attend une action (cloche), au format de A_TRAITER (app.js)
+export const CLOCHE_MODULES = MODULES.filter((m) => m.cloche).map((m) => ({ href: `#/${m.route}`, ic: m.menu?.ic || 'suivant', ...m.cloche }));
+
+// Commandes fixes de la palette Ctrl K, au format de FIXES (commandes.js)
+export const COMMANDES_MODULES = (aller) => MODULES.flatMap((m) => (m.commandes || []).map((c) => ({
+  ic: c.ic || m.menu?.ic || 'suivant', titre: c.titre, mots: c.mots || '', danger: c.danger,
+  run: c.run || (() => aller(c.href || `#/${m.route}`)),
+})));

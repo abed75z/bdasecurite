@@ -28,10 +28,15 @@ if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
 $action = (string)($_GET['a'] ?? '');
 $methode = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $lectures = ['session', 'tableau', 'document', 'piece', 'envoi', 'messages', 'invitation.verifier'];
-if (in_array($action, $lectures, true) !== ($methode === 'GET')) echec('Méthode non autorisée.', 405);
+$module = str_starts_with($action, 'mod.'); // actions des modules (app/modules/<nom>.php), méthode contrôlée par le module
+if (!$module && in_array($action, $lectures, true) !== ($methode === 'GET')) echec('Méthode non autorisée.', 405);
 if ($methode === 'POST') {
   if (!origine_ok()) echec('Origine refusée.', 403);
   if (!hash_equals((string)$_SESSION['csrf'], (string)($_SERVER['HTTP_X_CSRF'] ?? ''))) echec('Session expirée : rechargez la page.', 419);
+}
+if ($module) {
+  require_once __DIR__ . '/../app/modules.php';
+  modules_api('client', $action, $methode); // l'action appelle elle-même exiger_compte()
 }
 
 // Compte connecté (et toujours actif), sinon null

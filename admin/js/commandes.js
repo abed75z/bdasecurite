@@ -10,6 +10,7 @@
      site off / site on                  → met le site hors ligne / le remet en ligne
    ========================================================= */
 import { api, h, icone, toast, erreur, confirmer, modale } from './outils.js';
+import { COMMANDES_MODULES } from './modules/index.js';
 
 const sansAccent = (s) => String(s || '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
 const SERVICES = { devis: 'devis', vtc: 'vtc', recrutement: 'recrutement', candidature: 'recrutement', candidatures: 'recrutement', avis: 'avis' };
@@ -107,6 +108,7 @@ export function installerPalette({ menu, aller, deconnexion, compteurs }) {
     { ic: 'site', titre: 'Voir le site public', mots: 'ouvrir bdasecurite', run: () => window.open('/', '_blank', 'noopener') },
     { ic: 'telecharger', titre: 'Télécharger une sauvegarde', mots: 'export backup', run: () => aller('#/parametres') },
     { ic: 'sortie', titre: 'Se déconnecter', mots: 'deconnexion logout quitter', run: deconnexion },
+    ...COMMANDES_MODULES(aller),
     { ic: 'commande', titre: 'Aide : toutes les commandes', mots: 'aide help ?', run: aide },
   ].map((c) => ({ ...c, groupe: 'Actions' }));
   const PAGES = () => menu.filter((m) => !m.groupe).map((m) => ({ groupe: 'Pages', ic: m.icone, titre: m.libelle, mots: m.route, run: () => aller(`#/${m.route}`) }))
@@ -125,6 +127,7 @@ export function installerPalette({ menu, aller, deconnexion, compteurs }) {
           try { localStorage.setItem('bda-pistes', JSON.stringify({ ...JSON.parse(localStorage.getItem('bda-pistes') || '{}'), q: p.nom, statut: '', cat: p.categorie })); } catch (e) { /* navigation privée */ }
           aller(`#/opportunites/${p.categorie}`);
         } })),
+      ...(I.modules || []).map((x) => ({ groupe: x.groupe || 'Autres', ic: x.ic || 'suivant', titre: x.titre, sous: x.sous, mots: x.mots, run: () => aller(x.href) })),
       ...(I.notes || []).map((n) => ({ groupe: 'Notes', ic: 'crayon', titre: n.texte.split('\n')[0].slice(0, 80), sous: 'Note', mots: n.texte, run: () => aller(`#/notes/${n.id}`) })),
       ...(I.reservations || []).map((r) => { const d = typeof r.data === 'string' ? JSON.parse(r.data || '{}') : (r.data || {}); return { groupe: 'Réservations VTC', ic: 'voiture', titre: `${r.ref} — ${d.nom || ''}`, sous: `${String(r.date_course).slice(8, 10)}/${String(r.date_course).slice(5, 7)} · ${LIB_STATUT[r.statut] || r.statut}`, mots: `${d.depart?.label || ''} ${d.arrivee?.label || ''}`, run: () => aller('#/vtc') }; }),
     ];

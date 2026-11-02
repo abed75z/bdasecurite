@@ -61,6 +61,8 @@ const ACTIONS_ADMIN = [
   'equipe.paie.ajouter', 'equipe.paie.fichier', 'equipe.paie.supprimer', 'equipe.compte.supprimer',
   // Veille commerciale : appels d'offres, recrutements, secrets (Discord, France Travail), notifications
   'opportunites', 'opportunite.statut', 'opportunite.note', 'veille.lancer', 'veille.reglages', 'veille.reglages.enregistrer', 'veille.tester', 'push.abonner', 'push.desabonner',
+  // Robot de prospection (pistes : chantiers, bars, boîtes de nuit, magasins, hôtels, restaurants)
+  'prospects', 'prospect.maj', 'robot.lancer',
   // Notifications sur les appareils de la direction
   'notif.prefs', 'notif.prefs.enregistrer', 'notif.tester', 'notif.appareil.retirer',
   // Serveur Discord de la direction : jeton du bot, installation, synchronisation

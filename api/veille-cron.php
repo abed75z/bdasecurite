@@ -8,6 +8,7 @@
 declare(strict_types=1);
 require __DIR__ . '/../app/bootstrap.php';
 require __DIR__ . '/../app/veille/veille.php';
+require __DIR__ . '/../app/veille/prospects.php';
 
 // Serveur Discord de la direction : panel, tableau de bord, dossiers, rappels… et une fois par jour le projet de A à Z
 function veille_cron_discord(): void
@@ -27,6 +28,7 @@ function veille_cron_discord(): void
 
 if (PHP_SAPI === 'cli') {
   $r = veille_lancer('cron');
+  robot_lancer('cron', [], 600);
   veille_cron_discord();
   echo json_encode(['ok' => $r['ok'], 'nouveaux' => $r['nouveaux'] ?? null, 'message' => $r['message'] ?? ''], JSON_UNESCAPED_UNICODE), "\n";
   exit;
@@ -53,6 +55,8 @@ try {
   if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
   else { @ob_end_flush(); flush(); }
   veille_lancer('auto');
+  // robot de prospection : les tâches en retard (annuaire, ouvertures, chantiers), dans le temps qui reste
+  try { robot_lancer('auto', [], 180); } catch (Throwable $e) { error_log('[BDA robot] ' . $e->getMessage()); }
   veille_cron_discord();
 } catch (Throwable $e) {
   error_log('[BDA veille-cron] ' . $e->getMessage());

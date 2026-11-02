@@ -17,13 +17,14 @@ const ESPACES = {
   site: {
     nom: 'Site internet', court: 'Site', ic: 'site', accueil: 'tableau', externe: ['/', 'Voir le site'],
     menu: [
+      // Le robot de prospection, en haut du menu : trouver du travail passe avant le reste
+      { chemin: 'opportunites', libelle: 'Trouver des clients', ic: 'cible', badge: 'opportunites', admin: true },
       { chemin: 'tableau', libelle: 'Statistiques', ic: 'graphique' },
       { groupe: 'Clients' },
       { chemin: 'demandes', libelle: 'Demandes reçues', ic: 'demande', badge: 'demandes' },
       { chemin: 'messages', libelle: 'Messages', ic: 'message', badge: 'messages' },
       { chemin: 'assistance', libelle: 'Assistance du site', ic: 'bouee', badge: 'assistance', alerte: true },
       { chemin: 'clients', libelle: 'Fiches clients', ic: 'clients' },
-      { chemin: 'opportunites', libelle: 'Opportunités', ic: 'cible', badge: 'opportunites', admin: true },
       { groupe: 'Facturation' },
       { chemin: 'devis', libelle: 'Devis', ic: 'devis' },
       { chemin: 'factures', libelle: 'Factures', ic: 'facture', badge: 'retards', alerte: true },
@@ -79,6 +80,7 @@ const A_TRAITER = [
   { cle: 'avis', libelle: 'Avis à valider', href: '#/avis', ic: 'avis' },
   { cle: 'reservations', libelle: 'Réservations du site', href: '#/vtc', ic: 'planning' },
   { cle: 'retards', libelle: 'Factures en retard', href: '#/factures', ic: 'facture', alerte: true },
+  { cle: 'rappels', libelle: 'Clients à rappeler aujourd’hui', href: '#/opportunites/rappels', ic: 'telephone' },
 ];
 // Pages communes aux deux espaces : elles restent dans l'espace ouvert
 const COMMUNES = ['parametres', 'securite', 'notifications', 'comptes'];
@@ -91,7 +93,7 @@ const espaceDeRoute = (route) => (route === 'appli' || route === 'vtc' ? 'appli'
 const RUBRIQUE = {};
 for (const e of Object.values(ESPACES)) e.menu.reduce((g, m) => { if (m.groupe) return m.groupe; RUBRIQUE[m.chemin] = g; return g; }, '');
 for (const m of COMPTE) RUBRIQUE[m.chemin] = 'Compte';
-Object.assign(RUBRIQUE, { cartes: 'Outils', visites: 'Outils', flyers: 'Outils' });
+Object.assign(RUBRIQUE, { cartes: 'Outils', visites: 'Outils', flyers: 'Outils', opportunites: 'Prospection' });
 function espaceMemo(v) {
   try { if (v) localStorage.setItem('bda-espace', v); return localStorage.getItem('bda-espace') === 'appli' ? 'appli' : 'site'; } catch (e) { return v || 'site'; }
 }
@@ -462,7 +464,7 @@ function lancerApplication() {
     menuEl,
     h('div', { class: 'cote__bas' },
       h('button', { class: 'cote__reduire', type: 'button', title: 'Réduire ou agrandir le menu', onclick: basculerMenuReduit }, icone('panneau'), h('span', null, 'Réduire le menu')),
-      h('p', { class: 'cote__version', title: 'Les compteurs se mettent à jour toutes les minutes' }, h('i', { 'aria-hidden': 'true' }), h('span', null, 'BDA Admin · v8.0 · ', h('span', { id: 'synchro' }, 'à jour')))));
+      h('p', { class: 'cote__version', title: 'Les compteurs se mettent à jour toutes les minutes' }, h('i', { 'aria-hidden': 'true' }), h('span', null, `BDA Admin · v${VERSION}.0 · `, h('span', { id: 'synchro' }, 'à jour')))));
 
   filEl = h('nav', { class: 'ariane', 'aria-label': 'Vous êtes ici' });
   titrePage = h('h1', { class: 'entete-page__titre' });
@@ -576,19 +578,19 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '8';
+const VERSION = '9';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 8 : toute l’équipe dans BDA Admin, et vos pages préférées à portée de main.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 9 : un robot qui vous trouve du travail.'),
       h('ul', null,
-        point('cle', 'securite', 'Comptes & accès', 'Créez un accès pour un proche ou un manager, choisissez son rôle, changez son mot de passe. Compte › Comptes & accès.'),
-        point('etoile', 'equipe', 'Favoris', 'L’étoile à côté du titre épingle la page en haut du menu.'),
-        point('plus', 'facturation', 'Bouton « Créer »', 'Devis, facture, agent, planning, note, accès. Ou la touche C. Touche ? pour tous les raccourcis.'),
-        point('eclair', 'appli', 'Effets', 'Écran d’ouverture, connexion animée, pages qui glissent, chiffres qui défilent.'))),
+        point('cible', 'clients', 'Trouver des clients', 'En haut du menu. Le robot cherche tout seul les chantiers, bars, boîtes de nuit, magasins, hôtels et restaurants d’Île-de-France, plus les appels d’offres.'),
+        point('eclair', 'clients', 'Ouvertures et reprises', 'Les lieux qui viennent d’ouvrir ou de changer de patron remontent en tête : c’est le meilleur moment pour appeler.'),
+        point('telephone', 'equipe', 'Suivi et rappels', 'Après un appel : « Contacté », « Intéressé », « Devis envoyé »… et une date de rappel. La cloche vous prévient le jour venu.'),
+        point('recherche', 'outils', 'Recherche rapide', 'Ctrl K retrouve aussi les pistes que vous avez déjà appelées.'))),
     actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
   }), 900);
 }

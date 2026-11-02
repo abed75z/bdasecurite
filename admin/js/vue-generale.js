@@ -53,6 +53,10 @@ export async function pageVueGenerale(ctx) {
     n ? h('em', { class: `acc-module__n ${alerte ? 'is-alerte' : ''}` }, String(n)) : null,
     icone('fleche', 'acc-module__fleche'));
   const modules = [
+    // Le robot de prospection (administrateurs seulement) : nouvelles pistes et clients à rappeler
+    session.role === 'admin' ? { href: c.rappels ? '#/opportunites/rappels' : '#/opportunites', dom: 'prospection', ic: 'cible', titre: 'Trouver des clients', grand: true, n: c.rappels,
+      info: c.rappels ? pluriel(c.rappels, 'client à rappeler aujourd’hui', 'clients à rappeler aujourd’hui') : c.opportunites ? pluriel(c.opportunites, 'nouvelle piste trouvée par le robot', 'nouvelles pistes trouvées par le robot') : 'Chantiers, bars, clubs, hôtels, magasins, appels d’offres',
+      details: [['nouvelles pistes', c.opportunites || 0], ['à rappeler', c.rappels || 0]] } : null,
     { href: '#/demandes', dom: 'clients', ic: 'clients', titre: 'Clients', grand: true, n: c.demandes + c.messages + c.assistance, alerte: Boolean(c.assistance),
       info: c.demandes ? pluriel(c.demandes, 'nouvelle demande de devis', 'nouvelles demandes de devis') : c.messages ? pluriel(c.messages, 'message client', 'messages clients') : 'Demandes, messages, fiches clients',
       details: [['demandes', c.demandes], ['messages', c.messages], ['assistance', c.assistance]] },
@@ -70,7 +74,7 @@ export async function pageVueGenerale(ctx) {
     { href: '#/creations', dom: 'outils', ic: 'calques', titre: 'Outils', info: 'Cartes agents, flyers, notes' },
     { href: '#/securite', dom: 'securite', ic: 'bouclier', titre: 'Sécurité', n: a.alertes, alerte: true,
       info: a.alertes ? pluriel(a.alertes, 'connexion refusée', 'connexions refusées') : 'Accès, appareils, journal' },
-  ].map(module);
+  ].filter(Boolean).map(module);
 
   ctx.afficher(h('div', { class: 'accueil' }, entete, h('nav', { class: 'acc-modules', 'aria-label': 'Domaines' }, modules)));
 

@@ -317,6 +317,25 @@ function schema(PDO $db): void
       PRAGMA user_version = 20;
     SQL);
   }
+  if ($version < 21) {
+    // Robot de prospection (app/veille/prospects.php) : une ligne par lieu ou chantier trouvé.
+    // base = note de priorité sans le bonus d'ouverture récente ; signal = dernier fait marquant (ouverture, reprise, chantier) ;
+    // statut / note / relance = suivi saisi dans l'admin, jamais écrasé par le robot ; actif = 0 si le lieu a disparu de la source ;
+    // nouveau_le = quand la piste est apparue ou a eu un fait marquant (pastille du menu et mention « Nouveau »)
+    $db->exec(<<<'SQL'
+      CREATE TABLE IF NOT EXISTS prospects (id INTEGER PRIMARY KEY, cle TEXT NOT NULL UNIQUE, categorie TEXT NOT NULL, source TEXT NOT NULL, nom TEXT NOT NULL,
+        activite TEXT NOT NULL DEFAULT '', adresse TEXT NOT NULL DEFAULT '', cp TEXT NOT NULL DEFAULT '', ville TEXT NOT NULL DEFAULT '', dep TEXT NOT NULL DEFAULT '',
+        lat REAL, lon REAL, tel TEXT NOT NULL DEFAULT '', mail TEXT NOT NULL DEFAULT '', site TEXT NOT NULL DEFAULT '', horaires TEXT NOT NULL DEFAULT '',
+        siren TEXT NOT NULL DEFAULT '', base INTEGER NOT NULL DEFAULT 0, atouts TEXT NOT NULL DEFAULT '[]', infos TEXT NOT NULL DEFAULT '{}',
+        signal TEXT NOT NULL DEFAULT '', signal_date TEXT NOT NULL DEFAULT '', statut TEXT NOT NULL DEFAULT 'a_contacter', note TEXT NOT NULL DEFAULT '',
+        relance TEXT NOT NULL DEFAULT '', contact_le TEXT NOT NULL DEFAULT '', nouveau_le TEXT NOT NULL DEFAULT '', actif INTEGER NOT NULL DEFAULT 1,
+        vu_source TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL, maj TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS i_prospects_cat ON prospects (categorie, actif, base DESC);
+      CREATE INDEX IF NOT EXISTS i_prospects_signal ON prospects (signal_date);
+      CREATE INDEX IF NOT EXISTS i_prospects_statut ON prospects (statut, relance);
+      PRAGMA user_version = 21;
+    SQL);
+  }
 }
 // Catégorie d'un agent : équipe principale, renfort, ou agent de secours (candidat retenu)
 function agent_categorie($c): string

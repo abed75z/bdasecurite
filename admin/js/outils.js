@@ -153,6 +153,14 @@ const TRACES = {
   soleil: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
   lune: '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
   pause: '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>',
+  // Catégories du robot de prospection (02/11/2026)
+  chantier: '<path d="M2 19h20"/><path d="M4 19v-2a8 8 0 0 1 16 0v2"/><path d="M10 9.2V5h4v4.2"/>',
+  verre: '<path d="M5 3h14l-7 9z"/><path d="M12 12v8M8 21h8"/>',
+  musique: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+  sac: '<path d="M5.5 7h13l1 14h-15z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/>',
+  lit: '<path d="M3 19V6M3 15h18v4M21 15v-2.5A2.5 2.5 0 0 0 18.5 10H11v5"/><circle cx="7" cy="11.5" r="2"/>',
+  couverts: '<path d="M7 2v20M4.5 2v5a2.5 2.5 0 0 0 5 0V2"/><path d="M18 22V2c-2.2 1.3-3.5 4-3.5 8h3.5"/>',
+  lieu: '<path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
 };
 export function icone(nom, cls = '') {
   const ns = 'http://www.w3.org/2000/svg';

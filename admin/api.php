@@ -35,7 +35,7 @@ if (connecte() && in_array($action, ACTIONS_ADMIN, true) && role_courant() !== '
 // L'administrateur connecté garde l'accès au site pendant la maintenance
 if (connecte() && !apercu_valide()) poser_apercu();
 
-$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord', 'contrats.reglages'];
+$lecture = ['utilisateurs', 'session', 'accueil', 'compteurs', 'site', 'journal', 'connexions', 'notes', 'recherche', 'chef.carte', 'chef.appareils', 'client.acces', 'messages.clients', 'messages.client', 'creations', 'creation', 'agent.docs', 'agent.doc', 'reservations', 'vtc.tarifs', 'reglages', 'documents', 'document', 'document.piece', 'envois', 'envoi.fichier', 'numero', 'planning', 'clients', 'agents', 'demandes', 'candidatures', 'avis', 'export', 'paie.parametres', 'paie.salaries', 'paie.bulletins', 'paie.bulletin', 'pointages', 'assist.liste', 'assist.conv', 'ia', 'equipe', 'equipe.paie.fichier', 'equipe.mc.photo', 'opportunites', 'veille.reglages', 'notif.prefs', 'discord', 'contrats.reglages', 'prospects'];
 if (in_array($action, $lecture, true) !== ($methode === 'GET')) echec('Méthode non autorisée pour cette action.', 405);
 
 try {
@@ -987,6 +987,73 @@ try {
       db()->prepare('UPDATE opportunites SET note = ?, maj = ? WHERE id = ?')->execute([texte($b['note'] ?? '', 2000), maintenant(), (int)($b['id'] ?? 0)]);
       repondre(['ok' => true]);
 
+    /* ----- Robot de prospection ----- */
+    case 'prospects':
+      require_once __DIR__ . '/../app/veille/veille.php';
+      require_once __DIR__ . '/../app/veille/prospects.php';
+      $l = robot_liste($_GET);
+      $r = ['ok' => true] + $l;
+      if ((int)($_GET['page'] ?? 1) <= 1) {
+        $taches = [];
+        foreach (robot_taches() as $k => $t) $taches[$k] = $t + ['etat' => robot_etat()['taches'][$k] ?? null];
+        $ao = db()->query("SELECT SUM(source = 'boamp' AND statut <> 'ignore' AND (date_limite = '' OR date_limite >= datetime('now'))) ao, SUM(source = 'francetravail' AND statut <> 'ignore') rec,
+          SUM(source = 'boamp' AND statut = 'a_traiter' AND cree > COALESCE((SELECT v FROM reglages WHERE k = 'veille_vu_le'), '')) ao_nouveaux FROM opportunites")->fetch();
+        $r += ['chiffres' => robot_chiffres((string)($_GET['cat'] ?? '')), 'taches' => $taches, 'robot' => robot_etat()['derniere'] ?? null, 'veille' => veille_etat()['derniere'] ?? null,
+          'opportunites' => ['ao' => (int)$ao['ao'], 'recrutements' => (int)$ao['rec'], 'aoNouveaux' => (int)$ao['ao_nouveaux']]];
+      }
+      // ouverture de la page : ce qui est arrivé depuis la dernière visite garde la mention « Nouveau », la pastille du menu repart de zéro
+      if (!empty($_GET['ouverture'])) {
+        $r['vuAvant'] = (string)(db()->query("SELECT v FROM reglages WHERE k = 'robot_vu_le'")->fetchColumn() ?: '');
+        db()->prepare("INSERT INTO reglages (k, v) VALUES ('robot_vu_le', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v")->execute([maintenant()]);
+      }
+      repondre($r);
+
+    case 'prospect.maj':
+      require_once __DIR__ . '/../app/veille/prospects.php';
+      $b = corps();
+      $id = (int)($b['id'] ?? 0);
+      $st = db()->prepare('SELECT id, statut FROM prospects WHERE id = ?');
+      $st->execute([$id]);
+      $p = $st->fetch();
+      if (!$p) echec('Piste introuvable.', 404);
+      $maj = [];
+      if (array_key_exists('statut', $b)) {
+        if (!in_array($b['statut'], ROBOT_STATUTS, true)) echec('Statut inconnu.');
+        $maj['statut'] = (string)$b['statut'];
+        if ($b['statut'] !== 'a_contacter' && $p['statut'] === 'a_contacter') $maj['contact_le'] = date('Y-m-d');
+      }
+      if (array_key_exists('note', $b)) $maj['note'] = texte($b['note'], 2000);
+      if (array_key_exists('relance', $b)) $maj['relance'] = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$b['relance']) ? (string)$b['relance'] : '';
+      if (array_key_exists('tel', $b)) $maj['tel'] = texte($b['tel'], 30);
+      if (!$maj) echec('Rien à enregistrer.');
+      $sets = implode(', ', array_map(fn($c) => "$c = ?", array_keys($maj)));
+      db()->prepare("UPDATE prospects SET $sets, maj = ? WHERE id = ?")->execute([...array_values($maj), maintenant(), $id]);
+      repondre(['ok' => true] + $maj);
+
+    case 'robot.lancer':
+      require_once __DIR__ . '/../app/veille/veille.php';
+      require_once __DIR__ . '/../app/veille/prospects.php';
+      $b = corps();
+      $forcer = array_values(array_intersect(array_map('strval', (array)($b['taches'] ?? [])), array_keys(robot_taches())));
+      // Bouton « Chercher maintenant » : tout ce qui n'a pas été fait dans l'heure
+      if (!$forcer) {
+        $e = robot_etat();
+        foreach (array_keys(robot_taches()) as $k) if (strtotime((string)($e['taches'][$k]['ok_le'] ?? '2000-01-01')) < time() - 3600) $forcer[] = $k;
+        if (!$forcer) echec('Le robot a déjà tout vérifié il y a moins d’une heure.', 409);
+      }
+      session_write_close();
+      // On répond tout de suite : la recherche continue sur le serveur et la page suit son avancement
+      ignore_user_abort(true);
+      $reponse = json_encode(['ok' => true, 'lance' => true, 'quand' => maintenant()], JSON_UNESCAPED_UNICODE);
+      header('Content-Type: application/json; charset=utf-8');
+      header('Cache-Control: no-store');
+      header('Content-Length: ' . strlen($reponse));
+      header('Connection: close');
+      echo $reponse;
+      if (function_exists('fastcgi_finish_request')) fastcgi_finish_request(); else { @ob_end_flush(); flush(); }
+      robot_lancer('manuel', $forcer, 240);
+      exit;
+
     case 'veille.lancer':
       require_once __DIR__ . '/../app/veille/veille.php';
       session_write_close(); // la collecte peut durer : on libère la session
@@ -1605,6 +1672,8 @@ try {
         'agents' => db()->query('SELECT id, nom, poste, categorie FROM agents ORDER BY nom COLLATE NOCASE LIMIT 400')->fetchAll(),
         'notes' => db()->query("SELECT id, substr(texte, 1, 140) AS texte FROM notes WHERE texte <> '' ORDER BY maj DESC LIMIT 200")->fetchAll(),
         'reservations' => db()->query('SELECT id, ref, statut, date_course, data FROM reservations ORDER BY date_course DESC LIMIT 100')->fetchAll(),
+        // pistes du robot déjà travaillées (appelées, intéressées, clients…) : on les retrouve par leur nom
+        'pistes' => role_courant() === 'admin' ? db()->query("SELECT id, nom, categorie, statut, ville FROM prospects WHERE statut NOT IN ('a_contacter', 'ignore') OR note <> '' ORDER BY maj DESC LIMIT 300")->fetchAll() : [],
       ]]);
 
     default:
@@ -1765,7 +1834,10 @@ function compteurs(): array
     'messages' => $q("SELECT COUNT(*) FROM messages_clients WHERE auteur = 'client' AND lu = 0"),
     'assistance' => $q("SELECT COUNT(*) FROM assist_conv WHERE statut = 'attente' OR (statut = 'equipe' AND non_lu > 0)"),
     'equipe' => $q("SELECT (SELECT COUNT(*) FROM comptes_equipe WHERE statut = 'attente') + (SELECT COUNT(*) FROM absences WHERE statut = 'attente') + (SELECT COUNT(*) FROM main_courante WHERE statut = 'nouveau')"),
-    'opportunites' => $q("SELECT COUNT(*) FROM opportunites WHERE statut = 'a_traiter' AND cree > COALESCE((SELECT v FROM reglages WHERE k = 'veille_vu_le'), '')"),
+    // appels d'offres arrivés depuis la dernière visite + pistes du robot pas encore vues
+    'opportunites' => $q("SELECT COUNT(*) FROM opportunites WHERE statut = 'a_traiter' AND cree > COALESCE((SELECT v FROM reglages WHERE k = 'veille_vu_le'), '')")
+      + $q("SELECT COUNT(*) FROM prospects WHERE actif = 1 AND statut <> 'ignore' AND nouveau_le > COALESCE((SELECT v FROM reglages WHERE k = 'robot_vu_le'), '')"),
+    'rappels' => $q("SELECT COUNT(*) FROM prospects WHERE relance <> '' AND relance <= '" . date('Y-m-d') . "' AND statut NOT IN ('client','refus','ignore')"),
     'appli' => $q("SELECT COUNT(*) FROM courses WHERE statut IN ('reservee', 'recherche')"),
   ];
 }

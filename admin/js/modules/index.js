@@ -14,7 +14,15 @@
      cloche: { cle: 'mails', libelle: 'Mails à traiter', ic: 'mail', alerte: false },
      commandes: [{ ic: 'mail', titre: 'Écrire un mail', mots: 'mail email envoyer', href: '#/messagerie/nouveau' }] }
    ========================================================= */
-export const MODULES = [];
+export const MODULES = [
+  // Version 12 — la messagerie : factures et devis par mail, relances, contacter agents et clients, boîte de réception de contact@
+  { route: 'messagerie', charger: () => import('./mails.js'), page: 'pageMessagerie',
+    menu: { groupe: 'Clients', apres: 'messages', libelle: 'Messagerie', ic: 'mail', badge: 'mails' },
+    cloche: [{ cle: 'mails', libelle: 'Mails reçus non lus', ic: 'mail' }, { cle: 'relances', libelle: 'Factures en retard à relancer', ic: 'facture', href: '#/messagerie/relances' }],
+    commandes: [{ ic: 'mail', titre: 'Écrire un mail (agent, client, groupe)', mots: 'mail email ecrire envoyer message contacter', href: '#/messagerie/nouveau' },
+      { ic: 'agents', titre: 'Écrire à tous les agents', mots: 'mail agents equipe groupe tous', href: '#/messagerie/nouveau/groupe/agents' },
+      { ic: 'facture', titre: 'Relances de factures', mots: 'relance impaye retard paiement', href: '#/messagerie/relances' }] },
+];
 
 // Pages des modules, au format de PAGES (pages.js)
 export const PAGES_MODULES = Object.fromEntries(MODULES.filter((m) => m.route && m.charger).map((m) => [m.route, async (ctx) => {

@@ -84,3 +84,10 @@ body.moi { background: radial-gradient(120% 60% at 50% -10%, rgba(0, 0, 0, 0.09)
 .fl__t1, .fl__t2 { color: #ffffff; }
 .fl__intro { color: #c9c3b8; }
 .fl__secteur { border: 0.35mm solid rgba(220, 195, 145, 0.55); color: #f6f2ea; }
+
+/* Documents imprimés (factures, devis, planning, paie, cartes, flyers, contrats) : jamais l'approche ni les
+   variantes de police de l'interface. Un espacement négatif hérité coupe les champs dans le PDF (html2canvas). */
+.feuille, .fl, .cv, .cp, .ct-page, .ct-pages, .planche, .planche-visites, .page-carte, .page-visite, .bp, .doc-paie {
+  letter-spacing: normal;
+  font-feature-settings: normal;
+}

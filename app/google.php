@@ -173,6 +173,10 @@ function google_envoyer(string $a, string $sujet, string $texte, array $pj = [],
   if ($cci) $entetes[] = 'Bcc: ' . implode(', ', $cci);
   $rep = $adresses([$options['repondreA'] ?? '']);
   if ($rep) $entetes[] = 'Reply-To: ' . $rep[0];
+  // réponse dans un fil existant (messagerie de l'admin) : en-têtes de suivi + identifiant du fil Gmail
+  $suivi = fn (string $s) => (string)preg_replace('/[^!-~ ]/', '', $propre($s));
+  if (!empty($options['inReplyTo'])) $entetes[] = 'In-Reply-To: ' . $suivi((string)$options['inReplyTo']);
+  if (!empty($options['references'])) $entetes[] = 'References: ' . $suivi((string)$options['references']);
   $entetes[] = 'Subject: ' . mb_encode_mimeheader($propre($sujet), 'UTF-8', 'B');
   $entetes[] = 'MIME-Version: 1.0';
 
@@ -191,6 +195,8 @@ function google_envoyer(string $a, string $sujet, string $texte, array $pj = [],
     $mime .= "--$limite--\r\n";
   }
   if (strlen($mime) > 24 * 1024 * 1024) throw new RuntimeException('Pièces jointes trop lourdes (25 Mo au maximum chez Gmail).');
-  $r = google_api('POST', 'https://gmail.googleapis.com/gmail/v1/users/me/messages/send', ['raw' => rtrim(strtr(base64_encode($mime), '+/', '-_'), '=')]);
+  $envoi = ['raw' => rtrim(strtr(base64_encode($mime), '+/', '-_'), '=')];
+  if (!empty($options['threadId']) && preg_match('/^[0-9a-f]{6,40}$/i', (string)$options['threadId'])) $envoi['threadId'] = (string)$options['threadId'];
+  $r = google_api('POST', 'https://gmail.googleapis.com/gmail/v1/users/me/messages/send', $envoi);
   return ['id' => (string)($r['id'] ?? ''), 'fil' => (string)($r['threadId'] ?? ''), 'de' => $compte];
 }

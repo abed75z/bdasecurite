@@ -76,6 +76,13 @@ export async function pdfFeuille(feuille, { paysage = false } = {}) {
   return fabriquerPdf(await Promise.all(decouper(canvas, H / W).map(enJpeg)), W, H);
 }
 
+// Plusieurs feuilles A4 portrait dans un même PDF, renvoyé en Blob (ex. envoi par mail d'une facture avec son relevé)
+export async function pdfFeuilles(feuilles) {
+  const images = [];
+  for (const f of feuilles) images.push(...await Promise.all(decouper(await capturer(f, 2.5), A4.h / A4.l).map(enJpeg)));
+  return fabriquerPdf(images, A4.l, A4.h);
+}
+
 // Plusieurs feuilles A4 portrait dans un même PDF (ex. facture + relevé d'heures en annexe)
 export async function telechargerFeuilles(feuilles, nomFichier) {
   const attente = toast('Préparation du PDF…', 'ok');

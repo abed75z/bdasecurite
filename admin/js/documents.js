@@ -8,7 +8,8 @@ import {
   euro, nombre, arrondi, fmtHeures, lireHeures, lireNombre, fr, frVersDate, isoVersFr, cap, MOIS, pad, iso,
 } from './outils.js';
 import { totauxDuMois } from './planning.js';
-import { telechargerPdf, telechargerFeuilles } from './pdf.js';
+import { telechargerPdf, telechargerFeuilles, pdfFeuille, pdfFeuilles } from './pdf.js';
+import { fenetreEnvoi, blocMailDocument } from './modules/mails.js';
 
 const CONFIG = {
   devis: { route: 'devis', titre: 'Devis', nouveau: 'Nouveau devis', un: 'le devis', statuts: ['brouillon', 'envoye', 'accepte', 'refuse'] },
@@ -193,6 +194,22 @@ export async function editeurDocument(ctx, type, param) {
     if (feuille.releve && !feuille.releve.hidden) await telechargerFeuilles([feuille.el, feuille.releve], nomFichier());
     else await telechargerPdf(feuille.el, nomFichier());
   };
+  // Envoi par mail (messagerie, v12) : le PDF se prépare pendant que l'on relit le message
+  const envoyerParMail = async ({ type: typeEnvoi, niveau } = {}) => {
+    if (!data.client?.nom?.trim()) return toast('Indiquez d’abord le client sur la feuille.', 'erreur');
+    plusTard.annuler();
+    await enregistrer();
+    const pdfPret = (feuille.releve && !feuille.releve.hidden) ? pdfFeuilles([feuille.el, feuille.releve]) : pdfFeuille(feuille.el);
+    pdfPret.catch(() => {});
+    const r = await fenetreEnvoi({ document: { id, type, numero: data.numero, client: data.client, statut }, pdf: pdfPret, nomPdf: `${nomFichier()}.pdf`, clients, type: typeEnvoi, niveau });
+    if (r?.statut && r.statut !== statut) { statut = r.statut; $$('.statut-btn', choixStatut).forEach((b) => b.classList.toggle('is-actif', b.textContent === LIBELLE_STATUT[statut])); }
+    if (r) { blocMail.maj(); ctx.compteurs(); }
+  };
+  const relancer = () => {
+    const retard = data.echeance && /^(\d{2})\/(\d{2})\/(\d{4})$/.test(data.echeance) ? Math.floor((Date.now() - new Date(data.echeance.split('/').reverse().join('-')).getTime()) / 86400000) : 0;
+    envoyerParMail({ type: 'relance', niveau: retard > 20 ? 3 : retard > 7 ? 2 : 1 });
+  };
+  const blocMail = blocMailDocument({ id: () => id, type, onEnvoyer: () => envoyerParMail(), onRelancer: relancer });
   const btnReleve = type === 'facture' ? h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => {
     if (data.releve?.lignes?.length) { delete data.releve; } else { data.releve = { lignes: [{ date: '', matin: '', apm: '' }] }; }
     feuille.majReleve(); majBtnReleve(); change();
@@ -270,6 +287,7 @@ export async function editeurDocument(ctx, type, param) {
   dessinerPiece();
 
   const panneau = h('aside', { class: 'panneau' },
+    blocMail.el,
     blocEspace,
     blocPiece,
     h('section', { class: 'panneau__bloc' }, h('h3', null, 'Statut'), choixStatut),
@@ -280,13 +298,19 @@ export async function editeurDocument(ctx, type, param) {
 
   ctx.titre(`${type === 'devis' ? 'Devis' : 'Facture'} ${data.numero}`);
   ctx.actions(h('a', { class: 'btn btn--ghost', href: `#/${C.route}` }, icone('retour'), h('span', null, C.titre)), indicateur,
-    h('button', { class: 'btn btn--gold', type: 'button', onclick: pdf }, icone('telecharger'), h('span', null, 'Télécharger PDF')));
+    h('button', { class: 'btn btn--ghost', type: 'button', onclick: pdf }, icone('telecharger'), h('span', null, 'Télécharger PDF')),
+    h('button', { class: 'btn btn--gold', type: 'button', onclick: () => envoyerParMail() }, icone('envoyer'), h('span', null, 'Envoyer par mail')));
   const zone = h('div', { class: 'feuille-zone' }, feuille.el, feuille.releve);
   ctx.afficher(h('div', { class: 'editeur' }, zone, panneau));
   ajusterZoom(zone, feuille.el);
   if (feuille.releve) ajusterZoom(zone, feuille.releve);
   if (!id) { if (prerempli) enregistrer(); else marquer('Nouveau'); }
   else marquer('✓ À jour', 'is-ok');
+  // Arrivée depuis Messagerie › Relances : la fenêtre de relance s'ouvre toute seule
+  try {
+    const rel = JSON.parse(sessionStorage.getItem('bda-relance') || 'null');
+    if (rel && +rel.id === +id) { sessionStorage.removeItem('bda-relance'); setTimeout(() => envoyerParMail({ type: 'relance', niveau: rel.niveau }), 400); }
+  } catch (e) { /* navigation privée */ }
 
   /* ----- Actions ----- */
   async function enregistrerClient() {

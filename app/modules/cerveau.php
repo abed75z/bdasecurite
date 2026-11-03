@@ -221,6 +221,24 @@ function mod_cerveau_cartes(bool $argent): array
   if ($devis) $ajouter('important', 'facturation', $n(count($devis), 'devis sans réponse', 'devis sans réponse') . ' depuis plus d’une semaine', 'Un appel au client fait souvent signer : demandez s’il a des questions.', '#/devis', 'Voir les devis',
     array_map(fn ($d) => $d['numero'] . ' · ' . $d['client'] . ' · envoyé le ' . mod_cerveau_fr((string)$d['date']) . ($argent ? ' · ' . mod_cerveau_euros((float)$d['total']) : ''), $devis));
 
+  // 8 bis. Formations à renouveler, embauches qui démarrent sans DPAE ou sans carte pro vérifiée
+  if (function_exists('mod_rh_a_renouveler')) {
+    $f = mod_rh_a_renouveler();
+    if ($f) $ajouter('important', 'equipe', $n(count($f), 'formation à renouveler', 'formations à renouveler'), 'MAC APS, SST, SSIAP ou H0B0 : inscrivez les agents avant l’échéance.', '#/rh', 'Formations',
+      array_map(fn ($x) => $x['nom'] . ' · ' . (MOD_RH_FORMATIONS[$x['type']][0] ?? 'Formation') . ' · ' . ((string)$x['expire'] < $auj ? 'expirée le ' : 'expire le ') . mod_cerveau_fr((string)$x['expire']), $f));
+  }
+  if (mod_cerveau_table('m_rh_embauches')) {
+    $st = $db->prepare("SELECT nom, debut, etapes FROM m_rh_embauches WHERE archive = '' AND statut = 'en_cours' AND debut <> '' AND debut <= ?");
+    $st->execute([date('Y-m-d', $mtn + 2 * 86400)]);
+    $manque = [];
+    foreach ($st as $e) {
+      $et = json_decode((string)$e['etapes'], true) ?: [];
+      $l = array_filter(['carte_pro' => 'carte pro', 'dpae' => 'DPAE', 'contrat' => 'contrat'], fn ($k) => empty($et[$k]), ARRAY_FILTER_USE_KEY);
+      if ($l) $manque[] = $e['nom'] . ' · début le ' . mod_cerveau_fr((string)$e['debut']) . ' · manque : ' . implode(', ', $l);
+    }
+    if ($manque) $ajouter('urgent', 'equipe', $n(count($manque), 'embauche démarre', 'embauches démarrent') . ' sans dossier complet', 'Carte pro vérifiée, DPAE et contrat sont obligatoires avant la première prise de poste.', '#/rh/embauches', 'Embauches', $manque);
+  }
+
   // 9. Clients et équipe qui attendent une réponse
   $st = $db->query("SELECT COUNT(*) AS n, MIN(recu) AS plus_ancien FROM demandes WHERE statut = 'nouvelle'")->fetch();
   if ((int)$st['n']) {

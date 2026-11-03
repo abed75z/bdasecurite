@@ -39,6 +39,12 @@ export const MODULES = [
     menu: { groupe: 'Exploitation', apres: 'terrain', libelle: 'Tout va bien ?', ic: 'lune', badge: 'presence' },
     cloche: { cle: 'presence', libelle: 'Agent de nuit sans réponse', ic: 'alerte', alerte: true, href: '#/controle' },
     commandes: [{ ic: 'lune', titre: 'Contrôle de présence « Tout va bien ? »', mots: 'presence nuit tout va bien travailleur isole pti dati alerte', href: '#/presence' }] },
+  // Formations (échéances MAC APS, SST, SSIAP, H0B0) et embauches de A à Z
+  { route: 'rh', charger: () => import('./rh.js'), page: 'pageRh',
+    menu: { groupe: 'Équipe', apres: 'candidatures', libelle: 'Formations & RH', ic: 'contrat', badge: 'formations' },
+    cloche: { cle: 'formations', libelle: 'Formations à renouveler', ic: 'contrat' },
+    commandes: [{ ic: 'contrat', titre: 'Nouvelle embauche (liste de contrôle)', mots: 'embauche recrutement dpae contrat registre onboarding', href: '#/rh/embauches' },
+      { ic: 'contrat', titre: 'Formations des agents (MAC APS, SST, SSIAP)', mots: 'formation recyclage mac aps sst ssiap h0b0 echeance', href: '#/rh' }] },
   // Audits de sûreté : visite guidée sur place, rapport PDF, devis pré-rempli
   { route: 'audit', charger: () => import('./audit.js'), page: 'pageAudit',
     menu: { groupe: 'Clients', apres: 'demandes', libelle: 'Audits de sûreté', ic: 'cible' },

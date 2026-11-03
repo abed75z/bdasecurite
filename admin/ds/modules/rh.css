@@ -1,0 +1,36 @@
+/* =========================================================
+   FORMATIONS & EMBAUCHES — échéances par agent, listes de contrôle
+   ========================================================= */
+.rh-legende { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin: 0; font-size: 12px; }
+.rh-point { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 6px; }
+.rh-point.is-valide { background: var(--iv-ok-point, #3fb37a); }
+.rh-point.is-bientot { background: var(--iv-attente-point, #d08a1e); }
+.rh-point.is-expiree { background: var(--iv-alerte-point, #d4433a); }
+.rh-matrice td { white-space: nowrap; }
+.rh-case, .rh-vide { min-width: 92px; padding: 5px 8px; border: 1px solid var(--iv-trait); border-radius: 6px; background: var(--iv-surface); color: var(--iv-encre-2); font: 500 12px/1.2 var(--iv-police); font-variant-numeric: tabular-nums; cursor: pointer; transition: border-color 120ms var(--iv-courbe); }
+.rh-case:hover, .rh-vide:hover { border-color: var(--iv-encre-2); }
+.rh-case.is-fixe { display: inline-block; cursor: default; }
+.rh-vide { color: var(--iv-muet); border-style: dashed; }
+.rh-case.is-valide { background: var(--iv-ok-fond); border-color: var(--iv-ok-trait); color: var(--iv-ok); }
+.rh-case.is-bientot { background: var(--iv-attente-fond); border-color: var(--iv-attente-trait); color: var(--iv-attente); font-weight: 600; }
+.rh-case.is-expiree { background: var(--iv-alerte-fond); border-color: var(--iv-alerte-trait); color: var(--iv-alerte); font-weight: 600; }
+.rh-matrice .chip { margin: 2px 4px 2px 0; }
+
+.rh-tete { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.rh-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; align-items: start; }
+.rh-embauche { display: grid; gap: 12px; }
+.rh-embauche.is-termine { opacity: 0.75; }
+.rh-embauche h2 { margin: 0; }
+.rh-actions { display: flex; align-items: center; gap: 4px; }
+.rh-actions small { margin-right: 6px; font-variant-numeric: tabular-nums; }
+.rh-jauge { height: 4px; border-radius: 2px; background: var(--iv-surface-3); overflow: hidden; }
+.rh-jauge i { display: block; height: 100%; background: var(--iv-encre); transition: width 300ms var(--iv-courbe); }
+.rh-embauche.is-termine .rh-jauge i { background: var(--iv-ok-point, #3fb37a); }
+.rh-etapes { margin: 0; padding: 0; list-style: none; display: grid; }
+.rh-etapes li { padding: 8px 0; border-top: 1px solid var(--iv-trait); }
+.rh-etapes li:first-child { border-top: 0; }
+.rh-etapes .case { align-items: flex-start; gap: 10px; }
+.rh-etapes .case span { display: grid; gap: 1px; }
+.rh-etapes b { font-weight: 500; font-size: 13.5px; }
+.rh-etapes small { font-size: 12px; line-height: 1.4; }
+@media (max-width: 640px) { .rh-grille { grid-template-columns: minmax(0, 1fr); } }

@@ -608,6 +608,7 @@ function montrerNouveautes() {
         point('mail', 'clients', 'Messagerie', 'Factures et devis envoyés par mail depuis contact@, avec suivi d’ouverture et relances préparées. Écrire à un agent, un client ou à tous en un clic.'),
         point('planning', 'exploitation', 'Planning nouvelle génération', 'Bouton « Remplir » qui propose les agents en respectant les règles, bourse aux postes libres, échanges entre agents à valider, besoins récurrents par site.'),
         point('bouclier', 'exploitation', 'Terrain & qualité', 'Classeur de chaque site : consignes que les agents signent « lu et compris », plans, numéros d’urgence, clés. Plus le matériel confié et les contrôles qualité notés sur place.'),
+        point('contrat', 'equipe', 'Formations & RH', 'Les échéances MAC APS, SST, SSIAP et H0B0 de chaque agent, et une liste de contrôle pour chaque embauche (carte pro, DPAE, contrat…).'),
         point('cible', 'clients', 'Audits de sûreté', 'Une grille de visite à remplir sur place au téléphone, un rapport PDF au nom du client et le devis pré-rempli en un clic.'),
         point('badge', 'exploitation', 'Cartes d’agent', 'Chaque agent a une carte avec QR code dans son Espace équipe : le client la scanne et vérifie en direct qu’il travaille pour vous.'),
         point('lune', 'exploitation', 'Tout va bien ?', 'Contrôle de présence des agents de nuit : une question sur leur téléphone, une alerte s’ils ne répondent pas. Désactivé tant que vous ne l’activez pas.'),

@@ -178,3 +178,11 @@ tr.is-a-faire td:first-child { box-shadow: inset 2px 0 0 #c4312a; }
   .mx-table td:nth-child(4), .mx-table th:nth-child(4) { display: none; }
 }
 :root[data-mouvement="reduit"] .mx * { animation: none !important; transition: none !important; }
+
+/* ---------- Fiche client : contacter, derniers échanges ---------- */
+.cl-contact { display: flex; flex-wrap: wrap; gap: 8px; }
+.cl-echanges { display: grid; gap: 6px; padding-top: 4px; border-top: 1px solid var(--iv-trait); }
+.cl-echanges ul { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.cl-echanges li { display: grid; gap: 1px; }
+.cl-echanges b { font-size: 13px; font-weight: 500; color: var(--iv-encre); }
+.cl-echanges small, .cl-echanges p { margin: 0; font-size: 12px; color: var(--iv-muet); }

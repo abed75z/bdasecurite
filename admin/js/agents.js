@@ -101,7 +101,8 @@ function actionsRapides(a, i, grand = false) {
   return h('span', { class: `ag-actions ${grand ? 'ag-actions--grand' : ''}` },
     a.tel ? bouton(`tel:${a.tel.replace(/[^\d+]/g, '')}`, 'telephone', 'Appeler') : null,
     a.tel ? bouton(`https://wa.me/${telInternational(a.tel)}`, 'message', 'WhatsApp', true) : null,
-    i.mail ? bouton(`mailto:${i.mail}`, 'mail', 'Écrire un mail') : null);
+    // le mail part de l'admin (contact@), avec l'historique gardé dans la messagerie
+    i.mail ? bouton(`#/messagerie/nouveau/agent/${a.id}`, 'mail', 'Écrire un mail') : null);
 }
 function vueMemo(v) {
   try { if (v) localStorage.setItem('bda-agents-vue', v); return localStorage.getItem('bda-agents-vue') === 'cartes' ? 'cartes' : 'tableau'; } catch (e) { return v || 'tableau'; }

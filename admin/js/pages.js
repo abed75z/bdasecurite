@@ -401,6 +401,16 @@ async function pageAvis(ctx) {
 /* =========================================================
    CLIENTS
    ========================================================= */
+// Derniers mails envoyés à un client depuis l'admin (messagerie) : envoi, objet, ouverture
+function echangesClient(id) {
+  const zone = h('div', { class: 'cl-echanges' }, h('span', { class: 'champ__label' }, 'Derniers échanges'), h('p', { class: 'muet' }, 'Chargement…'));
+  api('mod.mails.envois', undefined, { client: id }).then(({ envois }) => {
+    zone.replaceChildren(h('span', { class: 'champ__label' }, 'Derniers échanges'), envois.length
+      ? h('ul', null, envois.slice(0, 5).map((e) => h('li', null, h('b', null, e.sujet), h('small', null, `${dateLisible(e.quand)} · ${e.a}${e.document_id ? (e.ouvert_le ? ' · ouvert' : ' · pas encore ouvert') : ''}`))))
+      : h('p', { class: 'muet' }, 'Aucun mail envoyé depuis l’admin à ce client.'));
+  }).catch(() => zone.remove());
+  return zone;
+}
 async function pageClients(ctx) {
   ctx.titre('Clients');
   let { clients } = await api('clients');
@@ -417,7 +427,13 @@ async function pageClients(ctx) {
     const f = { nom: saisie({ value: c.nom, required: true }), adresse: zoneTexte({ value: c.adresse, rows: 3 }), tel: saisie({ value: c.tel, type: 'tel' }), email: saisie({ value: c.email, type: 'email' }), notes: zoneTexte({ value: c.notes, rows: 3 }) };
     const choix = await modale({
       titre: c.id ? c.nom : 'Nouveau client',
-      contenu: h('div', { class: 'form-grille' }, champ('Nom ou société', f.nom), champ('Adresse', f.adresse), champ('Téléphone', f.tel), champ('Email', f.email), champ('Notes (privées)', f.notes)),
+      contenu: h('div', { class: 'form-grille' },
+        // Contacter le client depuis l'admin : appel (Lien avec Windows sur PC), mail depuis contact@, derniers échanges
+        c.id ? h('div', { class: 'cl-contact' },
+          c.tel ? h('a', { class: 'btn btn--ghost btn--petit', href: `tel:${c.tel.replace(/[^\d+]/g, '')}` }, icone('telephone'), 'Appeler') : null,
+          h('a', { class: 'btn btn--ghost btn--petit', href: `#/messagerie/nouveau/client/${c.id}`, onclick: () => document.querySelector('.modale-fond')?.remove() }, icone('mail'), 'Écrire un mail')) : null,
+        champ('Nom ou société', f.nom), champ('Adresse', f.adresse), champ('Téléphone', f.tel), champ('Email', f.email), champ('Notes (privées)', f.notes),
+        c.id ? echangesClient(c.id) : null),
       actions: [
         c.id ? { libelle: 'Supprimer', classe: 'btn--danger-ghost', valeur: 'supprimer' } : null,
         c.id ? { libelle: 'Espace client', classe: 'btn--ghost', valeur: 'acces' } : null,

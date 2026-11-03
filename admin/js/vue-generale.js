@@ -5,7 +5,30 @@
    action, et l'accès direct aux grands domaines. Données : accueil,
    centre de contrôle et pilotage (chiffre d'affaires, pour les administrateurs).
    ========================================================= */
-import { api, h, cap, icone, pad, ErreurApi } from './outils.js';
+import { api, h, cap, icone, pad, ErreurApi, modale, erreur, toast } from './outils.js';
+
+// Accueil à la carte : blocs affichés et ordre, par compte (module « accueil »)
+const BLOCS = { kpis: 'Chiffres du jour', priorites: 'Priorités du jour', terrain: 'Le terrain aujourd’hui', traiter: 'À traiter', domaines: 'Accès aux domaines' };
+const PREFS_DEFAUT = { ordre: ['kpis', 'priorites', 'terrain', 'traiter', 'domaines'], masques: [] };
+async function personnaliser(prefs, recharger) {
+  const ordre = [...prefs.ordre];
+  const visibles = new Set(ordre.filter((b) => !prefs.masques.includes(b)));
+  const liste = h('ul', { class: 'vg-perso' });
+  const dessiner = () => liste.replaceChildren(...ordre.map((b, i) => h('li', null,
+    h('label', { class: 'case' }, h('input', { type: 'checkbox', checked: visibles.has(b), onchange: (e) => { if (e.target.checked) visibles.add(b); else visibles.delete(b); } }), h('span', null, BLOCS[b])),
+    h('span', { class: 'vg-perso__ordre' },
+      h('button', { class: 'icon-btn', type: 'button', disabled: i === 0, 'aria-label': 'Monter', onclick: () => { [ordre[i - 1], ordre[i]] = [ordre[i], ordre[i - 1]]; dessiner(); } }, icone('chevronBas', 'vg-perso__haut')),
+      h('button', { class: 'icon-btn', type: 'button', disabled: i === ordre.length - 1, 'aria-label': 'Descendre', onclick: () => { [ordre[i + 1], ordre[i]] = [ordre[i], ordre[i + 1]]; dessiner(); } }, icone('chevronBas'))))));
+  dessiner();
+  const ok = await modale({ titre: 'Personnaliser l’accueil', contenu: h('div', null, h('p', { class: 'modale__texte' }, 'Cochez les blocs à afficher et rangez-les dans l’ordre qui vous convient. Le même accueil vous suit sur l’ordinateur et le téléphone.'), liste),
+    actions: [
+      { libelle: 'Par défaut', classe: 'btn--ghost', action: async () => { try { await api('mod.accueil.prefs.enregistrer', PREFS_DEFAUT); return true; } catch (e) { erreur(e); return false; } } },
+      { libelle: 'Annuler', classe: 'btn--ghost', valeur: false },
+      { libelle: 'Enregistrer', classe: 'btn--gold', submit: true, action: async () => {
+        try { await api('mod.accueil.prefs.enregistrer', { ordre, masques: ordre.filter((b) => !visibles.has(b)) }); return true; } catch (e) { erreur(e); return false; }
+      } }] });
+  if (ok) { toast('Accueil enregistré.'); recharger(); }
+}
 
 async function tableauAppli() {
   const res = await fetch('appli-api.php?a=tableau', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
@@ -27,8 +50,10 @@ const compte = (v) => (Array.isArray(v) ? v.length : Number(v) || 0);
 
 export async function pageVueGenerale(ctx) {
   ctx.titre('Vue générale');
-  const [accueil, session, appli, controle] = await Promise.all([
-    api('accueil'), api('session'), tableauAppli().catch(() => null), api('controle').catch(() => null)]);
+  const [accueil, session, appli, controle, perso, prio] = await Promise.all([
+    api('accueil'), api('session'), tableauAppli().catch(() => null), api('controle').catch(() => null),
+    api('mod.accueil.prefs').catch(() => null), api('mod.cerveau.cartes').catch(() => null)]);
+  const prefs = perso?.prefs || PREFS_DEFAUT;
   const admin = session.role === 'admin';
   const pilotage = admin ? await api('pilotage').catch(() => null) : null;
   if (!ctx.actuel()) return;
@@ -72,6 +97,7 @@ export async function pageVueGenerale(ctx) {
       h('h1', { class: 'vg-titre' }, `${auj.getHours() >= 5 && auj.getHours() < 18 ? 'Bonjour' : 'Bonsoir'}${session.utilisateur ? `, ${cap(session.utilisateur)}` : ''}`),
       h('p', { class: 'vg-resume' }, points ? h('span', null, h('b', null, pluriel(points, 'point demande', 'points demandent')), ' votre attention aujourd’hui.') : 'Tout est en ordre : rien n’attend d’action.')),
     h('div', { class: 'vg-tete__actions' },
+      perso ? h('button', { class: 'btn btn--ghost', type: 'button', title: 'Choisir et ranger les blocs de l’accueil', onclick: () => personnaliser(prefs, () => pageVueGenerale(ctx)) }, icone('curseurs'), 'Personnaliser') : null,
       h('a', { class: 'btn btn--ghost', href: '#/controle' }, icone('direct'), 'Centre de contrôle'),
       h('a', { class: 'btn btn--gold', href: '#/factures/nouvelle' }, icone('plus'), 'Nouvelle facture')));
 
@@ -139,7 +165,25 @@ export async function pageVueGenerale(ctx) {
   const acces = h('nav', { class: 'vg-domaines', 'aria-label': 'Domaines' },
     domaines.map(([titre, href, info], i) => h('a', { href }, h('kbd', null, String(i + 1)), h('span', null, h('b', null, titre), h('small', null, info)), icone('fleche', 'vg-domaines__fleche'))));
 
-  ctx.afficher(h('div', { class: 'vg' }, tete, kpis, h('div', { class: 'vg-grille' }, terrain, traiter), acces));
+  /* ----- Priorités du jour (directeur des opérations) : les plus importantes ----- */
+  const urgentes = prio ? prio.cartes.filter((x) => x.niveau !== 'conseil') : [];
+  const priorites = prio ? h('section', { class: 'vg-bloc vg-prio' },
+    h('header', { class: 'vg-bloc__tete' }, h('h2', null, 'Priorités du jour'), h('a', { class: 'vg-lien', href: '#/cerveau' }, prio.cartes.length ? `Tout voir (${prio.cartes.length})` : 'Ouvrir')),
+    urgentes.length
+      ? h('ul', { class: 'vg-liste vg-liste--prio' }, urgentes.slice(0, 5).map((x) => h('li', null,
+        h('a', { href: x.lien, class: x.niveau === 'urgent' ? 'is-alerte' : '' }, h('span', { class: `pj-point-niveau is-${x.niveau}` }), h('span', null, h('b', null, x.titre), h('small', null, x.detail)), icone('fleche', 'vg-liste__fleche')))))
+      : h('p', { class: 'vg-calme' }, prio.cartes.length ? 'Rien d’urgent : seulement des conseils pour aujourd’hui.' : 'Rien ne vous attend. Profitez-en pour démarcher.')) : null;
+
+  // Blocs dans l'ordre choisi ; « terrain » et « à traiter » côte à côte quand ils se suivent
+  const blocs = { kpis, priorites, terrain, traiter, domaines: acces };
+  const montres = prefs.ordre.filter((b) => !prefs.masques.includes(b) && blocs[b]);
+  const corps = [];
+  for (let i = 0; i < montres.length; i++) {
+    const b = montres[i], suivant = montres[i + 1];
+    if ((b === 'terrain' && suivant === 'traiter') || (b === 'traiter' && suivant === 'terrain')) { corps.push(h('div', { class: 'vg-grille' }, blocs[b], blocs[suivant])); i++; }
+    else corps.push(blocs[b]);
+  }
+  ctx.afficher(h('div', { class: 'vg' }, tete, ...corps));
 
   // Raccourcis clavier : 1 à 9 ouvrent les domaines
   const touches = (e) => {

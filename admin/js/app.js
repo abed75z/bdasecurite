@@ -595,15 +595,16 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '13';
+const VERSION = '14';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 13 : la messagerie, le planning nouvelle génération et le terrain.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 14 : priorités du jour, terrain, audits, cartes d’agent, formations… le tour de ce qui est nouveau.'),
       h('ul', null,
+        point('curseurs', 'equipe', 'Accueil à la carte', 'Bouton « Personnaliser » sur la Vue générale : choisissez les blocs et leur ordre, le même accueil vous suit sur le téléphone.'),
         point('cible', 'equipe', 'Priorités du jour', 'Ce qui demande votre attention, trié par urgence, avec le bouton pour agir. Tapez une question dans Ctrl K : Claude répond à partir de vos données.'),
         point('mail', 'clients', 'Messagerie', 'Factures et devis envoyés par mail depuis contact@, avec suivi d’ouverture et relances préparées. Écrire à un agent, un client ou à tous en un clic.'),
         point('planning', 'exploitation', 'Planning nouvelle génération', 'Bouton « Remplir » qui propose les agents en respectant les règles, bourse aux postes libres, échanges entre agents à valider, besoins récurrents par site.'),

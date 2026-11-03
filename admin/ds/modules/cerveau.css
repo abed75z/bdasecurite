@@ -73,3 +73,15 @@
   .pj-carte__action { justify-self: start; }
   .pj-form { flex-direction: column; }
 }
+
+/* Bloc « Priorités du jour » de la Vue générale, et fenêtre « Personnaliser l'accueil » */
+.vg-liste--prio a { grid-template-columns: 8px minmax(0, 1fr) 16px; gap: 12px; }
+.vg-liste--prio a > span:nth-child(2) { display: grid; gap: 1px; min-width: 0; }
+.vg-liste--prio b { font-weight: 600; color: var(--iv-encre); }
+.vg-liste--prio small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--iv-muet); font-size: 12px; }
+.vg-perso { margin: 12px 0 0; padding: 0; list-style: none; border: 1px solid var(--iv-trait); border-radius: 8px; }
+.vg-perso li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; border-top: 1px solid var(--iv-trait); }
+.vg-perso li:first-child { border-top: 0; }
+.vg-perso__ordre { display: inline-flex; gap: 2px; }
+.vg-perso__haut { transform: rotate(180deg); }
+.vg-perso .icon-btn:disabled { opacity: 0.3; }

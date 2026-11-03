@@ -1781,7 +1781,8 @@ try {
       $c = $st->fetch();
       if (!$c) echec('Ce client n’a pas d’espace client.', 404);
       db()->prepare("INSERT INTO messages_clients (client_id, auteur, texte, cree, lu) VALUES (?, 'admin', ?, ?, 0)")->execute([$id, $texte, maintenant()]);
-      if ((int)$c['actif'] === 1) envoyer_mail('Nouveau message de BDA Security Group', "Bonjour,\n\nBDA Security Group vous a répondu dans votre espace client :\n\n« $texte »\n\nRépondre : https://bdasecurite.com/espace-client#/messages\n\nBDA Security Group — 06 11 67 86 25", BDA_EMAIL, $c['email']);
+      // le mail prévient seulement : le message se lit dans l'espace client (rien de confidentiel ne passe par mail)
+      if ((int)$c['actif'] === 1) envoyer_mail('Nouveau message de BDA Security Group', "Bonjour,\n\nBDA Security Group vous a écrit dans votre espace client.\n\nLire le message : https://bdasecurite.com/espace-client#/messages\n\nBDA Security Group — 06 11 67 86 25", BDA_EMAIL, $c['email']);
       journal('site', "Réponse envoyée à {$c['nom']} (espace client)");
       repondre(['ok' => true]);
 

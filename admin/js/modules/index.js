@@ -58,6 +58,11 @@ export const MODULES = [
     menu: { apres: 'controle', libelle: 'Priorités du jour', ic: 'cible' },
     libre: { titre: 'Demander à l’assistant : « {q} »', ic: 'eclair', groupe: 'Assistant' },
     commandes: [{ ic: 'cible', titre: 'Priorités du jour', mots: 'priorites directeur operations urgent a faire aujourd hui resume', href: '#/cerveau' }] },
+  // Espace client haut de gamme : quels agents et documents chaque client voit, ce qu'il dépose, ses demandes
+  { route: 'portail', charger: () => import('./portail.js'), page: 'pagePortail',
+    menu: { groupe: 'Clients', apres: 'messages', libelle: 'Espace client', ic: 'clients', badge: 'portail' },
+    cloche: { cle: 'portail', libelle: 'Dépôts et demandes de clients', ic: 'clients' },
+    commandes: [{ ic: 'clients', titre: 'Espace client : dossiers d’agents partagés', mots: 'espace client portail partager dossier agent carte pro documents', href: '#/portail' }] },
   // Appli iPhone « BDA Équipe » : messages avec les agents, notifications, téléphones reliés
   { route: 'bda-equipe', charger: () => import('./bda-equipe.js'), page: 'pageBdaEquipe',
     menu: { groupe: 'Appli Équipe', libelle: 'Messages', ic: 'message', badge: 'messagesAgents' },

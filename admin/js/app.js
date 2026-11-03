@@ -596,15 +596,16 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '15';
+const VERSION = '16';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 15 : l’appli iPhone « BDA Équipe » de vos agents se pilote d’ici, dans la nouvelle rubrique Appli Équipe.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 16 : l’espace client devient un salon privé, et l’appli iPhone « BDA Équipe » de vos agents se pilote d’ici.'),
       h('ul', null,
+        point('clients', 'clients', 'Espace client', 'Clients › Espace client : pour chaque client, vous cochez les agents et les documents qu’il voit (carte pro, diplômes…). Il signe ses devis en ligne, vous dépose ses documents et suit ses demandes.'),
         point('message', 'equipe', 'Messages', 'Les agents vous écrivent depuis l’appli, avec une photo si besoin. Vous répondez ici : ils reçoivent une notification sur leur iPhone.'),
         point('cloche', 'equipe', 'Notifications', 'Une annonce à un agent ou à toute l’équipe en un clic. Nouveau poste au planning, postes à prendre et nouvelles consignes partent tout seuls (réglable).'),
         point('mobile', 'equipe', 'Téléphones', 'Qui a installé l’appli, et la clé Apple des notifications à coller une seule fois.'))),

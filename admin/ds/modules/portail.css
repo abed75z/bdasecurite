@@ -1,0 +1,44 @@
+/* =========================================================
+   ESPACE CLIENT (côté admin) — dossiers d'agents partagés, dépôts du client
+   (réutilise .tr, .tr-colonnes, .tr-col du module Terrain)
+   ========================================================= */
+.pt .carte { display: grid; gap: 12px; }
+.pt-intro { margin: 0; font-size: 13px; line-height: 1.55; }
+.pt-agent { padding: 14px 0; border-top: 1px solid var(--iv-trait); display: grid; gap: 10px; }
+.pt-agent__tete { display: flex; align-items: center; gap: 14px; }
+.pt-agent__nom { flex: 1; min-width: 0; display: grid; }
+.pt-agent__nom b { font-size: 14px; font-weight: 600; }
+.pt-agent__nom small { font-size: 12px; }
+.pt-agent:not(.is-visible) .pt-docs { opacity: .55; }
+.pt-bascule { position: relative; width: 40px; height: 24px; flex: none; cursor: pointer; }
+.pt-bascule input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.pt-bascule span { position: absolute; inset: 0; border-radius: 12px; background: var(--iv-surface-3); transition: background-color 160ms var(--iv-courbe); pointer-events: none; }
+.pt-bascule span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 2px rgba(0, 0, 0, .2); transition: transform 160ms var(--iv-courbe); }
+.pt-bascule input:checked + span { background: var(--iv-ok); }
+.pt-bascule input:checked + span::after { transform: translateX(16px); }
+.pt-bascule input:focus-visible + span { outline: 2px solid var(--iv-focus, var(--iv-encre)); outline-offset: 2px; }
+.pt-docs { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px 14px; padding-left: 54px; }
+.pt-doc { align-items: flex-start; gap: 8px; font-size: 13px; }
+.pt-doc span { display: grid; min-width: 0; }
+.pt-doc b { font-weight: 500; }
+.pt-doc small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.pt-aucun { margin: 0; padding-left: 54px; font-size: 12.5px; }
+.pt-autres { border-top: 1px solid var(--iv-trait); padding-top: 10px; }
+.pt-autres summary { cursor: pointer; font-size: 13px; color: var(--iv-muet); }
+.pt-depots { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.pt-depots a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--iv-trait); border-radius: 6px; color: inherit; text-decoration: none; }
+.pt-depots a:hover { background: var(--iv-surface-2); }
+.pt-depots .ic { width: 16px; height: 16px; flex: none; color: var(--iv-muet); }
+.pt-depots span { display: grid; min-width: 0; }
+.pt-depots b { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt-depots small { font-size: 12px; }
+.pt-regles p { margin: 0; font-size: 13px; line-height: 1.55; }
+@media (max-width: 700px) { .pt-docs, .pt-aucun { padding-left: 0; } }
+
+/* Messages clients : pièces jointes et demandes guidées */
+.bulle .pt-piece { display: flex; width: fit-content; align-items: center; gap: 6px; margin: 6px 0; font-size: 12.5px; }
+.bulle .pt-piece img { display: block; max-width: 220px; max-height: 160px; border-radius: 8px; }
+.pt-demande { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 11.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--iv-muet); }
+.pt-demande select { height: 28px; padding: 0 6px; font-size: 12px; text-transform: none; letter-spacing: 0; }
+.pt-joindre { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.pt-joint { font-size: 12px; color: var(--iv-muet); }

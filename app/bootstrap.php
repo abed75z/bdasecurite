@@ -580,11 +580,25 @@ function reglages_defaut(): array
 const BDA_EMETTEUR_EURL = "BDASECURITE\nEURL au capital de 2 000 €\n61 rue de la Croix Saint-Simon\n75020 PARIS\nSIRET : 109 076 463 00016\nRCS Paris 109 076 463\nAPE : 8010Z\nTVA : FR95 109 076 463\nTÉL : 07.84.73.90.70";
 const BDA_PIED_EURL = "BDASECURITE — EURL au capital de 2 000 € — SIRET 109 076 463 00016 — RCS Paris — APE 8010Z — Autorisation d'exercice CNAPS n° 2026-0141958-AUT-1102740\n« L'autorisation d'exercice ne confère aucune prérogative de puissance publique à l'entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du Code de la sécurité intérieure)";
 // Passage de la sécurité de l'EI à l'EURL (03/11/2026) : les réglages enregistrés qui désignent encore l'EI
-// sont basculés une seule fois. L'ancien IBAN (celui de l'EI) est mis de côté : l'IBAN de l'EURL est à saisir dans les Paramètres.
+// sont basculés une seule fois. Le compte bancaire reste le même (dit par Abed le 03/11) : IBAN et titulaire sont gardés.
 function bascule_eurl(): void
 {
   $db = db();
-  if ($db->query("SELECT 1 FROM reglages WHERE k = 'bascule_eurl'")->fetchColumn()) return;
+  if ($db->query("SELECT 1 FROM reglages WHERE k = 'bascule_eurl'")->fetchColumn()) {
+    // première version de la bascule : l'IBAN avait été mis de côté ; on le remet, avec son titulaire
+    if (!$db->query("SELECT 1 FROM reglages WHERE k = 'bascule_eurl_iban'")->fetchColumn()) {
+      $st = $db->prepare("SELECT v FROM reglages WHERE k = 'entreprise'");
+      $st->execute();
+      $e = json_decode((string)$st->fetchColumn(), true);
+      if (is_array($e) && ($e['iban'] ?? '') === '' && ($e['ibanEI'] ?? '') !== '') {
+        $e['iban'] = $e['ibanEI'];
+        if (($e['beneficiaireEI'] ?? '') !== '') $e['beneficiaire'] = $e['beneficiaireEI'];
+        $db->prepare("UPDATE reglages SET v = ? WHERE k = 'entreprise'")->execute([json_encode($e, JSON_UNESCAPED_UNICODE)]);
+      }
+      $db->prepare("INSERT INTO reglages (k, v) VALUES ('bascule_eurl_iban', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v")->execute([maintenant()]);
+    }
+    return;
+  }
   $st = $db->prepare('SELECT v FROM reglages WHERE k = ?');
   $ecrire = $db->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v');
   $ei = fn ($v) => is_string($v) && (str_contains($v, '977 933 316') || str_contains($v, '977933316'));
@@ -595,12 +609,6 @@ function bascule_eurl(): void
     if ($ei($e['emetteur'] ?? '')) $e['emetteur'] = BDA_EMETTEUR_EURL;
     if ($ei($e['pied'] ?? '') || str_contains((string)($e['pied'] ?? ''), '2026-0141958-AUT')) $e['pied'] = BDA_PIED_EURL;
     if (in_array($e['nom'] ?? '', ['', 'BDA SECURITE'], true)) $e['nom'] = 'BDASECURITE';
-    if (mb_strtoupper(trim((string)($e['beneficiaire'] ?? ''))) === 'ABDELOUAHAB BOUIDIA') {
-      $e['ibanEI'] = (string)($e['iban'] ?? '');
-      $e['beneficiaireEI'] = (string)$e['beneficiaire'];
-      $e['beneficiaire'] = 'BDASECURITE';
-      $e['iban'] = '';
-    }
     if (($e['prefixeFacture'] ?? 'FA-{AAAA}-') === 'FA-{AAAA}-') $e['prefixeFacture'] = 'F-{AAAA}-';
     if (($e['prefixeDevis'] ?? 'DV-{AAAA}-') === 'DV-{AAAA}-') $e['prefixeDevis'] = 'D-{AAAA}-';
     if (($e['numeroTva'] ?? '') === '') $e['numeroTva'] = 'FR95 109 076 463';

@@ -18,3 +18,34 @@
 .pl-auto tr.is-vide td { color: var(--iv-muet); }
 .pl-auto__aucun { color: var(--iv-alerte); font-size: 12.5px; }
 .modale--large:has(.pl-auto) { width: min(820px, 100%); }
+
+/* ---------- Page « Bourse & échanges » ---------- */
+.pf { display: grid; gap: 16px; }
+.pf-section { display: grid; gap: 16px; }
+.pf-aide { margin: 0; max-width: 760px; font-size: 13px; line-height: 1.55; color: var(--iv-muet); }
+.pf-tete { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.pf-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.pf-carte { display: grid; gap: 6px; padding: 14px 16px; border: 1px solid var(--iv-trait); border-radius: 8px; background: var(--iv-surface); font-size: 13px; }
+.pf-carte.is-a-faire { box-shadow: inset 2px 0 0 #c4312a; }
+.pf-carte p { margin: 0; color: var(--iv-encre-2); }
+.pf-carte__haut { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pf-carte__haut b { font-family: var(--iv-police-mono); font-size: 12.5px; color: var(--iv-encre); }
+.pf-carte__site { font-weight: 600; color: var(--iv-encre) !important; }
+.pf-carte__msg { font-style: italic; color: var(--iv-muet) !important; }
+.pf-carte__alerte { display: flex; gap: 6px; align-items: flex-start; color: var(--iv-attente) !important; font-size: 12.5px; }
+.pf-carte__alerte .ic { width: 14px; height: 14px; flex: none; margin-top: 2px; }
+.pf-carte__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
+.pf-vide { padding: 8px 0; }
+.pf-generer { display: flex; gap: 8px; align-items: center; }
+.pf-besoins-grille { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+.pf-pile { display: grid; gap: 12px; }
+.pf-besoins { display: grid; margin: 0; padding: 0; list-style: none; }
+.pf-besoins li { display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--iv-trait); font-size: 13px; color: var(--iv-encre-2); }
+.pf-besoins li:last-child { border-bottom: 0; }
+.pf-besoins__jours { display: inline-flex; gap: 3px; }
+.pf-besoins__jours i { display: grid; place-items: center; width: 20px; height: 20px; border-radius: 4px; background: var(--iv-surface-3); font-style: normal; font-size: 10.5px; font-weight: 600; color: var(--iv-pale); }
+.pf-besoins__jours i.is-on { background: var(--iv-encre); color: var(--iv-surface); }
+.pf-jours { display: flex; flex-wrap: wrap; gap: 6px; }
+.pf-form { position: sticky; top: calc(var(--iv-haut, 56px) + 16px); }
+@media (max-width: 1000px) { .pf-besoins-grille { grid-template-columns: minmax(0, 1fr); } .pf-form { position: static; } }
+@media (max-width: 600px) { .pf-besoins li { grid-template-columns: 1fr auto; } .pf-besoins__jours { grid-column: 1 / -1; } }

@@ -1,0 +1,29 @@
+/* Espace équipe — Postes à prendre (bourse aux postes, échanges) */
+.eqb { display: grid; gap: 1rem; }
+.eqb-liste { display: grid; gap: .75rem; }
+.eqb-poste { display: grid; gap: .55rem; padding: .9rem 1rem; border: 1px solid var(--ligne); border-radius: var(--rayon-s); background: rgba(255, 255, 255, .02); }
+.eqb-poste__quand b { display: block; font-family: var(--titre); font-size: 1.02rem; color: var(--texte); }
+.eqb-poste__quand small { color: var(--doux); font-size: .82rem; }
+.eqb-poste__ou { display: flex; gap: .5rem; align-items: flex-start; color: var(--doux); font-size: .86rem; }
+.eqb-poste__ou .eq-ic { width: 1rem; height: 1rem; flex: none; margin-top: .15rem; color: var(--or); }
+.eqb-poste__ou b { display: block; color: var(--texte); font-weight: 600; }
+.eqb-poste__ou a { color: var(--doux); text-decoration: underline; text-underline-offset: 3px; }
+.eqb-poste__de { margin: 0; color: var(--doux); font-size: .86rem; font-style: italic; }
+.eqb-poste__raison { display: flex; gap: .4rem; align-items: center; margin: 0; color: var(--orange); font-size: .84rem; }
+.eqb-poste__raison .eq-ic { width: .95rem; height: .95rem; }
+.eqb-poste .eq-btn { justify-self: start; }
+.eqb-aide { margin: 0 0 .75rem; color: var(--doux); font-size: .88rem; line-height: 1.5; }
+.eqb-ceder { display: grid; gap: .7rem; }
+.eqb-ceder .eq-btn { justify-self: start; }
+.eqb-props { display: grid; gap: .6rem; margin: 0; padding: 0; list-style: none; }
+.eqb-props li { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; padding-bottom: .6rem; border-bottom: 1px solid var(--ligne); }
+.eqb-props li:last-child { border-bottom: 0; padding-bottom: 0; }
+.eqb-props li > div { flex: 1; min-width: 160px; }
+.eqb-props b { display: block; color: var(--texte); font-size: .92rem; }
+.eqb-props small { display: block; color: var(--doux); font-size: .8rem; }
+.eqb-alerte { display: flex; align-items: center; gap: .85rem; text-decoration: none; color: var(--texte); border-color: var(--ligne-forte); }
+.eqb-alerte > .eq-ic:last-child { margin-left: auto; width: 1.1rem; height: 1.1rem; color: var(--or); }
+.eqb-alerte__ic { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; flex: none; border-radius: 50%; background: rgba(201, 166, 107, .14); color: var(--or-clair); }
+.eqb-alerte__ic .eq-ic { width: 1.2rem; height: 1.2rem; }
+.eqb-alerte b { display: block; font-family: var(--titre); }
+.eqb-alerte small { color: var(--doux); font-size: .84rem; }

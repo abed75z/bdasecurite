@@ -22,6 +22,12 @@ export const MODULES = [
     commandes: [{ ic: 'mail', titre: 'Écrire un mail (agent, client, groupe)', mots: 'mail email ecrire envoyer message contacter', href: '#/messagerie/nouveau' },
       { ic: 'agents', titre: 'Écrire à tous les agents', mots: 'mail agents equipe groupe tous', href: '#/messagerie/nouveau/groupe/agents' },
       { ic: 'facture', titre: 'Relances de factures', mots: 'relance impaye retard paiement', href: '#/messagerie/relances' }] },
+  // Version 13 — le planning nouvelle génération : bourse aux postes, échanges entre agents, besoins récurrents
+  { route: 'planif', charger: () => import('./planif.js'), page: 'pagePlanif',
+    menu: { groupe: 'Exploitation', apres: 'exploitation', libelle: 'Bourse & échanges', ic: 'agents', badge: 'bourse' },
+    cloche: { cle: 'bourse', libelle: 'Échanges de postes à valider', ic: 'agents', alerte: true },
+    commandes: [{ ic: 'planning', titre: 'Besoins récurrents des sites', mots: 'besoins recurrents generer postes mois', href: '#/planif/besoins' },
+      { ic: 'agents', titre: 'Bourse aux postes', mots: 'bourse postes libres proposer agents', href: '#/planif/bourse' }] },
 ];
 
 // Pages des modules, au format de PAGES (pages.js)

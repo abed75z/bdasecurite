@@ -42,7 +42,9 @@ async function tableauDeBord(ctx, mois) {
   const lignesPlanning = planning?.agents || [];
   const auPlanning = (a) => lignesPlanning.some((l) => normNom(l.nom) === normNom(a.nom));
   const bulletinDe = (a) => bulletins.find((x) => +x.agent_id === +a.id);
-  const salaries = agents.filter((a) => auPlanning(a) || bulletinDe(a));
+  // le gérant (entreprise individuelle) travaille sur le planning mais n'est pas salarié : jamais de fiche de paie
+  const gerant = (a) => a.poste === 'Gérant';
+  const salaries = agents.filter((a) => !gerant(a) && (auPlanning(a) || bulletinDe(a)));
   const orphelins = bulletins.filter((x) => !agents.some((a) => +a.id === +x.agent_id));
   const inconnus = lignesPlanning.map((l) => l.nom).filter((nom) => nom && !agents.some((a) => normNom(a.nom) === normNom(nom)));
   const aDeclarer = salaries.filter((a) => !bulletinDe(a));
@@ -97,7 +99,7 @@ async function tableauDeBord(ctx, mois) {
       h('td', { class: 'num' }, bul ? h('b', null, fmtE(bul.net)) : h('span', { class: 'muet' }, '—')),
       h('td', { class: 'paie-action' }, action));
   };
-  const autres = agents.filter((a) => +a.actif && !salaries.includes(a));
+  const autres = agents.filter((a) => +a.actif && !gerant(a) && !salaries.includes(a));
   const choix = h('select', { class: 'input input--auto', onchange: () => { const a = agents.find((x) => String(x.id) === choix.value); choix.value = ''; if (a) declarer(a); } },
     h('option', { value: '' }, '+ Déclarer un autre agent…'), autres.map((a) => h('option', { value: a.id }, `${a.nom} (${a.poste})`)));
 

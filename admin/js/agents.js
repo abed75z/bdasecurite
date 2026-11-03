@@ -26,7 +26,7 @@ export const DOCS = [
 ];
 const OBLIGATOIRES = DOCS.filter((d) => d.obligatoire);
 const CATEGORIES = { primaire: 'Équipe principale', secondaire: 'Renfort', secours: 'Agent de secours' };
-const POSTES = ['ADS', 'Agent de protection rapprochée', 'Agent événementiel', 'Chef d\'équipe', 'Chauffeur VTC', 'SSIAP'];
+const POSTES = ['ADS', 'Agent de protection rapprochée', 'Agent événementiel', 'Chef d\'équipe', 'Chauffeur VTC', 'SSIAP', 'Gérant'];
 const EXTENSIONS = /\.(pdf|png|jpe?g|webp)$/i;
 
 const sansAccents = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();

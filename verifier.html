@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Vérification d’un agent — BDA Security Group</title>
+  <meta name="description" content="Vérifiez en direct qu’un agent de sécurité travaille bien pour BDA Security Group.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#0f0e0c">
+  <link rel="icon" href="/favicon.ico?v=5" sizes="48x48">
+  <link rel="icon" href="assets/img/favicon.svg?v=5" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png?v=5">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --fond: #0f0e0c; --carte: #171513; --trait: rgba(234, 224, 205, .1); --texte: #f3ede2; --doux: #a59d90; --or: #c9a66b; --vert: #3fb37a; --rouge: #e5534b; --orange: #e0a03a; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--fond); color: var(--texte); font: 15px/1.5 Inter, system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+    main { width: min(440px, 100%); margin: 0 auto; padding: max(24px, env(safe-area-inset-top)) 16px 32px; display: grid; gap: 16px; }
+    .marque { display: grid; justify-items: center; gap: 8px; padding: 8px 0 4px; }
+    .marque img { height: 34px; width: auto; }
+    .marque .marque__sg { height: 9px; }
+    .carte { border: 1px solid var(--trait); border-radius: 14px; background: var(--carte); overflow: hidden; }
+    .etat { display: grid; justify-items: center; gap: 10px; padding: 28px 20px 22px; text-align: center; border-bottom: 1px solid var(--trait); }
+    .etat__ic { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: rgba(63, 179, 122, .12); color: var(--vert); }
+    .etat__ic svg { width: 32px; height: 32px; }
+    .etat h1 { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -.01em; }
+    .etat p { margin: 0; color: var(--doux); font-size: 14px; }
+    .is-non .etat__ic { background: rgba(229, 83, 75, .12); color: var(--rouge); }
+    .is-attention .etat__ic { background: rgba(224, 160, 58, .12); color: var(--orange); }
+    .agent { display: grid; gap: 0; padding: 6px 20px 8px; }
+    .ligne { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--trait); font-size: 14px; }
+    .ligne:last-child { border-bottom: 0; }
+    .ligne span { color: var(--doux); }
+    .ligne b { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+    .nom { font-size: 26px; font-weight: 700; letter-spacing: -.02em; text-align: center; padding: 18px 0 2px; }
+    .quali { text-align: center; color: var(--or); font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding-bottom: 12px; border-bottom: 1px solid var(--trait); }
+    .direct { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; font-size: 12.5px; color: var(--doux); background: rgba(255, 255, 255, .02); font-variant-numeric: tabular-nums; }
+    .direct i { width: 8px; height: 8px; border-radius: 50%; background: var(--vert); box-shadow: 0 0 0 0 rgba(63, 179, 122, .6); animation: pouls 1.6s ease-out infinite; }
+    @keyframes pouls { to { box-shadow: 0 0 0 10px rgba(63, 179, 122, 0); } }
+    @media (prefers-reduced-motion: reduce) { .direct i { animation: none; } }
+    .aide { padding: 16px 20px; border: 1px solid var(--trait); border-radius: 14px; font-size: 14px; color: var(--doux); text-align: center; }
+    .aide a { display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; width: 100%; padding: 13px 16px; border-radius: 10px; background: var(--or); color: #17130d; font-weight: 700; text-decoration: none; }
+    .legal { margin: 0; color: #6f685e; font-size: 11px; line-height: 1.5; text-align: center; }
+    .chargement { padding: 48px 20px; text-align: center; color: var(--doux); }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="marque"><img src="assets/img/marque-bda-blanc.png" alt="BDA Security Group"><img class="marque__sg" src="assets/img/marque-sg-or-clair.png" alt=""></div>
+    <section class="carte" id="resultat" aria-live="polite"><p class="chargement">Vérification en cours…</p></section>
+    <section class="aide">Un doute sur une personne qui se présente de notre part ?<a href="tel:+33611678625">Appeler BDA Security Group · 06 11 67 86 25</a></section>
+    <p class="legal">BDA Security Group — BDA SECURITE (EI). Autorisation d’exercice CNAPS n° AUT-075-2124-07-01-20250906336. « L’autorisation d’exercice ne confère aucune prérogative de puissance publique à l’entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du Code de la sécurité intérieure)</p>
+  </main>
+  <script>
+    (function () {
+      var zone = document.getElementById('resultat');
+      var ICONES = {
+        ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+        non: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+        attention: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg>'
+      };
+      var ETATS = {
+        valide: ['ok', 'Agent vérifié', 'Cette personne est un agent de BDA Security Group, avec une carte professionnelle valide.'],
+        expiree: ['non', 'Carte professionnelle expirée', 'Cet agent ne doit pas travailler tant que sa carte n’est pas renouvelée. Appelez-nous.'],
+        a_verifier: ['attention', 'Carte professionnelle à confirmer', 'Agent de BDA Security Group : appelez-nous pour confirmer sa carte professionnelle.'],
+        inactif: ['non', 'Carte désactivée', 'Cette personne n’est plus en mission pour BDA Security Group.']
+      };
+      function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+      function ligne(lib, val) { var l = el('div', 'ligne'); l.append(el('span', null, lib), el('b', null, val)); return l; }
+      function erreur(msg) {
+        zone.className = 'carte is-non';
+        var t = el('div', 'etat'); var ic = el('div', 'etat__ic'); ic.innerHTML = ICONES.non;
+        t.append(ic, el('h1', null, 'Vérification impossible'), el('p', null, msg));
+        zone.replaceChildren(t);
+      }
+      var jeton = (location.hash || '').replace(/^#/, '').trim();
+      if (!/^[a-f0-9]{32}$/.test(jeton)) return erreur('Scannez le QR code affiché sur le téléphone de l’agent.');
+      fetch('/api/module.php?m=badge&a=verifier', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ jeton: jeton }) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (x) {
+          if (!x.ok || !x.j.ok) return erreur(x.j.erreur || 'QR code non reconnu.');
+          var a = x.j.agent, e = ETATS[a.etat] || ETATS.a_verifier;
+          zone.className = 'carte is-' + e[0];
+          var t = el('div', 'etat'); var ic = el('div', 'etat__ic'); ic.innerHTML = ICONES[e[0]];
+          t.append(ic, el('h1', null, e[1]), el('p', null, e[2]));
+          var ag = el('div', 'agent');
+          ag.append(el('div', 'nom', (a.prenom + ' ' + a.initiale).trim()), el('div', 'quali', a.qualification));
+          if (a.carte) ag.append(ligne('Carte professionnelle', a.carte));
+          if (a.validite) ag.append(ligne('Valable jusqu’au', a.validite));
+          ag.append(ligne('Employeur', 'BDA Security Group'));
+          var direct = el('div', 'direct'); var point = el('i'); var heure = el('span');
+          direct.append(point, heure);
+          var tic = function () { heure.textContent = 'Vérifié le ' + x.j.verifie + ' · il est ' + new Date().toLocaleTimeString('fr-FR'); };
+          tic(); setInterval(tic, 1000);
+          zone.replaceChildren(t, ag, direct);
+        })
+        .catch(function () { erreur('Pas de connexion internet. Réessayez.'); });
+    })();
+  </script>
+</body>
+</html>

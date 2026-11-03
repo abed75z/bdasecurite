@@ -1,0 +1,16 @@
+/* =========================================================
+   CARTES D'AGENT — aperçu de la carte numérique avec QR code
+   ========================================================= */
+.bg-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.bg-apercu { display: grid; gap: 12px; justify-items: center; text-align: center; }
+.bg-apercu p { margin: 0; font-size: 12.5px; max-width: 360px; }
+.bg-carte { display: grid; gap: 8px; justify-items: center; width: min(320px, 100%); padding: 18px 18px 20px; border-radius: 14px; background: #12110f; color: #f3ede2; }
+.bg-carte__haut { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 6px; }
+.bg-carte__haut img { height: 22px; width: auto; }
+.bg-carte__nom { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+.bg-carte__quali { color: #c9a66b; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.bg-carte__qr { width: 180px; margin: 8px 0; padding: 8px; border-radius: 8px; background: #fff; }
+.bg-carte__qr svg { display: block; width: 100%; height: auto; }
+.bg-carte__infos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; padding-top: 10px; border-top: 1px solid rgba(243, 237, 226, 0.12); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: #a59d90; }
+.bg-carte__infos b { display: block; margin-top: 2px; color: #f3ede2; font-size: 12.5px; letter-spacing: 0; text-transform: none; font-variant-numeric: tabular-nums; word-break: break-all; }
+@media (max-width: 900px) { .bg-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

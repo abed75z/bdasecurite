@@ -41,7 +41,7 @@ RewriteRule ^transfert-aeroport-paris(\.html)?/?$ https://bdasecurite.com/chauff
 # (l'espace admin, les services et les images restent accessibles)
 RewriteCond %{DOCUMENT_ROOT}/.site-hors-ligne -f
 RewriteCond %{REQUEST_URI} !^/(admin|api|assets|app|appli)/
-RewriteCond %{REQUEST_URI} !^/(maintenance\.php|robots\.txt|pointage|pointage\.html|espace-equipe|espace-equipe\.html|manifest-equipe-bda\.webmanifest)$
+RewriteCond %{REQUEST_URI} !^/(maintenance\.php|robots\.txt|pointage|pointage\.html|espace-equipe|espace-equipe\.html|manifest-equipe-bda\.webmanifest|sw-equipe\.js|verifier|verifier\.html)$
 RewriteRule ^ maintenance.php [END]
 # Mon accès (page personnelle du gérant, protégée par la connexion admin)
 RewriteRule ^admin/moi/?$ admin/chef.php [END]

@@ -39,6 +39,10 @@ export const MODULES = [
     menu: { groupe: 'Exploitation', apres: 'terrain', libelle: 'Tout va bien ?', ic: 'lune', badge: 'presence' },
     cloche: { cle: 'presence', libelle: 'Agent de nuit sans réponse', ic: 'alerte', alerte: true, href: '#/controle' },
     commandes: [{ ic: 'lune', titre: 'Contrôle de présence « Tout va bien ? »', mots: 'presence nuit tout va bien travailleur isole pti dati alerte', href: '#/presence' }] },
+  // Carte d'agent numérique avec QR code, vérifiable par le client sur bdasecurite.com/verifier
+  { route: 'badges', charger: () => import('./badge.js'), page: 'pageBadges',
+    menu: { groupe: 'Exploitation', apres: 'agents', libelle: 'Cartes d’agent', ic: 'badge' },
+    commandes: [{ ic: 'badge', titre: 'Cartes d’agent (QR code de vérification)', mots: 'carte agent badge qr verification client identite', href: '#/badges' }] },
   // Version 16 — le directeur des opérations : priorités du jour, point du jour et questions libres à Claude
   { route: 'cerveau', charger: () => import('./cerveau.js'), page: 'pageCerveau',
     menu: { apres: 'controle', libelle: 'Priorités du jour', ic: 'cible' },

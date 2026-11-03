@@ -5,7 +5,7 @@
    (Capacitor, identifiant com.bdasecurite.equipe), avec en plus :
    - les notifications natives d'Apple (APNs) : chaque iPhone enregistre son jeton ici ;
      l'envoi utilise la clé .p8 « Apple Push Notifications » créée par le gérant et collée
-     dans l'admin (APNS_KEY_ID, APNS_KEY_P8 dans le .env privé, équipe 9U2RH4B64B) ;
+     dans l'admin (APNS_KEY_ID, APNS_KEY_P8 dans le .env privé, équipe 9U2RH4864B) ;
    - le mode hors ligne (géré dans l'appli : planning, consignes et carte gardés sur le téléphone).
    Notifications envoyées : « Tout va bien ? » (module presence), nouveau poste au planning,
    postes à prendre (bourse), nouvelles consignes, et les messages écrits par la direction.
@@ -16,7 +16,7 @@
 declare(strict_types=1);
 
 const MOD_MOBILE_APPLI = 'com.bdasecurite.equipe';
-const MOD_MOBILE_EQUIPE_APPLE = '9U2RH4B64B';
+const MOD_MOBILE_EQUIPE_APPLE = '9U2RH4864B';
 const MOD_MOBILE_AUTO = ['planning' => true, 'bourse' => true, 'consignes' => true];
 
 function module_mobile(): array

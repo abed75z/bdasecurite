@@ -37,9 +37,9 @@ function vueEchanges(d, recharger) {
       if (err.statut !== 409) erreur(err);
     }
   };
-  const STATUTS = { proposee: ['En attente d’un collègue', 'attente'], acceptee: ['À valider', 'retard'], validee: ['Validé', 'payee'], refusee: ['Refusé', 'annulee'], annulee: ['Retiré par l’agent', 'brouillon'] };
+  const STATUTS = { proposee: ['En attente d’un collègue', 'attente'], acceptee: ['À valider', 'retard'], validee: ['Validé', 'payee'], refusee: ['Refusé', 'annulee'], annulee: ['Retiré par l’agent', 'archivee'] };
   const ligne = (e) => {
-    const [lib, ton] = STATUTS[e.statut] || [e.statut, 'brouillon'];
+    const [lib, ton] = STATUTS[e.statut] || [e.statut, 'archivee'];
     return h('article', { class: `pf-carte ${e.statut === 'acceptee' ? 'is-a-faire' : ''}` },
       h('div', { class: 'pf-carte__haut' }, h('b', null, `${fmtJour(e.jour)} · ${e.debut}-${e.fin}`), h('span', { class: `pastille pastille--${ton}` }, lib)),
       h('p', { class: 'pf-carte__site' }, e.site_nom || 'Site'),

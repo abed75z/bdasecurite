@@ -28,6 +28,12 @@ export const MODULES = [
     cloche: { cle: 'bourse', libelle: 'Échanges de postes à valider', ic: 'agents', alerte: true },
     commandes: [{ ic: 'planning', titre: 'Besoins récurrents des sites', mots: 'besoins recurrents generer postes mois', href: '#/planif/besoins' },
       { ic: 'agents', titre: 'Bourse aux postes', mots: 'bourse postes libres proposer agents', href: '#/planif/bourse' }] },
+  // Version 13 — le terrain : classeur de chaque site (consignes lues et signées, documents, urgences, clés), matériel et tenues, contrôles qualité
+  { route: 'terrain', charger: () => import('./terrain.js'), page: 'pageTerrain',
+    menu: { groupe: 'Exploitation', apres: 'planif', libelle: 'Terrain & qualité', ic: 'bouclier', badge: 'materiel' },
+    cloche: { cle: 'materiel', libelle: 'Matériel à récupérer', ic: 'cle', href: '#/terrain/materiel' },
+    commandes: [{ ic: 'bouclier', titre: 'Nouveau contrôle qualité sur site', mots: 'controle qualite inspection noter agent visite', href: '#/terrain/controle/nouveau' },
+      { ic: 'cle', titre: 'Matériel & tenues', mots: 'materiel tenue talkie badge remettre retour', href: '#/terrain/materiel' }] },
 ];
 
 // Pages des modules, au format de PAGES (pages.js)

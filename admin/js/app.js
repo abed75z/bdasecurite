@@ -595,20 +595,19 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '12';
+const VERSION = '13';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 12 : un nouveau design pour tout l’admin.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 13 : la messagerie, le planning nouvelle génération et le terrain.'),
       h('ul', null,
-        point('etoile', 'equipe', 'Design « Ivoire signature »', 'Polices Geist et Inter, palette ivoire et encre, une touche d’or, la couleur réservée aux états (payé, en attente, en retard).'),
-        point('grille', 'equipe', 'Plus net, plus calme', 'Menu, en-têtes, tableaux, cartes et boutons redessinés : coins discrets, filets fins, plus de dégradés.'),
-        point('lune', 'equipe', 'Clair et sombre', 'Les deux thèmes ont été refaits (menu du compte › Apparence).'),
-        point('mail', 'clients', 'Messagerie Google', 'Paramètres › Messagerie Google : l’admin est relié à contact@bdasecurite.com pour les prochains envois de factures et de devis.'),
-        point('coche', 'facturation', 'Correctif', 'Le Contrôle du site et Contenu & tarifs enregistrent de nouveau vos réglages.'))),
+        point('mail', 'clients', 'Messagerie', 'Factures et devis envoyés par mail depuis contact@, avec suivi d’ouverture et relances préparées. Écrire à un agent, un client ou à tous en un clic.'),
+        point('planning', 'exploitation', 'Planning nouvelle génération', 'Bouton « Remplir » qui propose les agents en respectant les règles, bourse aux postes libres, échanges entre agents à valider, besoins récurrents par site.'),
+        point('bouclier', 'exploitation', 'Terrain & qualité', 'Classeur de chaque site : consignes que les agents signent « lu et compris », plans, numéros d’urgence, clés. Plus le matériel confié et les contrôles qualité notés sur place.'),
+        point('etoile', 'equipe', 'Design « Ivoire signature »', 'Menu sombre et or, tableaux et cartes redessinés, accueil en tableau de bord.'))),
     actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
   }), 900);
 }

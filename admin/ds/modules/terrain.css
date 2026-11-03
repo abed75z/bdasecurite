@@ -1,0 +1,120 @@
+/* =========================================================
+   TERRAIN & QUALITÉ (v13) — classeur des sites, matériel, contrôles qualité
+   Mêmes règles que le design Signature : filets fins, coins de 6 à 8 px,
+   couleur réservée aux états.
+   ========================================================= */
+.tr { display: grid; gap: 16px; }
+.tr-zone { display: grid; gap: 16px; }
+.tr-kpis { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.tr-colonnes { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); gap: 16px; align-items: start; }
+.tr-col { display: grid; gap: 16px; min-width: 0; }
+.tr .carte { min-width: 0; }
+.tr .tableau table { width: 100%; }
+
+/* Bandeaux */
+.tr-alerte, .tr-info { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border: 1px solid var(--iv-attente-trait); border-radius: 8px; background: var(--iv-attente-fond); color: var(--iv-encre-2); font-size: 13px; }
+.tr-alerte > .ic, .tr-info > .ic { width: 16px; height: 16px; flex: none; margin-top: 2px; color: var(--iv-attente); }
+.tr-alerte > div { flex: 1; min-width: 0; }
+.tr-alerte b { color: var(--iv-encre); font-weight: 600; }
+.tr-alerte ul { margin: 6px 0 0; padding-left: 16px; color: var(--iv-encre-2); line-height: 1.6; }
+.tr-info { align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.tr-info span { flex: 1; min-width: 220px; }
+
+/* Notes */
+.tr-note { font-family: var(--iv-police-mono); font-size: 12.5px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--iv-encre); }
+.tr-note.is-ok { color: var(--iv-ok); }
+.tr-note.is-attente { color: var(--iv-attente); }
+.tr-note.is-alerte { color: var(--iv-alerte); }
+.tr-note--grand { font-size: 22px; letter-spacing: -0.02em; }
+
+/* Classeur */
+
+.tr-site { margin: -6px 0 0; font-size: 13px; }
+.tr-courante { display: grid; gap: 10px; }
+.tr-courante__meta { margin: 0; font-size: 12px; }
+.tr-courante > .btn { justify-self: start; }
+.tr-consignes { padding: 14px 16px; border: 1px solid var(--iv-trait); border-radius: 8px; background: var(--iv-surface-2); font-size: 13.5px; line-height: 1.6; color: var(--iv-encre-2); }
+.tr-consignes h4 { margin: 14px 0 4px; font-size: 11px; font-family: var(--iv-police-mono); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--iv-encre); }
+.tr-consignes h4:first-child { margin-top: 0; }
+.tr-consignes p { margin: 0 0 6px; }
+.tr-consignes ul, .tr-consignes ol { margin: 0 0 6px; padding-left: 20px; }
+.tr-consignes b { color: var(--iv-encre); font-weight: 600; }
+.tr-edition { display: grid; gap: 10px; margin-top: 12px; }
+.tr-edition[hidden] { display: none; }
+.tr-edition textarea { font-family: var(--iv-police-mono); font-size: 12.5px; line-height: 1.6; resize: vertical; }
+.tr-edition__pied { display: flex; flex-wrap: wrap; gap: 8px; }
+.tr-edition__pied .input { flex: 1; min-width: 220px; }
+.tr-versions { margin-top: 12px; font-size: 13px; }
+.tr-versions summary { cursor: pointer; color: var(--iv-muet); }
+.tr-versions ul { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+
+.tr-lecteurs { margin: 0; padding: 0; list-style: none; }
+.tr-lecteurs li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 0; border-top: 1px solid var(--iv-trait); font-size: 13px; }
+.tr-lecteurs li:first-child { border-top: 0; padding-top: 0; }
+.tr-lecteurs small { grid-column: 1; font-size: 12px; }
+.tr-lecteurs .mx-ouvert { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-size: 12px; white-space: nowrap; }
+.tr-lecteurs .mx-ouvert.is-ok { color: var(--iv-ok); }
+
+.tr-docs { margin: 0 0 12px; padding: 0; list-style: none; display: grid; gap: 6px; }
+.tr-docs li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--iv-trait); border-radius: 6px; transition: border-color 140ms var(--iv-courbe), background-color 140ms var(--iv-courbe); }
+.tr-docs li:hover { border-color: var(--iv-trait-fort); background: var(--iv-surface-2); }
+.tr-docs a { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+.tr-docs a .ic { width: 16px; height: 16px; flex: none; color: var(--iv-muet); }
+.tr-docs a span { display: grid; min-width: 0; }
+.tr-docs b { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tr-docs small { font-size: 12px; color: var(--iv-muet); }
+.tr-ajout { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.tr-ajout .input:not(select) { flex: 1; min-width: 160px; }
+
+.tr-urgences { display: grid; gap: 10px; }
+.tr-urgence { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 32px 32px; gap: 6px; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--iv-trait); }
+.tr-urgence:last-child { padding-bottom: 0; border-bottom: 0; }
+.tr-urgence > :nth-child(3) { grid-column: 1 / span 2; grid-row: 2; }
+.tr-pied { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 12px; }
+
+/* Matériel */
+.tr-actions { white-space: nowrap; }
+.tr-actions > * { vertical-align: middle; }
+.tr-actions .btn { margin-right: 4px; }
+.tr .chips { margin: 0 0 12px; }
+
+/* Contrôles */
+.tr-moyennes { margin: 0; padding: 0; list-style: none; }
+.tr-moyennes li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: baseline; padding: 8px 0; border-top: 1px solid var(--iv-trait); font-size: 13px; }
+.tr-moyennes li:first-child { border-top: 0; }
+.tr-moyennes small { font-size: 12px; }
+.tr-fiche { max-width: 720px; }
+.tr-criteres-lus { margin: 0 0 12px; padding: 0; list-style: none; }
+.tr-criteres-lus li { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-top: 1px solid var(--iv-trait); font-size: 13.5px; }
+.tr-criteres-lus li:first-child { border-top: 0; }
+.tr-etoiles { display: inline-flex; gap: 4px; }
+.tr-etoiles i { width: 18px; height: 6px; border-radius: 2px; background: var(--iv-surface-3); }
+.tr-etoiles i.is-on { background: var(--iv-or-500, #b8975a); }
+.tr-commentaire { margin: 0 0 12px; padding: 10px 14px; border-left: 2px solid var(--iv-trait-fort); color: var(--iv-encre-2); font-size: 13.5px; line-height: 1.55; white-space: pre-wrap; }
+.tr-photo { display: block; max-width: 100%; max-height: 420px; margin: 0 0 12px; border-radius: 8px; border: 1px solid var(--iv-trait); }
+
+/* Formulaire de contrôle (téléphone) */
+.tr-nouveau { max-width: 640px; }
+.tr-nouveau .carte { display: grid; gap: 14px; }
+.tr-sous-titre { margin: 4px 0 0; font-family: var(--iv-police-mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--iv-muet); }
+.tr-criteres { display: grid; gap: 4px; }
+.tr-critere { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--iv-trait); font-size: 14px; }
+.tr-critere:first-child { border-top: 0; }
+.tr-n-groupe { display: inline-flex; gap: 4px; }
+.tr-n { width: 36px; height: 36px; border: 1px solid var(--iv-trait-fort); border-radius: 6px; background: var(--iv-surface); color: var(--iv-encre-2); font: 600 13px/1 var(--iv-police-mono); cursor: pointer; transition: background-color 120ms var(--iv-courbe), border-color 120ms var(--iv-courbe), color 120ms var(--iv-courbe), transform 120ms var(--iv-courbe); }
+.tr-n:hover { border-color: var(--iv-encre-2); }
+.tr-n:active { transform: scale(0.94); }
+.tr-n.is-on { background: var(--iv-encre); border-color: var(--iv-encre); color: var(--iv-surface); }
+.tr-photo-apercu:empty { display: none; }
+.tr-photo-apercu { display: grid; gap: 6px; justify-items: start; }
+.tr-photo-apercu img { max-width: 100%; max-height: 260px; border-radius: 8px; border: 1px solid var(--iv-trait); }
+
+@media (max-width: 1100px) {
+  .tr-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tr-colonnes { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .tr-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tr-critere { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .tr-n { width: 44px; height: 44px; font-size: 14px; }
+}

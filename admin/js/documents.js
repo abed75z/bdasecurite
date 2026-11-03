@@ -90,7 +90,7 @@ export async function listeDocuments(ctx, type) {
    NOUVEAU DOCUMENT
    ========================================================= */
 function paiementTexte(r) {
-  return `Bénéficiaire : ${r.beneficiaire || ''}\nIBAN : ${r.iban || '(à compléter dans Paramètres)'}`;
+  return `Bénéficiaire : ${r.beneficiaire || ''}\nIBAN : ${r.iban || '(à compléter dans Paramètres)'}${r.bic ? `\nBIC : ${r.bic}` : ''}`;
 }
 // taux : TVA du document en % (par défaut celle des Paramètres)
 export function nouveauDocument(type, r, numero, taux = +r.tauxTva || 0) {
@@ -112,7 +112,7 @@ export function nouveauDocument(type, r, numero, taux = +r.tauxTva || 0) {
     lieu: '', periode: '', horaires: '', effectif: '',
     lignes: [{ designation: 'Agents de sécurité (ADS)', detail: '', qte: 0, unite: 'h', pu: +r.tauxHoraire || 0 }],
     acompte: +r.acompte || 0,
-    conditions: avecTva(`${r.conditionsDevis}\nRèglement par virement — Bénéficiaire : ${r.beneficiaire} — IBAN : ${r.iban || '(à compléter)'}.`),
+    conditions: avecTva(`${r.conditionsDevis}\nRèglement par virement — Bénéficiaire : ${r.beneficiaire} — IBAN : ${r.iban || '(à compléter)'}${r.bic ? ` — BIC : ${r.bic}` : ''}.`),
   };
 }
 

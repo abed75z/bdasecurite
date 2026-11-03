@@ -563,6 +563,7 @@ function reglages_defaut(): array
     'email' => BDA_EMAIL,
     'beneficiaire' => 'BDASECURITE',
     'iban' => '',
+    'bic' => 'QNTOFRP1XXX',
     'conditionsFacture' => "Conditions générales de vente : Aucun escompte accordé en cas de paiement comptant.\nTVA non applicable, art. 293 B du CGI.\nEn cas de retard de paiement : pénalités égales à trois fois le taux d'intérêt légal et indemnité forfaitaire de 40 € pour frais de recouvrement (art. L441-10 du Code de commerce).",
     'conditionsDevis' => "Devis valable 30 jours à compter de sa date d'émission.\nAcompte à la signature du devis, solde à réception de la facture de fin de mission.\nAucun escompte accordé en cas de paiement comptant. TVA non applicable, art. 293 B du CGI.",
     'pied' => BDA_PIED_EURL,
@@ -596,6 +597,21 @@ function bascule_eurl(): void
         $db->prepare("UPDATE reglages SET v = ? WHERE k = 'entreprise'")->execute([json_encode($e, JSON_UNESCAPED_UNICODE)]);
       }
       $db->prepare("INSERT INTO reglages (k, v) VALUES ('bascule_eurl_iban', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v")->execute([maintenant()]);
+    }
+    // 03/11 au soir : l'EURL a son compte Qonto. Titulaire et BIC mis à jour ; l'ancien IBAN est retiré des nouveaux
+    // documents (gardé dans ibanAncien) : le nouvel IBAN est saisi par la direction dans Paramètres.
+    if (!$db->query("SELECT 1 FROM reglages WHERE k = 'bascule_eurl_qonto'")->fetchColumn()) {
+      $st = $db->prepare("SELECT v FROM reglages WHERE k = 'entreprise'");
+      $st->execute();
+      $e = json_decode((string)$st->fetchColumn(), true);
+      if (is_array($e)) {
+        if (($e['iban'] ?? '') !== '') $e['ibanAncien'] = $e['iban'];
+        $e['iban'] = '';
+        $e['beneficiaire'] = 'BDASECURITE';
+        $e['bic'] = 'QNTOFRP1XXX';
+        $db->prepare("UPDATE reglages SET v = ? WHERE k = 'entreprise'")->execute([json_encode($e, JSON_UNESCAPED_UNICODE)]);
+      }
+      $db->prepare("INSERT INTO reglages (k, v) VALUES ('bascule_eurl_qonto', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v")->execute([maintenant()]);
     }
     return;
   }

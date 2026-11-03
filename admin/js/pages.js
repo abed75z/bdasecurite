@@ -574,7 +574,7 @@ async function pageParametres(ctx) {
   const { reglages: r } = await api('reglages');
   const c = {
     nom: saisie({ value: r.nom }), emetteur: zoneTexte({ value: r.emetteur, rows: 6 }), email: saisie({ value: r.email, type: 'email' }),
-    beneficiaire: saisie({ value: r.beneficiaire }), iban: saisie({ value: r.iban, placeholder: 'FR76 …', autocomplete: 'off', spellcheck: 'false' }),
+    beneficiaire: saisie({ value: r.beneficiaire }), iban: saisie({ value: r.iban, placeholder: 'FR76 …', autocomplete: 'off', spellcheck: 'false' }), bic: saisie({ value: r.bic || '', placeholder: 'QNTOFRP1XXX', autocomplete: 'off', spellcheck: 'false' }),
     conditionsFacture: zoneTexte({ value: r.conditionsFacture, rows: 4 }), conditionsDevis: zoneTexte({ value: r.conditionsDevis, rows: 4 }), pied: zoneTexte({ value: r.pied, rows: 3 }),
     prefixeFacture: saisie({ value: r.prefixeFacture }), prefixeDevis: saisie({ value: r.prefixeDevis }),
     tauxHoraire: saisie({ value: r.tauxHoraire, inputmode: 'decimal' }), echeanceJours: saisie({ value: r.echeanceJours, inputmode: 'numeric' }),
@@ -593,7 +593,7 @@ async function pageParametres(ctx) {
   carte([h('h2', null, 'TVA'), h('small', null, 'Appliquée aux nouveaux devis et factures')], h('div', { class: 'form-grille form-grille--2' },
     champ('Taux de TVA par défaut (%)', c.tauxTva, 'Ex. 20 (sécurité) ou 10 (transport VTC). 0 = « TVA non applicable ». Modifiable ensuite sur chaque devis ou facture.'),
     champ('N° de TVA intracommunautaire', c.numeroTva, 'Obligatoire sur les factures avec TVA. Ajouté automatiquement sous vos coordonnées.'))),
-  carte([h('h2', null, 'Paiement'), h('small', null, 'Imprimé sur vos factures — reste privé, jamais publié sur le site')], h('div', { class: 'form-grille' }, champ('Bénéficiaire', c.beneficiaire), champ('IBAN', c.iban))),
+  carte([h('h2', null, 'Paiement'), h('small', null, 'Imprimé sur vos factures — reste privé, jamais publié sur le site')], h('div', { class: 'form-grille' }, champ('Bénéficiaire', c.beneficiaire), champ('IBAN', c.iban), champ('BIC', c.bic))),
   h('details', { class: 'avance' }, h('summary', null, icone('reglages'), 'Réglages avancés', h('small', null, 'mentions légales, numérotation, valeurs par défaut')),
   carte([h('h2', null, 'Mentions et conditions')], h('div', { class: 'form-grille' }, champ('Conditions des factures', c.conditionsFacture), champ('Conditions des devis', c.conditionsDevis), champ('Pied de page (CNAPS, SIRET…)', c.pied, 'La mention de l\'autorisation CNAPS est obligatoire sur tous vos documents.'))),
   carte([h('h2', null, 'Numérotation et valeurs par défaut')], h('div', { class: 'form-grille form-grille--2' },

@@ -1,0 +1,86 @@
+/* =========================================================
+   BDA ADMIN — HÉRITAGE (contenu imprimé à préserver)
+   Règles reprises telles quelles de blanc.css : rendu des flyers,
+   cartes de visite, planches et du nom « BDA / SECURITY GROUP ».
+   Ne pas modifier : le rendu des PDF en dépend.
+   ========================================================= */
+.galerie__visuel { background: radial-gradient(80% 90% at 50% 0%, rgba(0, 0, 0, 0.04), transparent 70%), #ffffff; }
+.galerie__visuel--carte .cp { box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.22); }
+.vide-grand__visuel .cp { box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.22); }
+.fl__hero { color: #0b0b0c; background: radial-gradient(130mm 90mm at 100% 0%, rgba(0, 0, 0, 0.09), transparent 62%), #ffffff; }
+.fl__marque b { color: #0b0b0c; }
+.fl__marque small { color: #0b0b0c; }
+.fl__t1 { color: #0b0b0c; }
+.fl__t2 { color: #0b0b0c; }
+.fl__intro { color: #3a3a3f; }
+.fl__secteur { border: 0.35mm solid rgba(0, 0, 0, 0.5); color: #0b0b0c; }
+.fl__filet { background: linear-gradient(90deg, #0b0b0c, #e5d8c3 50%, #0b0b0c); }
+.fl__kicker { color: #0b0b0c; }
+.fl__carte { border-top: 1mm solid rgba(0, 0, 0, 0.5); }
+.fl__ic { background: #ffffff; color: #0b0b0c; }
+.fl--modifiable .fl__ic:hover { box-shadow: 0 0 0 0.6mm rgba(0, 0, 0, 0.12); }
+.fl__carte-sous { color: #6e6e73; }
+.fl__point::before { background: #0b0b0c; }
+.fl__chiffres { border-top: 0.3mm solid rgba(0, 0, 0, 0.14); border-bottom: 0.3mm solid rgba(0, 0, 0, 0.14); }
+.fl__chiffres > div + div { border-left: 0.3mm solid rgba(0, 0, 0, 0.14); }
+.fl__reference { border-left: 1mm solid rgba(0, 0, 0, 0.5); }
+.fl__contact { background: #ffffff; color: #0b0b0c; }
+.fl__contact::before { border: 0.3mm solid rgba(0, 0, 0, 0.25); }
+.fl__kicker--clair { color: #0b0b0c; }
+.fl__contact-titre { color: #0b0b0c; }
+.fl__tel-label { color: #0b0b0c; }
+.fl__tel { color: #0b0b0c; }
+.fl__infos { color: #3a3a3f; }
+.fl__qr-sous { color: #0b0b0c; }
+.fl--modifiable [contenteditable]:hover { box-shadow: 0 0 0 0.5mm rgba(0, 0, 0, 0.12); }
+.fl--modifiable [contenteditable]:focus { box-shadow: 0 0 0 0.6mm rgba(0, 0, 0, 0.12); background: rgba(0, 0, 0, 0.045); }
+.fl--modifiable .est-vide::before { color: #3a3a3f; }
+.cv--recto { color: #0b0b0c; background: radial-gradient(60mm 40mm at 50% 0%, rgba(0, 0, 0, 0.099), transparent 65%), #ffffff; }
+.cv--recto::after { border: 0.25mm solid rgba(0, 0, 0, 0.225); }
+.cv__filet { background: linear-gradient(90deg, transparent, #0b0b0c, transparent); }
+.cv__slogan { color: #0b0b0c; }
+.cv__zone { color: #6e6e73; }
+.cv__fonction { color: #0b0b0c; }
+.cv__trait { background: #0b0b0c; }
+.cv__contacts em { color: #6e6e73; }
+.cv__ic { background: #ffffff; color: #0b0b0c; }
+.cv__qr small { color: #0b0b0c; }
+.cv__bande { background: #ffffff; border-top: 0.5mm solid rgba(0, 0, 0, 0.5); }
+.cv__bande span { color: #0b0b0c; }
+.galerie__visuel--visite .cv { box-shadow: 0 16px 40px -18px rgba(0, 0, 0, 0.22); }
+.vide-grand__visuel--visite .cv { box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.22); }
+.apercu-carte .cv { box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.06); }
+.planche-visites .cv { outline: 0.2mm dashed rgba(0, 0, 0, 0.14); }
+.planche__ligne { outline: 0.2mm dashed rgba(0, 0, 0, 0.14); }
+.planche__ligne .cp + .cp { box-shadow: -0.2mm 0 0 #ffffff; }
+.capture-pdf .planche__ligne, .capture-pdf .planche-visites .cv { box-shadow: 0 0 0 0.25mm #ffffff; }
+.digitale { border-color: rgba(0, 0, 0, 0.175); background: linear-gradient(120deg, rgba(0, 0, 0, 0.04), var(--surface) 60%); }
+body.moi { background: radial-gradient(120% 60% at 50% -10%, rgba(0, 0, 0, 0.09), transparent 60%), radial-gradient(80% 50% at 50% 110%, rgba(0, 0, 0, 0.04), transparent 60%), #ffffff; }
+   Nom « BDA / SECURITY GROUP » avec les lettres du logo
+   (cartes agents, cartes de visite, flyers ; images = rendu identique en PDF)
+   ========================================================= */
+.marque-logo { display: inline-flex; flex-direction: column; align-items: center; line-height: 0; }
+.marque-logo img { display: block; height: auto; max-width: none; }
+/* carte de visite : recto */
+.cv__marque-logo { gap: 1.5mm; margin-top: 0.6mm; }
+.cv__marque-logo .marque-logo__bda { width: 27mm; }
+.cv__marque-logo .marque-logo__sg { width: 47.4mm; }
+/* flyer */
+.fl__marque .marque-logo { gap: 2.2mm; }
+.fl__marque .marque-logo__bda { width: 38mm; }
+.fl__marque .marque-logo__sg { width: 66.8mm; }
+/* Titre du flyer : même style que la phrase du site (gras, sans empattement), une phrase par ligne */
+.fl__titre { font-family: "Manrope", "Inter", system-ui, sans-serif; font-weight: 800; font-size: 8.2mm; line-height: 1.14; letter-spacing: -0.035em; }
+.fl__t1, .fl__t2 { color: #0b0b0c; white-space: nowrap; }
+
+/* ---------- Zones de la marque en noir, comme le haut du site ---------- */
+/* carte de visite : recto noir, liseré doré */
+.cv--recto { color: #f6f2ea; background: radial-gradient(60mm 40mm at 50% 0%, rgba(201, 173, 122, 0.2), transparent 65%), #0b0b0c; }
+.cv--recto::after { border: 0.25mm solid rgba(201, 173, 122, 0.5); }
+.cv__filet { background: linear-gradient(90deg, transparent, #c4a472, transparent); }
+.cv__zone { color: #a7a39b; }
+/* flyer : en-tête noir, titre en blanc */
+.fl__hero { color: #f6f2ea; background: radial-gradient(130mm 90mm at 100% 0%, rgba(201, 173, 122, 0.18), transparent 62%), #0b0b0c; }
+.fl__t1, .fl__t2 { color: #ffffff; }
+.fl__intro { color: #c9c3b8; }
+.fl__secteur { border: 0.35mm solid rgba(220, 195, 145, 0.55); color: #f6f2ea; }

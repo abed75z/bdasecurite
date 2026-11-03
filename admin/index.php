@@ -5,7 +5,7 @@ require __DIR__ . '/../app/bootstrap.php';
 entetes_securite();
 header('Cache-Control: no-store');
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://data.geopf.fr; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'");
-$v = '54';
+$v = '56';
 ?><!doctype html>
 <html lang="fr" data-theme="jour">
 <head>
@@ -38,17 +38,20 @@ $v = '54';
 <link rel="stylesheet" href="admin.css?v=<?= $v ?>">
 <link rel="stylesheet" href="documents.css?v=<?= $v ?>">
 <link rel="stylesheet" href="creations.css?v=<?= $v ?>">
-<link rel="stylesheet" href="blanc.css?v=<?= $v ?>">
-<link rel="stylesheet" href="pro.css?v=<?= $v ?>">
-<link rel="stylesheet" href="console.css?v=<?= $v ?>">
 <link rel="stylesheet" href="contrats.css?v=<?= $v ?>">
 <link rel="stylesheet" href="carte-agent.css?v=<?= $v ?>">
-<link rel="stylesheet" href="entreprise.css?v=<?= $v ?>">
-<link rel="stylesheet" href="nuit.css?v=<?= $v ?>">
-<link rel="stylesheet" href="ivoire.css?v=<?= $v ?>">
-<link rel="stylesheet" href="sobre.css?v=<?= $v ?>">
+<link rel="stylesheet" href="ds/heritage.css?v=<?= $v ?>">
 <link rel="stylesheet" href="prospection.css?v=<?= $v ?>">
 <link rel="stylesheet" href="exploitation.css?v=<?= $v ?>">
+<!-- Design « Ivoire signature » (v12) : posé par-dessus l'existant, il redirige les anciennes couleurs vers sa palette -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Inter:opsz,wght@14..32,400..700&display=swap">
+<link rel="stylesheet" href="ds/tokens.css?v=<?= $v ?>">
+<link rel="stylesheet" href="ds/base.css?v=<?= $v ?>">
+<link rel="stylesheet" href="ds/components.css?v=<?= $v ?>">
+<link rel="stylesheet" href="ds/shell.css?v=<?= $v ?>">
+<link rel="stylesheet" href="ds/pages.css?v=<?= $v ?>">
+<link rel="stylesheet" href="ds/raccord.css?v=<?= $v ?>">
+<link rel="stylesheet" href="ds/motion.css?v=<?= $v ?>">
 <?php // styles des modules (admin/ds/modules/<nom>.css), ajoutés automatiquement
 foreach (glob(__DIR__ . '/ds/modules/*.css') ?: [] as $f) echo '<link rel="stylesheet" href="ds/modules/' . htmlspecialchars(basename($f), ENT_QUOTES) . '?v=' . $v . "\">
 "; ?>
@@ -56,7 +59,7 @@ foreach (glob(__DIR__ . '/ds/modules/*.css') ?: [] as $f) echo '<link rel="style
 </head>
 <body>
 <div id="app"><div class="chargement chargement--plein"><span></span><span></span><span></span></div></div>
-<noscript><p style="color:#fff;padding:2rem">Activez JavaScript pour utiliser l'espace admin.</p></noscript>
+<noscript><p style="padding:2rem">Activez JavaScript pour utiliser l'espace admin.</p></noscript>
 <script type="module" src="js/app.js?v=<?= $v ?>"></script>
 </body>
 </html>

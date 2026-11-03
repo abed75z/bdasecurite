@@ -1,0 +1,127 @@
+/* =========================================================
+   BDA ADMIN — DESIGN SYSTEM « IVOIRE SIGNATURE »
+   6/6 · MOUVEMENT (motion.css)
+   Principes : court (90 à 420 ms), décéléré, sans rebond ni
+   rotation gratuite ; on bouge l'opacité et quelques pixels,
+   jamais la mise en page. Tout s'arrête si les animations sont
+   réduites :
+   - réglage de l'admin (menu du compte > Animations > Réduites)
+     → <html data-mouvement="reduit"> (prioritaire, voulu par Abed) ;
+   - réglage du système (prefers-reduced-motion) quand l'admin
+     n'a pas posé de choix (data-mouvement absent).
+   ========================================================= */
+
+/* ---------- 1. Bibliothèque d'images clés ---------- */
+@keyframes iv-tourne { to { transform: rotate(360deg); } }
+@keyframes iv-fondu { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes iv-monte { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes iv-deroule { from { opacity: 0; transform: translateY(-4px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes iv-bulle { from { opacity: 0; transform: translate(-50%, calc(-100% + 3px)); } to { opacity: 1; transform: translate(-50%, -100%); } }
+@keyframes iv-minuteur { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes iv-reflet { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+@keyframes iv-points { 0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); } 40% { opacity: 1; transform: none; } }
+@keyframes iv-onde { 0% { opacity: 0.6; transform: scale(0.5); } 100% { opacity: 0; transform: scale(1.6); } }
+@keyframes iv-pouls-doux { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes iv-progression { from { transform: translateX(-100%); } to { transform: translateX(270%); } }
+@keyframes iv-sonne { 0%, 100% { transform: none; } 20% { transform: rotate(9deg); } 45% { transform: rotate(-7deg); } 70% { transform: rotate(3deg); } }
+@keyframes iv-etoile { from { transform: scale(0.72); opacity: 0.4; } to { transform: none; opacity: 1; } }
+@keyframes iv-repere { from { transform: scaleY(0.2); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes iv-barre { from { transform: scaleY(0); } to { transform: none; } }
+@keyframes iv-segment { from { transform: scaleX(0); } to { transform: none; } }
+@keyframes iv-trace { to { stroke-dashoffset: 0; } }
+@keyframes iv-anneau { from { --p: 0; } }
+@keyframes iv-sos { 0%, 100% { box-shadow: 0 0 0 0 rgba(208, 57, 47, 0.5); } 50% { box-shadow: 0 0 0 9px rgba(208, 57, 47, 0); } }
+@keyframes iv-intro-ecusson { from { opacity: 0; transform: translateY(6px) scale(0.94); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes iv-icone-page { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: none; } }
+@keyframes iv-haut-filet { to { border-bottom-color: var(--iv-trait); } }
+
+/* ---------- 2. Arrivée d'une page : les blocs montent l'un après l'autre ---------- */
+.page > * { animation: iv-monte var(--iv-d-entree) var(--iv-courbe-entree) both; }
+.page > :nth-child(2) { animation-delay: 40ms; }
+.page > :nth-child(3) { animation-delay: 80ms; }
+.page > :nth-child(4) { animation-delay: 120ms; }
+.page > :nth-child(n + 5) { animation-delay: 160ms; }
+.page > .chargement { animation: iv-fondu var(--iv-d-moyen) var(--iv-courbe) both; }
+.entete-page { animation: iv-fondu var(--iv-d-lent) var(--iv-courbe) both; }
+.entete-page__ic.is-in { animation: iv-icone-page var(--iv-d-lent) var(--iv-courbe-entree) both; }
+
+/* Vue générale : l'en-tête, puis les tuiles en cascade */
+.acc-entete { animation: iv-monte 0.5s var(--iv-courbe-entree) both; }
+.acc-module { animation: iv-monte 0.5s var(--iv-courbe-entree) both; }
+.acc-module:nth-child(2) { animation-delay: 30ms; }
+.acc-module:nth-child(3) { animation-delay: 60ms; }
+.acc-module:nth-child(4) { animation-delay: 90ms; }
+.acc-module:nth-child(5) { animation-delay: 120ms; }
+.acc-module:nth-child(6) { animation-delay: 150ms; }
+.acc-module:nth-child(7) { animation-delay: 180ms; }
+.acc-module:nth-child(n + 8) { animation-delay: 210ms; }
+
+/* ---------- 3. Menus : rubriques, déroulants, nouveautés ---------- */
+.nav__section.is-ouvert .nav__tiroir .nav__item { animation: iv-fondu var(--iv-d-lent) var(--iv-courbe) both; }
+.nav__section.is-ouvert .nav__tiroir .nav__item:nth-child(2) { animation-delay: 25ms; }
+.nav__section.is-ouvert .nav__tiroir .nav__item:nth-child(3) { animation-delay: 50ms; }
+.nav__section.is-ouvert .nav__tiroir .nav__item:nth-child(4) { animation-delay: 75ms; }
+.nav__section.is-ouvert .nav__tiroir .nav__item:nth-child(n + 5) { animation-delay: 100ms; }
+.nav__item--favori { animation: iv-fondu var(--iv-d-lent) var(--iv-courbe) both; }
+.deroulant__liste li { animation: iv-fondu var(--iv-d-moyen) var(--iv-courbe) both; }
+.deroulant__liste li:nth-child(2) { animation-delay: 20ms; }
+.deroulant__liste li:nth-child(3) { animation-delay: 40ms; }
+.deroulant__liste li:nth-child(4) { animation-delay: 60ms; }
+.deroulant__liste li:nth-child(n + 5) { animation-delay: 80ms; }
+.nouveautes li { animation: iv-monte 0.5s var(--iv-courbe-entree) both; }
+.nouveautes li:nth-child(1) { animation-delay: 120ms; }
+.nouveautes li:nth-child(2) { animation-delay: 180ms; }
+.nouveautes li:nth-child(3) { animation-delay: 240ms; }
+.nouveautes li:nth-child(4) { animation-delay: 300ms; }
+.nouveautes li:nth-child(n + 5) { animation-delay: 360ms; }
+.carte-onglets__panneau { animation: iv-fondu var(--iv-d-lent) var(--iv-courbe) both; }
+
+/* ---------- 4. Graphiques qui se dessinent ---------- */
+.gr-col i { animation: iv-barre 0.7s var(--iv-courbe-entree) both; }
+.gr-cols .gr-col:nth-child(n + 4) i { animation-delay: 30ms; }
+.gr-cols .gr-col:nth-child(n + 7) i { animation-delay: 60ms; }
+.gr-cols .gr-col:nth-child(n + 10) i { animation-delay: 90ms; }
+.gr-cols .gr-col:nth-child(n + 13) i { animation-delay: 120ms; }
+.gr-cols .gr-col:nth-child(n + 16) i { animation-delay: 150ms; }
+.gr-cols .gr-col:nth-child(n + 19) i { animation-delay: 180ms; }
+.gr-cols .gr-col:nth-child(n + 22) i { animation-delay: 210ms; }
+.gr-cols .gr-col:nth-child(n + 25) i { animation-delay: 240ms; }
+.gr-cols .gr-col:nth-child(n + 28) i { animation-delay: 270ms; }
+.gr-trait { stroke-dasharray: 6000; stroke-dashoffset: 6000; animation: iv-trace 1.4s 0.1s var(--iv-courbe) forwards; }
+.gr-aire { animation: iv-fondu 0.9s 0.4s var(--iv-courbe) both; }
+.gr-repartition__piste i { animation: iv-segment 0.8s var(--iv-courbe-entree) both; }
+
+/* ---------- 5. Réglage « Animations : Réduites » ---------- */
+:root[data-mouvement="reduit"] *,
+:root[data-mouvement="reduit"] *::before,
+:root[data-mouvement="reduit"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+:root[data-mouvement="reduit"] .gr-trait { stroke-dasharray: none; stroke-dashoffset: 0; }
+:root[data-mouvement="reduit"] .page > .chargement span::after { display: none; }
+:root[data-mouvement="reduit"] .page-en-charge .haut::after { width: 100%; opacity: 0.6; transform: none; background: var(--iv-accent); }
+:root[data-mouvement="reduit"] .cc-sos { box-shadow: 0 0 0 3px rgba(208, 57, 47, 0.35); }
+:root[data-mouvement="reduit"] .toast::after { display: none; }
+:root[data-mouvement="reduit"] .btn.is-loading::after { border-top-color: var(--btn-roue); border-right-color: var(--btn-roue); }
+
+/* ---------- 6. Réglage du système, si l'admin n'a rien choisi ---------- */
+@media (prefers-reduced-motion: reduce) {
+  :root:not([data-mouvement]) *,
+  :root:not([data-mouvement]) *::before,
+  :root:not([data-mouvement]) *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+  :root:not([data-mouvement]) .gr-trait { stroke-dasharray: none; stroke-dashoffset: 0; }
+  :root:not([data-mouvement]) .page > .chargement span::after { display: none; }
+  :root:not([data-mouvement]) .toast::after { display: none; }
+}

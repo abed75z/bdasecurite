@@ -595,21 +595,20 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '11';
+const VERSION = '12';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 11 : tout le terrain dans votre admin.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 12 : un nouveau design pour tout l’admin.'),
       h('ul', null,
-        point('lieu', 'equipe', 'Carte des opérations', 'Dans le centre de contrôle : vos sites et les agents en poste sur la carte, en direct.'),
-        point('alerte', 'facturation', 'Alerte SOS des agents', 'Un bouton SOS dans l’Espace équipe (maintenir 2 s). Vous recevez l’alerte avec sa position, l’écran sonne et passe au rouge.'),
-        point('cible', 'equipe', 'Rondes avec QR codes', 'Dans la fiche d’un site : ajoutez des points de ronde, imprimez les QR codes. L’agent les scanne avec son téléphone.'),
-        point('facture', 'facturation', 'Facture en un clic', 'Planning des sites › Facturer : la facture du mois d’un client avec le relevé d’heures, prête à vérifier.'),
-        point('euro', 'clients', 'Pilotage', 'Chiffre d’affaires, encaissements, heures vendues, remplissage du planning, meilleurs clients.'),
-        point('mail', 'clients', 'Mails tout prêts', 'Trouver des clients › Préparer un mail : un texte adapté au lieu (ouverture, reprise, chantier).'))),
+        point('etoile', 'equipe', 'Design « Ivoire signature »', 'Polices Geist et Inter, palette ivoire et encre, une touche d’or, la couleur réservée aux états (payé, en attente, en retard).'),
+        point('grille', 'equipe', 'Plus net, plus calme', 'Menu, en-têtes, tableaux, cartes et boutons redessinés : coins discrets, filets fins, plus de dégradés.'),
+        point('lune', 'equipe', 'Clair et sombre', 'Les deux thèmes ont été refaits (menu du compte › Apparence).'),
+        point('mail', 'clients', 'Messagerie Google', 'Paramètres › Messagerie Google : l’admin est relié à contact@bdasecurite.com pour les prochains envois de factures et de devis.'),
+        point('coche', 'facturation', 'Correctif', 'Le Contrôle du site et Contenu & tarifs enregistrent de nouveau vos réglages.'))),
     actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
   }), 900);
 }

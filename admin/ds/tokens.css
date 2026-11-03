@@ -1,0 +1,463 @@
+/* =========================================================
+   BDA ADMIN — DESIGN SYSTEM « IVOIRE SIGNATURE »
+   1/6 · JETONS (tokens.css)
+
+   Direction : l'école Mercury / Stripe / Apple. Neutres chauds
+   (pierre), fond ivoire, surfaces blanches, encre profonde.
+   Une seule couleur de marque : un OR sourd, utilisé avec
+   parcimonie (repère du menu, anneau de focus, surtitres,
+   « aujourd'hui », favoris). La couleur vive est réservée aux
+   ÉTATS : vert = payé / OK, ambre = en attente, rouge = retard.
+   Sombre : anthracite chaud, jamais noir pur.
+
+   Thème : <html data-theme="jour"> (défaut) ou "nuit"
+           posé par app.js (clé localStorage « bda-theme-v6»).
+   Mouvement : <html data-mouvement="plein"> ou "reduit"
+           (réglage « Animations » du menu du compte).
+
+   Polices (à charger dans index.php, autorisées par la CSP) :
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@400..600&family=Inter:opsz,wght@14..32,400..700&display=swap">
+   (garder Manrope / JetBrains Mono / Cormorant pour les documents
+   imprimés : cartes agents, flyers, contrats.)
+
+   Les noms --iv-* sont les jetons du système. Les anciens noms
+   (--bg, --surface, --text, --gold…) sont redirigés vers eux en
+   bas de fichier : les feuilles des modules (planning, documents,
+   prospection…) prennent la nouvelle palette sans être réécrites.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   1. PRIMITIVES (valeurs brutes, ne pas utiliser directement
+      dans les composants : passer par les jetons sémantiques)
+   --------------------------------------------------------- */
+:root {
+  /* Pierre chaude : neutres du thème clair */
+  --iv-pierre-0: #ffffff;
+  --iv-pierre-25: #fcfbf8;
+  --iv-pierre-50: #f8f6f1;
+  --iv-pierre-75: #f2efe8;
+  --iv-pierre-100: #ece8df;
+  --iv-pierre-150: #e3ded3;
+  --iv-pierre-200: #d6cfc2;
+  --iv-pierre-300: #bbb3a5;
+  --iv-pierre-400: #948d81;
+  --iv-pierre-500: #736d63;
+  --iv-pierre-600: #5b554c;
+  --iv-pierre-700: #433e37;
+  --iv-pierre-800: #2c2823;
+  --iv-pierre-900: #1d1a17;
+  --iv-pierre-950: #13110f;
+
+  /* Anthracite chaud : neutres du thème sombre */
+  --iv-anthracite-1000: #0e0d0c;
+  --iv-anthracite-950: #121110;
+  --iv-anthracite-900: #161514;
+  --iv-anthracite-850: #1b1a18;
+  --iv-anthracite-800: #1f1e1c;
+  --iv-anthracite-750: #252321;
+  --iv-anthracite-700: #2c2a27;
+  --iv-anthracite-600: #3a3733;
+
+  /* Ivoire (texte et action du thème sombre) */
+  --iv-ivoire-50: #fbf9f5;
+  --iv-ivoire-100: #f3f0ea;
+  --iv-ivoire-200: #e8e3da;
+  --iv-ivoire-300: #cfc9bf;
+  --iv-ivoire-400: #a39d93;
+  --iv-ivoire-500: #77726a;
+
+  /* Or sourd : la seule couleur de marque */
+  --iv-or-50: #faf6ee;
+  --iv-or-100: #f4ecdd;
+  --iv-or-200: #e7d7b9;
+  --iv-or-300: #d3b98a;
+  --iv-or-400: #bb9c66;
+  --iv-or-500: #a0834f;
+  --iv-or-600: #86693d;
+  --iv-or-700: #6b532f;
+
+  /* États (désaturés, lisibles en texte : contraste AA) */
+  --iv-vert-50: #edf5f0;
+  --iv-vert-200: #c9e1d3;
+  --iv-vert-500: #3f8a63;
+  --iv-vert-600: #2f6f4e;
+  --iv-ambre-50: #fcf3e6;
+  --iv-ambre-200: #f0d9b4;
+  --iv-ambre-500: #c47b1e;
+  --iv-ambre-600: #9c5a0b;
+  --iv-rouge-50: #fcefed;
+  --iv-rouge-200: #f3cfca;
+  --iv-rouge-500: #d0392f;
+  --iv-rouge-600: #b3261e;
+  --iv-bleu-50: #eef2f7;
+  --iv-bleu-200: #cfdae7;
+  --iv-bleu-600: #3b5878;
+}
+
+/* ---------------------------------------------------------
+   2. ÉCHELLES INDÉPENDANTES DU THÈME
+   --------------------------------------------------------- */
+:root {
+  /* Familles : Inter pour l'interface, Geist pour les titres
+     et les chiffres, Geist Mono pour les numéros et les codes */
+  --iv-police: "Inter", "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --iv-police-titre: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --iv-police-chiffres: "Geist", "Inter", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --iv-police-mono: "Geist Mono", ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+
+  /* Tailles (px : l'interface est dense et précise) */
+  --iv-t-2xs: 11px;      /* surtitres en capitales, compteurs */
+  --iv-t-xs: 12px;       /* aides, légendes, méta */
+  --iv-t-sm: 12.5px;     /* secondaire, pastilles */
+  --iv-t-md: 13.5px;     /* contrôles, cellules, menu */
+  --iv-t-base: 14px;     /* texte courant */
+  --iv-t-lg: 15px;       /* titres de carte */
+  --iv-t-xl: 17px;       /* titres de fenêtre */
+  --iv-t-2xl: 21px;      /* petits chiffres clés */
+  --iv-t-3xl: 28px;      /* titre de page */
+  --iv-t-4xl: 30px;      /* chiffres clés */
+  --iv-t-5xl: 44px;      /* salutation de l’accueil */
+
+  /* Graisses */
+  --iv-g-normal: 400;
+  --iv-g-moyen: 500;
+  --iv-g-fort: 600;
+  --iv-g-tres-fort: 650;
+
+  /* Interlignes et approches */
+  --iv-li-serre: 1.15;
+  --iv-li-titre: 1.25;
+  --iv-li-texte: 1.5;
+  --iv-approche-titre: -0.022em;
+  --iv-approche-chiffre: -0.03em;
+  --iv-approche-capitales: 0.08em;
+
+  /* Espacements : grille de 4 px */
+  --iv-e-0: 0;
+  --iv-e-px: 1px;
+  --iv-e-05: 2px;
+  --iv-e-1: 4px;
+  --iv-e-15: 6px;
+  --iv-e-2: 8px;
+  --iv-e-25: 10px;
+  --iv-e-3: 12px;
+  --iv-e-4: 16px;
+  --iv-e-5: 20px;
+  --iv-e-6: 24px;
+  --iv-e-7: 28px;
+  --iv-e-8: 32px;
+  --iv-e-10: 40px;
+  --iv-e-12: 48px;
+  --iv-e-16: 64px;
+
+  /* Rayons : 8 px partout, pas d'arrondis excessifs */
+  --iv-r-xs: 4px;        /* touches, petites étiquettes */
+  --iv-r-sm: 6px;        /* pastilles, puces, lignes de menu */
+  --iv-r: 8px;           /* boutons, champs, cartes */
+  --iv-r-lg: 10px;       /* menus déroulants */
+  --iv-r-xl: 12px;       /* fenêtres, barre de commande */
+  --iv-r-rond: 999px;    /* avatars, interrupteurs, points d'état */
+
+  /* Bordures */
+  --iv-filet: 1px;
+  --iv-filet-fort: 1.5px;
+
+  /* Durées et courbes : courtes, décélérées, jamais de rebond */
+  --iv-d-instant: 90ms;
+  --iv-d-rapide: 140ms;
+  --iv-d-moyen: 220ms;
+  --iv-d-lent: 320ms;
+  --iv-d-entree: 420ms;
+  --iv-d-shimmer: 1600ms;
+  --iv-courbe: cubic-bezier(0.2, 0, 0, 1);          /* standard : départ vif, arrivée douce */
+  --iv-courbe-entree: cubic-bezier(0.16, 1, 0.3, 1); /* apparition : longue décélération, sans dépassement */
+  --iv-courbe-sortie: cubic-bezier(0.4, 0, 1, 1);    /* disparition : accélère et s'efface */
+  --iv-courbe-lineaire: linear;
+
+  /* Plans (z-index) */
+  --iv-z-dessus: 1;
+  --iv-z-collant: 20;
+  --iv-z-haut: 30;
+  --iv-z-cote: 40;
+  --iv-z-voile: 55;
+  --iv-z-tiroir: 60;
+  --iv-z-menu: 90;
+  --iv-z-modale: 100;
+  --iv-z-toast: 200;
+  --iv-z-intro: 300;
+
+  /* Gabarits */
+  --iv-cote: 252px;           /* barre latérale */
+  --iv-cote-reduite: 64px;    /* barre latérale réduite (icônes) */
+  --iv-haut: 56px;            /* barre du haut */
+  --iv-page-max: 1320px;      /* largeur utile des pages */
+  --iv-page-marge: 32px;      /* marges latérales des pages */
+  --iv-controle: 34px;        /* hauteur d'un bouton */
+  --iv-controle-champ: 36px;  /* hauteur d'un champ */
+  --iv-controle-petit: 28px;
+  --iv-controle-grand: 40px;
+}
+
+/* ---------------------------------------------------------
+   3. THÈME CLAIR « JOUR » (défaut)
+   --------------------------------------------------------- */
+:root,
+:root[data-theme="jour"] {
+  color-scheme: light;
+
+  /* Fonds et surfaces */
+  --iv-fond: #f8f6f1;                    /* toile ivoire */
+  --iv-fond-cote: #f2efe8;               /* barre latérale, un ton plus chaud */
+  --iv-fond-haut: rgba(248, 246, 241, 0.82); /* barre du haut, translucide */
+  --iv-surface: #ffffff;                 /* cartes */
+  --iv-surface-2: #fbfaf7;               /* en-têtes de tableau, pieds de fenêtre */
+  --iv-surface-3: #f3f0ea;               /* survol, puits, pistes */
+  --iv-surface-4: #ebe7de;               /* pressé */
+  --iv-surface-elevee: #ffffff;          /* menus, fenêtres, toasts */
+  --iv-surface-inverse: #1d1a17;         /* bulles d'aide */
+
+  /* Filets */
+  --iv-trait: rgba(29, 26, 23, 0.085);
+  --iv-trait-2: rgba(29, 26, 23, 0.13);
+  --iv-trait-3: rgba(29, 26, 23, 0.22);
+  --iv-trait-fort: rgba(29, 26, 23, 0.42);
+  --iv-trait-cote: rgba(29, 26, 23, 0.075);
+
+  /* Texte */
+  --iv-encre: #1d1a17;
+  --iv-encre-2: #433e37;
+  --iv-muet: #736d63;
+  --iv-pale: #948d81;
+  --iv-texte-inverse: #f6f3ed;
+
+  /* Action principale : encre (l'or n'est pas un bouton) */
+  --iv-action: #1d1a17;
+  --iv-action-survol: #2e2a25;
+  --iv-action-presse: #13110f;
+  --iv-action-texte: #faf8f4;
+
+  /* Or de marque */
+  --iv-accent: var(--iv-or-500);
+  --iv-accent-fort: var(--iv-or-600);
+  --iv-accent-texte: var(--iv-or-600);
+  --iv-accent-doux: #f6efe2;
+  --iv-accent-trait: #e4d4b6;
+  --iv-accent-lueur: rgba(160, 131, 79, 0.16);
+
+  /* Focus et sélection */
+  --iv-focus: var(--iv-or-500);
+  --iv-focus-halo: rgba(160, 131, 79, 0.22);
+  --iv-selection: rgba(160, 131, 79, 0.24);
+
+  /* États */
+  --iv-ok: var(--iv-vert-600);
+  --iv-ok-point: var(--iv-vert-500);
+  --iv-ok-fond: var(--iv-vert-50);
+  --iv-ok-trait: var(--iv-vert-200);
+  --iv-attente: var(--iv-ambre-600);
+  --iv-attente-point: var(--iv-ambre-500);
+  --iv-attente-fond: var(--iv-ambre-50);
+  --iv-attente-trait: var(--iv-ambre-200);
+  --iv-alerte: var(--iv-rouge-600);
+  --iv-alerte-point: var(--iv-rouge-500);
+  --iv-alerte-fond: var(--iv-rouge-50);
+  --iv-alerte-trait: var(--iv-rouge-200);
+  --iv-alerte-plein: #c4312a;
+  --iv-info: var(--iv-bleu-600);
+  --iv-info-fond: var(--iv-bleu-50);
+  --iv-info-trait: var(--iv-bleu-200);
+
+  /* Données (graphiques) : une série = l'encre ; le point fort = l'or */
+  --iv-donnee: #4a443d;
+  --iv-donnee-douce: rgba(74, 68, 61, 0.09);
+  --iv-donnee-fort: var(--iv-or-500);
+  --iv-grille: rgba(29, 26, 23, 0.06);
+
+  /* Élévations : douces et précises */
+  --iv-ombre-1: 0 1px 2px rgba(29, 26, 23, 0.05);
+  --iv-ombre-2: 0 1px 2px rgba(29, 26, 23, 0.04), 0 2px 6px -1px rgba(29, 26, 23, 0.045);
+  --iv-ombre-3: 0 1px 2px rgba(29, 26, 23, 0.05), 0 10px 26px -8px rgba(29, 26, 23, 0.16);
+  --iv-ombre-4: 0 2px 6px -1px rgba(29, 26, 23, 0.06), 0 28px 64px -16px rgba(29, 26, 23, 0.3);
+  --iv-ombre-action: 0 1px 2px rgba(29, 26, 23, 0.22), 0 2px 6px -2px rgba(29, 26, 23, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --iv-ombre-champ: 0 1px 1px rgba(29, 26, 23, 0.035);
+  --iv-reflet: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  --iv-voile: rgba(26, 23, 20, 0.32);
+  --iv-voile-flou: 4px;
+
+  /* Squelettes de chargement */
+  --iv-squelette: #ece8df;
+  --iv-squelette-reflet: rgba(255, 255, 255, 0.8);
+
+  /* Pictogrammes d'interface (data: autorisé par la CSP) */
+  --iv-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23736d63' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+  --iv-loupe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23948d81' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
+  --iv-fleche-lien: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 17 17 7M8 7h9v9'/%3E%3C/svg%3E");
+
+  /* Motif guilloché (fond des grandes surfaces de marque) */
+  --iv-guilloche-trait: rgba(160, 131, 79, 0.15);
+}
+
+/* ---------------------------------------------------------
+   4. THÈME SOMBRE « NUIT » : anthracite chaud
+   --------------------------------------------------------- */
+:root[data-theme="nuit"] {
+  color-scheme: dark;
+
+  --iv-fond: #161514;
+  --iv-fond-cote: #121110;
+  --iv-fond-haut: rgba(22, 21, 20, 0.8);
+  --iv-surface: #1d1c1a;
+  --iv-surface-2: #21201e;
+  --iv-surface-3: #282624;
+  --iv-surface-4: #312f2c;
+  --iv-surface-elevee: #222120;
+  --iv-surface-inverse: #f3f0ea;
+
+  --iv-trait: rgba(255, 246, 230, 0.075);
+  --iv-trait-2: rgba(255, 246, 230, 0.115);
+  --iv-trait-3: rgba(255, 246, 230, 0.2);
+  --iv-trait-fort: rgba(255, 246, 230, 0.38);
+  --iv-trait-cote: rgba(255, 246, 230, 0.06);
+
+  --iv-encre: #f3f0ea;
+  --iv-encre-2: #cfc9bf;
+  --iv-muet: #9c968c;
+  --iv-pale: #77726a;
+  --iv-texte-inverse: #1d1a17;
+
+  --iv-action: #f3f0ea;
+  --iv-action-survol: #ffffff;
+  --iv-action-presse: #e2ddd3;
+  --iv-action-texte: #161514;
+
+  --iv-accent: #c9ac74;
+  --iv-accent-fort: #d8be8c;
+  --iv-accent-texte: #d4b983;
+  --iv-accent-doux: rgba(201, 172, 116, 0.1);
+  --iv-accent-trait: rgba(201, 172, 116, 0.3);
+  --iv-accent-lueur: rgba(201, 172, 116, 0.18);
+
+  --iv-focus: #c9ac74;
+  --iv-focus-halo: rgba(201, 172, 116, 0.25);
+  --iv-selection: rgba(201, 172, 116, 0.3);
+
+  --iv-ok: #7ccb9f;
+  --iv-ok-point: #5db585;
+  --iv-ok-fond: rgba(93, 181, 133, 0.12);
+  --iv-ok-trait: rgba(93, 181, 133, 0.28);
+  --iv-attente: #e7a858;
+  --iv-attente-point: #e09a3e;
+  --iv-attente-fond: rgba(224, 154, 62, 0.12);
+  --iv-attente-trait: rgba(224, 154, 62, 0.28);
+  --iv-alerte: #f08a80;
+  --iv-alerte-point: #eb6b5f;
+  --iv-alerte-fond: rgba(235, 107, 95, 0.13);
+  --iv-alerte-trait: rgba(235, 107, 95, 0.3);
+  --iv-alerte-plein: #c4352d;
+  --iv-info: #9db7d3;
+  --iv-info-fond: rgba(157, 183, 211, 0.1);
+  --iv-info-trait: rgba(157, 183, 211, 0.26);
+
+  --iv-donnee: #a39c91;
+  --iv-donnee-douce: rgba(163, 156, 145, 0.1);
+  --iv-donnee-fort: #c9ac74;
+  --iv-grille: rgba(255, 246, 230, 0.06);
+
+  --iv-ombre-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --iv-ombre-2: 0 1px 2px rgba(0, 0, 0, 0.32), 0 3px 10px -2px rgba(0, 0, 0, 0.3);
+  --iv-ombre-3: 0 2px 6px -1px rgba(0, 0, 0, 0.45), 0 16px 36px -10px rgba(0, 0, 0, 0.55);
+  --iv-ombre-4: 0 4px 12px -2px rgba(0, 0, 0, 0.5), 0 32px 80px -20px rgba(0, 0, 0, 0.75);
+  --iv-ombre-action: 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  --iv-ombre-champ: inset 0 1px 1px rgba(0, 0, 0, 0.18);
+  --iv-reflet: inset 0 1px 0 rgba(255, 246, 230, 0.04);
+  --iv-voile: rgba(5, 4, 3, 0.6);
+  --iv-voile-flou: 4px;
+
+  --iv-squelette: #24221f;
+  --iv-squelette-reflet: rgba(255, 246, 230, 0.06);
+
+  --iv-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239c968c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 10 5 5 5-5'/%3E%3C/svg%3E");
+  --iv-loupe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2377726a' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
+
+  --iv-guilloche-trait: rgba(201, 172, 116, 0.075);
+
+  /* Le texte clair sur fond sombre paraît plus gras : on allège d'un cran */
+  --iv-g-moyen: 470;
+  --iv-g-fort: 580;
+  --iv-g-tres-fort: 620;
+}
+
+/* ---------------------------------------------------------
+   5. COMPATIBILITÉ : anciens noms → nouveaux jetons
+   (feuilles de modules : exploitation, prospection, documents…)
+   --------------------------------------------------------- */
+:root,
+:root[data-theme="jour"],
+:root[data-theme="nuit"] {
+  --bg: var(--iv-fond);
+  --side: var(--iv-fond-cote);
+  --side-2: var(--iv-surface-3);
+  --side-line: var(--iv-trait-cote);
+  --side-text: var(--iv-encre-2);
+  --side-muted: var(--iv-muet);
+  --surface: var(--iv-surface);
+  --surface-2: var(--iv-surface-2);
+  --surface-3: var(--iv-surface-3);
+  --line: var(--iv-trait);
+  --line-2: var(--iv-trait-2);
+  --line-3: var(--iv-trait-3);
+  --text: var(--iv-encre);
+  --text-2: var(--iv-encre-2);
+  --muted: var(--iv-muet);
+  --faint: var(--iv-pale);
+  --action: var(--iv-action);
+  --action-fonce: var(--iv-action-presse);
+  --action-clair: var(--iv-surface-3);
+  --action-filet: var(--iv-trait-3);
+  --action-texte: var(--iv-action-texte);
+  /* « gold » désignait l'action principale dans les anciennes feuilles */
+  --gold: var(--iv-action);
+  --gold-light: var(--iv-encre);
+  --gold-dark: var(--iv-action-presse);
+  --gold-grad: var(--iv-action);
+  --gold-soft: var(--iv-surface-3);
+  --accent: var(--iv-encre);
+  --accent-light: var(--iv-encre-2);
+  --accent-soft: var(--iv-surface-3);
+  --accent-line: var(--iv-trait-3);
+  --link: var(--iv-encre);
+  --blue: var(--iv-encre-2);
+  --champagne: var(--iv-accent);
+  --vert-point: var(--iv-ok-point);
+  --green: var(--iv-ok);
+  --green-bg: var(--iv-ok-fond);
+  --green-line: var(--iv-ok-trait);
+  --amber: var(--iv-attente);
+  --amber-bg: var(--iv-attente-fond);
+  --amber-line: var(--iv-attente-trait);
+  --red: var(--iv-alerte);
+  --red-bg: var(--iv-alerte-fond);
+  --red-line: var(--iv-alerte-trait);
+  --radius: var(--iv-r);
+  --radius-sm: var(--iv-r-sm);
+  --radius-lg: var(--iv-r-lg);
+  --shadow-xs: var(--iv-ombre-1);
+  --shadow-sm: var(--iv-ombre-2);
+  --shadow-md: var(--iv-ombre-3);
+  --shadow-lg: var(--iv-ombre-4);
+  --font: var(--iv-police);
+  --serif: var(--iv-police-titre);
+  --mono: var(--iv-police-mono);
+  --ease: var(--iv-courbe);
+  --cote: var(--iv-cote);
+  --haut: var(--iv-haut);
+  --hero-bg: var(--iv-surface);
+  --lueur-1: transparent;
+  --lueur-2: transparent;
+  --lueur-3: transparent;
+  /* Une seule teinte pour tous les domaines (plus d'arc-en-ciel) */
+  --dom: var(--iv-encre);
+  --dom2: var(--iv-encre);
+}

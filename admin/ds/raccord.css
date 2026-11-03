@@ -1,0 +1,103 @@
+/* =========================================================
+   BDA ADMIN — DESIGN « IVOIRE SIGNATURE » · RACCORD
+   Les anciennes feuilles des pages (admin.css…) écrivaient des fonds
+   sombres en dur, corrigés autrefois par des couches de thème
+   (blanc, pro, console, entreprise, nuit, ivoire, sobre) qui ont été
+   retirées. Ce fichier rebranche ces éléments sur les jetons du design :
+   même rendu en clair et en sombre, sans dégradé ni gros arrondi.
+   ========================================================= */
+
+/* ---------- Surfaces (cartes de page) ---------- */
+:is(.outil, .fil, .assist-corps, .poste, .raccourci-admin, .action, .paie-etape, .galerie__item, .agent-tuile, .voyant, .mini,
+  .op-bandeau, .op-carte, .fiche, .installation, .etat-site, .panneau__bloc, .digitale, .doc-type, .lc-espace) {
+  background: var(--iv-surface) !important;
+  background-image: none !important;
+  border: var(--iv-filet) solid var(--iv-trait) !important;
+  border-radius: var(--iv-r-lg) !important;
+  color: var(--iv-encre);
+  box-shadow: var(--iv-ombre-1);
+}
+:is(.raccourci-admin, .action, .paie-etape, .op-carte, .galerie__item, .agent-tuile, .outil--lien, button.fiche) {
+  transition: border-color var(--iv-d-rapide) var(--iv-courbe), box-shadow var(--iv-d-rapide) var(--iv-courbe), background-color var(--iv-d-rapide) var(--iv-courbe) !important;
+}
+:is(.raccourci-admin, .action, .paie-etape, .op-carte, .galerie__item, .agent-tuile, .outil--lien, button.fiche):hover {
+  border-color: var(--iv-trait-3) !important;
+  box-shadow: var(--iv-ombre-2);
+  transform: none !important;
+}
+.paie-etape { color: var(--iv-encre-2) !important; }
+
+/* ---------- Puits (blocs intérieurs, un ton en dessous) ---------- */
+:is(.service, .appareil, .pages-site a, .notif-appareils li, .pt-lien, .conv, .eqa-carte, .course, .note, .note-mini, .q-carte, .choix-visuel__btn,
+  .cp-stat, .op-stats > div, .pt-live__carte, .pt-total, .assist-apercu, .encart, .panneau__bloc--espace, .panneau__bloc--astuce, .lien-acces,
+  .eqa-demande, .ecrire, .poste__cmd, .q__choix, .depot) {
+  background: var(--iv-surface-2) !important;
+  background-image: none !important;
+  border-color: var(--iv-trait) !important;
+  color: var(--iv-encre);
+}
+:is(.action__ic, .raccourci-admin__ic) {
+  background: var(--iv-surface-3) !important;
+  border: 0 !important;
+  border-radius: var(--iv-r) !important;
+  color: var(--iv-encre) !important;
+  box-shadow: none !important;
+}
+:is(.action, .raccourci-admin):hover :is(.action__ic, .raccourci-admin__ic) { background: var(--iv-surface-4) !important; }
+
+/* ---------- Zone d'écriture des notes ---------- */
+.ecrire__zone {
+  background: var(--iv-surface) !important;
+  color: var(--iv-encre) !important;
+  border: var(--iv-filet) solid var(--iv-trait-2) !important;
+  border-radius: var(--iv-r) !important;
+  box-shadow: var(--iv-ombre-champ);
+}
+.ecrire__zone::placeholder { color: var(--iv-pale); }
+.ecrire__zone:focus { border-color: var(--iv-focus) !important; box-shadow: 0 0 0 3px var(--iv-focus-halo) !important; }
+
+/* ---------- Onglets : l'onglet actif est souligné, jamais un bloc plein ---------- */
+.onglet.is-actif { background: transparent !important; background-image: none !important; font-weight: var(--iv-g-fort); }
+.onglet.is-actif span, .onglet span { background: var(--iv-surface-3); color: var(--iv-encre-2); }
+
+/* ---------- Interrupteurs ---------- */
+.interrupteur input:checked + span { background: var(--iv-action) !important; }
+.interrupteur input:checked + span::after { background: #ffffff !important; }
+
+/* ---------- Aperçu du bandeau d'annonce (Contrôle du site) ---------- */
+.apercu-annonce {
+  background: var(--iv-surface-2) !important;
+  background-image: none !important;
+  border: var(--iv-filet) solid var(--iv-trait-2) !important;
+  border-radius: var(--iv-r) !important;
+  color: var(--iv-encre-2) !important;
+}
+.apercu-annonce u { color: var(--iv-encre); }
+
+/* ---------- Bandeau de la veille commerciale ---------- */
+.op-bandeau { color: var(--iv-encre) !important; }
+.op-bandeau h2 { color: var(--iv-encre) !important; }
+.op-bandeau h2 em { background: none !important; -webkit-background-clip: border-box !important; background-clip: border-box !important; color: var(--iv-accent-texte) !important; -webkit-text-fill-color: currentColor !important; }
+.op-stats b { color: var(--iv-encre) !important; }
+.op-stats .is-rouge b { color: var(--iv-alerte) !important; }
+.op-carte.is-cible { border-color: var(--iv-accent) !important; box-shadow: 0 0 0 3px var(--iv-accent-lueur) !important; }
+
+/* ---------- Cadre des aperçus de flyers ---------- */
+.apercu-flyer { background: var(--iv-surface-3) !important; border: var(--iv-filet) solid var(--iv-trait) !important; border-radius: var(--iv-r-lg) !important; }
+
+/* ---------- Pastilles d'icône des tuiles et services ---------- */
+:is(.service__ic, .appareil__ic, .notif-appareils__ic, .tuile__ic, .voyant__ic, .outil__ic, .palette__ic) {
+  background: var(--iv-surface-3) !important;
+  border: 0 !important;
+  color: var(--iv-encre-2) !important;
+  border-radius: var(--iv-r) !important;
+}
+
+/* ---------- Tableau des agents : il défile dans son propre cadre, l'en-tête colle en haut de ce cadre ---------- */
+.tableau-agents .tableau--agents th { top: 0 !important; background: var(--iv-surface-2) !important; }
+
+/* ---------- Onglets de la paie : segment actif en encre, lisible en clair comme en sombre ---------- */
+.paie-onglets { background: var(--iv-surface-2) !important; border-color: var(--iv-trait) !important; border-radius: var(--iv-r-lg) !important; }
+.paie-onglet { border-radius: var(--iv-r) !important; }
+.paie-onglet:hover { background: var(--iv-surface-3) !important; color: var(--iv-encre) !important; }
+.paie-onglet.is-actif { background: var(--iv-action) !important; background-image: none !important; color: var(--iv-action-texte) !important; }

@@ -1,10 +1,11 @@
 /* =========================================================
    ESPACE ADMIN BDA — Vue générale (écran de départ)
-   Écran calme : la salutation, l'état du site et de l'appli,
-   puis une tuile par grand domaine (Clients, Facturation, Équipe…).
-   Le détail de ce qui attend une action est dans la cloche du haut.
+   Le tableau de bord de la direction : les chiffres du jour en une ligne,
+   le terrain d'aujourd'hui (qui est où, qui manque), ce qui attend une
+   action, et l'accès direct aux grands domaines. Données : accueil,
+   centre de contrôle et pilotage (chiffre d'affaires, pour les administrateurs).
    ========================================================= */
-import { api, h, cap, icone, ErreurApi } from './outils.js';
+import { api, h, cap, icone, pad, ErreurApi } from './outils.js';
 
 async function tableauAppli() {
   const res = await fetch('appli-api.php?a=tableau', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
@@ -13,81 +14,139 @@ async function tableauAppli() {
   return json;
 }
 
+const euro = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+const nb = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
+const espace = (s) => String(s).replace(/ /g, ' ');
+const ETATS = {
+  en_poste: ['En poste', 'ok'], arrivee: ['Prise de poste', 'attente'], a_venir: ['À venir', 'neutre'], retard: ['Pas arrivé', 'alerte'],
+  partie: ['Parti', 'neutre'], terminee: ['Terminé', 'neutre'], en_cours: ['En cours', 'neutre'], sans_pointage: ['Sans pointage', 'attente'], non_pourvue: ['Non pourvu', 'alerte'],
+};
+const ORDRE = { retard: 0, non_pourvue: 1, arrivee: 2, en_poste: 3, en_cours: 4, a_venir: 5, sans_pointage: 6, partie: 7, terminee: 8 };
+const hm = (ts) => { const d = new Date(ts * 1000); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const compte = (v) => (Array.isArray(v) ? v.length : Number(v) || 0);
+
 export async function pageVueGenerale(ctx) {
   ctx.titre('Vue générale');
-  const [{ accueil: a }, session, appli] = await Promise.all([api('accueil'), api('session'), tableauAppli().catch(() => null)]);
+  const [accueil, session, appli, controle] = await Promise.all([
+    api('accueil'), api('session'), tableauAppli().catch(() => null), api('controle').catch(() => null)]);
+  const admin = session.role === 'admin';
+  const pilotage = admin ? await api('pilotage').catch(() => null) : null;
   if (!ctx.actuel()) return;
-  const c = { demandes: 0, messages: 0, assistance: 0, candidatures: 0, equipe: 0, avis: 0, retards: 0, reservations: 0, ...a.compteurs };
+  const a = accueil.accueil;
+  const c = { demandes: 0, messages: 0, assistance: 0, candidatures: 0, equipe: 0, avis: 0, retards: 0, reservations: 0, nonpourvus: 0, rappels: 0, opportunites: 0, sos: 0, ...a.compteurs };
   const auj = new Date();
-  const pluriel = (n, un, plusieurs) => `${n} ${n > 1 ? plusieurs : un}`;
-  const enCours = appli ? appli.enDirect.length : 0;
+  const pluriel = (n, un, plusieurs) => `${nb.format(n)} ${n > 1 ? plusieurs : un}`;
   const aAttribuer = appli ? appli.aVenir.filter((x) => x.statut === 'reservee').length : 0;
-  const alertes = appli ? appli.enDirect.filter((x) => x.alertes && x.alertes.length).length : 0;
+  const alertesAppli = appli ? appli.enDirect.filter((x) => x.alertes && x.alertes.length).length : 0;
   const cartes = a.agentsAlerte.length;
 
-  // Nombre de points qui attendent une action (même liste que la cloche, plus la sécurité et les cartes pro)
-  const points = [c.demandes, c.messages, c.assistance, c.candidatures, c.equipe, c.avis, c.retards, c.reservations, alertes, aAttribuer, a.alertes, cartes, c.horsLigne ? 1 : 0, c.nonpourvus]
-    .reduce((s, n) => s + (Number(n) || 0), 0);
+  /* ----- Ce qui attend une action (même logique que la cloche, la plus grave en premier) ----- */
+  const aFaire = [
+    [c.sos, 'Alerte d’un agent à prendre en charge', '#/controle', true],
+    [c.nonpourvus, 'Postes non pourvus dans les 48 h', '#/exploitation', true],
+    [c.retards, 'Factures en retard de paiement', '#/factures', true],
+    [c.assistance, 'Visiteurs qui demandent un conseiller', '#/assistance', true],
+    [alertesAppli, 'Courses VTC avec une alerte', '#/appli', true],
+    [c.demandes, 'Demandes de devis à traiter', '#/demandes'],
+    [c.messages, 'Messages de clients non lus', '#/messages'],
+    [c.rappels, 'Clients à rappeler aujourd’hui', '#/opportunites/rappels'],
+    [aAttribuer, 'Courses VTC à attribuer', '#/appli'],
+    [c.reservations, 'Réservations VTC du site', '#/vtc'],
+    [c.candidatures, 'Nouvelles candidatures', '#/candidatures'],
+    [c.equipe, 'Espace équipe : comptes, absences, main courante', '#/equipe'],
+    [cartes, 'Cartes professionnelles à renouveler', '#/agents'],
+    [c.avis, 'Avis clients à valider', '#/avis'],
+    [a.alertes, 'Connexions refusées à l’admin', '#/securite', true],
+    [c.horsLigne ? 1 : 0, 'Le site est hors ligne', '#/site', true],
+  ].filter(([n]) => Number(n) > 0);
+  const points = aFaire.reduce((s, [n]) => s + Number(n), 0);
 
-  /* ----- En-tête : salutation, heure, état du site et de l'appli ----- */
-  const heure = h('span', { class: 'acc-heure' });
+  /* ----- En-tête : date, heure, salutation, résumé ----- */
+  const heure = h('span', { class: 'vg-heure' });
   const majHeure = () => { heure.textContent = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date()); };
   majHeure();
   const minuteur = setInterval(() => { if (!document.body.contains(heure)) { clearInterval(minuteur); return; } majHeure(); }, 10000);
+  const tete = h('header', { class: 'vg-tete' },
+    h('div', { class: 'vg-tete__txt' },
+      h('p', { class: 'vg-date' }, cap(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).format(auj)), h('span', { 'aria-hidden': 'true' }, '/'), heure),
+      h('h1', { class: 'vg-titre' }, `${auj.getHours() >= 5 && auj.getHours() < 18 ? 'Bonjour' : 'Bonsoir'}${session.utilisateur ? `, ${cap(session.utilisateur)}` : ''}`),
+      h('p', { class: 'vg-resume' }, points ? h('span', null, h('b', null, pluriel(points, 'point demande', 'points demandent')), ' votre attention aujourd’hui.') : 'Tout est en ordre : rien n’attend d’action.')),
+    h('div', { class: 'vg-tete__actions' },
+      h('a', { class: 'btn btn--ghost', href: '#/controle' }, icone('direct'), 'Centre de contrôle'),
+      h('a', { class: 'btn btn--gold', href: '#/factures/nouvelle' }, icone('plus'), 'Nouvelle facture')));
 
-  const entete = h('section', { class: 'acc-entete' },
-    h('div', { class: 'acc-entete__txt' },
-      h('p', { class: 'acc-date' }, cap(new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }).format(auj)), h('span', { 'aria-hidden': 'true' }, '·'), heure),
-      h('h1', { class: 'acc-titre' }, `${auj.getHours() >= 5 && auj.getHours() < 18 ? 'Bonjour' : 'Bonsoir'}${session.utilisateur ? `, ${cap(session.utilisateur)}` : ''}`),
-      h('p', { class: 'acc-sous' }, points ? `${pluriel(points, 'point demande', 'points demandent')} votre attention.` : 'Tout est en ordre. Rien n’attend d’action.')),
-    // L'état du site est déjà en haut de l'écran : ici, seulement ce qui attend une action
-    points ? h('div', { class: 'acc-entete__droite' },
-      h('button', { class: 'btn btn--gold acc-voir', type: 'button', onclick: () => document.querySelector('.haut-btn')?.click() }, icone('cloche'), 'Voir ce qui attend')) : null);
+  /* ----- Chiffres du jour ----- */
+  const journee = controle ? [...controle.journee] : [];
+  const enPoste = controle ? compte(controle.enPoste) : 0;
+  const retards = journee.filter((v) => v.etat === 'retard').length;
+  const iMois = pilotage ? pilotage.mois.length - 3 : -1;
+  const caMois = pilotage ? pilotage.ca[iMois] || 0 : 0;
+  const caPrec = pilotage ? pilotage.ca[iMois - 1] || 0 : 0;
+  const evol = caPrec ? Math.round(((caMois - caPrec) / caPrec) * 100) : null;
+  const kpi = (libelle, valeur, sous, href, ton) => h('a', { class: `vg-kpi ${ton ? `is-${ton}` : ''}`.trim(), href },
+    h('span', { class: 'vg-kpi__lib' }, libelle), h('b', { class: 'vg-kpi__val' }, valeur), h('span', { class: 'vg-kpi__sous' }, sous));
+  const kpis = h('section', { class: 'vg-kpis', 'aria-label': 'Chiffres du jour' },
+    kpi('En poste', nb.format(enPoste), retards ? pluriel(retards, 'agent pas arrivé', 'agents pas arrivés') : 'aucun retard', '#/controle', retards ? 'alerte' : ''),
+    kpi('Postes du jour', nb.format(journee.length), journee.length ? `${journee.filter((v) => v.etat === 'terminee').length} terminés` : 'aucun poste prévu', '#/exploitation'),
+    kpi('Non pourvus 48 h', nb.format(c.nonpourvus), c.nonpourvus ? 'à placer dans le planning' : 'planning complet', '#/exploitation', c.nonpourvus ? 'alerte' : ''),
+    pilotage
+      ? kpi('Facturé ce mois', espace(euro.format(caMois)), evol === null ? 'factures envoyées ou payées' : `${evol >= 0 ? '+' : '−'}${Math.abs(evol)} % vs mois dernier`, '#/pilotage')
+      : kpi('Demandes à traiter', nb.format(c.demandes), 'reçues par le site', '#/demandes'),
+    pilotage
+      ? kpi('À encaisser', espace(euro.format(pilotage.factures.attente || 0)), pilotage.factures.retard ? `dont ${espace(euro.format(pilotage.factures.retard))} en retard` : 'aucun retard', '#/factures', pilotage.factures.retard ? 'alerte' : '')
+      : kpi('Factures en retard', nb.format(c.retards), 'à relancer', '#/factures', c.retards ? 'alerte' : ''),
+    kpi('Heures 7 jours', `${nb.format(controle?.semaine?.heures || 0)} h`, controle?.semaine ? `${nb.format(controle.semaine.vacations)} postes · ${nb.format(controle.semaine.agents)} agents` : 'planning des sites', '#/exploitation'));
 
-  /* ----- Une tuile par domaine ----- */
-  // Tuiles de tailles différentes (les grandes montent leurs chiffres), une couleur par domaine
-  const module = ({ href, dom, ic, titre, info, n = 0, alerte = false, grand = false, details = [] }) => h('a', { class: `acc-module ${grand ? 'acc-module--grand' : ''} ${n ? 'a-traiter' : ''}`.trim(), href, dataset: { dom } },
-    h('span', { class: 'acc-module__ic' }, icone(ic)),
-    h('span', { class: 'acc-module__txt' }, h('b', null, titre), h('small', null, info)),
-    grand && details.length ? h('span', { class: 'acc-module__details' }, details.map(([libelle, v]) => h('span', { class: Number(v) ? 'is-plein' : '' }, h('b', null, String(v)), libelle))) : null,
-    n ? h('em', { class: `acc-module__n ${alerte ? 'is-alerte' : ''}` }, String(n)) : null,
-    icone('fleche', 'acc-module__fleche'));
-  const modules = [
-    // Le robot de prospection (administrateurs seulement) : nouvelles pistes et clients à rappeler
-    session.role === 'admin' ? { href: c.rappels ? '#/opportunites/rappels' : '#/opportunites', dom: 'prospection', ic: 'cible', titre: 'Trouver des clients', grand: true, n: c.rappels,
-      info: c.rappels ? pluriel(c.rappels, 'client à rappeler aujourd’hui', 'clients à rappeler aujourd’hui') : c.opportunites ? pluriel(c.opportunites, 'nouvelle piste trouvée par le robot', 'nouvelles pistes trouvées par le robot') : 'Chantiers, bars, clubs, hôtels, magasins, appels d’offres',
-      details: [['nouvelles pistes', c.opportunites || 0], ['à rappeler', c.rappels || 0]] } : null,
-    { href: '#/demandes', dom: 'clients', ic: 'clients', titre: 'Clients', grand: true, n: c.demandes + c.messages + c.assistance, alerte: Boolean(c.assistance),
-      info: c.demandes ? pluriel(c.demandes, 'nouvelle demande de devis', 'nouvelles demandes de devis') : c.messages ? pluriel(c.messages, 'message client', 'messages clients') : 'Demandes, messages, fiches clients',
-      details: [['demandes', c.demandes], ['messages', c.messages], ['assistance', c.assistance]] },
-    { href: '#/devis', dom: 'facturation', ic: 'facture', titre: 'Facturation', n: c.retards, alerte: true,
-      info: c.retards ? pluriel(c.retards, 'facture à relancer', 'factures à relancer') : 'Devis, factures, PDF clients' },
-    { href: '#/site', dom: 'site', ic: 'site', titre: 'Site web', n: c.avis + (c.horsLigne ? 1 : 0), alerte: Boolean(c.horsLigne),
-      info: c.horsLigne ? 'Hors ligne · maintenance' : c.avis ? pluriel(c.avis, 'avis à valider', 'avis à valider') : 'En ligne · bdasecurite.com' },
-    // Exploitation : la journée en direct et les postes à pourvoir
-    { href: c.nonpourvus ? '#/exploitation' : '#/controle', dom: 'equipe', ic: 'direct', titre: 'Centre de contrôle', grand: true, n: c.nonpourvus || 0, alerte: Boolean(c.nonpourvus),
-      info: c.nonpourvus ? pluriel(c.nonpourvus, 'poste non pourvu dans les 48 h', 'postes non pourvus dans les 48 h') : 'Qui est en poste, planning des sites, alertes',
-      details: [['non pourvus', c.nonpourvus || 0], ['cartes pro', cartes]] },
-    { href: '#/agents', dom: 'equipe', ic: 'agents', titre: 'Équipe', grand: true, n: c.candidatures + c.equipe, alerte: false,
-      info: c.candidatures ? pluriel(c.candidatures, 'nouvelle candidature', 'nouvelles candidatures') : 'Agents, candidatures, paie, contrats',
-      details: [['candidatures', c.candidatures], ['espace équipe', c.equipe]] },
-    { href: '#/appli', dom: 'appli', ic: 'voiture', titre: 'Application VTC', grand: true, n: alertes + aAttribuer + c.reservations, alerte: alertes > 0,
-      info: appli ? (appli.ouvert ? 'Ouverte · BDASH et BDASH Pro' : 'Fermée · BDASH et BDASH Pro') : 'BDASH et BDASH Pro',
-      details: [['en cours', enCours], ['à attribuer', aAttribuer], ['réservations', c.reservations]] },
-    { href: '#/tableau', dom: 'stats', ic: 'graphique', titre: 'Statistiques', grand: true, info: 'Activité du site sur 30 jours, documents récents, journal' },
-    { href: '#/creations', dom: 'outils', ic: 'calques', titre: 'Outils', info: 'Cartes agents, flyers, notes' },
-    { href: '#/securite', dom: 'securite', ic: 'bouclier', titre: 'Sécurité', n: a.alertes, alerte: true,
-      info: a.alertes ? pluriel(a.alertes, 'connexion refusée', 'connexions refusées') : 'Accès, appareils, journal' },
-  ].filter(Boolean).map(module);
+  /* ----- Le terrain aujourd'hui ----- */
+  journee.sort((x, y) => (ORDRE[x.etat] ?? 9) - (ORDRE[y.etat] ?? 9) || x.debut_ts - y.debut_ts);
+  const ligne = (v) => {
+    const [lib, ton] = ETATS[v.etat] || [v.etat, 'neutre'];
+    return h('tr', null,
+      h('td', { class: 'vg-num' }, `${hm(v.debut_ts)} – ${hm(v.fin_ts)}`),
+      h('td', null, h('span', { class: 'vg-site' }, v.site_nom || 'Site')),
+      h('td', null, v.agent_id ? (v.agent_nom || 'Agent') : h('span', { class: 'vg-vide' }, 'Personne')),
+      h('td', { class: 'vg-etat-cell' }, h('span', { class: `vg-etat vg-etat--${ton}` }, lib)));
+  };
+  const terrain = h('section', { class: 'vg-bloc vg-terrain' },
+    h('header', { class: 'vg-bloc__tete' }, h('h2', null, 'Le terrain aujourd’hui'), h('a', { class: 'vg-lien', href: '#/exploitation' }, 'Planning des sites')),
+    journee.length
+      ? h('div', { class: 'vg-table' }, h('table', null,
+        h('thead', null, h('tr', null, h('th', null, 'Horaire'), h('th', null, 'Site'), h('th', null, 'Agent'), h('th', { class: 'vg-etat-cell' }, 'État'))),
+        h('tbody', null, journee.slice(0, 9).map(ligne))))
+      : h('p', { class: 'vg-calme' }, 'Aucun poste prévu aujourd’hui dans le planning des sites.'),
+    journee.length > 9 ? h('a', { class: 'vg-plus', href: '#/controle' }, `Voir les ${journee.length} postes du jour`) : null);
 
-  ctx.afficher(h('div', { class: 'accueil' }, entete, h('nav', { class: 'acc-modules', 'aria-label': 'Domaines' }, modules)));
+  /* ----- À traiter ----- */
+  const traiter = h('section', { class: 'vg-bloc vg-traiter' },
+    h('header', { class: 'vg-bloc__tete' }, h('h2', null, 'À traiter'), h('span', { class: 'vg-compte' }, points ? nb.format(points) : '')),
+    aFaire.length
+      ? h('ul', { class: 'vg-liste' }, aFaire.map(([n, libelle, href, alerte]) => h('li', null,
+        h('a', { href, class: alerte ? 'is-alerte' : '' }, h('b', { class: 'vg-liste__n' }, nb.format(n)), h('span', null, libelle), icone('fleche', 'vg-liste__fleche')))))
+      : h('p', { class: 'vg-calme' }, 'Rien n’attend d’action. Bonne journée.'));
 
-  // Raccourcis clavier : 1 à 8 ouvrent les tuiles
+  /* ----- Accès direct aux domaines ----- */
+  const domaines = [
+    admin ? ['Trouver des clients', '#/opportunites', c.opportunites ? pluriel(c.opportunites, 'nouvelle piste', 'nouvelles pistes') : 'Robot de prospection'] : null,
+    ['Clients', '#/clients', c.demandes ? pluriel(c.demandes, 'demande', 'demandes') : 'Fiches, demandes, messages'],
+    ['Facturation', '#/factures', c.retards ? pluriel(c.retards, 'facture en retard', 'factures en retard') : 'Devis, factures, PDF'],
+    ['Planning des sites', '#/exploitation', c.nonpourvus ? pluriel(c.nonpourvus, 'poste à pourvoir', 'postes à pourvoir') : 'Postes, sites, rondes'],
+    ['Agents', '#/agents', cartes ? pluriel(cartes, 'carte pro à renouveler', 'cartes pro à renouveler') : 'Équipe, renforts, secours'],
+    admin ? ['Paie', '#/paie', 'Fiches de paie du mois'] : null,
+    ['Site web', '#/site', c.horsLigne ? 'Hors ligne' : 'En ligne · bdasecurite.com'],
+    ['Application VTC', '#/appli', appli ? (appli.ouvert ? 'Ouverte · BDASH' : 'Fermée · BDASH') : 'BDASH et BDASH Pro'],
+    ['Statistiques', '#/tableau', 'Activité du site, journal'],
+  ].filter(Boolean);
+  const acces = h('nav', { class: 'vg-domaines', 'aria-label': 'Domaines' },
+    domaines.map(([titre, href, info], i) => h('a', { href }, h('kbd', null, String(i + 1)), h('span', null, h('b', null, titre), h('small', null, info)), icone('fleche', 'vg-domaines__fleche'))));
+
+  ctx.afficher(h('div', { class: 'vg' }, tete, kpis, h('div', { class: 'vg-grille' }, terrain, traiter), acces));
+
+  // Raccourcis clavier : 1 à 9 ouvrent les domaines
   const touches = (e) => {
-    if (!document.body.contains(modules[0])) { document.removeEventListener('keydown', touches); return; }
+    if (!document.body.contains(acces)) { document.removeEventListener('keydown', touches); return; }
     if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input, textarea, select, [contenteditable="true"]') || document.querySelector('.modale-fond, .palette-fond, .deroulant')) return;
     const i = Number(e.key) - 1;
-    if (i >= 0 && i < modules.length) location.hash = modules[i].getAttribute('href');
+    if (i >= 0 && i < domaines.length) location.hash = domaines[i][1];
   };
   document.addEventListener('keydown', touches);
 }

@@ -5,7 +5,7 @@ require __DIR__ . '/../app/bootstrap.php';
 entetes_securite();
 header('Cache-Control: no-store');
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://data.geopf.fr; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'");
-$v = '56';
+$v = '57';
 ?><!doctype html>
 <html lang="fr" data-theme="jour">
 <head>
@@ -52,6 +52,7 @@ $v = '56';
 <link rel="stylesheet" href="ds/pages.css?v=<?= $v ?>">
 <link rel="stylesheet" href="ds/raccord.css?v=<?= $v ?>">
 <link rel="stylesheet" href="ds/motion.css?v=<?= $v ?>">
+<link rel="stylesheet" href="ds/signature.css?v=<?= $v ?>">
 <?php // styles des modules (admin/ds/modules/<nom>.css), ajoutés automatiquement
 foreach (glob(__DIR__ . '/ds/modules/*.css') ?: [] as $f) echo '<link rel="stylesheet" href="ds/modules/' . htmlspecialchars(basename($f), ENT_QUOTES) . '?v=' . $v . "\">
 "; ?>

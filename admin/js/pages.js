@@ -278,6 +278,7 @@ async function pageDemandes(ctx) {
         { libelle: 'Supprimer', classe: 'btn--danger-ghost', valeur: 'supprimer' },
         { libelle: d.statut === 'archivee' ? 'Remettre en nouvelle' : 'Archiver', classe: 'btn--ghost', valeur: d.statut === 'archivee' ? 'nouvelle' : 'archivee' },
         { libelle: 'Marquer traitée', classe: 'btn--ghost', valeur: 'traitee' },
+        { libelle: 'Audit de sûreté', classe: 'btn--ghost', valeur: 'audit' },
         { libelle: 'Créer un devis', classe: 'btn--gold', valeur: 'devis', submit: true },
       ],
     });
@@ -290,6 +291,8 @@ async function pageDemandes(ctx) {
         }));
         if (d.statut === 'nouvelle') await changer(d, 'traitee');
         ctx.aller('#/devis/nouveau');
+      } else if (choix === 'audit') {
+        ctx.aller(`#/audit/nouveau/demande/${d.id}`);
       } else if (choix === 'supprimer') {
         if (!(await confirmer('Supprimer définitivement cette demande ?', { ok: 'Supprimer', danger: true }))) return;
         await api('demande.supprimer', { id: d.id });

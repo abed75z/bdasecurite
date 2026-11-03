@@ -39,6 +39,10 @@ export const MODULES = [
     menu: { groupe: 'Exploitation', apres: 'terrain', libelle: 'Tout va bien ?', ic: 'lune', badge: 'presence' },
     cloche: { cle: 'presence', libelle: 'Agent de nuit sans réponse', ic: 'alerte', alerte: true, href: '#/controle' },
     commandes: [{ ic: 'lune', titre: 'Contrôle de présence « Tout va bien ? »', mots: 'presence nuit tout va bien travailleur isole pti dati alerte', href: '#/presence' }] },
+  // Audits de sûreté : visite guidée sur place, rapport PDF, devis pré-rempli
+  { route: 'audit', charger: () => import('./audit.js'), page: 'pageAudit',
+    menu: { groupe: 'Clients', apres: 'demandes', libelle: 'Audits de sûreté', ic: 'cible' },
+    commandes: [{ ic: 'cible', titre: 'Nouvel audit de sûreté', mots: 'audit surete visite diagnostic prospect', href: '#/audit/nouveau' }] },
   // Carte d'agent numérique avec QR code, vérifiable par le client sur bdasecurite.com/verifier
   { route: 'badges', charger: () => import('./badge.js'), page: 'pageBadges',
     menu: { groupe: 'Exploitation', apres: 'agents', libelle: 'Cartes d’agent', ic: 'badge' },

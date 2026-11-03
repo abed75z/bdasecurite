@@ -1,0 +1,64 @@
+/* =========================================================
+   AUDITS DE SÛRETÉ — grille de visite (téléphone) et rapport A4
+   ========================================================= */
+.au .carte { display: grid; gap: 12px; }
+.au-barre { position: sticky; top: 8px; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; padding: 12px 16px; border: 1px solid var(--iv-trait); border-radius: 8px; background: color-mix(in srgb, var(--iv-surface) 92%, transparent); backdrop-filter: blur(10px); box-shadow: var(--iv-ombre-1); }
+.au-barre__note { display: grid; gap: 2px; }
+.au-barre__note .f-label { margin: 0; font-family: var(--iv-police-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--iv-muet); }
+.au-note { font-size: 22px; letter-spacing: -0.02em; }
+.au-barre__txt { display: grid; gap: 2px; flex: 1; min-width: 200px; font-size: 13px; color: var(--iv-encre-2); }
+.au-barre__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.au-theme .au-point { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--iv-trait); }
+.au-theme .au-point:first-of-type { border-top: 0; padding-top: 0; }
+.au-point p { margin: 0; font-size: 14px; color: var(--iv-encre); }
+.au-choix-groupe { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.au-choix { min-height: 36px; padding: 6px 8px; border: 1px solid var(--iv-trait-fort); border-radius: 6px; background: var(--iv-surface); color: var(--iv-encre-2); font: 500 12.5px/1.2 var(--iv-police); cursor: pointer; transition: background-color 120ms var(--iv-courbe), border-color 120ms var(--iv-courbe), color 120ms var(--iv-courbe); }
+.au-choix:hover { border-color: var(--iv-encre-2); }
+.au-choix.is-on.is-ok { background: var(--iv-ok-fond); border-color: var(--iv-ok-trait); color: var(--iv-ok); font-weight: 600; }
+.au-choix.is-on.is-ameliorer { background: var(--iv-attente-fond); border-color: var(--iv-attente-trait); color: var(--iv-attente); font-weight: 600; }
+.au-choix.is-on.is-critique { background: var(--iv-alerte-fond); border-color: var(--iv-alerte-trait); color: var(--iv-alerte); font-weight: 600; }
+.au-choix.is-on.is-na { background: var(--iv-surface-3); color: var(--iv-encre); font-weight: 600; }
+.au-point .input { font-size: 13px; }
+
+.au-recos { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.au-recos li { display: flex; align-items: baseline; gap: 10px; font-size: 13px; line-height: 1.5; color: var(--iv-encre-2); }
+.au-recos .pastille { flex: none; }
+
+.au-besoins { display: grid; gap: 10px; }
+.au-besoin { display: grid; grid-template-columns: minmax(160px, 1.6fr) 80px 100px 100px minmax(150px, 1.2fr) 80px auto 32px; gap: 8px; align-items: end; padding-bottom: 10px; border-bottom: 1px solid var(--iv-trait); }
+.au-mini { display: grid; gap: 3px; }
+.au-mini span { font-size: 11px; color: var(--iv-muet); }
+.au-heures { align-self: center; font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+/* Rapport A4 (capturé en PDF, hors écran) */
+.au-scene { position: fixed; left: -10000px; top: 0; }
+.au-f .f-lignes { white-space: pre-line; }
+.au-f-score { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 4mm; margin: 6mm 0 2mm; }
+.au-f-score > div { padding: 3mm 4mm; border: 1px solid var(--trait); border-radius: 2mm; }
+.au-f-score b { display: block; font: 700 18pt "Montserrat", "Segoe UI", sans-serif; color: var(--encre); }
+.au-f-score b small { font-size: 10pt; color: var(--gris); }
+.au-f-score > div:first-child { background: var(--creme); border-left: 3px solid var(--or); }
+.au-f-bloc { margin-top: 6mm; }
+.au-f-bloc p { margin: 0; white-space: pre-line; color: var(--encre-2); }
+.au-f-table { width: 100%; border-collapse: collapse; font-size: 8.6pt; }
+.au-f-table th { padding: 2mm; border-bottom: 1px solid var(--or); text-align: left; font: 600 6.8pt "Montserrat", "Segoe UI", sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: var(--encre); }
+.au-f-table td { padding: 2.2mm 2mm; border-bottom: 1px solid var(--trait); vertical-align: top; color: var(--encre-2); }
+.au-f-table td small { display: block; font-size: 6.8pt; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gris); }
+.au-f-table td em { display: block; margin-top: 1mm; color: var(--gris); }
+.au-f-etat { display: inline-block; padding: 0.6mm 2mm; border-radius: 1mm; font-weight: 600; white-space: nowrap; }
+.au-f-etat.is-critique { background: #fbe9e7; color: #b3261e; }
+.au-f-etat.is-ameliorer { background: #fdf3e1; color: #95600c; }
+.au-f-pied { margin-top: auto; padding-top: 6mm; font-size: 7pt; line-height: 1.45; color: var(--gris); text-align: center; white-space: pre-line; }
+
+@media (max-width: 1100px) {
+  .au-besoin { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); }
+  .au-besoin > select:first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) {
+  .au-barre { top: 0; }
+  .au-barre__actions { width: 100%; }
+  .au-barre__actions .btn { flex: 1; justify-content: center; }
+  .au-choix { min-height: 42px; }
+  .au-besoin { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+}

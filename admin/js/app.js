@@ -607,6 +607,7 @@ function montrerNouveautes() {
         point('mail', 'clients', 'Messagerie', 'Factures et devis envoyés par mail depuis contact@, avec suivi d’ouverture et relances préparées. Écrire à un agent, un client ou à tous en un clic.'),
         point('planning', 'exploitation', 'Planning nouvelle génération', 'Bouton « Remplir » qui propose les agents en respectant les règles, bourse aux postes libres, échanges entre agents à valider, besoins récurrents par site.'),
         point('bouclier', 'exploitation', 'Terrain & qualité', 'Classeur de chaque site : consignes que les agents signent « lu et compris », plans, numéros d’urgence, clés. Plus le matériel confié et les contrôles qualité notés sur place.'),
+        point('lune', 'exploitation', 'Tout va bien ?', 'Contrôle de présence des agents de nuit : une question sur leur téléphone, une alerte s’ils ne répondent pas. Désactivé tant que vous ne l’activez pas.'),
         point('etoile', 'equipe', 'Design « Ivoire signature »', 'Menu sombre et or, tableaux et cartes redessinés, accueil en tableau de bord.'))),
     actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
   }), 900);

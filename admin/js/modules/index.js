@@ -34,6 +34,11 @@ export const MODULES = [
     cloche: { cle: 'materiel', libelle: 'Matériel à récupérer', ic: 'cle', href: '#/terrain/materiel' },
     commandes: [{ ic: 'bouclier', titre: 'Nouveau contrôle qualité sur site', mots: 'controle qualite inspection noter agent visite', href: '#/terrain/controle/nouveau' },
       { ic: 'cle', titre: 'Matériel & tenues', mots: 'materiel tenue talkie badge remettre retour', href: '#/terrain/materiel' }] },
+  // « Tout va bien ? » — contrôle de présence des agents de nuit (désactivé par défaut)
+  { route: 'presence', charger: () => import('./presence.js'), page: 'pagePresence',
+    menu: { groupe: 'Exploitation', apres: 'terrain', libelle: 'Tout va bien ?', ic: 'lune', badge: 'presence' },
+    cloche: { cle: 'presence', libelle: 'Agent de nuit sans réponse', ic: 'alerte', alerte: true, href: '#/controle' },
+    commandes: [{ ic: 'lune', titre: 'Contrôle de présence « Tout va bien ? »', mots: 'presence nuit tout va bien travailleur isole pti dati alerte', href: '#/presence' }] },
 ];
 
 // Pages des modules, au format de PAGES (pages.js)

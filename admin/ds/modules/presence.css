@@ -1,0 +1,21 @@
+/* =========================================================
+   « TOUT VA BIEN ? » — contrôle de présence des agents de nuit
+   (réutilise la mise en page du module Terrain : .tr, .tr-colonnes, .tr-pied, .tr-alerte)
+   ========================================================= */
+.tv .carte { display: grid; gap: 12px; }
+.tv .carte__tete select { max-width: 340px; }
+.tv-interrupteur { align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid var(--iv-trait); border-radius: 8px; background: var(--iv-surface-2); }
+.tv-interrupteur b { font-weight: 600; font-size: 13.5px; }
+.tv-sites { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px 12px; }
+.tv-sites[hidden] { display: none; }
+.tv-limites ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; line-height: 1.55; color: var(--iv-encre-2); }
+.tv-equipe { margin: 0; padding: 0; list-style: none; }
+.tv-equipe li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--iv-trait); font-size: 13px; }
+.tv-equipe li:first-child { border-top: 0; padding-top: 0; }
+.tv-equipe li > span:first-child { display: grid; }
+.tv-equipe small { font-size: 12px; }
+.tv-ok { display: inline-flex; align-items: center; gap: 6px; color: var(--iv-ok); font-size: 12.5px; }
+.tv-ok .ic { width: 14px; height: 14px; }
+.tv-alerte { border-color: var(--iv-alerte-trait); background: var(--iv-alerte-fond); text-decoration: none; }
+.tv-alerte > .ic { color: var(--iv-alerte); }
+.tv-alerte p { margin: 2px 0 0; }

@@ -71,7 +71,12 @@ async function rendu(o) {
     e.currentTarget.disabled = true;
     try { await api('mod.presence.tester', {}); toast('Alerte d’essai envoyée : elle arrive dans quelques secondes.'); } catch (err) { toast(err.message, true); }
   };
-  const telephone = h('section', { class: 'eq-carte' },
+  // Dans l'appli BDA Équipe : les alertes arrivent par les notifications de l'iPhone
+  const telephone = window.Capacitor?.isNativePlatform?.() ? h('section', { class: 'eq-carte' },
+    h('div', { class: 'eq-carte__tete' }, h('h2', null, 'Alertes sur ce téléphone'), h('span', { class: `eq-pastille eq-pastille--${d.natifs ? 'ok' : 'neutre'}` }, d.natifs ? 'Activées' : 'Non activées')),
+    h('p', { class: 'eqp-aide' }, d.natifs ? 'L’appli vous enverra « Tout va bien ? » pendant vos postes de nuit. Gardez le téléphone allumé, avec internet et le son.' : 'Autorisez les notifications : Réglages de l’iPhone › Notifications › BDA Équipe.'),
+    d.natifs ? h('div', { class: 'eqp-actions' }, h('button', { class: 'eq-btn', type: 'button', onclick: tester }, 'Envoyer une alerte d’essai')) : null)
+    : h('section', { class: 'eq-carte' },
     h('div', { class: 'eq-carte__tete' }, h('h2', null, 'Alertes sur ce téléphone'), h('span', { class: `eq-pastille eq-pastille--${ici ? 'ok' : 'neutre'}` }, ici ? 'Activées' : 'Non activées')),
     iphone() && !installee() ? h('p', { class: 'eqp-aide' }, 'Sur iPhone : ajoutez d’abord l’Espace équipe à l’écran d’accueil (bouton Partager › « Sur l’écran d’accueil »), ouvrez-le depuis l’icône, puis activez les alertes.') : null,
     h('p', { class: 'eqp-aide' }, ici ? 'Ce téléphone recevra « Tout va bien ? » pendant vos postes de nuit. Gardez-le allumé, avec internet et le son.' : 'Activez les alertes pour recevoir « Tout va bien ? » pendant vos postes de nuit et y répondre d’un appui.'),
@@ -114,7 +119,7 @@ export const CARTES = [async (o) => {
       h('span', null, h('b', null, 'Tout va bien ?'), h('small', null, `Répondez avant ${heure(d.attente[0].limite)}`)),
       ic('fleche'));
   }
-  if (d.reglages.actif && !d.appareils.length) {
+  if (d.reglages.actif && !d.appareils.length && !d.natifs) {
     return h('a', { class: 'eq-carte eqp-alerte', href: '#/presence' },
       h('span', { class: 'eqp-alerte__ic' }, ic('presence')),
       h('span', null, h('b', null, 'Activez les alertes de service'), h('small', null, 'Pour le contrôle « Tout va bien ? » des postes de nuit')),

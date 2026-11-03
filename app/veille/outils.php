@@ -9,7 +9,9 @@ const VEILLE_ENV_CLES = ['DISCORD_WEBHOOK_URL', 'FT_CLIENT_ID', 'FT_CLIENT_SECRE
   // appli BDASH : envoi des codes de connexion par SMS (API OVH)
   'OVH_SMS_AK', 'OVH_SMS_AS', 'OVH_SMS_CK', 'OVH_SMS_SERVICE',
   // compte Google relié à l'admin (Gmail, agenda) : voir app/google.php
-  'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REFRESH_TOKEN', 'GOOGLE_COMPTE'];
+  'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_REFRESH_TOKEN', 'GOOGLE_COMPTE',
+  // appli iPhone « BDA Équipe » : notifications natives d'Apple (APNs), voir app/modules/mobile.php
+  'APNS_KEY_ID', 'APNS_KEY_P8', 'APNS_TEAM_ID'];
 
 function veille_env_chemin(): string
 {

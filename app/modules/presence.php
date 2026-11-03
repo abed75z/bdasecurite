@@ -152,6 +152,8 @@ function mod_presence_en_poste(array $r, int $mtn): array
       WHERE a.id IN ($ids)") as $a) $infos[(int)$a['id']] = $a;
   $abos = [];
   foreach ($db->query("SELECT agent_id, COUNT(*) AS n FROM m_presence_abonnements WHERE agent_id IN ($ids) GROUP BY agent_id") as $x) $abos[(int)$x['agent_id']] = (int)$x['n'];
+  // l'appli iPhone « BDA Équipe » compte aussi comme téléphone joignable
+  if (function_exists('mobile_nb_appareils')) foreach ($db->query("SELECT agent_id, COUNT(*) AS n FROM m_mobile_jetons WHERE agent_id IN ($ids) GROUP BY agent_id") as $x) $abos[(int)$x['agent_id']] = ($abos[(int)$x['agent_id']] ?? 0) + (int)$x['n'];
   $plage = mod_presence_dans_plage($r, $mtn);
   $res = [];
   foreach ($liste as $aid => $x) {
@@ -180,21 +182,32 @@ function mod_presence_moi(int $agentId, array $r, int $mtn): ?array
 /* =========================================================
    Envoi sur les téléphones des agents (Web Push chiffré, clés VAPID du .env privé)
    ========================================================= */
+// Notifications de l'appli iPhone « BDA Équipe » (module mobile) en plus du Web Push
+function mod_presence_natif(int $agentId, array $donnees, int $ttl): int
+{
+  if (!function_exists('mobile_pousser')) return 0;
+  return mobile_pousser($agentId, (string)($donnees['title'] ?? ''), (string)($donnees['body'] ?? ''), (string)($donnees['url'] ?? '/espace-equipe#/presence'), 'presence', $ttl);
+}
+function mod_presence_nb_natifs(int $agentId): int
+{
+  return function_exists('mobile_nb_appareils') ? mobile_nb_appareils($agentId) : 0;
+}
 function mod_presence_pousser(int $agentId, array $donnees, int $ttl): int
 {
   $db = db();
   $st = $db->prepare('SELECT * FROM m_presence_abonnements WHERE agent_id = ? ORDER BY id');
   $st->execute([$agentId]);
   $abos = $st->fetchAll();
-  if (!$abos) return 0;
+  $natifs = mod_presence_natif($agentId, $donnees, $ttl);
+  if (!$abos) return $natifs;
   if (getenv('BDA_NO_MAIL')) { // tests sur ordinateur : aucune notification ne part vraiment (copie dans le journal des mails)
     if ($j = getenv('BDA_MAIL_LOG')) @file_put_contents($j, '=== ' . date('c') . " → NOTIFICATION agent n° $agentId (" . count($abos) . " téléphone(s), simulée)\n" . ($donnees['title'] ?? '') . "\n" . ($donnees['body'] ?? '') . "\n\n", FILE_APPEND);
     $db->prepare('UPDATE m_presence_abonnements SET vu = ?, echecs = 0 WHERE agent_id = ?')->execute([maintenant(), $agentId]);
-    return count($abos);
+    return count($abos) + $natifs;
   }
   require_once __DIR__ . '/../veille/outils.php';
   require_once __DIR__ . '/../veille/webpush.php';
-  if (veille_env('VAPID_PUBLIC_KEY') === '' || veille_env('VAPID_PRIVATE_KEY') === '') return 0;
+  if (veille_env('VAPID_PUBLIC_KEY') === '' || veille_env('VAPID_PRIVATE_KEY') === '') return $natifs;
   $corps = (string)json_encode($donnees, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   $ok = 0;
   foreach ($abos as $abo) {
@@ -218,7 +231,7 @@ function mod_presence_pousser(int $agentId, array $donnees, int $ttl): int
       $db->prepare('UPDATE m_presence_abonnements SET echecs = echecs + 1 WHERE id = ?')->execute([$abo['id']]);
     }
   }
-  return $ok;
+  return $ok + $natifs;
 }
 
 /* =========================================================
@@ -441,6 +454,7 @@ function mod_presence_eq_etat(): void
     'ok' => true,
     'vapid' => mod_presence_cle_publique(),
     'appareils' => mod_presence_appareils($aid),
+    'natifs' => mod_presence_nb_natifs($aid),
     'reglages' => ['actif' => $r['actif'], 'intervalle' => $r['intervalle'], 'debut' => $r['debut'], 'fin' => $r['fin'], 'delai' => $r['delai']],
     'poste' => $moi ? ['site' => $moi['site'], 'debut' => date(MOD_PRESENCE_FMT, (int)$moi['debut_ts']), 'fin' => date(MOD_PRESENCE_FMT, (int)$moi['fin_ts'])] : null,
     'dansPortee' => (bool)($moi['dans_portee'] ?? false),
@@ -484,7 +498,7 @@ function mod_presence_eq_tester(): void
 {
   $c = eq_exiger();
   $aid = (int)$c['agent_id'];
-  if (!mod_presence_appareils($aid)) throw new RuntimeException('Activez d’abord les alertes sur ce téléphone.');
+  if (!mod_presence_appareils($aid) && !mod_presence_nb_natifs($aid)) throw new RuntimeException('Activez d’abord les alertes sur ce téléphone.');
   if (!limiter('presence-essai:' . $aid, 5, 600)) throw new RuntimeException('Alertes d’essai déjà envoyées : patientez quelques minutes.');
   $n = mod_presence_pousser($aid, ['type' => 'essai', 'title' => 'Alertes de service activées',
     'body' => 'Ce téléphone recevra le contrôle de présence « Tout va bien ? » pendant vos postes de nuit.', 'url' => '/espace-equipe#/presence', 'tag' => 'bda-essai'], 600);
@@ -577,7 +591,7 @@ function mod_presence_adm_tableau(): void
   ], $enPoste);
   // téléphones des agents (comptes Espace équipe validés, hors chauffeurs)
   $equipe = $db->query("SELECT a.id AS agent_id, a.nom, a.poste, ce.derniere,
-      (SELECT COUNT(*) FROM m_presence_abonnements p WHERE p.agent_id = a.id) AS appareils,
+      (SELECT COUNT(*) FROM m_presence_abonnements p WHERE p.agent_id = a.id) + (SELECT COUNT(*) FROM m_mobile_jetons j WHERE j.agent_id = a.id) AS appareils,
       (SELECT MAX(p.vu) FROM m_presence_abonnements p WHERE p.agent_id = a.id) AS vu
       FROM agents a JOIN comptes_equipe ce ON ce.id = (SELECT x.id FROM comptes_equipe x WHERE x.agent_id = a.id AND x.statut = 'actif' ORDER BY x.id LIMIT 1)
       WHERE a.actif = 1 AND ce.metier <> 'chauffeur' ORDER BY a.nom COLLATE NOCASE")->fetchAll();
@@ -624,7 +638,7 @@ function mod_presence_adm_demander(): void
   $st->execute([$aid]);
   $a = $st->fetch();
   if (!$a || !(int)$a['actif']) throw new RuntimeException('Agent introuvable.');
-  $n = (int)$db->query('SELECT COUNT(*) FROM m_presence_abonnements WHERE agent_id = ' . $aid)->fetchColumn();
+  $n = (int)$db->query('SELECT COUNT(*) FROM m_presence_abonnements WHERE agent_id = ' . $aid)->fetchColumn() + mod_presence_nb_natifs($aid);
   if (!$n) throw new RuntimeException('Cet agent n’a pas activé les alertes sur son téléphone (Espace équipe › Tout va bien ? › Activer les alertes).');
   $r = mod_presence_reglages();
   $x = mod_presence_moi($aid, $r, time()) ?? ['agent_id' => $aid, 'vacation_id' => 0, 'site_id' => 0, 'site' => ''];

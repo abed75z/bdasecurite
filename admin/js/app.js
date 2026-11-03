@@ -30,6 +30,7 @@ const ESPACES = {
       { chemin: 'pointage', libelle: 'Pointage', ic: 'horloge' },
       { chemin: 'equipe', libelle: 'Espace équipe', ic: 'equipe', badge: 'equipe' },
       { chemin: 'planning', libelle: 'Feuille mensuelle', ic: 'tableau' },
+      { groupe: 'Appli Équipe' },
       { groupe: 'Clients' },
       { chemin: 'demandes', libelle: 'Demandes reçues', ic: 'demande', badge: 'demandes' },
       { chemin: 'messages', libelle: 'Messages', ic: 'message', badge: 'messages' },
@@ -231,7 +232,7 @@ const fermerMenu = () => document.body.classList.remove('menu-ouvert');
 const visible = (m) => menuVisible(m, etat.session.role);
 
 // Icône de chaque rubrique du menu
-const GROUPE_IC = { Exploitation: 'planning', Clients: 'clients', Facturation: 'facture', 'Équipe': 'agents', 'Site web': 'site', Outils: 'calques', 'Activité': 'activite', Comptes: 'personne', Configuration: 'curseurs', Compte: 'reglages' };
+const GROUPE_IC = { Exploitation: 'planning', 'Appli Équipe': 'mobile', Clients: 'clients', Facturation: 'facture', 'Équipe': 'agents', 'Site web': 'site', Outils: 'calques', 'Activité': 'activite', Comptes: 'personne', Configuration: 'curseurs', Compte: 'reglages' };
 let groupeOuvert = null;
 
 // Menu de l'espace ouvert : les pages principales, puis des rubriques qui se déplient au clic
@@ -595,25 +596,18 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '14';
+const VERSION = '15';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 14 : priorités du jour, terrain, audits, cartes d’agent, formations… le tour de ce qui est nouveau.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 15 : l’appli iPhone « BDA Équipe » de vos agents se pilote d’ici, dans la nouvelle rubrique Appli Équipe.'),
       h('ul', null,
-        point('curseurs', 'equipe', 'Accueil à la carte', 'Bouton « Personnaliser » sur la Vue générale : choisissez les blocs et leur ordre, le même accueil vous suit sur le téléphone.'),
-        point('cible', 'equipe', 'Priorités du jour', 'Ce qui demande votre attention, trié par urgence, avec le bouton pour agir. Tapez une question dans Ctrl K : Claude répond à partir de vos données.'),
-        point('mail', 'clients', 'Messagerie', 'Factures et devis envoyés par mail depuis contact@, avec suivi d’ouverture et relances préparées. Écrire à un agent, un client ou à tous en un clic.'),
-        point('planning', 'exploitation', 'Planning nouvelle génération', 'Bouton « Remplir » qui propose les agents en respectant les règles, bourse aux postes libres, échanges entre agents à valider, besoins récurrents par site.'),
-        point('bouclier', 'exploitation', 'Terrain & qualité', 'Classeur de chaque site : consignes que les agents signent « lu et compris », plans, numéros d’urgence, clés. Plus le matériel confié et les contrôles qualité notés sur place.'),
-        point('contrat', 'equipe', 'Formations & RH', 'Les échéances MAC APS, SST, SSIAP et H0B0 de chaque agent, et une liste de contrôle pour chaque embauche (carte pro, DPAE, contrat…).'),
-        point('cible', 'clients', 'Audits de sûreté', 'Une grille de visite à remplir sur place au téléphone, un rapport PDF au nom du client et le devis pré-rempli en un clic.'),
-        point('badge', 'exploitation', 'Cartes d’agent', 'Chaque agent a une carte avec QR code dans son Espace équipe : le client la scanne et vérifie en direct qu’il travaille pour vous.'),
-        point('lune', 'exploitation', 'Tout va bien ?', 'Contrôle de présence des agents de nuit : une question sur leur téléphone, une alerte s’ils ne répondent pas. Désactivé tant que vous ne l’activez pas.'),
-        point('etoile', 'equipe', 'Design « Ivoire signature »', 'Menu sombre et or, tableaux et cartes redessinés, accueil en tableau de bord.'))),
+        point('message', 'equipe', 'Messages', 'Les agents vous écrivent depuis l’appli, avec une photo si besoin. Vous répondez ici : ils reçoivent une notification sur leur iPhone.'),
+        point('cloche', 'equipe', 'Notifications', 'Une annonce à un agent ou à toute l’équipe en un clic. Nouveau poste au planning, postes à prendre et nouvelles consignes partent tout seuls (réglable).'),
+        point('mobile', 'equipe', 'Téléphones', 'Qui a installé l’appli, et la clé Apple des notifications à coller une seule fois.'))),
     actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
   }), 900);
 }
@@ -727,7 +721,7 @@ async function router() {
 
   // En-tête de page : l'icône de la rubrique dans sa couleur, et le nom de la rubrique au-dessus du titre
   const entree = actif ? [...E.menu, ...COMPTE].find((m) => m.chemin === actif) : null;
-  const DOM_RUBRIQUE = { Exploitation: 'equipe', Clients: 'clients', Facturation: 'facturation', 'Équipe': 'equipe', 'Site web': 'site', Outils: 'outils', 'Activité': 'appli', Comptes: 'appli', Configuration: 'appli', Compte: 'securite' };
+  const DOM_RUBRIQUE = { Exploitation: 'equipe', 'Appli Équipe': 'equipe', Clients: 'clients', Facturation: 'facturation', 'Équipe': 'equipe', 'Site web': 'site', Outils: 'outils', 'Activité': 'appli', Comptes: 'appli', Configuration: 'appli', Compte: 'securite' };
   const avecIcone = Boolean(entree?.ic) && !lanceur;
   iconePage.replaceChildren(...(avecIcone ? [icone(entree.ic)] : []));
   iconePage.dataset.dom = DOM_RUBRIQUE[rubrique] || (route === 'appli' || route === 'vtc' ? 'appli' : route === 'tableau' ? 'stats' : 'securite');

@@ -443,11 +443,28 @@ try {
         $ins->execute([$site, $j, $debut, $fin, $i === 0 ? $agent : 0, $qualif, $champs[4], $champs[5], $serie, maintenant(), maintenant()]);
         $ids[] = (int)db()->lastInsertId();
       }
+      // l'agent placé est prévenu dans l'appli BDA Équipe (envoi réglable dans l'admin)
+      if ($agent > 0) {
+        try {
+          require_once __DIR__ . '/../app/modules.php';
+          modules();
+          if (function_exists('mobile_planning_nouveau')) mobile_planning_nouveau($agent, $jours, $debut, $fin, $site);
+        } catch (Throwable $e) { error_log('[BDA admin] notification planning : ' . $e->getMessage()); }
+      }
       repondre(['ok' => true, 'ids' => $ids]);
 
     case 'vacation.affecter':
       $b = corps();
       db()->prepare('UPDATE vacations SET agent_id = ?, alerte = 0, maj = ? WHERE id = ?')->execute([max(0, (int)($b['agent_id'] ?? 0)), maintenant(), (int)($b['id'] ?? 0)]);
+      if ((int)($b['agent_id'] ?? 0) > 0) {
+        $st = db()->prepare('SELECT site_id, jour, debut, fin FROM vacations WHERE id = ?');
+        $st->execute([(int)($b['id'] ?? 0)]);
+        try {
+          require_once __DIR__ . '/../app/modules.php';
+          modules();
+          if (($v = $st->fetch()) && function_exists('mobile_planning_nouveau')) mobile_planning_nouveau((int)$b['agent_id'], [(string)$v['jour']], (string)$v['debut'], (string)$v['fin'], (int)$v['site_id']);
+        } catch (Throwable $e) { error_log('[BDA admin] notification planning : ' . $e->getMessage()); }
+      }
       repondre(['ok' => true]);
 
     case 'vacation.supprimer':

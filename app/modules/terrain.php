@@ -550,6 +550,8 @@ function mod_terrain_consigne_publier(): void
     $r = mod_terrain_publier($s, $texte, texte($b['resume'] ?? '', 300), 'classeur');
   }
   journal('equipe', 'Consignes du site « ' . $s['nom'] . ' » : version ' . $r['version'] . ' publiée');
+  // agents prévus sur ce site : notification dans l'appli BDA Équipe (réglable dans l'admin)
+  if (function_exists('mobile_auto')) mobile_auto('consignes', array_keys(mod_terrain_prevus(0, (int)$s['id'])[(int)$s['id']] ?? []), 'Nouvelles consignes', 'Consignes mises à jour pour ' . $s['nom'] . ' : à lire avant votre prochain poste.', '/espace-equipe#/consignes');
   repondre(['ok' => true] + $r);
 }
 // Fiche du planning vidée : on y remet la version en vigueur (rien n'est perdu, le champ était vide)

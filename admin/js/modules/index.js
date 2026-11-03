@@ -58,6 +58,14 @@ export const MODULES = [
     menu: { apres: 'controle', libelle: 'Priorités du jour', ic: 'cible' },
     libre: { titre: 'Demander à l’assistant : « {q} »', ic: 'eclair', groupe: 'Assistant' },
     commandes: [{ ic: 'cible', titre: 'Priorités du jour', mots: 'priorites directeur operations urgent a faire aujourd hui resume', href: '#/cerveau' }] },
+  // Appli iPhone « BDA Équipe » : messages avec les agents, notifications, téléphones reliés
+  { route: 'bda-equipe', charger: () => import('./bda-equipe.js'), page: 'pageBdaEquipe',
+    menu: { groupe: 'Appli Équipe', libelle: 'Messages', ic: 'message', badge: 'messagesAgents' },
+    cloche: { cle: 'messagesAgents', libelle: 'Messages d’agents non lus', ic: 'message' },
+    commandes: [{ ic: 'message', titre: 'Écrire à un agent (appli BDA Équipe)', mots: 'message agent appli iphone ecrire conversation', href: '#/bda-equipe' },
+      { ic: 'cloche', titre: 'Envoyer une notification aux agents', mots: 'notification push iphone appli agents annonce', href: '#/bda-equipe/notifications' }] },
+  { route: 'bda-equipe/notifications', menu: { groupe: 'Appli Équipe', libelle: 'Notifications', ic: 'cloche' } },
+  { route: 'bda-equipe/telephones', menu: { groupe: 'Appli Équipe', libelle: 'Téléphones', ic: 'mobile' } },
 ];
 
 // Pages des modules, au format de PAGES (pages.js)

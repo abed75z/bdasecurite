@@ -398,6 +398,8 @@ function mod_planif_bourse_proposer(): void
   }
   if (!$n) throw new RuntimeException('Aucun poste libre et à venir à proposer.');
   journal('equipe', "Bourse aux postes : $n poste(s) proposé(s) aux agents");
+  // agents qui ont l'appli BDA Équipe : « postes à prendre » (réglable dans l'admin)
+  if (function_exists('mobile_auto')) mobile_auto('bourse', db()->query('SELECT DISTINCT agent_id FROM m_mobile_jetons')->fetchAll(PDO::FETCH_COLUMN), 'Postes à prendre', $n > 1 ? "$n postes libres sont proposés : le premier qui les prend les a." : 'Un poste libre est proposé : le premier qui le prend l’a.', '/espace-equipe#/postes');
   repondre(['ok' => true, 'proposes' => $n]);
 }
 function mod_planif_bourse_retirer(): void

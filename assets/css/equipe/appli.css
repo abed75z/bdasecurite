@@ -1,0 +1,11 @@
+/* Espace équipe — Mon compte (module « mobile », appli BDA Équipe) */
+.eqa { display: grid; gap: 1rem; }
+.eqa-ligne { display: flex; justify-content: space-between; gap: 1rem; padding: .8rem 0; border-bottom: 1px solid var(--ligne); font-size: .92rem; }
+.eqa-ligne:first-child { padding-top: 0; }
+.eqa-ligne:last-child { padding-bottom: 0; border-bottom: 0; }
+.eqa-ligne span { color: var(--doux); }
+.eqa-ligne b { font-weight: 500; text-align: right; overflow-wrap: anywhere; }
+.eqa-danger { display: grid; gap: .75rem; }
+.eqa-danger h2 { margin: 0; font-size: 1rem; }
+.eqa-danger p { margin: 0; color: var(--doux); font-size: .88rem; line-height: 1.5; }
+.eqa-supprimer { justify-self: start; border: 1px solid rgba(236, 107, 97, .55); background: transparent; box-shadow: none; color: var(--rouge); }

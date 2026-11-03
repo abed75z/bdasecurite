@@ -1956,6 +1956,7 @@ function mois_valide(string $m): string
 // Réglage enregistré en JSON (vide s'il n'existe pas encore)
 function reglage_json(string $k): array
 {
+  bascule_eurl();
   $st = db()->prepare('SELECT v FROM reglages WHERE k = ?');
   $st->execute([$k]);
   $v = json_decode((string)$st->fetchColumn(), true);

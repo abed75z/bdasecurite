@@ -557,26 +557,80 @@ function envoyer_mail(string $sujet, string $message, string $repondreA = '', st
 function reglages_defaut(): array
 {
   return [
-    'nom' => 'BDA SECURITE',
-    'emetteur' => "Abdelouahab BOUIDIA EI\n61 rue de la Croix Saint-Simon\n75020 PARIS\nSIRET : 977 933 316 00019\nAPE : 8010Z\nTÉL : 07.84.73.90.70",
+    // depuis le 03/11/2026, la sécurité est exercée par l'EURL (autorisation CNAPS du même jour) ; l'EI garde le VTC
+    'nom' => 'BDASECURITE',
+    'emetteur' => BDA_EMETTEUR_EURL,
     'email' => BDA_EMAIL,
-    'beneficiaire' => 'ABDELOUAHAB BOUIDIA',
+    'beneficiaire' => 'BDASECURITE',
     'iban' => '',
     'conditionsFacture' => "Conditions générales de vente : Aucun escompte accordé en cas de paiement comptant.\nTVA non applicable, art. 293 B du CGI.\nEn cas de retard de paiement : pénalités égales à trois fois le taux d'intérêt légal et indemnité forfaitaire de 40 € pour frais de recouvrement (art. L441-10 du Code de commerce).",
     'conditionsDevis' => "Devis valable 30 jours à compter de sa date d'émission.\nAcompte à la signature du devis, solde à réception de la facture de fin de mission.\nAucun escompte accordé en cas de paiement comptant. TVA non applicable, art. 293 B du CGI.",
-    'pied' => "BDA SECURITE — Abdelouahab Bouidia EI — SIRET 977 933 316 00019 — APE 8010Z — Autorisation d'exercice CNAPS n° AUT-075-2124-07-01-20250906336\n« L'autorisation d'exercice ne confère aucune prérogative de puissance publique à l'entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du Code de la sécurité intérieure)",
-    'prefixeFacture' => 'FA-{AAAA}-',
-    'prefixeDevis' => 'DV-{AAAA}-',
+    'pied' => BDA_PIED_EURL,
+    // nouvelle série de numéros pour l'EURL (chaque société a sa propre suite) ; FA- et DV- restent ceux de l'EI
+    'prefixeFacture' => 'F-{AAAA}-',
+    'prefixeDevis' => 'D-{AAAA}-',
     'echeanceJours' => 7,
     'validiteDevis' => '30 jours',
     'acompte' => 30,
     'tauxHoraire' => 22,
     'tauxTva' => 20.0,
-    'numeroTva' => '',
+    'numeroTva' => 'FR95 109 076 463',
   ];
+}
+const BDA_EMETTEUR_EURL = "BDASECURITE\nEURL au capital de 2 000 €\n61 rue de la Croix Saint-Simon\n75020 PARIS\nSIRET : 109 076 463 00016\nRCS Paris 109 076 463\nAPE : 8010Z\nTVA : FR95 109 076 463\nTÉL : 07.84.73.90.70";
+const BDA_PIED_EURL = "BDASECURITE — EURL au capital de 2 000 € — SIRET 109 076 463 00016 — RCS Paris — APE 8010Z — Autorisation d'exercice CNAPS n° 2026-0141958-AUT-1102740\n« L'autorisation d'exercice ne confère aucune prérogative de puissance publique à l'entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du Code de la sécurité intérieure)";
+// Passage de la sécurité de l'EI à l'EURL (03/11/2026) : les réglages enregistrés qui désignent encore l'EI
+// sont basculés une seule fois. L'ancien IBAN (celui de l'EI) est mis de côté : l'IBAN de l'EURL est à saisir dans les Paramètres.
+function bascule_eurl(): void
+{
+  $db = db();
+  if ($db->query("SELECT 1 FROM reglages WHERE k = 'bascule_eurl'")->fetchColumn()) return;
+  $st = $db->prepare('SELECT v FROM reglages WHERE k = ?');
+  $ecrire = $db->prepare('INSERT INTO reglages (k, v) VALUES (?, ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v');
+  $ei = fn ($v) => is_string($v) && (str_contains($v, '977 933 316') || str_contains($v, '977933316'));
+  // factures et devis
+  $st->execute(['entreprise']);
+  $e = json_decode((string)$st->fetchColumn(), true);
+  if (is_array($e)) {
+    if ($ei($e['emetteur'] ?? '')) $e['emetteur'] = BDA_EMETTEUR_EURL;
+    if ($ei($e['pied'] ?? '') || str_contains((string)($e['pied'] ?? ''), '2026-0141958-AUT')) $e['pied'] = BDA_PIED_EURL;
+    if (in_array($e['nom'] ?? '', ['', 'BDA SECURITE'], true)) $e['nom'] = 'BDASECURITE';
+    if (mb_strtoupper(trim((string)($e['beneficiaire'] ?? ''))) === 'ABDELOUAHAB BOUIDIA') {
+      $e['ibanEI'] = (string)($e['iban'] ?? '');
+      $e['beneficiaireEI'] = (string)$e['beneficiaire'];
+      $e['beneficiaire'] = 'BDASECURITE';
+      $e['iban'] = '';
+    }
+    if (($e['prefixeFacture'] ?? 'FA-{AAAA}-') === 'FA-{AAAA}-') $e['prefixeFacture'] = 'F-{AAAA}-';
+    if (($e['prefixeDevis'] ?? 'DV-{AAAA}-') === 'DV-{AAAA}-') $e['prefixeDevis'] = 'D-{AAAA}-';
+    if (($e['numeroTva'] ?? '') === '') $e['numeroTva'] = 'FR95 109 076 463';
+    $ecrire->execute(['entreprise', json_encode($e, JSON_UNESCAPED_UNICODE)]);
+  }
+  // employeur des fiches de paie
+  $st->execute(['paie']);
+  $p = json_decode((string)$st->fetchColumn(), true);
+  if (is_array($p) && is_array($p['employeur'] ?? null) && $ei($p['employeur']['siret'] ?? '')) {
+    $p['employeurEI'] = $p['employeur'];
+    $p['employeur'] = array_merge($p['employeur'], ['nom' => 'BDASECURITE', 'siret' => '109 076 463 00016', 'ape' => '8010Z', 'adresse' => "61 rue de la Croix Saint-Simon\n75020 PARIS"]);
+    $ecrire->execute(['paie', json_encode($p, JSON_UNESCAPED_UNICODE)]);
+  }
+  // employeurs des contrats : l'EURL a son autorisation, l'EI n'en a plus besoin (VTC)
+  $st->execute(['contrats']);
+  $c = json_decode((string)$st->fetchColumn(), true);
+  if (is_array($c) && is_array($c['employeurs'] ?? null)) {
+    if (is_array($c['employeurs']['eurl'] ?? null)) {
+      $c['employeurs']['eurl']['cnaps'] = '2026-0141958-AUT-1102740';
+      if (str_contains((string)($c['employeurs']['eurl']['forme'] ?? ''), '…')) $c['employeurs']['eurl']['forme'] = 'EURL au capital de 2 000 €';
+    }
+    if (is_array($c['employeurs']['ei'] ?? null)) $c['employeurs']['ei']['cnaps'] = '';
+    $ecrire->execute(['contrats', json_encode($c, JSON_UNESCAPED_UNICODE)]);
+  }
+  $ecrire->execute(['bascule_eurl', maintenant()]);
+  journal('securite', 'Passage à l’EURL BDASECURITE (autorisation CNAPS 2026-0141958-AUT-1102740) : factures, devis, paie et contrats basculés');
 }
 function reglages(): array
 {
+  bascule_eurl();
   $st = db()->prepare('SELECT v FROM reglages WHERE k = ?');
   $st->execute(['entreprise']);
   $v = json_decode((string)$st->fetchColumn(), true);

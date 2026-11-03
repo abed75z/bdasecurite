@@ -77,12 +77,12 @@ export const REGLAGES_DEFAUT = {
     ei: {
       type: 'ei', nom: 'BDA SECURITE', forme: 'Entreprise individuelle de M. Abdelouahab BOUIDIA',
       adresse: '61 rue de la Croix Saint-Simon\n75020 Paris', siret: '977 933 316 00019', ape: '8010Z', rcs: '',
-      cnaps: 'AUT-075-2124-07-01-20250906336', evtc: '', representant: 'Abdelouahab BOUIDIA', qualite: 'Entrepreneur individuel', email: 'contact@bdasecurite.com',
+      cnaps: '', evtc: '', representant: 'Abdelouahab BOUIDIA', qualite: 'Entrepreneur individuel', email: 'contact@bdasecurite.com',
     },
     eurl: {
-      type: 'societe', nom: 'BDASECURITE', forme: 'EURL au capital de ……… €',
+      type: 'societe', nom: 'BDASECURITE', forme: 'EURL au capital de 2 000 €',
       adresse: '61 rue de la Croix Saint-Simon\n75020 Paris', siret: '109 076 463 00016', ape: '8010Z', rcs: 'RCS Paris 109 076 463',
-      cnaps: '', evtc: '', representant: 'Abdelouahab BOUIDIA', qualite: 'Gérant', email: 'contact@bdasecurite.com',
+      cnaps: '2026-0141958-AUT-1102740', evtc: '', representant: 'Abdelouahab BOUIDIA', qualite: 'Gérant', email: 'contact@bdasecurite.com',
     },
   },
   organismes: { retraite: '', prevoyance: '', mutuelle: '', sante: '' },
@@ -102,7 +102,7 @@ export function reglagesComplets(r) {
 /* ---------- Données d'un contrat ---------- */
 const VIDE = () => ({
   modele: '', genre: 'travail', metier: 'securite', nature: 'CDI', temps: 'plein', posteCle: 'ads', statut: 'brouillon', extra: false,
-  emp: {}, empCle: 'ei',
+  emp: {}, empCle: 'eurl',
   ex: { vacations: '', heures: '' },
   sal: { civ: '', nom: '', prenom: '', naissance: '', lieuNaissance: '', nationalite: 'française', ue: true, titreSejour: '', titreFin: '', adresse: '', nir: '', tel: '', email: '',
     carte: '', carteFin: '', ssiapDiplome: '', ssiapDate: '', secourisme: '', carteVtc: '', carteVtcFin: '', prefecture: '', permis: '', permisDate: '', agentId: 0 },
@@ -135,8 +135,9 @@ export function nouveauContrat(modeleId, R) {
   const M = modele(modeleId);
   const d = fusion(VIDE(), JSON.parse(JSON.stringify(M.base)));
   d.modele = M.id;
-  d.empCle = 'ei';
-  d.emp = { ...R.employeurs.ei };
+  // depuis le 03/11/2026 : la sécurité dans l'EURL, le VTC dans l'EI
+  d.empCle = M.famille === 'vtc' ? 'ei' : 'eurl';
+  d.emp = { ...R.employeurs[d.empCle] };
   d.org = { ...R.organismes };
   d.fait.ville = R.ville || 'Paris';
   d.poste.lieu = d.metier === 'bureau' ? R.siege : '';

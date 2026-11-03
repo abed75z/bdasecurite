@@ -36,7 +36,7 @@ export const FLYER_DEFAUT = {
   tel2Label: 'WhatsApp', tel2: '07 84 73 90 70',
   infos: 'bdasecurite.com     bdasecurite@gmail.com     Paris & Île-de-France',
   qr: 'https://bdasecurite.com/devis', qrTitre: 'Scannez-moi', qrSous: 'Devis en 2 minutes',
-  pied: 'BDA Security Group — BDASECURITE, EURL · SIRET 109 076 463 00016 · Autorisation CNAPS n° AUT-075-2124-07-01-20250906336\n« L\'autorisation d\'exercice ne confère aucune prérogative de puissance publique à l\'entreprise ou aux personnes qui en bénéficient. » (art. L612-14 CSI)',
+  pied: 'BDA Security Group — BDASECURITE, EURL · SIRET 109 076 463 00016 · Autorisation CNAPS n° 2026-0141958-AUT-1102740\n« L\'autorisation d\'exercice ne confère aucune prérogative de puissance publique à l\'entreprise ou aux personnes qui en bénéficient. » (art. L612-14 CSI)',
   afficher: { secteurs: true, chiffres: true, reference: true, qr: true },
 };
 const copie = (o) => JSON.parse(JSON.stringify(o));

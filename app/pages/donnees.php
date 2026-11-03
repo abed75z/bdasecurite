@@ -10,7 +10,7 @@ const P_ESCORTE = 'photo-1553885762-df52cdc82f36';
 
 // Briques communes
 $pointsCommuns = [
-  ['Des agents titulaires de la carte professionnelle CNAPS', 'et une entreprise autorisée (n° AUT-075-2124-07-01-20250906336).'],
+  ['Des agents titulaires de la carte professionnelle CNAPS', 'et une entreprise autorisée (n° 2026-0141958-AUT-1102740).'],
   ['Un interlocuteur unique', ': le responsable de votre mission, joignable 24h/24.'],
   ['Des agents présentables et discrets', ', choisis pour leur sérieux et leur sens du service.'],
   ['Un devis clair et sans engagement', ', avec le détail des horaires et des consignes.'],

@@ -377,8 +377,8 @@ async function pageReglages(ctx) {
   const o = R.organismes;
   ctx.actions(h('a', { class: 'btn btn--ghost', href: '#/contrats' }, icone('retour'), h('span', null, 'Contrats')), indicateur);
   ctx.afficher(h('div', { class: 'ct-reglages' },
-    blocEmployeur('ei', 'Entreprise individuelle (EI) · BDA SECURITE', 'L’employeur actuel des agents. Après le passage de la sécurité dans l’EURL, l’EI ne gardera que le VTC.'),
-    blocEmployeur('eurl', 'EURL BDASECURITE', 'Pour les contrats de sécurité une fois l’autorisation CNAPS de l’EURL obtenue (demande en cours).'),
+    blocEmployeur('eurl', 'EURL BDASECURITE', 'L’employeur des agents de sécurité depuis le 03/11/2026 (autorisation CNAPS n° 2026-0141958-AUT-1102740).'),
+    blocEmployeur('ei', 'Entreprise individuelle (EI) · BDA SECURITE', 'Ne garde que le VTC (chauffeurs), après sa renonciation à l’autorisation CNAPS et son inscription au registre VTC.'),
     h('section', { class: 'carte ct-reglage' }, h('header', { class: 'carte__tete' }, 'Organismes (obligatoires sur un CDD)'),
       h('p', { class: 'panneau__astuce' }, 'Le nom et l’adresse de la caisse de retraite complémentaire et de l’organisme de prévoyance doivent figurer dans tout CDD (art. L1242-12 du Code du travail). Ils sont sur vos bulletins TESE ou vos courriers d’affiliation.'),
       h('div', { class: 'form-grille form-grille--2' },

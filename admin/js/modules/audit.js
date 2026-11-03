@@ -202,7 +202,7 @@ async function editeur(ctx, id, demandeId) {
         h('table', { class: 'au-f-table' }, h('thead', null, h('tr', null, h('th', null, 'Profil'), h('th', null, 'Agents'), h('th', null, 'Horaires'), h('th', null, 'Fréquence'), h('th', null, 'Heures'))),
           h('tbody', null, D.besoins.map((b) => h('tr', null, h('td', null, o.profils[b.profil]), h('td', null, String(b.nombre)), h('td', null, `${b.debut} – ${b.fin}`),
             h('td', null, b.frequence === 'mois' ? `${b.jours} j / semaine` : `${b.jours} jour${b.jours > 1 ? 's' : ''}`), h('td', null, `${heuresBesoin(b)} h${b.frequence === 'mois' ? ' / mois' : ''}`)))))) : null,
-      h('div', { class: 'au-f-pied' }, r.pied || 'BDA SECURITE — Autorisation d’exercice CNAPS n° AUT-075-2124-07-01-20250906336. « L’autorisation d’exercice ne confère aucune prérogative de puissance publique à l’entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du CSI)'));
+      h('div', { class: 'au-f-pied' }, r.pied || 'BDA SECURITE — Autorisation d’exercice CNAPS n° 2026-0141958-AUT-1102740. « L’autorisation d’exercice ne confère aucune prérogative de puissance publique à l’entreprise ou aux personnes qui en bénéficient. » (art. L.612-14 du CSI)'));
     const scene = h('div', { class: 'au-scene' }, feuille);
     document.body.append(scene);
     try { await telechargerFeuilles([feuille], `Audit de sûreté — ${champClient.value} — ${isoVersFr(champVisite.value).replace(/\//g, '-')}`); } finally { scene.remove(); }

@@ -44,7 +44,7 @@ Déjà en place : téléphone +33 6 11 67 86 25 (principal) et +33 7 84 73 90 70
 
 S'y ajoutent le siège, le gérant et l'hébergeur OVH. La page `mentions-legales.html` contient aussi la politique de confidentialité (RGPD).
 
-Le n° d'autorisation CNAPS (AUT-075-2124-07-01-20250906336) figure dans le pied de page de l'accueil, dans celui du recrutement et dans les mentions légales.
+Le n° d'autorisation CNAPS (2026-0141958-AUT-1102740) figure dans le pied de page de l'accueil, dans celui du recrutement et dans les mentions légales.
 
 Reste à compléter :
 

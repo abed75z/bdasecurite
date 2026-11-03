@@ -1,0 +1,75 @@
+/* =========================================================
+   PRIORITÉS DU JOUR (v16) — directeur des opérations
+   Mêmes règles que le design Signature : filets fins, couleur réservée aux niveaux.
+   ========================================================= */
+.pj { display: grid; gap: 16px; }
+.pj-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pj-colonnes { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); gap: 16px; align-items: start; }
+.pj-col { display: grid; gap: 16px; min-width: 0; }
+.pj-col:last-child { position: sticky; top: 16px; }
+
+/* Groupes et cartes */
+.pj-groupe { display: grid; gap: 8px; scroll-margin-top: 80px; }
+.pj-groupe__titre { display: flex; align-items: center; gap: 8px; margin: 4px 0 2px; font-family: var(--iv-police-mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--iv-muet); }
+.pj-groupe__titre small { margin-left: auto; font-size: 10.5px; }
+.pj-point-niveau { width: 7px; height: 7px; border-radius: 50%; background: var(--iv-muet); }
+.pj-point-niveau.is-urgent { background: var(--iv-alerte-point, #d4433a); }
+.pj-point-niveau.is-important { background: var(--iv-attente-point, #d08a1e); }
+.pj-carte { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 14px; align-items: start; padding: 14px 16px; border: 1px solid var(--iv-trait); border-radius: 8px; background: var(--iv-surface); transition: border-color 140ms var(--iv-courbe), box-shadow 140ms var(--iv-courbe); }
+.pj-carte:hover { border-color: var(--iv-trait-fort); box-shadow: var(--iv-ombre-1); }
+.pj-carte.is-urgent { box-shadow: inset 2px 0 0 var(--iv-alerte-point, #d4433a); }
+.pj-carte.is-urgent:hover { box-shadow: inset 2px 0 0 var(--iv-alerte-point, #d4433a), var(--iv-ombre-1); }
+.pj-carte.is-important { box-shadow: inset 2px 0 0 var(--iv-attente-point, #d08a1e); }
+.pj-carte.is-important:hover { box-shadow: inset 2px 0 0 var(--iv-attente-point, #d08a1e), var(--iv-ombre-1); }
+.pj-carte__ic { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--iv-trait); border-radius: 6px; color: var(--iv-encre-2); }
+.pj-carte__ic .ic { width: 16px; height: 16px; }
+.pj-carte.is-urgent .pj-carte__ic { color: var(--iv-alerte); }
+.pj-carte__txt { min-width: 0; }
+.pj-carte__txt h3 { margin: 0; font-size: 14px; font-weight: 600; color: var(--iv-encre); line-height: 1.4; }
+.pj-carte__txt p { margin: 3px 0 0; font-size: 13px; line-height: 1.5; color: var(--iv-muet); }
+.pj-carte__txt ul { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+.pj-carte__txt li { position: relative; padding-left: 12px; font-size: 12.5px; color: var(--iv-encre-2); font-variant-numeric: tabular-nums; }
+.pj-carte__txt li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 4px; height: 1px; background: var(--iv-muet); }
+.pj-carte__action { white-space: nowrap; align-self: center; }
+.pj-carte__action .ic { width: 14px; height: 14px; }
+
+/* Point du jour, Demander */
+.pj-point, .pj-demande { display: grid; gap: 12px; }
+.pj-texte { font-size: 13.5px; line-height: 1.65; color: var(--iv-encre-2); }
+.pj-texte p { margin: 0 0 8px; }
+.pj-texte p:last-child { margin-bottom: 0; }
+.pj-texte ul { margin: 0 0 8px; padding-left: 18px; }
+.pj-texte h4 { margin: 10px 0 4px; font-size: 13px; color: var(--iv-encre); }
+.pj-texte b { color: var(--iv-encre); font-weight: 600; }
+.pj-texte a { color: var(--iv-encre); text-decoration: underline; text-decoration-color: var(--iv-or-500, #b8975a); text-underline-offset: 3px; }
+.pj-meta { margin: 10px 0 0; font-size: 11.5px; color: var(--iv-muet); }
+.pj-form { display: flex; gap: 8px; }
+.pj-form .input { flex: 1; min-width: 0; }
+.pj-reponse { display: grid; gap: 10px; padding: 14px 16px; border: 1px solid var(--iv-trait); border-radius: 8px; background: var(--iv-surface-2); }
+.pj-reponse[hidden] { display: none; }
+.pj-q { margin: 0; font-weight: 600; font-size: 13.5px; color: var(--iv-encre); }
+.pj-histo summary { cursor: pointer; font-size: 12.5px; color: var(--iv-muet); }
+.pj-histo ul { margin: 8px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.pj-histo li > details { padding: 8px 10px; border: 1px solid var(--iv-trait); border-radius: 6px; }
+.pj-histo li summary { display: flex; justify-content: space-between; gap: 10px; color: var(--iv-encre-2); font-size: 13px; }
+.pj-histo li summary span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pj-histo li .pj-texte { margin-top: 8px; font-size: 13px; }
+.pj-attente { display: inline-flex; gap: 5px; padding: 6px 0; }
+.pj-attente i { width: 6px; height: 6px; border-radius: 50%; background: var(--iv-muet); animation: pj-attente 1s ease-in-out infinite; }
+.pj-attente i:nth-child(2) { animation-delay: 0.15s; }
+.pj-attente i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes pj-attente { 0%, 100% { opacity: 0.25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) { .pj-attente i { animation: none; opacity: 0.6; } }
+.pj-matin { align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid var(--iv-trait); border-radius: 8px; background: var(--iv-surface); }
+.pj-matin b { font-weight: 600; font-size: 13.5px; }
+
+@media (max-width: 1100px) {
+  .pj-colonnes { grid-template-columns: minmax(0, 1fr); }
+  .pj-col:last-child { position: static; order: -1; }
+}
+@media (max-width: 640px) {
+  .pj-carte { grid-template-columns: minmax(0, 1fr); }
+  .pj-carte__ic { display: none; }
+  .pj-carte__action { justify-self: start; }
+  .pj-form { flex-direction: column; }
+}

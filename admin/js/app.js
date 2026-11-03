@@ -604,6 +604,7 @@ function montrerNouveautes() {
     contenu: h('div', { class: 'nouveautes' },
       h('p', { class: 'nouveautes__intro' }, 'Version 13 : la messagerie, le planning nouvelle génération et le terrain.'),
       h('ul', null,
+        point('cible', 'equipe', 'Priorités du jour', 'Ce qui demande votre attention, trié par urgence, avec le bouton pour agir. Tapez une question dans Ctrl K : Claude répond à partir de vos données.'),
         point('mail', 'clients', 'Messagerie', 'Factures et devis envoyés par mail depuis contact@, avec suivi d’ouverture et relances préparées. Écrire à un agent, un client ou à tous en un clic.'),
         point('planning', 'exploitation', 'Planning nouvelle génération', 'Bouton « Remplir » qui propose les agents en respectant les règles, bourse aux postes libres, échanges entre agents à valider, besoins récurrents par site.'),
         point('bouclier', 'exploitation', 'Terrain & qualité', 'Classeur de chaque site : consignes que les agents signent « lu et compris », plans, numéros d’urgence, clés. Plus le matériel confié et les contrôles qualité notés sur place.'),

@@ -39,6 +39,11 @@ export const MODULES = [
     menu: { groupe: 'Exploitation', apres: 'terrain', libelle: 'Tout va bien ?', ic: 'lune', badge: 'presence' },
     cloche: { cle: 'presence', libelle: 'Agent de nuit sans réponse', ic: 'alerte', alerte: true, href: '#/controle' },
     commandes: [{ ic: 'lune', titre: 'Contrôle de présence « Tout va bien ? »', mots: 'presence nuit tout va bien travailleur isole pti dati alerte', href: '#/presence' }] },
+  // Version 16 — le directeur des opérations : priorités du jour, point du jour et questions libres à Claude
+  { route: 'cerveau', charger: () => import('./cerveau.js'), page: 'pageCerveau',
+    menu: { apres: 'controle', libelle: 'Priorités du jour', ic: 'cible' },
+    libre: { titre: 'Demander à l’assistant : « {q} »', ic: 'eclair', groupe: 'Assistant' },
+    commandes: [{ ic: 'cible', titre: 'Priorités du jour', mots: 'priorites directeur operations urgent a faire aujourd hui resume', href: '#/cerveau' }] },
 ];
 
 // Pages des modules, au format de PAGES (pages.js)

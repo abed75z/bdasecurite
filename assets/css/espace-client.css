@@ -624,3 +624,50 @@ body.a-defile .haut { box-shadow: 0 10px 28px -22px rgba(15, 27, 45, .5); }
 /* Les chiffres qui défilent gardent leur largeur */
 .compteur { font-variant-numeric: tabular-nums; }
 .kpi b > .compteur, .resume-mois b > .compteur { color: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit; }
+
+/* ----- v29 : chargé de compte, rapport mensuel ----- */
+.initiales--nuit { background: var(--nuit); border-color: var(--nuit); color: var(--champagne-clair); }
+.interlocuteur { display: grid; gap: 14px; }
+.interlocuteur__tete { display: flex; align-items: center; gap: 14px; }
+.interlocuteur__tete .initiales { width: 46px; height: 46px; font-size: 18px; }
+.interlocuteur__tete b { display: block; color: var(--encre); font-size: 15px; font-weight: 600; }
+.interlocuteur__tete small { display: block; margin-top: 2px; color: var(--muet); font-size: 12.5px; line-height: 1.4; }
+.interlocuteur .contact__boutons { display: flex; flex-wrap: wrap; gap: 8px; }
+.interlocuteur .contact__boutons .btn { flex: 1 1 auto; }
+.interlocuteur__urgence { padding-top: 12px; border-top: 1px solid var(--filet-2); color: var(--muet); font-size: 12.5px; }
+.interlocuteur__urgence a { color: var(--encre); font-weight: 600; }
+.panneau__tete .tete__actions { display: flex; align-items: center; gap: 12px; }
+.rapport-mensuel { display: grid; gap: 30px; }
+.rm-chiffres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--filet); }
+.rm-chiffres > div { display: grid; gap: 6px; padding: 18px 22px; border-left: 1px solid var(--filet); animation: ec-entree 520ms var(--courbe) both; }
+.rm-chiffres > div:first-child { border-left: 0; }
+.rm-chiffres > :nth-child(2) { animation-delay: 70ms; } .rm-chiffres > :nth-child(3) { animation-delay: 140ms; }
+.rm-chiffres small { color: var(--muet); font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.rm-chiffres b { color: var(--encre); font-size: 28px; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.rm-section { display: grid; gap: 12px; }
+.rm-section h3 { display: flex; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--filet); color: var(--encre); font-family: var(--serif); font-size: 22px; font-weight: 600; }
+.rm-section h3 em { color: var(--champagne); font-family: var(--sans, inherit); font-size: 11px; font-style: normal; font-weight: 600; letter-spacing: .18em; }
+.rm-section p { color: var(--texte); font-size: 14px; line-height: 1.65; }
+.rm-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rm-table th { padding: 8px 10px; border-bottom: 1px solid var(--filet-fort); color: var(--muet); font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-align: left; text-transform: uppercase; }
+.rm-table td { padding: 9px 10px; border-bottom: 1px solid var(--filet-2); color: var(--texte); font-variant-numeric: tabular-nums; }
+.rm-table .d { text-align: right; }
+.rm-table tfoot td { border-bottom: 0; border-top: 1px solid var(--filet-fort); color: var(--encre); font-weight: 600; }
+.rm-signature { display: grid; grid-template-columns: 1fr auto; gap: 24px; padding-top: 22px; border-top: 1px solid var(--filet-fort); }
+.rm-signature div { display: grid; gap: 3px; }
+.rm-signature small { color: var(--muet); font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.rm-signature b { color: var(--encre); font-size: 15px; }
+.rm-signature span { color: var(--muet); font-size: 12.5px; }
+@media (max-width: 900px) {
+  .rm-chiffres { grid-template-columns: 1fr 1fr; }
+  .rm-chiffres > :nth-child(3) { grid-column: span 2; border-left: 0; border-top: 1px solid var(--filet); }
+  .rm-signature { grid-template-columns: 1fr; }
+  .rm-table { font-size: 12px; }
+}
+@media print {
+  .rapport-mensuel { gap: 18px; }
+  .rm-chiffres > div { animation: none; }
+  .rm-section { break-inside: avoid-page; }
+}
+.rapport-mensuel .rm-table th, .rapport-mensuel .rm-table td { text-align: left; }
+.rapport-mensuel .rm-table .d { text-align: right; }

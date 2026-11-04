@@ -77,3 +77,10 @@
 .pt-role select { min-width: 210px; }
 .pt-role__note { flex: 1 1 280px; }
 @media (max-width: 640px) { .pt-role { margin-left: 0; } }
+
+/* Rapport mensuel : résumé chiffré dans la fenêtre de préparation */
+.pt-rm-resume { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--iv-trait); border: 1px solid var(--iv-trait); }
+.pt-rm-resume > div { display: grid; gap: 4px; padding: 12px 14px; background: var(--iv-fond, #fff); }
+.pt-rm-resume small { font-size: 11px; }
+.pt-rm-resume b { font-size: 17px; font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) { .pt-rm-resume { grid-template-columns: 1fr 1fr; } }

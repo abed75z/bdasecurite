@@ -292,8 +292,8 @@ function naviguer() {
   const [brut, param] = location.hash.replace(/^#\/?/, '').split('/');
   const autre = redirection(brut, param);
   if (autre) { location.replace(autre); return; }
-  const route = brut === 'document' ? brut : (LIBELLES[brut] ? brut : 'accueil');
-  const actif = route === 'document' ? 'documents' : route;
+  const route = ['document', 'rapport-mensuel'].includes(brut) ? brut : (LIBELLES[brut] ? brut : 'accueil');
+  const actif = ['document', 'rapport-mensuel'].includes(route) ? 'documents' : route;
   const c = etat.client;
   const marque = (cls) => h('a', { class: cls, href: '#/accueil' }, h('img', { src: '/assets/img/blason.svg?v=1', alt: '', width: 24, height: 30 }), h('span', null, h('b', null, 'BDA Security Group'), h('small', null, 'Portail client')));
   const menu = h('aside', { class: 'menu', 'aria-label': 'Menu principal' },
@@ -310,13 +310,13 @@ function naviguer() {
   const haut = h('header', { class: 'haut' },
     h('button', { class: 'btn btn--icone haut__menu', type: 'button', 'aria-label': 'Ouvrir le menu', onclick: () => { document.body.classList.add('menu-ouvert'); voile.classList.add('is-ouvert'); } }, ic('menu')),
     marque('haut__marque'),
-    h('p', { class: 'haut__fil' }, 'Portail', h('i'), h('b', null, route === 'document' ? 'Document' : LIBELLES[route])),
+    h('p', { class: 'haut__fil' }, 'Portail', h('i'), h('b', null, route === 'document' ? 'Document' : route === 'rapport-mensuel' ? 'Rapport mensuel' : LIBELLES[route])),
     h('button', { class: 'haut__recherche', type: 'button', onclick: palette, 'aria-label': 'Rechercher un document' }, ic('recherche'), h('span', null, 'Rechercher un document, une facture…'), h('kbd', null, 'Ctrl K')));
   const page = h('main', { class: 'page', id: 'contenu' }, squelette(6));
   racine.replaceChildren(h('div', { class: 'app' }, menu, h('div', { class: 'corps' }, haut, page)));
   majBadges();
   const vues = {
-    accueil: vueAccueil, documents: () => vueCentre(param), factures: vueFactures, document: () => vueDocument(param),
+    accueil: vueAccueil, documents: () => vueCentre(param), factures: vueFactures, document: () => vueDocument(param), 'rapport-mensuel': () => vueRapportMensuel(param),
     prestations: () => vuePrestations(param), equipe: () => (param ? vueAgent(+param) : vueEquipe()), messages: vueMessages, compte: vueCompte,
   };
   Promise.resolve(vues[route]()).then((contenu) => { page.replaceChildren(...[contenu].flat(Infinity).filter(Boolean)); animerNombres(page); })
@@ -484,11 +484,22 @@ async function vueAccueil() {
             td(euro.format(i.montant), 'd chiffre fort'), td(statut(i.statut.ton, i.statut.libelle), 'm-cache'), tdFleche()])))
             : vide('Aucune facture pour l’instant', 'Vos factures apparaîtront ici dès leur émission.'))),
       h('div', { class: 'colonne' },
-        panneau('Votre équipe', h('a', { class: 'lien', href: '#/equipe' }, 'Dossiers', ic('fleche')), corpsP(equipe)),
-        panneau('Votre interlocuteur', null, corpsP(h('div', { class: 'contact' },
-          h('div', null, h('small', { class: 'sur' }, 'Direction · 24h/24'), h('p', { class: 'contact__tel' }, '06 11 67 86 25')),
-          h('div', { class: 'contact__boutons' }, h('a', { class: 'btn btn--nuit', href: '#/messages' }, ic('messages'), 'Écrire à la direction'), h('a', { class: 'btn', href: 'tel:+33611678625' }, ic('telephone'), 'Appeler'))))))),
+        panneau('Votre chargé de compte', null, corpsP(carteInterlocuteur(t.interlocuteur))),
+        panneau('Votre équipe', h('a', { class: 'lien', href: '#/equipe' }, 'Dossiers', ic('fleche')), corpsP(equipe)))),
   ];
+}
+
+/* ---------- Chargé de compte : la personne qui suit le client au bureau ---------- */
+function carteInterlocuteur(p) {
+  if (!p) return null;
+  return h('div', { class: 'interlocuteur' },
+    h('div', { class: 'interlocuteur__tete' }, h('i', { class: 'initiales initiales--nuit' }, initiales(p.nom)),
+      h('span', null, h('b', null, p.nom), h('small', null, p.role))),
+    h('p', { class: 'note' }, `${p.mission} : une question, un changement de planning, un document, c’est lui qui s’en occupe.`),
+    h('div', { class: 'contact__boutons' },
+      h('a', { class: 'btn btn--nuit', href: '#/messages' }, ic('messages'), 'Lui écrire'),
+      p.email ? h('a', { class: 'btn', href: `mailto:${p.email}` }, ic('envoyer'), p.email) : null),
+    h('p', { class: 'interlocuteur__urgence' }, 'Urgence sur site, 24h/24 : ', h('a', { href: 'tel:+33611678625' }, '06 11 67 86 25')));
 }
 
 /* ---------- Documents : quelques dossiers et une recherche ---------- */
@@ -497,6 +508,7 @@ const TON_CONF = { valide: ['ok', 'Disponible'], bientot: ['attente', 'À renouv
 const DOSSIERS = {
   factures: ['Factures', 'facture', 'Toutes les factures envoyées'],
   conformite: ['Documents de l’entreprise', 'bouclier', 'Kbis, autorisation CNAPS, assurance'],
+  rapports: ['Rapports mensuels', 'rapport', 'Le compte rendu de chaque mois'],
   devis: ['Devis', 'dossier', 'Devis reçus et signés'],
   contrats: ['Contrats', 'dossier', 'Contrat de prestation et avenants'],
   courriers: ['Courriers', 'dossier', 'Courriers de la direction'],
@@ -714,7 +726,9 @@ async function vuePrestations(choix) {
     tete('Prestation', 'Heures de présence', `Les heures de nos agents sur votre site (${site}), mois par mois.`, h('button', { class: 'btn', type: 'button', onclick: () => window.print() }, ic('imprimer'), 'Imprimer')),
     h('section', { class: 'panneau' },
       mois.length > 1 ? h('div', { class: 'outils' }, onglets) : null,
-      h('header', { class: 'panneau__tete' }, h('h2', null, actif.libelle), r.source === 'releve' ? statut('ok', 'Mois facturé') : r.encours ? statut('attente', 'Mois en cours') : statut('neutre', 'Mois terminé')),
+      h('header', { class: 'panneau__tete' }, h('h2', null, actif.libelle), h('div', { class: 'tete__actions' },
+        actif.rapport ? h('a', { class: 'btn btn--petit', href: `#/rapport-mensuel/${actif.mois}` }, ic('rapport'), 'Rapport du mois') : null,
+        r.source === 'releve' ? statut('ok', 'Mois facturé') : r.encours ? statut('attente', 'Mois en cours') : statut('neutre', 'Mois terminé'))),
       h('div', { class: 'resume-mois' }, resume),
       r.source !== 'releve' && r.encours && tt.prevu ? h('div', { class: 'avancement' }, barre(tt.heures, tt.prevu),
         h('span', null, `${Math.round(tt.heures / tt.prevu * 100)} % du mois effectué`)) : null,
@@ -724,16 +738,67 @@ async function vuePrestations(choix) {
   ];
 }
 
+/* ---------- Rapport mensuel de prestation ---------- */
+async function vueRapportMensuel(mois) {
+  const { rapport: r } = await api('mod.portail.rapport.mensuel', undefined, { mois });
+  oublierCentre();
+  const s = r.signataire || {};
+  const texte = (t) => String(t || '').split('\n').map((x, i) => [i ? h('br') : null, x]);
+  const section = (n, titre, ...corps) => h('section', { class: 'rm-section' }, h('h3', null, h('em', null, n), titre), corps);
+  const releve = r.source === 'releve';
+  const suivant = r.suivant;
+  return [
+    h('div', { class: 'barre-doc' },
+      h('a', { class: 'retour', href: '#/documents/rapports' }, ic('retour'), 'Rapports mensuels'),
+      r.factureId ? h('a', { class: 'btn', href: `#/document/${r.factureId}` }, ic('facture'), `Facture ${r.facture}`) : null,
+      h('button', { class: 'btn btn--nuit', type: 'button', onclick: () => window.print() }, ic('imprimer'), 'Imprimer ou enregistrer en PDF')),
+    h('article', { class: 'feuille rapport-mensuel' },
+      h('header', { class: 'feuille__tete' },
+        h('img', { src: '/admin/logo-document.jpg?v=4', alt: 'BDA Security Group', class: 'feuille__logo' }),
+        h('div', { class: 'feuille__titre' }, h('h2', null, 'Rapport mensuel'), h('b', null, r.libelle), h('span', { class: 'note' }, 'Compte rendu de prestation'))),
+      h('div', { class: 'feuille__parties' },
+        h('div', null, h('small', null, 'Client'), h('b', null, r.client), h('p', null, r.sites.join(', '))),
+        h('div', null, h('small', null, 'Prestataire'), h('b', null, 'BDA Security Group'), h('p', null, 'Surveillance humaine et gardiennage'))),
+      h('div', { class: 'rm-chiffres' },
+        h('div', null, h('small', null, 'Heures assurées'), h('b', null, nombre(r.heures, 'heures'))),
+        h('div', null, h('small', null, 'Jours de présence'), h('b', null, nombre(r.jours))),
+        h('div', null, h('small', null, 'Agents mobilisés'), h('b', null, nombre(r.equipe.length)))),
+      section('01', 'Faits marquants', h('p', { class: r.faits ? null : 'note' }, r.faits ? texte(r.faits) : 'Aucun incident à signaler sur la période.')),
+      r.qualite ? section('02', 'Contrôle qualité', h('p', null, texte(r.qualite))) : null,
+      section(r.qualite ? '03' : '02', 'Équipe affectée', r.equipe.length ? h('table', { class: 'rm-table' },
+        h('thead', null, h('tr', null, h('th', null, 'Agent'), h('th', null, 'Qualification'), h('th', null, 'Carte professionnelle'))),
+        h('tbody', null, r.equipe.map((a) => h('tr', null, h('td', null, a.nom), h('td', null, a.qualification), h('td', null, a.carte)))))
+        : h('p', { class: 'note' }, 'Équipe communiquée sur demande.')),
+      section(r.qualite ? '04' : '03', 'Détail des présences', r.lignes.length ? h('table', { class: 'rm-table' },
+        h('thead', null, h('tr', null, h('th', null, 'Jour'), h('th', null, 'Horaires'), releve ? null : h('th', null, 'Agent'), h('th', { class: 'd' }, 'Heures'))),
+        h('tbody', null, r.lignes.map((l) => h('tr', null, h('td', null, cap(frJour(l.jour))), h('td', null, plage(l.horaires) || '—'), releve ? null : h('td', null, l.agent), h('td', { class: 'd' }, heures(l.heures))))),
+        h('tfoot', null, h('tr', null, h('td', { colspan: releve ? 2 : 3 }, `Total · ${pluriel(r.jours, 'jour')}`), h('td', { class: 'd' }, heures(r.heures)))))
+        : h('p', { class: 'note' }, 'Aucune présence sur la période.'),
+        releve ? h('p', { class: 'note' }, `Heures reprises du relevé joint à la facture ${r.facture}.`) : null),
+      section(r.qualite ? '05' : '04', `${suivant.libelle} : à venir`, h('p', null, suivant.jours
+        ? `${pluriel(suivant.jours, 'jour')} de présence prévu${suivant.jours > 1 ? 's' : ''}, soit ${heures(suivant.heures)}${suivant.horaires ? `, horaires habituels ${plage(suivant.horaires)}` : ''}.`
+        : 'Planning en cours de préparation : il vous sera communiqué dans votre espace.')),
+      h('footer', { class: 'rm-signature' },
+        h('div', null, h('small', null, 'Établi par'), h('b', null, s.nom || 'La direction'), h('span', null, s.role || ''), h('span', null, 'Pour la direction de BDA Security Group')),
+        h('div', null, h('small', null, 'Date'), h('b', null, frLong(r.publie)), h('span', null, 'Document disponible dans votre espace client')))),
+  ];
+}
+
 /* ---------- Équipe : sur site, puis en attente d'embauche ---------- */
 const ETATS_CARTE = { valide: ['ok', 'Carte pro valide'], expiree: ['alerte', 'Carte pro expirée'], a_verifier: ['neutre', 'Carte pro non renseignée'], inactif: ['neutre', 'Inactif'] };
 const nbDocs = (a) => (a.docs.length ? pluriel(a.docs.length, 'document') : 'Dossier en cours');
 async function vueEquipe() {
-  const { agents, candidats = [] } = await api('mod.portail.equipe');
+  const { agents, candidats = [], suivi = [] } = await api('mod.portail.equipe');
   const personne = (a, clair) => h('div', { class: 'personne' }, h('i', { class: `initiales ${clair ? 'initiales--clair' : ''}` }, initiales(a.nom)),
     h('span', null, h('b', { class: 'fort' }, a.nom), h('small', null, a.qualification)));
   const ouvrir = (a) => () => { location.hash = `#/equipe/${a.id}`; };
   return [
-    tete('Prestation', 'Équipe', 'Les personnes affectées à votre site, puis les candidats que nous vous avons présentés. Cliquez sur un nom pour ouvrir son dossier.'),
+    tete('Prestation', 'Équipe', 'Votre chargé de compte, les personnes affectées à votre site, puis les candidats que nous vous avons présentés.'),
+    suivi.length ? panneau('Suivi de votre compte', h('small', null, 'Au bureau, à votre service'),
+      tableau([['Nom'], ['Rôle', 'm-cache'], ['', 'd']], suivi.map((p) => ligne(() => { location.hash = '#/messages'; }, [
+        td(h('div', { class: 'personne' }, h('i', { class: 'initiales initiales--nuit' }, initiales(p.nom)), h('span', null, h('b', { class: 'fort' }, p.nom), h('small', null, p.mission)))),
+        td([p.role, h('small', null, p.email)], 'm-cache'),
+        td(h('span', { class: 'lien' }, 'Lui écrire', ic('fleche')), 'd')])))) : null,
     panneau('Équipe sur site', h('small', null, pluriel(agents.length, 'personne')),
       agents.length ? tableau([['Nom'], ['Carte professionnelle', 'm-cache'], ['Dossier', 'm-cache'], ['', 'd']], agents.map((a) => {
         const [ton, lib] = ETATS_CARTE[a.etat] || ETATS_CARTE.a_verifier;

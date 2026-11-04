@@ -10,7 +10,7 @@
    (carte pro, diplômes, certifications, attestations, CV) ; le reste ne sort jamais.
    Les documents déposés ici sont des copies : l'original reste où il est.
    ========================================================= */
-import { api, apiFichier, h, icone, toast, erreur, ilYa, dateLisible, modale, confirmer, champ, saisie, zoneTexte, euro, isoVersFr } from '../outils.js';
+import { api, apiFichier, h, icone, toast, erreur, ilYa, dateLisible, modale, confirmer, champ, saisie, zoneTexte, euro, isoVersFr, fmtHeures } from '../outils.js';
 
 const ETATS = { valide: ['payee', 'En ligne'], bientot: ['attente', 'À renouveler'], expire: ['retard', 'Expirée'], manquant: ['archivee', 'Manquant'] };
 const pluriel = (n, un, plusieurs) => `${n} ${n > 1 ? (plusieurs || `${un}s`) : un}`;
@@ -59,6 +59,40 @@ async function deposer(clientId, types, preset = {}) {
     } }],
   });
 }
+// Rapport mensuel : les chiffres se remplissent seuls, la direction écrit les faits marquants puis publie (le client est prévenu par e-mail)
+async function preparerRapport(clientId, r) {
+  const faits = zoneTexte({ rows: 5, maxlength: 4000, placeholder: 'Ex. : RAS, aucun incident.\nLe 12 : refus d’accès à une personne sans rendez-vous.\nLe 20 : renfort pour l’événement du Consulat.' });
+  faits.value = r.faits || '';
+  const qualite = zoneTexte({ rows: 3, maxlength: 2000, placeholder: 'Facultatif. Ex. : passage du responsable le 15, poste conforme, tenue correcte.' });
+  qualite.value = r.qualite || '';
+  const envoyer = (action, message) => async () => {
+    try {
+      await api('mod.portail.rapport.enregistrer', { client_id: clientId, mois: r.mois, faits: faits.value, qualite: qualite.value, action });
+      toast(message);
+      return true;
+    } catch (e) { erreur(e); return false; }
+  };
+  const publie = r.statut === 'publie';
+  const resume = [['Heures', fmtHeures(r.heures || 0)], ['Jours', String(r.jours)], ['Agents', String(r.equipe.length)], [r.suivant.libelle, r.suivant.jours ? `${r.suivant.jours} j prévus` : 'pas encore planifié']];
+  return modale({
+    titre: `Rapport mensuel · ${r.libelle}`,
+    contenu: h('div', { class: 'pt-formulaire' },
+      h('div', { class: 'pt-rm-resume' }, resume.map(([k, v]) => h('div', null, h('small', { class: 'muet' }, k), h('b', null, v)))),
+      h('p', { class: 'muet pt-aide' }, r.source === 'releve' ? `Heures reprises du relevé de la facture ${r.facture}.` : 'Heures reprises du planning (vacations terminées).'),
+      r.termine ? null : h('p', { class: 'pt-alerte' }, 'Le mois n’est pas terminé : les heures du rapport s’arrêtent à aujourd’hui. Publiez plutôt le 1er du mois suivant.'),
+      champ('Faits marquants (vide = « Aucun incident à signaler »)', faits),
+      champ('Contrôle qualité (facultatif)', qualite),
+      h('p', { class: 'muet pt-aide' }, 'Signé : Abed BOUIDIA, chargé de compte, pour la direction. Le client le trouve dans Documents › Rapports mensuels et dans Heures de présence.')),
+    actions: [
+      { libelle: 'Annuler', classe: 'btn--ghost', valeur: false },
+      publie ? { libelle: 'Retirer de son espace', classe: 'btn--ghost', action: envoyer('retirer', 'Rapport retiré de l’espace client.') }
+        : { libelle: 'Enregistrer le brouillon', classe: 'btn--ghost', action: envoyer('enregistrer', 'Brouillon enregistré.') },
+      { libelle: publie ? 'Mettre à jour' : 'Publier et prévenir le client', classe: 'btn--gold', submit: true,
+        action: envoyer(publie ? 'enregistrer' : 'publier', publie ? 'Rapport mis à jour.' : 'Rapport publié : le client est prévenu par e-mail.') },
+    ],
+  });
+}
+
 async function publierAnnonce(clientId, a = {}) {
   const titre = saisie({ value: a.titre || '', maxlength: 140, placeholder: 'Ex. : Nouveau numéro de permanence' });
   const texte = zoneTexte({ rows: 4, maxlength: 1200 });
@@ -154,8 +188,8 @@ export async function pagePortail(ctx) {
 }
 
 async function pageClient(ctx, id) {
-  const [p, d, v, b] = await Promise.all([api('mod.portail.partages', undefined, { client_id: id }), api('mod.portail.depots', undefined, { client_id: id }),
-    api('mod.portail.vue', undefined, { client_id: id }), api('mod.portail.biblio', undefined, { client_id: id })]);
+  const [p, d, v, b, rm] = await Promise.all([api('mod.portail.partages', undefined, { client_id: id }), api('mod.portail.depots', undefined, { client_id: id }),
+    api('mod.portail.vue', undefined, { client_id: id }), api('mod.portail.biblio', undefined, { client_id: id }), api('mod.portail.rapports', undefined, { client_id: id })]);
   if (!ctx.actuel()) return;
   const recharger = () => pageClient(ctx, id);
   ctx.titre(`Espace client · ${p.client.nom}`);
@@ -241,6 +275,17 @@ async function pageClient(ctx, id) {
               h('td', null, h('b', null, s.numero), h('small', { class: 'muet mx-bloc' }, s.type === 'facture' ? 'Facture' : 'Devis')),
               h('td', null, s.client), h('td', null, isoVersFr(s.date) || '—'), h('td', { class: 'mx-droite' }, euro.format(s.total)),
               h('td', { class: 'mx-droite' }, h('button', { class: 'btn btn--ghost btn--petit', type: 'button', onclick: () => rattacher(s, true) }, 'Rattacher')))))) : null),
+        h('section', { class: 'carte' },
+          h('header', { class: 'carte__tete' }, h('h2', null, 'Rapports mensuels'), h('small', null, 'À publier au début de chaque mois')),
+          h('p', { class: 'muet pt-intro' }, 'Heures, équipe et mois suivant se remplissent seuls. Ajoutez les faits marquants, puis publiez : le client le voit dans son espace et reçoit un e-mail.'),
+          rm.rapports.length ? tableau(['Mois', 'Heures', 'État', ''], rm.rapports.map((r) => h('tr', null,
+            h('td', null, h('b', null, r.libelle), h('small', { class: 'muet mx-bloc' }, r.source === 'releve' ? `Relevé de la facture ${r.facture}` : r.termine ? 'D’après le planning' : 'Mois en cours')),
+            h('td', null, `${fmtHeures(r.heures || 0)} · ${r.jours} j`),
+            h('td', null, h('span', { class: `pastille pastille--${r.statut === 'publie' ? 'payee' : r.statut === 'brouillon' ? 'attente' : 'archivee'}` },
+              r.statut === 'publie' ? `Publié le ${isoVersFr(String(r.publie).slice(0, 10))}` : r.statut === 'brouillon' ? 'Brouillon' : 'À préparer')),
+            h('td', { class: 'mx-droite' }, h('button', { class: `btn ${r.statut === 'publie' ? 'btn--ghost' : 'btn--gold'} btn--petit`, type: 'button', onclick: async () => { if (await preparerRapport(id, r)) recharger(); } },
+              r.statut === 'publie' ? 'Modifier' : 'Préparer')))))
+            : h('p', { class: 'muet' }, 'Aucune heure enregistrée ces derniers mois.')),
         h('section', { class: 'carte' },
           h('header', { class: 'carte__tete' }, h('h2', null, 'Documents déposés pour ce client'), h('button', { class: 'btn btn--ghost btn--petit', type: 'button', onclick: async () => { if (await deposer(id, b.types)) recharger(); } }, 'Déposer')),
           h('p', { class: 'muet pt-intro' }, 'Contrat de prestation, avenants, courriers, rapports : ce que vous déposez ici n’est visible que par ce client.'),

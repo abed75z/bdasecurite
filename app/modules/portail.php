@@ -16,6 +16,9 @@ declare(strict_types=1);
 
 // Types de documents d'agent qu'on peut partager avec un client (les autres restent privés)
 const MOD_PORTAIL_TYPES_PARTAGE = ['carte_pro' => 'Carte professionnelle', 'diplome_aps' => 'Diplôme / titre APS', 'certif' => 'Certification', 'attestation' => 'Attestation', 'cv' => 'CV'];
+// Chargé de compte présenté aux clients (accueil, équipe, signature du rapport mensuel)
+const MOD_PORTAIL_INTERLOCUTEUR = ['nom' => 'Abed BOUIDIA', 'role' => 'Responsable des opérations, des ressources humaines et du digital',
+  'mission' => 'Chargé de votre compte', 'email' => 'abed@bdasecurite.com', 'tel' => '06 11 67 86 25'];
 const MOD_PORTAIL_DEMANDES = ['renfort' => 'Demande de renfort', 'planning' => 'Modification du planning', 'probleme' => 'Problème signalé', 'facture' => 'Question sur une facture', 'document' => 'Demande de document'];
 const MOD_PORTAIL_STATUTS = ['recue' => 'Reçue', 'en_cours' => 'Prise en charge', 'faite' => 'Faite'];
 const MOD_PORTAIL_MAX = 15 * 1048576;
@@ -87,6 +90,11 @@ function module_portail(): array
         ALTER TABLE m_portail_partages ADD COLUMN role TEXT NOT NULL DEFAULT 'equipe';
         ALTER TABLE m_portail_partages ADD COLUMN note TEXT NOT NULL DEFAULT '';
         SQL,
+      // Rapport mensuel de prestation : le texte de la direction (faits marquants, contrôle qualité) et sa publication
+      5 => <<<'SQL'
+        CREATE TABLE IF NOT EXISTS m_portail_rapports (client_id INTEGER NOT NULL, mois TEXT NOT NULL, faits TEXT NOT NULL DEFAULT '', qualite TEXT NOT NULL DEFAULT '',
+          statut TEXT NOT NULL DEFAULT 'brouillon', publie TEXT NOT NULL DEFAULT '', par TEXT NOT NULL DEFAULT '', maj TEXT NOT NULL, PRIMARY KEY (client_id, mois));
+        SQL,
     ],
     'admin' => [
       'clients' => ['methode' => 'GET', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_clients'],
@@ -106,6 +114,8 @@ function module_portail(): array
       'rattacher' => ['methode' => 'POST', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_rattacher'],
       'annonce.enregistrer' => ['methode' => 'POST', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_annonce'],
       'annonce.retirer' => ['methode' => 'POST', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_annonce_retirer'],
+      'rapports' => ['methode' => 'GET', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_rapports'],
+      'rapport.enregistrer' => ['methode' => 'POST', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_rapport'],
     ],
     'client' => [
       'accueil' => ['methode' => 'GET', 'fn' => 'mod_portail_cl_accueil'],
@@ -127,6 +137,7 @@ function module_portail(): array
       'biblio.fichier' => ['methode' => 'GET', 'fn' => 'mod_portail_cl_biblio_fichier'],
       'envoi.fichier' => ['methode' => 'GET', 'fn' => 'mod_portail_cl_envoi_fichier'],
       'rapport' => ['methode' => 'GET', 'fn' => 'mod_portail_cl_rapport'],
+      'rapport.mensuel' => ['methode' => 'GET', 'fn' => 'mod_portail_cl_rapport_mensuel'],
     ],
     'compteurs' => 'mod_portail_compteurs',
   ];
@@ -380,7 +391,7 @@ function mod_portail_cl_equipe(): void
     if ($candidat) $candidats[] = $fiche;
     else $agents[] = $fiche;
   }
-  repondre(['ok' => true, 'agents' => $agents, 'candidats' => $candidats]);
+  repondre(['ok' => true, 'agents' => $agents, 'candidats' => $candidats, 'suivi' => [MOD_PORTAIL_INTERLOCUTEUR]]);
 }
 function mod_portail_heures_agent(int $agentId, array $siteIds): float
 {
@@ -954,7 +965,7 @@ function mod_portail_centre(array $c): array
   foreach ($docs as &$d) if ($d['categorie'] === 'devis' && isset($accords[$d['id']])) $d['accord'] = $accords[$d['id']];
   unset($d);
   $biblio = mod_portail_biblio_client($cid);
-  $items = array_merge($docs, $biblio, mod_portail_envois_items($cid), mod_portail_rapports_items(mod_portail_sites($cid), mod_portail_releves($brut)), mod_portail_equipe_items($cid), mod_portail_echanges_items($cid));
+  $items = array_merge($docs, $biblio, mod_portail_envois_items($cid), mod_portail_rapports_mensuels_items($cid), mod_portail_equipe_items($cid), mod_portail_echanges_items($cid));
   usort($items, fn ($a, $b) => [$b['date'], $b['cle']] <=> [$a['date'], $a['cle']]);
   return ['items' => $items, 'conformite' => mod_portail_conformite($biblio), 'categories' => MOD_PORTAIL_CATEGORIES];
 }
@@ -1001,6 +1012,9 @@ function mod_portail_cl_tableau(): void
   $precedent = date('Y-m', strtotime('first day of last month'));
   $releves = mod_portail_releves(mod_portail_docs($c));
   $parMois = mod_portail_heures_mois($ids, $releves);
+  $publies = mod_portail_rapports_publies($cid);
+  foreach ($parMois as &$pm) $pm['rapport'] = isset($publies[$pm['mois']]);
+  unset($pm);
   $heuresDe = function (string $m) use ($parMois): ?array { foreach ($parMois as $x) if ($x['mois'] === $m) return $x; return null; };
   $st = $db->prepare("SELECT d.message_id, d.type, d.statut, d.maj, m.cree FROM m_portail_demandes d JOIN messages_clients m ON m.id = d.message_id WHERE d.client_id = ? AND d.statut <> 'faite' ORDER BY d.message_id DESC LIMIT 20");
   $st->execute([$cid]);
@@ -1008,7 +1022,7 @@ function mod_portail_cl_tableau(): void
   $nl = $db->prepare("SELECT COUNT(*) FROM messages_clients WHERE client_id = ? AND auteur = 'admin' AND lu = 0");
   $nl->execute([$cid]);
   $conf = $centre['conformite'];
-  repondre(['ok' => true,
+  repondre(['ok' => true, 'interlocuteur' => MOD_PORTAIL_INTERLOCUTEUR,
     'prestations' => ['sites' => array_values($sites), 'enPoste' => mod_portail_en_poste($ids), 'prochain' => mod_portail_prochain($ids), 'semaine' => mod_portail_semaine($sites),
       'heuresMois' => $heuresDe(date('Y-m'))['heures'] ?? 0, 'heuresPrecedent' => $heuresDe($precedent)['heures'] ?? 0, 'moisPrecedent' => $precedent,
       'mois' => $parMois, 'courant' => mod_portail_mois_courant($ids),
@@ -1112,6 +1126,138 @@ function mod_portail_cl_rapport(): void
     'lignes' => $lignes, 'agents' => array_values($agents), 'total' => ['vacations' => count($faites), 'heures' => round(array_sum(array_column($faites, 'heures')), 2),
       'jours' => count(array_unique(array_column($faites, 'jour'))), 'agents' => count($agents),
       'prevu' => round(array_sum(array_column($lignes, 'heures')), 2), 'joursPrevus' => count(array_unique(array_column($lignes, 'jour')))]]);
+}
+
+/* ----- Rapport mensuel de prestation ----- */
+function mod_portail_rapports_publies(int $cid): array
+{
+  $st = db()->prepare("SELECT mois, publie FROM m_portail_rapports WHERE client_id = ? AND statut = 'publie'");
+  $st->execute([$cid]);
+  return array_column($st->fetchAll(), 'publie', 'mois');
+}
+function mod_portail_rapports_mensuels_items(int $cid): array
+{
+  $st = db()->prepare("SELECT r.mois, r.publie, (SELECT quand FROM m_portail_lus l WHERE l.client_id = r.client_id AND l.cle = 'rm:' || r.mois) AS lu
+      FROM m_portail_rapports r WHERE r.client_id = ? AND r.statut = 'publie' ORDER BY r.mois DESC");
+  $st->execute([$cid]);
+  return array_map(fn ($r) => ['cle' => 'rm:' . $r['mois'], 'id' => 0, 'categorie' => 'rapports', 'genre' => 'Rapport mensuel', 'titre' => 'Rapport mensuel — ' . mod_portail_mois((string)$r['mois']),
+    'sous' => 'Heures, équipe, faits marquants et contrôle qualité', 'reference' => (string)$r['mois'], 'date' => substr((string)$r['publie'], 0, 10), 'nouveau' => empty($r['lu']),
+    'vue' => '#/rapport-mensuel/' . $r['mois'], 'url' => '', 'format' => 'rapport'], $st->fetchAll());
+}
+// Tout ce que contient le rapport d'un mois : calculé (heures, présences, équipe, mois suivant) + le texte de la direction
+function mod_portail_rapport_donnees(array $c, string $mois): array
+{
+  $db = db();
+  $cid = (int)$c['client_id'];
+  $sites = mod_portail_sites($cid);
+  $ids = array_keys($sites);
+  $releve = mod_portail_releves(mod_portail_docs($c))[$mois] ?? null;
+  $lignes = [];
+  $agents = [];
+  if ($releve) {
+    foreach ($releve['lignes'] as $l) $lignes[] = ['jour' => $l['jour'], 'horaires' => implode(' · ', array_filter([$l['matin'], $l['apm']])), 'heures' => $l['heures'], 'agent' => ''];
+    $heures = (float)$releve['heures'];
+    $jours = (int)$releve['jours'];
+  } else {
+    $heures = 0.0;
+    $set = [];
+    foreach (mod_portail_activite($ids, "$mois-01", date('Y-m-t', strtotime("$mois-01"))) as $v) {
+      $nuit = substr((string)$v['fin'], 0, 5) <= substr((string)$v['debut'], 0, 5);
+      if ((int)strtotime($v['jour'] . ' ' . substr((string)$v['fin'], 0, 5)) + ($nuit ? 86400 : 0) > time()) continue;
+      $h = round(mod_portail_duree((string)$v['debut'], (string)$v['fin'], (int)$v['pause']), 2);
+      $heures += $h;
+      $set[(string)$v['jour']] = true;
+      $agents[(int)$v['agent_id']] = true;
+      $lignes[] = ['jour' => (string)$v['jour'], 'horaires' => substr((string)$v['debut'], 0, 5) . ' - ' . substr((string)$v['fin'], 0, 5), 'heures' => $h, 'agent' => mod_portail_nom_court((string)$v['nom'])];
+    }
+    $jours = count($set);
+  }
+  // l'équipe : les agents du planning du mois, sinon l'équipe partagée avec le client
+  $aids = array_keys($agents) ?: array_keys(array_filter(mod_portail_partages($cid), fn ($p) => $p['visible'] && $p['role'] !== 'candidat'));
+  $equipe = [];
+  if ($aids) {
+    foreach ($db->query('SELECT id, nom, poste, validite FROM agents WHERE id IN (' . mod_portail_in($aids) . ') ORDER BY nom COLLATE NOCASE')->fetchAll() as $a) {
+      $val = substr((string)$a['validite'], 0, 10);
+      $equipe[] = ['nom' => mod_portail_nom_court((string)$a['nom']), 'qualification' => mod_portail_qualif((string)$a['poste']),
+        'carte' => $val === '' ? 'Non renseignée' : ($val >= date('Y-m-d') ? 'Valide jusqu’au ' . date('d/m/Y', strtotime($val)) : 'Expirée')];
+    }
+  }
+  // le mois suivant d'après le planning
+  $suivant = date('Y-m', strtotime("$mois-01 +1 month"));
+  $prevu = ['mois' => $suivant, 'libelle' => mod_portail_mois($suivant), 'jours' => 0, 'heures' => 0.0, 'horaires' => ''];
+  $plages = [];
+  $joursSuivants = [];
+  foreach (mod_portail_activite($ids, "$suivant-01", date('Y-m-t', strtotime("$suivant-01"))) as $v) {
+    $prevu['heures'] += mod_portail_duree((string)$v['debut'], (string)$v['fin'], (int)$v['pause']);
+    $joursSuivants[(string)$v['jour']] = true;
+    $cle = substr((string)$v['debut'], 0, 5) . ' - ' . substr((string)$v['fin'], 0, 5);
+    $plages[$cle] = ($plages[$cle] ?? 0) + 1;
+  }
+  arsort($plages);
+  $prevu['jours'] = count($joursSuivants);
+  $prevu['heures'] = round($prevu['heures'], 2);
+  $prevu['horaires'] = (string)(array_key_first($plages) ?? '');
+  $st = $db->prepare('SELECT faits, qualite, statut, publie, maj FROM m_portail_rapports WHERE client_id = ? AND mois = ?');
+  $st->execute([$cid, $mois]);
+  $r = $st->fetch() ?: ['faits' => '', 'qualite' => '', 'statut' => '', 'publie' => '', 'maj' => ''];
+  return ['mois' => $mois, 'libelle' => mod_portail_mois($mois), 'client' => (string)$c['nom'], 'sites' => array_values($sites),
+    'source' => $releve ? 'releve' : 'planning', 'facture' => $releve['facture'] ?? '', 'factureId' => $releve['factureId'] ?? 0, 'termine' => $mois < date('Y-m'),
+    'heures' => round($heures, 2), 'jours' => $jours, 'lignes' => $lignes, 'equipe' => $equipe, 'suivant' => $prevu,
+    'faits' => (string)$r['faits'], 'qualite' => (string)$r['qualite'], 'statut' => (string)$r['statut'] ?: 'nouveau', 'publie' => (string)$r['publie'], 'maj' => (string)$r['maj'],
+    'signataire' => MOD_PORTAIL_INTERLOCUTEUR];
+}
+function mod_portail_cl_rapport_mensuel(): void
+{
+  $c = mod_portail_compte();
+  $cid = (int)$c['client_id'];
+  $mois = (string)($_GET['mois'] ?? '');
+  if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $mois)) throw new RuntimeException('Mois invalide.');
+  if (!isset(mod_portail_rapports_publies($cid)[$mois])) echec('Ce rapport n’est pas encore disponible.', 404);
+  $ins = db()->prepare('INSERT OR IGNORE INTO m_portail_lus (client_id, cle, quand) VALUES (?, ?, ?)');
+  $ins->execute([$cid, 'rm:' . $mois, maintenant()]);
+  if ($ins->rowCount()) journal('document', "Espace client : {$c['nom']} a ouvert le rapport mensuel de " . mod_portail_mois($mois));
+  repondre(['ok' => true, 'rapport' => mod_portail_rapport_donnees($c, $mois)]);
+}
+function mod_portail_adm_rapports(): void
+{
+  $cid = (int)($_GET['client_id'] ?? 0);
+  $c = ['client_id' => $cid, 'nom' => mod_portail_nom_client($cid)];
+  $mois = [];
+  for ($i = 0; $i < 4; $i++) $mois[] = date('Y-m', strtotime("first day of -$i months"));
+  $liste = [];
+  foreach ($mois as $m) {
+    $d = mod_portail_rapport_donnees($c, $m);
+    if (!$d['heures'] && !$d['jours'] && $d['statut'] === 'nouveau' && $m !== date('Y-m')) continue;
+    unset($d['lignes'], $d['signataire']);
+    $liste[] = $d;
+  }
+  repondre(['ok' => true, 'rapports' => $liste]);
+}
+function mod_portail_adm_rapport(): void
+{
+  $b = corps();
+  $cid = (int)($b['client_id'] ?? 0);
+  $nom = mod_portail_nom_client($cid);
+  $mois = (string)($b['mois'] ?? '');
+  if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $mois) || $mois > date('Y-m')) throw new RuntimeException('Mois invalide.');
+  $db = db();
+  $st = $db->prepare('SELECT statut, publie FROM m_portail_rapports WHERE client_id = ? AND mois = ?');
+  $st->execute([$cid, $mois]);
+  $avant = $st->fetch() ?: ['statut' => '', 'publie' => ''];
+  $action = (string)($b['action'] ?? 'enregistrer');
+  $statut = $action === 'publier' ? 'publie' : ($action === 'retirer' ? 'brouillon' : ($avant['statut'] ?: 'brouillon'));
+  $publie = $statut === 'publie' ? ($avant['publie'] ?: maintenant()) : '';
+  $db->prepare('INSERT INTO m_portail_rapports (client_id, mois, faits, qualite, statut, publie, par, maj) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(client_id, mois) DO UPDATE SET faits = excluded.faits, qualite = excluded.qualite, statut = excluded.statut, publie = excluded.publie, par = excluded.par, maj = excluded.maj')
+    ->execute([$cid, $mois, texte($b['faits'] ?? '', 4000), texte($b['qualite'] ?? '', 2000), $statut, $publie, (string)($_SESSION['login'] ?? ''), maintenant()]);
+  // « d’octobre 2026 », « de novembre 2026 »
+  $lib = mb_strtolower(mod_portail_mois($mois));
+  $de = (preg_match('/^[aeiou]/u', $lib) ? 'd’' : 'de ') . $lib;
+  if ($statut === 'publie' && $avant['statut'] !== 'publie') {
+    journal('document', "Espace client de $nom : rapport mensuel $de publié");
+    mod_portail_alerter($cid, "Votre rapport mensuel $de est disponible", "Le rapport mensuel de prestation $de est disponible", 'rapport-mensuel/' . $mois);
+  } elseif ($action === 'retirer') journal('document', "Espace client de $nom : rapport mensuel $de retiré");
+  repondre(['ok' => true, 'statut' => $statut, 'publie' => $publie]);
 }
 
 /* ----- Centre documentaire : côté direction ----- */

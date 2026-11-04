@@ -82,6 +82,11 @@ function module_portail(): array
         ALTER TABLE m_portail_biblio ADD COLUMN montant REAL NOT NULL DEFAULT 0;
         ALTER TABLE m_portail_biblio ADD COLUMN statut TEXT NOT NULL DEFAULT '';
         SQL,
+      // Dossiers partagés : « équipe sur site » ou « en attente d'embauche » (candidat présenté au client), avec une note (ex. date d'entretien)
+      4 => <<<'SQL'
+        ALTER TABLE m_portail_partages ADD COLUMN role TEXT NOT NULL DEFAULT 'equipe';
+        ALTER TABLE m_portail_partages ADD COLUMN note TEXT NOT NULL DEFAULT '';
+        SQL,
     ],
     'admin' => [
       'clients' => ['methode' => 'GET', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_clients'],
@@ -249,14 +254,20 @@ function mod_portail_alerter(int $clientId, string $sujet, string $quoi, string 
   if ($email === '') return;
   envoyer_mail($sujet, "Bonjour,\n\n$quoi dans votre espace client.\n\nOuvrir votre espace : https://bdasecurite.com/espace-client#/$ancre\n\nBDA Security Group — 06 11 67 86 25", BDA_EMAIL, $email);
 }
-// Partages d'un client : [agent_id => ['visible' => bool, 'docs' => [ids]]]
+// Partages d'un client : [agent_id => ['visible' => bool, 'docs' => [ids], 'role' => 'equipe'|'candidat', 'note' => texte]]
 function mod_portail_partages(int $clientId): array
 {
-  $st = db()->prepare('SELECT agent_id, visible, docs FROM m_portail_partages WHERE client_id = ?');
+  $st = db()->prepare('SELECT agent_id, visible, docs, role, note FROM m_portail_partages WHERE client_id = ? ORDER BY maj, agent_id');
   $st->execute([$clientId]);
   $out = [];
-  foreach ($st->fetchAll() as $p) $out[(int)$p['agent_id']] = ['visible' => (int)$p['visible'] === 1, 'docs' => array_values(array_map('intval', json_decode((string)$p['docs'], true) ?: []))];
+  foreach ($st->fetchAll() as $p) $out[(int)$p['agent_id']] = ['visible' => (int)$p['visible'] === 1, 'docs' => array_values(array_map('intval', json_decode((string)$p['docs'], true) ?: [])),
+    'role' => $p['role'] === 'candidat' ? 'candidat' : 'equipe', 'note' => (string)$p['note']];
   return $out;
+}
+// Un candidat présenté au client n'est pas encore actif : son dossier reste visible tant que la direction le partage
+function mod_portail_filtre_actif(array $p): string
+{
+  return $p['role'] === 'candidat' ? '' : ' AND a.actif = 1';
 }
 
 /* =========================================================
@@ -317,11 +328,13 @@ function mod_portail_cl_equipe(): void
   $enPoste = array_column(mod_portail_en_poste($sites), 'depuis', 'agent_id');
   $db = db();
   $agents = [];
+  $candidats = [];
   foreach ($partages as $aid => $p) {
+    $candidat = $p['role'] === 'candidat';
     $st = $db->prepare('SELECT id, nom, poste, carte, validite, actif FROM agents WHERE id = ?');
     $st->execute([$aid]);
     $a = $st->fetch();
-    if (!$a || !(int)$a['actif']) continue;
+    if (!$a || (!$candidat && !(int)$a['actif'])) continue;
     $docs = [];
     if ($p['docs']) {
       $d = $db->prepare('SELECT id, type, nom, mime, ajoute FROM agent_docs WHERE agent_id = ? AND id IN (' . mod_portail_in($p['docs']) . ') AND type IN (\'' . implode("','", array_keys(MOD_PORTAIL_TYPES_PARTAGE)) . '\') ORDER BY ajoute DESC');
@@ -338,29 +351,36 @@ function mod_portail_cl_equipe(): void
       }
     } catch (Throwable $e) { /* module Formations absent */ }
     $carte = (string)$a['carte'];
-    $etat = function_exists('mod_badge_etat') ? mod_badge_etat($a) : ((string)$a['validite'] >= date('Y-m-d') ? 'valide' : 'a_verifier');
+    $validite = substr((string)$a['validite'], 0, 10);
+    $etat = $candidat ? ($validite === '' ? 'a_verifier' : ($validite >= date('Y-m-d') ? 'valide' : 'expiree'))
+      : (function_exists('mod_badge_etat') ? mod_badge_etat($a) : ($validite >= date('Y-m-d') ? 'valide' : 'a_verifier'));
     $depuis = '';
-    if ($sites) {
+    if ($sites && !$candidat) {
       $s = $db->prepare('SELECT MIN(jour) FROM vacations WHERE agent_id = ? AND site_id IN (' . mod_portail_in($sites) . ") AND statut <> 'annulee'");
       $s->execute([$aid]);
       $depuis = (string)$s->fetchColumn();
     }
-    $agents[] = [
+    $fiche = [
       'id' => (int)$a['id'],
+      'role' => $p['role'],
       'nom' => mod_portail_nom_court((string)$a['nom']),
       'qualification' => mod_portail_qualif((string)$a['poste']),
+      'gerant' => (bool)preg_match('/g[ée]rant|direct/i', (string)$a['poste']),
       'carte' => $carte !== '' ? '···· ' . mb_substr($carte, -4) : '',
       'validite' => preg_match('/^(\d{4})-(\d{2})-(\d{2})/', (string)$a['validite'], $m) ? "$m[3]/$m[2]/$m[1]" : '',
       'etat' => $etat,
-      'verifier' => function_exists('mod_badge_jeton') && $etat !== 'inactif' ? mod_url('verifier') . '#' . mod_badge_jeton((int)$a['id']) : '',
-      'enPoste' => $enPoste[(int)$a['id']] ?? '',
+      'verifier' => !$candidat && function_exists('mod_badge_jeton') && $etat !== 'inactif' ? mod_url('verifier') . '#' . mod_badge_jeton((int)$a['id']) : '',
+      'enPoste' => $candidat ? '' : ($enPoste[(int)$a['id']] ?? ''),
       'depuis' => $depuis,
-      'heuresMois' => $sites ? mod_portail_heures_agent((int)$a['id'], $sites) : 0,
+      'heuresMois' => $sites && !$candidat ? mod_portail_heures_agent((int)$a['id'], $sites) : 0,
+      'note' => $p['note'],
       'formations' => $formations,
       'docs' => $docs,
     ];
+    if ($candidat) $candidats[] = $fiche;
+    else $agents[] = $fiche;
   }
-  repondre(['ok' => true, 'agents' => $agents]);
+  repondre(['ok' => true, 'agents' => $agents, 'candidats' => $candidats]);
 }
 function mod_portail_heures_agent(int $agentId, array $siteIds): float
 {
@@ -393,7 +413,7 @@ function mod_portail_cl_documents(): void
   $depots = $st->fetchAll();
   $agents = [];
   foreach (array_filter(mod_portail_partages($cid), fn ($p) => $p['visible'] && $p['docs']) as $aid => $p) {
-    $d = db()->prepare('SELECT d.id, d.type, d.nom, d.ajoute, a.nom AS agent FROM agent_docs d JOIN agents a ON a.id = d.agent_id WHERE d.agent_id = ? AND a.actif = 1 AND d.id IN (' . mod_portail_in($p['docs']) . ')');
+    $d = db()->prepare('SELECT d.id, d.type, d.nom, d.ajoute, a.nom AS agent FROM agent_docs d JOIN agents a ON a.id = d.agent_id WHERE d.agent_id = ?' . mod_portail_filtre_actif($p) . ' AND d.id IN (' . mod_portail_in($p['docs']) . ')');
     $d->execute([$aid]);
     foreach ($d->fetchAll() as $x) if (isset(MOD_PORTAIL_TYPES_PARTAGE[$x['type']])) $agents[] = ['id' => (int)$x['id'], 'titre' => MOD_PORTAIL_TYPES_PARTAGE[$x['type']] . ' · ' . mod_portail_nom_court((string)$x['agent']), 'nom' => (string)$x['nom'], 'date' => substr((string)$x['ajoute'], 0, 10)];
   }
@@ -556,17 +576,18 @@ function mod_portail_adm_partages(): void
   $partages = mod_portail_partages($cid);
   $types = "'" . implode("','", array_keys(MOD_PORTAIL_TYPES_PARTAGE)) . "'";
   $agents = [];
-  foreach ($db->query('SELECT id, nom, poste, carte, validite FROM agents WHERE actif = 1 ORDER BY nom COLLATE NOCASE')->fetchAll() as $a) {
+  foreach ($db->query('SELECT id, nom, poste, carte, validite, actif FROM agents ORDER BY nom COLLATE NOCASE')->fetchAll() as $a) {
     $aid = (int)$a['id'];
     $d = $db->prepare("SELECT id, type, nom, ajoute FROM agent_docs WHERE agent_id = ? AND type IN ($types) ORDER BY type, ajoute DESC");
     $d->execute([$aid]);
     $agents[] = ['id' => $aid, 'nom' => (string)$a['nom'], 'court' => mod_portail_nom_court((string)$a['nom']), 'poste' => (string)$a['poste'],
-      'validite' => (string)$a['validite'], 'affecte' => in_array($aid, $affectes, true),
+      'validite' => (string)$a['validite'], 'affecte' => in_array($aid, $affectes, true), 'actif' => (int)$a['actif'] === 1,
       'visible' => $partages[$aid]['visible'] ?? false, 'partages' => $partages[$aid]['docs'] ?? [],
+      'role' => $partages[$aid]['role'] ?? ((int)$a['actif'] === 1 ? 'equipe' : 'candidat'), 'note' => $partages[$aid]['note'] ?? '',
       'docs' => array_map(fn ($x) => ['id' => (int)$x['id'], 'type' => MOD_PORTAIL_TYPES_PARTAGE[$x['type']] ?? $x['type'], 'nom' => (string)$x['nom'], 'ajoute' => substr((string)$x['ajoute'], 0, 10)], $d->fetchAll())];
   }
   // les agents du site d'abord, puis ceux déjà visibles, puis les autres
-  usort($agents, fn ($x, $y) => [!$x['affecte'], !$x['visible'], $x['nom']] <=> [!$y['affecte'], !$y['visible'], $y['nom']]);
+  usort($agents, fn ($x, $y) => [!$x['affecte'], !$x['visible'], !$x['actif'], $x['nom']] <=> [!$y['affecte'], !$y['visible'], !$y['actif'], $y['nom']]);
   repondre(['ok' => true, 'client' => ['id' => $cid, 'nom' => (string)$client['nom']], 'sites' => count($sites), 'agents' => $agents]);
 }
 function mod_portail_adm_partage(): void
@@ -588,11 +609,15 @@ function mod_portail_adm_partage(): void
     $ok = array_map('intval', $d->fetchAll(PDO::FETCH_COLUMN));
   }
   $visible = !empty($b['visible']) ? 1 : 0;
-  $db->prepare('INSERT INTO m_portail_partages (client_id, agent_id, visible, docs, par, maj) VALUES (?, ?, ?, ?, ?, ?)
-      ON CONFLICT(client_id, agent_id) DO UPDATE SET visible = excluded.visible, docs = excluded.docs, par = excluded.par, maj = excluded.maj')
-    ->execute([$cid, $aid, $visible, json_encode($ok), (string)($_SESSION['login'] ?? ''), maintenant()]);
-  journal('equipe', "Espace client de {$n['client']} : dossier de {$n['agent']} " . ($visible ? 'partagé (' . count($ok) . ' document' . (count($ok) > 1 ? 's' : '') . ')' : 'retiré'));
-  repondre(['ok' => true, 'visible' => (bool)$visible, 'docs' => $ok]);
+  // le rôle et la note ne changent que s'ils sont envoyés (cocher un document ne les efface pas)
+  $avant = mod_portail_partages($cid)[$aid] ?? ['role' => 'equipe', 'note' => ''];
+  $role = array_key_exists('role', $b) ? (($b['role'] ?? '') === 'candidat' ? 'candidat' : 'equipe') : $avant['role'];
+  $note = array_key_exists('note', $b) ? texte($b['note'], 200) : $avant['note'];
+  $db->prepare('INSERT INTO m_portail_partages (client_id, agent_id, visible, docs, role, note, par, maj) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(client_id, agent_id) DO UPDATE SET visible = excluded.visible, docs = excluded.docs, role = excluded.role, note = excluded.note, par = excluded.par, maj = excluded.maj')
+    ->execute([$cid, $aid, $visible, json_encode($ok), $role, $note, (string)($_SESSION['login'] ?? ''), maintenant()]);
+  journal('equipe', "Espace client de {$n['client']} : dossier de {$n['agent']} " . ($visible ? 'partagé (' . count($ok) . ' document' . (count($ok) > 1 ? 's' : '') . ($role === 'candidat' ? ', en attente d’embauche' : '') . ')' : 'retiré'));
+  repondre(['ok' => true, 'visible' => (bool)$visible, 'docs' => $ok, 'role' => $role, 'note' => $note]);
 }
 function mod_portail_adm_depots(): void
 {
@@ -734,7 +759,8 @@ function mod_portail_item_biblio(array $b, bool $admin = false): array
   return ['cle' => 'b:' . $id, 'id' => $id, 'categorie' => (string)$b['categorie'], 'type' => (string)$b['type'],
     'genre' => MOD_PORTAIL_TYPES_BIBLIO[$b['categorie']][$b['type']] ?? 'Document', 'titre' => (string)$b['titre'], 'sous' => (string)$b['description'],
     'reference' => (string)$b['reference'], 'date' => (string)$b['date_doc'] !== '' ? (string)$b['date_doc'] : substr((string)$b['cree'], 0, 10),
-    'expire' => mod_portail_expiration($b), 'nouveau' => !$admin && empty($b['lu']), 'commun' => (int)$b['client_id'] === 0,
+    'expire' => mod_portail_expiration($b), 'nouveau' => !$admin && empty($b['lu']) && !($b['categorie'] === 'factures' && (string)$b['date_doc'] !== '' && $b['date_doc'] < date('Y-m-d', strtotime('-45 days'))),
+    'commun' => (int)$b['client_id'] === 0,
     'url' => $admin ? 'api.php?a=mod.portail.biblio.fichier&id=' . $id : mod_portail_url('biblio.fichier', $id), 'format' => mod_portail_format((string)$b['mime']),
     'taille' => (int)$b['taille'], 'nom' => (string)$b['nom']]
     + ($b['categorie'] === 'factures' ? ['montant' => round((float)($b['montant'] ?? 0), 2), 'periode' => (string)$b['description'], 'echeance' => '',
@@ -770,7 +796,61 @@ function mod_portail_activite(array $siteIds, string $du, string $au): array
   $st->execute([$du, $au]);
   return $st->fetchAll();
 }
-function mod_portail_rapports_items(array $sites): array
+// Plages « 08:30 - 13:45 » (plusieurs possibles) → minutes, comme le relevé de la facture
+function mod_portail_minutes_plages(string $txt): int
+{
+  preg_match_all('/(\d{1,2})\s*[:hH]\s*(\d{2})\s*(?:-|–|à)\s*(\d{1,2})\s*[:hH]\s*(\d{2})/u', $txt, $m, PREG_SET_ORDER);
+  $t = 0;
+  foreach ($m as $x) { $d = ((int)$x[3] * 60 + (int)$x[4]) - ((int)$x[1] * 60 + (int)$x[2]); $t += $d > 0 ? $d : $d + 1440; }
+  return $t;
+}
+// Relevés d'heures joints aux factures visibles par le client (page 2 de la facture) : [mois => relevé]. La facture fait foi.
+function mod_portail_releves(array $docs): array
+{
+  $out = [];
+  foreach ($docs as $d) {
+    if (($d['type'] ?? '') !== 'facture' || ($d['statut'] ?? '') === 'annulee') continue;
+    $L = (json_decode((string)($d['data'] ?? ''), true) ?: [])['releve']['lignes'] ?? null;
+    if (!is_array($L)) continue;
+    $lignes = [];
+    $parMois = [];
+    foreach ($L as $l) {
+      if (!is_array($l) || !preg_match('#^(\d{2})/(\d{2})/(\d{4})$#', trim((string)($l['date'] ?? '')), $m)) continue;
+      $min = mod_portail_minutes_plages((string)($l['matin'] ?? '')) + mod_portail_minutes_plages((string)($l['apm'] ?? ''));
+      $lignes[] = ['jour' => "$m[3]-$m[2]-$m[1]", 'matin' => trim((string)($l['matin'] ?? '')), 'apm' => trim((string)($l['apm'] ?? '')), 'minutes' => $min, 'heures' => round($min / 60, 2)];
+      $parMois["$m[3]-$m[2]"] = ($parMois["$m[3]-$m[2]"] ?? 0) + 1;
+    }
+    if (!$lignes) continue;
+    arsort($parMois);
+    $mois = (string)array_key_first($parMois);
+    if (isset($out[$mois])) continue; // une facture par mois : la plus récente (les documents arrivent du plus récent au plus ancien)
+    usort($lignes, fn ($a, $b) => strcmp($a['jour'], $b['jour']));
+    $min = array_sum(array_column($lignes, 'minutes'));
+    $out[$mois] = ['mois' => $mois, 'facture' => (string)$d['numero'], 'factureId' => (int)$d['id'], 'lignes' => $lignes, 'heures' => round($min / 60, 2),
+      'jours' => count(array_filter($lignes, fn ($l) => $l['minutes'] > 0))];
+  }
+  krsort($out);
+  return $out;
+}
+// Heures par mois : le relevé de la facture quand il existe, sinon le planning (12 derniers mois)
+function mod_portail_heures_mois(array $siteIds, array $releves): array
+{
+  $mois = [];
+  foreach (mod_portail_activite($siteIds, date('Y-m-01', strtotime('first day of -11 months')), date('Y-m-d')) as $v) {
+    $m = substr((string)$v['jour'], 0, 7);
+    $mois[$m] ??= ['h' => 0.0, 'jours' => []];
+    $mois[$m]['h'] += mod_portail_duree((string)$v['debut'], (string)$v['fin'], (int)$v['pause']);
+    $mois[$m]['jours'][(string)$v['jour']] = true;
+  }
+  $out = [];
+  foreach ($mois as $m => $x) $out[$m] = ['mois' => $m, 'libelle' => mod_portail_mois($m), 'heures' => round($x['h'], 2), 'jours' => count($x['jours']), 'source' => 'planning',
+    'facture' => '', 'factureId' => 0, 'encours' => $m === date('Y-m')];
+  foreach ($releves as $m => $r) $out[$m] = ['mois' => $m, 'libelle' => mod_portail_mois($m), 'heures' => $r['heures'], 'jours' => $r['jours'], 'source' => 'releve',
+    'facture' => $r['facture'], 'factureId' => $r['factureId'], 'encours' => false];
+  krsort($out);
+  return array_values($out);
+}
+function mod_portail_rapports_items(array $sites, array $releves = []): array
 {
   $mois = [];
   foreach (mod_portail_activite(array_keys($sites), date('Y-m-01', strtotime('first day of -11 months')), date('Y-m-d')) as $v) {
@@ -788,6 +868,13 @@ function mod_portail_rapports_items(array $sites): array
       'sous' => $x['n'] . ' vacation' . ($x['n'] > 1 ? 's' : '') . ' · ' . str_replace('.', ',', (string)$h) . ' h · ' . count($x['agents']) . ' agent' . (count($x['agents']) > 1 ? 's' : '') . ($courant ? ' · mois en cours' : ''),
       'reference' => $m, 'date' => $courant ? date('Y-m-d') : date('Y-m-t', strtotime("$m-01")), 'nouveau' => false, 'vue' => '#/rapport/' . $m, 'url' => '', 'format' => 'rapport', 'encours' => $courant];
   }
+  // le relevé joint à la facture remplace le rapport tiré du planning pour son mois
+  foreach ($releves as $m => $r) {
+    $out = array_values(array_filter($out, fn ($i) => $i['reference'] !== $m));
+    $out[] = ['cle' => 'r:' . $m, 'id' => 0, 'categorie' => 'rapports', 'genre' => 'Relevé d’heures', 'titre' => 'Relevé d’heures — ' . mod_portail_mois($m),
+      'sous' => str_replace('.', ',', (string)round($r['heures'], 2)) . ' h · ' . $r['jours'] . ' jour' . ($r['jours'] > 1 ? 's' : '') . ' · annexe à la facture ' . $r['facture'],
+      'reference' => $m, 'date' => date('Y-m-t', strtotime("$m-01")), 'nouveau' => false, 'vue' => '#/rapport/' . $m, 'url' => '', 'format' => 'rapport', 'encours' => false];
+  }
   return $out;
 }
 function mod_portail_envois_items(int $cid): array
@@ -802,10 +889,11 @@ function mod_portail_equipe_items(int $cid): array
 {
   $out = [];
   foreach (array_filter(mod_portail_partages($cid), fn ($p) => $p['visible'] && $p['docs']) as $aid => $p) {
-    $d = db()->prepare('SELECT d.id, d.type, d.nom, d.mime, d.taille, d.ajoute, a.nom AS agent FROM agent_docs d JOIN agents a ON a.id = d.agent_id WHERE d.agent_id = ? AND a.actif = 1 AND d.id IN (' . mod_portail_in($p['docs']) . ')');
+    $d = db()->prepare('SELECT d.id, d.type, d.nom, d.mime, d.taille, d.ajoute, a.nom AS agent FROM agent_docs d JOIN agents a ON a.id = d.agent_id WHERE d.agent_id = ?' . mod_portail_filtre_actif($p) . ' AND d.id IN (' . mod_portail_in($p['docs']) . ')');
     $d->execute([$aid]);
     foreach ($d->fetchAll() as $x) if (isset(MOD_PORTAIL_TYPES_PARTAGE[$x['type']])) $out[] = ['cle' => 'a:' . $x['id'], 'id' => (int)$x['id'], 'categorie' => 'equipe',
-      'genre' => MOD_PORTAIL_TYPES_PARTAGE[$x['type']], 'titre' => MOD_PORTAIL_TYPES_PARTAGE[$x['type']] . ' · ' . mod_portail_nom_court((string)$x['agent']), 'sous' => 'Dossier de ' . mod_portail_nom_court((string)$x['agent']),
+      'genre' => MOD_PORTAIL_TYPES_PARTAGE[$x['type']], 'titre' => MOD_PORTAIL_TYPES_PARTAGE[$x['type']] . ' · ' . mod_portail_nom_court((string)$x['agent']),
+      'sous' => ($p['role'] === 'candidat' ? 'Candidat en attente d’embauche · ' : 'Dossier de ') . mod_portail_nom_court((string)$x['agent']),
       'reference' => '', 'date' => substr((string)$x['ajoute'], 0, 10), 'nouveau' => false, 'url' => mod_portail_url('agent.doc', (int)$x['id']), 'format' => mod_portail_format((string)$x['mime']), 'taille' => (int)$x['taille']];
   }
   return $out;
@@ -830,7 +918,8 @@ function mod_portail_echanges_items(int $cid): array
 function mod_portail_centre(array $c): array
 {
   $cid = (int)$c['client_id'];
-  $docs = array_map('mod_portail_item_doc', mod_portail_docs($c));
+  $brut = mod_portail_docs($c);
+  $docs = array_map('mod_portail_item_doc', $brut);
   // un devis signé en ligne garde la trace du « bon pour accord »
   $st = db()->prepare('SELECT document_id, nom, fonction, quand FROM m_portail_accords WHERE client_id = ? ORDER BY id');
   $st->execute([$cid]);
@@ -839,7 +928,7 @@ function mod_portail_centre(array $c): array
   foreach ($docs as &$d) if ($d['categorie'] === 'devis' && isset($accords[$d['id']])) $d['accord'] = $accords[$d['id']];
   unset($d);
   $biblio = mod_portail_biblio_client($cid);
-  $items = array_merge($docs, $biblio, mod_portail_envois_items($cid), mod_portail_rapports_items(mod_portail_sites($cid)), mod_portail_equipe_items($cid), mod_portail_echanges_items($cid));
+  $items = array_merge($docs, $biblio, mod_portail_envois_items($cid), mod_portail_rapports_items(mod_portail_sites($cid), mod_portail_releves($brut)), mod_portail_equipe_items($cid), mod_portail_echanges_items($cid));
   usort($items, fn ($a, $b) => [$b['date'], $b['cle']] <=> [$a['date'], $a['cle']]);
   return ['items' => $items, 'conformite' => mod_portail_conformite($biblio), 'categories' => MOD_PORTAIL_CATEGORIES];
 }
@@ -884,6 +973,9 @@ function mod_portail_cl_tableau(): void
   $sites = mod_portail_sites($cid);
   $ids = array_keys($sites);
   $precedent = date('Y-m', strtotime('first day of last month'));
+  $releves = mod_portail_releves(mod_portail_docs($c));
+  $parMois = mod_portail_heures_mois($ids, $releves);
+  $heuresDe = function (string $m) use ($parMois): ?array { foreach ($parMois as $x) if ($x['mois'] === $m) return $x; return null; };
   $st = $db->prepare("SELECT d.message_id, d.type, d.statut, d.maj, m.cree FROM m_portail_demandes d JOIN messages_clients m ON m.id = d.message_id WHERE d.client_id = ? AND d.statut <> 'faite' ORDER BY d.message_id DESC LIMIT 20");
   $st->execute([$cid]);
   $demandes = array_map(fn ($d) => ['libelle' => MOD_PORTAIL_DEMANDES[$d['type']] ?? 'Demande', 'statut' => (string)$d['statut'], 'etat' => MOD_PORTAIL_STATUTS[$d['statut']] ?? '', 'cree' => (string)$d['cree'], 'maj' => (string)$d['maj']], $st->fetchAll());
@@ -892,7 +984,8 @@ function mod_portail_cl_tableau(): void
   $conf = $centre['conformite'];
   repondre(['ok' => true,
     'prestations' => ['sites' => array_values($sites), 'enPoste' => mod_portail_en_poste($ids), 'prochain' => mod_portail_prochain($ids), 'semaine' => mod_portail_semaine($sites),
-      'heuresMois' => mod_portail_heures($ids, date('Y-m') . '-01', $auj), 'heuresPrecedent' => mod_portail_heures($ids, "$precedent-01", date('Y-m-t', strtotime("$precedent-01"))), 'moisPrecedent' => $precedent],
+      'heuresMois' => $heuresDe(date('Y-m'))['heures'] ?? 0, 'heuresPrecedent' => $heuresDe($precedent)['heures'] ?? 0, 'moisPrecedent' => $precedent,
+      'mois' => $parMois, 'dernier' => $parMois[0] ?? null],
     'factures' => ['nombre' => count($factures), 'aRegler' => count($aRegler), 'montantDu' => round(array_sum(array_column($aRegler, 'montant')), 2),
       'enRetard' => count(array_filter($aRegler, fn ($i) => $i['statut']['ton'] === 'alerte')),
       'totalAnnee' => round(array_sum(array_map(fn ($i) => str_starts_with($i['date'], $annee) && $i['statut']['code'] !== 'annulee' ? $i['montant'] : 0, $factures)), 2), 'annee' => $annee],
@@ -964,6 +1057,13 @@ function mod_portail_cl_rapport(): void
   if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $mois) || $mois > date('Y-m')) throw new RuntimeException('Mois invalide.');
   $sites = mod_portail_sites((int)$c['client_id']);
   $fin = min(date('Y-m-t', strtotime("$mois-01")), date('Y-m-d'));
+  $r = mod_portail_releves(mod_portail_docs($c))[$mois] ?? null;
+  if ($r) {
+    repondre(['ok' => true, 'source' => 'releve', 'mois' => $mois, 'libelle' => mod_portail_mois($mois), 'du' => $r['lignes'][0]['jour'], 'au' => end($r['lignes'])['jour'], 'encours' => false,
+      'sites' => array_values($sites), 'facture' => $r['facture'], 'factureId' => $r['factureId'],
+      'lignes' => array_map(fn ($l) => ['jour' => $l['jour'], 'matin' => $l['matin'], 'apm' => $l['apm'], 'heures' => $l['heures']], $r['lignes']),
+      'total' => ['heures' => $r['heures'], 'jours' => $r['jours']]]);
+  }
   $lignes = [];
   $agents = [];
   foreach (mod_portail_activite(array_keys($sites), "$mois-01", $fin) as $v) {
@@ -975,7 +1075,7 @@ function mod_portail_cl_rapport(): void
     $agents[(int)$v['agent_id']]['vacations']++;
     $agents[(int)$v['agent_id']]['heures'] += $h;
   }
-  repondre(['ok' => true, 'mois' => $mois, 'libelle' => mod_portail_mois($mois), 'du' => "$mois-01", 'au' => $fin, 'encours' => $mois === date('Y-m'), 'sites' => array_values($sites),
+  repondre(['ok' => true, 'source' => 'planning', 'mois' => $mois, 'libelle' => mod_portail_mois($mois), 'du' => "$mois-01", 'au' => $fin, 'encours' => $mois === date('Y-m'), 'sites' => array_values($sites),
     'lignes' => $lignes, 'agents' => array_values($agents), 'total' => ['vacations' => count($lignes), 'heures' => round(array_sum(array_column($lignes, 'heures')), 2),
       'jours' => count(array_unique(array_column($lignes, 'jour'))), 'agents' => count($agents)]]);
 }

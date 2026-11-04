@@ -166,11 +166,15 @@ async function pageClient(ctx, id) {
   const enregistrer = async (a, ligne) => {
     const docs = [...ligne.querySelectorAll('input[data-doc]:checked')].map((x) => +x.dataset.doc);
     const visible = ligne.querySelector('input[data-visible]').checked;
+    const role = ligne.querySelector('select[data-role]').value;
+    const note = ligne.querySelector('input[data-note]').value.trim();
     try {
-      const r = await api('mod.portail.partage.enregistrer', { client_id: id, agent_id: a.id, visible, docs });
-      a.visible = r.visible; a.partages = r.docs;
+      const r = await api('mod.portail.partage.enregistrer', { client_id: id, agent_id: a.id, visible, docs, role, note });
+      a.visible = r.visible; a.partages = r.docs; a.role = r.role; a.note = r.note;
       ligne.classList.toggle('is-visible', r.visible);
-      toast(r.visible ? `${a.court} : dossier visible (${pluriel(r.docs.length, 'document')}).` : `${a.court} : dossier caché pour ce client.`);
+      ligne.querySelector('.pt-role').hidden = !r.visible;
+      ligne.querySelector('.pt-role__note').hidden = r.role !== 'candidat';
+      toast(r.visible ? `${a.court} : dossier visible${r.role === 'candidat' ? ' en « En attente d’embauche »' : ''} (${pluriel(r.docs.length, 'document')}).` : `${a.court} : dossier caché pour ce client.`);
     } catch (e) { erreur(e); }
   };
   const ligneAgent = (a) => {
@@ -180,7 +184,16 @@ async function pageClient(ctx, id) {
       h('div', { class: 'pt-agent__tete' },
         h('label', { class: 'pt-bascule' }, bascule, h('span', { 'aria-hidden': 'true' })),
         h('span', { class: 'pt-agent__nom' }, h('b', null, a.nom), h('small', { class: 'muet' }, `${a.poste}${a.validite ? ` · carte pro valide jusqu’au ${dateLisible(a.validite)}` : ' · carte pro non renseignée'}`)),
-        a.affecte ? h('span', { class: 'pastille pastille--payee' }, 'Sur son site') : null),
+        a.affecte ? h('span', { class: 'pastille pastille--payee' }, 'Sur son site') : null,
+        a.actif ? null : h('span', { class: 'pastille pastille--archivee' }, 'Pas encore embauché')),
+      // Où le client le voit : « Équipe sur site » ou « En attente d'embauche » (avec la date d'entretien)
+      h('div', { class: 'pt-role', hidden: !a.visible },
+        h('label', null, h('span', { class: 'muet' }, 'Affiché dans'),
+          h('select', { class: 'input', 'data-role': '1', onchange: () => enregistrer(a, ligne) },
+            h('option', { value: 'equipe', selected: a.role !== 'candidat' }, 'Équipe sur site'),
+            h('option', { value: 'candidat', selected: a.role === 'candidat' }, 'En attente d’embauche'))),
+        h('label', { class: 'pt-role__note', hidden: a.role !== 'candidat' }, h('span', { class: 'muet' }, 'Note pour le client'),
+          h('input', { class: 'input', 'data-note': '1', value: a.note || '', maxlength: 200, placeholder: 'Ex. : Entretien le vendredi 6 novembre à 15 h', onchange: () => enregistrer(a, ligne) }))),
       a.docs.length ? h('div', { class: 'pt-docs' }, a.docs.map((x) => h('label', { class: 'case pt-doc' },
         h('input', { type: 'checkbox', checked: a.partages.includes(x.id), 'data-doc': String(x.id), onchange: () => { if (!bascule.checked) bascule.checked = true; enregistrer(a, ligne); } }),
         h('span', null, h('b', null, x.type), h('small', { class: 'muet' }, x.nom)))))
@@ -188,8 +201,10 @@ async function pageClient(ctx, id) {
     return ligne;
   };
   const surSite = p.agents.filter((a) => a.affecte || a.visible);
-  const autres = p.agents.filter((a) => !a.affecte && !a.visible);
+  const autres = p.agents.filter((a) => !a.affecte && !a.visible && a.actif);
+  const inactifs = p.agents.filter((a) => !a.affecte && !a.visible && !a.actif);
   const plus = h('details', { class: 'pt-autres' }, h('summary', null, `Autres agents (${autres.length})`), autres.map(ligneAgent));
+  const plusInactifs = h('details', { class: 'pt-autres' }, h('summary', null, `Candidats et agents inactifs (${inactifs.length}) : pour « En attente d’embauche »`), inactifs.map(ligneAgent));
 
   // Ce que voit le client : une ligne par rubrique du portail
   const rubriques = h('div', { class: 'pt-rubriques' }, Object.entries(v.categories).map(([k, lib]) => h('span', { class: v.parCategorie[k] ? null : 'is-vide' }, h('b', null, v.parCategorie[k] || 0), h('small', null, lib))));
@@ -234,7 +249,8 @@ async function pageClient(ctx, id) {
           h('header', { class: 'carte__tete' }, h('h2', null, 'Dossiers des agents'), h('small', null, `${visibles} visible${visibles > 1 ? 's' : ''}`)),
           h('p', { class: 'muet pt-intro' }, p.sites ? 'Les agents qui travaillent sur ses sites sont en premier. Cochez ce que le client peut voir : chaque changement est enregistré tout de suite.' : 'Ce client n’a pas encore de site relié dans le Planning des sites : tous les agents sont listés.'),
           surSite.length ? surSite.map(ligneAgent) : h('p', { class: 'muet' }, 'Aucun agent sur ses sites pour l’instant.'),
-          autres.length ? plus : null)),
+          autres.length ? plus : null,
+          inactifs.length ? plusInactifs : null)),
       h('div', { class: 'tr-col' },
         h('section', { class: 'carte' },
           h('header', { class: 'carte__tete' }, h('h2', null, 'Informations pour ce client'), h('button', { class: 'btn btn--ghost btn--petit', type: 'button', onclick: async () => { if (await publierAnnonce(id)) recharger(); } }, 'Publier')),

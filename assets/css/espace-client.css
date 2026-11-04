@@ -500,3 +500,39 @@ a.kpi:hover::after { transform: scaleX(1); }
 }
 @media (max-width: 900px) { .table td .doc + .m-seul { margin: 6px 0 0 48px; } }
 @media (max-width: 900px) { .table td small.m-seul { display: block; margin-top: 6px; color: var(--muet); font-size: 12px; } }
+
+/* ----- v25 : pages simplifiées ----- */
+.annees { display: flex; flex-wrap: wrap; gap: 6px; }
+.annee { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border: 1px solid var(--filet); border-radius: var(--r); background: var(--blanc); color: var(--texte); font: inherit; font-size: 13px; cursor: pointer; transition: border-color var(--vite), background-color var(--vite); }
+.annee em { color: var(--muet); font-size: 11.5px; font-style: normal; font-variant-numeric: tabular-nums; }
+.annee:hover { border-color: var(--champagne-clair); }
+.annee.is-actif { border-color: var(--nuit); background: var(--nuit); color: var(--ivoire); }
+.annee.is-actif em { color: var(--champagne-clair); }
+.table tr.groupe td { padding: 12px 24px 10px; background: var(--ivoire); border-bottom: 1px solid var(--filet); }
+.table tr.groupe td > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.table tr.groupe b { color: var(--encre); font-family: var(--serif); font-size: 19px; font-weight: 600; }
+.table tr.groupe span { color: var(--muet); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.table tbody tr.groupe { animation: none; }
+.liste-equipe { display: grid; gap: 2px; }
+.liste-equipe__titre { margin: 14px 0 4px; padding-top: 14px; border-top: 1px solid var(--filet-2); color: var(--champagne); font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.personne-ligne { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 8px 0; color: inherit; text-decoration: none; }
+.personne-ligne b { display: block; color: var(--encre); font-size: 13.5px; font-weight: 500; }
+.personne-ligne small { display: block; color: var(--muet); font-size: 12px; }
+.personne-ligne:hover b { color: var(--champagne); }
+.initiales--clair { background: var(--ivoire); color: var(--nuit); border: 1px solid var(--champagne-clair); }
+.a-faire { margin: 0; padding: 0; list-style: none; }
+.a-faire li + li { border-top: 1px solid var(--filet-2); }
+.a-faire a { display: block; padding: 14px 24px; color: inherit; text-decoration: none; }
+.a-faire b { display: block; color: var(--encre); font-size: 13.5px; font-weight: 500; }
+.a-faire small { color: var(--muet); font-size: 12px; }
+.a-faire a:hover b { color: var(--champagne); }
+@media (max-width: 900px) {
+  .table tr.groupe td { padding: 10px 16px 8px; }
+  .annees { flex-wrap: nowrap; overflow-x: auto; }
+  .chiffres--3 > :last-child:nth-child(odd) { grid-column: span 2; border-top: 1px solid var(--filet); border-left: 0; }
+}
+@media (max-width: 900px) {
+  .table td .doc .nouveau { display: none; }
+  .table tr.groupe td > div { flex-wrap: wrap; gap: 2px 12px; }
+  .table td .doc b { word-break: normal; overflow-wrap: anywhere; }
+}

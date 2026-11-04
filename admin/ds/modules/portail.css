@@ -69,3 +69,11 @@
 .pt-annonces small { font-size: 12px; }
 @media (max-width: 700px) { .pt-deux, .pt-trois { grid-template-columns: 1fr; } .pt-rubriques span { border-right: 0; border-bottom: 1px solid var(--iv-trait); } }
 .pt-alerte { margin: 0; padding: 10px 12px; border-left: 2px solid var(--iv-alerte, #B42318); background: rgba(180, 35, 24, .06); font-size: 13px; line-height: 1.55; }
+
+/* Dossier partagé : où le client le voit (équipe sur site / en attente d'embauche) */
+.pt-role { display: flex; flex-wrap: wrap; gap: 10px 16px; margin: 10px 0 2px 52px; }
+.pt-role[hidden], .pt-role__note[hidden] { display: none; }
+.pt-role label { display: grid; gap: 4px; font-size: 12px; }
+.pt-role select { min-width: 210px; }
+.pt-role__note { flex: 1 1 280px; }
+@media (max-width: 640px) { .pt-role { margin-left: 0; } }

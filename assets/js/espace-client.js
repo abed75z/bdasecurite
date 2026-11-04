@@ -41,9 +41,8 @@ const ICONES = {
 };
 const DEMANDES = [['renfort', 'Demande de renfort'], ['planning', 'Modification du planning'], ['probleme', 'Signaler un problème'], ['facture', 'Question sur une facture'], ['document', 'Demande de document']];
 const MENU = [
-  [null, [['accueil', 'Tableau de bord', 'grille'], ['documents', 'Centre documentaire', 'dossier'], ['factures', 'Factures', 'facture']]],
-  ['Prestation', [['prestations', 'Prestations', 'bouclier'], ['equipe', 'Équipe sur site', 'equipe']]],
-  ['Relation', [['messages', 'Messages et demandes', 'messages'], ['compte', 'Mon compte', 'compte']]],
+  [null, [['accueil', 'Accueil', 'grille'], ['factures', 'Factures', 'facture'], ['prestations', 'Heures de présence', 'horloge'], ['equipe', 'Équipe', 'equipe'],
+    ['documents', 'Documents', 'dossier'], ['messages', 'Messages', 'messages'], ['compte', 'Mon compte', 'compte']]],
 ];
 const LIBELLES = Object.fromEntries(MENU.flatMap(([, items]) => items.map(([k, lib]) => [k, lib])));
 const etat = { csrf: '', client: null, nonLus: 0, nouveaux: 0, centre: null, centreT: 0, demande: '' };
@@ -97,12 +96,18 @@ function toast(msg, erreur) {
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const dt = (s) => new Date(`${String(s).slice(0, 10)}T12:00:00`);
 const frDate = (s) => (/^\d{4}-\d{2}-\d{2}/.test(s || '') ? `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(0, 4)}` : '—');
-const frLong = (s) => { if (!/^\d{4}-\d{2}-\d{2}/.test(s || '')) return '—'; const d = dt(s); return `${d.getDate()} ${MOIS[d.getMonth()]} ${d.getFullYear()}`; };
-const frJour = (s) => { const d = dt(s); return `${JOURS[d.getDay()]} ${d.getDate()} ${MOIS[d.getMonth()]}`; };
+const quantieme = (d) => (d.getDate() === 1 ? '1er' : String(d.getDate()));
+const frLong = (s) => { if (!/^\d{4}-\d{2}-\d{2}/.test(s || '')) return '—'; const d = dt(s); return `${quantieme(d)} ${MOIS[d.getMonth()]} ${d.getFullYear()}`; };
+const frJour = (s) => { const d = dt(s); return `${JOURS[d.getDay()]} ${quantieme(d)} ${MOIS[d.getMonth()]}`; };
 const frDateHeure = (s) => (s ? `${frDate(s)} à ${String(s).slice(11, 16)}` : '');
 const hm = (s) => String(s || '').slice(0, 5).replace(/^0(\d)/, '$1').replace(':', 'h');
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : '');
-const heures = (n) => (n >= 10 ? `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(n)} h` : fmtHeures(+n || 0));
+const heures = (n) => fmtHeures(+n || 0);
+const decimal = (n) => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2 }).format(+n || 0);
+// « 08:30 - 13:45 » → « 8h30 – 13h45 »
+const plage = (t) => String(t || '').replace(/(\d{1,2})\s*[:hH]\s*(\d{2})/g, (_, a, b) => `${+a}h${b}`).replace(/\s*(?:-|–)\s*/g, ' – ').replace(/\s*·\s*/g, ' · ');
+const kpi = (href, titre, valeur, sous, ton) => h(href ? 'a' : 'div', { class: `kpi ${ton ? `is-${ton}` : ''}`, href }, h('small', null, titre), h('b', null, valeur), sous ? h('span', null, sous) : null);
+const parDate = (a, b) => String(b.date).localeCompare(String(a.date)) || String(b.reference || '').localeCompare(String(a.reference || ''), 'fr', { numeric: true });
 const pluriel = (n, un, plusieurs) => `${n} ${n > 1 ? (plusieurs || `${un}s`) : un}`;
 const initiales = (nom) => String(nom || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((m) => m[0]).join('').toUpperCase();
 const sansAccent = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -276,7 +281,7 @@ function naviguer() {
   const haut = h('header', { class: 'haut' },
     h('button', { class: 'btn btn--icone haut__menu', type: 'button', 'aria-label': 'Ouvrir le menu', onclick: () => { document.body.classList.add('menu-ouvert'); voile.classList.add('is-ouvert'); } }, ic('menu')),
     marque('haut__marque'),
-    h('p', { class: 'haut__fil' }, 'Portail', h('i'), h('b', null, route === 'document' ? 'Document' : route === 'rapport' ? 'Rapport d’activité' : LIBELLES[route])),
+    h('p', { class: 'haut__fil' }, 'Portail', h('i'), h('b', null, route === 'document' ? 'Document' : route === 'rapport' ? 'Relevé d’heures' : LIBELLES[route])),
     h('button', { class: 'haut__recherche', type: 'button', onclick: palette, 'aria-label': 'Rechercher un document' }, ic('recherche'), h('span', null, 'Rechercher un document, une facture…'), h('kbd', null, 'Ctrl K')));
   const page = h('main', { class: 'page', id: 'contenu' }, squelette(6));
   racine.replaceChildren(h('div', { class: 'app' }, menu, h('div', { class: 'corps' }, haut, page)));
@@ -397,69 +402,56 @@ async function demanderDocument(libelle, bouton) {
   catch (e) { toast(e.message, true); if (bouton) bouton.disabled = false; }
 }
 
-/* ---------- Tableau de bord ---------- */
+/* ---------- Accueil ---------- */
 async function vueAccueil() {
-  const t = await api('mod.portail.tableau');
+  const [t, data, eq] = await Promise.all([api('mod.portail.tableau'), chargerCentre(true), api('mod.portail.equipe').catch(() => ({ agents: [], candidats: [] }))]);
   etat.nouveaux = t.nouveaux;
   etat.nonLus = t.messagesNonLus;
   majBadges();
   const p = t.prestations;
   const f = t.factures;
+  const der = p.dernier;
   const maintenant = new Date();
-  const mois = MOIS[maintenant.getMonth()];
-  const heure = maintenant.getHours();
-  const kpi = (href, titre, valeur, sous, ton) => h(href ? 'a' : 'div', { class: `kpi ${ton ? `is-${ton}` : ''}`, href }, h('small', null, titre), h('b', null, valeur), h('span', null, sous));
-  const prochain = p.prochain ? `Prochaine vacation ${frJour(p.prochain.jour)} à ${hm(p.prochain.debut)}${p.prochain.agent ? ` · ${p.prochain.agent}` : ''}` : 'Aucune vacation programmée';
+  const factures = data.items.filter((i) => i.categorie === 'factures' && i.statut.code !== 'annulee').sort(parDate);
+  const annee = String(f.annee);
+  const nbAnnee = factures.filter((i) => String(i.date).startsWith(annee)).length;
+  const candidats = eq.candidats || [];
 
-  const presence = h('div', { class: 'presence' },
-    p.enPoste.length ? p.enPoste.map((a) => h('div', { class: 'presence__ligne' }, h('i', { class: 'pouls' }), h('span', null, h('b', null, a.nom), h('small', null, a.qualification)),
-      statut('ok', `En poste depuis ${hm(a.depuis)}`)))
-      : h('div', { class: 'presence__ligne' }, h('i', { class: 'pouls pouls--off' }), h('span', null, h('b', null, 'Aucun agent en poste à cet instant'), h('small', null, prochain)), null));
-  const semaine = p.semaine.slice(0, 6);
-  const planning = semaine.length ? tableau([['Jour'], ['Horaires'], ['Agent', 'm-cache']], semaine.map((s) => ligne(null, [
-    td(cap(frJour(s.jour)), 'fort'), td(`${hm(s.debut)} – ${hm(s.fin)}`, 'chiffre'),
-    td(s.agents.length ? s.agents.join(', ') : h('span', { class: 'manquant' }, 'Affectation en cours'), 'm-cache')]))) : null;
+  const equipe = h('div', { class: 'liste-equipe' },
+    eq.agents.length ? eq.agents.map((a) => h('a', { class: 'personne-ligne', href: `#/equipe/${a.id}` }, h('i', { class: 'initiales' }, initiales(a.nom)),
+      h('span', null, h('b', null, a.nom), h('small', null, a.qualification)), a.enPoste ? statut('ok', `En poste depuis ${hm(a.enPoste)}`) : null))
+      : h('p', { class: 'note' }, 'Les dossiers des agents affectés à votre site apparaîtront ici.'),
+    candidats.length ? [h('p', { class: 'liste-equipe__titre' }, 'En attente d’embauche'),
+      candidats.map((a) => h('a', { class: 'personne-ligne', href: `#/equipe/${a.id}` }, h('i', { class: 'initiales initiales--clair' }, initiales(a.nom)),
+        h('span', null, h('b', null, a.nom), h('small', null, a.note || a.qualification))))] : null);
 
-  const echeances = t.echeances.length ? h('ul', { class: 'echeances' }, t.echeances.map((e) => {
-    const d = dt(e.date);
-    return h('li', null, h('a', { href: e.vue },
-      h('span', { class: `date-bloc ${e.ton === 'alerte' ? 'is-alerte' : ''}` }, h('b', null, d.getDate()), h('small', null, MOIS_COURTS[d.getMonth()])),
-      h('span', null, h('b', null, e.titre), h('small', null, [e.detail, typeof e.montant === 'number' ? euro.format(e.montant) : null].filter(Boolean).join(' · ')))));
-  })) : corpsP(h('p', { class: 'note' }, 'Aucune échéance à venir. Tout est à jour.'));
-
-  const conf = t.conformite;
-  const tonConf = { valide: 'ok', bientot: 'attente', expire: 'alerte', manquant: '' };
-  const dossier = corpsP(h('div', { class: 'jauge' },
-    h('div', { class: 'jauge__texte' }, h('b', null, `${conf.disponibles} / ${conf.total}`), h('span', null, 'pièces disponibles en ligne')),
-    h('div', { class: 'jauge__barre' }, conf.pieces.map((x) => h('i', { class: tonConf[x.etat] ? `is-${tonConf[x.etat]}` : '', title: x.libelle }))),
-    h('ul', { class: 'liste-etats' }, conf.pieces.slice(0, 5).map((x) => h('li', null, h('span', null, x.libelle),
-      x.etat === 'manquant' ? h('span', { class: 'manquant' }, 'Sur demande') : statut(tonConf[x.etat], x.etat === 'expire' ? 'Expirée' : x.etat === 'bientot' ? 'À renouveler' : 'Disponible'))))));
+  const aFaire = [
+    ...t.echeances.map((e) => h('li', null, h('a', { href: e.vue }, h('span', null, h('b', null, e.titre), h('small', null, [e.detail, frDate(e.date), typeof e.montant === 'number' ? euro.format(e.montant) : null].filter(Boolean).join(' · ')))))),
+    ...t.demandes.map((d) => h('li', null, h('a', { href: '#/messages' }, h('span', null, h('b', null, d.libelle), h('small', null, `${d.etat} · envoyée le ${frDate(d.cree)}`))))),
+  ];
 
   return [
     h('header', { class: 'accueil-tete' },
-      h('div', null, h('span', { class: 'sur' }, heure < 18 ? 'Bonjour' : 'Bonsoir'), h('h1', null, etat.client.nom),
-        h('p', null, 'Votre espace réunit l’ensemble de notre relation : prestations, documents, factures et échanges avec la direction.')),
+      h('div', null, h('span', { class: 'sur' }, maintenant.getHours() < 18 ? 'Bonjour' : 'Bonsoir'), h('h1', null, etat.client.nom),
+        h('p', null, 'Vos factures, vos heures de présence et votre équipe, au même endroit.')),
       h('div', { class: 'accueil-tete__date' }, h('b', null, `${maintenant.getDate()} ${MOIS[maintenant.getMonth()]}`), cap(JOURS[maintenant.getDay()]))),
     t.annonces.map((a) => h('section', { class: `annonce ${a.niveau === 'important' ? 'annonce--important' : ''}` }, h('small', null, a.niveau === 'important' ? 'Important' : 'Information'), h('b', null, a.titre), a.texte ? h('p', null, a.texte) : null)),
-    h('div', { class: 'chiffres' },
-      kpi('#/prestations', `Heures · ${mois}`, heures(p.heuresMois), p.heuresPrecedent ? `${heures(p.heuresPrecedent)} le mois dernier` : 'Depuis le 1er du mois'),
-      kpi('#/prestations', 'Agents en poste', String(p.enPoste.length), p.enPoste.length ? 'À cet instant' : 'Aucun en ce moment'),
-      kpi('#/factures', 'Montant à régler', euro.format(f.montantDu), f.enRetard ? `${pluriel(f.enRetard, 'facture')} en retard` : f.aRegler ? `${pluriel(f.aRegler, 'facture')} en attente` : 'Aucune facture en attente', f.enRetard ? 'alerte' : f.montantDu > 0 ? 'attente' : ''),
-      kpi('#/documents', 'Centre documentaire', String(t.documents), t.nouveaux ? `${pluriel(t.nouveaux, 'nouveau document', 'nouveaux documents')}` : 'Tout est consulté')),
+    h('div', { class: 'chiffres chiffres--3' },
+      kpi('#/prestations', der ? `Heures · ${der.libelle}` : 'Heures de présence', heures(der ? der.heures : 0),
+        der ? `${pluriel(der.jours, 'jour')} travaillé${der.jours > 1 ? 's' : ''}${der.source === 'releve' ? ` · facture ${der.facture}` : ''}` : 'Aucune heure enregistrée'),
+      kpi('#/factures', 'Reste à régler', euro.format(f.montantDu), f.enRetard ? `${pluriel(f.enRetard, 'facture')} en retard` : f.aRegler ? `${pluriel(f.aRegler, 'facture')} en attente` : 'Toutes vos factures sont réglées',
+        f.enRetard ? 'alerte' : f.montantDu > 0 ? 'attente' : ''),
+      kpi('#/factures', `Facturé en ${annee}`, euro.format(f.totalAnnee), pluriel(nbAnnee, 'facture'))),
+    aFaire.length ? panneau('À traiter', null, h('ul', { class: 'a-faire' }, aFaire)) : null,
     h('div', { class: 'grille' },
       h('div', { class: 'colonne' },
-        panneau(p.sites.length === 1 ? `Prestation · ${p.sites[0]}` : 'Prestations', h('a', { class: 'lien', href: '#/prestations' }, 'Détail', ic('fleche')),
-          p.sites.length ? [presence, planning] : corpsP(h('p', { class: 'note' }, 'Aucun site n’est encore rattaché à votre espace.'))),
-        panneau('Documents récents', h('a', { class: 'lien', href: '#/documents' }, 'Centre documentaire', ic('fleche')),
-          t.recents.length ? tableau([['Document'], ['Date', 'm-cache'], ['Montant', 'd m-cache'], ['', 'm-cache']], t.recents.map((i) => ligne(() => ouvrirItem(i), [
-            td(celluleDoc(i)), td(frDate(i.date), 'chiffre m-cache'), td(typeof i.montant === 'number' ? euro.format(i.montant) : '', 'd chiffre m-cache'), tdFleche()])))
-            : vide('Aucun document pour l’instant', 'Vos factures, devis, attestations et rapports apparaîtront ici dès leur émission.'))),
+        panneau('Dernières factures', h('a', { class: 'lien', href: '#/factures' }, `Toutes les factures (${factures.length})`, ic('fleche')),
+          factures.length ? tableau([['Facture'], ['Montant', 'd'], ['Statut', 'm-cache'], ['', 'd m-cache']], factures.slice(0, 5).map((i) => ligne(() => ouvrirItem(i), [
+            td(h('div', { class: 'doc' }, pictos(i), h('span', null, h('b', null, i.reference || i.titre), h('small', null, i.periode || frLong(i.date))))),
+            td(euro.format(i.montant), 'd chiffre fort'), td(statut(i.statut.ton, i.statut.libelle), 'm-cache'), tdFleche()])))
+            : vide('Aucune facture pour l’instant', 'Vos factures apparaîtront ici dès leur émission.'))),
       h('div', { class: 'colonne' },
-        panneau('Échéances', null, echeances),
-        panneau('Dossier administratif', h('a', { class: 'lien', href: '#/documents/conformite' }, 'Voir', ic('fleche')), dossier),
-        panneau('Demandes en cours', h('a', { class: 'lien', href: '#/messages' }, 'Messages', ic('fleche')),
-          t.demandes.length ? h('ul', { class: 'suivi' }, t.demandes.map((d) => h('li', null, h('div', null, h('b', null, d.libelle), statut(d.statut === 'recue' ? 'attente' : 'info', d.etat)), h('small', null, `Envoyée le ${frDateHeure(d.cree)}`))))
-            : corpsP(h('p', { class: 'note' }, 'Aucune demande en cours.'))),
+        panneau('Votre équipe', h('a', { class: 'lien', href: '#/equipe' }, 'Dossiers', ic('fleche')), corpsP(equipe)),
         panneau('Votre interlocuteur', null, corpsP(h('div', { class: 'contact' },
           h('div', null, h('small', { class: 'sur' }, 'Direction · 24h/24'), h('p', { class: 'contact__tel' }, '06 11 67 86 25')),
           h('div', { class: 'contact__boutons' }, h('a', { class: 'btn btn--nuit', href: '#/messages' }, ic('messages'), 'Écrire à la direction'), h('a', { class: 'btn', href: 'tel:+33611678625' }, ic('telephone'), 'Appeler'))))))),
@@ -484,9 +476,12 @@ async function vueCentre(categorie) {
 
   const rendreRail = () => remplir(rail,
     h('p', { class: 'rubriques__titre' }, 'Rubriques'),
-    [['tous', 'Tous les documents'], ['nouveaux', 'Nouveaux']].map(([k, lib]) => h('button', { type: 'button', class: `rubrique ${f.cat === k ? 'is-actif' : ''}`, onclick: () => choisir(k) }, lib, h('em', null, compte(k)))),
+    [['tous', 'Tous les documents'], ['nouveaux', 'Nouveaux']].filter(([k]) => k !== 'nouveaux' || compte(k) || f.cat === k)
+      .map(([k, lib]) => h('button', { type: 'button', class: `rubrique ${f.cat === k ? 'is-actif' : ''}`, onclick: () => choisir(k) }, lib, h('em', null, compte(k)))),
     h('hr'),
-    Object.entries(cats).map(([k, lib]) => h('button', { type: 'button', class: `rubrique ${f.cat === k ? 'is-actif' : ''}`, onclick: () => choisir(k) }, lib, h('em', null, compte(k)))));
+    // une rubrique vide n'est pas montrée (sauf le dossier administratif, toujours utile)
+    Object.entries(cats).filter(([k]) => compte(k) || k === 'conformite' || f.cat === k)
+      .map(([k, lib]) => h('button', { type: 'button', class: `rubrique ${f.cat === k ? 'is-actif' : ''}`, onclick: () => choisir(k) }, lib, h('em', null, compte(k)))));
   const choisir = (k) => { f.cat = k; f.statut = ''; history.replaceState(null, '', `#/documents/${k}`); rendreRail(); rendre(); };
 
   const rendre = () => {
@@ -533,7 +528,7 @@ async function vueCentre(categorie) {
     remplir(zone,
       conformite,
       h('section', { class: 'panneau' },
-        h('div', { class: 'outils' }, h('div', { class: 'recherche' }, ic('recherche'), recherche), selAnnee, selStatut, selTri),
+        h('div', { class: 'outils' }, h('div', { class: 'recherche' }, ic('recherche'), recherche), selAnnee, selStatut),
         h('p', { class: 'compte-resultats' }, `${titre} · ${pluriel(liste.length, 'document')}${q || f.annee || f.statut ? ' (filtrés)' : ''}`),
         liste.length ? tableau(colonnes, lignes)
           : q || f.annee || f.statut ? vide('Aucun résultat', 'Modifiez la recherche ou les filtres.')
@@ -548,7 +543,7 @@ async function vueCentre(categorie) {
   rendreRail();
   rendre();
   return [
-    tete('Centre documentaire', 'Tous vos documents', `${pluriel(items.length, 'document')} réunis au même endroit : factures, devis, contrats, attestations, rapports et échanges. Recherche rapide : Ctrl + K.`,
+    tete('Documents', 'Tous vos documents', `${pluriel(items.length, 'document')} : factures, attestations de l’entreprise, relevés d’heures, dossiers des agents et pièces échangées.`,
       h('button', { class: 'btn', type: 'button', onclick: transmettre }, ic('televerser'), 'Transmettre un document')),
     h('div', { class: 'centre' }, rail, zone),
   ];
@@ -557,46 +552,45 @@ async function vueCentre(categorie) {
 /* ---------- Factures ---------- */
 async function vueFactures() {
   const data = await chargerCentre(true);
-  const toutes = data.items.filter((i) => i.categorie === 'factures').sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.id - a.id);
+  const toutes = data.items.filter((i) => i.categorie === 'factures' && i.statut.code !== 'annulee').sort(parDate);
   const annee = String(new Date().getFullYear());
-  const actives = toutes.filter((i) => i.statut.code !== 'annulee');
-  const somme = (l) => l.reduce((s, i) => s + (i.montant || 0), 0);
+  const somme = (l) => Math.round(l.reduce((s, i) => s + (i.montant || 0), 0) * 100) / 100;
+  const de = (a) => toutes.filter((i) => String(i.date).startsWith(a));
   const aRegler = toutes.filter((i) => i.statut.code === 'envoyee');
   const retard = aRegler.filter((i) => i.statut.ton === 'alerte');
-  const annees = [...new Set(toutes.map((i) => String(i.date).slice(0, 4)).filter((a) => /^\d{4}$/.test(a)))];
-  const f = { annee: '', statut: '', q: '' };
-  const recherche = saisie({ type: 'search', placeholder: 'Numéro, période, montant…', 'aria-label': 'Rechercher une facture' });
-  const selAnnee = h('select', { class: 'input', 'aria-label': 'Année' }, h('option', { value: '' }, 'Toutes les années'), annees.map((a) => h('option', { value: a }, a)));
-  const selStatut = h('select', { class: 'input', 'aria-label': 'Statut' }, [['', 'Tous les statuts'], ['envoyee', 'À régler'], ['retard', 'En retard'], ['payee', 'Réglées'], ['archive', 'Archives'], ['annulee', 'Annulées']].map(([v, l]) => h('option', { value: v }, l)));
+  const reglees = toutes.filter((i) => i.statut.code === 'payee');
+  const annees = [...new Set(toutes.map((i) => String(i.date).slice(0, 4)).filter((a) => /^\d{4}$/.test(a)))].sort().reverse();
+  let choix = '';
+  const onglets = h('div', { class: 'annees', role: 'tablist', 'aria-label': 'Année' });
   const zone = h('div');
+  const ligneFacture = (i) => ligne(() => ouvrirItem(i), [
+    td([h('div', { class: 'doc' }, pictos(i), h('span', null, h('b', null, i.reference || i.titre, i.nouveau ? h('i', { class: 'nouveau' }, 'Nouveau') : null), h('small', null, i.periode || i.sous || 'Facture'))),
+      h('small', { class: 'm-seul' }, `${i.statut.libelle} · ${frDate(i.date)}`)]),
+    td(frDate(i.date), 'chiffre m-cache'),
+    td(euro.format(i.montant), 'd chiffre fort'),
+    td(statut(i.statut.ton, i.statut.libelle), 'm-cache'),
+    td(h('div', { class: 'actions' }, boutonTelecharger(i), h('span', { class: 'fleche' }, ic('fleche'))), 'd m-cache')]);
   const rendre = () => {
-    const q = sansAccent(f.q.trim());
-    const liste = toutes.filter((i) => (!f.annee || String(i.date).startsWith(f.annee)) && (!f.statut || (f.statut === 'retard' ? i.statut.ton === 'alerte' : i.statut.code === f.statut))
-      && (!q || q.split(/\s+/).every((m) => sansAccent(`${i.reference} ${i.sous} ${frDate(i.date)} ${i.montant}`).includes(m))));
-    const total = somme(liste.filter((i) => i.statut.code !== 'annulee'));
-    remplir(zone, liste.length ? tableau([['Facture'], ['Émise le', 'm-cache'], ['Échéance', 'm-cache'], ['Montant TTC', 'd'], ['Statut', 'm-cache'], ['', 'd m-cache']], liste.map((i) => ligne(() => ouvrirItem(i), [
-      td([h('div', { class: 'doc' }, pictos(i), h('span', null, h('b', null, i.reference, i.nouveau ? h('i', { class: 'nouveau' }, 'Nouveau') : null), h('small', null, i.periode ? `Période : ${i.periode}` : (i.sous || 'Facture')))),
-        h('small', { class: 'm-seul' }, `${i.statut.libelle} · émise le ${frDate(i.date)}${i.echeance ? ` · échéance ${frDate(i.echeance)}` : ''}`)]),
-      td(frDate(i.date), 'chiffre m-cache'), td(i.echeance ? frDate(i.echeance) : '—', 'chiffre m-cache'),
-      td(euro.format(i.montant), 'd chiffre fort'), td(statut(i.statut.ton, i.statut.libelle), 'm-cache'),
-      td(h('div', { class: 'actions' }, boutonTelecharger(i), h('span', { class: 'fleche' }, ic('fleche'))), 'd m-cache')])))
-      : vide(toutes.length ? 'Aucune facture ne correspond' : 'Aucune facture pour le moment', toutes.length ? 'Modifiez la recherche ou les filtres.' : 'Dès qu’une facture vous est adressée, elle apparaît ici automatiquement.'),
-    liste.length ? h('div', { class: 'panneau__pied' }, h('span', { class: 'note' }, `${pluriel(liste.length, 'facture')} · classées de la plus récente à la plus ancienne${liste.some((i) => i.statut.code === 'archive') ? ' · « Archive » : copie de la facture envoyée par e-mail' : ''}`), h('b', { class: 'chiffre' }, `Total : ${euro.format(total)}`)) : null);
+    remplir(onglets, [['', 'Toutes', toutes.length], ...annees.map((a) => [a, a, de(a).length])].map(([v, lib, n]) =>
+      h('button', { type: 'button', role: 'tab', class: `annee ${choix === v ? 'is-actif' : ''}`, 'aria-selected': choix === v ? 'true' : 'false', onclick: () => { choix = v; rendre(); } }, lib, h('em', null, n))));
+    const lignes = (choix ? [choix] : annees).flatMap((a) => {
+      const l = de(a);
+      return l.length ? [h('tr', { class: 'groupe' }, h('td', { colspan: 5 }, h('div', null, h('b', null, a), h('span', null, `${pluriel(l.length, 'facture')} · ${euro.format(somme(l))}`)))), ...l.map(ligneFacture)] : [];
+    });
+    const liste = choix ? de(choix) : toutes;
+    remplir(zone, liste.length ? tableau([['Facture'], ['Date', 'm-cache'], ['Montant TTC', 'd'], ['Statut', 'm-cache'], ['', 'd m-cache']], lignes)
+      : vide('Aucune facture pour le moment', 'Dès qu’une facture vous est adressée, elle apparaît ici automatiquement.'),
+    liste.length ? h('div', { class: 'panneau__pied' }, h('span', { class: 'note' }, `${pluriel(liste.length, 'facture')}${choix ? ` en ${choix}` : ' depuis le début'}`), h('b', { class: 'chiffre' }, `Total : ${euro.format(somme(liste))}`)) : null);
   };
-  let attente;
-  recherche.addEventListener('input', () => { clearTimeout(attente); attente = setTimeout(() => { f.q = recherche.value; rendre(); }, 120); });
-  selAnnee.addEventListener('change', () => { f.annee = selAnnee.value; rendre(); });
-  selStatut.addEventListener('change', () => { f.statut = selStatut.value; rendre(); });
   rendre();
   return [
-    tete('Facturation', 'Factures', 'Toutes les factures adressées à votre institution, avec leur date, leur numéro, leur montant et leur statut.',
+    tete('Facturation', 'Factures', toutes.length ? `Toutes les factures adressées à ${etat.client.nom}${annees.length ? ` depuis ${annees.at(-1)}` : ''}. Cliquez sur une facture pour l’ouvrir ou la télécharger.` : '',
       h('a', { class: 'btn', href: '#/messages', onclick: () => { etat.demande = 'facture'; } }, ic('messages'), 'Une question sur une facture')),
-    h('div', { class: 'chiffres' },
-      h('div', { class: 'kpi' }, h('small', null, `Facturé en ${annee}`), h('b', null, euro.format(somme(actives.filter((i) => String(i.date).startsWith(annee))))), h('span', null, pluriel(actives.filter((i) => String(i.date).startsWith(annee)).length, 'facture'))),
-      h('div', { class: 'kpi' }, h('small', null, 'Réglé'), h('b', null, euro.format(somme(toutes.filter((i) => i.statut.code === 'payee')))), h('span', null, 'Toutes années confondues')),
-      h('div', { class: `kpi ${aRegler.length ? 'is-attente' : ''}` }, h('small', null, 'À régler'), h('b', null, euro.format(somme(aRegler))), h('span', null, aRegler.length ? pluriel(aRegler.length, 'facture') + ' en attente' : 'Aucune facture en attente')),
-      h('div', { class: `kpi ${retard.length ? 'is-alerte' : ''}` }, h('small', null, 'En retard'), h('b', null, String(retard.length)), h('span', null, retard.length ? 'Échéance dépassée' : 'Aucun retard'))),
-    h('section', { class: 'panneau' }, h('div', { class: 'outils' }, h('div', { class: 'recherche' }, ic('recherche'), recherche), selAnnee, selStatut), zone),
+    h('div', { class: 'chiffres chiffres--3' },
+      kpi(null, `Facturé en ${annee}`, euro.format(somme(de(annee))), pluriel(de(annee).length, 'facture')),
+      kpi(null, 'Total réglé', euro.format(somme(reglees)), `${pluriel(reglees.length, 'facture')} depuis le début`),
+      kpi(null, 'Reste à régler', euro.format(somme(aRegler)), retard.length ? `${pluriel(retard.length, 'facture')} en retard` : aRegler.length ? `${pluriel(aRegler.length, 'facture')} en attente` : 'Rien à régler', retard.length ? 'alerte' : aRegler.length ? 'attente' : '')),
+    h('section', { class: 'panneau' }, annees.length > 1 ? h('div', { class: 'outils' }, onglets) : null, zone),
   ];
 }
 
@@ -676,103 +670,118 @@ function panneauSignature(doc) {
   return p;
 }
 
-/* ---------- Rapport d'activité (d'après le planning) ---------- */
+/* ---------- Relevé d'heures d'un mois (relevé de la facture, sinon planning) ---------- */
 async function vueRapport(mois) {
   const r = await api('mod.portail.rapport', undefined, { mois });
   const t = r.total;
-  return [
-    h('div', { class: 'barre-doc' }, h('a', { class: 'retour', href: '#/prestations' }, ic('retour'), 'Prestations'),
-      h('button', { class: 'btn', type: 'button', onclick: () => window.print() }, ic('imprimer'), 'Imprimer'),
-      h('a', { class: 'btn', href: '#/documents/rapports' }, ic('dossier'), 'Rapports et relevés')),
-    h('div', { class: 'rapport' },
-      tete('Rapport d’activité', r.libelle, `${r.sites.join(', ') || 'Vos sites'} · du ${frLong(r.du)} au ${frLong(r.au)}${r.encours ? ' (mois en cours)' : ''}`),
-      h('div', { class: 'chiffres' },
-        h('div', { class: 'kpi' }, h('small', null, 'Vacations'), h('b', null, String(t.vacations)), h('span', null, 'Créneaux assurés')),
-        h('div', { class: 'kpi' }, h('small', null, 'Heures'), h('b', null, heures(t.heures)), h('span', null, 'Temps de présence prévu')),
-        h('div', { class: 'kpi' }, h('small', null, 'Jours couverts'), h('b', null, String(t.jours)), h('span', null, 'Jours avec au moins une vacation')),
-        h('div', { class: 'kpi' }, h('small', null, 'Agents'), h('b', null, String(t.agents)), h('span', null, 'Intervenus sur le site'))),
-      panneau('Détail des vacations', h('small', null, pluriel(t.vacations, 'vacation')),
-        r.lignes.length ? tableau([['Date'], ['Horaires'], ['Agent'], ['Durée', 'd']], r.lignes.map((l) => ligne(null, [
-          td(cap(frJour(l.jour)), 'fort'), td(`${hm(l.debut)} – ${hm(l.fin)}`, 'chiffre'), td([l.agent, h('small', null, l.qualification)]), td(heures(l.heures), 'd chiffre')])))
-          : vide('Aucune vacation ce mois-ci', '')),
-      r.agents.length ? panneau('Par agent', null, tableau([['Agent'], ['Vacations', 'd'], ['Heures', 'd']], r.agents.map((a) => ligne(null, [
-        td(h('div', { class: 'personne' }, h('i', { class: 'initiales' }, initiales(a.agent)), h('span', null, h('b', { class: 'fort' }, a.agent), h('small', null, a.qualification)))),
-        td(String(a.vacations), 'd chiffre'), td(heures(a.heures), 'd chiffre')])))) : null,
-      h('p', { class: 'rapport__note' }, 'Rapport établi à partir du planning des agents de BDA Security Group. En cas d’écart, la facture du mois fait foi.')),
-  ];
-}
-
-/* ---------- Prestations ---------- */
-async function vuePrestations() {
-  const [t, data] = await Promise.all([api('mod.portail.tableau'), chargerCentre()]);
-  const p = t.prestations;
-  const mois = MOIS[new Date().getMonth()];
-  const rapports = data.items.filter((i) => i.format === 'rapport' || (i.categorie === 'rapports' && i.url));
-  return [
-    tete('Prestation', p.sites.length === 1 ? p.sites[0] : 'Vos prestations', 'La présence de nos agents en temps réel, le programme des prochains jours et l’historique de l’activité.'),
+  const barre = h('div', { class: 'barre-doc' }, h('a', { class: 'retour', href: '#/prestations' }, ic('retour'), 'Heures de présence'),
+    h('button', { class: 'btn', type: 'button', onclick: () => window.print() }, ic('imprimer'), 'Imprimer'),
+    r.factureId ? h('a', { class: 'btn', href: `#/document/${r.factureId}` }, ic('facture'), `Voir la facture ${r.facture}`) : null);
+  const site = r.sites.join(', ') || 'Votre site';
+  if (r.source === 'releve') {
+    return [barre, h('div', { class: 'rapport' },
+      tete('Relevé d’heures', r.libelle, `${site} · du ${frLong(r.du)} au ${frLong(r.au)}`),
+      h('div', { class: 'chiffres chiffres--3' },
+        kpi(null, 'Total du mois', heures(t.heures), `soit ${decimal(t.heures)} h facturées`),
+        kpi(null, 'Jours travaillés', String(t.jours), r.libelle),
+        kpi(null, 'Moyenne par jour', heures(t.jours ? t.heures / t.jours : 0), 'Sur les jours travaillés')),
+      panneau('Détail jour par jour', h('small', null, pluriel(r.lignes.length, 'jour')),
+        tableau([['Date'], ['Matin'], ['Après-midi', 'm-cache'], ['Durée', 'd']], r.lignes.map((l) => ligne(null, [
+          td(cap(frJour(l.jour)), 'fort'), td(l.matin ? plage(l.matin) : '—', 'chiffre'), td(l.apm ? plage(l.apm) : '—', 'chiffre m-cache'), td(l.heures ? heures(l.heures) : '—', 'd chiffre')])))),
+      h('p', { class: 'rapport__note' }, `Relevé joint à la facture ${r.facture}. En cas d’écart, la facture fait foi.`))];
+  }
+  return [barre, h('div', { class: 'rapport' },
+    tete('Relevé d’heures', r.libelle, `${site} · du ${frLong(r.du)} au ${frLong(r.au)}${r.encours ? ' (mois en cours)' : ''}`),
     h('div', { class: 'chiffres chiffres--3' },
-      h('div', { class: 'kpi' }, h('small', null, `Heures · ${mois}`), h('b', null, heures(p.heuresMois)), h('span', null, 'Depuis le 1er du mois')),
-      h('div', { class: 'kpi' }, h('small', null, `Heures · ${MOIS[(new Date().getMonth() + 11) % 12]}`), h('b', null, heures(p.heuresPrecedent)), h('span', null, 'Mois précédent')),
-      h('div', { class: 'kpi' }, h('small', null, 'Agents en poste'), h('b', null, String(p.enPoste.length)), h('span', null, 'À cet instant'))),
-    h('div', { class: 'grille' },
-      h('div', { class: 'colonne' },
-        panneau('Les 7 prochains jours', null, p.semaine.length ? tableau([['Jour'], ['Horaires'], ['Agent']], p.semaine.map((s) => ligne(null, [
-          td(cap(frJour(s.jour)), 'fort'), td(`${hm(s.debut)} – ${hm(s.fin)}`, 'chiffre'), td(s.agents.length ? s.agents.join(', ') : h('span', { class: 'manquant' }, 'Affectation en cours'))])))
-          : vide('Aucune vacation programmée', 'Le programme des prochains jours apparaîtra ici.')),
-        panneau('Rapports et relevés', h('a', { class: 'lien', href: '#/documents/rapports' }, 'Tout voir', ic('fleche')),
-          rapports.length ? tableau([['Document'], ['Date', 'm-cache'], ['', 'd']], rapports.slice(0, 12).map((i) => ligne(() => ouvrirItem(i), [td(celluleDoc(i)), td(frDate(i.date), 'chiffre m-cache'), td(h('div', { class: 'actions' }, boutonTelecharger(i), h('span', { class: 'fleche' }, ic('fleche'))), 'd')])))
-            : vide('Aucun rapport pour l’instant', 'Les rapports d’activité mensuels apparaîtront ici dès les premières vacations.'))),
-      h('div', { class: 'colonne' },
-        panneau('En ce moment', null, h('div', { class: 'presence' }, p.enPoste.length ? p.enPoste.map((a) => h('div', { class: 'presence__ligne' }, h('i', { class: 'pouls' }), h('span', null, h('b', null, a.nom), h('small', null, a.qualification)), h('small', { class: 'chiffre' }, `depuis ${hm(a.depuis)}`)))
-          : h('div', { class: 'presence__ligne' }, h('i', { class: 'pouls pouls--off' }), h('span', null, h('b', null, 'Aucun agent en poste'), h('small', null, p.prochain ? `Prochaine vacation ${frJour(p.prochain.jour)} à ${hm(p.prochain.debut)}` : 'Aucune vacation programmée')), null))),
-        panneau('Équipe sur site', h('a', { class: 'lien', href: '#/equipe' }, 'Dossiers', ic('fleche')), corpsP(h('p', { class: 'note' }, 'Consultez les cartes professionnelles et qualifications des agents affectés à votre site.'))))),
+      kpi(null, 'Heures', heures(t.heures), 'D’après le planning'),
+      kpi(null, 'Jours couverts', String(t.jours), r.libelle),
+      kpi(null, 'Agents', String(t.agents), 'Intervenus sur le site')),
+    panneau('Détail des vacations', h('small', null, pluriel(t.vacations, 'vacation')),
+      r.lignes.length ? tableau([['Date'], ['Horaires'], ['Agent', 'm-cache'], ['Durée', 'd']], r.lignes.map((l) => ligne(null, [
+        td(cap(frJour(l.jour)), 'fort'), td(`${hm(l.debut)} – ${hm(l.fin)}`, 'chiffre'), td([l.agent, h('small', null, l.qualification)], 'm-cache'), td(heures(l.heures), 'd chiffre')])))
+        : vide('Aucune vacation ce mois-ci', '')),
+    h('p', { class: 'rapport__note' }, 'Établi à partir du planning des agents de BDA Security Group. En cas d’écart, la facture du mois fait foi.'))];
+}
+
+/* ---------- Heures de présence ---------- */
+async function vuePrestations() {
+  const t = await api('mod.portail.tableau');
+  const p = t.prestations;
+  const mois = p.mois || [];
+  const der = p.dernier;
+  const site = p.sites.join(', ') || 'Votre site';
+  const enDirect = p.enPoste.length || p.semaine.length;
+  const presence = p.enPoste.map((a) => h('div', { class: 'presence__ligne' }, h('i', { class: 'pouls' }), h('span', null, h('b', null, a.nom), h('small', null, a.qualification)), statut('ok', `En poste depuis ${hm(a.depuis)}`)));
+  return [
+    tete('Prestation', 'Heures de présence', `${site} · les heures assurées par nos agents, mois par mois. Cliquez sur un mois pour voir le détail jour par jour.`),
+    der ? h('div', { class: 'chiffres chiffres--3' },
+      kpi(`#/rapport/${der.mois}`, `Heures · ${der.libelle}`, heures(der.heures), der.source === 'releve' ? `Relevé de la facture ${der.facture}` : 'D’après le planning'),
+      kpi(`#/rapport/${der.mois}`, 'Jours travaillés', String(der.jours), der.libelle),
+      kpi(null, 'Agents en poste', String(p.enPoste.length), p.enPoste.length ? 'À cet instant' : 'Aucun en ce moment')) : null,
+    panneau('Heures par mois', h('small', null, pluriel(mois.length, 'mois', 'mois')),
+      mois.length ? tableau([['Mois'], ['Jours', 'd m-cache'], ['Heures', 'd'], ['Source', 'm-cache'], ['', 'd m-cache']], mois.map((m) => ligne(() => { location.hash = `#/rapport/${m.mois}`; }, [
+        td([h('b', { class: 'fort' }, m.libelle), m.encours ? h('small', null, 'Mois en cours') : null, h('small', { class: 'm-seul' }, `${pluriel(m.jours, 'jour')} · ${m.source === 'releve' ? `facture ${m.facture}` : 'planning'}`)]),
+        td(String(m.jours), 'd chiffre m-cache'), td(heures(m.heures), 'd chiffre fort'),
+        td(m.source === 'releve' ? `Relevé joint à la facture ${m.facture}` : 'Planning des agents', 'm-cache'), tdFleche()])))
+        : vide('Aucune heure enregistrée pour l’instant', 'Les heures apparaîtront ici avec le relevé joint à chaque facture mensuelle.')),
+    enDirect ? panneau('Cette semaine', null,
+      presence.length ? h('div', { class: 'presence' }, presence) : null,
+      p.semaine.length ? tableau([['Jour'], ['Horaires'], ['Agent', 'm-cache']], p.semaine.map((s) => ligne(null, [
+        td(cap(frJour(s.jour)), 'fort'), td(`${hm(s.debut)} – ${hm(s.fin)}`, 'chiffre'), td(s.agents.length ? s.agents.join(', ') : h('span', { class: 'manquant' }, 'Affectation en cours'), 'm-cache')]))) : null) : null,
+    h('p', { class: 'note' }, 'Les heures sont celles du relevé joint à chaque facture : en cas d’écart, la facture fait foi. Une question ? ', h('a', { href: '#/messages' }, 'Écrivez-nous'), '.'),
   ];
 }
 
-/* ---------- Équipe sur site ---------- */
-const ETATS_CARTE = { valide: ['ok', 'Valide'], expiree: ['alerte', 'Expirée'], a_verifier: ['attente', 'À vérifier'], inactif: ['neutre', 'Inactif'] };
+/* ---------- Équipe : sur site, puis en attente d'embauche ---------- */
+const ETATS_CARTE = { valide: ['ok', 'Carte pro valide'], expiree: ['alerte', 'Carte pro expirée'], a_verifier: ['attente', 'Carte pro à vérifier'], inactif: ['neutre', 'Inactif'] };
+const nbDocs = (a) => (a.docs.length ? pluriel(a.docs.length, 'document') : 'Dossier en cours');
 async function vueEquipe() {
-  const { agents } = await api('mod.portail.equipe');
+  const { agents, candidats = [] } = await api('mod.portail.equipe');
+  const personne = (a, clair) => h('div', { class: 'personne' }, h('i', { class: `initiales ${clair ? 'initiales--clair' : ''}` }, initiales(a.nom)),
+    h('span', null, h('b', { class: 'fort' }, a.nom), h('small', null, a.qualification)));
+  const ouvrir = (a) => () => { location.hash = `#/equipe/${a.id}`; };
   return [
-    tete('Prestation', 'Équipe sur site', 'Les agents affectés à votre site et les documents que la direction partage avec vous.'),
-    panneau('Agents', h('small', null, pluriel(agents.length, 'agent')),
-      agents.length ? tableau([['Agent'], ['Qualification', 'm-cache'], ['Carte professionnelle'], ['Présence', 'm-cache'], ['', 'm-cache']], agents.map((a) => {
+    tete('Prestation', 'Équipe', 'Les personnes affectées à votre site, puis les candidats que nous vous avons présentés. Cliquez sur un nom pour ouvrir son dossier.'),
+    panneau('Équipe sur site', h('small', null, pluriel(agents.length, 'personne')),
+      agents.length ? tableau([['Nom'], ['Carte professionnelle', 'm-cache'], ['Dossier', 'm-cache'], ['', 'd']], agents.map((a) => {
         const [ton, lib] = ETATS_CARTE[a.etat] || ETATS_CARTE.a_verifier;
-        return ligne(() => { location.hash = `#/equipe/${a.id}`; }, [
-          td(h('div', { class: 'personne' }, h('i', { class: 'initiales' }, initiales(a.nom)), h('span', null, h('b', { class: 'fort' }, a.nom), h('small', { class: 'm-seul' }, a.qualification)))),
-          td(a.qualification, 'm-cache'), td(statut(ton, lib)), td(a.enPoste ? statut('ok', `En poste depuis ${hm(a.enPoste)}`) : statut('neutre', 'Hors poste'), 'm-cache'), tdFleche()]);
-      })) : vide('Aucun dossier partagé', 'Les dossiers de vos agents apparaîtront ici lorsque la direction les partagera avec vous.')),
+        return ligne(ouvrir(a), [td([personne(a), h('small', { class: 'm-seul' }, `${lib} · ${nbDocs(a)}`)]), td(statut(ton, lib), 'm-cache'), td(nbDocs(a), 'm-cache'), tdFleche()]);
+      })) : vide('Aucun dossier partagé', 'Les dossiers des agents affectés à votre site apparaîtront ici.')),
+    candidats.length ? panneau('En attente d’embauche', h('small', null, pluriel(candidats.length, 'candidat')),
+      tableau([['Candidat'], ['Rendez-vous', 'm-cache'], ['Dossier', 'm-cache'], ['', 'd']], candidats.map((a) => ligne(ouvrir(a), [
+        td([personne(a, true), h('small', { class: 'm-seul' }, [a.note, nbDocs(a)].filter(Boolean).join(' · '))]), td(a.note || '—', 'm-cache'), td(nbDocs(a), 'm-cache'), tdFleche()])))) : null,
+    h('p', { class: 'note' }, 'Copies remises par BDA Security Group pour le contrôle de la prestation. Merci de ne pas les diffuser.'),
   ];
 }
 async function vueAgent(id) {
-  const { agents } = await api('mod.portail.equipe');
-  const a = agents.find((x) => x.id === id);
-  const retour = h('div', { class: 'barre-doc' }, h('a', { class: 'retour', href: '#/equipe' }, ic('retour'), 'Équipe sur site'));
+  const { agents, candidats = [] } = await api('mod.portail.equipe');
+  const a = [...agents, ...candidats].find((x) => x.id === id);
+  const retour = h('div', { class: 'barre-doc' }, h('a', { class: 'retour', href: '#/equipe' }, ic('retour'), 'Équipe'));
   if (!a) return [retour, panneau(null, null, vide('Dossier indisponible', 'Ce dossier n’est plus partagé avec vous.'))];
+  const candidat = a.role === 'candidat';
   const [ton, lib] = ETATS_CARTE[a.etat] || ETATS_CARTE.a_verifier;
+  const docs = a.docs.map((d) => ({ titre: d.type, genre: candidat ? 'Dossier du candidat' : 'Dossier de l’agent', sous: d.nom, date: d.ajoute, url: lien('mod.portail.agent.doc', { id: d.id }), format: d.image ? 'image' : 'pdf', categorie: 'equipe' }));
+  const surSite = !candidat && (a.enPoste || a.depuis || a.heuresMois);
   return [
     retour,
     h('section', { class: 'panneau' }, h('div', { class: 'agent-tete' },
-      h('i', { class: 'initiales initiales--grand' }, initiales(a.nom)),
-      h('div', { class: 'agent-tete__nom' }, h('span', { class: 'sur' }, 'Dossier de l’agent'), h('h1', null, a.nom), h('span', null, a.qualification)),
+      h('i', { class: `initiales initiales--grand ${candidat ? 'initiales--clair' : ''}` }, initiales(a.nom)),
+      h('div', { class: 'agent-tete__nom' }, h('span', { class: 'sur' }, candidat ? 'En attente d’embauche' : 'Équipe sur site'), h('h1', null, a.nom), h('span', null, a.qualification)),
       a.verifier ? h('a', { class: 'btn', href: a.verifier, target: '_blank', rel: 'noopener' }, ic('bouclier'), 'Vérifier la carte en ligne') : null)),
-    h('div', { class: 'grille' },
-      h('div', { class: 'colonne' },
-        panneau('Habilitations', null, tableau([['Habilitation'], ['Validité', 'm-cache'], ['Statut', 'd']], [
-          ligne(null, [td(['Carte professionnelle CNAPS', a.carte ? h('small', null, a.carte) : null], 'fort'), td(a.validite ? `Jusqu’au ${a.validite}` : 'Non renseignée', 'm-cache'), td(statut(ton, lib), 'd')]),
-          ...a.formations.map((x) => ligne(null, [td(x.libelle, 'fort'), td(x.expire ? `${x.valide ? 'Jusqu’au' : 'Expirée le'} ${frDate(x.expire)}` : 'À jour', 'm-cache'), td(statut(x.valide ? 'ok' : 'attente', x.valide ? 'Valide' : 'À renouveler'), 'd')])),
-        ])),
-        panneau('Documents partagés', h('small', null, pluriel(a.docs.length, 'document')),
-          a.docs.length ? tableau([['Document'], ['Partagé le', 'm-cache'], ['', 'd']], a.docs.map((d) => {
-            const i = { titre: d.type, genre: 'Dossier de l’agent', sous: d.nom, date: d.ajoute, url: lien('mod.portail.agent.doc', { id: d.id }), format: d.image ? 'image' : 'pdf', categorie: 'equipe' };
-            return ligne(() => apercu(i), [td(celluleDoc(i)), td(frDate(d.ajoute), 'chiffre m-cache'), td(h('div', { class: 'actions' }, boutonTelecharger(i), h('span', { class: 'fleche' }, ic('fleche'))), 'd')]);
-          })) : vide('Aucun document partagé', ''))),
-      h('div', { class: 'colonne' },
-        panneau('Sur votre site', null, corpsP(h('dl', { class: 'infos' },
-          h('dt', null, 'Statut'), h('dd', null, a.enPoste ? statut('ok', `En poste depuis ${hm(a.enPoste)}`) : statut('neutre', 'Hors poste')),
-          a.depuis ? [h('dt', null, 'Présent depuis'), h('dd', null, frLong(a.depuis))] : null,
-          h('dt', null, `Heures · ${MOIS[new Date().getMonth()]}`), h('dd', null, heures(a.heuresMois))))),
-        h('p', { class: 'note' }, 'Copies remises par BDA Security Group pour le contrôle de la prestation. Merci de ne pas les diffuser.'))),
+    candidat && a.note ? h('section', { class: 'annonce' }, h('small', null, 'Rendez-vous'), h('b', null, a.note), h('p', null, 'Candidat présenté par BDA Security Group. Son embauche sera confirmée après l’entretien.')) : null,
+    panneau('Documents du dossier', h('small', null, docs.length ? `${pluriel(docs.length, 'document')} · cliquez pour ouvrir` : ''),
+      docs.length ? tableau([['Document'], ['Ajouté le', 'm-cache'], ['', 'd']], docs.map((i) => ligne(() => apercu(i), [td(celluleDoc(i)), td(frDate(i.date), 'chiffre m-cache'),
+        td(h('div', { class: 'actions' }, boutonTelecharger(i), h('span', { class: 'fleche' }, ic('fleche'))), 'd')])))
+        : vide('Dossier en cours de constitution', 'Les pièces seront ajoutées ici par la direction.')),
+    panneau('Habilitations', null, tableau([['Habilitation'], ['Validité', 'm-cache'], ['Statut', 'd']], [
+      ligne(null, [td(['Carte professionnelle CNAPS', a.carte ? h('small', null, a.carte) : null], 'fort'), td(a.validite ? `Jusqu’au ${a.validite}` : 'Non renseignée', 'm-cache'), td(statut(ton, cap(lib.replace('Carte pro ', ''))), 'd')]),
+      ...a.formations.map((x) => ligne(null, [td(x.libelle, 'fort'), td(x.expire ? `${x.valide ? 'Jusqu’au' : 'Expirée le'} ${frDate(x.expire)}` : 'À jour', 'm-cache'), td(statut(x.valide ? 'ok' : 'attente', x.valide ? 'Valide' : 'À renouveler'), 'd')])),
+    ])),
+    surSite ? panneau('Sur votre site', null, corpsP(h('dl', { class: 'infos' },
+      h('dt', null, 'Statut'), h('dd', null, a.enPoste ? statut('ok', `En poste depuis ${hm(a.enPoste)}`) : statut('neutre', 'Hors poste')),
+      a.depuis ? [h('dt', null, 'Présent depuis'), h('dd', null, frLong(a.depuis))] : null,
+      a.heuresMois ? [h('dt', null, `Heures · ${MOIS[new Date().getMonth()]}`), h('dd', null, heures(a.heuresMois))] : null))) : null,
+    h('p', { class: 'note' }, 'Copies remises par BDA Security Group pour le contrôle de la prestation. Merci de ne pas les diffuser.'),
   ];
 }
 
@@ -813,7 +822,7 @@ async function vueMessages() {
   requestAnimationFrame(() => { fil.scrollTop = fil.scrollHeight; });
   const enCours = messages.filter((m) => m.demande && m.demande.statut !== 'faite').reverse();
   return [
-    tete('Relation', 'Messages et demandes', 'Votre ligne directe avec la direction de BDA Security Group. Joignez un PDF ou une photo si besoin.'),
+    tete('Relation', 'Messages', 'Votre ligne directe avec la direction de BDA Security Group. Joignez un PDF ou une photo si besoin.'),
     h('div', { class: 'messagerie' },
       panneau('Conversation', h('small', null, pluriel(messages.length, 'message')), fil,
         h('div', { class: 'redaction' },

@@ -95,6 +95,10 @@ function module_portail(): array
         CREATE TABLE IF NOT EXISTS m_portail_rapports (client_id INTEGER NOT NULL, mois TEXT NOT NULL, faits TEXT NOT NULL DEFAULT '', qualite TEXT NOT NULL DEFAULT '',
           statut TEXT NOT NULL DEFAULT 'brouillon', publie TEXT NOT NULL DEFAULT '', par TEXT NOT NULL DEFAULT '', maj TEXT NOT NULL, PRIMARY KEY (client_id, mois));
         SQL,
+      // corbeille : un message retiré par la direction y est gardé tel quel (avec sa demande et ses pièces), il n'est jamais effacé
+      6 => <<<'SQL'
+        CREATE TABLE IF NOT EXISTS m_portail_corbeille (id INTEGER PRIMARY KEY, client_id INTEGER NOT NULL, quoi TEXT NOT NULL, donnees TEXT NOT NULL, par TEXT NOT NULL DEFAULT '', quand TEXT NOT NULL);
+        SQL,
     ],
     'admin' => [
       'clients' => ['methode' => 'GET', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_clients'],
@@ -116,6 +120,7 @@ function module_portail(): array
       'annonce.retirer' => ['methode' => 'POST', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_annonce_retirer'],
       'rapports' => ['methode' => 'GET', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_rapports'],
       'rapport.enregistrer' => ['methode' => 'POST', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_rapport'],
+      'message.retirer' => ['methode' => 'POST', 'roles' => ['admin', 'manager'], 'fn' => 'mod_portail_adm_message_retirer'],
     ],
     'client' => [
       'accueil' => ['methode' => 'GET', 'fn' => 'mod_portail_cl_accueil'],
@@ -663,6 +668,32 @@ function mod_portail_adm_piece(): void
   $p = $st->fetch();
   if (!$p) echec('Pièce introuvable.', 404);
   mod_portail_servir(mod_portail_dossier('pieces') . '/' . basename((string)$p['fichier']), (string)$p['mime'], (string)$p['nom'], !empty($_GET['telecharger']));
+}
+// Retirer un message de la conversation (essai, doublon) : il disparaît des deux côtés mais reste gardé dans la corbeille
+function mod_portail_adm_message_retirer(): void
+{
+  $id = (int)(corps()['id'] ?? 0);
+  $db = db();
+  $st = $db->prepare('SELECT * FROM messages_clients WHERE id = ?');
+  $st->execute([$id]);
+  $m = $st->fetch();
+  if (!$m) throw new RuntimeException('Message introuvable.');
+  $d = $db->prepare('SELECT * FROM m_portail_demandes WHERE message_id = ?');
+  $d->execute([$id]);
+  $p = $db->prepare('SELECT * FROM m_portail_pieces WHERE message_id = ?');
+  $p->execute([$id]);
+  $u = function_exists('utilisateur_courant') ? (utilisateur_courant() ?: []) : [];
+  $db->beginTransaction();
+  try {
+    $db->prepare('INSERT INTO m_portail_corbeille (client_id, quoi, donnees, par, quand) VALUES (?, ?, ?, ?, ?)')
+      ->execute([(int)$m['client_id'], 'message', json_encode(['message' => $m, 'demande' => $d->fetch() ?: null, 'pieces' => $p->fetchAll()], JSON_UNESCAPED_UNICODE), (string)($u['login'] ?? ''), maintenant()]);
+    $db->prepare('DELETE FROM m_portail_demandes WHERE message_id = ?')->execute([$id]);
+    $db->prepare('DELETE FROM m_portail_pieces WHERE message_id = ?')->execute([$id]); // les fichiers restent sur le disque
+    $db->prepare('DELETE FROM messages_clients WHERE id = ?')->execute([$id]);
+    $db->commit();
+  } catch (Throwable $e) { $db->rollBack(); throw $e; }
+  journal('clients', 'Message retiré de la conversation d’un client (gardé dans la corbeille)');
+  repondre(['ok' => true]);
 }
 // Réponse de la direction, avec une pièce jointe si besoin ; le client est prévenu sans le contenu
 function mod_portail_adm_repondre(): void

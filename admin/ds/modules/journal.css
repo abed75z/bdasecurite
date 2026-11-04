@@ -44,3 +44,7 @@
   .jn-ligne { grid-template-columns: 48px minmax(0, 1fr); }
   .jn-ligne__qui { grid-column: 2; justify-items: start; text-align: left; display: flex; gap: 8px; }
 }
+.jn-retirer { margin-top: 2px; padding: 0; border: 0; background: none; color: var(--iv-muet); font: 500 11.5px var(--iv-police); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; opacity: 0; transition: opacity 140ms var(--iv-courbe), color 140ms var(--iv-courbe); }
+.jn-ligne:hover .jn-retirer, .jn-retirer:focus-visible { opacity: 1; }
+.jn-retirer:hover { color: var(--iv-alerte); }
+@media (hover: none) { .jn-retirer { opacity: 1; } }

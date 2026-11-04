@@ -84,3 +84,10 @@
 .pt-rm-resume small { font-size: 11px; }
 .pt-rm-resume b { font-size: 17px; font-variant-numeric: tabular-nums; }
 @media (max-width: 640px) { .pt-rm-resume { grid-template-columns: 1fr 1fr; } }
+/* Retirer un message de la conversation (gardé dans la corbeille) */
+.bulle small { display: flex; align-items: center; gap: 8px; }
+.bulle__retirer { display: inline-grid; place-items: center; width: 22px; height: 22px; margin-left: auto; padding: 0; border: 0; border-radius: 6px; background: none; color: inherit; opacity: 0; cursor: pointer; transition: opacity 140ms ease, background-color 140ms ease; }
+.bulle__retirer .ic { width: 13px; height: 13px; }
+.bulle:hover .bulle__retirer, .bulle__retirer:focus-visible { opacity: .75; }
+.bulle__retirer:hover { opacity: 1; background: rgba(0, 0, 0, .06); }
+@media (hover: none) { .bulle__retirer { opacity: .6; } }

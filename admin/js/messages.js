@@ -4,7 +4,7 @@
    Chaque message client arrive aussi sur bdasecurite@gmail.com ;
    chaque réponse prévient le client par email.
    ========================================================= */
-import { api, apiFichier, h, icone, toast, erreur, ilYa, dateLisible } from './outils.js';
+import { api, apiFichier, h, icone, toast, erreur, ilYa, dateLisible, confirmer } from './outils.js';
 
 export async function pageMessages(ctx) {
   ctx.titre('Messages clients');
@@ -39,8 +39,13 @@ export async function pageMessages(ctx) {
       } }, Object.entries(statuts).map(([k, lib]) => h('option', { value: k, selected: k === m.demande.statut }, lib)));
       return h('div', { class: 'pt-demande' }, m.demande.libelle, choix);
     };
+    // retirer un message (essai, doublon) : il disparaît des deux côtés, gardé dans la corbeille
+    const retirer = (m) => h('button', { class: 'bulle__retirer', type: 'button', title: 'Retirer ce message', 'aria-label': 'Retirer ce message', onclick: async () => {
+      if (!(await confirmer(`Retirer ce message de la conversation ? Il disparaît aussi de l’espace du client${m.demande ? ', avec sa demande' : ''}. Il reste gardé dans la corbeille.`, { titre: 'Retirer le message', ok: 'Retirer', danger: true }))) return;
+      try { await api('mod.portail.message.retirer', { id: m.id }); toast('Message retiré.'); afficherFil(id); } catch (e) { erreur(e); }
+    } }, icone('poubelle'));
     const fil = h('div', { class: 'fil__messages' }, messages.length
-      ? messages.map((m) => h('div', { class: `bulle bulle--${m.auteur}` }, demande(m), h('p', null, m.texte), m.pieces.map(piece), h('small', null, `${m.auteur === 'admin' ? 'Vous' : client?.nom || 'Client'} · ${dateLisible(m.cree, true)}`)))
+      ? messages.map((m) => h('div', { class: `bulle bulle--${m.auteur}` }, demande(m), h('p', null, m.texte), m.pieces.map(piece), h('small', null, `${m.auteur === 'admin' ? 'Vous' : client?.nom || 'Client'} · ${dateLisible(m.cree, true)}`, retirer(m))))
       : h('p', { class: 'astuce' }, 'Aucun message. Écrivez le premier : le client sera prévenu par un court email, sans le contenu.'));
     const zone = h('textarea', { class: 'input fil__saisie', rows: 3, placeholder: 'Votre réponse… (Ctrl + Entrée pour envoyer)' });
     const fichier = h('input', { type: 'file', accept: 'application/pdf,image/jpeg,image/png,image/webp', hidden: true });

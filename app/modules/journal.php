@@ -31,6 +31,7 @@ function module_journal(): array
       'sites' => $lire('mod_journal_adm_sites'),
       'jour' => $lire('mod_journal_adm_jour'),
       'reglages' => $ecrire('mod_journal_adm_reglages'),
+      'retirer' => $ecrire('mod_journal_adm_retirer'),
       'photo' => $lire('mod_journal_adm_photo'),
     ],
     'equipe' => [
@@ -303,6 +304,16 @@ function mod_journal_adm_reglages(): void
     ->execute([$id, json_encode($boutons, JSON_UNESCAPED_UNICODE), !empty($b['compteur']) ? 1 : 0, !empty($b['client']) ? 1 : 0, maintenant()]);
   journal('exploitation', "Main courante de $nom : réglages modifiés");
   repondre(['ok' => true, 'reglages' => mod_journal_reglages($id)]);
+}
+// Retirer une ligne (essai, erreur) : elle est écartée de la main courante, jamais effacée
+function mod_journal_adm_retirer(): void
+{
+  $id = (int)(corps()['id'] ?? 0);
+  $st = db()->prepare("UPDATE m_journal_lignes SET annule = ?, maj = ? WHERE id = ? AND annule = ''");
+  $st->execute([maintenant(), maintenant(), $id]);
+  if (!$st->rowCount()) throw new RuntimeException('Ligne introuvable.');
+  journal('exploitation', 'Main courante : une ligne retirée par la direction');
+  repondre(['ok' => true]);
 }
 function mod_journal_adm_photo(): void
 {

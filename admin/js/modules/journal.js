@@ -4,7 +4,7 @@
    ouvertures et fermetures, rondes, visiteurs et livraisons, notes, personnes reçues,
    prises et fins de service, incidents. En direct, jour par jour, imprimable en PDF.
    ========================================================= */
-import { api, h, icone, toast, erreur, champ, iso } from '../outils.js';
+import { api, h, icone, toast, erreur, champ, iso, confirmer } from '../outils.js';
 
 const heure = (s) => (s && s.length >= 16 ? s.slice(11, 16).replace(':', 'h') : '');
 const jourLisible = (j) => { const d = new Date(`${j}T12:00:00`); return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); };
@@ -56,7 +56,11 @@ export async function pageJournal(ctx) {
       h('time', null, heure(l.quand)),
       h('div', { class: 'jn-ligne__corps' }, h('b', null, titre), detail ? h('p', null, detail) : null,
         l.photo ? h('a', { class: 'jn-photo', href: `api.php?a=mod.journal.photo&id=${l.id}`, target: '_blank', rel: 'noopener' }, h('img', { src: `api.php?a=mod.journal.photo&id=${l.id}`, alt: 'Photo jointe', loading: 'lazy' })) : null),
-      h('span', { class: 'jn-ligne__qui' }, h('small', { class: `jn-type jn-type--${l.type}` }, TYPES[l.type] || ''), l.agent));
+      h('span', { class: 'jn-ligne__qui' }, h('small', { class: `jn-type jn-type--${l.type}` }, TYPES[l.type] || ''), l.agent,
+        l.id && l.type !== 'incident' ? h('button', { class: 'jn-retirer', type: 'button', title: 'Retirer cette ligne', onclick: async () => {
+          if (!(await confirmer('Retirer cette ligne de la main courante ? Elle disparaît aussi pour l’agent et le client.', { titre: 'Retirer la ligne', ok: 'Retirer', danger: true }))) return;
+          try { await api('mod.journal.retirer', { id: l.id }); toast('Ligne retirée.'); recharger(); } catch (e) { erreur(e); }
+        } }, 'Retirer') : null));
   });
   const imprimer = () => imprimerCahier(d);
   const cahier = h('section', { class: 'carte jn-cahier' },

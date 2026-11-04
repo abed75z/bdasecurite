@@ -55,6 +55,12 @@ const ICONES = {
   poubelle: '<path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
   info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
   appareil: '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',
+  auj: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  cal: '<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/>',
+  msg: '<path d="M4.5 5.5h15v10h-10l-5 4z"/>',
+  moi: '<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.3-3.6 3.9-5.5 7-5.5s5.7 1.9 7 5.5"/>',
+  chrono: '<circle cx="12" cy="13.5" r="7.5"/><path d="M12 10v3.5l2.5 1.5M9.5 2.5h5M12 2.5V6"/>',
+  versHaut: '<path d="M7 17 17 7M9 7h8v8"/>',
 };
 const METIERS = {
   securite: ['Agent de sécurité', 'Surveillance, filtrage, rondes', 'bouclier'],
@@ -224,16 +230,34 @@ function choix(nom, options, valeur, classe = '') {
     h('label', null, h('input', { type: 'radio', name: nom, value: k, checked: k === valeur }), h('span', { class: 'eq-tuile' }, icone ? ic(icone) : null, h('span', null, titre, sous ? h('small', null, sous) : null)))));
 }
 const valeurChoix = (el, nom) => el.querySelector(`input[name="${nom}"]:checked`)?.value || '';
-function tiroir(titre, contenu) {
-  const fermer = () => { voile.remove(); document.removeEventListener('keydown', echap); document.body.style.overflow = ''; };
+function tiroir(titre, contenu, opts = {}) {
+  const fermer = () => {
+    feuille.classList.remove('is-in');
+    voile.classList.remove('is-in');
+    document.removeEventListener('keydown', echap);
+    setTimeout(() => { voile.remove(); if (!document.querySelector('.eq-voile')) document.body.style.overflow = ''; }, 300);
+  };
   const echap = (e) => { if (e.key === 'Escape') fermer(); };
-  const voile = h('div', { class: 'eq-voile', onclick: (e) => { if (e.target === voile) fermer(); } },
-    h('div', { class: 'eq-tiroir', role: 'dialog', 'aria-modal': 'true', 'aria-label': titre },
-      h('div', { class: 'eq-tiroir__tete' }, h('h2', null, titre), h('button', { class: 'eq-icone-btn', type: 'button', 'aria-label': 'Fermer', onclick: () => fermer() }, ic('croix'))),
-      contenu));
+  const poignee = h('span', { class: 'ap-poignee', 'aria-hidden': 'true' });
+  const tete = h('div', { class: 'eq-tiroir__tete' },
+    h('div', null, opts.sur ? h('p', { class: 'ap-sur' }, opts.sur) : null, h('h2', null, titre)),
+    h('button', { class: 'ap-fermer', type: 'button', 'aria-label': 'Fermer', onclick: () => fermer() }, ic('croix')));
+  const feuille = h('div', { class: 'eq-tiroir', role: 'dialog', 'aria-modal': 'true', 'aria-label': titre }, poignee, tete, h('div', { class: 'eq-tiroir__corps' }, contenu));
+  const voile = h('div', { class: 'eq-voile', onclick: (e) => { if (e.target === voile) fermer(); } }, feuille);
+  // glisser la poignée (ou l'en-tête) vers le bas pour fermer
+  let y0 = null;
+  let dy = 0;
+  [poignee, tete].forEach((z) => {
+    z.addEventListener('pointerdown', (e) => { if (e.target.closest('button')) return; y0 = e.clientY; dy = 0; feuille.style.transition = 'none'; z.setPointerCapture?.(e.pointerId); });
+    z.addEventListener('pointermove', (e) => { if (y0 === null) return; dy = Math.max(0, e.clientY - y0); feuille.style.transform = `translateY(${dy}px)`; });
+    const lacher = () => { if (y0 === null) return; y0 = null; feuille.style.transition = ''; feuille.style.transform = ''; if (dy > 90) fermer(); };
+    z.addEventListener('pointerup', lacher);
+    z.addEventListener('pointercancel', lacher);
+  });
   document.body.append(voile);
   document.body.style.overflow = 'hidden';
   document.addEventListener('keydown', echap);
+  requestAnimationFrame(() => requestAnimationFrame(() => { voile.classList.add('is-in'); feuille.classList.add('is-in'); }));
   return fermer;
 }
 const pastille = (cls, txt) => h('span', { class: `eq-pastille eq-pastille--${cls}` }, txt);
@@ -464,8 +488,39 @@ async function ecranReset(jeton) {
 }
 
 /* ---------- Application ---------- */
+/* ----- Moi : carte d'agent, paie, documents, congés, réglages ----- */
+async function pageMoi() {
+  const [d, carte] = await Promise.all([api('accueil'), PAGES.carte ? api('mod.badge.carte').then((r) => r.carte).catch(() => null) : Promise.resolve(null)]);
+  compteurs.fichesNonVues = d.fichesNonVues;
+  compteurs.absencesAttente = d.absencesAttente;
+  enService = Boolean(d.enCours);
+  ouvrirApplication.menus?.();
+  const etat = carte ? ({ valide: 'Carte pro valide', expiree: 'Carte pro expirée', a_verifier: 'Carte pro à vérifier', inactif: 'Carte inactive' })[carte.etat] || 'Carte professionnelle' : '';
+  const lignes = [
+    ligne({ href: '#/paie' }, 'Fiches de paie', d.fichesNonVues ? h('span', { class: 'ap-compte' }, d.fichesNonVues) : null),
+    ligne({ href: '#/documents' }, 'Documents', null),
+    ligne({ href: '#/absences' }, 'Congés et absences', d.absencesAttente ? `${d.absencesAttente} en attente` : 'Demander'),
+    moi.metier === 'chauffeur' ? ligne({ href: '#/courses' }, 'Mes courses', null) : ligne({ href: '#/main-courante' }, 'Mes signalements', d.incidentsOuverts ? `${d.incidentsOuverts} en cours` : null),
+    PAGES.consignes ? ligne({ href: '#/consignes' }, 'Consignes des sites', null) : null,
+    PAGES.materiel ? ligne({ href: '#/materiel' }, 'Mon matériel', null) : null,
+    PAGES.presence ? ligne({ href: '#/presence' }, 'Tout va bien ?', 'Alertes') : null,
+    ligne({ href: '#/profil' }, 'Profil et disponibilités', null),
+    PAGES.compte ? ligne({ href: '#/compte' }, 'Réglages', null) : null,
+  ].filter(Boolean);
+  return h('div', { class: 'ap-v ap-moi' },
+    h('header', { class: 'ap-tete ap-tete--page' }, h('p', { class: 'ap-sur' }, d.moi.metierLibelle || METIERS[d.moi.metier]?.[0] || ''), h('h1', { class: 'ap-titre' }, `${d.moi.prenom} ${d.moi.nom || ''}`.trim())),
+    carte ? h('a', { class: 'ap-carte-agent', href: '#/carte', 'aria-label': 'Afficher ma carte d’agent' },
+      h('span', { class: 'ap-carte-agent__haut' }, h('span', { class: 'ap-marque-carte' }, h('b', null, 'BDA'), h('small', null, 'SECURITY GROUP')), h('small', null, 'CARTE D’AGENT')),
+      h('span', { class: 'ap-carte-agent__bas' }, h('b', null, `${carte.prenom} ${String(carte.nom || '').charAt(0)}.`),
+        h('span', null, h('small', null, `${etat}${carte.validite ? ` · ${carte.validite}` : ''}`), h('small', { class: 'is-clair' }, 'Afficher le QR')))) : null,
+    h('div', { class: 'ap-chiffres' }, h('div', null, h('small', null, 'Cette semaine'), h('b', null, fmtMin(d.semaine))), h('div', null, h('small', null, 'Ce mois'), h('b', null, fmtMin(d.mois)))),
+    h('nav', { class: 'ap-lignes', 'aria-label': 'Mon compte' }, lignes),
+    h('button', { class: 'ap-btn-texte ap-deconnexion', type: 'button', onclick: deconnexion }, 'Se déconnecter'));
+}
+
 const PAGES = {
-  '': { titre: 'Accueil', icone: 'accueil', rendu: pageAccueil },
+  '': { titre: 'Aujourd’hui', icone: 'auj', rendu: pageAccueil },
+  moi: { titre: 'Moi', icone: 'moi', rendu: pageMoi },
   planning: { titre: 'Planning', icone: 'planning', rendu: pagePlanning },
   'main-courante': { titre: 'Main courante', icone: 'mc', rendu: pageMainCourante },
   courses: { titre: 'Mes courses', icone: 'voiture', rendu: pageCourses, chauffeur: true },
@@ -482,45 +537,43 @@ function outilsModules() {
 }
 const pagesVisibles = () => Object.entries(PAGES).filter(([, p]) => !p.chauffeur || moi.metier === 'chauffeur');
 let principal = null;
+let ongletsNav = null;
+let enService = false;
+// 4 onglets ; les autres pages appartiennent à l'un d'eux (flèche retour et onglet allumé)
+const ONGLETS = [['', 'Aujourd’hui', 'auj'], ['planning', 'Planning', 'cal'], ['messages', 'Messages', 'msg'], ['moi', 'Moi', 'moi']];
+const PARENTS = { consignes: '', presence: '', postes: 'planning', carte: 'moi', paie: 'moi', documents: 'moi', absences: 'moi', profil: 'moi', compte: 'moi', materiel: 'moi', 'main-courante': 'moi', courses: 'moi' };
+const routeActuelle = () => location.hash.replace(/^#\/?/, '').split('?')[0];
+const estOnglet = (r) => ONGLETS.some(([k]) => k === r);
+const ongletDe = (r) => (estOnglet(r) ? r : (PARENTS[r] ?? 'moi'));
+const vibrer = (motif) => { try { navigator.vibrate?.(motif); } catch (e) { /* pas de vibreur */ } };
+let ecouteSaisie = false;
 function ouvrirApplication() {
-  document.body.classList.add('eq--app');
-  const badge = (k) => (compteurs[k] ? h('i', { class: 'eq-badge' }, compteurs[k]) : null);
-  const nav = h('nav', { class: 'eq-nav', 'aria-label': 'Menu' });
-  const onglets = h('nav', { class: 'eq-onglets', 'aria-label': 'Menu' });
-  const avatar = h('a', { class: 'eq-avatar', href: '#/profil', 'aria-label': 'Mon profil' });
-  const moiCote = h('a', { class: 'eq-moi', href: '#/profil' });
-  principal = h('main', { class: 'eq-principal', id: 'contenu' });
+  document.body.classList.add('eq--app', 'ap-v2');
+  principal = h('main', { class: 'ap-ecran', id: 'contenu' });
+  ongletsNav = h('nav', { class: 'ap-onglets', 'aria-label': 'Navigation principale' });
   const dessinerMenus = () => {
-    const route = (location.hash.replace(/^#\/?/, '').split('?')[0]);
-    nav.replaceChildren(...pagesVisibles().map(([r, p]) => h('a', { href: `#/${r}`, class: r === route ? 'is-actif' : '' }, ic(p.icone), p.titre, p.badge ? badge(p.badge) : null)));
-    const plusBadge = (compteurs.fichesNonVues || 0) + (compteurs.absencesAttente || 0);
-    onglets.replaceChildren(
-      h('a', { href: '#/', class: route === '' ? 'is-actif' : '' }, ic('accueil'), 'Accueil'),
-      h('a', { href: '#/planning', class: route === 'planning' ? 'is-actif' : '' }, ic('planning'), 'Planning'),
-      h('button', { class: 'eq-onglet-plus', type: 'button', onclick: () => formulaireIncident(), 'aria-label': 'Signaler un événement' }, h('span', { class: 'eq-rond' }, ic('plus')), 'Signaler'),
-      moi.metier === 'chauffeur'
-        ? h('a', { href: '#/courses', class: route === 'courses' ? 'is-actif' : '' }, ic('voiture'), 'Courses')
-        : h('a', { href: '#/paie', class: route === 'paie' ? 'is-actif' : '' }, ic('paie'), 'Paie', badge('fichesNonVues')),
-      h('button', { type: 'button', class: ['absences', 'documents', 'profil', 'main-courante', moi.metier === 'chauffeur' ? 'paie' : ''].includes(route) ? 'is-actif' : '', onclick: menuPlus }, ic('menu'), 'Plus', plusBadge ? h('i', { class: 'eq-badge' }, plusBadge) : null));
-    const ini = initiales(moi.prenom, moi.nom);
-    avatar.textContent = ini;
-    moiCote.replaceChildren(h('span', { class: 'eq-avatar' }, ini), h('span', null, h('b', null, `${moi.prenom} ${moi.nom || ''}`.trim()), h('small', null, METIERS[moi.metier]?.[0] || 'Mon profil')));
+    const actif = ongletDe(routeActuelle());
+    const liste = ONGLETS.filter(([k]) => k !== 'messages' || PAGES.messages);
+    ongletsNav.style.setProperty('--n', liste.length);
+    ongletsNav.replaceChildren(...liste.map(([k, lib, icone]) => {
+      const service = k === '' && enService;
+      const point = (k === 'messages' && compteurs.messages) || (k === 'moi' && (compteurs.fichesNonVues || compteurs.absencesAttente));
+      return h('a', { href: `#/${k}`, class: `ap-onglet ${k === actif ? 'is-actif' : ''} ${service ? 'is-service' : ''}`, 'aria-current': k === actif ? 'page' : null },
+        h('span', { class: 'ap-onglet__ic' }, ic(service ? 'chrono' : icone), point ? h('i', { class: 'ap-point', 'aria-label': 'Nouveau' }) : null),
+        h('span', null, service ? 'En service' : lib));
+    }));
   };
-  racine.replaceChildren(h('div', { class: 'eq-app' },
-    h('aside', { class: 'eq-cote' },
-      h('a', { class: 'eq-marque', href: '#/' }, h('img', { src: '/assets/img/blason.svg?v=1', alt: '', width: 44, height: 45 }), h('span', null, h('b', null, 'BDA SECURITY GROUP'), h('small', null, 'Espace équipe'))),
-      nav,
-      h('div', { class: 'eq-cote__bas' }, moiCote, h('button', { class: 'eq-btn eq-btn--ghost eq-btn--petit', type: 'button', onclick: deconnexion }, ic('sortie'), 'Se déconnecter'))),
-    h('div', null,
-      h('header', { class: 'eq-entete' },
-        h('a', { class: 'eq-marque', href: '#/' }, h('img', { src: '/assets/img/blason.svg?v=1', alt: '', width: 34, height: 35 }), h('span', null, h('b', null, 'BDA'), h('small', null, 'Équipe'))),
-        avatar),
-      principal),
-    onglets));
+  racine.replaceChildren(h('div', { class: 'ap' }, principal, ongletsNav));
   ouvrirApplication.menus = dessinerMenus;
+  // clavier ouvert sur téléphone : la barre d'onglets se range pour laisser la place à la saisie
+  if (!ecouteSaisie) {
+    ecouteSaisie = true;
+    const champ = (el) => el?.matches?.('input:not([type=checkbox]):not([type=radio]):not([type=file]), textarea, select');
+    document.addEventListener('focusin', (e) => { if (champ(e.target)) document.body.classList.add('ap-saisie'); });
+    document.addEventListener('focusout', () => setTimeout(() => { if (!champ(document.activeElement)) document.body.classList.remove('ap-saisie'); }, 80));
+  }
   window.onhashchange = naviguer;
   naviguer();
-  if (moi.metier !== 'chauffeur') boutonSos();
   let ronde = null;
   try { ronde = sessionStorage.getItem('eq-ronde'); sessionStorage.removeItem('eq-ronde'); } catch (e) { /* navigation privée */ }
   if (ronde) validerRonde(ronde);
@@ -539,36 +592,55 @@ async function validerRonde(jeton) {
   }
 }
 
-/* ---------- Bouton d'alerte : maintenir 2 s ; la direction est prévenue avec la position ---------- */
-function boutonSos() {
-  if (document.querySelector('.eq-sos')) return;
-  let minuteur = null;
-  const bouton = h('button', { class: 'eq-sos', type: 'button', 'aria-label': 'Alerte : maintenez 2 secondes pour prévenir la direction' }, h('i', { class: 'eq-sos__anneau' }), h('b', null, 'SOS'));
-  const arreter = () => { clearTimeout(minuteur); bouton.classList.remove('is-appui'); };
-  const declencher = async () => {
-    bouton.classList.remove('is-appui');
-    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    const etat = h('p', { class: 'eq-sos-etat' }, 'Envoi de l’alerte…');
-    tiroir('Alerte', h('div', { class: 'eq-sos-fenetre' }, etat,
-      h('p', null, 'En cas de danger immédiat, appelez aussi les secours :'),
-      h('div', { class: 'eq-sos-numeros' },
-        h('a', { class: 'eq-btn eq-btn--rouge', href: 'tel:17' }, 'Police · 17'),
-        h('a', { class: 'eq-btn eq-btn--rouge', href: 'tel:15' }, 'SAMU · 15'),
-        h('a', { class: 'eq-btn eq-btn--rouge', href: 'tel:18' }, 'Pompiers · 18'),
-        h('a', { class: 'eq-btn eq-btn--ghost', href: 'tel:112' }, 'Urgences · 112'))));
-    try {
-      await api('sos', { ...(await position()) });
-      etat.textContent = 'Alerte envoyée : la direction est prévenue avec votre position.';
-      etat.classList.add('is-ok');
-    } catch (e) {
-      etat.textContent = `L’alerte n’est pas partie (${e.message}). Appelez la direction.`;
-      etat.classList.add('is-non');
-    }
+/* ---------- Maintenir pour valider (prise et fin de service, SOS) : un trait se remplit, la vibration confirme ---------- */
+function maintenir(bouton, duree, action) {
+  let t = null;
+  bouton.classList.add('ap-maintenir');
+  bouton.style.setProperty('--duree', `${duree}ms`);
+  const partir = () => {
+    if (bouton.disabled || t) return;
+    bouton.classList.add('is-appui');
+    vibrer(8);
+    t = setTimeout(() => {
+      t = null;
+      bouton.classList.remove('is-appui');
+      bouton.classList.add('is-valide');
+      vibrer([25, 40, 25]);
+      setTimeout(() => bouton.classList.remove('is-valide'), 700);
+      action();
+    }, duree);
   };
-  bouton.addEventListener('pointerdown', (e) => { e.preventDefault(); bouton.classList.add('is-appui'); minuteur = setTimeout(declencher, 2000); });
-  ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => bouton.addEventListener(ev, arreter));
+  const stop = () => { if (t) { clearTimeout(t); t = null; } bouton.classList.remove('is-appui'); };
+  bouton.addEventListener('pointerdown', (e) => { if (e.button > 0) return; e.preventDefault(); bouton.setPointerCapture?.(e.pointerId); partir(); });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((ev) => bouton.addEventListener(ev, stop));
+  bouton.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); partir(); } });
+  bouton.addEventListener('keyup', (e) => { if (e.key === 'Enter' || e.key === ' ') stop(); });
+  bouton.addEventListener('click', (e) => e.preventDefault());
   bouton.addEventListener('contextmenu', (e) => e.preventDefault());
-  document.body.append(bouton);
+  return bouton;
+}
+
+/* ---------- SOS : maintenir 2 s ; la direction est prévenue avec la position ---------- */
+function sosPilule() {
+  return maintenir(h('button', { class: 'ap-sos', type: 'button', 'aria-label': 'SOS : maintenez 2 secondes pour prévenir la direction' }, 'SOS'), 2000, declencherSos);
+}
+async function declencherSos() {
+  const etat = h('p', { class: 'eq-sos-etat' }, 'Envoi de l’alerte…');
+  tiroir('Alerte', h('div', { class: 'eq-sos-fenetre' }, etat,
+    h('p', null, 'En cas de danger immédiat, appelez aussi les secours :'),
+    h('div', { class: 'eq-sos-numeros' },
+      h('a', { class: 'eq-btn eq-btn--rouge', href: 'tel:17' }, 'Police · 17'),
+      h('a', { class: 'eq-btn eq-btn--rouge', href: 'tel:15' }, 'SAMU · 15'),
+      h('a', { class: 'eq-btn eq-btn--rouge', href: 'tel:18' }, 'Pompiers · 18'),
+      h('a', { class: 'eq-btn eq-btn--ghost', href: 'tel:112' }, 'Urgences · 112'))), { sur: 'SOS' });
+  try {
+    await api('sos', { ...(await position()) });
+    etat.textContent = 'Alerte envoyée : la direction est prévenue avec votre position.';
+    etat.classList.add('is-ok');
+  } catch (e) {
+    etat.textContent = `L’alerte n’est pas partie (${e.message}). Appelez la direction.`;
+    etat.classList.add('is-non');
+  }
 }
 function menuPlus() {
   const lien = (r) => { const p = PAGES[r]; return h('a', { href: `#/${r}`, onclick: () => fermer() }, ic(p.icone), p.titre, p.badge && compteurs[p.badge] ? h('i', { class: 'eq-badge' }, compteurs[p.badge]) : null); };
@@ -583,189 +655,246 @@ async function deconnexion() {
   history.replaceState(null, '', location.pathname);
   ecranConnexion();
 }
+let routePrecedente = null;
+const squelette = () => h('div', { class: 'ap-squelette', 'aria-hidden': 'true' }, h('i', { class: 'is-court' }), h('i', { class: 'is-titre' }), h('i', { class: 'is-bloc' }), h('i'), h('i'));
 async function naviguer() {
   if (!document.body.classList.contains('eq--app')) return;
   clearInterval(minuteur);
-  const route = location.hash.replace(/^#\/?/, '').split('?')[0];
+  // lien direct « #/signaler » (raccourci, notification) : ouvre la feuille sur l'écran Aujourd'hui
+  if (routeActuelle() === 'signaler') { history.replaceState(null, '', '#/'); setTimeout(() => formulaireIncident(), 450); }
+  const route = routeActuelle();
   const page = PAGES[route] && (!PAGES[route].chauffeur || moi.metier === 'chauffeur') ? PAGES[route] : PAGES[''];
-  document.title = `${page.titre} | Espace équipe BDA`;
+  document.title = `${page.titre} | BDA Équipe`;
+  const avant = routePrecedente;
+  routePrecedente = route;
+  // onglet ↔ onglet : fondu ; vers une sous-page : glisse depuis la droite ; retour : depuis la gauche
+  const sens = avant === null || (estOnglet(route) && estOnglet(avant)) ? 'fondu' : !estOnglet(route) ? 'avant' : 'arriere';
   ouvrirApplication.menus?.();
-  principal.replaceChildren(h('div', { class: 'eq-squelette' }), h('div', { class: 'eq-squelette' }));
-  window.scrollTo(0, 0);
+  principal.classList.add('is-attente');
+  const lent = setTimeout(() => { principal.classList.remove('is-attente'); principal.replaceChildren(squelette()); }, 260);
   try {
     const contenu = await page.rendu();
-    if (location.hash.replace(/^#\/?/, '').split('?')[0] !== route) return;
-    principal.replaceChildren(anim(contenu));
+    clearTimeout(lent);
+    if (routeActuelle() !== route) return;
+    const parent = ongletDe(route);
+    const ecran = h('div', { class: `ap-page ap-page--${sens}` },
+      estOnglet(route) ? null : h('a', { class: 'ap-retour', href: `#/${parent}` }, ic('retour'), ONGLETS.find(([k]) => k === parent)?.[1] || 'Retour'),
+      anim(contenu));
+    principal.classList.remove('is-attente');
+    principal.replaceChildren(ecran);
+    // la conversation s'ouvre sur le dernier message ; les autres écrans en haut
+    if (route === 'messages') requestAnimationFrame(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    else window.scrollTo(0, 0);
   } catch (e) {
-    if (e.message !== 'Connexion requise.') principal.replaceChildren(vide('alerte', 'Impossible de charger cette page', e.message));
+    clearTimeout(lent);
+    principal.classList.remove('is-attente');
+    if (e.message !== 'Connexion requise.') principal.replaceChildren(h('div', { class: 'ap-page ap-page--fondu' }, h('div', { class: 'ap-v ap-erreur' }, vide('alerte', 'Impossible de charger cette page', e.message))));
   }
 }
 const recharger = () => naviguer();
 const enTete = (surtitre, titre, texte, ...actions) => h('div', { class: 'eq-titre' }, h('div', null, surtitre ? h('div', { class: 'eq-surtitre' }, surtitre) : null, h('h1', null, titre), texte ? h('p', null, texte) : null), actions.length ? h('div', { style: 'display:flex;gap:.5rem;flex-wrap:wrap' }, actions) : null);
 
-/* ----- Accueil ----- */
+/* ----- Aujourd'hui : le prochain poste et une seule action (prendre ou finir le service) ----- */
+const JOURS_MAJ = ['DIMANCHE', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI'];
+const hm = (s) => String(s || '').slice(0, 5).replace(/^0(\d)/, '$1').replace(':', 'h');
+const minVersHm = (m) => { const x = ((m % 1440) + 1440) % 1440; return `${Math.floor(x / 60)}h${pad(x % 60)}`; };
+const marque = () => h('span', { class: 'ap-marque', role: 'img', 'aria-label': 'BDA Security Group' }, h('b', null, 'BDA'), h('i'));
+const ligne = (attrs, gauche, droite) => h(attrs.href ? 'a' : 'button', { class: `ap-ligne ${attrs.class || ''}`, type: attrs.href ? null : 'button', href: attrs.href || null, onclick: attrs.onclick || null },
+  h('span', { class: 'ap-ligne__g' }, gauche), h('span', { class: 'ap-ligne__d' }, droite || null, ic('fleche')));
+const dans = (m) => (m < 60 ? `DANS ${Math.max(1, m)} MIN` : m % 60 ? `DANS ${Math.floor(m / 60)} H ${pad(m % 60)}` : `DANS ${m / 60} H`);
+const lienCarte = (adresse) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}`;
+// Fiche d'un poste : adresse, consignes, contact, confirmation
+function detailPostes(ps) {
+  const p0 = ps[0];
+  tiroir(ps.map((p) => p.site).filter((v, i, a) => a.indexOf(v) === i).join(' · '), h('div', { class: 'ap-fiche' }, ps.map((p) => {
+    const conf = p.confirme ? h('p', { class: 'ap-ok' }, ic('coche'), 'Présence confirmée') : h('button', { class: 'ap-btn ap-btn--contour', type: 'button', onclick: async (e) => {
+      const b = e.currentTarget;
+      b.disabled = true;
+      try { await api('poste.confirmer', { id: p.id }); b.replaceWith(h('p', { class: 'ap-ok' }, ic('coche'), 'Présence confirmée')); vibrer(15); toast('Merci, la direction voit que vous avez confirmé.'); } catch (err) { toast(err.message, true); b.disabled = false; }
+    } }, 'Je confirme ma présence');
+    return h('section', { class: 'ap-fiche__poste' },
+      h('p', { class: 'ap-fiche__heures' }, hm(p.debut), h('span', null, ' — '), hm(p.fin)),
+      p.adresse ? h('a', { class: 'ap-lien-adresse', href: lienCarte(p.adresse), target: '_blank', rel: 'noopener' }, p.adresse, ic('versHaut')) : null,
+      p.note ? h('p', { class: 'ap-fiche__texte' }, p.note) : null,
+      p.contact ? h('div', { class: 'ap-fiche__bloc' }, h('p', { class: 'ap-sur' }, 'CONTACT SUR PLACE'), h('p', null, p.contact)) : null,
+      p.consignes ? h('div', { class: 'ap-fiche__bloc' }, h('p', { class: 'ap-sur' }, 'CONSIGNES DU SITE'), h('p', { class: 'ap-fiche__texte' }, p.consignes)) : null,
+      conf);
+  })), { sur: dateLongue(p0.jour).toUpperCase() });
+}
 async function pageAccueil() {
-  const [d, mesPostes, cartesModules] = await Promise.all([api('accueil'), api('postes').then((r) => r.postes).catch(() => []),
+  const [d, mesPostes, nonLus, cartesModules] = await Promise.all([api('accueil'), api('postes').then((r) => r.postes).catch(() => []),
+    PAGES.messages ? api('mod.mobile.messages.nonlus').catch(() => ({})) : Promise.resolve({}),
     Promise.all((MODULES.CARTES || []).map((f) => Promise.resolve().then(() => f(outilsModules())).catch((e) => { console.error(e); return null; })))]);
   Object.assign(moi, { prenom: d.moi.prenom, nom: d.moi.nom, metier: d.moi.metier });
-  compteurs = { fichesNonVues: d.fichesNonVues, absencesAttente: d.absencesAttente };
-  ouvrirApplication.menus?.();
+  compteurs = { fichesNonVues: d.fichesNonVues, absencesAttente: d.absencesAttente, messages: nonLus.nonLus || 0 };
   decalage = versDate(d.serveur) - Date.now();
+  enService = Boolean(d.enCours);
+  ouvrirApplication.menus?.();
+  const maintenant = new Date(Date.now() + decalage);
+  const aujIso = iso(maintenant);
+  const heureNow = `${pad(maintenant.getHours())}:${pad(maintenant.getMinutes())}`;
   const auj = d.prochains[0];
-  const c = lireCreneau(auj.creneau);
-  const heure = new Date().getHours();
-  const salut = heure < 5 || heure >= 18 ? 'Bonsoir' : 'Bonjour';
+  const c = lireCreneau(auj?.creneau);
+  // les postes du planning des sites donnent le lieu, l'adresse et les horaires exacts
+  const fini = (p) => p.jour < aujIso || (p.jour === aujIso && p.fin > p.debut && p.fin.slice(0, 5) <= heureNow);
+  const aVenir = mesPostes.filter((p) => !fini(p)).sort((a, b) => `${a.jour}${a.debut}`.localeCompare(`${b.jour}${b.debut}`));
+  const prochain = aVenir[0] || null;
+  const posteDuJour = mesPostes.find((p) => p.jour === aujIso) || null;
+  const sos = moi.metier !== 'chauffeur' ? sosPilule() : null;
 
-  // Service du jour + pointage
-  const chrono = h('span', { class: 'eq-chrono' }, h('i'), h('span'));
-  const majChrono = () => { if (d.enCours) chrono.lastChild.textContent = (() => { const s = Math.max(0, Math.floor((Date.now() + decalage - versDate(d.enCours.debut)) / 1000)); return `${Math.floor(s / 3600)}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`; })(); };
-  const btnPointer = h('button', { class: `eq-btn ${d.enCours ? 'eq-btn--rouge' : ''}`, type: 'button', onclick: async () => {
-    if (d.enCours && !confirm('Terminer votre service maintenant ?')) return;
-    btnPointer.disabled = true;
-    btnPointer.lastChild.textContent = 'Localisation…';
+  const pointer = async (quoi, bouton) => {
+    const texte = bouton.textContent;
+    bouton.disabled = true;
+    bouton.textContent = 'Localisation…';
     try {
       const pos = await position();
-      const r = await api(d.enCours ? 'pointer.fin' : 'pointer.debut', pos);
-      toast(d.enCours ? `Fin de service enregistrée (${fmtMin(r.minutes)}). Bon repos !` : 'Prise de service enregistrée. Bon courage !');
+      const r = await api(quoi === 'fin' ? 'pointer.fin' : 'pointer.debut', pos);
+      toast(quoi === 'fin' ? `Fin de service enregistrée (${fmtMin(r.minutes)}). Bon repos !` : 'Prise de service enregistrée. Bon courage !');
       recharger();
-    } catch (e) { toast(e.message, true); btnPointer.disabled = false; btnPointer.lastChild.textContent = d.enCours ? 'Terminer mon service' : 'Prendre mon service'; }
-  } }, ic(d.enCours ? 'stop' : 'jouer'), h('span', null, d.enCours ? 'Terminer mon service' : 'Prendre mon service'));
-  if (d.enCours) { majChrono(); minuteur = setInterval(majChrono, 1000); }
-  const service = h('section', { class: 'eq-carte eq-service' },
-    h('div', { class: 'eq-service__jour' }, `Aujourd’hui · ${dateLongue(auj.jour)}`),
-    h('div', { class: 'eq-service__creneau' }, d.enCours ? 'En service' : !c ? 'Pas de service prévu' : c.code ? (CODES[c.code] || c.code) : h('span', { class: 'eq-or-texte' }, String(auj.creneau).replace(/\s+/g, ''))),
-    d.enCours ? h('div', { class: 'eq-service__site' }, chrono, h('span', null, `depuis ${frHeure(d.enCours.debut)}${d.enCours.site ? ` · ${d.enCours.site}` : ''}`))
-      : (auj.site && c && !c.code) ? h('div', { class: 'eq-service__site' }, ic('pin'), auj.site, c.min ? ` · ${fmtMin(c.min)}` : '') : h('div', { class: 'eq-service__site' }, c?.code ? 'Profitez-en.' : 'Consultez votre planning pour les prochains jours.'),
-    h('div', { class: 'eq-service__actions' }, btnPointer, h('button', { class: 'eq-btn eq-btn--ghost', type: 'button', onclick: () => formulaireIncident() }, ic('mc'), 'Signaler')));
+    } catch (e) { toast(e.message, true); bouton.disabled = false; bouton.textContent = texte; }
+  };
 
-  // Prochain service
-  const prochain = d.prochains.slice(1).find((j) => { const x = lireCreneau(j.creneau); return x && !x.code; });
-  const stats = h('div', { class: 'eq-stats' },
-    h('div', { class: 'eq-stat' }, h('span', null, 'Cette semaine'), h('b', null, fmtMin(d.semaine))),
-    h('div', { class: 'eq-stat' }, h('span', null, 'Ce mois'), h('b', null, fmtMin(d.mois))),
-    h('div', { class: 'eq-stat' }, h('span', null, 'Prochain service'), h('b', { style: 'font-size:1rem' }, prochain ? `${JOURS_COURTS[versDate(prochain.jour).getDay()]} ${versDate(prochain.jour).getDate()}` : '—', prochain ? h('small', null, ` ${libelleCreneau(prochain.creneau)}`) : null)));
+  // ce qui demande l'attention : questions « Tout va bien ? », consignes à lire, messages, postes à prendre, alertes
+  const lignes = [
+    ...d.alertes.map((a) => h('div', { class: `ap-ligne ap-ligne--${a.niveau}` }, h('span', { class: 'ap-ligne__g' }, h('i', { class: 'ap-puce-etat' }), a.texte))),
+    ...cartesModules.filter(Boolean),
+    d.consignes.length ? ligne({ onclick: () => tiroir('Consignes', h('div', { class: 'ap-fiche' }, d.consignes.map((x) => h('div', { class: 'ap-fiche__bloc' },
+      h('p', { class: 'ap-sur' }, `${frDate(x.cree)} · ${+x.agent_id ? 'POUR VOUS' : 'TOUTE L’ÉQUIPE'}`), h('p', { class: 'ap-fiche__texte' }, x.texte)))), { sur: 'LA DIRECTION' }) },
+      [h('i', { class: 'ap-puce-etat is-clair' }), 'Consignes de la direction'], `${d.consignes.length}`) : null,
+    moi.metier === 'chauffeur' && d.courses.length ? ligne({ href: '#/courses' }, 'Prochaines courses', `${d.courses.length}`) : null,
+  ].filter(Boolean);
+  const blocLignes = lignes.length ? h('nav', { class: 'ap-lignes', 'aria-label': 'À voir' }, lignes) : null;
 
-  const semaine = h('section', { class: 'eq-carte' },
-    h('div', { class: 'eq-carte__tete' }, h('h2', null, ic('planning'), '7 prochains jours'), h('a', { href: '#/planning' }, 'Tout voir →')),
-    h('div', { class: 'eq-semaine' }, d.prochains.map((j, i) => {
-      const x = lireCreneau(j.creneau);
-      const dt = versDate(j.jour);
-      return h('div', { class: `eq-jour ${i === 0 ? 'is-auj' : ''} ${x?.code ? 'is-code' : ''}`, title: j.creneau ? `${dateLongue(j.jour)} : ${libelleCreneau(j.creneau)}` : '' },
-        h('small', null, i === 0 ? 'auj.' : JOURS_COURTS[dt.getDay()]), h('b', null, dt.getDate()),
-        h('em', { class: j.creneau ? '' : 'is-libre' }, j.creneau ? (x?.code || String(j.creneau).replace(/\s+/g, '').replace(/h(?=-|$)/g, '')) : 'libre'));
-    })));
+  // ----- en service : le temps qui passe, signaler, finir -----
+  if (d.enCours) {
+    const debut = versDate(d.enCours.debut);
+    const p = posteDuJour && !fini(posteDuJour) ? posteDuJour : (posteDuJour || null);
+    let fin = null;
+    let finLib = '';
+    if (p) { fin = versDate(`${p.jour}T${p.fin.slice(0, 5)}:00`); if (p.fin <= p.debut) fin = new Date(fin.getTime() + 86400000); finLib = hm(p.fin); }
+    else if (c && c.fin) { fin = new Date(versDate(`${aujIso}T00:00:00`).getTime() + c.fin * 60000); finLib = minVersHm(c.fin); }
+    if (fin && fin <= debut) fin = null;
+    const chrono = h('p', { class: 'ap-chrono' });
+    const barre = h('i');
+    const tic = () => {
+      const t = Date.now() + decalage;
+      const sec = Math.max(0, Math.floor((t - debut) / 1000));
+      chrono.replaceChildren(String(Math.floor(sec / 3600)), h('span', { class: 'ap-or' }, ':'), pad(Math.floor(sec / 60) % 60), h('small', null, pad(sec % 60)));
+      if (fin) barre.style.width = `${Math.min(100, Math.max(0, ((t - debut) / (fin - debut)) * 100))}%`;
+    };
+    tic();
+    minuteur = setInterval(tic, 1000);
+    const finir = maintenir(h('button', { class: 'ap-btn-texte', type: 'button' }, 'Finir mon service · maintenir'), 2000, () => pointer('fin', finir));
+    const site = d.enCours.site || p?.site || '';
+    if (p && (p.consignes || p.contact)) lignes.push(ligne({ onclick: () => detailPostes([p]) }, 'Consignes du site', ''));
+    return h('div', { class: 'ap-v ap-aujourdhui is-service' },
+      h('header', { class: 'ap-haut' }, marque(), sos),
+      h('section', { class: 'ap-tete' },
+        h('p', { class: 'ap-sur ap-sur--or' }, h('i', { class: 'ap-pouls' }), 'EN SERVICE'),
+        h('h1', { class: 'ap-titre ap-titre--m' }, site || 'Service en cours'),
+        chrono,
+        fin ? h('div', { class: 'ap-progres', role: 'presentation' }, barre) : null,
+        h('p', { class: 'ap-bornes' }, h('span', null, `Depuis ${frHeure(d.enCours.debut)}`), finLib ? h('span', null, `Fin ${finLib}`) : null)),
+      lignes.length ? h('nav', { class: 'ap-lignes', 'aria-label': 'Pendant le service' }, lignes) : null,
+      h('div', { class: 'ap-bas' },
+        h('button', { class: 'ap-btn', type: 'button', onclick: () => formulaireIncident(site) }, 'Signaler un événement'),
+        finir));
+  }
 
-  const raccourcis = h('div', { class: 'eq-raccourcis' },
-    h('a', { class: 'eq-raccourci', href: '#/paie' }, ic('paie'), h('span', null, 'Fiches de paie', h('small', null, 'PDF sécurisés')), d.fichesNonVues ? h('i', { class: 'eq-badge' }, d.fichesNonVues) : null),
-    h('a', { class: 'eq-raccourci', href: '#/absences' }, ic('absences'), h('span', null, 'Congés', h('small', null, 'Demander un jour')), d.absencesAttente ? h('i', { class: 'eq-badge' }, d.absencesAttente) : null),
-    h('a', { class: 'eq-raccourci', href: '#/documents' }, ic('documents'), h('span', null, 'Documents', h('small', null, 'Contrat, carte pro…'))),
-    moi.metier === 'chauffeur'
-      ? h('a', { class: 'eq-raccourci', href: '#/courses' }, ic('voiture'), h('span', null, 'Mes courses', h('small', null, 'Trajets confiés')))
-      : h('a', { class: 'eq-raccourci eq-raccourci--rouge', href: '#/main-courante' }, ic('mc'), h('span', null, 'Main courante', h('small', null, d.incidentsOuverts ? `${d.incidentsOuverts} en cours` : 'Mes signalements'))));
-
-  const consignes = d.consignes.length ? h('section', { class: 'eq-carte' },
-    h('div', { class: 'eq-carte__tete' }, h('h2', null, ic('info'), 'Consignes de la direction')),
-    d.consignes.map((x) => h('div', { class: 'eq-consigne' }, h('p', null, x.texte), h('small', null, `${frDate(x.cree)}${+x.agent_id ? ' · pour vous' : ' · toute l’équipe'}`)))) : null;
-  const courses = d.courses.length ? h('section', { class: 'eq-carte' },
-    h('div', { class: 'eq-carte__tete' }, h('h2', null, ic('voiture'), 'Prochaines courses'), h('a', { href: '#/courses' }, 'Toutes →')),
-    h('div', { class: 'eq-liste' }, d.courses.map(carteCourse))) : null;
-
-  // postes du planning des sites : où aller, quand, et les consignes du site
-  const postes = mesPostes.length ? h('section', { class: 'eq-carte' },
-    h('div', { class: 'eq-carte__tete' }, h('h2', null, ic('pin'), 'Mes prochains postes')),
-    h('div', { class: 'eq-liste' }, mesPostes.slice(0, 8).map((p) => {
-      const conf = h('button', { class: 'eq-btn eq-btn--petit', type: 'button', onclick: async () => {
-        conf.disabled = true;
-        try { await api('poste.confirmer', { id: p.id }); conf.replaceWith(pastille('ok', 'Confirmé')); toast('Merci, la direction voit que vous avez confirmé.'); } catch (e) { toast(e.message, true); conf.disabled = false; }
-      } }, ic('coche'), 'Je confirme');
-      return h('div', { class: 'eq-poste' },
-        h('div', { class: 'eq-poste__tete' }, h('b', null, `${dateLongue(p.jour)} · ${p.debut.replace(':', 'h')} – ${p.fin.replace(':', 'h')}`), p.confirme ? pastille('ok', 'Confirmé') : conf),
-        h('div', { class: 'eq-poste__site' }, h('span', { class: 'eq-or-texte' }, p.site),
-          p.adresse ? h('a', { href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.adresse)}`, target: '_blank', rel: 'noopener' }, ic('pin'), p.adresse) : null),
-        p.note ? h('p', { class: 'eq-poste__note' }, p.note) : null,
-        p.consignes || p.contact ? h('details', { class: 'eq-poste__consignes' }, h('summary', null, 'Consignes du site'),
-          p.contact ? h('p', null, h('b', null, 'Contact : '), p.contact) : null, p.consignes ? h('p', null, p.consignes) : null) : null);
-    }))) : null;
-
-  return h('div', null,
-    enTete(dateLongue(iso(new Date())), h('span', null, `${salut}, `, h('span', { class: 'eq-or-texte' }, d.moi.prenom)), d.moi.metierLibelle),
-    d.alertes.length ? h('div', { class: 'eq-liste', style: 'margin-bottom:1rem' }, d.alertes.map((a) => h('div', { class: `eq-alerte eq-alerte--${a.niveau}` }, ic('alerte'), a.texte))) : null,
-    h('div', { class: 'eq-grille' },
-      h('div', { class: 'eq-g-7' }, service, h('div', { class: 'eq-mt' }, stats)),
-      h('div', { class: 'eq-g-5' }, semaine),
-      postes ? h('div', null, postes) : null,
-      ...cartesModules.filter(Boolean).map((el) => h('div', null, el)),
-      h('div', null, raccourcis),
-      consignes ? h('div', { class: courses ? 'eq-g-6' : '' }, consignes) : null,
-      courses ? h('div', { class: consignes ? 'eq-g-6' : '' }, courses) : null));
+  // ----- avant le poste -----
+  const heure = maintenant.getHours();
+  const salut = heure < 5 || heure >= 18 ? 'Bonsoir' : 'Bonjour';
+  const demainIso = iso(new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate() + 1));
+  let carte;
+  if (prochain) {
+    const debutPoste = versDate(`${prochain.jour}T${prochain.debut.slice(0, 5)}:00`);
+    const ecart = Math.round((debutPoste - maintenant) / 60000);
+    const quand = ecart <= 0 ? 'MAINTENANT' : prochain.jour === aujIso ? dans(ecart) : prochain.jour === demainIso ? `DEMAIN · ${hm(prochain.debut)}` : dateLongue(prochain.jour).toUpperCase();
+    carte = h('button', { class: 'ap-poste', type: 'button', onclick: () => detailPostes(mesPostes.filter((p) => p.jour === prochain.jour)) },
+      h('p', { class: 'ap-sur' }, `PROCHAIN POSTE · ${quand}`),
+      h('p', { class: 'ap-poste__site' }, prochain.site),
+      h('p', { class: 'ap-poste__heures' }, hm(prochain.debut), h('span', null, ' — '), hm(prochain.fin)),
+      prochain.adresse ? h('span', { class: 'ap-poste__adresse' }, prochain.adresse, ic('versHaut')) : null,
+      h('span', { class: `ap-poste__etat ${prochain.confirme ? 'is-ok' : ''}` }, prochain.confirme ? 'Présence confirmée' : 'Toucher pour confirmer et voir les consignes'));
+  } else {
+    const planif = d.prochains.find((j) => { const x = lireCreneau(j.creneau); return x && !x.code; });
+    if (c?.code) {
+      carte = h('section', { class: 'ap-poste is-calme' }, h('p', { class: 'ap-sur' }, 'AUJOURD’HUI'), h('p', { class: 'ap-poste__site' }, CODES[c.code] || c.code), h('p', { class: 'ap-poste__note' }, 'Profitez-en.'));
+    } else if (planif) {
+      const x = lireCreneau(planif.creneau);
+      carte = h('section', { class: 'ap-poste' },
+        h('p', { class: 'ap-sur' }, `PROCHAIN POSTE · ${planif.jour === aujIso ? 'AUJOURD’HUI' : planif.jour === demainIso ? 'DEMAIN' : dateLongue(planif.jour).toUpperCase()}`),
+        planif.site ? h('p', { class: 'ap-poste__site' }, planif.site) : null,
+        h('p', { class: 'ap-poste__heures' }, x.debut !== undefined ? [minVersHm(x.debut), h('span', null, ' — '), minVersHm(x.fin)] : String(planif.creneau).replace(/\s+/g, '')));
+    } else {
+      carte = h('section', { class: 'ap-poste is-calme' }, h('p', { class: 'ap-sur' }, 'PROCHAIN POSTE'), h('p', { class: 'ap-poste__site' }, 'Aucun poste prévu'),
+        h('p', { class: 'ap-poste__note' }, 'Votre planning s’affichera ici dès que la direction l’aura préparé.'));
+    }
+  }
+  const prendre = h('button', { class: 'ap-btn', type: 'button' }, 'Prendre mon service');
+  maintenir(prendre, 1200, () => pointer('debut', prendre));
+  return h('div', { class: 'ap-v ap-aujourdhui' },
+    h('header', { class: 'ap-haut' }, marque(), sos),
+    h('section', { class: 'ap-tete' },
+      h('p', { class: 'ap-sur' }, `${JOURS_MAJ[maintenant.getDay()]} ${maintenant.getDate()} ${MOIS[maintenant.getMonth()].toUpperCase()}`),
+      h('h1', { class: 'ap-titre' }, `${salut}, ${d.moi.prenom}`)),
+    carte,
+    blocLignes,
+    h('div', { class: 'ap-bas' },
+      prendre,
+      h('p', { class: 'ap-aide' }, 'Maintenir pour pointer · votre position est enregistrée'),
+      moi.metier !== 'chauffeur' ? h('button', { class: 'ap-btn-texte', type: 'button', onclick: () => formulaireIncident(prochain?.jour === aujIso ? prochain.site : undefined) }, 'Signaler un événement') : null));
 }
 
-/* ----- Planning ----- */
-let moisPlanning = iso(new Date()).slice(0, 7);
+/* ----- Planning : les postes, semaine par semaine ----- */
 async function pagePlanning() {
-  const d = await api('planning', undefined, { mois: moisPlanning });
-  const [an, mo] = moisPlanning.split('-').map(Number);
-  const jours = d.jours || {};
-  const fer = feries(an);
-  const auj = iso(new Date());
-  const nbJours = new Date(an, mo, 0).getDate();
-  const absenceDu = (j) => d.absences.find((a) => a.du <= j && a.au >= j);
-  const pointeLe = (j) => d.pointages.filter((p) => p.debut.slice(0, 10) === j).reduce((s, p) => s + Math.max(0, ((p.fin ? versDate(p.fin) : new Date(Date.now() + decalage)) - versDate(p.debut)) / 60000), 0);
-  let prevu = 0, travailles = 0, nuits = 0;
-  for (const [, v] of Object.entries(jours)) { const c = lireCreneau(v); if (c && !c.code && c.min) { prevu += c.min; travailles++; if (c.nuit) nuits++; } }
-  const pointe = d.pointages.reduce((s, p) => s + Math.max(0, ((p.fin ? versDate(p.fin) : new Date(Date.now() + decalage)) - versDate(p.debut)) / 60000), 0);
-  const changer = (n) => { const x = new Date(an, mo - 1 + n, 1); moisPlanning = `${x.getFullYear()}-${pad(x.getMonth() + 1)}`; recharger(); };
-  let vue = memoire.lire('eq-vue-planning') || (window.innerWidth < 700 ? 'liste' : 'calendrier');
-  const zone = h('div');
-  const dessiner = () => {
-    if (vue === 'calendrier') {
-      const premier = (new Date(an, mo - 1, 1).getDay() + 6) % 7;
-      const cases = [];
-      ['lun', 'mar', 'mer', 'jeu', 'ven', 'sam', 'dim'].forEach((j) => cases.push(h('div', { class: 'eq-cal-tete' }, j)));
-      for (let i = 0; i < premier; i++) cases.push(h('div', { class: 'eq-case-j is-vide' }));
-      for (let n = 1; n <= nbJours; n++) {
-        const j = `${moisPlanning}-${pad(n)}`;
-        const v = jours[j] || '';
-        const c = lireCreneau(v);
-        const ab = !v ? absenceDu(j) : null;
-        const pt = pointeLe(j);
-        cases.push(h('div', { class: ['eq-case-j', j === auj ? 'is-auj' : '', c && !c.code ? 'is-travail' : '', c?.code || ab ? 'is-code' : '', fer.has(j) ? 'is-ferie' : '', j < auj ? 'is-passe' : ''].join(' '), title: v ? libelleCreneau(v) : '' },
-          h('small', null, n), v ? h('b', null, c?.code || String(v).replace(/\s+/g, '').replace('-', '‑')) : ab ? h('b', null, ab.statut === 'attente' ? 'demandé' : ({ conges: 'CP', maladie: 'M', absence: 'ABS', indispo: 'indispo' })[ab.type]) : null,
-          pt ? h('span', { class: 'eq-pointe' }, `✓ ${fmtMin(pt)}`) : null));
-      }
-      zone.replaceChildren(h('div', { class: 'eq-calendrier' }, cases));
-    } else {
-      const lignes = [];
-      for (let n = 1; n <= nbJours; n++) {
-        const j = `${moisPlanning}-${pad(n)}`;
-        const v = jours[j] || '';
-        if (!v) continue;
-        const c = lireCreneau(v);
-        const dt = versDate(j);
-        const pt = pointeLe(j);
-        lignes.push(h('div', { class: `eq-item ${j === auj ? 'is-auj' : ''}`, style: j < auj ? 'opacity:.6' : '' },
-          h('div', { class: 'eq-date-bloc' }, h('small', null, JOURS_COURTS[dt.getDay()]), h('b', null, n)),
-          h('div', { class: 'eq-item__corps' }, h('b', null, c?.code ? (CODES[c.code] || c.code) : String(v).replace(/\s+/g, '')),
-            h('small', null, [c && !c.code && c.min ? fmtMin(c.min) : '', c?.nuit ? 'nuit' : '', fer.has(j) ? 'jour férié' : ''].filter(Boolean).join(' · '))),
-          pt ? pastille('ok', `pointé ${fmtMin(pt)}`) : j === auj ? pastille('nouveau', 'aujourd’hui') : null));
-      }
-      zone.replaceChildren(lignes.length ? h('div', { class: 'eq-liste eq-jours-liste' }, lignes) : vide('planning', 'Aucun service ce mois-ci', 'Votre planning apparaîtra ici dès que la direction l’aura préparé.'));
-    }
-  };
-  const btnVue = (v, icone, lib) => h('button', { class: `eq-icone-btn ${vue === v ? '' : ''}`, type: 'button', 'aria-label': lib, title: lib, style: vue === v ? 'color:var(--or-clair);border-color:var(--or)' : '', onclick: () => { vue = v; memoire.ecrire('eq-vue-planning', v); dessiner(); entete.querySelectorAll('.eq-vues button').forEach((b, i) => { b.style.cssText = (i === 0) === (v === 'calendrier') ? 'color:var(--or-clair);border-color:var(--or)' : ''; }); } }, ic(icone));
-  const entete = h('div', { class: 'eq-carte__tete' },
-    h('div', { class: 'eq-mois-nav' }, h('button', { class: 'eq-icone-btn', type: 'button', 'aria-label': 'Mois précédent', onclick: () => changer(-1) }, ic('retour')), h('b', null, `${MOIS[mo - 1]} ${an}`), h('button', { class: 'eq-icone-btn', type: 'button', 'aria-label': 'Mois suivant', onclick: () => changer(1) }, ic('fleche'))),
-    h('div', { class: 'eq-vues', style: 'display:flex;gap:.4rem' }, btnVue('calendrier', 'grille', 'Vue calendrier'), btnVue('liste', 'liste', 'Vue liste')));
-  dessiner();
-  return h('div', null,
-    enTete('Mon planning', 'Planning', d.client ? `Mission : ${[d.client, d.site, d.mission].filter(Boolean).join(' · ')}` : 'Vos services, mis à jour en direct par la direction.'),
-    h('div', { class: 'eq-stats', style: 'margin-bottom:1rem' },
-      h('div', { class: 'eq-stat' }, h('span', null, 'Jours travaillés'), h('b', null, travailles, nuits ? h('small', null, ` dont ${nuits} nuit${nuits > 1 ? 's' : ''}`) : null)),
-      h('div', { class: 'eq-stat' }, h('span', null, 'Heures prévues'), h('b', null, fmtMin(prevu))),
-      h('div', { class: 'eq-stat' }, h('span', null, 'Heures pointées'), h('b', null, fmtMin(pointe)))),
-    h('section', { class: 'eq-carte' }, entete, zone,
-      h('div', { class: 'eq-legende' }, Object.entries(CODES).map(([k, l]) => h('span', null, h('b', null, k), ` ${l}`)), h('span', null, h('b', { style: 'color:var(--vert)' }, '✓'), ' heures pointées'))),
-    h('p', { class: 'eq-note' }, ic('info'), 'Une erreur dans votre planning ? Prévenez la direction au 06 11 67 86 25.'));
+  const maintenant = new Date(Date.now() + decalage);
+  const aujIso = iso(maintenant);
+  const m1 = aujIso.slice(0, 7);
+  const m2 = iso(new Date(maintenant.getFullYear(), maintenant.getMonth() + 1, 1)).slice(0, 7);
+  const videP = { jours: {}, absences: [], pointages: [] };
+  const [p1, p2, postes, bourse] = await Promise.all([api('planning', undefined, { mois: m1 }), api('planning', undefined, { mois: m2 }).catch(() => videP),
+    api('postes').then((r) => r.postes).catch(() => []), PAGES.postes ? api('mod.planif.postes').catch(() => null) : Promise.resolve(null)]);
+  const jours = { ...(p1.jours || {}), ...(p2.jours || {}) };
+  const absences = [...(p1.absences || []), ...(p2.absences || [])];
+  const pointages = [...(p1.pointages || []), ...(p2.pointages || [])];
+  const fer = new Set([...feries(maintenant.getFullYear()), ...feries(maintenant.getFullYear() + 1)]);
+  const pointeLe = (j) => pointages.filter((p) => p.debut.slice(0, 10) === j).reduce((s, p) => s + Math.max(0, ((p.fin ? versDate(p.fin) : new Date(Date.now() + decalage)) - versDate(p.debut)) / 60000), 0);
+  const lundi = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate() - ((maintenant.getDay() + 6) % 7), 12);
+  const groupes = [['CETTE SEMAINE', []], ['SEMAINE PROCHAINE', []], ['ENSUITE', []]];
+  for (let n = 0; n < 42; n++) {
+    const dt = new Date(lundi.getFullYear(), lundi.getMonth(), lundi.getDate() + n, 12);
+    const j = iso(dt);
+    const v = jours[j] || '';
+    const ps = postes.filter((p) => p.jour === j).sort((a, b) => a.debut.localeCompare(b.debut));
+    const ab = absences.find((a) => a.du <= j && a.au >= j);
+    if (!v && !ps.length && !ab) continue;
+    const c = lireCreneau(v);
+    const passe = j < aujIso;
+    const pt = pointeLe(j);
+    const titre = ps.length ? [...new Set(ps.map((p) => p.site))].join(' · ')
+      : c?.code ? (CODES[c.code] || c.code) : ab && !v ? (ab.statut === 'attente' ? 'Absence demandée' : ABSENCES[ab.type]?.[0] || 'Absence') : 'Service';
+    const horaires = ps.length ? ps.map((p) => `${hm(p.debut)} — ${hm(p.fin)}`).join(' · ')
+      : c && c.debut !== undefined ? `${minVersHm(c.debut)} — ${minVersHm(c.fin)}` : c && !c.code ? String(v).replace(/\s+/g, '') : '';
+    const extra = [ps.some((p) => p.fin <= p.debut) || c?.nuit ? 'nuit' : '', fer.has(j) ? 'férié' : ''].filter(Boolean).join(' · ');
+    const etiquette = j === aujIso ? h('span', { class: 'ap-etiquette' }, 'Aujourd’hui')
+      : pt ? h('span', { class: 'ap-etiquette is-ok' }, `✓ ${fmtMin(pt)}`)
+        : ps.length && !passe && ps.some((p) => !p.confirme) ? h('span', { class: 'ap-etiquette is-attente' }, 'À confirmer') : null;
+    groupes[n < 7 ? 0 : n < 14 ? 1 : 2][1].push(h(ps.length ? 'button' : 'div', {
+      class: `ap-jour ${passe ? 'is-passe' : ''} ${j === aujIso ? 'is-auj' : ''} ${c?.code || (ab && !v && !ps.length) ? 'is-code' : ''}`,
+      type: ps.length ? 'button' : null, onclick: ps.length ? () => detailPostes(ps) : null },
+      h('span', { class: 'ap-jour__date' }, h('small', null, JOURS_COURTS[dt.getDay()].replace('.', '').toUpperCase()), h('b', null, dt.getDate())),
+      h('span', { class: 'ap-jour__corps' }, h('b', null, titre), horaires || extra ? h('small', null, [horaires, extra].filter(Boolean).join(' · ')) : null),
+      etiquette));
+  }
+  const offres = bourse ? bourse.bourse.filter((p) => p.possible).length + bourse.pourMoi.filter((p) => p.possible).length : 0;
+  const rien = groupes.every(([, l]) => !l.length);
+  return h('div', { class: 'ap-v ap-planning' },
+    h('header', { class: 'ap-tete ap-tete--page' }, h('p', { class: 'ap-sur' }, `${MOIS[maintenant.getMonth()].toUpperCase()} ${maintenant.getFullYear()}`), h('h1', { class: 'ap-titre' }, 'Planning')),
+    offres ? h('nav', { class: 'ap-lignes ap-lignes--haut' }, ligne({ href: '#/postes' }, `${offres} poste${offres > 1 ? 's' : ''} proposé${offres > 1 ? 's' : ''}`, 'Voir')) : null,
+    ...groupes.filter(([, l]) => l.length).map(([t, l]) => h('section', { class: 'ap-groupe' }, h('h2', { class: 'ap-sur' }, t), l)),
+    rien ? h('div', { class: 'ap-vide-v' }, vide('planning', 'Aucun poste prévu', 'Votre planning apparaîtra ici dès que la direction l’aura préparé.')) : null,
+    h('p', { class: 'ap-pied' }, `Mis à jour à ${pad(maintenant.getHours())}h${pad(maintenant.getMinutes())} · une erreur ? `, h('a', { href: 'tel:+33611678625' }, 'appelez la direction')));
 }
 
 /* ----- Fiches de paie ----- */
@@ -937,56 +1066,62 @@ async function pageMainCourante() {
 async function formulaireIncident(siteConnu) {
   if (siteConnu === undefined) { try { siteConnu = (await api('main_courante')).siteDuJour; } catch (e) { siteConnu = ''; } }
   const maintenant = new Date(Date.now() + decalage);
-  const cats = h('div', { class: 'eq-choix', role: 'radiogroup' }, Object.entries(INCIDENTS).map(([k, [t, i]]) =>
-    h('label', null, h('input', { type: 'radio', name: 'cat', value: k }), h('span', { class: 'eq-tuile' }, ic(i), h('span', null, t)))));
-  const gravites = h('div', { class: 'eq-seg' }, [['info', 'Info'], ['normale', 'Normal'], ['urgente', 'Urgent']].map(([v, l]) =>
-    h('label', null, h('input', { type: 'radio', name: 'grav', value: v, checked: v === 'normale' }), h('span', { 'data-g': v }, h('i', { class: 'eq-point' }), l))));
+  const TYPES = [['intrusion', 'Intrusion'], ['agression', 'Agression'], ['vol', 'Vol, dégradation'], ['incendie', 'Incendie, alarme'], ['secours', 'Secours à personne'], ['technique', 'Problème technique'], ['ronde', 'Ronde, contrôle'], ['autre', 'Autre']];
+  let cat = '';
+  const puces = h('div', { class: 'ap-puces', role: 'radiogroup', 'aria-label': 'Type d’événement' }, TYPES.map(([k, l]) => h('button', {
+    type: 'button', class: 'ap-puce', role: 'radio', 'aria-checked': 'false',
+    onclick: (e) => { cat = k; puces.querySelectorAll('.ap-puce').forEach((b) => b.setAttribute('aria-checked', String(b === e.currentTarget))); vibrer(6); msg.textContent = ''; } }, l)));
+  const texte = h('textarea', { class: 'ap-zone', rows: 4, maxlength: 5000, placeholder: 'Que s’est-il passé ?', 'aria-label': 'Que s’est-il passé ?' });
   const quand = saisie({ type: 'datetime-local', value: `${iso(maintenant)}T${pad(maintenant.getHours())}:${pad(maintenant.getMinutes())}`, max: `${iso(maintenant)}T23:59` });
   const site = saisie({ value: siteConnu || '', placeholder: 'Nom du site ou adresse', maxlength: 120 });
-  const compteur = h('div', { class: 'eq-compteur' }, '0 / 5000');
-  const texte = h('textarea', { class: 'eq-input', rows: 5, maxlength: 5000, placeholder: 'Ce qui s’est passé, les personnes concernées, ce que vous avez fait, qui a été prévenu…', oninput: () => { compteur.textContent = `${texte.value.length} / 5000`; } });
   const photos = [];
-  const grille = h('div', { class: 'eq-photos' });
-  const entree = h('input', { type: 'file', accept: 'image/jpeg,image/png,image/webp', multiple: true, class: 'sr', onchange: async () => {
+  const vignettes = h('div', { class: 'ap-vignettes' });
+  const nbPhotos = h('span', null, '');
+  const entree = h('input', { type: 'file', accept: 'image/*', multiple: true, class: 'sr', onchange: async () => {
     for (const f of [...entree.files].slice(0, 4 - photos.length)) photos.push(await compresser(f));
     entree.value = '';
     dessinerPhotos();
   } });
   const dessinerPhotos = () => {
-    grille.replaceChildren(...photos.map((f, i) => {
+    nbPhotos.textContent = photos.length ? `${photos.length} photo${photos.length > 1 ? 's' : ''}` : '4 au plus';
+    vignettes.replaceChildren(...photos.map((f, i) => {
       const url = URL.createObjectURL(f);
-      return h('div', { class: 'eq-photo' }, h('img', { src: url, alt: '', onload: () => URL.revokeObjectURL(url) }), h('button', { type: 'button', 'aria-label': 'Retirer la photo', onclick: () => { photos.splice(i, 1); dessinerPhotos(); } }, ic('croix')));
-    }), photos.length < 4 ? h('label', { class: 'eq-ajout' }, h('span', null, ic('photo'), 'Ajouter'), entree) : null);
+      return h('div', { class: 'ap-vignette' }, h('img', { src: url, alt: '', onload: () => URL.revokeObjectURL(url) }), h('button', { type: 'button', 'aria-label': 'Retirer la photo', onclick: () => { photos.splice(i, 1); dessinerPhotos(); } }, ic('croix')));
+    }));
   };
   dessinerPhotos();
-  const msg = h('p', { class: 'eq-erreur', role: 'alert' });
-  const btn = h('button', { class: 'eq-btn eq-btn--plein', type: 'submit' }, ic('envoyer'), 'Envoyer à la direction');
-  const fermer = tiroir('Signaler un événement', h('form', { class: 'eq-form', onsubmit: async (e) => {
+  const urgent = h('button', { type: 'button', class: 'ap-interrupteur', role: 'switch', 'aria-checked': 'false', 'aria-label': 'Urgent', onclick: () => { urgent.setAttribute('aria-checked', String(urgent.getAttribute('aria-checked') !== 'true')); vibrer(10); } });
+  const msg = h('p', { class: 'ap-erreur-texte', role: 'alert' });
+  const btn = h('button', { class: 'ap-btn', type: 'submit' }, 'Envoyer à la direction');
+  const fermer = tiroir('Signaler', h('form', { class: 'ap-signaler', onsubmit: async (e) => {
     e.preventDefault(); msg.textContent = '';
-    const cat = valeurChoix(cats, 'cat');
-    const g = valeurChoix(gravites, 'grav');
-    if (!cat) { msg.textContent = 'Choisissez le type d’événement.'; return; }
+    const g = urgent.getAttribute('aria-checked') === 'true' ? 'urgente' : 'normale';
+    if (!cat) { msg.textContent = 'Choisissez le type d’événement.'; puces.classList.remove('is-secoue'); void puces.offsetWidth; puces.classList.add('is-secoue'); vibrer(30); return; }
     if (texte.value.trim().length < 10) { msg.textContent = 'Décrivez ce qui s’est passé (10 caractères minimum).'; texte.focus(); return; }
     if (g === 'urgente' && !confirm('Événement URGENT : la direction est alertée immédiatement. En cas de danger, appelez d’abord le 17, le 18 ou le 112. Envoyer ?')) return;
-    btn.disabled = true; btn.lastChild.textContent = 'Envoi…';
+    btn.disabled = true; btn.textContent = 'Envoi…';
     const fd = new FormData();
     fd.append('categorie', cat); fd.append('gravite', g); fd.append('quand', quand.value); fd.append('site', site.value.trim()); fd.append('texte', texte.value.trim());
     photos.forEach((p) => fd.append('photos[]', p));
     try {
       await apiForm('incident.signaler', fd);
+      vibrer([20, 40, 20]);
       fermer();
       toast('Événement transmis à la direction.');
-      if (location.hash !== '#/main-courante') location.hash = '#/main-courante'; else recharger();
-    } catch (err) { msg.textContent = err.message; btn.disabled = false; btn.lastChild.textContent = 'Envoyer à la direction'; }
+      if (location.hash === '#/main-courante') recharger();
+    } catch (err) { msg.textContent = err.message; btn.disabled = false; btn.textContent = 'Envoyer à la direction'; }
   } },
-    h('div', { class: 'eq-alerte eq-alerte--rouge' }, ic('alerte'), h('span', null, 'Danger immédiat ? Appelez d’abord le ', h('a', { href: 'tel:17' }, '17'), ', le ', h('a', { href: 'tel:18' }, '18'), ' ou le ', h('a', { href: 'tel:112' }, '112'), '.')),
-    h('div', { class: 'eq-champ' }, h('span', null, 'Type d’événement'), cats),
-    h('div', { class: 'eq-champ' }, h('span', null, 'Gravité'), gravites),
-    h('div', { class: 'eq-grille-2' }, champ('Date et heure', quand), champ('Site', site)),
-    h('label', { class: 'eq-champ' }, h('span', null, 'Description'), texte, compteur),
-    h('div', { class: 'eq-champ' }, h('span', null, 'Photos (4 maximum)'), grille),
+    puces,
+    texte,
+    h('div', { class: 'ap-options' },
+      h('label', { class: 'ap-option' }, h('span', null, 'Ajouter une photo'), nbPhotos, entree),
+      vignettes,
+      h('div', { class: 'ap-option' }, h('span', null, 'Urgent'), urgent),
+      h('details', { class: 'ap-details' }, h('summary', { class: 'ap-option' }, h('span', null, 'Date, heure et lieu'), h('span', null, `${pad(maintenant.getHours())}h${pad(maintenant.getMinutes())}${site.value ? ` · ${site.value}` : ''}`)),
+        h('div', { class: 'ap-details__corps' }, champ('Date et heure', quand), champ('Site', site)))),
     msg, btn,
-    h('p', { class: 'eq-note', style: 'margin:0' }, ic('cadenas'), 'Horodaté et non modifiable après envoi.')));
+    h('p', { class: 'ap-aide' }, 'Danger immédiat : appelez d’abord le ', h('a', { href: 'tel:17' }, '17'), ', le ', h('a', { href: 'tel:18' }, '18'), ' ou le ', h('a', { href: 'tel:112' }, '112'), '.')),
+  { sur: `${(siteConnu || 'ÉVÉNEMENT').toUpperCase()} · ${pad(maintenant.getHours())}H${pad(maintenant.getMinutes())}` });
 }
 
 /* ----- Courses VTC ----- */

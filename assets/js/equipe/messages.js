@@ -30,7 +30,7 @@ async function rendu(o) {
         h('small', null, heure(m.cree), m.auteur === 'agent' && m.lu ? ' · lu' : '')));
     }
     fil.replaceChildren(...(n.length ? n : [h('div', { class: 'eqm-vide' }, ic('messages'), h('b', null, 'Écrivez à la direction'), h('p', null, 'Une question, un souci sur le site, une photo : la direction vous répond ici.'))]));
-    requestAnimationFrame(() => { fil.scrollTop = fil.scrollHeight; });
+    requestAnimationFrame(() => { fil.scrollTop = fil.scrollHeight; if (fil.isConnected) window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }); });
   };
   dessiner(d.messages);
 
@@ -57,7 +57,7 @@ async function rendu(o) {
     h('label', { class: 'eqm-photo', 'aria-label': 'Joindre une photo' }, ic('photo'), fichier),
     h('div', { class: 'eqm-champ' }, texte, choisie), bouton);
 
-  const page = h('div', { class: 'eqm' }, enTete('Direction', 'Messages', null), fil, formulaire);
+  const page = h('div', { class: 'eqm' }, enTete('Messages', 'Direction', null, h('a', { class: 'ap-rond', href: 'tel:+33611678625', 'aria-label': 'Appeler la direction' }, ic('telephone'))), fil, formulaire);
   // la conversation se met à jour toute seule tant que la page est ouverte
   const minuteur = setInterval(async () => {
     if (!page.isConnected) { clearInterval(minuteur); return; }

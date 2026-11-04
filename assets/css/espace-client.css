@@ -130,7 +130,7 @@ select.input { padding-right: 34px; appearance: none; background-image: url("dat
 .haut__recherche kbd, .palette kbd { padding: 1px 6px; border: 1px solid var(--filet-fort); border-radius: var(--r); color: var(--muet); font: 500 11px/1.5 var(--sans); }
 .haut__menu, .haut__marque { display: none; }
 .page { width: 100%; max-width: 1280px; display: grid; gap: 28px; padding: 40px 48px 80px; animation: ec-entree var(--moyen) var(--courbe) both; }
-@keyframes ec-entree { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes ec-entree { from { opacity: 0; transform: translateY(var(--monte, 8px)); } to { opacity: 1; transform: none; } }
 .voile { position: fixed; inset: 0; z-index: 60; background: rgba(15, 27, 45, .32); opacity: 0; pointer-events: none; transition: opacity var(--moyen) var(--courbe); }
 .voile.is-ouvert { opacity: 1; pointer-events: auto; }
 
@@ -485,7 +485,10 @@ a.kpi:hover::after { transform: scaleX(1); }
 
 /* Mouvements réduits : on garde tout, sans animation */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
+  /* Animations réduites dans Windows : on garde les fondus doux, on retire le mouvement */
+  :root { --monte: 0px; }
+  .pouls::after, .ec-chargement span, .squelette i { animation: none !important; }
+  .dossier:hover, .btn:active, .table tr.cliquable:hover .fleche, .lien:hover .ec-ic { transform: none !important; }
 }
 
 /* Colonnes : le document garde de la place, la rubrique ne se coupe pas */
@@ -567,3 +570,57 @@ a.annee { text-decoration: none; }
 }
 @media (min-width: 901px) and (max-width: 1180px) { .dossiers { grid-template-columns: 1fr 1fr; } }
 .annee { flex: none; white-space: nowrap; }
+
+/* ----- v28 : effets légers et fluides ----- */
+/* Entrée de page : les blocs apparaissent l'un après l'autre (fondu + légère montée) */
+.page { animation: none; }
+.page > * { animation: ec-entree 460ms var(--courbe) both; }
+.page > :nth-child(2) { animation-delay: 50ms; } .page > :nth-child(3) { animation-delay: 100ms; }
+.page > :nth-child(4) { animation-delay: 150ms; } .page > :nth-child(5) { animation-delay: 200ms; } .page > :nth-child(n + 6) { animation-delay: 240ms; }
+.colonne > .panneau, .colonne > .dossiers { animation: ec-entree 380ms var(--courbe) both; }
+.colonne > :nth-child(2) { animation-delay: 70ms; }
+/* Cases chiffrées et dossiers : apparition en cascade */
+.chiffres > .kpi, .resume-mois > div, .dossiers > .dossier { animation: ec-entree 520ms var(--courbe) both; }
+.chiffres > :nth-child(2), .resume-mois > :nth-child(2), .dossiers > :nth-child(2) { animation-delay: 70ms; }
+.chiffres > :nth-child(3), .resume-mois > :nth-child(3), .dossiers > :nth-child(3) { animation-delay: 140ms; }
+.chiffres > :nth-child(4), .dossiers > :nth-child(4) { animation-delay: 210ms; } .dossiers > :nth-child(n + 5) { animation-delay: 260ms; }
+/* Lignes de tableau : fondu en cascade un peu plus doux */
+@keyframes ec-ligne { from { opacity: 0; transform: translateY(var(--monte, 3px)); } to { opacity: 1; transform: none; } }
+.table tbody tr { animation-duration: 380ms; }
+.table tbody tr:nth-child(2) { animation-delay: 30ms; } .table tbody tr:nth-child(3) { animation-delay: 60ms; } .table tbody tr:nth-child(4) { animation-delay: 90ms; }
+.table tbody tr:nth-child(5) { animation-delay: 120ms; } .table tbody tr:nth-child(6) { animation-delay: 150ms; } .table tbody tr:nth-child(7) { animation-delay: 180ms; }
+.table tbody tr:nth-child(n + 8) { animation-delay: 210ms; }
+.table tr.cliquable td { transition: background-color var(--moyen) var(--courbe); }
+/* Dossiers : se soulèvent à peine au survol, la flèche glisse */
+.dossier { transition: border-color var(--moyen) var(--courbe), background-color var(--moyen) var(--courbe), box-shadow var(--moyen) var(--courbe), transform var(--moyen) var(--courbe); }
+.dossier:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -22px rgba(15, 27, 45, .45); }
+.dossier > .ec-ic:last-child { transition: transform var(--moyen) var(--courbe), color var(--moyen); }
+.dossier:hover > .ec-ic:last-child { transform: translateX(3px); color: var(--champagne); }
+.dossier__ic { transition: background-color var(--moyen) var(--courbe); }
+.dossier:hover .dossier__ic { background: var(--nuit-2); }
+/* Onglets de mois / d'années */
+.annee { transition: background-color var(--moyen) var(--courbe), border-color var(--moyen) var(--courbe), color var(--moyen) var(--courbe); }
+/* Barre de recherche : un liseré champagne doux quand on écrit */
+.recherche--grande { transition: border-color var(--moyen) var(--courbe), box-shadow var(--moyen) var(--courbe); }
+.recherche--grande:focus-within { box-shadow: 0 0 0 3px rgba(168, 138, 82, .14); }
+/* En-tête : une ombre très légère quand on descend */
+.haut { transition: box-shadow var(--moyen) var(--courbe); }
+body.a-defile .haut { box-shadow: 0 10px 28px -22px rgba(15, 27, 45, .5); }
+/* Menu : glissement doux */
+.menu__item { transition: background-color var(--moyen) var(--courbe), color var(--moyen) var(--courbe), padding-left var(--moyen) var(--courbe); }
+.menu__item:not(.is-actif):hover { padding-left: 15px; }
+.menu__item.is-actif::before { animation: ec-trait 420ms var(--courbe) both; transform-origin: center; }
+@keyframes ec-trait { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+/* Boutons : réponse douce */
+.btn { transition: background-color var(--moyen) var(--courbe), border-color var(--moyen) var(--courbe), color var(--moyen) var(--courbe), box-shadow var(--moyen) var(--courbe), transform var(--vite) var(--courbe); }
+.btn:hover { box-shadow: 0 8px 18px -14px rgba(15, 27, 45, .5); }
+/* Progression des heures du mois */
+.avancement { display: flex; align-items: center; gap: 14px; padding: 14px 24px; border-bottom: 1px solid var(--filet); }
+.avancement span { flex: none; color: var(--muet); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.progression { position: relative; flex: 1; height: 4px; background: var(--filet-2); border-radius: 2px; overflow: hidden; }
+.progression i, .kpi__barre i { position: absolute; inset: 0 auto 0 0; width: var(--p); background: linear-gradient(90deg, var(--champagne), var(--champagne-clair)); border-radius: 2px; animation: ec-remplit 1100ms var(--courbe) 200ms both; }
+.kpi__barre { position: relative; height: 3px; margin-top: 4px; background: var(--filet-2); border-radius: 2px; overflow: hidden; }
+@keyframes ec-remplit { from { width: 0; } to { width: var(--p); } }
+/* Les chiffres qui défilent gardent leur largeur */
+.compteur { font-variant-numeric: tabular-nums; }
+.kpi b > .compteur, .resume-mois b > .compteur { color: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit; }

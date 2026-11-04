@@ -107,6 +107,33 @@ const decimal = (n) => new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 2
 // « 08:30 - 13:45 » → « 8h30 – 13h45 »
 const plage = (t) => String(t || '').replace(/(\d{1,2})\s*[:hH]\s*(\d{2})/g, (_, a, b) => `${+a}h${b}`).replace(/\s*(?:-|–)\s*/g, ' – ').replace(/\s*·\s*/g, ' · ');
 const kpi = (href, titre, valeur, sous, ton) => h(href ? 'a' : 'div', { class: `kpi ${ton ? `is-${ton}` : ''}`, href }, h('small', null, titre), h('b', null, valeur), sous ? h('span', null, sous) : null);
+// Chiffres clés : ils montent en douceur jusqu'à leur valeur (0,9 s), sans jamais changer le résultat affiché à la fin
+const FORMATS = { euro: (n) => euro.format(n), heures: (n) => heures(n), nombre: (n) => String(Math.round(n)) };
+const nombre = (v, f = 'nombre') => h('span', { class: 'compteur', 'data-v': String(+v || 0), 'data-f': f }, FORMATS[f](+v || 0));
+function animerNombres(racine) {
+  racine.querySelectorAll('.compteur').forEach((el) => {
+    const v = +el.dataset.v;
+    const f = el.dataset.f;
+    if (!v) return;
+    const fin = FORMATS[f](v);
+    const debut = performance.now();
+    const pas = (t) => {
+      const k = Math.min(1, (t - debut) / 900);
+      const e = 1 - Math.pow(1 - k, 3);
+      el.textContent = k >= 1 ? fin : FORMATS[f](f === 'euro' ? Math.round(v * e * 100) / 100 : f === 'heures' ? Math.round(v * e * 60) / 60 : v * e);
+      if (k < 1) requestAnimationFrame(pas);
+    };
+    el.textContent = FORMATS[f](0);
+    requestAnimationFrame(pas);
+    // filet de sécurité : la vraie valeur s'affiche toujours (onglet en arrière-plan, appareil lent…)
+    setTimeout(() => { el.textContent = fin; }, 1000);
+  });
+}
+// Barre de progression (heures faites sur heures prévues)
+const barre = (fait, prevu, cls = 'progression') => {
+  const p = prevu > 0 ? Math.max(0, Math.min(100, Math.round(fait / prevu * 100))) : 0;
+  return h('div', { class: cls, role: 'img', 'aria-label': `${p} % des heures prévues ce mois-ci sont faites` }, h('i', { style: `--p:${p}%` }));
+};
 const parDate = (a, b) => String(b.date).localeCompare(String(a.date)) || String(b.reference || '').localeCompare(String(a.reference || ''), 'fr', { numeric: true });
 const pluriel = (n, un, plusieurs) => `${n} ${n > 1 ? (plusieurs || `${un}s`) : un}`;
 const initiales = (nom) => String(nom || '?').split(/\s+/).filter(Boolean).slice(0, 2).map((m) => m[0]).join('').toUpperCase();
@@ -223,6 +250,7 @@ async function ouvrir() {
     voile = h('div', { class: 'voile', onclick: fermerTout });
     document.body.append(voile);
     document.addEventListener('keydown', raccourcis);
+    window.addEventListener('scroll', () => document.body.classList.toggle('a-defile', window.scrollY > 8), { passive: true });
   }
   window.onhashchange = naviguer;
   naviguer();
@@ -291,7 +319,7 @@ function naviguer() {
     accueil: vueAccueil, documents: () => vueCentre(param), factures: vueFactures, document: () => vueDocument(param),
     prestations: () => vuePrestations(param), equipe: () => (param ? vueAgent(+param) : vueEquipe()), messages: vueMessages, compte: vueCompte,
   };
-  Promise.resolve(vues[route]()).then((contenu) => { page.replaceChildren(...[contenu].flat(Infinity).filter(Boolean)); page.style.animation = 'none'; void page.offsetWidth; page.style.animation = ''; })
+  Promise.resolve(vues[route]()).then((contenu) => { page.replaceChildren(...[contenu].flat(Infinity).filter(Boolean)); animerNombres(page); })
     .catch((e) => page.replaceChildren(h('p', { class: 'ec-message' }, e.message)));
   window.scrollTo(0, 0);
 }
@@ -439,12 +467,14 @@ async function vueAccueil() {
       h('div', { class: 'accueil-tete__date' }, h('b', null, `${maintenant.getDate()} ${MOIS[maintenant.getMonth()]}`), cap(JOURS[maintenant.getDay()]))),
     t.annonces.map((a) => h('section', { class: `annonce ${a.niveau === 'important' ? 'annonce--important' : ''}` }, h('small', null, a.niveau === 'important' ? 'Important' : 'Information'), h('b', null, a.titre), a.texte ? h('p', null, a.texte) : null)),
     h('div', { class: 'chiffres chiffres--3' },
-      kpi(der ? `#/prestations/${der.mois}` : '#/prestations', der ? `Heures · ${der.libelle}` : 'Heures de présence', heures(der ? der.heures : 0),
+      der && der.encours && der.prevu ? [kpi(der ? `#/prestations/${der.mois}` : '#/prestations', der ? `Heures · ${der.libelle}` : 'Heures de présence', nombre(der ? der.heures : 0, 'heures'),
         !der ? 'Aucune heure enregistrée' : der.encours ? `${pluriel(der.jours, 'jour')} fait${der.jours > 1 ? 's' : ''} · ${heures(der.prevu || der.heures)} prévues ce mois-ci`
-          : `${pluriel(der.jours, 'jour')}${der.source === 'releve' ? ` · facture ${der.facture}` : ''}`),
-      kpi('#/factures', 'Reste à régler', euro.format(f.montantDu), f.enRetard ? `${pluriel(f.enRetard, 'facture')} en retard` : f.aRegler ? `${pluriel(f.aRegler, 'facture')} en attente` : 'Toutes vos factures sont réglées',
+          : `${pluriel(der.jours, 'jour')}${der.source === 'releve' ? ` · facture ${der.facture}` : ''}`)].map((k) => { k.append(barre(der.heures, der.prevu, 'kpi__barre')); return k; })
+        : kpi(der ? `#/prestations/${der.mois}` : '#/prestations', der ? `Heures · ${der.libelle}` : 'Heures de présence', nombre(der ? der.heures : 0, 'heures'),
+          der ? `${pluriel(der.jours, 'jour')}${der.source === 'releve' ? ` · facture ${der.facture}` : ''}` : 'Aucune heure enregistrée'),
+      kpi('#/factures', 'Reste à régler', nombre(f.montantDu, 'euro'), f.enRetard ? `${pluriel(f.enRetard, 'facture')} en retard` : f.aRegler ? `${pluriel(f.aRegler, 'facture')} en attente` : 'Toutes vos factures sont réglées',
         f.enRetard ? 'alerte' : f.montantDu > 0 ? 'attente' : ''),
-      kpi('#/factures', `Facturé en ${annee}`, euro.format(f.totalAnnee), pluriel(nbAnnee, 'facture'))),
+      kpi('#/factures', `Facturé en ${annee}`, nombre(f.totalAnnee, 'euro'), pluriel(nbAnnee, 'facture'))),
     aFaire.length ? panneau('À traiter', null, h('ul', { class: 'a-faire' }, aFaire)) : null,
     h('div', { class: 'grille' },
       h('div', { class: 'colonne' },
@@ -568,9 +598,9 @@ async function vueFactures() {
     tete('Facturation', 'Factures', toutes.length ? `Toutes les factures adressées à ${etat.client.nom}${annees.length ? ` depuis ${annees.at(-1)}` : ''}. Cliquez sur une facture pour l’ouvrir ou la télécharger.` : '',
       h('a', { class: 'btn', href: '#/messages', onclick: () => { etat.demande = 'facture'; } }, ic('messages'), 'Une question sur une facture')),
     h('div', { class: 'chiffres chiffres--3' },
-      kpi(null, `Facturé en ${annee}`, euro.format(somme(de(annee))), pluriel(de(annee).length, 'facture')),
-      kpi(null, 'Total réglé', euro.format(somme(reglees)), `${pluriel(reglees.length, 'facture')} depuis le début`),
-      kpi(null, 'Reste à régler', euro.format(somme(aRegler)), retard.length ? `${pluriel(retard.length, 'facture')} en retard` : aRegler.length ? `${pluriel(aRegler.length, 'facture')} en attente` : 'Rien à régler', retard.length ? 'alerte' : aRegler.length ? 'attente' : '')),
+      kpi(null, `Facturé en ${annee}`, nombre(somme(de(annee)), 'euro'), pluriel(de(annee).length, 'facture')),
+      kpi(null, 'Total réglé', nombre(somme(reglees), 'euro'), `${pluriel(reglees.length, 'facture')} depuis le début`),
+      kpi(null, 'Reste à régler', nombre(somme(aRegler), 'euro'), retard.length ? `${pluriel(retard.length, 'facture')} en retard` : aRegler.length ? `${pluriel(aRegler.length, 'facture')} en attente` : 'Rien à régler', retard.length ? 'alerte' : aRegler.length ? 'attente' : '')),
     h('section', { class: 'panneau' }, annees.length > 1 ? h('div', { class: 'outils' }, onglets) : null, zone),
   ];
 }
@@ -667,15 +697,15 @@ async function vuePrestations(choix) {
   let resume;
   let table;
   if (r.source === 'releve') {
-    resume = [chiffre('Total du mois', heures(tt.heures)), chiffre('Jours travaillés', String(tt.jours)),
+    resume = [chiffre('Total du mois', nombre(tt.heures, 'heures')), chiffre('Jours travaillés', nombre(tt.jours)),
       chiffre('Facture', h('a', { href: `#/document/${r.factureId}` }, r.facture), 'Réglée')];
     table = tableau([['Jour'], ['Horaires'], ['Heures', 'd']], r.lignes.map((l) => ligne(null, [
       td(cap(frJour(l.jour)), 'fort'), td([l.matin, l.apm].filter(Boolean).map(plage).join(' · ') || '—', 'chiffre'), td(l.heures ? heures(l.heures) : '—', 'd chiffre')])));
   } else {
     resume = r.encours
-      ? [chiffre('Heures faites', heures(tt.heures), `jusqu’à aujourd’hui · ${pluriel(tt.jours, 'jour')}`), chiffre('Prévues ce mois-ci', heures(tt.prevu), pluriel(tt.joursPrevus, 'jour')),
-        chiffre('Restent à faire', heures(Math.max(0, tt.prevu - tt.heures)), 'd’ici la fin du mois')]
-      : [chiffre('Total du mois', heures(tt.heures)), chiffre('Jours travaillés', String(tt.jours))];
+      ? [chiffre('Heures faites', nombre(tt.heures, 'heures'), `jusqu’à aujourd’hui · ${pluriel(tt.jours, 'jour')}`), chiffre('Prévues ce mois-ci', nombre(tt.prevu, 'heures'), pluriel(tt.joursPrevus, 'jour')),
+        chiffre('Restent à faire', nombre(Math.max(0, tt.prevu - tt.heures), 'heures'), 'd’ici la fin du mois')]
+      : [chiffre('Total du mois', nombre(tt.heures, 'heures')), chiffre('Jours travaillés', nombre(tt.jours))];
     table = tableau([['Jour'], ['Horaires'], ['Agent', 'm-cache'], ['Heures', 'd']], r.lignes.map((l) => h('tr', { class: l.fait ? null : 'prevu' },
       td([cap(frJour(l.jour)), h('small', null, l.fait ? 'Fait' : 'Prévu'), h('small', { class: 'm-seul' }, l.agent)], 'fort'), td(`${hm(l.debut)} – ${hm(l.fin)}`, 'chiffre'),
       td(l.agent, 'm-cache'), td(heures(l.heures), 'd chiffre'))));
@@ -686,6 +716,8 @@ async function vuePrestations(choix) {
       mois.length > 1 ? h('div', { class: 'outils' }, onglets) : null,
       h('header', { class: 'panneau__tete' }, h('h2', null, actif.libelle), r.source === 'releve' ? statut('ok', 'Mois facturé') : r.encours ? statut('attente', 'Mois en cours') : statut('neutre', 'Mois terminé')),
       h('div', { class: 'resume-mois' }, resume),
+      r.source !== 'releve' && r.encours && tt.prevu ? h('div', { class: 'avancement' }, barre(tt.heures, tt.prevu),
+        h('span', null, `${Math.round(tt.heures / tt.prevu * 100)} % du mois effectué`)) : null,
       r.lignes.length ? table : vide('Aucune vacation ce mois-ci', '')),
     h('p', { class: 'note' }, r.source === 'releve' ? `Heures reprises du relevé joint à la facture ${r.facture}.` : r.encours ? 'Les jours « Prévu » sont à venir : ils peuvent encore changer.' : '',
       ' Une question ? ', h('a', { href: '#/messages' }, 'Écrivez-nous'), '.'),

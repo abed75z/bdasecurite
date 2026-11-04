@@ -17,7 +17,7 @@ $v = '77';
 <meta name="apple-mobile-web-app-title" content="BDA Admin">
 <title>BDA Admin</title>
 <meta name="description" content="Espace d’administration BDA Security Group. Accès réservé, connexion sécurisée.">
-<!-- Aperçu quand le lien est partagé (WhatsApp, iMessage, Discord…) -->
+<!-- Aperçu quand le lien est partagé (WhatsApp, iMessage…) -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="BDA Security Group">
 <meta property="og:title" content="BDA Security Group — Espace administration">

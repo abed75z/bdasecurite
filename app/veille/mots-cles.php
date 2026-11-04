@@ -145,7 +145,7 @@ return [
   'niveau_fort' => 60,    // 🟢 très pertinent
   'niveau_moyen' => 35,   // 🟡 à regarder (en dessous : ⚪ faible)
 
-  // Notifications : niveau minimum pour prévenir (Discord / téléphone) et pour le rappel J-3
+  // Notifications : niveau minimum pour prévenir (téléphone) et pour le rappel J-3
   'notifier_a_partir_du_niveau' => 'moyen', // 'fort', 'moyen' ou 'faible'
   'rappel_jours' => 3,
 

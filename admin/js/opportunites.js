@@ -443,7 +443,6 @@ function carteVeille(o, vuAvant, cible, redessiner) {
 async function reglages(recharger) {
   let r;
   try { r = await api('veille.reglages'); } catch (e) { return erreur(e); }
-  const discord = saisie({ placeholder: r.discord || 'https://discord.com/api/webhooks/…', autocomplete: 'off' });
   const ftId = saisie({ placeholder: r.ftId || 'PAR_bdasecuritygroup_…', autocomplete: 'off' });
   const ftSecret = saisie({ type: 'password', placeholder: r.ftSecret ? '•••••••• (enregistrée)' : 'Clé secrète', autocomplete: 'new-password' });
   const cron = h('code', { class: 'op-code' }, r.cron);
@@ -452,7 +451,6 @@ async function reglages(recharger) {
     large: true,
     contenu: h('div', { class: 'form-grille' },
       h('p', { class: 'modale__texte' }, `Les secrets sont rangés dans ${r.envFichier}, jamais dans le code ni sur GitHub. Laissez un champ vide pour garder la valeur actuelle.`),
-      champ('Webhook Discord', discord, r.discord ? `Actuel : ${r.discord}` : 'Discord > salon > Modifier > Intégrations > Webhooks > Copier l’URL'),
       h('div', { class: 'form-grille form-grille--2' },
         champ('France Travail : identifiant client', ftId, r.ftId ? `Actuel : ${r.ftId}` : 'francetravail.io > Mes applications'),
         champ('France Travail : clé secrète', ftSecret, r.ftSecret ? 'Une clé est enregistrée.' : '')),
@@ -467,12 +465,12 @@ async function reglages(recharger) {
         h('a', { class: 'btn btn--ghost btn--petit', href: '#/notifications' }, icone('mobile'), 'Notifications sur le téléphone'),
         h('button', { class: 'btn btn--ghost btn--petit', type: 'button', onclick: async (e) => {
           e.currentTarget.disabled = true;
-          try { const t = await api('veille.tester', {}); toast(`Test : Discord ${t.discord.ok ? 'OK' : 'en erreur ' + (t.discord.erreur || '')} · téléphone : ${t.push.envoyes} envoi(s)`, t.discord.ok ? 'ok' : 'erreur'); } catch (err) { erreur(err); }
+          try { const t = await api('veille.tester', {}); toast(`Test : ${t.push.envoyes} notification(s) envoyée(s) sur les téléphones.`, t.push.envoyes ? 'ok' : 'erreur'); } catch (err) { erreur(err); }
           e.currentTarget.disabled = false;
         } }, icone('envoyer'), 'Envoyer un message de test'))),
     actions: [{ libelle: 'Fermer', classe: 'btn--ghost', valeur: false }, { libelle: 'Enregistrer', classe: 'btn--gold', submit: true, action: async () => {
       try {
-        await api('veille.reglages.enregistrer', { discord: discord.value.trim(), ftId: ftId.value.trim(), ftSecret: ftSecret.value.trim() });
+        await api('veille.reglages.enregistrer', { ftId: ftId.value.trim(), ftSecret: ftSecret.value.trim() });
         toast('Réglages enregistrés.');
         return true;
       } catch (e) { erreur(e); return false; }

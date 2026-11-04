@@ -742,10 +742,6 @@ function robot_notifier(array $ids): void
     $total = count($ids);
     $texte = implode(', ', $parts);
     notifier('veille', "Robot : $total nouvelle" . ($total > 1 ? 's' : '') . ' piste' . ($total > 1 ? 's' : ''), $texte, '/admin/#/opportunites', 'robot-pistes');
-    if (veille_env('DISCORD_WEBHOOK_URL') !== '') {
-      require_once __DIR__ . '/discord.php';
-      discord_envoyer([], "🧭 **Robot de prospection : $total nouvelle(s) piste(s)** — $texte\nhttps://bdasecurite.com/admin/#/opportunites");
-    }
   } catch (Throwable $e) {
     error_log('[BDA robot notif] ' . $e->getMessage());
   }

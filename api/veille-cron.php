@@ -10,22 +10,6 @@ require __DIR__ . '/../app/bootstrap.php';
 require __DIR__ . '/../app/veille/veille.php';
 require __DIR__ . '/../app/veille/prospects.php';
 
-// Serveur Discord de la direction : panel, tableau de bord, dossiers, rappels… et une fois par jour le projet de A à Z
-function veille_cron_discord(): void
-{
-  if (!dc_actif()) return;
-  try {
-    require_once __DIR__ . '/../app/discord/structure.php';
-    dc_cron();
-    if ((dc_config()['projet_jour'] ?? '') !== date('Y-m-d')) {
-      dc_publier_projet();
-      dc_config_maj(['projet_jour' => date('Y-m-d')]);
-    }
-  } catch (Throwable $e) {
-    error_log('[BDA discord cron] ' . $e->getMessage());
-  }
-}
-
 // Tâches planifiées des modules (rapports, relances, sauvegarde…), chacune isolée, avant la veille qui peut être longue
 function veille_cron_modules(string $origine): void
 {
@@ -38,7 +22,6 @@ if (PHP_SAPI === 'cli') {
   require_once __DIR__ . '/../app/exploitation.php';
   exp_alertes();
   robot_lancer('cron', [], 600);
-  veille_cron_discord();
   echo json_encode(['ok' => $r['ok'], 'nouveaux' => $r['nouveaux'] ?? null, 'message' => $r['message'] ?? ''], JSON_UNESCAPED_UNICODE), "\n";
   exit;
 }
@@ -69,7 +52,6 @@ try {
   try { require_once __DIR__ . '/../app/exploitation.php'; exp_alertes(); } catch (Throwable $e) { error_log('[BDA planning] ' . $e->getMessage()); }
   // robot de prospection : les tâches en retard (annuaire, ouvertures, chantiers), dans le temps qui reste
   try { robot_lancer('auto', [], 180); } catch (Throwable $e) { error_log('[BDA robot] ' . $e->getMessage()); }
-  veille_cron_discord();
 } catch (Throwable $e) {
   error_log('[BDA veille-cron] ' . $e->getMessage());
   if (!headers_sent()) echec('Erreur du serveur.', 500);

@@ -865,9 +865,6 @@ function journal(string $type, string $message): void
   try {
     db()->prepare('INSERT INTO journal (quand, type, message, appareil, ip) VALUES (?, ?, ?, ?, ?)')->execute([maintenant(), $type, mb_substr($message, 0, 300), appareil(), ip_masquee()]);
     if (random_int(1, 50) === 1) db()->exec("DELETE FROM journal WHERE quand < datetime('now', '-365 days') OR id <= (SELECT MAX(id) - 5000 FROM journal)");
-    // Copie dans le salon #journal du serveur Discord de la direction (et détail de la notification qui suit)
-    $GLOBALS['__dernier_journal'] = $message;
-    if (function_exists('notif_journal')) notif_journal($type, $message);
   } catch (Throwable $e) {
     error_log('[BDA journal] ' . $e->getMessage());
   }

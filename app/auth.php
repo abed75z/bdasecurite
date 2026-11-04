@@ -59,7 +59,7 @@ const ACTIONS_ADMIN = [
   'paie.bulletins', 'paie.bulletin', 'paie.bulletin.enregistrer', 'paie.bulletin.supprimer',
   // Fiches de paie déposées dans l'Espace équipe, suppression d'un compte agent
   'equipe.paie.ajouter', 'equipe.paie.fichier', 'equipe.paie.supprimer', 'equipe.compte.supprimer',
-  // Veille commerciale : appels d'offres, recrutements, secrets (Discord, France Travail), notifications
+  // Veille commerciale : appels d'offres, recrutements, secrets (France Travail), notifications
   'opportunites', 'opportunite.statut', 'opportunite.note', 'veille.lancer', 'veille.reglages', 'veille.reglages.enregistrer', 'veille.tester', 'push.abonner', 'push.desabonner',
   // Robot de prospection (pistes : chantiers, bars, boîtes de nuit, magasins, hôtels, restaurants)
   'prospects', 'prospect.maj', 'robot.lancer',
@@ -69,8 +69,6 @@ const ACTIONS_ADMIN = [
   'google', 'google.enregistrer', 'google.connecter', 'google.tester', 'google.deconnecter',
   // Notifications sur les appareils de la direction
   'notif.prefs', 'notif.prefs.enregistrer', 'notif.tester', 'notif.appareil.retirer',
-  // Serveur Discord de la direction : jeton du bot, installation, synchronisation
-  'discord', 'discord.jeton', 'discord.installer', 'discord.sync',
   // Contrats de travail : réglages communs (les contrats eux-mêmes sont protégés dans api.php)
   'contrats.reglages', 'contrats.reglages.enregistrer',
 ];

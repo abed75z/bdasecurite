@@ -75,10 +75,6 @@ function notifier(string $categorie, string $titre, string $texte, string $url =
     'tag' => $tag,
     'sauf' => $sauf,
   ];
-  // Serveur Discord de la direction : message détaillé dans le bon salon (construit après la réponse)
-  if (dc_actif() && !in_array($categorie, ['veille', 'rappels'], true)) {
-    dc_file_notif(['notif' => ['categorie' => $categorie, 'titre' => $titre, 'texte' => $texte, 'url' => $url, 'tag' => $tag, 'detail' => (string)($GLOBALS['__dernier_journal'] ?? '')]]);
-  }
   notif_programmer();
 }
 function notif_programmer(): void
@@ -94,8 +90,7 @@ function notif_envoyer_fin(): void
 {
   $liste = $GLOBALS['__notifs'] ?? [];
   $GLOBALS['__notifs'] = [];
-  $discord = !empty($GLOBALS['__dc_file']);
-  if (!$liste && !$discord) return;
+  if (!$liste) return;
   if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
   ignore_user_abort(true);
   if (function_exists('fastcgi_finish_request')) @fastcgi_finish_request();
@@ -114,48 +109,8 @@ function notif_envoyer_fin(): void
   } catch (Throwable $e) {
     error_log('[BDA notifications] ' . $e->getMessage());
   }
-  if ($discord) {
-    try {
-      require_once __DIR__ . '/discord/sync.php';
-      dc_vider_file(30);
-    } catch (Throwable $e) {
-      error_log('[BDA discord] ' . $e->getMessage());
-    }
-  }
 }
 
-/* ---------- Serveur Discord de la direction (autorisé par le gérant le 07/10/2026) ---------- */
-// Discord prêt : jeton du bot dans le .env privé et serveur installé
-function dc_actif(): bool
-{
-  static $a = null;
-  if ($a !== null) return $a;
-  try {
-    require_once __DIR__ . '/veille/outils.php';
-    $st = db()->prepare("SELECT v FROM reglages WHERE k = 'discord'");
-    $st->execute();
-    $c = json_decode((string)$st->fetchColumn(), true);
-    return $a = is_array($c) && !empty($c['salons']) && veille_env('DISCORD_BOT_TOKEN') !== '';
-  } catch (Throwable $e) {
-    return $a = false;
-  }
-}
-function dc_file_notif(array $donnees, string $salon = ''): void
-{
-  try {
-    db()->prepare('INSERT INTO dc_file (salon, message, cree) VALUES (?, ?, ?)')->execute([$salon, json_encode($donnees, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE), maintenant()]);
-    $GLOBALS['__dc_file'] = true;
-    notif_programmer();
-  } catch (Throwable $e) {
-    error_log('[BDA discord file] ' . $e->getMessage());
-  }
-}
-// Chaque ligne du journal part aussi dans #journal (et #securite, #devis… selon le cas)
-function notif_journal(string $type, string $message): void
-{
-  if (!dc_actif()) return;
-  dc_file_notif(['journal' => ['t' => $type, 'm' => $message, 'q' => maintenant(), 'a' => appareil()]], 'journal');
-}
 // Envoie à chaque appareil abonné (sauf ceux du compte $sauf) ; supprime les abonnements expirés
 function notif_push(array $donnees, int $sauf = 0): void
 {

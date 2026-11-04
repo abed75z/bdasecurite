@@ -443,6 +443,7 @@ function mod_journal_cl_semaine(): void
 {
   if (!function_exists('exiger_compte')) echec('Connexion requise.', 401);
   $c = exiger_compte();
+  require_once __DIR__ . '/../exploitation.php';
   $ref = mod_journal_jour($_GET['jour'] ?? '');
   $lundi = date('Y-m-d', strtotime($ref) - ((int)date('N', strtotime($ref)) - 1) * 86400);
   $dimanche = date('Y-m-d', strtotime("$lundi +6 days"));
@@ -454,10 +455,17 @@ function mod_journal_cl_semaine(): void
   foreach ($st->fetchAll() as $s) {
     $reg = mod_journal_reglages((int)$s['id']);
     if (!$reg['client']) continue;
+    // horaires prévus au planning des sites (affichés pour les jours à venir)
+    $prevus = [];
+    foreach (exp_vacations($lundi, $dimanche) as $v) if ((int)$v['site_id'] === (int)$s['id']) $prevus[$v['jour']][] = [substr((string)$v['debut'], 0, 5), substr((string)$v['fin'], 0, 5)];
     $jours = [];
-    for ($j = $lundi; $j <= $dimanche && $j <= $auj; $j = date('Y-m-d', strtotime("$j +1 day"))) {
+    for ($j = $lundi; $j <= $dimanche; $j = date('Y-m-d', strtotime("$j +1 day"))) {
+      $prevu = $prevus[$j] ?? [];
+      usort($prevu, fn ($a, $b) => strcmp($a[0], $b[0]));
+      if ($j > $auj) { $jours[] = ['jour' => $j, 'avenir' => true, 'prevu' => $prevu, 'resume' => null, 'agents' => [], 'lignes' => []]; continue; }
       $lignes = mod_journal_lignes((int)$s['id'], (string)$s['nom'], "$j 00:00:00", "$j 23:59:59", true);
-      $jours[] = ['jour' => $j, 'resume' => mod_journal_resume($lignes), 'lignes' => $lignes];
+      $agents = array_values(array_unique(array_map(fn ($l) => $l['agent'], array_filter($lignes, fn ($l) => $l['type'] === 'prise'))));
+      $jours[] = ['jour' => $j, 'avenir' => false, 'prevu' => $prevu, 'resume' => mod_journal_resume($lignes), 'agents' => $agents, 'lignes' => $lignes];
     }
     $sites[] = ['nom' => (string)$s['nom'], 'liste' => $reg['liste'], 'jours' => $jours];
   }

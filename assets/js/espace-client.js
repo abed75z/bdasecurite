@@ -782,55 +782,54 @@ function libelleSemaine(lundi, dimanche) {
   const a = dt(lundi), b = dt(dimanche);
   return a.getMonth() === b.getMonth() ? `Semaine du ${quantieme(a)} au ${quantieme(b)} ${MOIS[b.getMonth()]}` : `Semaine du ${quantieme(a)} ${MOIS[a.getMonth()]} au ${quantieme(b)} ${MOIS[b.getMonth()]}`;
 }
-// « Mer. 4 nov. » sur téléphone
-const jourCourtMC = (j) => { const d = dt(j); return `${cap(JOURS[d.getDay()].slice(0, 3))}. ${quantieme(d)} ${MOIS_COURTS[d.getMonth()]}`; };
-const presenceMC = (r) => (r.debut ? (r.enCours ? `Depuis ${hmMC(r.debut)}` : `${hmMC(r.debut)} – ${hmMC(r.fin)}`) : '');
-function tableauLignesMC(lignes) {
-  return tableau([['Heure'], ['Événement'], ['Agent', 'm-cache']], lignes.map((l) => {
+const presenceMC = (r) => (r && r.debut ? (r.enCours ? `Depuis ${hmMC(r.debut)}` : `${hmMC(r.debut)} – ${hmMC(r.fin)}`) : '');
+// Une colonne du tableau de la semaine : le jour, la présence, le compte rendu de la liste, puis chaque ligne
+function colonneJour(j, auj) {
+  const d = dt(j.jour);
+  const r = j.resume;
+  const estAuj = j.jour === auj;
+  const tete = h('header', { class: 'mcs-tete' }, h('small', null, JOURS[d.getDay()].slice(0, 3).toUpperCase()), h('b', null, String(d.getDate())),
+    h('span', null, MOIS_COURTS[d.getMonth()]), estAuj ? h('i', null, 'Aujourd’hui') : null);
+  const prevu = (j.prevu || []).map(([a, b]) => `${hmMC(a)} – ${hmMC(b)}`).join(' · ');
+  if (j.avenir) return h('section', { class: 'mcs-jour is-avenir' }, tete, h('p', { class: 'mcs-info' }, prevu ? [h('small', null, 'Présence prévue'), h('b', null, prevu)] : 'À venir'));
+  if (!j.lignes.length) return h('section', { class: 'mcs-jour is-vide' }, tete, h('p', { class: 'mcs-info' }, estAuj && prevu ? [h('small', null, 'Présence prévue'), h('b', null, prevu)] : 'Aucune activité'));
+  const resume = h('div', { class: 'mcs-resume' },
+    r.debut ? h('p', { class: 'mcs-presence' }, h('b', null, presenceMC(r)), (r.pauses || []).map(([a, b]) => h('small', null, `Pause ${hmMC(a)} – ${hmMC(b)}`)),
+      (j.agents || []).length ? h('small', null, j.agents.join(', ')) : null, r.enCours ? statut('ok', 'En poste') : null) : null,
+    r.absents !== null || r.sansRdv || r.passages ? h('div', { class: 'mcs-chips' },
+      r.absents !== null ? h('span', null, h('b', null, String(r.absents)), r.absents > 1 ? ' absents' : ' absent') : null,
+      r.sansRdv ? h('span', null, h('b', null, String(r.sansRdv)), ' sans RDV') : null,
+      r.passages ? h('span', null, h('b', null, String(r.passages)), r.passages > 1 ? ' visites' : ' visite') : null) : null);
+  const lignes = h('ol', { class: 'mcs-lignes' }, j.lignes.map((l) => {
     const x = ligneMC(l);
-    return h('tr', { class: classeMC(l) }, td(heureMC(l.quand), 'chiffre fort mc-heure'),
-      td([h('b', { class: 'mc-titre' }, x.titre), x.detail ? h('small', null, x.detail) : null, h('small', { class: 'm-seul' }, l.agent)]), td(l.agent, 'm-cache'));
+    return h('li', { class: classeMC(l), title: [`${heureMC(l.quand)} ${x.titre}`, x.detail, l.agent].filter(Boolean).join(' — ') },
+      h('time', null, heureMC(l.quand)), h('span', null, h('b', null, x.titre), l.absents !== null && l.absents !== undefined
+        ? h('small', null, `${l.absents} absent${l.absents > 1 ? 's' : ''}${l.sansRdv ? ` · ${l.sansRdv} sans RDV` : ''}`) : x.detail ? h('small', null, x.detail) : null));
   }));
+  return h('section', { class: `mcs-jour ${estAuj ? 'is-auj' : ''}` }, tete, resume, lignes);
 }
 async function vueMainCourante(param) {
   const auj = iso(new Date());
   const ref = /^\d{4}-\d{2}-\d{2}$/.test(param || '') && param <= auj ? param : auj;
-  const zone = h('div', { class: 'mc' });
+  const zone = h('div', { class: 'mcs' });
   const dessiner = (d) => {
-    const navigation = h('div', { class: 'mc-jours' },
-      h('a', { class: 'btn btn--petit btn--icone', href: `#/main-courante/${decalerJour(d.lundi, -7)}`, 'aria-label': 'Semaine précédente' }, ic('retour')),
-      h('b', null, libelleSemaine(d.lundi, d.dimanche)),
-      !d.actuelle ? h('a', { class: 'btn btn--petit btn--icone mc-suivant', href: `#/main-courante/${decalerJour(d.lundi, 7)}`, 'aria-label': 'Semaine suivante' }, ic('fleche')) : null,
-      d.actuelle ? statut('ok', 'En direct') : h('a', { class: 'lien', href: '#/main-courante' }, 'Cette semaine'));
-    const sites = d.sites.map((s) => {
-      const actifs = s.jours.filter((j) => j.lignes.length);
-      const ancre = (j) => `mc-${s.nom.replace(/\W+/g, '')}-${j}`;
-      // la semaine en un coup d'œil : un jour par ligne
-      const recap = tableau([['Jour'], ['Présence de l’agent'], ['Absents', 'd'], ['Sans rendez-vous', 'd m-cache'], ['Visites et livraisons', 'd m-cache'], ['', 'd m-cache']],
-        s.jours.map((j) => {
-          const r = j.resume;
-          const rien = !j.lignes.length;
-          const tr = ligne(rien ? null : () => document.getElementById(ancre(j.jour))?.scrollIntoView({ behavior: 'smooth', block: 'start' }), [
-            td([h('span', { class: 'm-cache' }, cap(frJour(j.jour))), h('span', { class: 'm-seul' }, jourCourtMC(j.jour)), j.jour === auj ? h('small', null, 'Aujourd’hui') : null], 'fort'),
-            td(rien ? h('span', { class: 'mc-muet' }, 'Aucune activité') : [presenceMC(r) || '—', (r.pauses || []).length ? h('small', null, r.pauses.map(([a, b]) => `pause ${hmMC(a)} – ${hmMC(b)}`).join(' · ')) : null], 'chiffre'),
-            td(r.absents !== null ? String(r.absents) : '—', 'd chiffre'),
-            td(r.sansRdv !== null ? String(r.sansRdv) : '—', 'd chiffre m-cache'),
-            td(r.passages ? String(r.passages) : '—', 'd chiffre m-cache'),
-            rien ? td('', 'm-cache') : tdFleche()]);
-          if (rien) tr.classList.add('mc-vide');
-          return tr;
-        }));
-      // le détail, du jour le plus récent au plus ancien
-      const details = actifs.slice().reverse().map((j) => h('section', { class: 'mc-jour', id: ancre(j.jour) },
-        h('header', { class: 'mc-jour__tete' }, h('h3', null, cap(frJour(j.jour))),
-          h('span', null, [presenceMC(j.resume), j.resume.absents !== null ? (j.resume.absents ? `${pluriel(j.resume.absents, 'absent')} sur la liste` : 'aucun absent sur la liste') : '', j.resume.sansRdv ? `${j.resume.sansRdv} sans rendez-vous` : ''].filter(Boolean).join(' · '))),
-        tableauLignesMC(j.lignes)));
-      return panneau(s.nom, h('small', null, actifs.length ? `${pluriel(actifs.length, 'jour')} d’activité` : 'Aucune activité cette semaine'),
-        recap, ...(details.length ? details : [vide('Rien n’est encore noté cette semaine', 'Les lignes apparaissent ici dès que nos agents les inscrivent.')]));
+    const nav = h('header', { class: 'mcs-entete' },
+      h('div', { class: 'mcs-entete__titre' }, h('h1', null, 'Main courante'), h('small', null, d.sites.map((x) => x.nom).join(' · '))),
+      h('nav', { class: 'mcs-nav', 'aria-label': 'Changer de semaine' },
+        h('a', { class: 'btn btn--petit', href: `#/main-courante/${decalerJour(d.lundi, -7)}` }, ic('retour'), 'Semaine précédente'),
+        h('b', { class: 'mcs-nav__titre' }, libelleSemaine(d.lundi, d.dimanche)),
+        d.actuelle ? h('span', { class: 'btn btn--petit mcs-off', 'aria-disabled': 'true' }, 'Semaine suivante', ic('fleche'))
+          : h('a', { class: 'btn btn--petit', href: `#/main-courante/${decalerJour(d.lundi, 7)}` }, 'Semaine suivante', ic('fleche'))),
+      d.actuelle ? statut('ok', 'En direct') : h('a', { class: 'lien', href: '#/main-courante' }, 'Cette semaine'),
+      h('button', { class: 'btn btn--petit mcs-imprimer', type: 'button', onclick: () => window.print() }, ic('imprimer'), 'Imprimer'));
+    const grilles = d.sites.map((s) => {
+      // samedi et dimanche sans activité restent étroits
+      const largeurs = s.jours.map((j) => { const n = dt(j.jour).getDay(); return (n === 0 || n === 6) && !j.lignes.length ? 'minmax(84px, .55fr)' : 'minmax(0, 1fr)'; }).join(' ');
+      return h('section', { class: 'mcs-site' }, d.sites.length > 1 ? h('p', { class: 'mcs-site__nom' }, s.nom) : null,
+        h('div', { class: 'mcs-grille', style: `grid-template-columns: ${largeurs}` }, s.jours.map((j) => colonneJour(j, auj))));
     });
-    zone.replaceChildren(navigation, ...(sites.length ? sites : [panneau(null, null, vide('Main courante non disponible', 'Elle s’affichera ici dès que votre site sera relié.'))]),
-      h('p', { class: 'note' }, 'Tenue par nos agents au fil du service, depuis leur téléphone. Les pages du cahier papier sont recopiées par la direction.',
-        d.actuelle ? ' La page se met à jour toute seule.' : ''));
+    zone.replaceChildren(nav, ...(grilles.length ? grilles : [panneau(null, null, vide('Main courante non disponible', 'Elle s’affichera ici dès que votre site sera relié.'))]),
+      h('p', { class: 'mcs-note' }, 'Tenue par nos agents au fil du service ; les pages du cahier papier sont recopiées par la direction. Survolez une ligne pour la lire en entier.'));
   };
   dessiner(await api('mod.journal.semaine', undefined, { jour: ref }));
   if (ref === auj) {
@@ -840,8 +839,7 @@ async function vueMainCourante(param) {
       try { dessiner(await api('mod.journal.semaine', undefined, { jour: ref })); } catch (e) { /* on réessaiera */ }
     }, 60000);
   }
-  return [tete('Prestation', 'Main courante', 'Le cahier de poste de votre site, semaine par semaine : présence de l’agent, ouvertures, fermetures, liste des rendez-vous, visites et livraisons.',
-    h('button', { class: 'btn', type: 'button', onclick: () => window.print() }, ic('imprimer'), 'Imprimer la semaine')), zone];
+  return zone;
 }
 
 /* ---------- Rapport mensuel de prestation ---------- */

@@ -730,3 +730,78 @@ body.a-defile .haut { box-shadow: 0 10px 28px -22px rgba(15, 27, 45, .5); }
 .mc-jour__tete span { color: var(--muet); font-size: 13px; font-variant-numeric: tabular-nums; }
 @media print { .mc-jour { break-inside: avoid-page; } .mc-jour__tete { background: none; } }
 @media (max-width: 900px) { .table td span.m-seul { display: inline; white-space: nowrap; } }
+
+/* ----- v36 : main courante, toute la semaine sur un écran ----- */
+.tete--compacte { margin-bottom: 4px; padding-bottom: 14px; }
+.tete--compacte h1 { font-size: clamp(30px, 3vw, 40px); }
+.mcs { display: grid; gap: 14px; }
+.mcs-nav { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; }
+.mcs-nav__centre { display: flex; align-items: baseline; justify-content: center; gap: 14px; flex-wrap: wrap; text-align: center; }
+.mcs-nav__centre > b { color: var(--encre); font-family: var(--serif); font-size: 22px; font-weight: 600; }
+.mcs-nav .btn { white-space: nowrap; }
+.mcs-off { opacity: .4; pointer-events: none; }
+.mcs-site { display: grid; gap: 8px; }
+.mcs-site__nom { margin: 0; color: var(--muet); font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.mcs-grille { display: grid; background: var(--blanc); border: 1px solid var(--filet); border-radius: var(--r); overflow: hidden; }
+.mcs-jour { display: flex; flex-direction: column; min-width: 0; border-left: 1px solid var(--filet); }
+.mcs-jour:first-child { border-left: 0; }
+.mcs-tete { display: flex; align-items: baseline; gap: 6px; min-height: 48px; padding: 12px 12px 10px; border-bottom: 1px solid var(--filet); background: #FBFAF7; }
+.mcs-tete small { color: var(--muet); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; }
+.mcs-tete b { color: var(--encre); font-family: var(--serif); font-size: 22px; font-weight: 600; line-height: 1; }
+.mcs-tete span { color: var(--muet); font-size: 12px; }
+.mcs-tete i { margin-left: auto; color: var(--champagne); font-size: 9.5px; font-style: normal; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.mcs-jour.is-auj .mcs-tete { background: var(--champagne-fond); box-shadow: inset 0 2px 0 var(--champagne); }
+.mcs-jour.is-auj { background: #FFFDF8; }
+.mcs-resume { display: grid; gap: 7px; padding: 10px 12px; border-bottom: 1px solid var(--filet-2); }
+.mcs-presence { display: grid; gap: 2px; margin: 0; }
+.mcs-presence b { color: var(--encre); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mcs-presence small { color: var(--muet); font-size: 11.5px; }
+.mcs-presence .statut { font-size: 11.5px; }
+.mcs-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.mcs-chips span { padding: 2px 7px; border: 1px solid var(--filet); border-radius: 3px; background: var(--blanc); color: var(--texte); font-size: 11.5px; white-space: nowrap; }
+.mcs-chips b { color: var(--encre); font-weight: 700; font-variant-numeric: tabular-nums; }
+.mcs-lignes { margin: 0; padding: 6px 0 10px; list-style: none; }
+.mcs-lignes li { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 6px; padding: 4px 12px; font-size: 12.5px; line-height: 1.35; }
+.mcs-lignes time { color: var(--encre); font-weight: 600; font-variant-numeric: tabular-nums; }
+.mcs-lignes b { display: block; color: var(--encre); font-weight: 500; overflow-wrap: anywhere; }
+.mcs-lignes small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--muet); font-size: 11.5px; }
+.mcs-lignes .mc-auto time, .mcs-lignes .mc-auto b { color: var(--muet); font-weight: 500; }
+.mcs-lignes .mc-incident time, .mcs-lignes .mc-incident b { color: var(--alerte); }
+.mcs-info { display: grid; gap: 2px; margin: 0; padding: 14px 12px; color: var(--muet-2); font-size: 12.5px; }
+.mcs-info small { color: var(--muet); font-size: 10.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+.mcs-info b { color: var(--texte); font-weight: 500; font-variant-numeric: tabular-nums; }
+.mcs-jour.is-avenir .mcs-tete b, .mcs-jour.is-vide .mcs-tete b { color: var(--muet); }
+.mcs-note { margin: 0; color: var(--muet); font-size: 12px; line-height: 1.5; }
+@media (max-width: 1180px) { .mcs-lignes li { grid-template-columns: 1fr; gap: 0; } }
+@media (max-width: 900px) {
+  .mcs-nav { grid-template-columns: 1fr 1fr; }
+  .mcs-nav__centre { grid-column: 1 / -1; grid-row: 1; }
+  .mcs-grille { grid-template-columns: 1fr !important; }
+  .mcs-jour { border-left: 0; border-top: 1px solid var(--filet); }
+  .mcs-jour:first-child { border-top: 0; }
+  .mcs-jour.is-vide:not(.is-auj), .mcs-jour.is-avenir { display: none; }
+  .mcs-lignes li { grid-template-columns: 44px minmax(0, 1fr); gap: 6px; }
+}
+@media print {
+  .mcs-nav .btn, .mcs-nav .lien, .mcs-nav .statut, .mcs-note { display: none !important; }
+  .mcs-grille { grid-template-columns: repeat(7, minmax(0, 1fr)) !important; font-size: 8pt; }
+  .mcs-lignes small { -webkit-line-clamp: unset; display: block; }
+}
+
+/* ----- v37 : en-tête de la semaine sur une ligne ----- */
+.mcs-entete { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; }
+.mcs-entete__titre { display: grid; gap: 2px; margin-right: 6px; }
+.mcs-entete__titre h1 { margin: 0; color: var(--encre); font-family: var(--serif); font-size: 32px; font-weight: 600; line-height: 1; }
+.mcs-entete__titre small { color: var(--muet); font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.mcs-nav { display: flex; align-items: center; gap: 10px; }
+.mcs-nav__titre { min-width: 230px; color: var(--encre); font-family: var(--serif); font-size: 20px; font-weight: 600; text-align: center; }
+.mcs-imprimer { margin-left: auto; }
+.page:has(.mcs) { padding-top: 22px; }
+@media (max-width: 900px) {
+  .mcs-nav { order: 3; width: 100%; justify-content: space-between; }
+  .mcs-nav__titre { min-width: 0; font-size: 16px; }
+  .mcs-nav .btn { padding-left: 10px; padding-right: 10px; font-size: 0; gap: 0; }
+  .mcs-nav .btn .ec-ic { font-size: 14px; }
+  .mcs-imprimer { display: none; }
+}
+@media print { .mcs-imprimer, .mcs-nav .btn { display: none !important; } }

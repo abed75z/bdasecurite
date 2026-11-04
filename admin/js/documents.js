@@ -53,14 +53,47 @@ export async function listeDocuments(ctx, type) {
   ctx.actions(h('a', { class: 'btn btn--gold', href: `#/${C.route}/nouveau` }, icone('plus'), h('span', null, C.nouveau)));
   const { documents } = await api('documents', undefined, { type });
 
-  let filtre = 'tous', recherche = '';
+  let filtre = 'tous', recherche = '', tri = null, sens = 1;
   const corps = h('tbody');
+  const pied = h('tfoot');
+  const tete = h('thead');
   const chips = h('div', { class: 'chips' });
+  const somme = (liste) => arrondi(liste.reduce((s, d) => s + (+d.total || 0), 0));
+  const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
+
+  // Colonnes triables : [titre, valeur de tri, classe]
+  const COLS = [
+    ['N°', (d) => d.numero],
+    ['Client', (d) => (d.client || '').toLowerCase()],
+    ['Date', (d) => d.date || ''],
+    ...(type === 'facture' ? [['Échéance', (d) => d.echeance || '']] : []),
+    ['Montant', (d) => +d.total || 0, 'num'],
+    ['Statut', (d) => (enRetard(d) ? ' retard' : d.statut)],
+  ];
+  function dessinerTete() {
+    tete.replaceChildren(h('tr', null, COLS.map(([t, , cls], n) => h('th', {
+      class: [cls, 'th-tri', tri === n ? 'is-trie' : ''].filter(Boolean).join(' '),
+      'aria-sort': tri === n ? (sens > 0 ? 'ascending' : 'descending') : null,
+      tabindex: 0, title: 'Trier',
+      onclick: () => trier(n),
+      onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trier(n); } },
+    }, t, h('span', { class: 'tri', 'aria-hidden': 'true' }, tri === n ? (sens > 0 ? '▲' : '▼') : '')))));
+  }
+  // 1er clic : croissant (décroissant pour les dates et montants), 2e clic : inverse, 3e clic : ordre d'origine
+  function trier(n) {
+    const decroissantDabord = ['Date', 'Échéance', 'Montant'].includes(COLS[n][0]);
+    if (tri !== n) { tri = n; sens = decroissantDabord ? -1 : 1; } else if (sens === (decroissantDabord ? -1 : 1)) sens = -sens; else tri = null;
+    dessinerTete(); dessiner();
+  }
 
   function dessiner() {
     const q = recherche.toLowerCase();
-    const visibles = documents.filter((d) => (filtre === 'tous' || (filtre === 'retard' ? enRetard(d) : d.statut === filtre))
+    let visibles = documents.filter((d) => (filtre === 'tous' || (filtre === 'retard' ? enRetard(d) : d.statut === filtre))
       && (!q || `${d.numero} ${d.client}`.toLowerCase().includes(q)));
+    if (tri !== null) {
+      const cle = COLS[tri][1];
+      visibles = [...visibles].sort((a, b) => { const x = cle(a), y = cle(b); return (x < y ? -1 : x > y ? 1 : 0) * sens; });
+    }
     corps.replaceChildren(...visibles.map((d) => h('tr', { class: 'ligne-clic', tabindex: 0, onclick: () => ctx.aller(`#/${C.route}/${d.id}`), onkeydown: (e) => { if (e.key === 'Enter') ctx.aller(`#/${C.route}/${d.id}`); } },
       h('td', null, h('b', { class: 'mono' }, d.numero)),
       h('td', null, d.client || h('span', { class: 'muet' }, 'Sans client')),
@@ -68,21 +101,59 @@ export async function listeDocuments(ctx, type) {
       type === 'facture' ? h('td', { class: enRetard(d) ? 'txt-alerte' : '' }, isoVersFr(d.echeance) || '—') : null,
       h('td', { class: 'num' }, euro.format(d.total)),
       h('td', null, statutPastille(enRetard(d) ? 'retard' : d.statut)))));
-    if (!visibles.length) corps.replaceChildren(h('tr', null, h('td', { colspan: 6, class: 'vide-ligne' }, documents.length ? 'Aucun document pour ce filtre.' : `Aucun ${type === 'devis' ? 'devis' : 'facture'} pour le moment. Cliquez sur « ${C.nouveau} ».`)));
+    if (!visibles.length) corps.replaceChildren(h('tr', null, h('td', { colspan: COLS.length, class: 'vide-ligne' }, documents.length ? 'Aucun document pour ce filtre.' : `Aucun ${type === 'devis' ? 'devis' : 'facture'} pour le moment. Cliquez sur « ${C.nouveau} ».`)));
+    // Total des lignes affichées (les documents annulés ne comptent pas)
+    const comptes = visibles.filter((d) => d.statut !== 'annulee');
+    pied.replaceChildren(...(visibles.length > 1 ? [h('tr', null,
+      h('td', { colspan: COLS.length - 2 }, pluriel(visibles.length, type === 'devis' ? 'devis' : 'facture').replace('deviss', 'devis'), comptes.length < visibles.length ? h('span', { class: 'muet' }, ' · total hors annulées') : null),
+      h('td', { class: 'num' }, euro.format(somme(comptes))),
+      h('td'))] : []));
+  }
+  function choisirFiltre(f) {
+    filtre = f;
+    $$('.chip', chips).forEach((c) => c.classList.toggle('is-actif', c.dataset.filtre === f));
+    dessiner();
   }
   const comptes = { tous: documents.length };
   C.statuts.forEach((s) => { comptes[s] = documents.filter((d) => d.statut === s).length; });
   if (type === 'facture') comptes.retard = documents.filter(enRetard).length;
   const filtres = ['tous', ...C.statuts, ...(type === 'facture' ? ['retard'] : [])];
-  chips.replaceChildren(...filtres.map((f) => h('button', { type: 'button', class: `chip ${f === filtre ? 'is-actif' : ''}`, onclick: (e) => { filtre = f; $$('.chip', chips).forEach((c) => c.classList.remove('is-actif')); e.currentTarget.classList.add('is-actif'); dessiner(); } },
+  chips.replaceChildren(...filtres.map((f) => h('button', { type: 'button', 'data-filtre': f, class: `chip ${f === filtre ? 'is-actif' : ''}`, onclick: () => choisirFiltre(f) },
     f === 'tous' ? 'Tous' : f === 'retard' ? 'En retard' : LIBELLE_STATUT[f], h('span', null, comptes[f] || 0))));
 
+  // Chiffres clés : un clic applique le filtre correspondant
+  const kpi = (libelle, valeur, sous, f, alerte) => h('button', { type: 'button', class: `vg-kpi ${alerte ? 'is-alerte' : ''}`, onclick: () => choisirFiltre(f), title: 'Filtrer la liste' },
+    h('span', { class: 'vg-kpi__lib' }, libelle), h('b', { class: 'vg-kpi__val' }, valeur), h('span', { class: 'vg-kpi__sous' }, sous));
+  const parStatut = (s) => documents.filter((d) => d.statut === s);
+  const annee = String(new Date().getFullYear());
+  let resume;
+  if (type === 'facture') {
+    const aEncaisser = parStatut('envoyee'), retard = documents.filter(enRetard);
+    const payeesAnnee = parStatut('payee').filter((d) => String(d.date || '').startsWith(annee));
+    resume = [
+      kpi('À encaisser', euro.format(somme(aEncaisser)), aEncaisser.length ? `${pluriel(aEncaisser.length, 'facture')} envoyée${aEncaisser.length > 1 ? 's' : ''}` : 'rien en attente', 'envoyee'),
+      kpi('En retard', euro.format(somme(retard)), retard.length ? `${pluriel(retard.length, 'facture')} échue${retard.length > 1 ? 's' : ''}` : 'aucun retard', 'retard', retard.length > 0),
+      kpi(`Encaissé en ${annee}`, euro.format(somme(payeesAnnee)), `${pluriel(payeesAnnee.length, 'facture')} payée${payeesAnnee.length > 1 ? 's' : ''}`, 'payee'),
+      kpi('Brouillons', String(comptes.brouillon || 0), comptes.brouillon ? 'à finaliser et envoyer' : 'aucun en cours', 'brouillon'),
+    ];
+  } else {
+    const attente = parStatut('envoye'), acceptes = parStatut('accepte'), refuses = parStatut('refuse');
+    const decides = acceptes.length + refuses.length;
+    resume = [
+      kpi('En attente de réponse', euro.format(somme(attente)), attente.length ? pluriel(attente.length, 'devis').replace('deviss', 'devis') + ' envoyé' + (attente.length > 1 ? 's' : '') : 'aucun devis en attente', 'envoye'),
+      kpi('Acceptés', euro.format(somme(acceptes)), pluriel(acceptes.length, 'devis').replace('deviss', 'devis'), 'accepte'),
+      kpi('Taux d’acceptation', decides ? `${Math.round((acceptes.length / decides) * 100)} %` : '—', decides ? `sur ${pluriel(decides, 'réponse')}` : 'pas encore de réponse', 'accepte'),
+      kpi('Brouillons', String(comptes.brouillon || 0), comptes.brouillon ? 'à finaliser et envoyer' : 'aucun en cours', 'brouillon'),
+    ];
+  }
+
   const rech = saisie({ type: 'search', placeholder: 'Numéro ou client…', class: 'input input--recherche', oninput: (e) => { recherche = e.target.value; dessiner(); } });
-  ctx.afficher(h('section', { class: 'carte' },
-    h('div', { class: 'carte__outils' }, chips, h('div', { class: 'recherche' }, icone('recherche'), rech)),
-    h('div', { class: 'tableau-defil' }, h('table', { class: 'tableau' },
-      h('thead', null, h('tr', null, h('th', null, 'N°'), h('th', null, 'Client'), h('th', null, 'Date'), type === 'facture' ? h('th', null, 'Échéance') : null, h('th', { class: 'num' }, 'Montant'), h('th', null, 'Statut'))),
-      corps))));
+  ctx.afficher(
+    documents.length ? h('div', { class: 'vg-kpis vg-kpis--4' }, resume) : null,
+    h('section', { class: 'carte' },
+      h('div', { class: 'carte__outils' }, chips, h('div', { class: 'recherche' }, icone('recherche'), rech)),
+      h('div', { class: 'tableau-defil' }, h('table', { class: `tableau tableau--docs tableau--${type}` }, tete, corps, pied))));
+  dessinerTete();
   dessiner();
 }
 

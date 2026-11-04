@@ -589,7 +589,7 @@ async function pageParametres(ctx) {
     donnees.tauxTva = Math.min(100, Math.max(0, parseFloat(String(donnees.tauxTva).replace(',', '.')) || 0));
     try { await api('reglages.enregistrer', donnees); toast('Paramètres enregistrés. Ils s\'appliquent aux nouveaux documents.'); } catch (err) { erreur(err); }
   } },
-  carte([h('h2', null, 'Votre entreprise'), h('small', null, 'Apparaît en haut de vos devis et factures')], h('div', { class: 'form-grille' }, champ('Nom affiché', c.nom), champ('Coordonnées (une info par ligne)', c.emetteur, 'Gardez la mention « EI » après votre nom : elle est obligatoire.'), champ('Email (sur les devis)', c.email))),
+  carte([h('h2', null, 'Votre entreprise'), h('small', null, 'Apparaît en haut de vos devis et factures')], h('div', { class: 'form-grille' }, champ('Nom affiché', c.nom), champ('Coordonnées (une info par ligne)', c.emetteur, 'Gardez la forme juridique, le capital, le SIRET et le RCS : ces mentions sont obligatoires sur les factures.'), champ('Email (sur les devis)', c.email))),
   carte([h('h2', null, 'TVA'), h('small', null, 'Appliquée aux nouveaux devis et factures')], h('div', { class: 'form-grille form-grille--2' },
     champ('Taux de TVA par défaut (%)', c.tauxTva, 'Ex. 20 (sécurité) ou 10 (transport VTC). 0 = « TVA non applicable ». Modifiable ensuite sur chaque devis ou facture.'),
     champ('N° de TVA intracommunautaire', c.numeroTva, 'Obligatoire sur les factures avec TVA. Ajouté automatiquement sous vos coordonnées.'))),

@@ -596,19 +596,19 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '16';
+const VERSION = '17';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 16 : l’espace client devient un salon privé, et l’appli iPhone « BDA Équipe » de vos agents se pilote d’ici.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 17 : le portail client devient le point d’accès unique de vos clients, avec un vrai centre documentaire.'),
       h('ul', null,
-        point('clients', 'clients', 'Espace client', 'Clients › Espace client : pour chaque client, vous cochez les agents et les documents qu’il voit (carte pro, diplômes…). Il signe ses devis en ligne, vous dépose ses documents et suit ses demandes.'),
-        point('message', 'equipe', 'Messages', 'Les agents vous écrivent depuis l’appli, avec une photo si besoin. Vous répondez ici : ils reçoivent une notification sur leur iPhone.'),
-        point('cloche', 'equipe', 'Notifications', 'Une annonce à un agent ou à toute l’équipe en un clic. Nouveau poste au planning, postes à prendre et nouvelles consignes partent tout seuls (réglable).'),
-        point('mobile', 'equipe', 'Téléphones', 'Qui a installé l’appli, et la clé Apple des notifications à coller une seule fois.'))),
+        point('clients', 'clients', 'Centre documentaire', 'Clients › Espace client : déposez le Kbis, l’attestation CNAPS, la RC Pro, l’URSSAF, les contrats et courriers. Les pièces manquantes sont signalées au client, qui peut les demander.'),
+        point('facture', 'clients', 'Factures et devis', 'Toutes les factures et tous les devis émis au nom du client (hors brouillons) apparaissent seuls dans son espace. Les pièces à un nom proche se rattachent en un clic.'),
+        point('message', 'clients', 'Informations', 'Publiez une information en haut du tableau de bord d’un client ou de tous les clients.'),
+        point('devis', 'site', 'Devis et factures', 'Chiffres clés cliquables, tri par colonne et total en bas de liste.'))),
     actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
   }), 900);
 }

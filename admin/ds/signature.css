@@ -259,3 +259,74 @@ table th {
   .vg-domaines { grid-template-columns: minmax(0, 1fr); }
 }
 :root[data-mouvement="reduit"] .vg * { transition: none !important; }
+
+/* =========================================================
+   13. FINITIONS (v17) — alignements, tableaux, détails
+   ========================================================= */
+/* Rythme : animations d'entrée plus courtes (300 ms), toujours sans rebond */
+:root { --iv-d-entree: 300ms; }
+
+/* Le contenu de la page s'aligne exactement sous le titre (l'ancien retrait de 32 px est retiré) */
+.cadre-page > .page { padding: 0 !important; max-width: none !important; animation: none; }
+/* Titres de carte : plus de retrait hérité de l'ancien repère doré */
+.carte__tete h2, .carte__tete h3 { padding-left: 0 !important; }
+
+/* Fil d'Ariane : sur écran moyen, l'espace (« Site internet ») s'efface pour laisser le titre entier */
+@media (max-width: 1560px) {
+  .ariane > a:nth-child(3):not(:last-child),
+  .ariane > a:nth-child(3):not(:last-child) + .ariane__sep { display: none; }
+}
+
+/* Cloche : un léger sursaut vertical au lieu d'une rotation */
+@keyframes iv-sonne-douce { 0%, 100% { transform: none; } 35% { transform: translateY(-2px); } 70% { transform: translateY(1px); } }
+.haut-btn.sonne .ic { animation: iv-sonne-douce 0.45s var(--iv-courbe) both !important; }
+
+/* Indicateur d'enregistrement : rien quand il n'a rien à dire */
+.etat-save:empty { display: none; }
+
+/* ---------- Tableaux ---------- */
+.tableau tbody td { transition: background-color var(--iv-d-instant) var(--iv-courbe); }
+.tableau td:empty::before { content: "—"; color: var(--iv-pale); }
+.tableau .mono, .tableau b.mono { white-space: nowrap; }
+.tableau th.th-tri { cursor: pointer; user-select: none; white-space: nowrap; transition: color var(--iv-d-instant) var(--iv-courbe); }
+.tableau th.th-tri:hover, .tableau th.th-tri.is-trie { color: var(--iv-encre) !important; }
+.tableau th .tri { display: inline-block; min-width: 10px; margin-left: 5px; font-size: 8px; color: var(--sg-or); vertical-align: 1px; }
+.tableau th.num .tri { margin-left: 0; margin-right: 5px; float: left; }
+.tableau tfoot td {
+  padding-top: 12px; padding-bottom: 12px;
+  border-top: 1px solid var(--iv-trait-2); border-bottom: 0;
+  background: var(--iv-surface-2);
+  color: var(--iv-encre-2); font-size: 12.5px;
+}
+.tableau tfoot td.num { color: var(--iv-encre); font-weight: 600; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+.tableau tfoot td:empty::before { content: none; }
+.tableau--agents .etat-carte { white-space: nowrap; }
+/* … sans faire déborder le tableau : les colonnes Contact et Notes cèdent un peu de place */
+.tableau-agents .tableau--agents td:nth-child(3) { min-width: 136px; }
+.tableau-agents .tableau--agents td:nth-child(7) { min-width: 104px; }
+
+/* ---------- Chiffres clés des listes Devis et Factures (cliquables) ---------- */
+.vg-kpis--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+button.vg-kpi { width: 100%; margin: 0; border: 0; border-left: 1px solid var(--iv-trait); background: transparent; font: inherit; text-align: left; cursor: pointer; }
+button.vg-kpi:first-child { border-left: 0; }
+button.vg-kpi:focus-visible { outline: 2px solid var(--iv-focus); outline-offset: -3px; }
+@media (max-width: 1200px) {
+  .vg-kpis--4 .vg-kpi:nth-child(4) { border-left: 1px solid var(--iv-trait); }
+  .vg-kpis--4 .vg-kpi:nth-child(n + 4) { border-top: 0; }
+}
+@media (max-width: 900px) {
+  .vg-kpis--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vg-kpis--4 .vg-kpi:nth-child(3) { border-left: 0; }
+  .vg-kpis--4 .vg-kpi:nth-child(n + 3) { border-top: 1px solid var(--iv-trait); }
+}
+@media (max-width: 600px) {
+  .vg-kpis--4 .vg-kpi:nth-child(4) { border-left: 1px solid var(--iv-trait); }
+  .vg-kpis--4 .vg-kpi__val { font-size: 19px; }
+  /* Liste des documents sur téléphone : la date d'émission s'efface, le numéro reste sur une ligne */
+  .tableau--docs th:nth-child(3), .tableau--docs td:nth-child(3) { display: none; }
+  .tableau--docs th, .tableau--docs td { padding-left: 7px; padding-right: 7px; }
+  .tableau--docs th:first-child, .tableau--docs td:first-child { padding-left: 14px; }
+  .tableau--docs th:last-child, .tableau--docs td:last-child { padding-right: 12px; }
+  .tableau--docs tfoot { display: none; }
+  .tableau--facture th:nth-child(4), .tableau--facture td:nth-child(4) { display: none; }
+}

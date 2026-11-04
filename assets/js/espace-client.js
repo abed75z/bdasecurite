@@ -438,7 +438,7 @@ async function vueAccueil() {
     t.annonces.map((a) => h('section', { class: `annonce ${a.niveau === 'important' ? 'annonce--important' : ''}` }, h('small', null, a.niveau === 'important' ? 'Important' : 'Information'), h('b', null, a.titre), a.texte ? h('p', null, a.texte) : null)),
     h('div', { class: 'chiffres chiffres--3' },
       kpi('#/prestations', der ? `Heures · ${der.libelle}` : 'Heures de présence', heures(der ? der.heures : 0),
-        der ? `${pluriel(der.jours, 'jour')} travaillé${der.jours > 1 ? 's' : ''}${der.source === 'releve' ? ` · facture ${der.facture}` : ''}` : 'Aucune heure enregistrée'),
+        der ? (der.encours ? `${pluriel(der.jours, 'jour')} à ce jour · mois en cours` : `${pluriel(der.jours, 'jour')}${der.source === 'releve' ? ` · facture ${der.facture}` : ''}`) : 'Aucune heure enregistrée'),
       kpi('#/factures', 'Reste à régler', euro.format(f.montantDu), f.enRetard ? `${pluriel(f.enRetard, 'facture')} en retard` : f.aRegler ? `${pluriel(f.aRegler, 'facture')} en attente` : 'Toutes vos factures sont réglées',
         f.enRetard ? 'alerte' : f.montantDu > 0 ? 'attente' : ''),
       kpi('#/factures', `Facturé en ${annee}`, euro.format(f.totalAnnee), pluriel(nbAnnee, 'facture'))),
@@ -708,27 +708,32 @@ async function vuePrestations() {
   const t = await api('mod.portail.tableau');
   const p = t.prestations;
   const mois = p.mois || [];
-  const der = p.dernier;
+  const c = p.courant;
+  const clos = mois.find((m) => !m.encours);
   const site = p.sites.join(', ') || 'Votre site';
-  const enDirect = p.enPoste.length || p.semaine.length;
-  const presence = p.enPoste.map((a) => h('div', { class: 'presence__ligne' }, h('i', { class: 'pouls' }), h('span', null, h('b', null, a.nom), h('small', null, a.qualification)), statut('ok', `En poste depuis ${hm(a.depuis)}`)));
+  const auj = iso(new Date());
+  const etatMois = (m) => (m.encours ? statut('attente', 'En cours') : m.source === 'releve' ? statut('ok', `Facturé · ${m.facture}`) : statut('neutre', 'Terminé'));
+  const enPoste = p.enPoste.map((a) => h('div', { class: 'presence__ligne' }, h('i', { class: 'pouls' }), h('span', null, h('b', null, a.nom), h('small', null, a.qualification)), statut('ok', `En poste depuis ${hm(a.depuis)}`)));
   return [
-    tete('Prestation', 'Heures de présence', `${site} · les heures assurées par nos agents, mois par mois. Cliquez sur un mois pour voir le détail jour par jour.`),
-    der ? h('div', { class: 'chiffres chiffres--3' },
-      kpi(`#/rapport/${der.mois}`, `Heures · ${der.libelle}`, heures(der.heures), der.source === 'releve' ? `Relevé de la facture ${der.facture}` : 'D’après le planning'),
-      kpi(`#/rapport/${der.mois}`, 'Jours travaillés', String(der.jours), der.libelle),
-      kpi(null, 'Agents en poste', String(p.enPoste.length), p.enPoste.length ? 'À cet instant' : 'Aucun en ce moment')) : null,
-    panneau('Heures par mois', h('small', null, pluriel(mois.length, 'mois', 'mois')),
-      mois.length ? tableau([['Mois'], ['Jours', 'd m-cache'], ['Heures', 'd'], ['Source', 'm-cache'], ['', 'd m-cache']], mois.map((m) => ligne(() => { location.hash = `#/rapport/${m.mois}`; }, [
-        td([h('b', { class: 'fort' }, m.libelle), m.encours ? h('small', null, 'Mois en cours') : null, h('small', { class: 'm-seul' }, `${pluriel(m.jours, 'jour')} · ${m.source === 'releve' ? `facture ${m.facture}` : 'planning'}`)]),
-        td(String(m.jours), 'd chiffre m-cache'), td(heures(m.heures), 'd chiffre fort'),
-        td(m.source === 'releve' ? `Relevé joint à la facture ${m.facture}` : 'Planning des agents', 'm-cache'), tdFleche()])))
-        : vide('Aucune heure enregistrée pour l’instant', 'Les heures apparaîtront ici avec le relevé joint à chaque facture mensuelle.')),
-    enDirect ? panneau('Cette semaine', null,
-      presence.length ? h('div', { class: 'presence' }, presence) : null,
-      p.semaine.length ? tableau([['Jour'], ['Horaires'], ['Agent', 'm-cache']], p.semaine.map((s) => ligne(null, [
-        td(cap(frJour(s.jour)), 'fort'), td(`${hm(s.debut)} – ${hm(s.fin)}`, 'chiffre'), td(s.agents.length ? s.agents.join(', ') : h('span', { class: 'manquant' }, 'Affectation en cours'), 'm-cache')]))) : null) : null,
-    h('p', { class: 'note' }, 'Les heures sont celles du relevé joint à chaque facture : en cas d’écart, la facture fait foi. Une question ? ', h('a', { href: '#/messages' }, 'Écrivez-nous'), '.'),
+    tete('Prestation', 'Heures de présence', `${site}. Un mois terminé reprend les heures de sa facture ; le mois en cours suit le planning de nos agents.`),
+    h('div', { class: 'chiffres chiffres--3' },
+      clos ? kpi(`#/rapport/${clos.mois}`, `${clos.libelle} · facturé`, heures(clos.heures), clos.source === 'releve' ? `${pluriel(clos.jours, 'jour')} · facture ${clos.facture}` : pluriel(clos.jours, 'jour'))
+        : kpi(null, 'Dernier mois facturé', '—', 'Aucun pour l’instant'),
+      kpi(`#/rapport/${c.mois}`, `${c.libelle} · effectué`, heures(c.fait), c.joursFaits ? `${pluriel(c.joursFaits, 'jour')} à ce jour` : 'Rien encore ce mois-ci'),
+      kpi(null, `${c.libelle} · prévu`, heures(c.prevu), c.joursPrevus ? `${pluriel(c.joursPrevus, 'jour')} au planning` : 'Planning en préparation')),
+    enPoste.length ? panneau('En ce moment', null, h('div', { class: 'presence' }, enPoste)) : null,
+    panneau('Mois par mois', h('small', null, 'Cliquez sur un mois pour voir chaque jour'),
+      mois.length ? tableau([['Mois'], ['Jours', 'd'], ['Heures', 'd'], ['État', 'm-cache'], ['', 'd m-cache']], mois.map((m) => ligne(() => { location.hash = `#/rapport/${m.mois}`; }, [
+        td([h('b', { class: 'fort' }, m.libelle), m.encours && m.prevu ? h('small', null, `${heures(m.heures)} faites sur ${heures(m.prevu)} prévues`) : null,
+          h('small', { class: 'm-seul' }, m.encours ? 'En cours' : m.source === 'releve' ? `Facturé · ${m.facture}` : 'Terminé')]),
+        td(String(m.jours), 'd chiffre'), td(heures(m.heures), 'd chiffre fort'), td(etatMois(m), 'm-cache'), tdFleche()])))
+        : vide('Aucune heure pour l’instant', 'Les heures apparaîtront ici dès les premières vacations.')),
+    p.semaine.length ? panneau('Prochains jours', h('small', null, 'Horaires prévus au planning'),
+      tableau([['Jour'], ['Horaires'], ['Agent', 'm-cache']], p.semaine.map((x) => ligne(null, [
+        td([cap(frJour(x.jour)), x.jour === auj ? h('i', { class: 'nouveau' }, 'Aujourd’hui') : null, h('small', { class: 'm-seul' }, x.agents.join(', ') || 'Affectation en cours')], 'fort'),
+        td(`${hm(x.debut)} – ${hm(x.fin)}`, 'chiffre'),
+        td(x.agents.length ? x.agents.join(', ') : h('span', { class: 'manquant' }, 'Affectation en cours'), 'm-cache')])))) : null,
+    h('p', { class: 'note' }, 'Une question sur des heures ? ', h('a', { href: '#/messages' }, 'Écrivez-nous'), ', la direction vous répond directement.'),
   ];
 }
 

@@ -832,6 +832,28 @@ function mod_portail_releves(array $docs): array
   krsort($out);
   return $out;
 }
+// Mois en cours : heures déjà effectuées (vacations terminées) et heures prévues sur tout le mois
+function mod_portail_mois_courant(array $siteIds): array
+{
+  $mois = date('Y-m');
+  $out = ['mois' => $mois, 'libelle' => mod_portail_mois($mois), 'fait' => 0.0, 'joursFaits' => 0, 'prevu' => 0.0, 'joursPrevus' => 0];
+  $faits = [];
+  $prevus = [];
+  foreach (mod_portail_activite($siteIds, "$mois-01", date('Y-m-t')) as $v) {
+    $h = mod_portail_duree((string)$v['debut'], (string)$v['fin'], (int)$v['pause']);
+    $out['prevu'] += $h;
+    $prevus[(string)$v['jour']] = true;
+    // une vacation compte comme faite une fois terminée (celle de nuit finit le lendemain)
+    $nuit = substr((string)$v['fin'], 0, 5) <= substr((string)$v['debut'], 0, 5);
+    $finVacation = (int)strtotime($v['jour'] . ' ' . substr((string)$v['fin'], 0, 5)) + ($nuit ? 86400 : 0);
+    if ($finVacation <= time()) { $out['fait'] += $h; $faits[(string)$v['jour']] = true; }
+  }
+  $out['fait'] = round($out['fait'], 2);
+  $out['prevu'] = round($out['prevu'], 2);
+  $out['joursFaits'] = count($faits);
+  $out['joursPrevus'] = count($prevus);
+  return $out;
+}
 // Heures par mois : le relevé de la facture quand il existe, sinon le planning (12 derniers mois)
 function mod_portail_heures_mois(array $siteIds, array $releves): array
 {
@@ -847,6 +869,10 @@ function mod_portail_heures_mois(array $siteIds, array $releves): array
     'facture' => '', 'factureId' => 0, 'encours' => $m === date('Y-m')];
   foreach ($releves as $m => $r) $out[$m] = ['mois' => $m, 'libelle' => mod_portail_mois($m), 'heures' => $r['heures'], 'jours' => $r['jours'], 'source' => 'releve',
     'facture' => $r['facture'], 'factureId' => $r['factureId'], 'encours' => false];
+  // le mois en cours compte seulement ce qui est fait, avec ce qui reste prévu
+  $c = mod_portail_mois_courant($siteIds);
+  if (!isset($releves[$c['mois']]) && ($c['prevu'] > 0 || isset($out[$c['mois']]))) $out[$c['mois']] = ['mois' => $c['mois'], 'libelle' => $c['libelle'], 'heures' => $c['fait'],
+    'jours' => $c['joursFaits'], 'prevu' => $c['prevu'], 'source' => 'planning', 'facture' => '', 'factureId' => 0, 'encours' => true];
   krsort($out);
   return array_values($out);
 }
@@ -985,7 +1011,9 @@ function mod_portail_cl_tableau(): void
   repondre(['ok' => true,
     'prestations' => ['sites' => array_values($sites), 'enPoste' => mod_portail_en_poste($ids), 'prochain' => mod_portail_prochain($ids), 'semaine' => mod_portail_semaine($sites),
       'heuresMois' => $heuresDe(date('Y-m'))['heures'] ?? 0, 'heuresPrecedent' => $heuresDe($precedent)['heures'] ?? 0, 'moisPrecedent' => $precedent,
-      'mois' => $parMois, 'dernier' => $parMois[0] ?? null],
+      'mois' => $parMois, 'courant' => mod_portail_mois_courant($ids),
+      // le dernier mois terminé (le plus parlant pour le client), sinon le mois en cours
+      'dernier' => array_values(array_filter($parMois, fn ($m) => !$m['encours']))[0] ?? ($parMois[0] ?? null)],
     'factures' => ['nombre' => count($factures), 'aRegler' => count($aRegler), 'montantDu' => round(array_sum(array_column($aRegler, 'montant')), 2),
       'enRetard' => count(array_filter($aRegler, fn ($i) => $i['statut']['ton'] === 'alerte')),
       'totalAnnee' => round(array_sum(array_map(fn ($i) => str_starts_with($i['date'], $annee) && $i['statut']['code'] !== 'annulee' ? $i['montant'] : 0, $factures)), 2), 'annee' => $annee],

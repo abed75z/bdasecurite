@@ -923,7 +923,7 @@ function ligneJournal(l, j) {
   const qui = !l.moi && l.agent ? l.agent : '';
   let titre = l.libelle;
   let sous = [l.detail, qui];
-  if (l.type === 'note') { titre = l.detail || 'Note'; sous = [qui]; }
+  if (l.type === 'note' && (!l.libelle || l.libelle === 'Note')) { titre = l.detail || 'Note'; sous = [qui]; }
   if (l.type === 'visiteur') sous = [l.detail, l.depart ? `reparti à ${heureDe(l.depart)}` : 'sur place', qui];
   if (l.attente) sous.push('en attente de réseau');
   const action = l.type === 'visiteur' && l.moi && !l.depart && l.id ? h('button', { class: 'ap-jl__action', type: 'button', onclick: async (e) => {
@@ -946,27 +946,9 @@ function vueJournal(j, { complet = false } = {}) {
     const enAttente = lireLocal(ATTENTE_LIGNES, []).map((x) => ({ ...x, type: x.type, libelle: x.libelle, detail: x.detail || '', moi: true, attente: true, id: 0 }));
     const toutes = [...donnees.lignes, ...enAttente].sort((a, b) => a.quand.localeCompare(b.quand));
     const montrees = complet ? toutes : toutes.slice(-3);
-    const cpt = donnees.compteur?.actif ? (donnees.compteur.nombre || 0) + (lireLocal(ATTENTE_COMPTEUR, null)?.delta || 0) : null;
-    let nombreEl = null;
-    const compteur = cpt === null ? null : h('div', { class: 'ap-compteur' },
-      h('button', { class: 'ap-compteur__nombre', type: 'button', 'aria-label': `${pluriel(cpt, 'personne')} reçue${cpt > 1 ? 's' : ''} aujourd’hui : corriger`, onclick: () => corrigerCompteur(cpt) },
-        nombreEl = h('b', null, String(cpt)), h('small', null, cpt > 1 ? 'personnes reçues' : 'personne reçue')),
-      h('button', { class: 'ap-compteur__plus', type: 'button', 'aria-label': 'Ajouter une personne reçue', onclick: async () => {
-        donnees.compteur.nombre = (donnees.compteur.nombre || 0) + 1;
-        vibrer(8);
-        nombreEl.textContent = String(cpt + 1);
-        nombreEl.classList.remove('is-bond'); void nombreEl.offsetWidth; nombreEl.classList.add('is-bond');
-        try { const r = await api('mod.journal.compteur', { delta: 1 }); donnees.compteur.nombre = r.nombre; }
-        catch (e) {
-          if (!sansReseau(e)) { donnees.compteur.nombre -= 1; toast(e.message, true); }
-          else { donnees.compteur.nombre -= 1; const a = lireLocal(ATTENTE_COMPTEUR, null); ecrireLocal(ATTENTE_COMPTEUR, { jour: iso(new Date(Date.now() + decalage)), delta: (a?.delta || 0) + 1 }); }
-        }
-        dessiner();
-      } }, '+1'));
     racineJ.replaceChildren(
       h('div', { class: 'ap-journal__tete' }, h('p', { class: 'ap-sur' }, complet ? (donnees.site?.nom || 'Votre poste') : 'Main courante'),
         !complet ? h('a', { class: 'ap-journal__tout', href: '#/journal' }, toutes.length > 3 ? `Tout voir · ${toutes.length}` : 'Ouvrir', ic('fleche')) : null),
-      compteur,
       montrees.length ? h('ol', { class: 'ap-jls' }, montrees.map((l) => ligneJournal(l, donnees)))
         : h('p', { class: 'ap-journal__vide' }, 'Rien de noté pour l’instant. Touchez « Noter » : l’heure se met toute seule.'));
   };
@@ -974,20 +956,6 @@ function vueJournal(j, { complet = false } = {}) {
     if (!racineJ.isConnected) return;
     try { donnees = await api('mod.journal.jour'); } catch (e) { /* hors ligne : on garde l'affichage */ }
     dessiner();
-  };
-  const corrigerCompteur = (actuel) => {
-    const champN = h('input', { type: 'number', inputmode: 'numeric', min: 0, max: 100000, value: actuel, 'aria-label': 'Nombre de personnes reçues' });
-    const pas = (n) => { champN.value = String(Math.max(0, (parseInt(champN.value, 10) || 0) + n)); vibrer(6); };
-    const enregistrer = h('button', { class: 'ap-btn', type: 'submit' }, 'Enregistrer');
-    const fermer = tiroir('Personnes reçues', h('form', { class: 'ap-correction', onsubmit: async (e) => {
-      e.preventDefault();
-      enregistrer.disabled = true;
-      try { const r = await api('mod.journal.compteur', { valeur: Math.max(0, parseInt(champN.value, 10) || 0) }); ecrireLocal(ATTENTE_COMPTEUR, null); donnees.compteur.nombre = r.nombre; dessiner(); fermer(); toast('Compteur corrigé.'); }
-      catch (err) { toast(err.message, true); enregistrer.disabled = false; }
-    } },
-      h('div', { class: 'ap-correction__ligne' }, h('button', { type: 'button', 'aria-label': 'Une de moins', onclick: () => pas(-1) }, '−'), champN, h('button', { type: 'button', 'aria-label': 'Une de plus', onclick: () => pas(1) }, '+')),
-      enregistrer,
-      h('p', { class: 'ap-aide' }, 'Le total s’ajoute tout seul à la ligne « Fermeture au public ».')), { sur: 'AUJOURD’HUI' });
   };
   dessiner();
   journalVue = { rafraichir, donnees: () => donnees };
@@ -1009,13 +977,14 @@ function feuilleNoter() {
   const corps = h('div', { class: 'ap-noter' });
   const retour = () => h('button', { class: 'ap-btn-texte ap-noter__retour', type: 'button', onclick: () => accueil() }, ic('retour'), 'Retour');
   const faits = (lib) => [...j.lignes].reverse().find((l) => l.type === 'bouton' && l.libelle === lib);
-  const nb = j.compteur?.actif ? (j.compteur.nombre || 0) : 0;
+  const avecListe = (b) => j.liste && /fermeture au public/i.test(b);
   const accueil = () => {
     corps.replaceChildren(blocHeure, reculs,
       h('div', { class: 'ap-tuiles' }, j.boutons.map((b) => {
         const fait = faits(b);
-        const sous = fait ? `Fait à ${heureDe(fait.quand)}` : /fermeture au public/i.test(b) && nb ? `${pluriel(nb, 'personne')} reçue${nb > 1 ? 's' : ''}` : '';
+        const sous = fait ? `Fait à ${heureDe(fait.quand)}` : avecListe(b) ? 'Avec le compte rendu de la liste' : '';
         return h('button', { class: `ap-tuile ${fait ? 'is-fait' : ''}`, type: 'button', onclick: async (e) => {
+          if (avecListe(b)) return fermeture(b);
           const t = e.currentTarget;
           corps.querySelectorAll('.ap-tuile').forEach((x) => { x.disabled = true; });
           t.classList.add('is-envoi');
@@ -1027,6 +996,32 @@ function feuilleNoter() {
         h('button', { class: 'ap-option ap-option--bouton', type: 'button', onclick: () => visiteur() }, h('span', null, 'Visiteur ou livraison'), ic('fleche')),
         h('button', { class: 'ap-option ap-option--bouton', type: 'button', onclick: () => note() }, h('span', null, 'Note libre'), ic('fleche'))),
       h('button', { class: 'ap-btn-texte ap-noter__incident', type: 'button', onclick: () => { fermer(); setTimeout(() => formulaireIncident(j.site?.nom || ''), 340); } }, 'Signaler un incident'));
+  };
+  // Fermeture au public : combien d'absents sur la liste, combien de personnes venues sans rendez-vous
+  const fermeture = (libelle) => {
+    const compteur = (titre, aide) => {
+      const champN = h('input', { class: 'ap-pas__nombre', type: 'number', inputmode: 'numeric', min: 0, max: 9999, value: 0, 'aria-label': titre });
+      const pas = (n) => { champN.value = String(Math.max(0, (parseInt(champN.value, 10) || 0) + n)); vibrer(6); champN.classList.remove('is-bond'); void champN.offsetWidth; champN.classList.add('is-bond'); };
+      champN.addEventListener('focus', () => champN.select());
+      return { champN, el: h('div', { class: 'ap-pas' },
+        h('div', { class: 'ap-pas__texte' }, h('b', null, titre), h('small', null, aide)),
+        h('div', { class: 'ap-pas__boutons' },
+          h('button', { type: 'button', 'aria-label': `${titre} : un de moins`, onclick: () => pas(-1) }, '−'), champN,
+          h('button', { type: 'button', 'aria-label': `${titre} : un de plus`, onclick: () => pas(1) }, '+'))) };
+    };
+    const absents = compteur('Absents sur la liste', 'Personnes attendues qui ne sont pas venues');
+    const sansRdv = compteur('Venus sans rendez-vous', 'Personnes reçues sans être sur la liste');
+    const remarque = h('input', { class: 'ap-saisie-ligne', maxlength: 300, placeholder: 'Remarque (facultatif)', 'aria-label': 'Remarque' });
+    const msg = h('p', { class: 'ap-erreur-texte', role: 'alert' });
+    const btn = h('button', { class: 'ap-btn', type: 'submit' }, 'Noter la fermeture');
+    corps.replaceChildren(h('form', { class: 'ap-noter', onsubmit: async (e) => {
+      e.preventDefault(); msg.textContent = '';
+      btn.disabled = true;
+      const nA = Math.max(0, parseInt(absents.champN.value, 10) || 0);
+      const nS = Math.max(0, parseInt(sansRdv.champN.value, 10) || 0);
+      try { await noterLigne({ type: 'bouton', libelle, detail: remarque.value.trim(), minutes: recul, absents: nA, sans_rdv: nS }, `${libelle} · ${nA} absent${nA > 1 ? 's' : ''}`); fermer(); }
+      catch (err) { msg.textContent = err.message; btn.disabled = false; }
+    } }, retour(), blocHeure, reculs, h('p', { class: 'ap-sur' }, 'Compte rendu de la liste'), absents.el, sansRdv.el, remarque, msg, btn));
   };
   const visiteur = () => {
     const nom = h('input', { class: 'ap-saisie-ligne', maxlength: 80, placeholder: 'Nom ou société (ex. ELIS)', autocapitalize: 'words', autocomplete: 'off', 'aria-label': 'Nom ou société' });

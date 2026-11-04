@@ -705,3 +705,17 @@ body.a-defile .haut { box-shadow: 0 10px 28px -22px rgba(15, 27, 45, .5); }
 .mc-liste .mc-incident time, .mc-liste .mc-incident b { color: var(--alerte); }
 .mc-liste .mc-auto time, .mc-liste .mc-auto b { color: var(--muet); font-weight: 500; }
 @media print { .mc-jours .btn, .mc-jours .lien, .mc-jours .statut { display: none !important; } }
+
+/* ----- v32 : résumé de la journée dans la main courante ----- */
+.mc-chiffres { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); border-bottom: 1px solid var(--filet); }
+.mc-chiffres > div { display: grid; align-content: start; gap: 4px; padding: 18px 24px; border-left: 1px solid var(--filet-2); }
+.mc-chiffres > div:first-child { border-left: 0; }
+.mc-chiffres small { color: var(--muet); font-size: 10.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.mc-chiffres b { color: var(--encre); font-size: 24px; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.mc-chiffres b > .compteur { color: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit; }
+.mc-chiffres span { color: var(--muet); font-size: 12.5px; }
+.mc-resume { flex-wrap: wrap; gap: 6px 22px; }
+.mc-resume > span { color: var(--muet); font-size: 13px; }
+.mc-resume > span b { margin-right: 4px; font-size: 20px; }
+@media (max-width: 640px) { .mc-chiffres { grid-template-columns: 1fr 1fr; } .mc-chiffres > div:nth-child(3) { border-left: 0; } .mc-chiffres > div { padding: 14px 16px; border-top: 1px solid var(--filet-2); } .mc-chiffres > div:nth-child(-n+2) { border-top: 0; } }
+@media print { .mc-chiffres { border: 1px solid #ccc; } }

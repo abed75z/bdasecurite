@@ -3,8 +3,10 @@
    MODULE « Main courante » — le cahier de poste de chaque site, sans papier
    L'agent touche un bouton (ouverture, fermeture, ronde…), note un visiteur ou une livraison,
    ou écrit une note : l'heure est prise toute seule. La prise et la fin de service (pointage)
-   et les incidents signalés s'ajoutent d'eux-mêmes. Un compteur « Personnes reçues » sert aux
-   postes d'accueil. La direction voit tout en direct (admin), le client aussi (espace client).
+   et les incidents signalés s'ajoutent d'eux-mêmes. Aux postes d'accueil avec une liste de rendez-vous,
+   la fermeture au public porte le compte rendu de la liste (absents, venus sans rendez-vous).
+   La direction voit tout en direct et peut ajouter ou corriger une ligne (admin), le client voit
+   le cahier de son site (espace client).
    ========================================================= */
 
 const MOD_JOURNAL_BOUTONS = ['Ouverture des portes', 'Ouverture au public', 'Fermeture au public', 'Fermeture des portes', 'Ronde faite'];
@@ -26,12 +28,19 @@ function module_journal(): array
       CREATE TABLE IF NOT EXISTS m_journal_sites (site_id INTEGER PRIMARY KEY, boutons TEXT NOT NULL DEFAULT '', compteur INTEGER NOT NULL DEFAULT 1,
         client INTEGER NOT NULL DEFAULT 1, maj TEXT NOT NULL DEFAULT '');
       CREATE TABLE IF NOT EXISTS m_journal_compteurs (site_id INTEGER NOT NULL, jour TEXT NOT NULL, nombre INTEGER NOT NULL DEFAULT 0, maj TEXT NOT NULL, PRIMARY KEY (site_id, jour));
+      SQL,
+      // compte rendu de la liste (nombre = absents, sans_rdv = venus sans rendez-vous, liste = 1 s'il est donné) ; par = 'direction' si saisi depuis l'admin
+      2 => <<<'SQL'
+      ALTER TABLE m_journal_lignes ADD COLUMN sans_rdv INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE m_journal_lignes ADD COLUMN liste INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE m_journal_lignes ADD COLUMN par TEXT NOT NULL DEFAULT '';
       SQL],
     'admin' => [
       'sites' => $lire('mod_journal_adm_sites'),
       'jour' => $lire('mod_journal_adm_jour'),
       'reglages' => $ecrire('mod_journal_adm_reglages'),
       'retirer' => $ecrire('mod_journal_adm_retirer'),
+      'ligne' => $ecrire('mod_journal_adm_ligne'),
       'photo' => $lire('mod_journal_adm_photo'),
     ],
     'equipe' => [
@@ -70,7 +79,20 @@ function mod_journal_reglages(int $siteId): array
   $st->execute([$siteId]);
   $r = $st->fetch();
   $boutons = $r ? (json_decode((string)$r['boutons'], true) ?: []) : [];
-  return ['boutons' => $boutons ?: MOD_JOURNAL_BOUTONS, 'compteur' => $r ? (int)$r['compteur'] === 1 : true, 'client' => $r ? (int)$r['client'] === 1 : true];
+  return ['boutons' => $boutons ?: MOD_JOURNAL_BOUTONS, 'liste' => $r ? (int)$r['compteur'] === 1 : false, 'client' => $r ? (int)$r['client'] === 1 : true];
+}
+// « 19 absents sur la liste · 7 personnes sans rendez-vous »
+function mod_journal_texte_liste(int $absents, int $sansRdv): string
+{
+  $t = [$absents ? $absents . ' absent' . ($absents > 1 ? 's' : '') . ' sur la liste' : 'Aucun absent sur la liste'];
+  if ($sansRdv > 0) $t[] = $sansRdv . ' personne' . ($sansRdv > 1 ? 's' : '') . ' sans rendez-vous';
+  return implode(' · ', $t);
+}
+// Lu dans le corps d'une requête : un nombre de 0 à 9999, ou null s'il n'est pas donné
+function mod_journal_nombre(array $b, string $cle): ?int
+{
+  if (!array_key_exists($cle, $b) || $b[$cle] === '' || $b[$cle] === null) return null;
+  return max(0, min(9999, (int)$b[$cle]));
 }
 function mod_journal_compteur(int $siteId, string $jour): int
 {
@@ -118,9 +140,13 @@ function mod_journal_lignes(int $siteId, string $siteNom, string $du, string $au
   $st = $db->prepare("SELECT * FROM m_journal_lignes WHERE site_id = ? AND annule = '' AND quand >= ? AND quand <= ? ORDER BY quand, id");
   $st->execute([$siteId, $du, $au]);
   foreach ($st->fetchAll() as $l) {
-    $lignes[] = ['id' => (int)$l['id'], 'quand' => (string)$l['quand'], 'type' => (string)$l['type'], 'libelle' => (string)$l['libelle'], 'detail' => (string)$l['detail'],
-      'depart' => (string)$l['depart'], 'nombre' => (int)$l['nombre'], 'photo' => !$pourClient && (string)$l['photo'] !== '', 'agent' => $nomAgent((int)$l['agent_id']), 'agentId' => (int)$l['agent_id'],
-      'cree' => (string)$l['cree']];
+    $liste = (int)($l['liste'] ?? 0) === 1;
+    $brut = (string)$l['detail'];
+    $lignes[] = ['id' => (int)$l['id'], 'quand' => (string)$l['quand'], 'type' => (string)$l['type'], 'libelle' => (string)$l['libelle'],
+      'detail' => trim(($liste ? mod_journal_texte_liste((int)$l['nombre'], (int)$l['sans_rdv']) : '') . ($liste && $brut !== '' ? ' · ' : '') . $brut),
+      'detailBrut' => $brut, 'absents' => $liste ? (int)$l['nombre'] : null, 'sansRdv' => $liste ? (int)$l['sans_rdv'] : null, 'par' => (string)($l['par'] ?? ''),
+      'depart' => (string)$l['depart'], 'nombre' => (int)$l['nombre'], 'photo' => !$pourClient && (string)$l['photo'] !== '',
+      'agent' => (int)$l['agent_id'] ? $nomAgent((int)$l['agent_id']) : 'Direction', 'agentId' => (int)$l['agent_id'], 'cree' => (string)$l['cree']];
   }
   if ($siteNom !== '') {
     // prise et fin de service : le pointage porte le nom du site
@@ -139,9 +165,29 @@ function mod_journal_lignes(int $siteId, string $siteNom, string $du, string $au
         'detail' => mb_substr((string)$m['texte'], 0, 400), 'depart' => '', 'nombre' => 0, 'photo' => false, 'agent' => $nomAgent((int)$m['agent_id']), 'agentId' => (int)$m['agent_id'], 'cree' => ''];
     }
   }
+  // une fin de service suivie d'une reprise le même jour (moins de 6 h après) est une pause
+  foreach ($lignes as $i => $l) {
+    if ($l['type'] !== 'fin') continue;
+    foreach ($lignes as $k => $m) {
+      if ($m['type'] === 'prise' && $m['agentId'] === $l['agentId'] && $m['quand'] > $l['quand'] && substr($m['quand'], 0, 10) === substr($l['quand'], 0, 10)
+        && strtotime($m['quand']) - strtotime($l['quand']) <= 6 * 3600) { $lignes[$i]['libelle'] = 'Pause'; $lignes[$k]['libelle'] = 'Reprise de service'; break; }
+    }
+  }
   usort($lignes, fn ($a, $b) => strcmp($a['quand'], $b['quand']));
-  if ($pourClient) foreach ($lignes as &$l) unset($l['agentId'], $l['cree'], $l['id']);
+  if ($pourClient) foreach ($lignes as &$l) unset($l['agentId'], $l['cree'], $l['id'], $l['detailBrut'], $l['par']);
   return $lignes;
+}
+// Le résumé d'une journée : présence (première prise, dernière fin), compte rendu de la liste, visites et livraisons, incidents
+function mod_journal_resume(array $lignes): array
+{
+  $prises = array_values(array_filter($lignes, fn ($l) => $l['type'] === 'prise'));
+  $fins = array_values(array_filter($lignes, fn ($l) => $l['type'] === 'fin'));
+  $listes = array_values(array_filter($lignes, fn ($l) => ($l['absents'] ?? null) !== null));
+  $derniere = $listes ? end($listes) : null;
+  $enCours = count($prises) > count($fins);
+  return ['debut' => $prises ? substr($prises[0]['quand'], 11, 5) : '', 'fin' => $fins && !$enCours ? substr(end($fins)['quand'], 11, 5) : '', 'enCours' => $enCours,
+    'absents' => $derniere ? $derniere['absents'] : null, 'sansRdv' => $derniere ? $derniere['sansRdv'] : null,
+    'passages' => count(array_filter($lignes, fn ($l) => $l['type'] === 'visiteur')), 'incidents' => count(array_filter($lignes, fn ($l) => $l['type'] === 'incident'))];
 }
 function mod_journal_dossier(): string
 {
@@ -180,7 +226,7 @@ function mod_journal_eq_jour(): void
   $s = db()->prepare("SELECT libelle, COUNT(*) AS n FROM m_journal_lignes WHERE site_id = ? AND type = 'visiteur' AND annule = '' GROUP BY libelle COLLATE NOCASE ORDER BY n DESC LIMIT 12");
   $s->execute([$site['id']]);
   $lignes = array_map(fn ($l) => $l + ['moi' => $l['agentId'] === $aid], mod_journal_lignes($site['id'], $site['nom'], $du, $au));
-  repondre(['ok' => true, 'site' => $site, 'boutons' => $reg['boutons'], 'compteur' => ['actif' => $reg['compteur'], 'nombre' => mod_journal_compteur($site['id'], date('Y-m-d'))],
+  repondre(['ok' => true, 'site' => $site, 'boutons' => $reg['boutons'], 'liste' => $reg['liste'],
     'enService' => $debutPoste !== '', 'lignes' => $lignes, 'suggestions' => array_column($s->fetchAll(), 'libelle'), 'serveur' => maintenant()]);
 }
 function mod_journal_eq_ajouter(): void
@@ -200,13 +246,10 @@ function mod_journal_eq_ajouter(): void
   $hors = (string)($b['quand'] ?? '');
   if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $hors) && $hors >= date('Y-m-d H:i:s', time() - 86400) && $hors <= date('Y-m-d H:i:s', time() + 300)) $quand = $hors;
   $site = mod_journal_site_agent($aid);
-  $reg = mod_journal_reglages($site['id']);
-  $nombre = 0;
-  // la fermeture au public garde le nombre de personnes reçues dans la journée
-  if ($type === 'bouton' && $reg['compteur'] && preg_match('/fermeture au public/i', $libelle)) {
-    $nombre = mod_journal_compteur($site['id'], date('Y-m-d'));
-    if ($nombre > 0) $detail = trim($nombre . ' personne' . ($nombre > 1 ? 's' : '') . ' reçue' . ($nombre > 1 ? 's' : '') . ($detail !== '' ? " · $detail" : ''));
-  }
+  // compte rendu de la liste (fermeture au public) : absents et venus sans rendez-vous
+  $absents = mod_journal_nombre($b, 'absents');
+  $sansRdv = mod_journal_nombre($b, 'sans_rdv');
+  $liste = $absents !== null || $sansRdv !== null ? 1 : 0;
   $photo = '';
   if (!empty($_FILES['photo']['tmp_name']) && is_uploaded_file((string)$_FILES['photo']['tmp_name'])) {
     if ((int)$_FILES['photo']['size'] > 8 * 1024 * 1024) throw new RuntimeException('Photo trop lourde (8 Mo maximum).');
@@ -215,8 +258,8 @@ function mod_journal_eq_ajouter(): void
     $photo = bin2hex(random_bytes(16)) . '.bin';
     if (!move_uploaded_file((string)$_FILES['photo']['tmp_name'], mod_journal_dossier() . '/' . $photo)) throw new RuntimeException('Enregistrement de la photo impossible.');
   }
-  db()->prepare('INSERT INTO m_journal_lignes (site_id, site_nom, agent_id, quand, type, libelle, detail, nombre, photo, cree, maj) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-    ->execute([$site['id'], $site['nom'], $aid, $quand, $type, $libelle, $detail, $nombre, $photo, maintenant(), maintenant()]);
+  db()->prepare('INSERT INTO m_journal_lignes (site_id, site_nom, agent_id, quand, type, libelle, detail, nombre, sans_rdv, liste, photo, cree, maj) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    ->execute([$site['id'], $site['nom'], $aid, $quand, $type, $libelle, $detail, (int)$absents, (int)$sansRdv, $liste, $photo, maintenant(), maintenant()]);
   repondre(['ok' => true, 'id' => (int)db()->lastInsertId(), 'quand' => $quand]);
 }
 // Une ligne de l'agent lui-même, encore modifiable
@@ -286,8 +329,10 @@ function mod_journal_adm_jour(): void
   $st->execute([$id]);
   $s = $st->fetch();
   if (!$s) throw new RuntimeException('Site introuvable.');
+  $lignes = mod_journal_lignes($id, (string)$s['nom'], "$jour 00:00:00", "$jour 23:59:59");
+  $agents = db()->query("SELECT id, nom FROM agents WHERE actif = 1 ORDER BY nom COLLATE NOCASE")->fetchAll();
   repondre(['ok' => true, 'site' => ['id' => $id, 'nom' => (string)$s['nom'], 'client' => (string)$s['client']], 'jour' => $jour, 'reglages' => mod_journal_reglages($id),
-    'compteur' => mod_journal_compteur($id, $jour), 'lignes' => mod_journal_lignes($id, (string)$s['nom'], "$jour 00:00:00", "$jour 23:59:59")]);
+    'lignes' => $lignes, 'resume' => mod_journal_resume($lignes), 'agents' => array_map(fn ($a) => ['id' => (int)$a['id'], 'nom' => (string)$a['nom']], $agents)]);
 }
 function mod_journal_adm_reglages(): void
 {
@@ -301,9 +346,56 @@ function mod_journal_adm_reglages(): void
   $boutons = array_slice($boutons, 0, 12);
   db()->prepare('INSERT INTO m_journal_sites (site_id, boutons, compteur, client, maj) VALUES (?, ?, ?, ?, ?)
       ON CONFLICT(site_id) DO UPDATE SET boutons = excluded.boutons, compteur = excluded.compteur, client = excluded.client, maj = excluded.maj')
-    ->execute([$id, json_encode($boutons, JSON_UNESCAPED_UNICODE), !empty($b['compteur']) ? 1 : 0, !empty($b['client']) ? 1 : 0, maintenant()]);
+    ->execute([$id, json_encode($boutons, JSON_UNESCAPED_UNICODE), !empty($b['liste']) ? 1 : 0, !empty($b['client']) ? 1 : 0, maintenant()]);
   journal('exploitation', "Main courante de $nom : réglages modifiés");
   repondre(['ok' => true, 'reglages' => mod_journal_reglages($id)]);
+}
+// Ajouter ou corriger une ligne depuis l'admin (cahier papier recopié, oubli, erreur d'heure)
+function mod_journal_adm_ligne(): void
+{
+  $b = corps();
+  $id = (int)($b['id'] ?? 0);
+  $siteId = (int)($b['site_id'] ?? 0);
+  $st = db()->prepare('SELECT nom FROM sites WHERE id = ?');
+  $st->execute([$siteId]);
+  $siteNom = (string)$st->fetchColumn();
+  if ($siteNom === '') throw new RuntimeException('Site introuvable.');
+  $jour = (string)($b['jour'] ?? '');
+  $heure = (string)($b['heure'] ?? '');
+  if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $jour) || !preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $heure)) throw new RuntimeException('Indiquez le jour et l’heure (ex. 08:30).');
+  $quand = "$jour $heure:00";
+  if ($quand > date('Y-m-d H:i:s', time() + 300)) throw new RuntimeException('Cette heure n’est pas encore passée.');
+  $type = in_array($b['type'] ?? '', ['bouton', 'visiteur', 'note'], true) ? (string)$b['type'] : 'note';
+  $libelle = texte($b['libelle'] ?? '', 80);
+  $detail = texte($b['detail'] ?? '', 1000);
+  if ($type === 'note' && $libelle === '') $libelle = 'Note';
+  if ($libelle === '') throw new RuntimeException('Écrivez ce qui s’est passé.');
+  $depart = (string)($b['depart'] ?? '');
+  if ($depart !== '') {
+    if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $depart)) throw new RuntimeException('Heure de départ invalide (ex. 11:00).');
+    $depart = "$jour $depart:00";
+    if ($depart < $quand) throw new RuntimeException('Le départ doit être après l’arrivée.');
+  }
+  $absents = mod_journal_nombre($b, 'absents');
+  $sansRdv = mod_journal_nombre($b, 'sans_rdv');
+  $liste = $absents !== null || $sansRdv !== null ? 1 : 0;
+  $agentId = (int)($b['agent_id'] ?? 0);
+  if ($agentId) {
+    $a = db()->prepare('SELECT id FROM agents WHERE id = ?');
+    $a->execute([$agentId]);
+    if (!$a->fetchColumn()) throw new RuntimeException('Agent introuvable.');
+  }
+  if ($id) {
+    $st = db()->prepare("UPDATE m_journal_lignes SET agent_id = ?, quand = ?, type = ?, libelle = ?, detail = ?, depart = ?, nombre = ?, sans_rdv = ?, liste = ?, maj = ? WHERE id = ? AND site_id = ? AND annule = ''");
+    $st->execute([$agentId, $quand, $type, $libelle, $detail, $depart, (int)$absents, (int)$sansRdv, $liste, maintenant(), $id, $siteId]);
+    if (!$st->rowCount()) throw new RuntimeException('Ligne introuvable.');
+  } else {
+    db()->prepare("INSERT INTO m_journal_lignes (site_id, site_nom, agent_id, quand, type, libelle, detail, depart, nombre, sans_rdv, liste, par, cree, maj) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'direction', ?, ?)")
+      ->execute([$siteId, $siteNom, $agentId, $quand, $type, $libelle, $detail, $depart, (int)$absents, (int)$sansRdv, $liste, maintenant(), maintenant()]);
+    $id = (int)db()->lastInsertId();
+  }
+  journal('exploitation', "Main courante de $siteNom : ligne " . ((int)($b['id'] ?? 0) ? 'corrigée' : 'ajoutée') . ' par la direction');
+  repondre(['ok' => true, 'id' => $id]);
 }
 // Retirer une ligne (essai, erreur) : elle est écartée de la main courante, jamais effacée
 function mod_journal_adm_retirer(): void
@@ -336,8 +428,8 @@ function mod_journal_cl_jour(): void
   foreach ($st->fetchAll() as $s) {
     $reg = mod_journal_reglages((int)$s['id']);
     if (!$reg['client']) continue;
-    $sites[] = ['nom' => (string)$s['nom'], 'compteur' => $reg['compteur'] ? mod_journal_compteur((int)$s['id'], $jour) : null,
-      'lignes' => mod_journal_lignes((int)$s['id'], (string)$s['nom'], "$jour 00:00:00", "$jour 23:59:59", true)];
+    $lignes = mod_journal_lignes((int)$s['id'], (string)$s['nom'], "$jour 00:00:00", "$jour 23:59:59", true);
+    $sites[] = ['nom' => (string)$s['nom'], 'liste' => $reg['liste'], 'resume' => mod_journal_resume($lignes), 'lignes' => $lignes];
   }
   repondre(['ok' => true, 'jour' => $jour, 'aujourdhui' => $jour === date('Y-m-d'), 'sites' => $sites]);
 }

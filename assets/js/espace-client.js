@@ -748,17 +748,31 @@ const decalerJour = (j, n) => { const d = dt(j); d.setDate(d.getDate() + n); ret
 const heureMC = (s) => String(s || '').slice(11, 16).replace(':', 'h');
 // Ce qu'on lit sur une ligne du cahier
 function ligneMC(l) {
-  if (l.type === 'note') return { titre: l.detail || 'Note', detail: '' };
+  if (l.type === 'note') return l.libelle && l.libelle !== 'Note' ? { titre: l.libelle, detail: l.detail } : { titre: l.detail || 'Note', detail: '' };
   if (l.type === 'visiteur') return { titre: l.libelle, detail: [l.detail, l.depart ? `reparti à ${heureMC(l.depart)}` : 'sur place'].filter(Boolean).join(' · ') };
   return { titre: l.libelle, detail: l.detail };
 }
 const classeMC = (l) => (l.type === 'incident' ? 'mc-incident' : l.type === 'prise' || l.type === 'fin' ? 'mc-auto' : null);
+// Le résumé de la journée : présence de l'agent, compte rendu de la liste, visites et livraisons
+const hmMC = (x) => String(x || '').replace(':', 'h').replace(/^0(\d)/, '$1');
+function chiffresMC(r, liste) {
+  if (!r) return null;
+  const cases = [
+    ['Présence de l’agent', r.debut ? (r.enCours ? `Depuis ${hmMC(r.debut)}` : `${hmMC(r.debut)} – ${hmMC(r.fin)}`) : '—', r.enCours ? statut('ok', 'En poste') : null],
+    liste || r.absents !== null ? ['Absents sur la liste', r.absents !== null ? nombre(r.absents) : '—', r.absents === null ? h('span', null, 'Noté à la fermeture') : null] : null,
+    liste || r.sansRdv ? ['Sans rendez-vous', r.sansRdv !== null ? nombre(r.sansRdv) : '—', null] : null,
+    ['Visites et livraisons', nombre(r.passages || 0), null],
+  ].filter(Boolean);
+  return h('div', { class: 'mc-chiffres' }, cases.map(([k, v, s2]) => h('div', null, h('small', null, k), h('b', null, v), s2)));
+}
 function panneauAujourdhui(mc) {
   const lignes = mc.sites.flatMap((s) => s.lignes.map((l) => ({ ...l, site: s.nom }))).sort((a, b) => a.quand.localeCompare(b.quand)).slice(-4);
-  const cpt = mc.sites.reduce((n, s) => n + (s.compteur || 0), 0);
-  const avecCompteur = mc.sites.some((s) => s.compteur !== null);
+  const r = mc.sites[0]?.resume;
+  const resume = r && (r.debut || r.absents !== null) ? h('div', { class: 'mc-resume' },
+    r.debut ? h('span', null, h('b', null, r.enCours ? `Depuis ${hmMC(r.debut)}` : `${hmMC(r.debut)} – ${hmMC(r.fin)}`), r.enCours ? ' agent en poste' : ' présence de l’agent') : null,
+    r.absents !== null ? h('span', null, h('b', null, nombre(r.absents)), r.absents > 1 ? ' absents sur la liste' : ' absent sur la liste') : null) : null;
   return panneau('Aujourd’hui sur votre site', h('a', { class: 'lien', href: '#/main-courante' }, 'Main courante', ic('fleche')),
-    avecCompteur ? h('div', { class: 'mc-resume' }, h('b', null, nombre(cpt)), h('span', null, cpt > 1 ? 'personnes reçues aujourd’hui' : 'personne reçue aujourd’hui')) : null,
+    resume,
     lignes.length ? h('ol', { class: 'mc-liste' }, lignes.map((l) => { const x = ligneMC(l); return h('li', { class: classeMC(l) }, h('time', null, heureMC(l.quand)), h('span', null, h('b', null, x.titre), x.detail ? h('small', null, x.detail) : null)); }))
       : corpsP(h('p', { class: 'note' }, 'Rien n’est encore noté aujourd’hui. Les lignes apparaissent ici dès que nos agents les inscrivent.')));
 }
@@ -772,14 +786,15 @@ async function vueMainCourante(jour) {
       h('b', null, cap(frJour(j))),
       j < auj ? h('a', { class: 'btn btn--petit btn--icone mc-suivant', href: `#/main-courante/${decalerJour(j, 1)}`, 'aria-label': 'Jour suivant' }, ic('fleche')) : null,
       j < auj ? h('a', { class: 'lien', href: '#/main-courante' }, 'Aujourd’hui') : statut('ok', 'En direct'));
-    const sites = d.sites.map((s) => panneau(s.nom, s.compteur !== null ? h('small', null, `${pluriel(s.compteur, 'personne reçue', 'personnes reçues')}`) : null,
+    const sites = d.sites.map((s) => panneau(s.nom, h('small', null, cap(frJour(j))),
+      s.lignes.length ? chiffresMC(s.resume, s.liste) : null,
       s.lignes.length ? tableau([['Heure'], ['Événement'], ['Agent', 'm-cache']], s.lignes.map((l) => {
         const x = ligneMC(l);
         return h('tr', { class: classeMC(l) }, td(heureMC(l.quand), 'chiffre fort mc-heure'),
           td([h('b', { class: 'mc-titre' }, x.titre), x.detail ? h('small', null, x.detail) : null, h('small', { class: 'm-seul' }, l.agent)]), td(l.agent, 'm-cache'));
       })) : vide(j === auj ? 'Rien n’est encore noté aujourd’hui' : 'Rien n’a été noté ce jour-là', j === auj ? 'Les lignes apparaissent ici dès que nos agents les inscrivent.' : '')));
     zone.replaceChildren(navigation, ...(sites.length ? sites : [panneau(null, null, vide('Main courante non disponible', 'Elle s’affichera ici dès que votre site sera relié.'))]),
-      h('p', { class: 'note' }, 'Tenue par nos agents depuis leur téléphone, au fil du service. Les prises et fins de service sont enregistrées automatiquement.',
+      h('p', { class: 'note' }, 'Tenue par nos agents au fil du service, depuis leur téléphone. Les pages du cahier papier sont recopiées par la direction.',
         j === auj ? ' La page se met à jour toute seule.' : ''));
   };
   dessiner(await api('mod.journal.jour', undefined, { jour: j }));

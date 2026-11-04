@@ -249,6 +249,7 @@ function redirection(brut, param) {
   if (brut === 'devis') return param ? `#/document/${param}` : '#/documents/devis';
   if (brut === 'factures' && param) return `#/document/${param}`;
   if (brut === 'plus') return '#/accueil';
+  if (brut === 'rapport') return param ? `#/prestations/${param}` : '#/prestations';
   return '';
 }
 async function deconnexion() {
@@ -263,8 +264,8 @@ function naviguer() {
   const [brut, param] = location.hash.replace(/^#\/?/, '').split('/');
   const autre = redirection(brut, param);
   if (autre) { location.replace(autre); return; }
-  const route = ['document', 'rapport'].includes(brut) ? brut : (LIBELLES[brut] ? brut : 'accueil');
-  const actif = route === 'document' ? 'documents' : route === 'rapport' ? 'prestations' : route;
+  const route = brut === 'document' ? brut : (LIBELLES[brut] ? brut : 'accueil');
+  const actif = route === 'document' ? 'documents' : route;
   const c = etat.client;
   const marque = (cls) => h('a', { class: cls, href: '#/accueil' }, h('img', { src: '/assets/img/blason.svg?v=1', alt: '', width: 24, height: 30 }), h('span', null, h('b', null, 'BDA Security Group'), h('small', null, 'Portail client')));
   const menu = h('aside', { class: 'menu', 'aria-label': 'Menu principal' },
@@ -281,14 +282,14 @@ function naviguer() {
   const haut = h('header', { class: 'haut' },
     h('button', { class: 'btn btn--icone haut__menu', type: 'button', 'aria-label': 'Ouvrir le menu', onclick: () => { document.body.classList.add('menu-ouvert'); voile.classList.add('is-ouvert'); } }, ic('menu')),
     marque('haut__marque'),
-    h('p', { class: 'haut__fil' }, 'Portail', h('i'), h('b', null, route === 'document' ? 'Document' : route === 'rapport' ? 'Relevé d’heures' : LIBELLES[route])),
+    h('p', { class: 'haut__fil' }, 'Portail', h('i'), h('b', null, route === 'document' ? 'Document' : LIBELLES[route])),
     h('button', { class: 'haut__recherche', type: 'button', onclick: palette, 'aria-label': 'Rechercher un document' }, ic('recherche'), h('span', null, 'Rechercher un document, une facture…'), h('kbd', null, 'Ctrl K')));
   const page = h('main', { class: 'page', id: 'contenu' }, squelette(6));
   racine.replaceChildren(h('div', { class: 'app' }, menu, h('div', { class: 'corps' }, haut, page)));
   majBadges();
   const vues = {
-    accueil: vueAccueil, documents: () => vueCentre(param), factures: vueFactures, document: () => vueDocument(param), rapport: () => vueRapport(param),
-    prestations: vuePrestations, equipe: () => (param ? vueAgent(+param) : vueEquipe()), messages: vueMessages, compte: vueCompte,
+    accueil: vueAccueil, documents: () => vueCentre(param), factures: vueFactures, document: () => vueDocument(param),
+    prestations: () => vuePrestations(param), equipe: () => (param ? vueAgent(+param) : vueEquipe()), messages: vueMessages, compte: vueCompte,
   };
   Promise.resolve(vues[route]()).then((contenu) => { page.replaceChildren(...[contenu].flat(Infinity).filter(Boolean)); page.style.animation = 'none'; void page.offsetWidth; page.style.animation = ''; })
     .catch((e) => page.replaceChildren(h('p', { class: 'ec-message' }, e.message)));
@@ -433,12 +434,14 @@ async function vueAccueil() {
   return [
     h('header', { class: 'accueil-tete' },
       h('div', null, h('span', { class: 'sur' }, maintenant.getHours() < 18 ? 'Bonjour' : 'Bonsoir'), h('h1', null, etat.client.nom),
-        h('p', null, 'Vos factures, vos heures de présence et votre équipe, au même endroit.')),
+        h('p', null, p.prochain ? ['Prochaine présence de nos agents : ', h('b', null, `${frJour(p.prochain.jour)}, ${hm(p.prochain.debut)} – ${hm(p.prochain.fin)}`), p.prochain.agent ? ` · ${p.prochain.agent}` : '']
+          : 'Vos factures, vos heures de présence et votre équipe, au même endroit.')),
       h('div', { class: 'accueil-tete__date' }, h('b', null, `${maintenant.getDate()} ${MOIS[maintenant.getMonth()]}`), cap(JOURS[maintenant.getDay()]))),
     t.annonces.map((a) => h('section', { class: `annonce ${a.niveau === 'important' ? 'annonce--important' : ''}` }, h('small', null, a.niveau === 'important' ? 'Important' : 'Information'), h('b', null, a.titre), a.texte ? h('p', null, a.texte) : null)),
     h('div', { class: 'chiffres chiffres--3' },
-      kpi('#/prestations', der ? `Heures · ${der.libelle}` : 'Heures de présence', heures(der ? der.heures : 0),
-        der ? (der.encours ? `${pluriel(der.jours, 'jour')} à ce jour · mois en cours` : `${pluriel(der.jours, 'jour')}${der.source === 'releve' ? ` · facture ${der.facture}` : ''}`) : 'Aucune heure enregistrée'),
+      kpi(der ? `#/prestations/${der.mois}` : '#/prestations', der ? `Heures · ${der.libelle}` : 'Heures de présence', heures(der ? der.heures : 0),
+        !der ? 'Aucune heure enregistrée' : der.encours ? `${pluriel(der.jours, 'jour')} fait${der.jours > 1 ? 's' : ''} · ${heures(der.prevu || der.heures)} prévues ce mois-ci`
+          : `${pluriel(der.jours, 'jour')}${der.source === 'releve' ? ` · facture ${der.facture}` : ''}`),
       kpi('#/factures', 'Reste à régler', euro.format(f.montantDu), f.enRetard ? `${pluriel(f.enRetard, 'facture')} en retard` : f.aRegler ? `${pluriel(f.aRegler, 'facture')} en attente` : 'Toutes vos factures sont réglées',
         f.enRetard ? 'alerte' : f.montantDu > 0 ? 'attente' : ''),
       kpi('#/factures', `Facturé en ${annee}`, euro.format(f.totalAnnee), pluriel(nbAnnee, 'facture'))),
@@ -458,94 +461,72 @@ async function vueAccueil() {
   ];
 }
 
-/* ---------- Centre documentaire ---------- */
+/* ---------- Documents : quelques dossiers et une recherche ---------- */
 const TON_CONF = { valide: ['ok', 'Disponible'], bientot: ['attente', 'À renouveler bientôt'], expire: ['alerte', 'Expirée — mise à jour en cours'], manquant: ['neutre', 'Sur demande'] };
+// L'équipe et les heures ont leur propre page : elles ne sont pas répétées ici
+const DOSSIERS = {
+  factures: ['Factures', 'facture', 'Toutes les factures envoyées'],
+  conformite: ['Documents de l’entreprise', 'bouclier', 'Kbis, autorisation CNAPS, assurance'],
+  devis: ['Devis', 'dossier', 'Devis reçus et signés'],
+  contrats: ['Contrats', 'dossier', 'Contrat de prestation et avenants'],
+  courriers: ['Courriers', 'dossier', 'Courriers de la direction'],
+  echanges: ['Pièces échangées', 'trombone', 'Ce que vous nous avez transmis'],
+};
 async function vueCentre(categorie) {
   const data = await chargerCentre(true);
-  const cats = data.categories;
-  const items = data.items;
-  const f = { cat: cats[categorie] || categorie === 'nouveaux' ? categorie : 'tous', q: '', annee: '', statut: '', tri: 'recents' };
-  const compte = (c) => (c === 'tous' ? items.length : c === 'nouveaux' ? items.filter((i) => i.nouveau).length : items.filter((i) => i.categorie === c).length);
-  const annees = [...new Set(items.map((i) => String(i.date).slice(0, 4)).filter((a) => /^\d{4}$/.test(a)))].sort().reverse();
-  const recherche = saisie({ type: 'search', placeholder: 'Rechercher par titre, numéro, montant…', 'aria-label': 'Rechercher dans les documents' });
-  const selAnnee = h('select', { class: 'input', 'aria-label': 'Année' }, h('option', { value: '' }, 'Toutes les années'), annees.map((a) => h('option', { value: a }, a)));
-  const selStatut = h('select', { class: 'input', 'aria-label': 'Statut' });
-  const selTri = h('select', { class: 'input', 'aria-label': 'Ordre' }, h('option', { value: 'recents' }, 'Plus récents d’abord'), h('option', { value: 'anciens' }, 'Plus anciens d’abord'), h('option', { value: 'montant' }, 'Montant décroissant'), h('option', { value: 'titre' }, 'Ordre alphabétique'));
-  const rail = h('nav', { class: 'rubriques', 'aria-label': 'Rubriques' });
+  const items = data.items.filter((i) => DOSSIERS[i.categorie]).sort(parDate);
+  const de = (k) => items.filter((i) => i.categorie === k);
+  const cat = DOSSIERS[categorie] ? categorie : '';
   const zone = h('div', { class: 'colonne' });
-
-  const rendreRail = () => remplir(rail,
-    h('p', { class: 'rubriques__titre' }, 'Rubriques'),
-    [['tous', 'Tous les documents'], ['nouveaux', 'Nouveaux']].filter(([k]) => k !== 'nouveaux' || compte(k) || f.cat === k)
-      .map(([k, lib]) => h('button', { type: 'button', class: `rubrique ${f.cat === k ? 'is-actif' : ''}`, onclick: () => choisir(k) }, lib, h('em', null, compte(k)))),
-    h('hr'),
-    // une rubrique vide n'est pas montrée (sauf le dossier administratif, toujours utile)
-    Object.entries(cats).filter(([k]) => compte(k) || k === 'conformite' || f.cat === k)
-      .map(([k, lib]) => h('button', { type: 'button', class: `rubrique ${f.cat === k ? 'is-actif' : ''}`, onclick: () => choisir(k) }, lib, h('em', null, compte(k)))));
-  const choisir = (k) => { f.cat = k; f.statut = ''; history.replaceState(null, '', `#/documents/${k}`); rendreRail(); rendre(); };
-
-  const rendre = () => {
-    const statuts = f.cat === 'factures' ? [['', 'Tous les statuts'], ['envoyee', 'À régler'], ['retard', 'En retard'], ['payee', 'Réglées'], ['archive', 'Archives'], ['annulee', 'Annulées']]
-      : f.cat === 'devis' ? [['', 'Tous les statuts'], ['envoye', 'À signer'], ['accepte', 'Acceptés'], ['refuse', 'Déclinés']] : null;
-    selStatut.replaceChildren(...(statuts || []).map(([v, l]) => h('option', { value: v, selected: v === f.statut }, l)));
-    selStatut.hidden = !statuts;
-    const q = sansAccent(f.q.trim());
-    let liste = items.filter((i) => (f.cat === 'tous' || (f.cat === 'nouveaux' ? i.nouveau : i.categorie === f.cat))
-      && (!f.annee || String(i.date).startsWith(f.annee))
-      && (!f.statut || (f.statut === 'retard' ? i.statut?.ton === 'alerte' : i.statut?.code === f.statut))
-      && (!q || q.split(/\s+/).every((m) => sansAccent(`${i.titre} ${i.sous} ${i.genre} ${i.reference} ${frDate(i.date)} ${i.montant ?? ''}`).includes(m))));
-    if (f.tri === 'anciens') liste = [...liste].reverse();
-    else if (f.tri === 'montant') liste = [...liste].sort((a, b) => (b.montant ?? -1) - (a.montant ?? -1));
-    else if (f.tri === 'titre') liste = [...liste].sort((a, b) => a.titre.localeCompare(b.titre, 'fr'));
-    const avecMontant = liste.some((i) => typeof i.montant === 'number');
-    const avecStatut = liste.some((i) => i.statut);
-    const titre = f.cat === 'tous' ? 'Tous les documents' : f.cat === 'nouveaux' ? 'Nouveaux documents' : cats[f.cat];
-    const colonnes = [['Document'], ['Date', 'm-cache'], avecMontant ? ['Montant', 'd m-cache'] : null, avecStatut ? ['Statut', 'm-cache'] : null, ['', 'd']].filter(Boolean);
-    const lignes = liste.map((i) => ligne(() => ouvrirItem(i), [
-      td([celluleDoc(i), h('small', { class: 'm-seul' }, [frDate(i.date), typeof i.montant === 'number' ? euro.format(i.montant) : '', i.statut?.libelle || ''].filter(Boolean).join(' · '))]),
+  const recherche = saisie({ type: 'search', placeholder: 'Rechercher : numéro de facture, mois, Kbis, assurance…', 'aria-label': 'Rechercher un document' });
+  const liste = (l) => {
+    const avecMontant = l.some((i) => typeof i.montant === 'number');
+    return tableau([['Document'], ['Date', 'm-cache'], avecMontant ? ['Montant', 'd m-cache'] : null, ['', 'd']].filter(Boolean), l.map((i) => ligne(() => ouvrirItem(i), [
+      td([celluleDoc(i), h('small', { class: 'm-seul' }, [frDate(i.date), typeof i.montant === 'number' ? euro.format(i.montant) : ''].filter(Boolean).join(' · '))]),
       td(frDate(i.date), 'chiffre m-cache'),
       avecMontant ? td(typeof i.montant === 'number' ? euro.format(i.montant) : '', 'd chiffre m-cache') : null,
-      avecStatut ? td(i.statut ? statut(i.statut.ton, i.statut.libelle) : '', 'm-cache') : null,
-      td(h('div', { class: 'actions' }, boutonTelecharger(i), h('span', { class: 'fleche' }, ic('fleche'))), 'd')].filter(Boolean)));
-    const videTexte = {
-      contrats: ['Aucun contrat déposé pour l’instant', 'Votre contrat de prestation et ses avenants seront consultables ici. Vous pouvez en demander une copie dès maintenant.', 'Contrat de prestation'],
-      courriers: ['Aucun courrier pour l’instant', 'Les courriers officiels de BDA Security Group vous concernant seront archivés ici.', ''],
-      rapports: ['Aucun rapport pour l’instant', 'Les relevés d’heures et les rapports d’activité mensuels apparaîtront ici.', ''],
-      equipe: ['Aucun document d’agent partagé', 'Les cartes professionnelles et qualifications des agents affectés à votre site apparaîtront ici lorsque la direction les partagera.', ''],
-      echanges: ['Aucune pièce échangée', 'Les documents que vous nous transmettez et les pièces jointes de la messagerie sont conservés ici.', ''],
-    }[f.cat];
-    const conformite = f.cat === 'conformite' ? panneau('Dossier administratif', h('small', null, 'Pièces qu’un donneur d’ordre peut exiger'), h('div', { class: 'conformite' },
-      tableau([['Pièce'], ['Validité', 'm-cache'], ['État'], ['', 'd']], data.conformite.map((k) => {
-        const [ton, lib] = TON_CONF[k.etat];
-        const doc = k.doc ? items.find((i) => i.cle === k.doc.cle) || k.doc : null;
-        return ligne(doc ? () => ouvrirItem(doc) : null, [
-          td(h('div', { class: 'doc' }, doc ? pictos(doc) : h('span', { class: 'pictos', 'aria-hidden': 'true' }, h('em', null, '—')), h('span', null, h('b', null, k.libelle), h('small', null, k.rappel)))),
-          td(k.expire ? `Jusqu’au ${frDate(k.expire)}` : doc ? 'Sans limite' : '—', 'chiffre m-cache'),
-          td(k.etat === 'manquant' ? h('span', { class: 'manquant' }, lib) : statut(ton, lib)),
-          td(doc ? h('div', { class: 'actions' }, boutonTelecharger(doc), h('span', { class: 'fleche' }, ic('fleche')))
-            : h('button', { class: 'btn btn--petit', type: 'button', onclick: (e) => demanderDocument(k.libelle, e.currentTarget) }, 'Demander'), 'd')]);
-      })))) : null;
+      td(h('div', { class: 'actions' }, boutonTelecharger(i), h('span', { class: 'fleche' }, ic('fleche'))), 'd')].filter(Boolean))));
+  };
+  const entreprise = () => tableau([['Pièce'], ['Validité', 'm-cache'], ['État'], ['', 'd']], data.conformite.map((k) => {
+    const [ton, lib] = TON_CONF[k.etat];
+    const doc = k.doc ? items.find((i) => i.cle === k.doc.cle) || k.doc : null;
+    return ligne(doc ? () => ouvrirItem(doc) : null, [
+      td(h('div', { class: 'doc' }, doc ? pictos(doc) : h('span', { class: 'pictos', 'aria-hidden': 'true' }, h('em', null, '—')), h('span', null, h('b', null, k.libelle), h('small', null, k.rappel)))),
+      td(k.expire ? `Jusqu’au ${frDate(k.expire)}` : doc ? 'Sans limite' : '—', 'chiffre m-cache'),
+      td(k.etat === 'manquant' ? h('span', { class: 'manquant' }, lib) : statut(ton, lib)),
+      td(doc ? h('div', { class: 'actions' }, boutonTelecharger(doc), h('span', { class: 'fleche' }, ic('fleche')))
+        : h('button', { class: 'btn btn--petit', type: 'button', onclick: (e) => demanderDocument(k.libelle, e.currentTarget) }, 'Demander'), 'd')]);
+  }));
+  const rendre = () => {
+    const q = sansAccent(recherche.value.trim());
+    if (q) {
+      const r = items.filter((i) => q.split(/\s+/).every((m) => sansAccent(`${i.titre} ${i.sous} ${i.genre} ${i.reference} ${frDate(i.date)} ${frLong(i.date)} ${i.montant ?? ''} ${DOSSIERS[i.categorie][0]}`).includes(m)));
+      return remplir(zone, panneau('Résultats', h('small', null, pluriel(r.length, 'document')),
+        r.length ? liste(r) : vide('Aucun document trouvé', 'Essayez un numéro de facture, un mois (par exemple « octobre ») ou un mot comme « Kbis ».')));
+    }
+    if (cat) {
+      const [lib, , texte] = DOSSIERS[cat];
+      const l = de(cat);
+      return remplir(zone, panneau(lib, h('small', null, cat === 'conformite' ? texte : pluriel(l.length, 'document')),
+        cat === 'conformite' ? entreprise() : l.length ? liste(l) : vide('Ce dossier est vide pour l’instant', '')));
+    }
     remplir(zone,
-      conformite,
-      h('section', { class: 'panneau' },
-        h('div', { class: 'outils' }, h('div', { class: 'recherche' }, ic('recherche'), recherche), selAnnee, selStatut),
-        h('p', { class: 'compte-resultats' }, `${titre} · ${pluriel(liste.length, 'document')}${q || f.annee || f.statut ? ' (filtrés)' : ''}`),
-        liste.length ? tableau(colonnes, lignes)
-          : q || f.annee || f.statut ? vide('Aucun résultat', 'Modifiez la recherche ou les filtres.')
-            : videTexte ? vide(videTexte[0], videTexte[1], videTexte[2] ? h('button', { class: 'btn', type: 'button', onclick: (e) => demanderDocument(videTexte[2], e.currentTarget) }, 'Demander une copie') : null)
-              : vide('Aucun document dans cette rubrique', 'Les documents apparaîtront ici dès qu’ils seront disponibles.')));
+      h('div', { class: 'dossiers' }, Object.entries(DOSSIERS).filter(([k]) => de(k).length || k === 'conformite' || k === 'factures').map(([k, [lib, icone, texte]]) => {
+        const n = k === 'conformite' ? data.conformite.filter((x) => x.doc).length : de(k).length;
+        return h('a', { class: 'dossier', href: `#/documents/${k}` }, h('span', { class: 'dossier__ic' }, ic(icone)),
+          h('span', { class: 'dossier__texte' }, h('b', null, lib), h('small', null, texte)), h('em', null, n), ic('fleche'));
+      })),
+      items.length ? panneau('Les plus récents', null, liste(items.slice(0, 5))) : null);
   };
   let attente;
-  recherche.addEventListener('input', () => { clearTimeout(attente); attente = setTimeout(() => { f.q = recherche.value; rendre(); recherche.focus(); }, 120); });
-  selAnnee.addEventListener('change', () => { f.annee = selAnnee.value; rendre(); });
-  selStatut.addEventListener('change', () => { f.statut = selStatut.value; rendre(); });
-  selTri.addEventListener('change', () => { f.tri = selTri.value; rendre(); });
-  rendreRail();
+  recherche.addEventListener('input', () => { clearTimeout(attente); attente = setTimeout(rendre, 120); });
   rendre();
   return [
-    tete('Documents', 'Tous vos documents', `${pluriel(items.length, 'document')} : factures, attestations de l’entreprise, relevés d’heures, dossiers des agents et pièces échangées.`,
-      h('button', { class: 'btn', type: 'button', onclick: transmettre }, ic('televerser'), 'Transmettre un document')),
-    h('div', { class: 'centre' }, rail, zone),
+    cat ? h('div', { class: 'barre-doc' }, h('a', { class: 'retour', href: '#/documents' }, ic('retour'), 'Tous les dossiers')) : null,
+    tete('Documents', cat ? DOSSIERS[cat][0] : 'Vos documents', cat ? '' : 'Choisissez un dossier, ou tapez un mot pour retrouver un document.',
+      h('button', { class: 'btn', type: 'button', onclick: transmettre }, ic('televerser'), 'Nous transmettre un document')),
+    h('div', { class: 'recherche recherche--grande' }, ic('recherche'), recherche),
+    zone,
   ];
 }
 
@@ -670,70 +651,44 @@ function panneauSignature(doc) {
   return p;
 }
 
-/* ---------- Relevé d'heures d'un mois (relevé de la facture, sinon planning) ---------- */
-async function vueRapport(mois) {
-  const r = await api('mod.portail.rapport', undefined, { mois });
-  const t = r.total;
-  const barre = h('div', { class: 'barre-doc' }, h('a', { class: 'retour', href: '#/prestations' }, ic('retour'), 'Heures de présence'),
-    h('button', { class: 'btn', type: 'button', onclick: () => window.print() }, ic('imprimer'), 'Imprimer'),
-    r.factureId ? h('a', { class: 'btn', href: `#/document/${r.factureId}` }, ic('facture'), `Voir la facture ${r.facture}`) : null);
-  const site = r.sites.join(', ') || 'Votre site';
-  if (r.source === 'releve') {
-    return [barre, h('div', { class: 'rapport' },
-      tete('Relevé d’heures', r.libelle, `${site} · du ${frLong(r.du)} au ${frLong(r.au)}`),
-      h('div', { class: 'chiffres chiffres--3' },
-        kpi(null, 'Total du mois', heures(t.heures), `soit ${decimal(t.heures)} h facturées`),
-        kpi(null, 'Jours travaillés', String(t.jours), r.libelle),
-        kpi(null, 'Moyenne par jour', heures(t.jours ? t.heures / t.jours : 0), 'Sur les jours travaillés')),
-      panneau('Détail jour par jour', h('small', null, pluriel(r.lignes.length, 'jour')),
-        tableau([['Date'], ['Matin'], ['Après-midi', 'm-cache'], ['Durée', 'd']], r.lignes.map((l) => ligne(null, [
-          td(cap(frJour(l.jour)), 'fort'), td(l.matin ? plage(l.matin) : '—', 'chiffre'), td(l.apm ? plage(l.apm) : '—', 'chiffre m-cache'), td(l.heures ? heures(l.heures) : '—', 'd chiffre')])))),
-      h('p', { class: 'rapport__note' }, `Relevé joint à la facture ${r.facture}. En cas d’écart, la facture fait foi.`))];
-  }
-  return [barre, h('div', { class: 'rapport' },
-    tete('Relevé d’heures', r.libelle, `${site} · du ${frLong(r.du)} au ${frLong(r.au)}${r.encours ? ' (mois en cours)' : ''}`),
-    h('div', { class: 'chiffres chiffres--3' },
-      kpi(null, 'Heures', heures(t.heures), 'D’après le planning'),
-      kpi(null, 'Jours couverts', String(t.jours), r.libelle),
-      kpi(null, 'Agents', String(t.agents), 'Intervenus sur le site')),
-    panneau('Détail des vacations', h('small', null, pluriel(t.vacations, 'vacation')),
-      r.lignes.length ? tableau([['Date'], ['Horaires'], ['Agent', 'm-cache'], ['Durée', 'd']], r.lignes.map((l) => ligne(null, [
-        td(cap(frJour(l.jour)), 'fort'), td(`${hm(l.debut)} – ${hm(l.fin)}`, 'chiffre'), td([l.agent, h('small', null, l.qualification)], 'm-cache'), td(heures(l.heures), 'd chiffre')])))
-        : vide('Aucune vacation ce mois-ci', '')),
-    h('p', { class: 'rapport__note' }, 'Établi à partir du planning des agents de BDA Security Group. En cas d’écart, la facture du mois fait foi.'))];
-}
-
-/* ---------- Heures de présence ---------- */
-async function vuePrestations() {
+/* ---------- Heures de présence : un onglet par mois, chaque jour dessous ---------- */
+async function vuePrestations(choix) {
   const t = await api('mod.portail.tableau');
   const p = t.prestations;
   const mois = p.mois || [];
-  const c = p.courant;
-  const clos = mois.find((m) => !m.encours);
-  const site = p.sites.join(', ') || 'Votre site';
-  const auj = iso(new Date());
-  const etatMois = (m) => (m.encours ? statut('attente', 'En cours') : m.source === 'releve' ? statut('ok', `Facturé · ${m.facture}`) : statut('neutre', 'Terminé'));
-  const enPoste = p.enPoste.map((a) => h('div', { class: 'presence__ligne' }, h('i', { class: 'pouls' }), h('span', null, h('b', null, a.nom), h('small', null, a.qualification)), statut('ok', `En poste depuis ${hm(a.depuis)}`)));
+  const site = p.sites.join(', ') || 'votre site';
+  if (!mois.length) return [tete('Prestation', 'Heures de présence', ''), panneau(null, null, vide('Aucune heure pour l’instant', 'Les heures apparaîtront ici dès les premières vacations.'))];
+  const actif = mois.find((m) => m.mois === choix) || mois[0];
+  const r = await api('mod.portail.rapport', undefined, { mois: actif.mois });
+  const tt = r.total;
+  const onglets = h('div', { class: 'annees', role: 'tablist', 'aria-label': 'Mois' }, mois.map((m) => h('a', { href: `#/prestations/${m.mois}`, role: 'tab',
+    class: `annee ${m.mois === actif.mois ? 'is-actif' : ''}`, 'aria-selected': m.mois === actif.mois ? 'true' : 'false' }, m.libelle, h('em', null, m.encours ? 'en cours' : heures(m.heures)))));
+  const chiffre = (lib, val, sous) => h('div', null, h('small', null, lib), h('b', null, val), sous ? h('span', null, sous) : null);
+  let resume;
+  let table;
+  if (r.source === 'releve') {
+    resume = [chiffre('Total du mois', heures(tt.heures)), chiffre('Jours travaillés', String(tt.jours)),
+      chiffre('Facture', h('a', { href: `#/document/${r.factureId}` }, r.facture), 'Réglée')];
+    table = tableau([['Jour'], ['Horaires'], ['Heures', 'd']], r.lignes.map((l) => ligne(null, [
+      td(cap(frJour(l.jour)), 'fort'), td([l.matin, l.apm].filter(Boolean).map(plage).join(' · ') || '—', 'chiffre'), td(l.heures ? heures(l.heures) : '—', 'd chiffre')])));
+  } else {
+    resume = r.encours
+      ? [chiffre('Heures faites', heures(tt.heures), `jusqu’à aujourd’hui · ${pluriel(tt.jours, 'jour')}`), chiffre('Prévues ce mois-ci', heures(tt.prevu), pluriel(tt.joursPrevus, 'jour')),
+        chiffre('Restent à faire', heures(Math.max(0, tt.prevu - tt.heures)), 'd’ici la fin du mois')]
+      : [chiffre('Total du mois', heures(tt.heures)), chiffre('Jours travaillés', String(tt.jours))];
+    table = tableau([['Jour'], ['Horaires'], ['Agent', 'm-cache'], ['Heures', 'd']], r.lignes.map((l) => h('tr', { class: l.fait ? null : 'prevu' },
+      td([cap(frJour(l.jour)), h('small', null, l.fait ? 'Fait' : 'Prévu'), h('small', { class: 'm-seul' }, l.agent)], 'fort'), td(`${hm(l.debut)} – ${hm(l.fin)}`, 'chiffre'),
+      td(l.agent, 'm-cache'), td(heures(l.heures), 'd chiffre'))));
+  }
   return [
-    tete('Prestation', 'Heures de présence', `${site}. Un mois terminé reprend les heures de sa facture ; le mois en cours suit le planning de nos agents.`),
-    h('div', { class: 'chiffres chiffres--3' },
-      clos ? kpi(`#/rapport/${clos.mois}`, `${clos.libelle} · facturé`, heures(clos.heures), clos.source === 'releve' ? `${pluriel(clos.jours, 'jour')} · facture ${clos.facture}` : pluriel(clos.jours, 'jour'))
-        : kpi(null, 'Dernier mois facturé', '—', 'Aucun pour l’instant'),
-      kpi(`#/rapport/${c.mois}`, `${c.libelle} · effectué`, heures(c.fait), c.joursFaits ? `${pluriel(c.joursFaits, 'jour')} à ce jour` : 'Rien encore ce mois-ci'),
-      kpi(null, `${c.libelle} · prévu`, heures(c.prevu), c.joursPrevus ? `${pluriel(c.joursPrevus, 'jour')} au planning` : 'Planning en préparation')),
-    enPoste.length ? panneau('En ce moment', null, h('div', { class: 'presence' }, enPoste)) : null,
-    panneau('Mois par mois', h('small', null, 'Cliquez sur un mois pour voir chaque jour'),
-      mois.length ? tableau([['Mois'], ['Jours', 'd'], ['Heures', 'd'], ['État', 'm-cache'], ['', 'd m-cache']], mois.map((m) => ligne(() => { location.hash = `#/rapport/${m.mois}`; }, [
-        td([h('b', { class: 'fort' }, m.libelle), m.encours && m.prevu ? h('small', null, `${heures(m.heures)} faites sur ${heures(m.prevu)} prévues`) : null,
-          h('small', { class: 'm-seul' }, m.encours ? 'En cours' : m.source === 'releve' ? `Facturé · ${m.facture}` : 'Terminé')]),
-        td(String(m.jours), 'd chiffre'), td(heures(m.heures), 'd chiffre fort'), td(etatMois(m), 'm-cache'), tdFleche()])))
-        : vide('Aucune heure pour l’instant', 'Les heures apparaîtront ici dès les premières vacations.')),
-    p.semaine.length ? panneau('Prochains jours', h('small', null, 'Horaires prévus au planning'),
-      tableau([['Jour'], ['Horaires'], ['Agent', 'm-cache']], p.semaine.map((x) => ligne(null, [
-        td([cap(frJour(x.jour)), x.jour === auj ? h('i', { class: 'nouveau' }, 'Aujourd’hui') : null, h('small', { class: 'm-seul' }, x.agents.join(', ') || 'Affectation en cours')], 'fort'),
-        td(`${hm(x.debut)} – ${hm(x.fin)}`, 'chiffre'),
-        td(x.agents.length ? x.agents.join(', ') : h('span', { class: 'manquant' }, 'Affectation en cours'), 'm-cache')])))) : null,
-    h('p', { class: 'note' }, 'Une question sur des heures ? ', h('a', { href: '#/messages' }, 'Écrivez-nous'), ', la direction vous répond directement.'),
+    tete('Prestation', 'Heures de présence', `Les heures de nos agents sur votre site (${site}), mois par mois.`, h('button', { class: 'btn', type: 'button', onclick: () => window.print() }, ic('imprimer'), 'Imprimer')),
+    h('section', { class: 'panneau' },
+      mois.length > 1 ? h('div', { class: 'outils' }, onglets) : null,
+      h('header', { class: 'panneau__tete' }, h('h2', null, actif.libelle), r.source === 'releve' ? statut('ok', 'Mois facturé') : r.encours ? statut('attente', 'Mois en cours') : statut('neutre', 'Mois terminé')),
+      h('div', { class: 'resume-mois' }, resume),
+      r.lignes.length ? table : vide('Aucune vacation ce mois-ci', '')),
+    h('p', { class: 'note' }, r.source === 'releve' ? `Heures reprises du relevé joint à la facture ${r.facture}.` : r.encours ? 'Les jours « Prévu » sont à venir : ils peuvent encore changer.' : '',
+      ' Une question ? ', h('a', { href: '#/messages' }, 'Écrivez-nous'), '.'),
   ];
 }
 

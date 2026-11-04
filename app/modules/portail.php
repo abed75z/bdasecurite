@@ -1013,7 +1013,7 @@ function mod_portail_cl_tableau(): void
       'heuresMois' => $heuresDe(date('Y-m'))['heures'] ?? 0, 'heuresPrecedent' => $heuresDe($precedent)['heures'] ?? 0, 'moisPrecedent' => $precedent,
       'mois' => $parMois, 'courant' => mod_portail_mois_courant($ids),
       // le dernier mois terminé (le plus parlant pour le client), sinon le mois en cours
-      'dernier' => array_values(array_filter($parMois, fn ($m) => !$m['encours']))[0] ?? ($parMois[0] ?? null)],
+      'dernier' => $parMois[0] ?? null],
     'factures' => ['nombre' => count($factures), 'aRegler' => count($aRegler), 'montantDu' => round(array_sum(array_column($aRegler, 'montant')), 2),
       'enRetard' => count(array_filter($aRegler, fn ($i) => $i['statut']['ton'] === 'alerte')),
       'totalAnnee' => round(array_sum(array_map(fn ($i) => str_starts_with($i['date'], $annee) && $i['statut']['code'] !== 'annulee' ? $i['montant'] : 0, $factures)), 2), 'annee' => $annee],
@@ -1092,20 +1092,26 @@ function mod_portail_cl_rapport(): void
       'lignes' => array_map(fn ($l) => ['jour' => $l['jour'], 'matin' => $l['matin'], 'apm' => $l['apm'], 'heures' => $l['heures']], $r['lignes']),
       'total' => ['heures' => $r['heures'], 'jours' => $r['jours']]]);
   }
+  // tout le mois : les vacations terminées comptent, celles à venir sont « prévues »
   $lignes = [];
   $agents = [];
-  foreach (mod_portail_activite(array_keys($sites), "$mois-01", $fin) as $v) {
+  foreach (mod_portail_activite(array_keys($sites), "$mois-01", date('Y-m-t', strtotime("$mois-01"))) as $v) {
     $h = round(mod_portail_duree((string)$v['debut'], (string)$v['fin'], (int)$v['pause']), 2);
     $nom = mod_portail_nom_court((string)$v['nom']);
+    $nuit = substr((string)$v['fin'], 0, 5) <= substr((string)$v['debut'], 0, 5);
+    $fait = (int)strtotime($v['jour'] . ' ' . substr((string)$v['fin'], 0, 5)) + ($nuit ? 86400 : 0) <= time();
     $lignes[] = ['jour' => (string)$v['jour'], 'debut' => substr((string)$v['debut'], 0, 5), 'fin' => substr((string)$v['fin'], 0, 5), 'heures' => $h, 'agent' => $nom,
-      'qualification' => mod_portail_qualif((string)$v['poste']), 'site' => $sites[(int)$v['site_id']] ?? ''];
+      'qualification' => mod_portail_qualif((string)$v['poste']), 'site' => $sites[(int)$v['site_id']] ?? '', 'fait' => $fait];
+    if (!$fait) continue;
     $agents[(int)$v['agent_id']] ??= ['agent' => $nom, 'qualification' => mod_portail_qualif((string)$v['poste']), 'vacations' => 0, 'heures' => 0.0];
     $agents[(int)$v['agent_id']]['vacations']++;
     $agents[(int)$v['agent_id']]['heures'] += $h;
   }
+  $faites = array_values(array_filter($lignes, fn ($l) => $l['fait']));
   repondre(['ok' => true, 'source' => 'planning', 'mois' => $mois, 'libelle' => mod_portail_mois($mois), 'du' => "$mois-01", 'au' => $fin, 'encours' => $mois === date('Y-m'), 'sites' => array_values($sites),
-    'lignes' => $lignes, 'agents' => array_values($agents), 'total' => ['vacations' => count($lignes), 'heures' => round(array_sum(array_column($lignes, 'heures')), 2),
-      'jours' => count(array_unique(array_column($lignes, 'jour'))), 'agents' => count($agents)]]);
+    'lignes' => $lignes, 'agents' => array_values($agents), 'total' => ['vacations' => count($faites), 'heures' => round(array_sum(array_column($faites, 'heures')), 2),
+      'jours' => count(array_unique(array_column($faites, 'jour'))), 'agents' => count($agents),
+      'prevu' => round(array_sum(array_column($lignes, 'heures')), 2), 'joursPrevus' => count(array_unique(array_column($lignes, 'jour')))]]);
 }
 
 /* ----- Centre documentaire : côté direction ----- */

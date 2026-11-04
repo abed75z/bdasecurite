@@ -24,7 +24,7 @@ export function resumeJour(r) {
   if (!r) return [];
   const hm = (x) => x.replace(':', 'h').replace(/^0(\d)/, '$1');
   return [
-    r.debut ? ['Présence', r.enCours ? `depuis ${hm(r.debut)}` : `${hm(r.debut)} – ${hm(r.fin)}`] : null,
+    r.debut ? ['Présence', (r.enCours ? `depuis ${hm(r.debut)}` : `${hm(r.debut)} – ${hm(r.fin)}`) + (r.pauses || []).map(([a, b]) => ` · pause ${hm(a)}–${hm(b)}`).join('')] : null,
     r.absents !== null && r.absents !== undefined ? ['Absents sur la liste', String(r.absents)] : null,
     r.sansRdv ? ['Sans rendez-vous', String(r.sansRdv)] : null,
     r.passages ? ['Visites et livraisons', String(r.passages)] : null,

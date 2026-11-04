@@ -758,7 +758,8 @@ const hmMC = (x) => String(x || '').replace(':', 'h').replace(/^0(\d)/, '$1');
 function chiffresMC(r, liste) {
   if (!r) return null;
   const cases = [
-    ['Présence de l’agent', r.debut ? (r.enCours ? `Depuis ${hmMC(r.debut)}` : `${hmMC(r.debut)} – ${hmMC(r.fin)}`) : '—', r.enCours ? statut('ok', 'En poste') : null],
+    ['Présence de l’agent', r.debut ? (r.enCours ? `Depuis ${hmMC(r.debut)}` : `${hmMC(r.debut)} – ${hmMC(r.fin)}`) : '—',
+      r.enCours ? statut('ok', 'En poste') : (r.pauses || []).length ? h('span', null, r.pauses.map(([a, b]) => `Pause de ${hmMC(a)} à ${hmMC(b)}`).join(' · ')) : null],
     liste || r.absents !== null ? ['Absents sur la liste', r.absents !== null ? nombre(r.absents) : '—', r.absents === null ? h('span', null, 'Noté à la fermeture') : null] : null,
     liste || r.sansRdv ? ['Sans rendez-vous', r.sansRdv !== null ? nombre(r.sansRdv) : '—', null] : null,
     ['Visites et livraisons', nombre(r.passages || 0), null],

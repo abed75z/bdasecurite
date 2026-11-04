@@ -173,7 +173,9 @@ function mod_journal_lignes(int $siteId, string $siteNom, string $du, string $au
         && strtotime($m['quand']) - strtotime($l['quand']) <= 6 * 3600) { $lignes[$i]['libelle'] = 'Pause'; $lignes[$k]['libelle'] = 'Reprise de service'; break; }
     }
   }
-  usort($lignes, fn ($a, $b) => strcmp($a['quand'], $b['quand']));
+  // à la même minute, la prise de service passe avant le reste et la fin de service après
+  $rang = fn ($l) => $l['type'] === 'prise' ? 0 : ($l['type'] === 'fin' ? 2 : 1);
+  usort($lignes, fn ($a, $b) => strcmp(substr($a['quand'], 0, 16), substr($b['quand'], 0, 16)) ?: ($rang($a) <=> $rang($b)) ?: strcmp($a['quand'], $b['quand']));
   if ($pourClient) foreach ($lignes as &$l) unset($l['agentId'], $l['cree'], $l['id'], $l['detailBrut'], $l['par']);
   return $lignes;
 }
@@ -185,7 +187,9 @@ function mod_journal_resume(array $lignes): array
   $listes = array_values(array_filter($lignes, fn ($l) => ($l['absents'] ?? null) !== null));
   $derniere = $listes ? end($listes) : null;
   $enCours = count($prises) > count($fins);
-  return ['debut' => $prises ? substr($prises[0]['quand'], 11, 5) : '', 'fin' => $fins && !$enCours ? substr(end($fins)['quand'], 11, 5) : '', 'enCours' => $enCours,
+  $pauses = [];
+  foreach ($lignes as $i => $l) if ($l['libelle'] === 'Pause') foreach (array_slice($lignes, $i + 1) as $m) if ($m['libelle'] === 'Reprise de service') { $pauses[] = [substr($l['quand'], 11, 5), substr($m['quand'], 11, 5)]; break; }
+  return ['debut' => $prises ? substr($prises[0]['quand'], 11, 5) : '', 'fin' => $fins && !$enCours ? substr(end($fins)['quand'], 11, 5) : '', 'enCours' => $enCours, 'pauses' => $pauses,
     'absents' => $derniere ? $derniere['absents'] : null, 'sansRdv' => $derniere ? $derniere['sansRdv'] : null,
     'passages' => count(array_filter($lignes, fn ($l) => $l['type'] === 'visiteur')), 'incidents' => count(array_filter($lignes, fn ($l) => $l['type'] === 'incident'))];
 }

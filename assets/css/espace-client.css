@@ -805,3 +805,60 @@ body.a-defile .haut { box-shadow: 0 10px 28px -22px rgba(15, 27, 45, .5); }
   .mcs-imprimer { display: none; }
 }
 @media print { .mcs-imprimer, .mcs-nav .btn { display: none !important; } }
+
+/* ----- v38 : tableau de la semaine, finition (textes entiers, bilan, en-têtes de jour) ----- */
+.mcs { gap: 12px; }
+.mcs-nav__titre { display: grid; justify-items: center; gap: 2px; min-width: 250px; }
+.mcs-nav__titre b { color: var(--encre); font-family: var(--serif); font-size: 20px; font-weight: 600; line-height: 1.15; }
+.mcs-nav__titre .statut, .mcs-nav__titre .lien { font-size: 11.5px; }
+.mcs-bilan { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin: 0; background: var(--blanc); border: 1px solid var(--filet); border-radius: var(--r); }
+.mcs-bilan > div { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 0 10px; padding: 10px 16px; border-left: 1px solid var(--filet-2); }
+.mcs-bilan > div:first-child { border-left: 0; }
+.mcs-bilan dt { grid-column: 1 / -1; color: var(--muet); font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.mcs-bilan dd { margin: 2px 0 0; color: var(--encre); font-size: 20px; font-weight: 500; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.mcs-bilan span { color: var(--muet); font-size: 11.5px; }
+.mcs-tete { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 0 6px; min-height: 0; padding: 10px 12px; }
+.mcs-tete__jour { color: var(--encre); font-size: 13px; font-weight: 600; }
+.mcs-tete__date { grid-column: 1; color: var(--muet); font-size: 12px; }
+.mcs-tete__date b { color: var(--muet); font-family: inherit; font-size: inherit; font-weight: 500; }
+.mcs-tete i { grid-column: 2; grid-row: 1; margin: 0; }
+.mcs-jour.is-auj .mcs-tete__jour { color: var(--champagne); }
+.mcs-jour.is-avenir .mcs-tete__jour, .mcs-jour.is-vide .mcs-tete__jour { color: var(--muet); font-weight: 500; }
+.mcs-resume { gap: 8px; padding: 10px 12px; }
+.mcs-presence { display: grid; gap: 1px; }
+.mcs-presence small { color: var(--muet); font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.mcs-presence b { font-size: 15px; }
+.mcs-presence span { color: var(--muet); font-size: 11.5px; line-height: 1.35; }
+.mcs-chiffres { display: flex; gap: 0; margin: 0; border: 1px solid var(--filet); border-radius: 3px; }
+.mcs-chiffres > div { flex: 1; padding: 4px 6px; border-left: 1px solid var(--filet-2); text-align: center; }
+.mcs-chiffres > div:first-child { border-left: 0; }
+.mcs-chiffres dt { color: var(--muet); font-size: 9.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.mcs-chiffres dd { margin: 0; color: var(--encre); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mcs-lignes { padding: 4px 0 8px; }
+.mcs-lignes li { grid-template-columns: 38px minmax(0, 1fr); padding: 5px 12px; border-top: 1px solid var(--filet-2); }
+.mcs-lignes li:first-child { border-top: 0; }
+.mcs-lignes b { overflow-wrap: break-word; }
+.mcs-lignes small { display: block; -webkit-line-clamp: unset; overflow: visible; margin-top: 1px; line-height: 1.35; overflow-wrap: break-word; }
+.mcs-info { gap: 3px; padding: 12px; }
+.mcs-info small { font-size: 10px; }
+.mcs-info span { color: var(--muet-2); font-size: 12px; }
+@media (max-width: 1180px) { .mcs-lignes li { grid-template-columns: 1fr; gap: 0; } }
+@media (max-width: 900px) {
+  .mcs-nav__titre { min-width: 0; }
+  .mcs-nav__titre b { font-size: 16px; }
+  .mcs-bilan { grid-template-columns: 1fr 1fr; }
+  .mcs-bilan > div:nth-child(odd) { border-left: 0; }
+  .mcs-bilan > div:nth-child(n+3) { border-top: 1px solid var(--filet-2); }
+  .mcs-lignes li { grid-template-columns: 44px minmax(0, 1fr); gap: 6px; }
+}
+
+/* ----- v39 : tout tient sur un écran ----- */
+.mcs-bilan > div { padding: 7px 16px; }
+.mcs-bilan dd { margin: 0; font-size: 17px; }
+.mcs-chiffres { display: flex; flex-wrap: wrap; gap: 2px 10px; margin: 0; border: 0; color: var(--muet); font-size: 12px; }
+.mcs-chiffres span { white-space: nowrap; }
+.mcs-chiffres b { color: var(--encre); font-weight: 700; font-variant-numeric: tabular-nums; }
+.mcs-resume { gap: 6px; padding: 9px 12px; }
+.mcs-tete { padding: 8px 12px; }
+.mcs-lignes li { padding: 4px 12px; }
+@media (max-width: 1480px) { .mcs-lignes li { grid-template-columns: 36px minmax(0, 1fr); gap: 5px; padding: 4px 10px; font-size: 12px; } .mcs-resume, .mcs-tete { padding-left: 10px; padding-right: 10px; } }

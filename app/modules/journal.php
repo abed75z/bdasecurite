@@ -177,7 +177,7 @@ function mod_journal_lignes(int $siteId, string $siteNom, string $du, string $au
   // à la même minute, la prise de service passe avant le reste et la fin de service après
   $rang = fn ($l) => $l['type'] === 'prise' ? 0 : ($l['type'] === 'fin' ? 2 : 1);
   usort($lignes, fn ($a, $b) => strcmp(substr($a['quand'], 0, 16), substr($b['quand'], 0, 16)) ?: ($rang($a) <=> $rang($b)) ?: strcmp($a['quand'], $b['quand']));
-  if ($pourClient) foreach ($lignes as &$l) unset($l['agentId'], $l['cree'], $l['id'], $l['detailBrut'], $l['par']);
+  if ($pourClient) foreach ($lignes as &$l) unset($l['agentId'], $l['cree'], $l['id'], $l['par']);
   return $lignes;
 }
 // Le résumé d'une journée : présence (première prise, dernière fin), compte rendu de la liste, visites et livraisons, incidents
@@ -190,7 +190,13 @@ function mod_journal_resume(array $lignes): array
   $enCours = count($prises) > count($fins);
   $pauses = [];
   foreach ($lignes as $i => $l) if ($l['libelle'] === 'Pause') foreach (array_slice($lignes, $i + 1) as $m) if ($m['libelle'] === 'Reprise de service') { $pauses[] = [substr($l['quand'], 11, 5), substr($m['quand'], 11, 5)]; break; }
-  return ['debut' => $prises ? substr($prises[0]['quand'], 11, 5) : '', 'fin' => $fins && !$enCours ? substr(end($fins)['quand'], 11, 5) : '', 'enCours' => $enCours, 'pauses' => $pauses,
+  $minutes = 0;
+  $ouvertes = [];
+  foreach ($lignes as $l) {
+    if ($l['type'] === 'prise') $ouvertes[$l['agent']] = strtotime($l['quand']);
+    elseif ($l['type'] === 'fin' && isset($ouvertes[$l['agent']])) { $minutes += (int)round((strtotime($l['quand']) - $ouvertes[$l['agent']]) / 60); unset($ouvertes[$l['agent']]); }
+  }
+  return ['debut' => $prises ? substr($prises[0]['quand'], 11, 5) : '', 'minutes' => $minutes, 'fin' => $fins && !$enCours ? substr(end($fins)['quand'], 11, 5) : '', 'enCours' => $enCours, 'pauses' => $pauses,
     'absents' => $derniere ? $derniere['absents'] : null, 'sansRdv' => $derniere ? $derniere['sansRdv'] : null,
     'passages' => count(array_filter($lignes, fn ($l) => $l['type'] === 'visiteur')), 'incidents' => count(array_filter($lignes, fn ($l) => $l['type'] === 'incident'))];
 }
@@ -445,10 +451,10 @@ function mod_journal_cl_semaine(): void
   $c = exiger_compte();
   require_once __DIR__ . '/../exploitation.php';
   $ref = mod_journal_jour($_GET['jour'] ?? '');
-  $lundi = date('Y-m-d', strtotime($ref) - ((int)date('N', strtotime($ref)) - 1) * 86400);
-  $dimanche = date('Y-m-d', strtotime("$lundi +6 days"));
+  $lundi = (new DateTimeImmutable($ref))->modify('monday this week')->format('Y-m-d');
+  $dimanche = (new DateTimeImmutable($lundi))->modify('+6 days')->format('Y-m-d');
   $auj = date('Y-m-d');
-  $lundiActuel = date('Y-m-d', time() - ((int)date('N') - 1) * 86400);
+  $lundiActuel = (new DateTimeImmutable($auj))->modify('monday this week')->format('Y-m-d');
   $st = db()->prepare('SELECT id, nom FROM sites WHERE client_id = ? AND actif = 1 ORDER BY ordre, nom');
   $st->execute([(int)$c['client_id']]);
   $sites = [];
@@ -459,7 +465,7 @@ function mod_journal_cl_semaine(): void
     $prevus = [];
     foreach (exp_vacations($lundi, $dimanche) as $v) if ((int)$v['site_id'] === (int)$s['id']) $prevus[$v['jour']][] = [substr((string)$v['debut'], 0, 5), substr((string)$v['fin'], 0, 5)];
     $jours = [];
-    for ($j = $lundi; $j <= $dimanche; $j = date('Y-m-d', strtotime("$j +1 day"))) {
+    for ($j = $lundi; $j <= $dimanche; $j = (new DateTimeImmutable($j))->modify('+1 day')->format('Y-m-d')) {
       $prevu = $prevus[$j] ?? [];
       usort($prevu, fn ($a, $b) => strcmp($a[0], $b[0]));
       if ($j > $auj) { $jours[] = ['jour' => $j, 'avenir' => true, 'prevu' => $prevu, 'resume' => null, 'agents' => [], 'lignes' => []]; continue; }

@@ -19,7 +19,7 @@ const tableau = (entetes, lignes) => h('div', { class: 'tableau-defil' }, h('tab
 
 // Fenêtre de dépôt d'un document (copie) dans le centre documentaire d'un client, ou de tous (client_id = 0)
 async function deposer(clientId, types, preset = {}) {
-  const rubriques = { conformite: 'Attestations et conformité', contrats: 'Contrats et avenants', rapports: 'Rapports et relevés', courriers: 'Courriers' };
+  const rubriques = { conformite: 'Attestations et conformité', contrats: 'Contrats et avenants', factures: 'Factures envoyées avant l’admin (copies)', rapports: 'Rapports et relevés', courriers: 'Courriers' };
   const cat = h('select', { class: 'input' }, Object.entries(rubriques).map(([k, l]) => h('option', { value: k, selected: k === (preset.categorie || (clientId ? 'contrats' : 'conformite')) }, l)));
   const type = h('select', { class: 'input' });
   const majTypes = () => type.replaceChildren(...Object.entries(types[cat.value] || {}).map(([k, l]) => h('option', { value: k, selected: k === preset.type }, l)));
@@ -31,6 +31,13 @@ async function deposer(clientId, types, preset = {}) {
   const date = saisie({ type: 'date' });
   const expire = saisie({ type: 'date' });
   const fichier = h('input', { type: 'file', class: 'input', accept: 'application/pdf,image/jpeg,image/png,image/webp', required: true });
+  // Facture d'avant l'admin : son montant TTC et son statut (laissé « Archive » si le règlement n'est pas vérifié)
+  const montant = saisie({ placeholder: 'Ex. : 2 568,50', inputmode: 'decimal' });
+  const statut = h('select', { class: 'input' }, h('option', { value: '' }, 'Archive (règlement non vérifié)'), h('option', { value: 'payee' }, 'Réglée'));
+  const blocFacture = h('div', { class: 'pt-deux' }, champ('Montant TTC (€)', montant), champ('Statut affiché au client', statut));
+  const majBloc = () => { blocFacture.hidden = cat.value !== 'factures'; };
+  cat.addEventListener('change', majBloc);
+  majBloc();
   const msg = h('p', { class: 'muet pt-aide' }, clientId ? 'Visible seulement par ce client. Il est prévenu par un e-mail court, sans le contenu.' : 'Visible par tous les clients qui ont un espace.');
   return modale({
     titre: clientId ? 'Déposer un document pour ce client' : 'Déposer un document de l’entreprise',
@@ -38,13 +45,14 @@ async function deposer(clientId, types, preset = {}) {
     contenu: h('div', { class: 'pt-formulaire' },
       h('div', { class: 'pt-deux' }, champ('Rubrique', cat), champ('Type de document', type)),
       champ('Fichier (PDF ou image, 15 Mo au plus)', fichier, 'Une copie est enregistrée : l’original sur votre ordinateur n’est pas modifié.'),
+      blocFacture,
       champ('Titre affiché', titre), champ('Description', desc),
       h('div', { class: 'pt-trois' }, champ('Référence', ref), champ('Date du document', date), champ('Valable jusqu’au', expire, 'Kbis : 3 mois, URSSAF : 6 mois, calculés tout seuls si vide.')),
       msg),
     actions: [{ libelle: 'Annuler', classe: 'btn--ghost', valeur: false }, { libelle: 'Déposer', classe: 'btn--gold', submit: true, action: async () => {
       if (!fichier.files[0]) { toast('Choisissez le fichier à déposer.', 'erreur'); return false; }
       const fd = new FormData();
-      Object.entries({ client_id: clientId, categorie: cat.value, type: type.value, titre: titre.value.trim(), description: desc.value.trim(), reference: ref.value.trim(), date_doc: date.value, expire: expire.value })
+      Object.entries({ client_id: clientId, categorie: cat.value, type: type.value, titre: titre.value.trim(), description: desc.value.trim(), reference: ref.value.trim(), date_doc: date.value, expire: expire.value, montant: montant.value, statut: statut.value })
         .forEach(([k, v]) => fd.append(k, v));
       fd.append('fichier', fichier.files[0]);
       try { await apiFichier('mod.portail.biblio.ajouter', fd); toast('Document mis en ligne dans l’espace client.'); return true; } catch (e) { erreur(e); return false; }
@@ -74,7 +82,7 @@ function listeBiblio(docs, recharger) {
   if (!docs.length) return h('p', { class: 'muet' }, 'Aucun document déposé pour l’instant.');
   return tableau(['Document', 'Rubrique', 'Date', 'Validité', 'Lu', ''], docs.map((d) => h('tr', { class: d.publie ? null : 'pt-retire' },
     h('td', null, h('b', null, d.titre), h('small', { class: 'muet mx-bloc' }, `${d.genre}${d.reference ? ` · ${d.reference}` : ''}`)),
-    h('td', null, d.categorie === 'conformite' ? 'Conformité' : d.categorie === 'contrats' ? 'Contrats' : d.categorie === 'rapports' ? 'Rapports' : 'Courriers'),
+    h('td', null, { conformite: 'Conformité', contrats: 'Contrats', factures: 'Factures', rapports: 'Rapports', courriers: 'Courriers' }[d.categorie] || d.categorie, typeof d.montant === 'number' ? h('small', { class: 'muet mx-bloc' }, euro.format(d.montant)) : null),
     h('td', null, isoVersFr(d.date) || '—'),
     h('td', null, d.expire ? isoVersFr(d.expire) : '—'),
     h('td', null, d.lectures ? pluriel(d.lectures, 'fois') : h('span', { class: 'muet' }, 'pas encore')),

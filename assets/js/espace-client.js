@@ -490,7 +490,7 @@ async function vueCentre(categorie) {
   const choisir = (k) => { f.cat = k; f.statut = ''; history.replaceState(null, '', `#/documents/${k}`); rendreRail(); rendre(); };
 
   const rendre = () => {
-    const statuts = f.cat === 'factures' ? [['', 'Tous les statuts'], ['envoyee', 'À régler'], ['retard', 'En retard'], ['payee', 'Réglées'], ['annulee', 'Annulées']]
+    const statuts = f.cat === 'factures' ? [['', 'Tous les statuts'], ['envoyee', 'À régler'], ['retard', 'En retard'], ['payee', 'Réglées'], ['archive', 'Archives'], ['annulee', 'Annulées']]
       : f.cat === 'devis' ? [['', 'Tous les statuts'], ['envoye', 'À signer'], ['accepte', 'Acceptés'], ['refuse', 'Déclinés']] : null;
     selStatut.replaceChildren(...(statuts || []).map(([v, l]) => h('option', { value: v, selected: v === f.statut }, l)));
     selStatut.hidden = !statuts;
@@ -567,7 +567,7 @@ async function vueFactures() {
   const f = { annee: '', statut: '', q: '' };
   const recherche = saisie({ type: 'search', placeholder: 'Numéro, période, montant…', 'aria-label': 'Rechercher une facture' });
   const selAnnee = h('select', { class: 'input', 'aria-label': 'Année' }, h('option', { value: '' }, 'Toutes les années'), annees.map((a) => h('option', { value: a }, a)));
-  const selStatut = h('select', { class: 'input', 'aria-label': 'Statut' }, [['', 'Tous les statuts'], ['envoyee', 'À régler'], ['retard', 'En retard'], ['payee', 'Réglées'], ['annulee', 'Annulées']].map(([v, l]) => h('option', { value: v }, l)));
+  const selStatut = h('select', { class: 'input', 'aria-label': 'Statut' }, [['', 'Tous les statuts'], ['envoyee', 'À régler'], ['retard', 'En retard'], ['payee', 'Réglées'], ['archive', 'Archives'], ['annulee', 'Annulées']].map(([v, l]) => h('option', { value: v }, l)));
   const zone = h('div');
   const rendre = () => {
     const q = sansAccent(f.q.trim());
@@ -581,7 +581,7 @@ async function vueFactures() {
       td(euro.format(i.montant), 'd chiffre fort'), td(statut(i.statut.ton, i.statut.libelle), 'm-cache'),
       td(h('div', { class: 'actions' }, boutonTelecharger(i), h('span', { class: 'fleche' }, ic('fleche'))), 'd m-cache')])))
       : vide(toutes.length ? 'Aucune facture ne correspond' : 'Aucune facture pour le moment', toutes.length ? 'Modifiez la recherche ou les filtres.' : 'Dès qu’une facture vous est adressée, elle apparaît ici automatiquement.'),
-    liste.length ? h('div', { class: 'panneau__pied' }, h('span', { class: 'note' }, `${pluriel(liste.length, 'facture')} · classées de la plus récente à la plus ancienne`), h('b', { class: 'chiffre' }, `Total : ${euro.format(total)}`)) : null);
+    liste.length ? h('div', { class: 'panneau__pied' }, h('span', { class: 'note' }, `${pluriel(liste.length, 'facture')} · classées de la plus récente à la plus ancienne${liste.some((i) => i.statut.code === 'archive') ? ' · « Archive » : copie de la facture envoyée par e-mail' : ''}`), h('b', { class: 'chiffre' }, `Total : ${euro.format(total)}`)) : null);
   };
   let attente;
   recherche.addEventListener('input', () => { clearTimeout(attente); attente = setTimeout(() => { f.q = recherche.value; rendre(); }, 120); });

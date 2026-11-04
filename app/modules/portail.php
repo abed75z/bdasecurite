@@ -25,6 +25,7 @@ const MOD_PORTAIL_CATEGORIES = ['factures' => 'Factures', 'devis' => 'Devis et a
   'rapports' => 'Rapports et relevés', 'courriers' => 'Courriers', 'equipe' => 'Équipe sur site', 'echanges' => 'Pièces échangées'];
 // Ce que la direction dépose elle-même, par rubrique : [code => libellé]
 const MOD_PORTAIL_TYPES_BIBLIO = [
+  'factures' => ['facture' => 'Facture', 'avoir' => 'Avoir'],
   'contrats' => ['contrat' => 'Contrat de prestation', 'avenant' => 'Avenant', 'cgv' => 'Conditions générales', 'autre' => 'Document contractuel'],
   'conformite' => ['kbis' => 'Extrait Kbis', 'cnaps' => 'Autorisation d’exercice CNAPS', 'rcpro' => 'Attestation d’assurance RC professionnelle', 'urssaf' => 'Attestation de vigilance URSSAF',
     'etrangers' => 'Liste des salariés étrangers', 'fiscal' => 'Attestation de régularité fiscale', 'rib' => 'Relevé d’identité bancaire', 'statuts' => 'Statuts de la société', 'autre' => 'Attestation'],
@@ -75,6 +76,11 @@ function module_portail(): array
         CREATE TABLE IF NOT EXISTS m_portail_liens (document_id INTEGER PRIMARY KEY, client_id INTEGER NOT NULL, par TEXT NOT NULL DEFAULT '', quand TEXT NOT NULL);
         CREATE TABLE IF NOT EXISTS m_portail_annonces (id INTEGER PRIMARY KEY, client_id INTEGER NOT NULL DEFAULT 0, titre TEXT NOT NULL, texte TEXT NOT NULL DEFAULT '',
           niveau TEXT NOT NULL DEFAULT 'info', debut TEXT NOT NULL, fin TEXT NOT NULL DEFAULT '', par TEXT NOT NULL DEFAULT '', cree TEXT NOT NULL);
+        SQL,
+      // Factures envoyées avant l'admin (copies des PDF retrouvés dans les e-mails) : montant et statut
+      3 => <<<'SQL'
+        ALTER TABLE m_portail_biblio ADD COLUMN montant REAL NOT NULL DEFAULT 0;
+        ALTER TABLE m_portail_biblio ADD COLUMN statut TEXT NOT NULL DEFAULT '';
         SQL,
     ],
     'admin' => [
@@ -730,7 +736,9 @@ function mod_portail_item_biblio(array $b, bool $admin = false): array
     'reference' => (string)$b['reference'], 'date' => (string)$b['date_doc'] !== '' ? (string)$b['date_doc'] : substr((string)$b['cree'], 0, 10),
     'expire' => mod_portail_expiration($b), 'nouveau' => !$admin && empty($b['lu']), 'commun' => (int)$b['client_id'] === 0,
     'url' => $admin ? 'api.php?a=mod.portail.biblio.fichier&id=' . $id : mod_portail_url('biblio.fichier', $id), 'format' => mod_portail_format((string)$b['mime']),
-    'taille' => (int)$b['taille'], 'nom' => (string)$b['nom']];
+    'taille' => (int)$b['taille'], 'nom' => (string)$b['nom']]
+    + ($b['categorie'] === 'factures' ? ['montant' => round((float)($b['montant'] ?? 0), 2), 'periode' => (string)$b['description'], 'echeance' => '',
+      'statut' => ($b['statut'] ?? '') === 'payee' ? ['code' => 'payee', 'libelle' => 'Réglée', 'ton' => 'ok'] : ['code' => 'archive', 'libelle' => 'Archive', 'ton' => 'neutre']] : []);
 }
 function mod_portail_biblio_client(int $cid): array
 {
@@ -1020,9 +1028,11 @@ function mod_portail_adm_biblio_ajouter(): void
   $nom = mod_portail_ranger($f, 'biblio');
   $quand = maintenant();
   $db = db();
-  $db->prepare('INSERT INTO m_portail_biblio (client_id, categorie, type, titre, description, reference, date_doc, expire, fichier, nom, mime, taille, publie, par, cree, maj) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?)')
+  $montant = $cat === 'factures' ? round((float)str_replace([' ', "\u{a0}", "\u{202f}", '€', ','], ['', '', '', '', '.'], (string)($_POST['montant'] ?? '0')), 2) : 0;
+  $statut = $cat === 'factures' && ($_POST['statut'] ?? '') === 'payee' ? 'payee' : '';
+  $db->prepare('INSERT INTO m_portail_biblio (client_id, categorie, type, titre, description, reference, date_doc, expire, fichier, nom, mime, taille, publie, par, cree, maj, montant, statut) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)')
     ->execute([$cid, $cat, $type, $titre, texte($_POST['description'] ?? '', 400), texte($_POST['reference'] ?? '', 80), mod_portail_date($_POST['date_doc'] ?? '') ?: substr($quand, 0, 10),
-      mod_portail_date($_POST['expire'] ?? ''), $nom, $f['nom'], $f['mime'], $f['taille'], (string)($_SESSION['login'] ?? ''), $quand, $quand]);
+      mod_portail_date($_POST['expire'] ?? ''), $nom, $f['nom'], $f['mime'], $f['taille'], (string)($_SESSION['login'] ?? ''), $quand, $quand, $montant, $statut]);
   $id = (int)$db->lastInsertId();
   journal('document', "Centre documentaire : « $titre » mis à disposition de $client");
   if ($cid) mod_portail_alerter($cid, 'Nouveau document disponible', 'Un nouveau document est disponible', 'documents');
@@ -1038,9 +1048,12 @@ function mod_portail_adm_biblio_modifier(): void
   $cat = isset(MOD_PORTAIL_TYPES_BIBLIO[$b['categorie'] ?? '']) ? (string)$b['categorie'] : (string)$x['categorie'];
   $type = isset(MOD_PORTAIL_TYPES_BIBLIO[$cat][$b['type'] ?? '']) ? (string)$b['type'] : (isset(MOD_PORTAIL_TYPES_BIBLIO[$cat][$x['type']]) ? (string)$x['type'] : 'autre');
   $publie = array_key_exists('publie', $b) ? (!empty($b['publie']) ? 1 : 0) : (int)$x['publie'];
-  db()->prepare('UPDATE m_portail_biblio SET categorie = ?, type = ?, titre = ?, description = ?, reference = ?, date_doc = ?, expire = ?, publie = ?, maj = ? WHERE id = ?')
+  $montant = array_key_exists('montant', $b) ? round((float)str_replace([' ', "\u{a0}", "\u{202f}", '€', ','], ['', '', '', '', '.'], (string)$b['montant']), 2) : (float)$x['montant'];
+  $statut = array_key_exists('statut', $b) ? (($b['statut'] ?? '') === 'payee' ? 'payee' : '') : (string)$x['statut'];
+  db()->prepare('UPDATE m_portail_biblio SET categorie = ?, type = ?, titre = ?, description = ?, reference = ?, date_doc = ?, expire = ?, publie = ?, montant = ?, statut = ?, maj = ? WHERE id = ?')
     ->execute([$cat, $type, texte($b['titre'] ?? $x['titre'], 160) ?: (string)$x['titre'], texte($b['description'] ?? $x['description'], 400), texte($b['reference'] ?? $x['reference'], 80),
-      array_key_exists('date_doc', $b) ? mod_portail_date($b['date_doc']) : (string)$x['date_doc'], array_key_exists('expire', $b) ? mod_portail_date($b['expire']) : (string)$x['expire'], $publie, maintenant(), $x['id']]);
+      array_key_exists('date_doc', $b) ? mod_portail_date($b['date_doc']) : (string)$x['date_doc'], array_key_exists('expire', $b) ? mod_portail_date($b['expire']) : (string)$x['expire'], $publie,
+      $cat === 'factures' ? $montant : 0, $cat === 'factures' ? $statut : '', maintenant(), $x['id']]);
   if ($publie !== (int)$x['publie']) journal('document', "Centre documentaire : « {$x['titre']} » " . ($publie ? 'remis en ligne' : 'retiré de l’espace client'));
   repondre(['ok' => true]);
 }

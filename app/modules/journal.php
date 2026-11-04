@@ -53,6 +53,7 @@ function module_journal(): array
     ],
     'client' => [
       'jour' => ['methode' => 'GET', 'fn' => 'mod_journal_cl_jour'],
+      'semaine' => ['methode' => 'GET', 'fn' => 'mod_journal_cl_semaine'],
     ],
   ];
 }
@@ -436,4 +437,29 @@ function mod_journal_cl_jour(): void
     $sites[] = ['nom' => (string)$s['nom'], 'liste' => $reg['liste'], 'resume' => mod_journal_resume($lignes), 'lignes' => $lignes];
   }
   repondre(['ok' => true, 'jour' => $jour, 'aujourdhui' => $jour === date('Y-m-d'), 'sites' => $sites]);
+}
+// La semaine (lundi → dimanche) de chaque site du client : un résumé par jour et le détail des lignes
+function mod_journal_cl_semaine(): void
+{
+  if (!function_exists('exiger_compte')) echec('Connexion requise.', 401);
+  $c = exiger_compte();
+  $ref = mod_journal_jour($_GET['jour'] ?? '');
+  $lundi = date('Y-m-d', strtotime($ref) - ((int)date('N', strtotime($ref)) - 1) * 86400);
+  $dimanche = date('Y-m-d', strtotime("$lundi +6 days"));
+  $auj = date('Y-m-d');
+  $lundiActuel = date('Y-m-d', time() - ((int)date('N') - 1) * 86400);
+  $st = db()->prepare('SELECT id, nom FROM sites WHERE client_id = ? AND actif = 1 ORDER BY ordre, nom');
+  $st->execute([(int)$c['client_id']]);
+  $sites = [];
+  foreach ($st->fetchAll() as $s) {
+    $reg = mod_journal_reglages((int)$s['id']);
+    if (!$reg['client']) continue;
+    $jours = [];
+    for ($j = $lundi; $j <= $dimanche && $j <= $auj; $j = date('Y-m-d', strtotime("$j +1 day"))) {
+      $lignes = mod_journal_lignes((int)$s['id'], (string)$s['nom'], "$j 00:00:00", "$j 23:59:59", true);
+      $jours[] = ['jour' => $j, 'resume' => mod_journal_resume($lignes), 'lignes' => $lignes];
+    }
+    $sites[] = ['nom' => (string)$s['nom'], 'liste' => $reg['liste'], 'jours' => $jours];
+  }
+  repondre(['ok' => true, 'lundi' => $lundi, 'dimanche' => $dimanche, 'actuelle' => $lundi === $lundiActuel, 'aujourdhui' => $auj, 'sites' => $sites]);
 }

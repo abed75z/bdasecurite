@@ -719,3 +719,14 @@ body.a-defile .haut { box-shadow: 0 10px 28px -22px rgba(15, 27, 45, .5); }
 .mc-resume > span b { margin-right: 4px; font-size: 20px; }
 @media (max-width: 640px) { .mc-chiffres { grid-template-columns: 1fr 1fr; } .mc-chiffres > div:nth-child(3) { border-left: 0; } .mc-chiffres > div { padding: 14px 16px; border-top: 1px solid var(--filet-2); } .mc-chiffres > div:nth-child(-n+2) { border-top: 0; } }
 @media print { .mc-chiffres { border: 1px solid #ccc; } }
+
+/* ----- v34 : main courante, la semaine ----- */
+.table tr.mc-vide td, .mc-muet { color: var(--muet-2); }
+.table tr.mc-vide td.fort { color: var(--muet); font-weight: 500; }
+.table td small { display: block; }
+.mc-jour { border-top: 1px solid var(--filet); }
+.mc-jour__tete { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 16px; padding: 22px 24px 12px; background: var(--fond, #FAF8F4); border-bottom: 1px solid var(--filet-2); }
+.mc-jour__tete h3 { margin: 0; color: var(--encre); font-family: var(--serif); font-size: 20px; font-weight: 600; }
+.mc-jour__tete span { color: var(--muet); font-size: 13px; font-variant-numeric: tabular-nums; }
+@media print { .mc-jour { break-inside: avoid-page; } .mc-jour__tete { background: none; } }
+@media (max-width: 900px) { .table td span.m-seul { display: inline; white-space: nowrap; } }

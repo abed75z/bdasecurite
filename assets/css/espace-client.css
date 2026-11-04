@@ -671,3 +671,14 @@ body.a-defile .haut { box-shadow: 0 10px 28px -22px rgba(15, 27, 45, .5); }
 }
 .rapport-mensuel .rm-table th, .rapport-mensuel .rm-table td { text-align: left; }
 .rapport-mensuel .rm-table .d { text-align: right; }
+
+/* ----- v30 : le gérant ressort en doré ----- */
+.initiales--or { background: linear-gradient(135deg, #CDB27A, #A88A52); border-color: #A88A52; color: var(--nuit); }
+.mention-or { display: inline-block; margin-left: 10px; padding: 2px 8px; border: 1px solid var(--champagne-clair); border-radius: var(--r); background: var(--champagne-fond); color: var(--champagne); font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; vertical-align: 2px; }
+.table tr.ligne--or td { background: var(--champagne-fond); }
+.table tr.ligne--or td:first-child { box-shadow: inset 2px 0 0 var(--champagne); }
+.table tr.ligne--or.cliquable:hover td { background: #F1E7D2; }
+.table tr.ligne--or small { color: var(--champagne); }
+.personne-ligne--or { margin: 0 -10px; padding: 10px; background: var(--champagne-fond); border-left: 2px solid var(--champagne); }
+.personne-ligne--or small { color: var(--champagne); }
+.personne span.mention-or, .personne-ligne span.mention-or { display: inline-block; width: auto; }

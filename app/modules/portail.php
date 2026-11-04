@@ -376,7 +376,7 @@ function mod_portail_cl_equipe(): void
       'role' => $p['role'],
       'nom' => mod_portail_nom_court((string)$a['nom']),
       'qualification' => mod_portail_qualif((string)$a['poste']),
-      'gerant' => (bool)preg_match('/g[ée]rant|direct/i', (string)$a['poste']),
+      'gerant' => (bool)preg_match('/g[ée]rant|direct/iu', (string)$a['poste']),
       'carte' => $carte !== '' ? '···· ' . mb_substr($carte, -4) : '',
       'validite' => preg_match('/^(\d{4})-(\d{2})-(\d{2})/', (string)$a['validite'], $m) ? "$m[3]/$m[2]/$m[1]" : '',
       'etat' => $etat,

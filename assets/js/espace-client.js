@@ -447,8 +447,10 @@ async function vueAccueil() {
   const candidats = eq.candidats || [];
 
   const equipe = h('div', { class: 'liste-equipe' },
-    eq.agents.length ? eq.agents.map((a) => h('a', { class: 'personne-ligne', href: `#/equipe/${a.id}` }, h('i', { class: 'initiales' }, initiales(a.nom)),
-      h('span', null, h('b', null, a.nom), h('small', null, a.qualification)), a.enPoste ? statut('ok', `En poste depuis ${hm(a.enPoste)}`) : null))
+    eq.agents.length ? gerantDabord(eq.agents).map((a) => h('a', { class: `personne-ligne ${a.gerant ? 'personne-ligne--or' : ''}`, href: `#/equipe/${a.id}` },
+      h('i', { class: `initiales ${a.gerant ? 'initiales--or' : ''}` }, initiales(a.nom)),
+      h('span', null, h('b', null, a.nom, a.gerant ? mentionGerant() : null), h('small', null, a.gerant ? 'Dirigeant de BDA Security Group' : a.qualification)),
+      a.enPoste ? statut('ok', `En poste depuis ${hm(a.enPoste)}`) : null))
       : h('p', { class: 'note' }, 'Les dossiers des agents affectés à votre site apparaîtront ici.'),
     candidats.length ? [h('p', { class: 'liste-equipe__titre' }, 'En attente d’embauche'),
       candidats.map((a) => h('a', { class: 'personne-ligne', href: `#/equipe/${a.id}` }, h('i', { class: 'initiales initiales--clair' }, initiales(a.nom)),
@@ -786,11 +788,14 @@ async function vueRapportMensuel(mois) {
 
 /* ---------- Équipe : sur site, puis en attente d'embauche ---------- */
 const ETATS_CARTE = { valide: ['ok', 'Carte pro valide'], expiree: ['alerte', 'Carte pro expirée'], a_verifier: ['neutre', 'Carte pro non renseignée'], inactif: ['neutre', 'Inactif'] };
+// Le gérant passe en tête de l'équipe et ressort en doré
+const gerantDabord = (l) => [...l].sort((a, b) => (b.gerant ? 1 : 0) - (a.gerant ? 1 : 0));
+const mentionGerant = () => h('span', { class: 'mention-or' }, 'Gérant');
 const nbDocs = (a) => (a.docs.length ? pluriel(a.docs.length, 'document') : 'Dossier en cours');
 async function vueEquipe() {
   const { agents, candidats = [], suivi = [] } = await api('mod.portail.equipe');
-  const personne = (a, clair) => h('div', { class: 'personne' }, h('i', { class: `initiales ${clair ? 'initiales--clair' : ''}` }, initiales(a.nom)),
-    h('span', null, h('b', { class: 'fort' }, a.nom), h('small', null, a.qualification)));
+  const personne = (a, clair) => h('div', { class: 'personne' }, h('i', { class: `initiales ${clair ? 'initiales--clair' : a.gerant ? 'initiales--or' : ''}` }, initiales(a.nom)),
+    h('span', null, h('b', { class: 'fort' }, a.nom, a.gerant ? mentionGerant() : null), h('small', null, a.gerant ? 'Dirigeant de BDA Security Group · présent sur votre site' : a.qualification)));
   const ouvrir = (a) => () => { location.hash = `#/equipe/${a.id}`; };
   return [
     tete('Prestation', 'Équipe', 'Votre chargé de compte, les personnes affectées à votre site, puis les candidats que nous vous avons présentés.'),
@@ -800,9 +805,11 @@ async function vueEquipe() {
         td([p.role, h('small', null, p.email)], 'm-cache'),
         td(h('span', { class: 'lien' }, 'Lui écrire', ic('fleche')), 'd')])))) : null,
     panneau('Équipe sur site', h('small', null, pluriel(agents.length, 'personne')),
-      agents.length ? tableau([['Nom'], ['Carte professionnelle', 'm-cache'], ['Dossier', 'm-cache'], ['', 'd']], agents.map((a) => {
+      agents.length ? tableau([['Nom'], ['Carte professionnelle', 'm-cache'], ['Dossier', 'm-cache'], ['', 'd']], gerantDabord(agents).map((a) => {
         const [ton, lib] = ETATS_CARTE[a.etat] || ETATS_CARTE.a_verifier;
-        return ligne(ouvrir(a), [td([personne(a), h('small', { class: 'm-seul' }, `${lib} · ${nbDocs(a)}`)]), td(statut(ton, lib), 'm-cache'), td(nbDocs(a), 'm-cache'), tdFleche()]);
+        const tr = ligne(ouvrir(a), [td([personne(a), h('small', { class: 'm-seul' }, `${lib} · ${nbDocs(a)}`)]), td(statut(ton, lib), 'm-cache'), td(nbDocs(a), 'm-cache'), tdFleche()]);
+        if (a.gerant) tr.classList.add('ligne--or');
+        return tr;
       })) : vide('Aucun dossier partagé', 'Les dossiers des agents affectés à votre site apparaîtront ici.')),
     candidats.length ? panneau('En attente d’embauche', h('small', null, pluriel(candidats.length, 'candidat')),
       tableau([['Candidat'], ['Rendez-vous', 'm-cache'], ['Dossier', 'm-cache'], ['', 'd']], candidats.map((a) => ligne(ouvrir(a), [
@@ -822,8 +829,9 @@ async function vueAgent(id) {
   return [
     retour,
     h('section', { class: 'panneau' }, h('div', { class: 'agent-tete' },
-      h('i', { class: `initiales initiales--grand ${candidat ? 'initiales--clair' : ''}` }, initiales(a.nom)),
-      h('div', { class: 'agent-tete__nom' }, h('span', { class: 'sur' }, candidat ? 'En attente d’embauche' : 'Équipe sur site'), h('h1', null, a.nom), h('span', null, a.qualification)),
+      h('i', { class: `initiales initiales--grand ${candidat ? 'initiales--clair' : a.gerant ? 'initiales--or' : ''}` }, initiales(a.nom)),
+      h('div', { class: 'agent-tete__nom' }, h('span', { class: 'sur' }, candidat ? 'En attente d’embauche' : a.gerant ? 'Gérant · équipe sur site' : 'Équipe sur site'), h('h1', null, a.nom),
+        h('span', null, a.gerant ? 'Dirigeant de BDA Security Group' : a.qualification)),
       a.verifier ? h('a', { class: 'btn', href: a.verifier, target: '_blank', rel: 'noopener' }, ic('bouclier'), 'Vérifier la carte en ligne') : null)),
     candidat && a.note ? h('section', { class: 'annonce' }, h('small', null, 'Rendez-vous'), h('b', null, a.note), h('p', null, 'Candidat présenté par BDA Security Group. Son embauche sera confirmée après l’entretien.')) : null,
     panneau('Documents du dossier', h('small', null, docs.length ? `${pluriel(docs.length, 'document')} · cliquez pour ouvrir` : ''),

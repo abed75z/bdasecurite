@@ -682,3 +682,26 @@ body.a-defile .haut { box-shadow: 0 10px 28px -22px rgba(15, 27, 45, .5); }
 .personne-ligne--or { margin: 0 -10px; padding: 10px; background: var(--champagne-fond); border-left: 2px solid var(--champagne); }
 .personne-ligne--or small { color: var(--champagne); }
 .personne span.mention-or, .personne-ligne span.mention-or { display: inline-block; width: auto; }
+
+/* ----- v31 : main courante (cahier de poste en direct) ----- */
+.mc { display: grid; gap: 18px; }
+.mc-jours { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; }
+.mc-jours > b { color: var(--encre); font-size: 15px; font-weight: 600; }
+.mc-jours .statut { margin-left: auto; }
+.table tr.mc-incident td, .table tr.mc-incident .mc-titre { color: var(--alerte); }
+.table tr.mc-auto td { color: var(--muet); }
+.table .mc-titre { display: block; font-weight: 500; white-space: pre-line; }
+.table td.mc-heure { width: 70px; }
+.mc-resume { display: flex; align-items: baseline; gap: 10px; padding: 16px 24px; border-bottom: 1px solid var(--filet); }
+.mc-resume b { color: var(--encre); font-size: 26px; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.mc-resume > span { color: var(--muet); font-size: 13px; }
+.mc-resume b > .compteur { color: inherit; font-size: inherit; font-weight: inherit; letter-spacing: inherit; }
+.mc-liste { margin: 0; padding: 0; list-style: none; }
+.mc-liste li { display: flex; gap: 16px; padding: 12px 24px; border-top: 1px solid var(--filet-2); }
+.mc-liste li:first-child { border-top: 0; }
+.mc-liste time { flex: none; width: 44px; color: var(--encre); font-size: 13.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mc-liste b { display: block; color: var(--encre); font-size: 13.5px; font-weight: 500; overflow-wrap: anywhere; }
+.mc-liste small { display: block; color: var(--muet); font-size: 12px; }
+.mc-liste .mc-incident time, .mc-liste .mc-incident b { color: var(--alerte); }
+.mc-liste .mc-auto time, .mc-liste .mc-auto b { color: var(--muet); font-weight: 500; }
+@media print { .mc-jours .btn, .mc-jours .lien, .mc-jours .statut { display: none !important; } }

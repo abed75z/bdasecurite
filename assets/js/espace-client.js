@@ -37,11 +37,12 @@ const ICONES = {
   coche: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
   rapport: '<path d="M4 20.5h16M7 17V11M12 17V6.5M17 17v-8"/>',
   horloge: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  cahier: '<path d="M6 3.5h12.5v17H6a1.5 1.5 0 0 1-1.5-1.5V5A1.5 1.5 0 0 1 6 3.5z"/><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4"/>',
   telephone: '<path d="M20.5 16.6v2.6a1.7 1.7 0 0 1-1.9 1.7A17 17 0 0 1 3.1 5.4 1.7 1.7 0 0 1 4.8 3.5h2.6a1.7 1.7 0 0 1 1.7 1.5c.1.9.3 1.7.6 2.5a1.7 1.7 0 0 1-.4 1.8l-1.1 1.1a13.7 13.7 0 0 0 5.4 5.4l1.1-1.1a1.7 1.7 0 0 1 1.8-.4c.8.3 1.6.5 2.5.6a1.7 1.7 0 0 1 1.5 1.7z"/>',
 };
 const DEMANDES = [['renfort', 'Demande de renfort'], ['planning', 'Modification du planning'], ['probleme', 'Signaler un problème'], ['facture', 'Question sur une facture'], ['document', 'Demande de document']];
 const MENU = [
-  [null, [['accueil', 'Accueil', 'grille'], ['factures', 'Factures', 'facture'], ['prestations', 'Heures de présence', 'horloge'], ['equipe', 'Équipe', 'equipe'],
+  [null, [['accueil', 'Accueil', 'grille'], ['factures', 'Factures', 'facture'], ['prestations', 'Heures de présence', 'horloge'], ['main-courante', 'Main courante', 'cahier'], ['equipe', 'Équipe', 'equipe'],
     ['documents', 'Documents', 'dossier'], ['messages', 'Messages', 'messages'], ['compte', 'Mon compte', 'compte']]],
 ];
 const LIBELLES = Object.fromEntries(MENU.flatMap(([, items]) => items.map(([k, lib]) => [k, lib])));
@@ -317,7 +318,7 @@ function naviguer() {
   majBadges();
   const vues = {
     accueil: vueAccueil, documents: () => vueCentre(param), factures: vueFactures, document: () => vueDocument(param), 'rapport-mensuel': () => vueRapportMensuel(param),
-    prestations: () => vuePrestations(param), equipe: () => (param ? vueAgent(+param) : vueEquipe()), messages: vueMessages, compte: vueCompte,
+    prestations: () => vuePrestations(param), 'main-courante': () => vueMainCourante(param), equipe: () => (param ? vueAgent(+param) : vueEquipe()), messages: vueMessages, compte: vueCompte,
   };
   Promise.resolve(vues[route]()).then((contenu) => { page.replaceChildren(...[contenu].flat(Infinity).filter(Boolean)); animerNombres(page); })
     .catch((e) => page.replaceChildren(h('p', { class: 'ec-message' }, e.message)));
@@ -433,7 +434,8 @@ async function demanderDocument(libelle, bouton) {
 
 /* ---------- Accueil ---------- */
 async function vueAccueil() {
-  const [t, data, eq] = await Promise.all([api('mod.portail.tableau'), chargerCentre(true), api('mod.portail.equipe').catch(() => ({ agents: [], candidats: [] }))]);
+  const [t, data, eq, mc] = await Promise.all([api('mod.portail.tableau'), chargerCentre(true), api('mod.portail.equipe').catch(() => ({ agents: [], candidats: [] })),
+    api('mod.journal.jour').catch(() => null)]);
   etat.nouveaux = t.nouveaux;
   etat.nonLus = t.messagesNonLus;
   majBadges();
@@ -480,6 +482,7 @@ async function vueAccueil() {
     aFaire.length ? panneau('À traiter', null, h('ul', { class: 'a-faire' }, aFaire)) : null,
     h('div', { class: 'grille' },
       h('div', { class: 'colonne' },
+        mc?.sites?.length ? panneauAujourdhui(mc) : null,
         panneau('Dernières factures', h('a', { class: 'lien', href: '#/factures' }, `Toutes les factures (${factures.length})`, ic('fleche')),
           factures.length ? tableau([['Facture'], ['Montant', 'd'], ['Statut', 'm-cache'], ['', 'd m-cache']], factures.slice(0, 5).map((i) => ligne(() => ouvrirItem(i), [
             td(h('div', { class: 'doc' }, pictos(i), h('span', null, h('b', null, i.reference || i.titre), h('small', null, i.periode || frLong(i.date))))),
@@ -738,6 +741,57 @@ async function vuePrestations(choix) {
     h('p', { class: 'note' }, r.source === 'releve' ? `Heures reprises du relevé joint à la facture ${r.facture}.` : r.encours ? 'Les jours « Prévu » sont à venir : ils peuvent encore changer.' : '',
       ' Une question ? ', h('a', { href: '#/messages' }, 'Écrivez-nous'), '.'),
   ];
+}
+
+/* ---------- Main courante : le cahier de poste, tenu en direct par nos agents ---------- */
+const decalerJour = (j, n) => { const d = dt(j); d.setDate(d.getDate() + n); return iso(d); };
+const heureMC = (s) => String(s || '').slice(11, 16).replace(':', 'h');
+// Ce qu'on lit sur une ligne du cahier
+function ligneMC(l) {
+  if (l.type === 'note') return { titre: l.detail || 'Note', detail: '' };
+  if (l.type === 'visiteur') return { titre: l.libelle, detail: [l.detail, l.depart ? `reparti à ${heureMC(l.depart)}` : 'sur place'].filter(Boolean).join(' · ') };
+  return { titre: l.libelle, detail: l.detail };
+}
+const classeMC = (l) => (l.type === 'incident' ? 'mc-incident' : l.type === 'prise' || l.type === 'fin' ? 'mc-auto' : null);
+function panneauAujourdhui(mc) {
+  const lignes = mc.sites.flatMap((s) => s.lignes.map((l) => ({ ...l, site: s.nom }))).sort((a, b) => a.quand.localeCompare(b.quand)).slice(-4);
+  const cpt = mc.sites.reduce((n, s) => n + (s.compteur || 0), 0);
+  const avecCompteur = mc.sites.some((s) => s.compteur !== null);
+  return panneau('Aujourd’hui sur votre site', h('a', { class: 'lien', href: '#/main-courante' }, 'Main courante', ic('fleche')),
+    avecCompteur ? h('div', { class: 'mc-resume' }, h('b', null, nombre(cpt)), h('span', null, cpt > 1 ? 'personnes reçues aujourd’hui' : 'personne reçue aujourd’hui')) : null,
+    lignes.length ? h('ol', { class: 'mc-liste' }, lignes.map((l) => { const x = ligneMC(l); return h('li', { class: classeMC(l) }, h('time', null, heureMC(l.quand)), h('span', null, h('b', null, x.titre), x.detail ? h('small', null, x.detail) : null)); }))
+      : corpsP(h('p', { class: 'note' }, 'Rien n’est encore noté aujourd’hui. Les lignes apparaissent ici dès que nos agents les inscrivent.')));
+}
+async function vueMainCourante(jour) {
+  const auj = iso(new Date());
+  const j = /^\d{4}-\d{2}-\d{2}$/.test(jour || '') && jour <= auj ? jour : auj;
+  const zone = h('div', { class: 'mc' });
+  const dessiner = (d) => {
+    const navigation = h('div', { class: 'mc-jours' },
+      h('a', { class: 'btn btn--petit btn--icone', href: `#/main-courante/${decalerJour(j, -1)}`, 'aria-label': 'Jour précédent' }, ic('retour')),
+      h('b', null, cap(frJour(j))),
+      j < auj ? h('a', { class: 'btn btn--petit btn--icone mc-suivant', href: `#/main-courante/${decalerJour(j, 1)}`, 'aria-label': 'Jour suivant' }, ic('fleche')) : null,
+      j < auj ? h('a', { class: 'lien', href: '#/main-courante' }, 'Aujourd’hui') : statut('ok', 'En direct'));
+    const sites = d.sites.map((s) => panneau(s.nom, s.compteur !== null ? h('small', null, `${pluriel(s.compteur, 'personne reçue', 'personnes reçues')}`) : null,
+      s.lignes.length ? tableau([['Heure'], ['Événement'], ['Agent', 'm-cache']], s.lignes.map((l) => {
+        const x = ligneMC(l);
+        return h('tr', { class: classeMC(l) }, td(heureMC(l.quand), 'chiffre fort mc-heure'),
+          td([h('b', { class: 'mc-titre' }, x.titre), x.detail ? h('small', null, x.detail) : null, h('small', { class: 'm-seul' }, l.agent)]), td(l.agent, 'm-cache'));
+      })) : vide(j === auj ? 'Rien n’est encore noté aujourd’hui' : 'Rien n’a été noté ce jour-là', j === auj ? 'Les lignes apparaissent ici dès que nos agents les inscrivent.' : '')));
+    zone.replaceChildren(navigation, ...(sites.length ? sites : [panneau(null, null, vide('Main courante non disponible', 'Elle s’affichera ici dès que votre site sera relié.'))]),
+      h('p', { class: 'note' }, 'Tenue par nos agents depuis leur téléphone, au fil du service. Les prises et fins de service sont enregistrées automatiquement.',
+        j === auj ? ' La page se met à jour toute seule.' : ''));
+  };
+  dessiner(await api('mod.journal.jour', undefined, { jour: j }));
+  if (j === auj) {
+    const t = setInterval(async () => {
+      if (!zone.isConnected) { clearInterval(t); return; }
+      if (document.hidden) return;
+      try { dessiner(await api('mod.journal.jour', undefined, { jour: j })); } catch (e) { /* on réessaiera */ }
+    }, 60000);
+  }
+  return [tete('Prestation', 'Main courante', 'Le cahier de poste de votre site : ouvertures, fermetures, visiteurs, livraisons et événements, heure par heure.',
+    h('button', { class: 'btn', type: 'button', onclick: () => window.print() }, ic('imprimer'), 'Imprimer')), zone];
 }
 
 /* ---------- Rapport mensuel de prestation ---------- */

@@ -596,19 +596,19 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '17';
+const VERSION = '18';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 17 : le portail client devient le point d’accès unique de vos clients, avec un vrai centre documentaire.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 18 : la main courante passe sur l’appli. Fini le cahier papier, les heures se notent toutes seules.'),
       h('ul', null,
-        point('clients', 'clients', 'Centre documentaire', 'Clients › Espace client : déposez le Kbis, l’attestation CNAPS, la RC Pro, l’URSSAF, les contrats et courriers. Les pièces manquantes sont signalées au client, qui peut les demander.'),
-        point('facture', 'clients', 'Factures et devis', 'Toutes les factures et tous les devis émis au nom du client (hors brouillons) apparaissent seuls dans son espace. Les pièces à un nom proche se rattachent en un clic.'),
-        point('message', 'clients', 'Informations', 'Publiez une information en haut du tableau de bord d’un client ou de tous les clients.'),
-        point('devis', 'site', 'Devis et factures', 'Chiffres clés cliquables, tri par colonne et total en bas de liste.'))),
+        point('note', 'equipe', 'Main courante des sites', 'Exploitation › Main courante des sites : le cahier de chaque site, en direct, jour par jour, imprimable en PDF.'),
+        point('mobile', 'equipe', 'Dans l’appli des agents', 'Pendant le service : « Noter » (ouverture, fermeture, ronde, visiteur ou livraison, note avec photo) et un compteur « Personnes reçues ». Prise et fin de service et incidents s’ajoutent seuls.'),
+        point('reglages', 'equipe', 'Réglable par site', 'Boutons rapides de l’agent, compteur de l’accueil, et visibilité dans l’espace du client.'),
+        point('clients', 'clients', 'Vu par le client', 'Le client suit la main courante de son site dans son espace, en direct, sans les photos.'))),
     actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
   }), 900);
 }

@@ -34,6 +34,10 @@ export const MODULES = [
     cloche: { cle: 'materiel', libelle: 'Matériel à récupérer', ic: 'cle', href: '#/terrain/materiel' },
     commandes: [{ ic: 'bouclier', titre: 'Nouveau contrôle qualité sur site', mots: 'controle qualite inspection noter agent visite', href: '#/terrain/controle/nouveau' },
       { ic: 'cle', titre: 'Matériel & tenues', mots: 'materiel tenue talkie badge remettre retour', href: '#/terrain/materiel' }] },
+  // Main courante des sites : le cahier de poste tenu par les agents depuis l'appli (heures prises toutes seules), visible par le client
+  { route: 'journal', charger: () => import('./journal.js'), page: 'pageJournal',
+    menu: { groupe: 'Exploitation', apres: 'terrain', libelle: 'Main courante des sites', ic: 'note' },
+    commandes: [{ ic: 'note', titre: 'Main courante des sites (cahier de poste)', mots: 'main courante cahier poste journal visiteurs livraisons ouverture fermeture personnes recues', href: '#/journal' }] },
   // « Tout va bien ? » — contrôle de présence des agents de nuit (désactivé par défaut)
   { route: 'presence', charger: () => import('./presence.js'), page: 'pagePresence',
     menu: { groupe: 'Exploitation', apres: 'terrain', libelle: 'Tout va bien ?', ic: 'lune', badge: 'presence' },

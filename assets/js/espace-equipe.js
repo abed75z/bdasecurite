@@ -522,7 +522,8 @@ const PAGES = {
   '': { titre: 'Aujourd’hui', icone: 'auj', rendu: pageAccueil },
   moi: { titre: 'Moi', icone: 'moi', rendu: pageMoi },
   planning: { titre: 'Planning', icone: 'planning', rendu: pagePlanning },
-  'main-courante': { titre: 'Main courante', icone: 'mc', rendu: pageMainCourante },
+  'main-courante': { titre: 'Mes signalements', icone: 'mc', rendu: pageMainCourante },
+  journal: { titre: 'Main courante', icone: 'mc', rendu: pageJournal },
   courses: { titre: 'Mes courses', icone: 'voiture', rendu: pageCourses, chauffeur: true },
   paie: { titre: 'Fiches de paie', icone: 'paie', rendu: pagePaie, badge: 'fichesNonVues' },
   absences: { titre: 'Congés & absences', icone: 'absences', rendu: pageAbsences, badge: 'absencesAttente' },
@@ -541,7 +542,7 @@ let ongletsNav = null;
 let enService = false;
 // 4 onglets ; les autres pages appartiennent à l'un d'eux (flèche retour et onglet allumé)
 const ONGLETS = [['', 'Aujourd’hui', 'auj'], ['planning', 'Planning', 'cal'], ['messages', 'Messages', 'msg'], ['moi', 'Moi', 'moi']];
-const PARENTS = { consignes: '', presence: '', postes: 'planning', carte: 'moi', paie: 'moi', documents: 'moi', absences: 'moi', profil: 'moi', compte: 'moi', materiel: 'moi', 'main-courante': 'moi', courses: 'moi' };
+const PARENTS = { consignes: '', presence: '', journal: '', postes: 'planning', carte: 'moi', paie: 'moi', documents: 'moi', absences: 'moi', profil: 'moi', compte: 'moi', materiel: 'moi', 'main-courante': 'moi', courses: 'moi' };
 const routeActuelle = () => location.hash.replace(/^#\/?/, '').split('?')[0];
 const estOnglet = (r) => ONGLETS.some(([k]) => k === r);
 const ongletDe = (r) => (estOnglet(r) ? r : (PARENTS[r] ?? 'moi'));
@@ -722,9 +723,11 @@ function detailPostes(ps) {
   })), { sur: dateLongue(p0.jour).toUpperCase() });
 }
 async function pageAccueil() {
-  const [d, mesPostes, nonLus, cartesModules] = await Promise.all([api('accueil'), api('postes').then((r) => r.postes).catch(() => []),
+  envoyerAttente();
+  const [d, mesPostes, nonLus, cartesModules, cahier] = await Promise.all([api('accueil'), api('postes').then((r) => r.postes).catch(() => []),
     PAGES.messages ? api('mod.mobile.messages.nonlus').catch(() => ({})) : Promise.resolve({}),
-    Promise.all((MODULES.CARTES || []).map((f) => Promise.resolve().then(() => f(outilsModules())).catch((e) => { console.error(e); return null; })))]);
+    Promise.all((MODULES.CARTES || []).map((f) => Promise.resolve().then(() => f(outilsModules())).catch((e) => { console.error(e); return null; }))),
+    api('mod.journal.jour').catch(() => null)]);
   Object.assign(moi, { prenom: d.moi.prenom, nom: d.moi.nom, metier: d.moi.metier });
   compteurs = { fichesNonVues: d.fichesNonVues, absencesAttente: d.absencesAttente, messages: nonLus.nonLus || 0 };
   decalage = versDate(d.serveur) - Date.now();
@@ -795,9 +798,13 @@ async function pageAccueil() {
         chrono,
         fin ? h('div', { class: 'ap-progres', role: 'presentation' }, barre) : null,
         h('p', { class: 'ap-bornes' }, h('span', null, `Depuis ${frHeure(d.enCours.debut)}`), finLib ? h('span', null, `Fin ${finLib}`) : null)),
+      cahier ? vueJournal(cahier) : null,
       lignes.length ? h('nav', { class: 'ap-lignes', 'aria-label': 'Pendant le service' }, lignes) : null,
       h('div', { class: 'ap-bas' },
-        h('button', { class: 'ap-btn', type: 'button', onclick: () => formulaireIncident(site) }, 'Signaler un événement'),
+        cahier ? h('div', { class: 'ap-duo' },
+          h('button', { class: 'ap-btn', type: 'button', onclick: () => feuilleNoter() }, ic('plus'), 'Noter'),
+          h('button', { class: 'ap-btn ap-btn--contour', type: 'button', onclick: () => formulaireIncident(site) }, 'Signaler'))
+          : h('button', { class: 'ap-btn', type: 'button', onclick: () => formulaireIncident(site) }, 'Signaler un événement'),
         finir));
   }
 
@@ -844,6 +851,262 @@ async function pageAccueil() {
       prendre,
       h('p', { class: 'ap-aide' }, 'Maintenir pour pointer · votre position est enregistrée'),
       moi.metier !== 'chauffeur' ? h('button', { class: 'ap-btn-texte', type: 'button', onclick: () => formulaireIncident(prochain?.jour === aujIso ? prochain.site : undefined) }, 'Signaler un événement') : null));
+}
+
+/* ----- Main courante : le cahier du poste, l'heure est prise toute seule ----- */
+// Sans réseau, les lignes (et les +1 du compteur) sont gardées sur le téléphone puis envoyées avec leur heure réelle
+const ATTENTE_LIGNES = 'eq-journal-attente';
+const ATTENTE_COMPTEUR = 'eq-journal-compteur';
+const lireLocal = (cle, defaut) => { try { return JSON.parse(localStorage.getItem(cle) || 'null') ?? defaut; } catch (e) { return defaut; } };
+const ecrireLocal = (cle, v) => { try { localStorage.setItem(cle, JSON.stringify(v)); } catch (e) { /* navigation privée ou stockage plein */ } };
+const sansReseau = (e) => !navigator.onLine || /Connexion impossible/.test(e?.message || '');
+const horodatage = (d) => `${iso(d)} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+const heureDe = (s) => String(s || '').slice(11, 16).replace(':', 'h');
+const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
+let journalVue = null;
+let envoiEnCours = false;
+async function envoyerAttente() {
+  if (envoiEnCours || !navigator.onLine) return 0;
+  const lignes = lireLocal(ATTENTE_LIGNES, []);
+  const cpt = lireLocal(ATTENTE_COMPTEUR, null);
+  if (!lignes.length && !cpt) return 0;
+  envoiEnCours = true;
+  let traitees = 0;
+  try {
+    for (const l of lignes) {
+      try { await api('mod.journal.ajouter', l); traitees++; } catch (e) { if (sansReseau(e)) break; traitees++; /* refusée par le serveur : écartée */ }
+    }
+    if (cpt && cpt.delta) {
+      if (cpt.jour === iso(new Date(Date.now() + decalage))) await api('mod.journal.compteur', { delta: cpt.delta });
+      ecrireLocal(ATTENTE_COMPTEUR, null);
+    }
+  } catch (e) { /* toujours sans réseau : on réessaiera */ } finally {
+    ecrireLocal(ATTENTE_LIGNES, lireLocal(ATTENTE_LIGNES, []).slice(traitees));
+    envoiEnCours = false;
+  }
+  if (traitees) { toast(`${pluriel(traitees, 'ligne')} de la main courante envoyée${traitees > 1 ? 's' : ''}.`); journalVue?.rafraichir(); }
+  return traitees;
+}
+window.addEventListener('online', () => { envoyerAttente(); });
+function toastAnnuler(msg, annuler) {
+  document.querySelectorAll('.eq-toast').forEach((x) => x.remove());
+  const bouton = h('button', { class: 'eq-toast__annuler', type: 'button' }, 'Annuler');
+  const t = h('div', { class: 'eq-toast eq-toast--action', role: 'status' }, ic('coche'), h('span', null, msg), bouton);
+  document.body.append(t);
+  requestAnimationFrame(() => t.classList.add('is-in'));
+  const partir = () => { t.classList.remove('is-in'); setTimeout(() => t.remove(), 350); };
+  const fin = setTimeout(partir, 6500);
+  bouton.addEventListener('click', async () => {
+    clearTimeout(fin);
+    bouton.disabled = true;
+    try { await annuler(); partir(); toast('Ligne retirée.'); } catch (e) { partir(); toast(e.message, true); }
+  });
+}
+// Ajoute une ligne : envoyée tout de suite, ou gardée si le téléphone n'a pas de réseau
+async function noterLigne(corps, resume) {
+  const quand = new Date(Date.now() + decalage - (corps.minutes || 0) * 60000);
+  try {
+    const r = await api('mod.journal.ajouter', corps);
+    vibrer(14);
+    toastAnnuler(`${resume} · ${heureDe(r.quand)}`, async () => { await api('mod.journal.annuler', { id: r.id }); journalVue?.rafraichir(); });
+  } catch (e) {
+    if (!sansReseau(e)) throw e;
+    ecrireLocal(ATTENTE_LIGNES, [...lireLocal(ATTENTE_LIGNES, []), { ...corps, minutes: 0, quand: horodatage(quand) }]);
+    vibrer(14);
+    toast('Pas de réseau : la ligne est gardée et partira toute seule.');
+  }
+  journalVue?.rafraichir();
+}
+// Une ligne du cahier
+function ligneJournal(l, j) {
+  const auto = l.type === 'prise' || l.type === 'fin';
+  const qui = !l.moi && l.agent ? l.agent : '';
+  let titre = l.libelle;
+  let sous = [l.detail, qui];
+  if (l.type === 'note') { titre = l.detail || 'Note'; sous = [qui]; }
+  if (l.type === 'visiteur') sous = [l.detail, l.depart ? `reparti à ${heureDe(l.depart)}` : 'sur place', qui];
+  if (l.attente) sous.push('en attente de réseau');
+  const action = l.type === 'visiteur' && l.moi && !l.depart && l.id ? h('button', { class: 'ap-jl__action', type: 'button', onclick: async (e) => {
+    const b = e.currentTarget;
+    b.disabled = true;
+    try { await api('mod.journal.depart', { id: l.id }); vibrer(10); toast(`${l.libelle} : départ noté.`); journalVue?.rafraichir(); } catch (err) { toast(err.message, true); b.disabled = false; }
+  } }, 'Parti') : null;
+  const photo = l.photo && l.id ? h('button', { class: 'ap-jl__photo', type: 'button', 'aria-label': 'Voir la photo', onclick: () => tiroir('Photo', h('img', { class: 'ap-photo-grande', src: `${API}?a=mod.journal.photo&id=${l.id}`, alt: '' }), { sur: `${heureDe(l.quand)} · ${titre}`.toUpperCase() }) },
+    h('img', { src: `${API}?a=mod.journal.photo&id=${l.id}`, alt: '', loading: 'lazy' })) : null;
+  return h('li', { class: `ap-jl ${auto ? 'is-auto' : ''} ${l.type === 'incident' ? 'is-incident' : ''} ${l.attente ? 'is-attente' : ''}` },
+    h('time', { datetime: l.quand }, heureDe(l.quand)),
+    h('div', { class: 'ap-jl__corps' }, h('b', null, titre), sous.filter(Boolean).length ? h('small', null, sous.filter(Boolean).join(' · ')) : null, photo),
+    action);
+}
+// Le bloc « Main courante » : compteur de personnes reçues et dernières lignes (ou toutes, sur la page)
+function vueJournal(j, { complet = false } = {}) {
+  const racineJ = h('section', { class: `ap-journal ${complet ? 'is-complet' : ''}`, 'aria-label': 'Main courante' });
+  let donnees = j;
+  const dessiner = () => {
+    const enAttente = lireLocal(ATTENTE_LIGNES, []).map((x) => ({ ...x, type: x.type, libelle: x.libelle, detail: x.detail || '', moi: true, attente: true, id: 0 }));
+    const toutes = [...donnees.lignes, ...enAttente].sort((a, b) => a.quand.localeCompare(b.quand));
+    const montrees = complet ? toutes : toutes.slice(-3);
+    const cpt = donnees.compteur?.actif ? (donnees.compteur.nombre || 0) + (lireLocal(ATTENTE_COMPTEUR, null)?.delta || 0) : null;
+    let nombreEl = null;
+    const compteur = cpt === null ? null : h('div', { class: 'ap-compteur' },
+      h('button', { class: 'ap-compteur__nombre', type: 'button', 'aria-label': `${pluriel(cpt, 'personne')} reçue${cpt > 1 ? 's' : ''} aujourd’hui : corriger`, onclick: () => corrigerCompteur(cpt) },
+        nombreEl = h('b', null, String(cpt)), h('small', null, cpt > 1 ? 'personnes reçues' : 'personne reçue')),
+      h('button', { class: 'ap-compteur__plus', type: 'button', 'aria-label': 'Ajouter une personne reçue', onclick: async () => {
+        donnees.compteur.nombre = (donnees.compteur.nombre || 0) + 1;
+        vibrer(8);
+        nombreEl.textContent = String(cpt + 1);
+        nombreEl.classList.remove('is-bond'); void nombreEl.offsetWidth; nombreEl.classList.add('is-bond');
+        try { const r = await api('mod.journal.compteur', { delta: 1 }); donnees.compteur.nombre = r.nombre; }
+        catch (e) {
+          if (!sansReseau(e)) { donnees.compteur.nombre -= 1; toast(e.message, true); }
+          else { donnees.compteur.nombre -= 1; const a = lireLocal(ATTENTE_COMPTEUR, null); ecrireLocal(ATTENTE_COMPTEUR, { jour: iso(new Date(Date.now() + decalage)), delta: (a?.delta || 0) + 1 }); }
+        }
+        dessiner();
+      } }, '+1'));
+    racineJ.replaceChildren(
+      h('div', { class: 'ap-journal__tete' }, h('p', { class: 'ap-sur' }, complet ? (donnees.site?.nom || 'Votre poste') : 'Main courante'),
+        !complet ? h('a', { class: 'ap-journal__tout', href: '#/journal' }, toutes.length > 3 ? `Tout voir · ${toutes.length}` : 'Ouvrir', ic('fleche')) : null),
+      compteur,
+      montrees.length ? h('ol', { class: 'ap-jls' }, montrees.map((l) => ligneJournal(l, donnees)))
+        : h('p', { class: 'ap-journal__vide' }, 'Rien de noté pour l’instant. Touchez « Noter » : l’heure se met toute seule.'));
+  };
+  const rafraichir = async () => {
+    if (!racineJ.isConnected) return;
+    try { donnees = await api('mod.journal.jour'); } catch (e) { /* hors ligne : on garde l'affichage */ }
+    dessiner();
+  };
+  const corrigerCompteur = (actuel) => {
+    const champN = h('input', { type: 'number', inputmode: 'numeric', min: 0, max: 100000, value: actuel, 'aria-label': 'Nombre de personnes reçues' });
+    const pas = (n) => { champN.value = String(Math.max(0, (parseInt(champN.value, 10) || 0) + n)); vibrer(6); };
+    const enregistrer = h('button', { class: 'ap-btn', type: 'submit' }, 'Enregistrer');
+    const fermer = tiroir('Personnes reçues', h('form', { class: 'ap-correction', onsubmit: async (e) => {
+      e.preventDefault();
+      enregistrer.disabled = true;
+      try { const r = await api('mod.journal.compteur', { valeur: Math.max(0, parseInt(champN.value, 10) || 0) }); ecrireLocal(ATTENTE_COMPTEUR, null); donnees.compteur.nombre = r.nombre; dessiner(); fermer(); toast('Compteur corrigé.'); }
+      catch (err) { toast(err.message, true); enregistrer.disabled = false; }
+    } },
+      h('div', { class: 'ap-correction__ligne' }, h('button', { type: 'button', 'aria-label': 'Une de moins', onclick: () => pas(-1) }, '−'), champN, h('button', { type: 'button', 'aria-label': 'Une de plus', onclick: () => pas(1) }, '+')),
+      enregistrer,
+      h('p', { class: 'ap-aide' }, 'Le total s’ajoute tout seul à la ligne « Fermeture au public ».')), { sur: 'AUJOURD’HUI' });
+  };
+  dessiner();
+  journalVue = { rafraichir, donnees: () => donnees };
+  return racineJ;
+}
+// La feuille « Noter » : l'heure (maintenant ou un peu avant), les boutons du site, un visiteur, une note
+function feuilleNoter() {
+  const j = journalVue?.donnees();
+  if (!j) return;
+  let recul = 0;
+  const heure = h('span', { class: 'ap-noter__heure' });
+  const majHeure = () => { const d = new Date(Date.now() + decalage - recul * 60000); heure.textContent = `${pad(d.getHours())}h${pad(d.getMinutes())}`; };
+  majHeure();
+  const reculs = h('div', { class: 'ap-reculs', role: 'radiogroup', 'aria-label': 'Heure à noter' },
+    [[0, 'Maintenant'], [5, '−5 min'], [15, '−15 min'], [30, '−30 min'], [60, '−1 h']].map(([m, l]) => h('button', {
+      type: 'button', class: 'ap-recul', role: 'radio', 'aria-checked': String(m === 0),
+      onclick: (e) => { recul = m; reculs.querySelectorAll('.ap-recul').forEach((b) => b.setAttribute('aria-checked', String(b === e.currentTarget))); majHeure(); vibrer(6); } }, l)));
+  const blocHeure = h('div', { class: 'ap-noter__quand' }, h('p', { class: 'ap-sur' }, 'Heure notée'), heure);
+  const corps = h('div', { class: 'ap-noter' });
+  const retour = () => h('button', { class: 'ap-btn-texte ap-noter__retour', type: 'button', onclick: () => accueil() }, ic('retour'), 'Retour');
+  const faits = (lib) => [...j.lignes].reverse().find((l) => l.type === 'bouton' && l.libelle === lib);
+  const nb = j.compteur?.actif ? (j.compteur.nombre || 0) : 0;
+  const accueil = () => {
+    corps.replaceChildren(blocHeure, reculs,
+      h('div', { class: 'ap-tuiles' }, j.boutons.map((b) => {
+        const fait = faits(b);
+        const sous = fait ? `Fait à ${heureDe(fait.quand)}` : /fermeture au public/i.test(b) && nb ? `${pluriel(nb, 'personne')} reçue${nb > 1 ? 's' : ''}` : '';
+        return h('button', { class: `ap-tuile ${fait ? 'is-fait' : ''}`, type: 'button', onclick: async (e) => {
+          const t = e.currentTarget;
+          corps.querySelectorAll('.ap-tuile').forEach((x) => { x.disabled = true; });
+          t.classList.add('is-envoi');
+          try { await noterLigne({ type: 'bouton', libelle: b, minutes: recul }, b); fermer(); }
+          catch (err) { toast(err.message, true); t.classList.remove('is-envoi'); corps.querySelectorAll('.ap-tuile').forEach((x) => { x.disabled = false; }); }
+        } }, h('span', null, b), sous ? h('small', null, sous) : null);
+      })),
+      h('div', { class: 'ap-options' },
+        h('button', { class: 'ap-option ap-option--bouton', type: 'button', onclick: () => visiteur() }, h('span', null, 'Visiteur ou livraison'), ic('fleche')),
+        h('button', { class: 'ap-option ap-option--bouton', type: 'button', onclick: () => note() }, h('span', null, 'Note libre'), ic('fleche'))),
+      h('button', { class: 'ap-btn-texte ap-noter__incident', type: 'button', onclick: () => { fermer(); setTimeout(() => formulaireIncident(j.site?.nom || ''), 340); } }, 'Signaler un incident'));
+  };
+  const visiteur = () => {
+    const nom = h('input', { class: 'ap-saisie-ligne', maxlength: 80, placeholder: 'Nom ou société (ex. ELIS)', autocapitalize: 'words', autocomplete: 'off', 'aria-label': 'Nom ou société' });
+    const objet = h('input', { class: 'ap-saisie-ligne', maxlength: 300, placeholder: 'Objet (facultatif)', 'aria-label': 'Objet de la visite' });
+    const suggestions = h('div', { class: 'ap-suggestions' });
+    const proposer = () => {
+      const q = nom.value.trim().toLowerCase();
+      suggestions.replaceChildren(...(j.suggestions || []).filter((x) => !q || (x.toLowerCase().includes(q) && x.toLowerCase() !== q)).slice(0, 6)
+        .map((x) => h('button', { class: 'ap-recul', type: 'button', onclick: () => { nom.value = x; proposer(); objet.focus(); } }, x)));
+    };
+    nom.addEventListener('input', proposer);
+    proposer();
+    const objets = h('div', { class: 'ap-suggestions' }, ['Livraison', 'Rendez-vous', 'Intervention', 'Visite'].map((x) => h('button', { class: 'ap-recul', type: 'button', onclick: () => { objet.value = objet.value ? `${x} · ${objet.value}` : x; vibrer(6); } }, x)));
+    const msg = h('p', { class: 'ap-erreur-texte', role: 'alert' });
+    const btn = h('button', { class: 'ap-btn', type: 'submit' }, 'Noter l’arrivée');
+    corps.replaceChildren(h('form', { class: 'ap-noter', onsubmit: async (e) => {
+      e.preventDefault(); msg.textContent = '';
+      if (!nom.value.trim()) { msg.textContent = 'Indiquez le nom de la personne ou de la société.'; nom.focus(); return; }
+      btn.disabled = true;
+      try { await noterLigne({ type: 'visiteur', libelle: nom.value.trim(), detail: objet.value.trim(), minutes: recul }, `Arrivée de ${nom.value.trim()}`); fermer(); }
+      catch (err) { msg.textContent = err.message; btn.disabled = false; }
+    } }, retour(), blocHeure, reculs, nom, suggestions, objet, objets, msg, btn,
+      h('p', { class: 'ap-aide' }, 'À son départ, touchez « Parti » sur sa ligne : l’heure se note toute seule.')));
+    setTimeout(() => nom.focus(), 60);
+  };
+  const note = () => {
+    const texte = h('textarea', { class: 'ap-zone', rows: 4, maxlength: 1000, placeholder: 'Ce que vous voulez noter', 'aria-label': 'Note' });
+    let photo = null;
+    const vignettes = h('div', { class: 'ap-vignettes' });
+    const lib = h('span', null, 'Facultatif');
+    const entree = h('input', { type: 'file', accept: 'image/*', class: 'sr', onchange: async () => {
+      if (entree.files[0]) photo = await compresser(entree.files[0]);
+      entree.value = '';
+      dessinerPhoto();
+    } });
+    const dessinerPhoto = () => {
+      lib.textContent = photo ? '1 photo' : 'Facultatif';
+      if (!photo) return vignettes.replaceChildren();
+      const url = URL.createObjectURL(photo);
+      vignettes.replaceChildren(h('div', { class: 'ap-vignette' }, h('img', { src: url, alt: '', onload: () => URL.revokeObjectURL(url) }),
+        h('button', { type: 'button', 'aria-label': 'Retirer la photo', onclick: () => { photo = null; dessinerPhoto(); } }, ic('croix'))));
+    };
+    const msg = h('p', { class: 'ap-erreur-texte', role: 'alert' });
+    const btn = h('button', { class: 'ap-btn', type: 'submit' }, 'Noter');
+    corps.replaceChildren(h('form', { class: 'ap-noter', onsubmit: async (e) => {
+      e.preventDefault(); msg.textContent = '';
+      const t = texte.value.trim();
+      if (!t && !photo) { msg.textContent = 'Écrivez la note.'; texte.focus(); return; }
+      btn.disabled = true;
+      try {
+        if (photo) {
+          const fd = new FormData();
+          fd.append('type', 'note'); fd.append('libelle', 'Note'); fd.append('detail', t); fd.append('minutes', String(recul)); fd.append('photo', photo);
+          let r;
+          try { r = await apiForm('mod.journal.ajouter', fd); } catch (err) { throw sansReseau(err) ? new Error('La photo a besoin du réseau : réessayez dans un instant, ou notez sans photo.') : err; }
+          vibrer(14);
+          toastAnnuler(`Note · ${heureDe(r.quand)}`, async () => { await api('mod.journal.annuler', { id: r.id }); journalVue?.rafraichir(); });
+          journalVue?.rafraichir();
+        } else await noterLigne({ type: 'note', libelle: 'Note', detail: t, minutes: recul }, 'Note');
+        fermer();
+      } catch (err) { msg.textContent = err.message; btn.disabled = false; }
+    } }, retour(), blocHeure, reculs, texte,
+      h('div', { class: 'ap-options' }, h('label', { class: 'ap-option' }, h('span', null, 'Ajouter une photo'), lib, entree), vignettes),
+      msg, btn));
+    setTimeout(() => texte.focus(), 60);
+  };
+  accueil();
+  const fermer = tiroir('Noter', corps, { sur: (j.site?.nom || 'Main courante').toUpperCase() });
+}
+async function pageJournal() {
+  envoyerAttente();
+  const j = await api('mod.journal.jour');
+  if (enService !== j.enService) { enService = j.enService; ouvrirApplication.menus?.(); }
+  const auj = new Date(Date.now() + decalage);
+  return h('div', { class: 'ap-v ap-aujourdhui ap-journal-page' },
+    h('header', { class: 'ap-tete ap-tete--page' }, h('p', { class: 'ap-sur' }, `${JOURS_MAJ[auj.getDay()]} ${auj.getDate()} ${MOIS[auj.getMonth()].toUpperCase()}`), h('h1', { class: 'ap-titre' }, 'Main courante')),
+    vueJournal(j, { complet: true }),
+    h('div', { class: 'ap-bas' },
+      h('button', { class: 'ap-btn', type: 'button', onclick: () => feuilleNoter() }, ic('plus'), 'Noter'),
+      h('p', { class: 'ap-aide' }, 'Prise et fin de service, incidents : notés tout seuls.')));
 }
 
 /* ----- Planning : les postes, semaine par semaine ----- */
@@ -1108,6 +1371,7 @@ async function formulaireIncident(siteConnu) {
       vibrer([20, 40, 20]);
       fermer();
       toast('Événement transmis à la direction.');
+      journalVue?.rafraichir();
       if (location.hash === '#/main-courante') recharger();
     } catch (err) { msg.textContent = err.message; btn.disabled = false; btn.textContent = 'Envoyer à la direction'; }
   } },

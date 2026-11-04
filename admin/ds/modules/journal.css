@@ -1,0 +1,46 @@
+/* =========================================================
+   MAIN COURANTE DES SITES — le cahier de poste, site par site, jour par jour
+   ========================================================= */
+.jn { display: grid; grid-template-columns: minmax(200px, 250px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.jn-zone { display: grid; gap: 16px; min-width: 0; }
+.jn-jours { display: flex; align-items: center; gap: 6px; }
+.jn-jours .input { width: auto; min-width: 150px; }
+.jn-sites { display: grid; gap: 2px; padding: 6px; border: 1px solid var(--iv-trait); border-radius: var(--iv-r-lg, 10px); background: var(--iv-surface); position: sticky; top: 16px; }
+.jn-site { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 10px; border-radius: var(--iv-r, 8px); color: var(--iv-encre); text-decoration: none; transition: background-color 140ms var(--iv-courbe); }
+.jn-site:hover { background: var(--iv-surface-2); }
+.jn-site.is-actif { background: var(--iv-surface-3); box-shadow: inset 2px 0 0 var(--iv-encre); }
+.jn-site span { display: grid; min-width: 0; }
+.jn-site b { font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jn-site small { font-size: 12px; color: var(--iv-muet); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.jn-nb { flex: none; min-width: 22px; padding: 1px 7px; border-radius: 11px; background: var(--iv-surface-inverse); color: var(--iv-texte-inverse); font: 600 11.5px/20px var(--iv-police); font-style: normal; text-align: center; }
+.jn-cahier .carte__tete { align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.jn-cahier .carte__tete p { margin: 2px 0 0; font-size: 13px; text-transform: none; }
+.jn-cahier .carte__tete p::first-letter { text-transform: uppercase; }
+.jn-tete-droite { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.jn-lignes { margin: 0; padding: 0; list-style: none; }
+.jn-ligne { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 14px; align-items: start; padding: 11px 0; border-top: 1px solid var(--iv-trait); }
+.jn-ligne:first-child { border-top: 0; }
+.jn-ligne time { font: 600 14px/1.45 var(--iv-police-chiffres, var(--iv-police)); font-variant-numeric: tabular-nums; color: var(--iv-encre); }
+.jn-ligne__corps b { display: block; font-size: 14px; font-weight: 500; line-height: 1.45; white-space: pre-line; overflow-wrap: anywhere; }
+.jn-ligne__corps p { margin: 2px 0 0; font-size: 13px; color: var(--iv-encre-2); line-height: 1.5; overflow-wrap: anywhere; }
+.jn-ligne__qui { display: grid; justify-items: end; gap: 2px; font-size: 12.5px; color: var(--iv-muet); text-align: right; white-space: nowrap; }
+.jn-type { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; }
+.jn-ligne--prise time, .jn-ligne--fin time, .jn-ligne--prise b, .jn-ligne--fin b { color: var(--iv-muet); font-weight: 500; }
+.jn-ligne--incident time, .jn-ligne--incident b, .jn-type--incident { color: var(--iv-alerte); }
+.jn-photo { display: inline-block; margin-top: 8px; border-radius: 8px; overflow: hidden; border: 1px solid var(--iv-trait); }
+.jn-photo img { display: block; width: 120px; height: 90px; object-fit: cover; }
+.jn-rien { padding: 18px 0 6px; }
+.jn-rien p { margin: 0 0 6px; }
+.jn-reglages { display: grid; gap: 12px; }
+.jn-reglages .case { align-items: flex-start; gap: 10px; }
+.jn-reglages .case b { font-weight: 600; font-size: 13.5px; }
+.jn-vide { display: grid; justify-items: center; gap: 6px; padding: 40px 20px; text-align: center; }
+.jn-vide .ic { width: 28px; height: 28px; color: var(--iv-muet); }
+.jn-impression { position: fixed; right: 0; bottom: 0; width: 0; height: 0; border: 0; }
+@media (max-width: 900px) {
+  .jn { grid-template-columns: 1fr; }
+  .jn-sites { position: static; display: flex; overflow-x: auto; scrollbar-width: none; }
+  .jn-site { flex: none; }
+  .jn-ligne { grid-template-columns: 48px minmax(0, 1fr); }
+  .jn-ligne__qui { grid-column: 2; justify-items: start; text-align: left; display: flex; gap: 8px; }
+}

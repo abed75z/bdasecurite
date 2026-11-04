@@ -733,7 +733,7 @@ async function vuePrestations() {
 }
 
 /* ---------- Équipe : sur site, puis en attente d'embauche ---------- */
-const ETATS_CARTE = { valide: ['ok', 'Carte pro valide'], expiree: ['alerte', 'Carte pro expirée'], a_verifier: ['attente', 'Carte pro à vérifier'], inactif: ['neutre', 'Inactif'] };
+const ETATS_CARTE = { valide: ['ok', 'Carte pro valide'], expiree: ['alerte', 'Carte pro expirée'], a_verifier: ['neutre', 'Carte pro non renseignée'], inactif: ['neutre', 'Inactif'] };
 const nbDocs = (a) => (a.docs.length ? pluriel(a.docs.length, 'document') : 'Dossier en cours');
 async function vueEquipe() {
   const { agents, candidats = [] } = await api('mod.portail.equipe');

@@ -18,14 +18,15 @@ SITE = 'https://bdasecurite.com'
 # Pages traduites (nom du fichier sans .html). L'accueil s'appelle « index ».
 PAGES = [
     'index', 'entreprises', 'recrutement', 'devis', 'avis', 'tarifs', 'mentions-legales', 'merci',
-    'securite-privee-paris', 'securite-incendie-ssiap-paris', 'protection-rapprochee-paris',
+    'securite-privee-paris', 'securite-incendie-ssiap-paris',
     'securite-evenementielle-paris', 'gardiennage-chantier-paris', 'securite-hotels-paris', 'securite-bars-restaurants-paris',
     'securite-commerces-paris', 'securite-bureaux-entreprises-paris', 'securite-ambassades-consulats-paris',
-    'securite-residences-coproprietes-paris', 'chauffeur-prive-vtc-paris', 'chauffeur-securite-vip-paris',
+    'securite-residences-coproprietes-paris', 'chauffeur-prive-vtc-paris',
 ]
 # Pages françaises non traduites : depuis /en/ et /ar/, leurs liens mènent à la page traduite la plus proche
 EQUIVALENTS = {
     'bda-securite': 'index', 'en': 'index', 'transfert-aeroport-paris': 'chauffeur-prive-vtc-paris',
+    'protection-rapprochee-paris': 'securite-privee-paris', 'chauffeur-securite-vip-paris': 'chauffeur-prive-vtc-paris',
     **{p: 'securite-privee-paris' for p in [
         'agent-securite-boulogne-billancourt', 'agent-securite-la-defense', 'agent-securite-neuilly-sur-seine',
         'agent-securite-paris-1', 'agent-securite-paris-16', 'agent-securite-paris-17', 'agent-securite-paris-20',

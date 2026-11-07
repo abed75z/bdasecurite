@@ -771,7 +771,7 @@ function site_reglages_defaut(): array
     'tarifs' => SITE_TARIFS,
     'accueil' => [
       'titre' => 'Votre sécurité, [en toute discrétion.]',
-      'texte' => 'Protection rapprochée, chauffeur privé, événements et sécurité privée.',
+      'texte' => 'Agents de sécurité, SSIAP, événements et chauffeur privé.',
       'note' => '',
       'visuel' => 'photo',
     ],
@@ -780,7 +780,7 @@ function site_reglages_defaut(): array
 // Anciens textes par défaut de l'accueil (trop longs) : remplacés par les nouveaux s'ils n'ont pas été personnalisés
 const ACCUEIL_ANCIENS = [
   'titre' => ['Agents de sécurité et chauffeurs privés à Paris, [24h/24.]', 'La sécurité de vos sites professionnels, [24h/24.]'],
-  'texte' => ['Agents de sécurité, SSIAP et événementiel pour les hôtels, bureaux, commerces et chantiers. Un interlocuteur unique.', "Gardiennage, sécurité incendie, sécurité d'événements, protection rapprochée et transport haut de gamme : une seule équipe, autorisée par le CNAPS, et un interlocuteur unique du devis jusqu'à la fin de la mission.", 'Une seule équipe autorisée par le CNAPS, du devis à la fin de la mission.', 'Agents de sécurité, agents SSIAP et sécurité événementielle pour les hôtels, bureaux, commerces, chantiers et institutions. Un interlocuteur unique, du devis à la prise de poste.'],
+  'texte' => ['Agents de sécurité, SSIAP et événementiel pour les hôtels, bureaux, commerces et chantiers. Un interlocuteur unique.', "Gardiennage, sécurité incendie, sécurité d'événements, protection rapprochée et transport haut de gamme : une seule équipe, autorisée par le CNAPS, et un interlocuteur unique du devis jusqu'à la fin de la mission.", 'Une seule équipe autorisée par le CNAPS, du devis à la fin de la mission.', 'Agents de sécurité, agents SSIAP et sécurité événementielle pour les hôtels, bureaux, commerces, chantiers et institutions. Un interlocuteur unique, du devis à la prise de poste.', 'Protection rapprochée, chauffeur privé, événements et sécurité privée.'],
   'note' => ['Réponse rapide · Devis gratuit et sans engagement · Interventions en urgence étudiées 24h/24'],
 ];
 function site_reglages(): array

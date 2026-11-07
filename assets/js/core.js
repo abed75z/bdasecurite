@@ -603,7 +603,7 @@
   const PAGES_RUBRIQUE = {
     tarifs: ['tarifs'], references: ['references'], avisClients: ['avis'], recrutement: ['recrutement'],
     ssiap: ['securite-incendie-ssiap-paris'],
-    offreVtc: ['chauffeur-prive-vtc-paris', 'chauffeur-securite-vip-paris', 'reserver'],
+    offreVtc: ['chauffeur-prive-vtc-paris', 'reserver'],
   };
   const pageCourante = nomPage(location.pathname);
   let contenuOriginal = [];

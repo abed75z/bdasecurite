@@ -20,7 +20,7 @@ $cartesZone = fn(string $lieu) => [
   ['building', 'Gardiennage & surveillance', "Bureaux, commerces, résidences ou chantiers $lieu : présence dissuasive et rondes, de jour comme de nuit."],
   ['lock', 'Accueil & contrôle d’accès', 'Filtrage des entrées, vérification des badges et des listes d’invités, accueil des visiteurs.'],
   ['ticket', 'Sécurité événementielle', 'Soirées, lancements, salons ou réceptions : un dispositif adapté au lieu et au nombre d’invités.'],
-  ['user', 'Protection rapprochée', 'Accompagnement discret de dirigeants, de personnalités et de leurs familles.'],
+  ['flame', 'Sécurité incendie SSIAP', 'Agents SSIAP 1, 2 et 3 pour les établissements recevant du public et les immeubles de bureaux.'],
 ];
 $faqZone = fn(string $lieu, string $delai) => [
   ["Intervenez-vous $lieu ?", "Oui. Nous intervenons $lieu pour des missions ponctuelles comme pour des prestations régulières, de jour comme de nuit, 7j/7."],
@@ -34,7 +34,7 @@ function zone(string $slug, string $nom, string $fil, string $lieu, string $zone
   return $plus + [
     'slug' => $slug, 'fil' => $fil, 'zoneServie' => $zoneServie, 'photo' => $photo, 'pos' => '50% 30%',
     'title' => "Agent de sécurité $nom | BDA Security Group",
-    'description' => "Agents de sécurité CNAPS $lieu : gardiennage, contrôle d’accès, événements et protection rapprochée. Devis gratuit, 24h/24.",
+    'description' => "Agents de sécurité CNAPS $lieu : gardiennage, contrôle d’accès, sécurité incendie et événements. Devis gratuit, 24h/24.",
     'kicker' => "Sécurité privée · $nom",
     'h1' => "Agent de sécurité <em>$lieu.</em>",
     'lead' => "Des agents de sécurité qualifiés et discrets $lieu, pour vos locaux, vos commerces, vos événements et vos proches. Un seul interlocuteur, 24h/24 et 7j/7.",
@@ -67,7 +67,7 @@ $secteurs = [
     'cartes' => [
       ['lock', 'Contrôle des accès', 'Surveillance du hall, des ascenseurs et des accès de service ; filtrage discret des personnes non autorisées.'],
       ['clock', 'Rondes de nuit', 'Rondes régulières dans les étages, parkings et locaux techniques, main courante tenue à jour.'],
-      ['user', 'Accueil des VIP', 'Arrivées discrètes, accompagnement jusqu’à la chambre, coordination avec les équipes de protection.'],
+      ['user', 'Accueil des VIP', 'Arrivées discrètes, accompagnement jusqu’à la chambre et surveillance des étages.'],
       ['ticket', 'Événements & réceptions', 'Galas, séminaires dans vos salons : un dispositif dimensionné et élégant.'],
     ],
     'h2c' => 'Un partenaire <em>à la hauteur de vos clients.</em>',
@@ -75,7 +75,7 @@ $secteurs = [
     'faq' => [
       ['Vos agents peuvent-ils travailler en tenue de ville ?', 'Oui. Selon votre établissement, nos agents interviennent en costume sombre ou dans une tenue adaptée à votre charte, pour rester discrets.'],
       ['Proposez-vous une présence la nuit uniquement ?', 'Oui : de nombreux hôtels nous confient la sécurité de nuit (rondes, accueil tardif, surveillance des accès), avec ou sans présence en journée.'],
-      ['Pouvez-vous sécuriser l’arrivée d’une personnalité ?', 'Oui. Nous organisons l’accueil, le cheminement et la surveillance des étages, et nous pouvons coordonner un chauffeur VTC et un agent de protection.'],
+      ['Pouvez-vous sécuriser l’arrivée d’une personnalité ?', 'Oui. Nous organisons l’accueil, le cheminement et la surveillance des étages, et nous pouvons prévoir un chauffeur VTC.'],
     ],
     'boite' => 'Sécuriser votre hôtel ?', 'cta' => 'Offrez à vos clients <em>une sécurité cinq étoiles.</em>',
   ],
@@ -176,14 +176,14 @@ $secteurs = [
       ['lock', 'Contrôle des accès', 'Filtrage des entrées, contrôle des rendez-vous et gestion des files d’attente.'],
       ['user', 'Accueil du public', 'Des agents courtois, patients et rigoureux, capables d’orienter chaque visiteur.'],
       ['ticket', 'Réceptions officielles', 'Fête nationale, visites de délégations, réceptions : dispositif sur mesure.'],
-      ['shield-check', 'Protection des personnalités', 'Accompagnement discret de diplomates et de délégations, avec chauffeur si besoin.'],
+      ['shield-check', 'Accueil des délégations', 'Accueil, filtrage et accompagnement des délégations dans vos locaux, avec chauffeur si besoin.'],
     ],
     'h2c' => 'Rigueur, discrétion, <em>fiabilité.</em>',
     'points' => [['Une référence diplomatique actuelle', ': le Consulat général de Colombie à Paris.'], ['Confidentialité garantie', 'sur les personnes et les lieux.'], ['Respect strict des protocoles', 'et des consignes de la représentation.'], ['Agents titulaires de la carte CNAPS', 'et entreprise autorisée.'], ['Un interlocuteur unique', 'joignable 24h/24.']],
     'faq' => [
       ['Travaillez-vous déjà pour une représentation diplomatique ?', 'Oui : nous assurons la sécurité du Consulat général de Colombie à Paris, une collaboration toujours en cours.'],
       ['Vos agents peuvent-ils gérer l’accueil d’un public nombreux ?', 'Oui : gestion des files d’attente, vérification des rendez-vous et orientation font partie de nos missions courantes.'],
-      ['Pouvez-vous organiser l’escorte d’une délégation ?', 'Oui, en associant un chauffeur VTC haut de gamme et un agent de protection rapprochée.'],
+      ['Pouvez-vous accueillir une délégation ?', 'Oui : accueil, filtrage et surveillance des locaux pendant la visite, avec un chauffeur VTC haut de gamme si besoin.'],
     ],
     'boite' => 'Une mission diplomatique ?', 'cta' => 'La sécurité <em>que les institutions exigent.</em>',
   ],
@@ -243,7 +243,7 @@ $zones = [
   ], 'nous sommes basés dans le 20ᵉ : c’est là que nous intervenons le plus vite', P_AGENT, $cartesZone, $faqZone, $pointsCommuns),
   zone('agent-securite-la-defense', 'La Défense', 'La Défense', 'à La Défense', 'La Défense, Courbevoie, Puteaux', [
     'Premier quartier d’affaires d’Europe, <strong>La Défense</strong> rassemble tours de bureaux, centres commerciaux et espaces événementiels, entre Courbevoie, Puteaux et Nanterre.',
-    'Accueil sécurité en entreprise, contrôle d’accès, événements professionnels et protection de dirigeants : nous accompagnons les sociétés du quartier.',
+    'Accueil sécurité en entreprise, contrôle d’accès, événements professionnels et rondes de sécurité : nous accompagnons les sociétés du quartier.',
   ], 'nous rejoignons La Défense rapidement depuis Paris', P_SECURITE, $cartesZone, $faqZone, $pointsCommuns),
   zone('agent-securite-neuilly-sur-seine', 'Neuilly-sur-Seine', 'Neuilly-sur-Seine', 'à Neuilly-sur-Seine', 'Neuilly-sur-Seine (92)', [
     'Villas, hôtels particuliers, cabinets et sièges sociaux : <strong>Neuilly-sur-Seine</strong> attend une sécurité discrète et haut de gamme.',

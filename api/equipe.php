@@ -16,6 +16,8 @@ header('Cache-Control: no-store');
 const EQ_JOURS = 30;          // durée d'une session
 const EQ_APPAREIL = 180;      // durée d'un appareil mémorisé
 const EQ_METIERS = ['securite' => 'Agent de sécurité', 'ssiap' => 'Agent SSIAP', 'chauffeur' => 'Chauffeur VTC'];
+// « Direction » : seulement pour les comptes créés depuis l'admin (jamais proposé à l'inscription)
+const EQ_LIBELLES = EQ_METIERS + ['direction' => 'Direction'];
 const EQ_ABSENCES = ['conges' => 'Congés payés', 'maladie' => 'Arrêt maladie', 'absence' => 'Absence', 'indispo' => 'Indisponibilité'];
 const EQ_INCIDENTS = ['intrusion' => 'Intrusion / tentative', 'vol' => 'Vol / dégradation', 'agression' => 'Agression / altercation', 'incendie' => 'Incendie / alarme', 'secours' => 'Secours à personne', 'technique' => 'Problème technique', 'ronde' => 'Ronde / contrôle', 'autre' => 'Autre'];
 const EQ_DOCS_AGENT = ['carte_pro', 'diplome_aps', 'certif', 'attestation', 'carte_vtc', 'permis', 'identite', 'rib', 'secu', 'justificatif', 'autre'];
@@ -119,7 +121,8 @@ function eq_ouvrir(array $c, bool $memoriser): void
 function eq_etat(): array
 {
   $c = eq_compte();
-  return ['ok' => true, 'connecte' => (bool)$c, 'csrf' => (string)$_SESSION['csrf'], 'prenom' => $c ? $c['prenom'] : '', 'nom' => $c ? $c['nom'] : '', 'metier' => $c ? $c['metier'] : ''];
+  return ['ok' => true, 'connecte' => (bool)$c, 'csrf' => (string)$_SESSION['csrf'], 'prenom' => $c ? $c['prenom'] : '', 'nom' => $c ? $c['nom'] : '', 'metier' => $c ? $c['metier'] : '',
+    'mdpProvisoire' => $c ? (int)($c['mdp_provisoire'] ?? 0) === 1 : false];
 }
 function eq_mdp_valide(string $mdp): void
 {
@@ -323,7 +326,7 @@ try {
       if ($action === 'reset.verifier') repondre(['ok' => true, 'prenom' => $c['prenom'], 'identifiant' => $c['identifiant']]);
       $mdp = chaine($b['motdepasse'] ?? '');
       eq_mdp_valide($mdp);
-      db()->prepare("UPDATE comptes_equipe SET hash = ?, reset = '', reset_expire = '', echecs = 0, bloque_jusqu = '' WHERE id = ?")->execute([password_hash($mdp, PASSWORD_DEFAULT), $c['id']]);
+      db()->prepare("UPDATE comptes_equipe SET hash = ?, reset = '', reset_expire = '', echecs = 0, bloque_jusqu = '', mdp_provisoire = 0 WHERE id = ?")->execute([password_hash($mdp, PASSWORD_DEFAULT), $c['id']]);
       db()->prepare('DELETE FROM equipe_appareils WHERE compte_id = ?')->execute([$c['id']]); // les autres appareils sont déconnectés
       eq_ouvrir($c, true);
       journal('securite', "Espace équipe : nouveau mot de passe pour {$c['prenom']} {$c['nom']}");
@@ -335,7 +338,7 @@ try {
       if (!password_verify(chaine($b['actuel'] ?? ''), (string)$c['hash'])) echec('Mot de passe actuel incorrect.', 403);
       $mdp = chaine($b['nouveau'] ?? '');
       eq_mdp_valide($mdp);
-      db()->prepare('UPDATE comptes_equipe SET hash = ? WHERE id = ?')->execute([password_hash($mdp, PASSWORD_DEFAULT), $c['id']]);
+      db()->prepare('UPDATE comptes_equipe SET hash = ?, mdp_provisoire = 0 WHERE id = ?')->execute([password_hash($mdp, PASSWORD_DEFAULT), $c['id']]);
       db()->prepare('DELETE FROM equipe_appareils WHERE compte_id = ? AND id <> ?')->execute([$c['id'], (int)($_SESSION['app'] ?? 0)]);
       journal('securite', "Espace équipe : mot de passe changé par {$c['prenom']} {$c['nom']}");
       repondre(['ok' => true]);
@@ -364,7 +367,7 @@ try {
         elseif ($reste <= 90) $alertes[] = ['niveau' => 'or', 'texte' => "Votre carte professionnelle expire dans $reste jours : pensez au renouvellement."];
       }
       repondre(['ok' => true,
-        'moi' => ['prenom' => $c['prenom'], 'nom' => $c['nom'], 'metier' => $c['metier'], 'metierLibelle' => EQ_METIERS[$c['metier']] ?? '', 'poste' => $c['poste'], 'identifiant' => $c['identifiant']],
+        'moi' => ['prenom' => $c['prenom'], 'nom' => $c['nom'], 'metier' => $c['metier'], 'metierLibelle' => EQ_LIBELLES[$c['metier']] ?? '', 'poste' => $c['poste'], 'identifiant' => $c['identifiant']],
         'prochains' => $prochains,
         'enCours' => eq_en_cours($aid),
         'semaine' => eq_minutes($aid, date('Y-m-d 00:00:00', strtotime('monday this week'))),

@@ -31,7 +31,7 @@ const DOC_TYPES = ['identite', 'carte_pro', 'diplome_aps', 'secu', 'rib', 'certi
 // Documents qu'un agent voit d'office dans son Espace équipe (les autres : seulement si l'admin les rend visibles)
 const DOC_VISIBLES_AGENT = ['contrat', 'carte_pro', 'diplome_aps', 'certif', 'attestation', 'carte_vtc', 'permis', 'assurance'];
 // Espace équipe : poste créé à la validation d'un compte, code écrit au planning pour une absence acceptée
-const EQ_POSTE_METIER = ['securite' => 'ADS', 'ssiap' => 'SSIAP', 'chauffeur' => 'Chauffeur VTC'];
+const EQ_POSTE_METIER = ['securite' => 'ADS', 'ssiap' => 'SSIAP', 'chauffeur' => 'Chauffeur VTC', 'direction' => 'Direction'];
 const EQ_CODE_ABSENCE = ['conges' => 'CP', 'maladie' => 'M', 'absence' => 'ABS', 'indispo' => 'R'];
 
 /* ---------- Réponses JSON ---------- */
@@ -373,6 +373,13 @@ function schema(PDO $db): void
     $db->exec(<<<'SQL'
       CREATE TABLE IF NOT EXISTS modules_schema (module TEXT PRIMARY KEY, version INTEGER NOT NULL DEFAULT 0, maj TEXT NOT NULL DEFAULT '');
       PRAGMA user_version = 24;
+    SQL);
+  }
+  if ($version < 25) {
+    // Espace équipe : compte créé par la direction avec un mot de passe provisoire, à changer à la première connexion
+    $db->exec(<<<'SQL'
+      ALTER TABLE comptes_equipe ADD COLUMN mdp_provisoire INTEGER NOT NULL DEFAULT 0;
+      PRAGMA user_version = 25;
     SQL);
   }
 }

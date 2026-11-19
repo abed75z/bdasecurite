@@ -6,7 +6,7 @@
    ========================================================= */
 import { api, apiFichier, h, icone, toast, erreur, modale, confirmer, champ, saisie, zoneTexte, statutPastille, dateLisible, ilYa, isoVersFr, MOIS, cap, pad } from './outils.js';
 
-const METIERS = { securite: 'Agent de sécurité', ssiap: 'Agent SSIAP', chauffeur: 'Chauffeur VTC' };
+const METIERS = { securite: 'Agent de sécurité', ssiap: 'Agent SSIAP', chauffeur: 'Chauffeur VTC', direction: 'Direction' };
 const ABSENCES = { conges: 'Congés payés', maladie: 'Arrêt maladie', absence: 'Absence', indispo: 'Indisponibilité' };
 const CODES = { conges: 'CP', maladie: 'M', absence: 'ABS', indispo: 'R' };
 const INCIDENTS = { intrusion: 'Intrusion / tentative', vol: 'Vol / dégradation', agression: 'Agression / altercation', incendie: 'Incendie / alarme', secours: 'Secours à personne', technique: 'Problème technique', ronde: 'Ronde / contrôle', autre: 'Autre' };
@@ -29,6 +29,7 @@ export async function pageEquipe(ctx) {
     'main-courante': d.mainCourante.filter((m) => m.statut === 'nouveau').length,
   };
   ctx.actions(
+    h('button', { class: 'btn btn--gold', type: 'button', onclick: () => creerCompte(d, recharger) }, icone('plus'), h('span', null, 'Créer un compte')),
     h('button', { class: 'btn btn--ghost', type: 'button', onclick: partagerLien }, icone('envoyer'), h('span', null, 'Lien d’inscription')),
     h('a', { class: 'btn btn--ghost', href: '/espace-equipe', target: '_blank', rel: 'noopener' }, icone('oeil'), h('span', null, 'Voir l’espace')));
   const barre = h('div', { class: 'onglets eqa-onglets' }, ONGLETS.map(([k, l]) => h('a', { class: `onglet ${k === onglet ? 'is-actif' : ''}`, href: `#/equipe/${k}` }, l, attente[k] ? h('span', null, attente[k]) : null)));
@@ -115,7 +116,8 @@ function ongletComptes(d, recharger) {
       enAttente.length ? h('div', { class: 'eqa-demandes' }, enAttente.map(demande))
         : h('div', { class: 'vide vide--petit' }, icone('agents'), h('p', null, 'Quand un agent crée son compte sur le site, sa demande apparaît ici. Cliquez sur « Lien d’inscription » pour l’envoyer à votre équipe.'))),
     h('section', { class: 'carte' },
-      h('header', { class: 'carte__tete' }, h('h2', null, 'Comptes de l’équipe'), h('small', null, `${autres.filter((c) => c.statut === 'actif').length} actif(s)`)),
+      h('header', { class: 'carte__tete' }, h('h2', null, 'Comptes de l’équipe'), h('small', null, `${autres.filter((c) => c.statut === 'actif').length} actif(s)`),
+        h('button', { class: 'btn btn--ghost btn--petit', type: 'button', onclick: () => creerCompte(d, recharger) }, icone('plus'), 'Créer un compte')),
       autres.length ? h('div', { class: 'tableau-defil' }, h('table', { class: 'tableau' },
         h('thead', null, h('tr', null, ['Agent', 'Métier', 'Contact', 'Dernière connexion', 'Statut', ''].map((t) => h('th', null, t)))),
         h('tbody', null, autres.map(compte)))) : h('div', { class: 'vide vide--petit' }, h('p', null, 'Aucun compte validé pour le moment.'))));
@@ -257,3 +259,62 @@ function ongletConsignes(d, recharger) {
         h('p', { class: 'eqa-texte' }, c.texte)))) : h('div', { class: 'vide vide--petit' }, h('p', null, 'Aucune consigne publiée.'))));
 }
 
+/* ----- Créer un compte directement (pour soi, le gérant, un agent sans smartphone…) ----- */
+const ROLES = [['securite', 'Agent de sécurité'], ['ssiap', 'Agent SSIAP'], ['chauffeur', 'Chauffeur VTC'], ['direction', 'Direction (gérant, responsable)']];
+async function creerCompte(d, recharger) {
+  const prenom = saisie({ placeholder: 'Ex. Karim', autocomplete: 'off' });
+  const nom = saisie({ placeholder: 'Ex. BENALI', autocomplete: 'off' });
+  const role = h('select', { class: 'input' }, ROLES.map(([k, l]) => h('option', { value: k }, l)));
+  const tel = saisie({ type: 'tel', placeholder: '06 12 34 56 78', autocomplete: 'off' });
+  const email = saisie({ type: 'email', placeholder: 'prenom@exemple.fr', autocomplete: 'off' });
+  const ident = saisie({ placeholder: 'prenom.nom', autocapitalize: 'none', spellcheck: 'false', maxlength: 30, autocomplete: 'off' });
+  let identTouche = false;
+  const court = (x) => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+  const libres = d.agents.filter((a) => !d.comptes.some((c) => +c.agent_id === +a.id && ['actif', 'bloque'].includes(c.statut)));
+  const fiche = h('select', { class: 'input' }, h('option', { value: '0' }, 'Créer une nouvelle fiche agent'),
+    libres.map((a) => h('option', { value: a.id }, `Relier à « ${a.nom} » (${a.poste})${+a.actif ? '' : ' — inactif'}`)));
+  const proposer = () => {
+    if (!identTouche) { const p = court(prenom.value), n = court(nom.value); ident.value = p && n ? `${p}.${n}`.slice(0, 30) : p || n; }
+    const nomComplet = simple(`${prenom.value} ${nom.value}`);
+    const f = nomComplet ? libres.find((a) => simple(a.nom) === nomComplet) : null;
+    if (f) fiche.value = String(f.id);
+  };
+  prenom.addEventListener('input', proposer);
+  nom.addEventListener('input', proposer);
+  ident.addEventListener('input', () => { identTouche = true; ident.value = ident.value.toLowerCase().replace(/\s/g, ''); });
+  const changer = h('input', { type: 'checkbox', checked: true });
+  const envoyer = h('input', { type: 'checkbox', checked: true });
+  const option = (input, titre, aide) => h('label', { class: 'eqa-option' }, input, h('span', null, h('b', null, titre), h('small', null, aide)));
+  const r = await modale({
+    titre: 'Créer un compte BDA Équipe', large: true,
+    contenu: h('div', { class: 'form-grille form-grille--2' },
+      h('p', { class: 'modale__texte eqa-plein' }, 'Le compte est actif tout de suite, sans validation. Un mot de passe provisoire est créé et affiché une seule fois.'),
+      champ('Prénom', prenom), champ('Nom', nom),
+      champ('Rôle', role, '« Direction » s’affiche sur sa carte et dans l’appli.'), champ('Identifiant de connexion', ident, 'Proposé automatiquement, modifiable.'),
+      champ('Téléphone', tel), champ('E-mail', email, 'Facultatif : sert au mot de passe oublié.'),
+      h('div', { class: 'eqa-plein' }, champ('Fiche agent', fiche, 'Reliez-la si la personne a déjà une fiche : son planning, ses documents et ses fiches de paie suivent.')),
+      h('div', { class: 'eqa-options eqa-plein' },
+        option(changer, 'Choisir son mot de passe à la première connexion', 'Recommandé : le mot de passe provisoire ne sert qu’une fois.'),
+        option(envoyer, 'Envoyer les accès par e-mail', 'Identifiant, mot de passe provisoire et lien de l’appli (si un e-mail est indiqué).'))),
+    actions: [{ libelle: 'Annuler', classe: 'btn--ghost', valeur: null }, { libelle: 'Créer le compte', classe: 'btn--gold', submit: true, action: async () => {
+      try {
+        return await api('equipe.compte.creer', { prenom: prenom.value.trim(), nom: nom.value.trim(), metier: role.value, identifiant: ident.value.trim(), tel: tel.value.trim(),
+          email: email.value.trim(), agent_id: +fiche.value, changer: changer.checked, envoyer: envoyer.checked });
+      } catch (e) { erreur(e); return false; }
+    } }],
+  });
+  if (!r || !r.ok) return;
+  recharger();
+  const texte = `Bonjour ${prenom.value.trim()}, voici ton accès à BDA Équipe :\nIdentifiant : ${r.identifiant}\nMot de passe provisoire : ${r.motdepasse}\n${changer.checked ? 'Tu choisiras ton propre mot de passe à la première connexion.\n' : ''}\niPhone : https://apps.apple.com/fr/app/id6830229089\nAutres téléphones : https://bdasecurite.com/espace-equipe`;
+  const num = tel.value.replace(/\D/g, '').replace(/^0(\d{9})$/, '33$1');
+  await modale({
+    titre: 'Compte créé',
+    contenu: h('div', { class: 'form-grille' },
+      h('p', { class: 'modale__texte' }, r.email ? 'Les accès sont partis par e-mail. Vous pouvez aussi les copier ou les envoyer par WhatsApp.' : 'Notez ces accès ou envoyez-les : le mot de passe provisoire ne sera plus affiché.'),
+      h('div', { class: 'eqa-acces' }, h('span', null, 'Identifiant'), h('code', null, r.identifiant), h('span', null, 'Mot de passe provisoire'), h('code', null, r.motdepasse))),
+    actions: [
+      { libelle: 'Copier', classe: 'btn--ghost', action: async () => { try { await navigator.clipboard.writeText(texte); toast('Accès copiés.'); } catch (e) { erreur('Copie impossible : sélectionnez le texte.'); } return false; } },
+      { libelle: 'Envoyer par WhatsApp', classe: 'btn--ghost', action: () => { window.open(`https://wa.me/${num.length >= 11 ? num : ''}?text=${encodeURIComponent(texte)}`, '_blank', 'noopener'); return false; } },
+      { libelle: 'Terminé', classe: 'btn--gold', submit: true, valeur: true }],
+  });
+}

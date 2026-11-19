@@ -61,6 +61,10 @@ const ICONES = {
   moi: '<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.3-3.6 3.9-5.5 7-5.5s5.7 1.9 7 5.5"/>',
   chrono: '<circle cx="12" cy="13.5" r="7.5"/><path d="M12 10v3.5l2.5 1.5M9.5 2.5h5M12 2.5V6"/>',
   versHaut: '<path d="M7 17 17 7M9 7h8v8"/>',
+  qr: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/>',
+  reglages: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  crayon: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  visiteur: '<circle cx="9" cy="8" r="3.5"/><path d="M3 20c.6-3.4 3-5 6-5s5.4 1.6 6 5M18 8v6M15 11h6"/>',
 };
 const METIERS = {
   securite: ['Agent de sécurité', 'Surveillance, filtrage, rondes', 'bouclier'],
@@ -153,6 +157,7 @@ const initiales = (p, n) => `${(p || '?')[0] || ''}${(n || '')[0] || ''}`.toUppe
 const champ = (label, input, aide) => h('label', { class: 'eq-champ' }, h('span', null, label), input, aide ? h('small', null, aide) : null);
 const saisie = (attrs) => h('input', { class: 'eq-input', ...attrs });
 const memoire = { lire: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } }, ecrire: (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* navigation privée */ } } };
+const cap = (s) => String(s || '').charAt(0).toUpperCase() + String(s || '').slice(1);
 const simplifier = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '');
 
 // Créneau du planning -> minutes travaillées (« 12h-19h », « 7h30-19h », « 19h-7h », « 8 », codes R/CP/M…)
@@ -275,6 +280,7 @@ async function demarrer() {
   if (location.hash === '#inscription') return ecranInscription();
   if (!s.connecte) return ecranConnexion();
   moi = { prenom: s.prenom, nom: s.nom, metier: s.metier };
+  if (s.mdpProvisoire) return ecranMdpProvisoire();
   ouvrirApplication();
 }
 
@@ -282,59 +288,61 @@ async function demarrer() {
 function carteAuth(titre, texte, ...contenu) {
   document.body.classList.remove('eq--app');
   clearInterval(minuteur);
-  const page = h('main', { class: 'eq-auth eq-auth--centre' },
-    h('section', { class: 'eq-auth__carte' },
-      h('a', { class: 'eq-marque', href: '/' }, h('img', { src: '/assets/img/blason.svg?v=1', alt: '', width: 34, height: 43 }), h('span', null, h('b', null, 'BDA Security Group'), h('small', null, 'Espace agent'))),
-      titre ? h('h1', null, titre) : null,
-      texte ? h('p', { class: 'eq-auth__texte' }, texte) : null,
-      ...contenu,
-      h('p', { class: 'eq-auth__aide' }, h('a', { href: 'tel:+33611678625' }, '06 11 67 86 25'), ' · ', h('a', { href: '/' }, 'Retour au site'))));
+  const noeud = (x, tag, cls) => (x instanceof Node ? x : h(tag, cls ? { class: cls } : null, x));
+  const page = h('main', { class: 'au-page' },
+    h('header', { class: 'au-bandeau' },
+      h('a', { class: 'au-marque', href: '/', 'aria-label': 'BDA Security Group' }, h('b', null, 'BDA'), h('span', null, 'SECURITY GROUP')),
+      titre ? noeud(titre, 'h1') : null,
+      texte ? noeud(texte, 'p', 'au-texte') : null),
+    h('section', { class: 'au-carte' }, ...contenu),
+    h('p', { class: 'au-aide' }, 'Besoin d’aide ? ', h('a', { href: 'tel:+33611678625' }, '06 11 67 86 25'), ' · ', h('a', { href: '/' }, 'Site BDA')));
   racine.replaceChildren(page);
   window.scrollTo(0, 0);
 }
 function ecranConnexion(message) {
   if (location.hash && !location.hash.startsWith('#/')) history.replaceState(null, '', location.pathname);
   const id = saisie({ autocomplete: 'username', required: true, placeholder: 'prenom.nom', autocapitalize: 'none', spellcheck: 'false' });
-  const mdp = champMdp({ autocomplete: 'current-password', required: true, placeholder: '••••••••' });
+  const mdp = champMdp({ autocomplete: 'current-password', required: true, placeholder: 'Votre mot de passe' });
   const memo = h('input', { type: 'checkbox', checked: true });
   const msg = h('p', { class: 'eq-erreur', role: 'alert' }, message || '');
-  const btn = h('button', { class: 'eq-btn eq-btn--plein', type: 'submit' }, 'Se connecter', ic('fleche'));
+  const btn = h('button', { class: 'eq-btn eq-btn--plein', type: 'submit' }, 'Se connecter');
   const form = h('form', { class: 'eq-form', onsubmit: async (e) => {
     e.preventDefault(); msg.textContent = ''; btn.disabled = true;
     try {
       const s = await api('connexion', { identifiant: id.value.trim(), motdepasse: mdp.input.value, memoriser: memo.checked });
       moi = { prenom: s.prenom, nom: s.nom, metier: s.metier };
+      if (s.mdpProvisoire) return ecranMdpProvisoire(mdp.input.value);
       if (!location.hash.startsWith('#/')) location.hash = '#/';
       ouvrirApplication();
     } catch (err) { msg.textContent = err.message; btn.disabled = false; }
   } },
-    champ('Identifiant ou email', id),
+    champ('Identifiant ou e-mail', id),
     champ('Mot de passe', mdp.bloc),
-    h('div', { class: 'eq-ligne-flex' }, h('label', { class: 'eq-case' }, memo, 'Rester connecté sur cet appareil'), h('button', { class: 'eq-lien', type: 'button', onclick: ecranOubli }, 'Mot de passe oublié ?')),
+    h('div', { class: 'au-ligne' }, h('label', { class: 'eq-case' }, memo, 'Rester connecté'), h('button', { class: 'eq-lien', type: 'button', onclick: ecranOubli }, 'Mot de passe oublié ?')),
     msg, btn);
-  carteAuth('Connexion', '', form,
-    h('div', { class: 'eq-auth__bascule' }, h('span', null, 'Nouveau dans l’équipe ?'), h('button', { class: 'eq-btn eq-btn--ghost eq-btn--petit', type: 'button', onclick: () => { history.replaceState(null, '', '#inscription'); ecranInscription(); } }, 'Créer mon compte')));
-  id.focus();
+  carteAuth('Connexion', 'Votre espace agent : planning, main courante, fiches de paie.', form,
+    h('div', { class: 'au-bascule' }, h('span', null, 'Nouveau dans l’équipe ?'), h('button', { class: 'eq-btn eq-btn--ghost', type: 'button', onclick: () => { history.replaceState(null, '', '#inscription'); ecranInscription(); } }, 'Créer mon compte')));
 }
+// Création de compte : 3 étapes courtes (qui vous êtes, comment vous joindre, votre mot de passe)
 function ecranInscription() {
-  const v = { metier: '' };
   let etape = 0;
+  let metier = '';
   let idModifie = false;
   let idLibre = null;
-  const prenom = saisie({ autocomplete: 'given-name', placeholder: 'Ex. Karim', required: true });
-  const nom = saisie({ autocomplete: 'family-name', placeholder: 'Ex. Benali', required: true });
-  const metiers = choix('metier', METIERS, '', 'eq-choix--3');
-  const email = saisie({ type: 'email', autocomplete: 'email', placeholder: 'vous@exemple.fr', inputmode: 'email', autocapitalize: 'none' });
+  const msg = h('p', { class: 'eq-erreur', role: 'alert' });
+  const prenom = saisie({ autocomplete: 'given-name', placeholder: 'Ex. Karim', required: true, autocapitalize: 'words' });
+  const nom = saisie({ autocomplete: 'family-name', placeholder: 'Ex. Benali', required: true, autocapitalize: 'words' });
+  const metiers = h('div', { class: 'au-metiers', role: 'radiogroup', 'aria-label': 'Votre métier' }, Object.entries(METIERS).map(([k, [titre]]) => h('button', {
+    type: 'button', class: 'au-metier', role: 'radio', 'aria-checked': 'false',
+    onclick: (e) => { metier = k; metiers.querySelectorAll('.au-metier').forEach((b) => b.setAttribute('aria-checked', String(b === e.currentTarget))); msg.textContent = ''; } }, titre)));
   const tel = saisie({ type: 'tel', autocomplete: 'tel', placeholder: '06 12 34 56 78', inputmode: 'tel' });
+  const email = saisie({ type: 'email', autocomplete: 'email', placeholder: 'vous@exemple.fr', inputmode: 'email', autocapitalize: 'none' });
   const ident = saisie({ autocomplete: 'username', autocapitalize: 'none', spellcheck: 'false', placeholder: 'prenom.nom', maxlength: 30 });
   const dispo = h('span', { class: 'eq-dispo' });
   const mdp = champMdp({ autocomplete: 'new-password', placeholder: 'Choisissez un mot de passe' });
-  const mdp2 = champMdp({ autocomplete: 'new-password', placeholder: 'Retapez-le' });
-  const regles = reglesMdp(mdp.input, mdp2.input);
+  const regles = reglesMdp(mdp.input);
   const accepte = h('input', { type: 'checkbox' });
   const piege = h('input', { type: 'text', name: 'site_web', tabindex: '-1', autocomplete: 'off', class: 'sr', 'aria-hidden': 'true' });
-  const msg = h('p', { class: 'eq-erreur', role: 'alert' });
-  const barres = [0, 1, 2].map(() => h('span'));
   const zone = h('div');
   let verif;
   const verifier = () => {
@@ -367,32 +375,30 @@ function ecranInscription() {
     if (ident.value) verifier();
   };
   const etapes = [
-    { titre: 'Qui êtes-vous ?', texte: 'Quelques informations pour que la direction vous reconnaisse.',
-      corps: () => [h('div', { class: 'eq-grille-2' }, champ('Prénom', prenom), champ('Nom', nom)), h('div', { class: 'eq-champ' }, h('span', null, 'Votre métier'), metiers)],
+    { titre: 'Qui êtes-vous ?',
+      corps: () => [champ('Prénom', prenom), champ('Nom', nom), h('div', { class: 'eq-champ' }, h('span', null, 'Votre métier'), metiers)],
       valider: () => {
-        v.metier = valeurChoix(metiers, 'metier');
         if (prenom.value.trim().length < 2) return [prenom, 'Indiquez votre prénom.'];
         if (nom.value.trim().length < 2) return [nom, 'Indiquez votre nom.'];
-        if (!v.metier) return [null, 'Choisissez votre métier.'];
+        if (!metier) return [null, 'Choisissez votre métier.'];
         return null;
       } },
-    { titre: 'Comment vous joindre ?', texte: 'La direction vous préviendra sur cet email dès que votre accès sera activé.',
-      corps: () => [champ('Adresse email', email), champ('Numéro de téléphone', tel, 'Le numéro sur lequel on peut vous appeler pour vos missions.')],
+    { titre: 'Comment vous joindre ?',
+      corps: () => [champ('Téléphone', tel), champ('E-mail', email, 'Vous y recevrez la confirmation de votre accès.')],
       valider: () => {
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim())) return [email, 'Adresse email invalide.'];
         if (tel.value.replace(/\D/g, '').length < 9) return [tel, 'Numéro de téléphone invalide.'];
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value.trim())) return [email, 'Adresse e-mail invalide.'];
         return null;
       } },
-    { titre: 'Vos accès', texte: 'Choisissez l’identifiant et le mot de passe avec lesquels vous vous connecterez.',
+    { titre: 'Votre mot de passe',
       corps: () => [
-        h('div', { class: 'eq-recap' }, h('span', null, h('b', null, `${prenom.value.trim()} ${nom.value.trim().toUpperCase()}`), ' · ', METIERS[v.metier][0]), h('span', null, `${email.value.trim()} · ${tel.value.trim()}`)),
-        h('label', { class: 'eq-champ' }, h('span', null, 'Identifiant de connexion'), ident, dispo, h('small', null, 'Proposé automatiquement : vous pouvez le modifier. Notez-le bien.')),
-        champ('Mot de passe', mdp.bloc), champ('Confirmez le mot de passe', mdp2.bloc), regles.liste,
-        h('label', { class: 'eq-case' }, accepte, 'J’accepte que BDA Security Group utilise ces informations pour gérer mon compte et mes missions.'), piege],
+        h('label', { class: 'eq-champ' }, h('span', null, 'Votre identifiant'), ident, dispo, h('small', null, 'Proposé pour vous : notez-le, il sert à vous connecter.')),
+        champ('Mot de passe', mdp.bloc), regles.liste,
+        h('label', { class: 'eq-case' }, accepte, h('span', null, 'J’accepte que BDA Security Group utilise ces informations pour gérer mon compte et mes missions (', h('a', { href: '/mentions-legales#appli-equipe', target: '_blank', rel: 'noopener' }, 'confidentialité'), ').')), piege],
       valider: () => {
         if (!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(ident.value.trim())) return [ident, 'Choisissez un identifiant valide.'];
         if (idLibre === false) return [ident, 'Cet identifiant est déjà pris.'];
-        if (!regles.valide()) return [mdp.input, mdp.input.value !== mdp2.input.value && mdp2.input.value ? 'Les deux mots de passe ne sont pas identiques.' : 'Le mot de passe ne respecte pas encore toutes les règles.'];
+        if (!regles.valide()) return [mdp.input, 'Le mot de passe doit avoir 8 caractères, une lettre et un chiffre.'];
         if (!accepte.checked) return [null, 'Cochez la case d’accord pour continuer.'];
         return null;
       } },
@@ -406,30 +412,27 @@ function ecranInscription() {
     if (etape < 2) return afficher(etape + 1);
     btnSuite.disabled = true;
     try {
-      await api('inscription', { prenom: prenom.value.trim(), nom: nom.value.trim(), email: email.value.trim(), tel: tel.value.trim(), metier: v.metier,
+      await api('inscription', { prenom: prenom.value.trim(), nom: nom.value.trim(), email: email.value.trim(), tel: tel.value.trim(), metier,
         identifiant: ident.value.trim().toLowerCase(), motdepasse: mdp.input.value, accepte: accepte.checked, site_web: piege.value });
       ecranEnvoye(prenom.value.trim(), ident.value.trim().toLowerCase(), email.value.trim());
     } catch (err2) { msg.textContent = err2.message; btnSuite.disabled = false; }
   } }, zone, msg, h('div', { class: 'eq-actions' }, btnRetour, btnSuite));
+  const barres = [0, 1, 2].map(() => h('span'));
+  const sur = h('p', { class: 'au-etape' });
   const titre = h('h1');
-  const texte = h('p', { class: 'eq-auth__texte' });
-  const sur = h('div', { class: 'eq-etape-titre' });
   function afficher(n) {
     etape = Math.max(0, n);
     if (etape === 2) suggerer();
     barres.forEach((b, i) => b.classList.toggle('is-fait', i <= etape));
     sur.textContent = `Étape ${etape + 1} sur 3`;
     titre.textContent = etapes[etape].titre;
-    texte.textContent = etapes[etape].texte;
     zone.replaceChildren(anim(h('div', { class: 'eq-form' }, etapes[etape].corps())));
     btnRetour.style.display = etape ? '' : 'none';
-    btnSuite.replaceChildren(etape < 2 ? 'Continuer' : 'Envoyer ma demande', ic(etape < 2 ? 'fleche' : 'coche'));
+    btnSuite.replaceChildren(etape < 2 ? 'Continuer' : 'Créer mon compte');
     msg.textContent = '';
-    const premier = zone.querySelector('input:not([type=radio]):not([type=checkbox])');
-    if (premier && !premier.value) setTimeout(() => premier.focus(), 60);
   }
-  carteAuth('', null, h('div', { class: 'eq-etapes' }, barres), sur, titre, texte, form,
-    h('div', { class: 'eq-auth__bascule' }, h('span', null, 'Déjà un compte ?'), h('button', { class: 'eq-btn eq-btn--ghost eq-btn--petit', type: 'button', onclick: () => ecranConnexion() }, 'Se connecter')));
+  carteAuth(h('div', null, sur, titre, h('div', { class: 'au-barres' }, barres)), null, form,
+    h('div', { class: 'au-bascule' }, h('span', null, 'Déjà un compte ?'), h('button', { class: 'eq-btn eq-btn--ghost', type: 'button', onclick: () => ecranConnexion() }, 'Se connecter')));
   afficher(0);
 }
 function ecranEnvoye(prenom, identifiant, email) {
@@ -445,6 +448,27 @@ function ecranEnvoye(prenom, identifiant, email) {
       h('li', null, h('b', null, 'Accès activé'), `Vous recevez un email sur ${email}.`)),
     h('div', { class: 'eq-recap' }, h('span', null, 'Votre identifiant de connexion :'), h('b', { style: 'font-size:1.2rem;color:var(--or-clair)' }, identifiant)),
     h('button', { class: 'eq-btn eq-btn--plein eq-mt', type: 'button', onclick: () => ecranConnexion() }, 'Retour à la connexion'));
+}
+// Compte créé par la direction : à la première connexion, l'agent remplace le mot de passe provisoire par le sien
+function ecranMdpProvisoire(actuelConnu) {
+  const actuel = champMdp({ autocomplete: 'current-password', placeholder: 'Reçu de la direction' });
+  if (actuelConnu) actuel.input.value = actuelConnu;
+  const nouveau = champMdp({ autocomplete: 'new-password', placeholder: 'Votre nouveau mot de passe' });
+  const regles = reglesMdp(nouveau.input);
+  const msg = h('p', { class: 'eq-erreur', role: 'alert' });
+  const btn = h('button', { class: 'eq-btn eq-btn--plein', type: 'submit' }, 'Enregistrer et continuer');
+  const form = h('form', { class: 'eq-form', onsubmit: async (e) => {
+    e.preventDefault(); msg.textContent = '';
+    if (!regles.valide()) { msg.textContent = 'Le mot de passe doit avoir 8 caractères, une lettre et un chiffre.'; return; }
+    btn.disabled = true;
+    try {
+      await api('motdepasse', { actuel: actuel.input.value, nouveau: nouveau.input.value });
+      toast('Mot de passe enregistré. Bienvenue !');
+      if (!location.hash.startsWith('#/')) location.hash = '#/';
+      ouvrirApplication();
+    } catch (err) { msg.textContent = err.message; btn.disabled = false; }
+  } }, actuelConnu ? null : champ('Mot de passe provisoire', actuel.bloc), champ('Nouveau mot de passe', nouveau.bloc), regles.liste, msg, btn);
+  carteAuth(`Bienvenue ${moi.prenom || ''}`.trim(), 'Votre compte a été créé par la direction : choisissez votre mot de passe personnel.', form);
 }
 function ecranOubli() {
   const id = saisie({ autocomplete: 'username', autocapitalize: 'none', placeholder: 'prenom.nom ou vous@exemple.fr' });
@@ -495,31 +519,43 @@ async function pageMoi() {
   compteurs.absencesAttente = d.absencesAttente;
   enService = Boolean(d.enCours);
   ouvrirApplication.menus?.();
-  const etat = carte ? ({ valide: 'Carte pro valide', expiree: 'Carte pro expirée', a_verifier: 'Carte pro à vérifier', inactif: 'Carte inactive' })[carte.etat] || 'Carte professionnelle' : '';
+  const etat = carte ? ({ valide: 'Valide', expiree: 'Expirée', a_verifier: 'À vérifier', inactif: 'Inactive' })[carte.etat] || 'Carte d’agent' : '';
+  const metierLib = d.moi.metierLibelle || METIERS[d.moi.metier]?.[0] || '';
+  // la carte pro numérique : le toucher affiche la carte d'agent avec son QR code
+  const cartePro = h(carte ? 'a' : 'section', { class: 'ap-carte-pro', href: carte ? '#/carte' : null, 'aria-label': carte ? 'Afficher ma carte d’agent et son QR code' : null },
+    h('span', { class: 'ap-carte-pro__av' }, initiales(d.moi.prenom, d.moi.nom)),
+    h('b', { class: 'ap-carte-pro__nom' }, `${d.moi.prenom} ${String(d.moi.nom || '').toUpperCase()}`.trim()),
+    h('span', { class: 'ap-carte-pro__metier' }, [metierLib, 'BDA Security Group'].filter(Boolean).join(' · ')),
+    carte ? h('span', { class: 'ap-carte-pro__infos' },
+      h('span', null, h('small', null, 'Carte professionnelle'), h('b', null, etat)),
+      carte.validite ? h('span', null, h('small', null, 'Valide jusqu’au'), h('b', null, carte.validite)) : null) : null,
+    carte ? h('span', { class: 'ap-carte-pro__qr', 'aria-hidden': 'true' }, ic('qr')) : null,
+    carte ? h('span', { class: 'ap-carte-pro__voir', 'aria-hidden': 'true' }, 'Afficher') : null);
+  const r = (href, icone, titre, sous, droite) => ligne({ href }, icLigne(icone, titre, sous), droite);
   const lignes = [
-    ligne({ href: '#/paie' }, 'Fiches de paie', d.fichesNonVues ? h('span', { class: 'ap-compte' }, d.fichesNonVues) : null),
-    ligne({ href: '#/documents' }, 'Documents', null),
-    ligne({ href: '#/absences' }, 'Congés et absences', d.absencesAttente ? `${d.absencesAttente} en attente` : 'Demander'),
-    moi.metier === 'chauffeur' ? ligne({ href: '#/courses' }, 'Mes courses', null) : ligne({ href: '#/main-courante' }, 'Mes signalements', d.incidentsOuverts ? `${d.incidentsOuverts} en cours` : null),
-    PAGES.consignes ? ligne({ href: '#/consignes' }, 'Consignes des sites', null) : null,
-    PAGES.materiel ? ligne({ href: '#/materiel' }, 'Mon matériel', null) : null,
-    PAGES.presence ? ligne({ href: '#/presence' }, 'Tout va bien ?', 'Alertes') : null,
-    ligne({ href: '#/profil' }, 'Profil et disponibilités', null),
-    PAGES.compte ? ligne({ href: '#/compte' }, 'Réglages', null) : null,
+    h('div', { class: 'ap-ligne' }, h('span', { class: 'ap-ligne__g' }, icLigne('horloge', 'Mes heures', `Cette semaine ${fmtMin(d.semaine)} · ce mois ${fmtMin(d.mois)}`))),
+    r('#/paie', 'paie', 'Fiches de paie', d.fichesNonVues ? `${d.fichesNonVues} nouvelle${d.fichesNonVues > 1 ? 's' : ''} fiche${d.fichesNonVues > 1 ? 's' : ''}` : 'Espace privé, en PDF', d.fichesNonVues ? h('span', { class: 'ap-compte' }, d.fichesNonVues) : null),
+    r('#/absences', 'absences', 'Congés et absences', d.absencesAttente ? `${pluriel(d.absencesAttente, 'demande')} en attente` : 'Faire une demande, suivre la réponse'),
+    r('#/documents', 'documents', 'Contrats et documents', 'Contrat, carte pro, attestations'),
+    moi.metier === 'chauffeur' ? r('#/courses', 'voiture', 'Mes courses', 'Les courses confiées par la direction')
+      : r('#/main-courante', 'mc', 'Mes signalements', d.incidentsOuverts ? `${d.incidentsOuverts} en cours` : 'Événements envoyés à la direction'),
+    r('#/planning', 'cal', 'Mes missions', 'Mon planning, semaine par semaine'),
+    PAGES.consignes ? r('#/consignes', 'info', 'Consignes des sites', 'À lire avant chaque poste') : null,
+    PAGES.materiel ? r('#/materiel', 'outil', 'Mon matériel', 'Tenue, badge, équipement') : null,
+    PAGES.presence ? r('#/presence', 'coeur', 'Tout va bien ?', 'Alertes de sécurité') : null,
+    r('#/profil', 'profil', 'Mes informations', 'Coordonnées, disponibilités, mot de passe'),
+    PAGES.compte ? r('#/compte', 'reglages', 'Réglages', 'Notifications et compte') : null,
   ].filter(Boolean);
   return h('div', { class: 'ap-v ap-moi' },
-    h('header', { class: 'ap-tete ap-tete--page' }, h('p', { class: 'ap-sur' }, d.moi.metierLibelle || METIERS[d.moi.metier]?.[0] || ''), h('h1', { class: 'ap-titre' }, `${d.moi.prenom} ${d.moi.nom || ''}`.trim())),
-    carte ? h('a', { class: 'ap-carte-agent', href: '#/carte', 'aria-label': 'Afficher ma carte d’agent' },
-      h('span', { class: 'ap-carte-agent__haut' }, h('span', { class: 'ap-marque-carte' }, h('b', null, 'BDA'), h('small', null, 'SECURITY GROUP')), h('small', null, 'CARTE D’AGENT')),
-      h('span', { class: 'ap-carte-agent__bas' }, h('b', null, `${carte.prenom} ${String(carte.nom || '').charAt(0)}.`),
-        h('span', null, h('small', null, `${etat}${carte.validite ? ` · ${carte.validite}` : ''}`), h('small', { class: 'is-clair' }, 'Afficher le QR')))) : null,
-    h('div', { class: 'ap-chiffres' }, h('div', null, h('small', null, 'Cette semaine'), h('b', null, fmtMin(d.semaine))), h('div', null, h('small', null, 'Ce mois'), h('b', null, fmtMin(d.mois)))),
-    h('nav', { class: 'ap-lignes', 'aria-label': 'Mon compte' }, lignes),
+    h('header', { class: 'ap-haut' }, marque()),
+    h('section', { class: 'ap-tete' }, h('h1', { class: 'ap-titre' }, 'Mon espace')),
+    cartePro,
+    h('section', { class: 'ap-carte ap-carte--liste' }, h('nav', { class: 'ap-lignes', 'aria-label': 'Mon compte' }, lignes)),
     h('button', { class: 'ap-btn-texte ap-deconnexion', type: 'button', onclick: deconnexion }, 'Se déconnecter'));
 }
 
 const PAGES = {
-  '': { titre: 'Aujourd’hui', icone: 'auj', rendu: pageAccueil },
+  '': { titre: 'Accueil', icone: 'accueil', rendu: pageAccueil },
   moi: { titre: 'Moi', icone: 'moi', rendu: pageMoi },
   planning: { titre: 'Planning', icone: 'planning', rendu: pagePlanning },
   'main-courante': { titre: 'Mes signalements', icone: 'mc', rendu: pageMainCourante },
@@ -541,7 +577,7 @@ let principal = null;
 let ongletsNav = null;
 let enService = false;
 // 4 onglets ; les autres pages appartiennent à l'un d'eux (flèche retour et onglet allumé)
-const ONGLETS = [['', 'Aujourd’hui', 'auj'], ['planning', 'Planning', 'cal'], ['messages', 'Messages', 'msg'], ['moi', 'Moi', 'moi']];
+const ONGLETS = [['', 'Accueil', 'accueil'], ['planning', 'Planning', 'cal'], ['messages', 'Messages', 'msg'], ['moi', 'Moi', 'moi']];
 const PARENTS = { consignes: '', presence: '', journal: '', postes: 'planning', carte: 'moi', paie: 'moi', documents: 'moi', absences: 'moi', profil: 'moi', compte: 'moi', materiel: 'moi', 'main-courante': 'moi', courses: 'moi' };
 const routeActuelle = () => location.hash.replace(/^#\/?/, '').split('?')[0];
 const estOnglet = (r) => ONGLETS.some(([k]) => k === r);
@@ -678,9 +714,9 @@ async function naviguer() {
     clearTimeout(lent);
     if (routeActuelle() !== route) return;
     const parent = ongletDe(route);
-    const ecran = h('div', { class: `ap-page ap-page--${sens}` },
-      estOnglet(route) ? null : h('a', { class: 'ap-retour', href: `#/${parent}` }, ic('retour'), ONGLETS.find(([k]) => k === parent)?.[1] || 'Retour'),
-      anim(contenu));
+    const retour = estOnglet(route) ? null : h('a', { class: 'ap-retour', href: `#/${parent}` }, ic('retour'), ONGLETS.find(([k]) => k === parent)?.[1] || 'Retour');
+    const corps = anim(contenu);
+    const ecran = h('div', { class: `ap-page ap-page--${sens}` }, poserBandeau(corps, retour), corps);
     principal.classList.remove('is-attente');
     principal.replaceChildren(ecran);
     // la conversation s'ouvre sur le dernier message ; les autres écrans en haut
@@ -695,7 +731,6 @@ async function naviguer() {
 const recharger = () => naviguer();
 const enTete = (surtitre, titre, texte, ...actions) => h('div', { class: 'eq-titre' }, h('div', null, surtitre ? h('div', { class: 'eq-surtitre' }, surtitre) : null, h('h1', null, titre), texte ? h('p', null, texte) : null), actions.length ? h('div', { style: 'display:flex;gap:.5rem;flex-wrap:wrap' }, actions) : null);
 
-/* ----- Aujourd'hui : le prochain poste et une seule action (prendre ou finir le service) ----- */
 const JOURS_MAJ = ['DIMANCHE', 'LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI'];
 const hm = (s) => String(s || '').slice(0, 5).replace(/^0(\d)/, '$1').replace(':', 'h');
 const minVersHm = (m) => { const x = ((m % 1440) + 1440) % 1440; return `${Math.floor(x / 60)}h${pad(x % 60)}`; };
@@ -722,6 +757,23 @@ function detailPostes(ps) {
       conf);
   })), { sur: dateLongue(p0.jour).toUpperCase() });
 }
+// Icône dorée + titre (+ petite ligne grise) pour les lignes des cartes
+const icLigne = (icone, titre, sous) => [h('span', { class: 'ap-ligne__ic' }, ic(icone)), h('span', { class: 'ap-ligne__t' }, titre, sous ? h('small', null, sous) : null)];
+// Bandeau bleu nuit : la marque (ou la flèche retour) et le titre de l'écran ; le reste passe dessous
+function poserBandeau(corps, retour) {
+  const tetes = [];
+  for (const el of [...corps.children]) { if (el.matches('header.ap-haut, .ap-tete, .eq-titre')) tetes.push(el); else break; }
+  const premier = [...corps.children].find((el) => !tetes.includes(el));
+  const avecMarque = tetes.some((t) => t.matches('header.ap-haut'));
+  corps.classList.add('ap-corps', premier && premier.matches('.ap-carte, .ap-carte-pro, .ap-journal, .eq-carte, .eq-carte-pleine') ? 'ap-corps--carte' : 'ap-corps--feuille');
+  return h('div', { class: 'ap-bandeau' }, retour || (avecMarque ? null : h('header', { class: 'ap-haut' }, marque())), ...tetes);
+}
+const consignesDirection = (liste) => tiroir('Consignes', h('div', { class: 'ap-fiche' }, liste.map((x) => h('div', { class: 'ap-fiche__bloc' },
+  h('p', { class: 'ap-sur' }, `${frDate(x.cree)} · ${+x.agent_id ? 'POUR VOUS' : 'TOUTE L’ÉQUIPE'}`), h('p', { class: 'ap-fiche__texte' }, x.texte)))), { sur: 'LA DIRECTION' });
+const dansMin = (m) => (m < 60 ? `dans ${Math.max(1, m)} min` : m % 60 ? `dans ${Math.floor(m / 60)} h ${pad(m % 60)}` : `dans ${m / 60} h`);
+const tuileRapide = (icone, titre, sous, action, cls = '') => h('button', { class: `ap-rapide ${cls}`, type: 'button', onclick: action }, ic(icone), h('span', null, titre, sous ? h('small', null, sous) : null));
+
+/* ----- Accueil : bonjour, le prochain poste avec « Prendre mon service », les consignes, ce qui attend ----- */
 async function pageAccueil() {
   envoyerAttente();
   const [d, mesPostes, nonLus, cartesModules, cahier] = await Promise.all([api('accueil'), api('postes').then((r) => r.postes).catch(() => []),
@@ -735,6 +787,7 @@ async function pageAccueil() {
   ouvrirApplication.menus?.();
   const maintenant = new Date(Date.now() + decalage);
   const aujIso = iso(maintenant);
+  const demainIso = iso(new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate() + 1));
   const heureNow = `${pad(maintenant.getHours())}:${pad(maintenant.getMinutes())}`;
   const auj = d.prochains[0];
   const c = lireCreneau(auj?.creneau);
@@ -744,6 +797,7 @@ async function pageAccueil() {
   const prochain = aVenir[0] || null;
   const posteDuJour = mesPostes.find((p) => p.jour === aujIso) || null;
   const sos = moi.metier !== 'chauffeur' ? sosPilule() : null;
+  const quandJour = (j) => (j === aujIso ? 'Aujourd’hui' : j === demainIso ? 'Demain' : cap(dateLongue(j)));
 
   const pointer = async (quoi, bouton) => {
     const texte = bouton.textContent;
@@ -757,21 +811,18 @@ async function pageAccueil() {
     } catch (e) { toast(e.message, true); bouton.disabled = false; bouton.textContent = texte; }
   };
 
-  // ce qui demande l'attention : questions « Tout va bien ? », consignes à lire, messages, postes à prendre, alertes
+  // ce qui demande l'attention : alertes, questions « Tout va bien ? », postes proposés, consignes de la direction
   const lignes = [
     ...d.alertes.map((a) => h('div', { class: `ap-ligne ap-ligne--${a.niveau}` }, h('span', { class: 'ap-ligne__g' }, h('i', { class: 'ap-puce-etat' }), a.texte))),
     ...cartesModules.filter(Boolean),
-    d.consignes.length ? ligne({ onclick: () => tiroir('Consignes', h('div', { class: 'ap-fiche' }, d.consignes.map((x) => h('div', { class: 'ap-fiche__bloc' },
-      h('p', { class: 'ap-sur' }, `${frDate(x.cree)} · ${+x.agent_id ? 'POUR VOUS' : 'TOUTE L’ÉQUIPE'}`), h('p', { class: 'ap-fiche__texte' }, x.texte)))), { sur: 'LA DIRECTION' }) },
-      [h('i', { class: 'ap-puce-etat is-clair' }), 'Consignes de la direction'], `${d.consignes.length}`) : null,
-    moi.metier === 'chauffeur' && d.courses.length ? ligne({ href: '#/courses' }, 'Prochaines courses', `${d.courses.length}`) : null,
+    d.consignes.length ? ligne({ onclick: () => consignesDirection(d.consignes) }, icLigne('info', 'Consignes de la direction', pluriel(d.consignes.length, 'consigne')), null) : null,
+    moi.metier === 'chauffeur' && d.courses.length ? ligne({ href: '#/courses' }, icLigne('voiture', 'Prochaines courses'), `${d.courses.length}`) : null,
   ].filter(Boolean);
-  const blocLignes = lignes.length ? h('nav', { class: 'ap-lignes', 'aria-label': 'À voir' }, lignes) : null;
 
-  // ----- en service : le temps qui passe, signaler, finir -----
+  // ----- en service : le temps qui passe, noter, signaler, terminer -----
   if (d.enCours) {
     const debut = versDate(d.enCours.debut);
-    const p = posteDuJour && !fini(posteDuJour) ? posteDuJour : (posteDuJour || null);
+    const p = posteDuJour || null;
     let fin = null;
     let finLib = '';
     if (p) { fin = versDate(`${p.jour}T${p.fin.slice(0, 5)}:00`); if (p.fin <= p.debut) fin = new Date(fin.getTime() + 86400000); finLib = hm(p.fin); }
@@ -787,70 +838,89 @@ async function pageAccueil() {
     };
     tic();
     minuteur = setInterval(tic, 1000);
-    const finir = maintenir(h('button', { class: 'ap-btn-texte', type: 'button' }, 'Finir mon service · maintenir'), 2000, () => pointer('fin', finir));
+    const finir = maintenir(h('button', { class: 'ap-btn ap-btn--contour ap-btn--fin', type: 'button' }, 'Terminer mon service'), 2000, () => pointer('fin', finir));
     const site = d.enCours.site || p?.site || '';
-    if (p && (p.consignes || p.contact)) lignes.push(ligne({ onclick: () => detailPostes([p]) }, 'Consignes du site', ''));
+    if (p && (p.consignes || p.contact)) lignes.push(ligne({ onclick: () => detailPostes([p]) }, icLigne('documents', 'Consignes du site', 'Contact, consignes, adresse'), null));
+    const exemples = (cahier?.boutons || []).slice(0, 2).join(' · ');
     return h('div', { class: 'ap-v ap-aujourdhui is-service' },
       h('header', { class: 'ap-haut' }, marque(), sos),
       h('section', { class: 'ap-tete' },
-        h('p', { class: 'ap-sur ap-sur--or' }, h('i', { class: 'ap-pouls' }), 'EN SERVICE'),
-        h('h1', { class: 'ap-titre ap-titre--m' }, site || 'Service en cours'),
+        h('span', { class: 'ap-statut is-service' }, 'En service'),
         chrono,
         fin ? h('div', { class: 'ap-progres', role: 'presentation' }, barre) : null,
-        h('p', { class: 'ap-bornes' }, h('span', null, `Depuis ${frHeure(d.enCours.debut)}`), finLib ? h('span', null, `Fin ${finLib}`) : null)),
+        h('p', { class: 'ap-bornes' }, h('span', null, `${site ? `${site} · ` : ''}depuis ${frHeure(d.enCours.debut)}`), finLib ? h('span', null, `fin ${finLib}`) : null)),
+      cahier ? h('section', { class: 'ap-carte' },
+        h('p', { class: 'ap-etiq' }, 'Noter dans la main courante'),
+        h('div', { class: 'ap-rapides' },
+          tuileRapide('ronde', 'Noter', exemples || 'Ronde, portes…', () => feuilleNoter()),
+          tuileRapide('visiteur', 'Visiteur', 'Arrivée, livraison', () => feuilleNoter('visiteur')),
+          tuileRapide('crayon', 'Note libre', 'Avec photo si besoin', () => feuilleNoter('note')),
+          tuileRapide('alerte', 'Incident', 'Prévenir la direction', () => formulaireIncident(site), 'is-incident')))
+        : h('section', { class: 'ap-carte' },
+          h('p', { class: 'ap-etiq' }, 'Pendant le service'),
+          h('div', { class: 'ap-rapides' },
+            tuileRapide('alerte', 'Signaler', 'Un événement', () => formulaireIncident(site), 'is-incident'),
+            tuileRapide('documents', 'Consignes', 'Du site', () => (p ? detailPostes([p]) : formulaireIncident(site))))),
       cahier ? vueJournal(cahier) : null,
-      lignes.length ? h('nav', { class: 'ap-lignes', 'aria-label': 'Pendant le service' }, lignes) : null,
-      h('div', { class: 'ap-bas' },
-        cahier ? h('div', { class: 'ap-duo' },
-          h('button', { class: 'ap-btn', type: 'button', onclick: () => feuilleNoter() }, ic('plus'), 'Noter'),
-          h('button', { class: 'ap-btn ap-btn--contour', type: 'button', onclick: () => formulaireIncident(site) }, 'Signaler'))
-          : h('button', { class: 'ap-btn', type: 'button', onclick: () => formulaireIncident(site) }, 'Signaler un événement'),
-        finir));
+      lignes.length ? h('section', { class: 'ap-carte ap-carte--liste' }, h('nav', { class: 'ap-lignes', 'aria-label': 'Pendant le service' }, lignes)) : null,
+      h('div', { class: 'ap-bas' }, finir, h('p', { class: 'ap-aide' }, 'Appui long pour terminer · l’heure est enregistrée')));
   }
 
   // ----- avant le poste -----
   const heure = maintenant.getHours();
   const salut = heure < 5 || heure >= 18 ? 'Bonsoir' : 'Bonjour';
-  const demainIso = iso(new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate() + 1));
-  let carte;
+  const termine = posteDuJour && fini(posteDuJour) && !(prochain && prochain.jour === aujIso);
+  let statut = termine ? ['fin', 'Service terminé'] : ['repos', 'En repos'];
+  const prendre = h('button', { class: 'ap-btn', type: 'button' }, 'Prendre mon service');
+  maintenir(prendre, 1200, () => pointer('debut', prendre));
+  const aidePointer = h('p', { class: 'ap-aide' }, 'Appui long pour pointer · votre position est enregistrée');
+  let infos;
   if (prochain) {
-    const debutPoste = versDate(`${prochain.jour}T${prochain.debut.slice(0, 5)}:00`);
-    const ecart = Math.round((debutPoste - maintenant) / 60000);
-    const quand = ecart <= 0 ? 'MAINTENANT' : prochain.jour === aujIso ? dans(ecart) : prochain.jour === demainIso ? `DEMAIN · ${hm(prochain.debut)}` : dateLongue(prochain.jour).toUpperCase();
-    carte = h('button', { class: 'ap-poste', type: 'button', onclick: () => detailPostes(mesPostes.filter((p) => p.jour === prochain.jour)) },
-      h('p', { class: 'ap-sur' }, `PROCHAIN POSTE · ${quand}`),
-      h('p', { class: 'ap-poste__site' }, prochain.site),
-      h('p', { class: 'ap-poste__heures' }, hm(prochain.debut), h('span', null, ' — '), hm(prochain.fin)),
-      prochain.adresse ? h('span', { class: 'ap-poste__adresse' }, prochain.adresse, ic('versHaut')) : null,
-      h('span', { class: `ap-poste__etat ${prochain.confirme ? 'is-ok' : ''}` }, prochain.confirme ? 'Présence confirmée' : 'Toucher pour confirmer et voir les consignes'));
+    const ecart = Math.round((versDate(`${prochain.jour}T${prochain.debut.slice(0, 5)}:00`) - maintenant) / 60000);
+    if (prochain.jour === aujIso && ecart <= 45) statut = ['heure', ecart <= 0 ? 'C’est l’heure' : 'Bientôt'];
+    infos = h('button', { class: 'ap-poste3__infos', type: 'button', onclick: () => detailPostes(mesPostes.filter((x) => x.jour === prochain.jour)) },
+      h('b', { class: 'ap-poste3__site' }, prochain.site),
+      prochain.adresse ? h('span', { class: 'ap-info' }, ic('pin'), prochain.adresse) : null,
+      h('span', { class: 'ap-info' }, ic('horloge'), `${quandJour(prochain.jour)} · ${hm(prochain.debut)} – ${hm(prochain.fin)}${prochain.jour === aujIso && ecart > 0 ? ` · ${dansMin(ecart)}` : ''}`),
+      h('span', { class: `ap-info ap-info--conf ${prochain.confirme ? 'is-ok' : ''}` }, ic(prochain.confirme ? 'coche' : 'fleche'), prochain.confirme ? 'Présence confirmée' : 'Toucher pour confirmer et voir les consignes'));
   } else {
     const planif = d.prochains.find((j) => { const x = lireCreneau(j.creneau); return x && !x.code; });
     if (c?.code) {
-      carte = h('section', { class: 'ap-poste is-calme' }, h('p', { class: 'ap-sur' }, 'AUJOURD’HUI'), h('p', { class: 'ap-poste__site' }, CODES[c.code] || c.code), h('p', { class: 'ap-poste__note' }, 'Profitez-en.'));
+      infos = [h('b', { class: 'ap-poste3__site' }, CODES[c.code] || c.code), h('p', { class: 'ap-poste3__calme' }, 'Aujourd’hui · profitez-en.')];
     } else if (planif) {
       const x = lireCreneau(planif.creneau);
-      carte = h('section', { class: 'ap-poste' },
-        h('p', { class: 'ap-sur' }, `PROCHAIN POSTE · ${planif.jour === aujIso ? 'AUJOURD’HUI' : planif.jour === demainIso ? 'DEMAIN' : dateLongue(planif.jour).toUpperCase()}`),
-        planif.site ? h('p', { class: 'ap-poste__site' }, planif.site) : null,
-        h('p', { class: 'ap-poste__heures' }, x.debut !== undefined ? [minVersHm(x.debut), h('span', null, ' — '), minVersHm(x.fin)] : String(planif.creneau).replace(/\s+/g, '')));
+      infos = h('div', { class: 'ap-poste3__infos' },
+        h('b', { class: 'ap-poste3__site' }, planif.site || 'Service'),
+        h('span', { class: 'ap-info' }, ic('horloge'), `${quandJour(planif.jour)} · ${x.debut !== undefined ? `${minVersHm(x.debut)} – ${minVersHm(x.fin)}` : String(planif.creneau).replace(/\s+/g, '')}`));
     } else {
-      carte = h('section', { class: 'ap-poste is-calme' }, h('p', { class: 'ap-sur' }, 'PROCHAIN POSTE'), h('p', { class: 'ap-poste__site' }, 'Aucun poste prévu'),
-        h('p', { class: 'ap-poste__note' }, 'Votre planning s’affichera ici dès que la direction l’aura préparé.'));
+      infos = [h('b', { class: 'ap-poste3__site' }, 'Aucun poste prévu'), h('p', { class: 'ap-poste3__calme' }, 'Votre planning s’affichera ici dès que la direction l’aura préparé.')];
     }
   }
-  const prendre = h('button', { class: 'ap-btn', type: 'button' }, 'Prendre mon service');
-  maintenir(prendre, 1200, () => pointer('debut', prendre));
+  const carte = h('section', { class: 'ap-carte' },
+    h('div', { class: 'ap-carte__tete' }, h('p', { class: 'ap-etiq' }, 'Prochain poste'), h('span', { class: `ap-statut is-${statut[0]}` }, statut[1])),
+    infos, prendre, aidePointer);
+  // consignes du site du prochain poste : les premières lignes, « Tout lire » ouvre la fiche
+  const consignesSite = prochain?.consignes ? h('section', { class: 'ap-carte' },
+    h('p', { class: 'ap-etiq' }, 'Consignes du site'),
+    h('p', { class: 'ap-consignes__texte' }, prochain.consignes),
+    h('button', { class: 'ap-lien-or', type: 'button', onclick: () => detailPostes(mesPostes.filter((x) => x.jour === prochain.jour)) }, 'Tout lire', ic('fleche'))) : null;
+  // messages, prochaines missions, signaler
+  const autres = [...new Set(aVenir.map((p) => p.jour))].filter((j) => j !== prochain?.jour).slice(0, 3)
+    .map((j) => { const x = versDate(j); return `${JOURS_COURTS[x.getDay()]} ${x.getDate()}`; }).join(' · ');
+  const raccourcis = [
+    ...lignes,
+    PAGES.messages ? ligne({ href: '#/messages' }, icLigne('msg', 'Messages', compteurs.messages ? `${compteurs.messages} message${compteurs.messages > 1 ? 's' : ''} non lu${compteurs.messages > 1 ? 's' : ''}` : 'Écrire à la direction'), compteurs.messages ? h('span', { class: 'ap-compte' }, compteurs.messages) : null) : null,
+    ligne({ href: '#/planning' }, icLigne('cal', 'Prochaines missions', autres || 'Voir mon planning'), null),
+    moi.metier !== 'chauffeur' ? ligne({ onclick: () => formulaireIncident(prochain?.jour === aujIso ? prochain.site : undefined) }, icLigne('alerte', 'Signaler un événement', 'Transmis tout de suite à la direction'), null) : null,
+  ].filter(Boolean);
   return h('div', { class: 'ap-v ap-aujourdhui' },
     h('header', { class: 'ap-haut' }, marque(), sos),
     h('section', { class: 'ap-tete' },
-      h('p', { class: 'ap-sur' }, `${JOURS_MAJ[maintenant.getDay()]} ${maintenant.getDate()} ${MOIS[maintenant.getMonth()].toUpperCase()}`),
-      h('h1', { class: 'ap-titre' }, `${salut}, ${d.moi.prenom}`)),
+      h('h1', { class: 'ap-titre' }, `${salut} ${d.moi.prenom}`),
+      h('p', { class: 'ap-date' }, cap(`${JOURS_LONGS[maintenant.getDay()]} ${maintenant.getDate()} ${MOIS[maintenant.getMonth()]}`))),
     carte,
-    blocLignes,
-    h('div', { class: 'ap-bas' },
-      prendre,
-      h('p', { class: 'ap-aide' }, 'Maintenir pour pointer · votre position est enregistrée'),
-      moi.metier !== 'chauffeur' ? h('button', { class: 'ap-btn-texte', type: 'button', onclick: () => formulaireIncident(prochain?.jour === aujIso ? prochain.site : undefined) }, 'Signaler un événement') : null));
+    consignesSite,
+    h('section', { class: 'ap-carte ap-carte--liste' }, h('nav', { class: 'ap-lignes', 'aria-label': 'À voir' }, raccourcis)));
 }
 
 /* ----- Main courante : le cahier du poste, l'heure est prise toute seule ----- */
@@ -962,7 +1032,7 @@ function vueJournal(j, { complet = false } = {}) {
   return racineJ;
 }
 // La feuille « Noter » : l'heure (maintenant ou un peu avant), les boutons du site, un visiteur, une note
-function feuilleNoter() {
+function feuilleNoter(vue) {
   const j = journalVue?.donnees();
   if (!j) return;
   let recul = 0;
@@ -1088,7 +1158,7 @@ function feuilleNoter() {
       msg, btn));
     setTimeout(() => texte.focus(), 60);
   };
-  accueil();
+  if (vue === 'visiteur') visiteur(); else if (vue === 'note') note(); else accueil();
   const fermer = tiroir('Noter', corps, { sur: (j.site?.nom || 'Main courante').toUpperCase() });
 }
 async function pageJournal() {
@@ -1471,7 +1541,7 @@ async function pageProfil() {
   return h('div', null,
     h('section', { class: 'eq-carte eq-service', style: 'margin-bottom:1rem' },
       h('div', { class: 'eq-profil-tete' }, h('span', { class: 'eq-avatar eq-avatar--grand' }, initiales(c.prenom, c.nom)),
-        h('div', null, h('h2', null, `${c.prenom} ${c.nom}`), h('p', null, `${METIERS[c.metier]?.[0] || ''} · identifiant `, h('b', { style: 'color:var(--or-clair)' }, c.identifiant)), h('p', { style: 'font-size:.82rem' }, `Membre depuis le ${frDate(c.cree)}`))),
+        h('div', null, h('h2', null, `${c.prenom} ${c.nom}`), h('p', null, `${METIERS[c.metier]?.[0] || (c.metier === 'direction' ? 'Direction' : '')} · identifiant `, h('b', { style: 'color:var(--or-clair)' }, c.identifiant)), h('p', { style: 'font-size:.82rem' }, `Membre depuis le ${frDate(c.cree)}`))),
       h('div', { class: 'eq-infos eq-mt' },
         h('div', { class: 'eq-info' }, h('span', null, 'Poste'), h('b', null, d.agent.poste || '—')),
         h('div', { class: 'eq-info' }, h('span', null, 'Carte professionnelle'), h('b', null, d.agent.carte || '—')),

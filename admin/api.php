@@ -1019,6 +1019,55 @@ try {
       journal('equipe', "Espace équipe : compte de {$c['prenom']} {$c['nom']} validé");
       repondre(['ok' => true, 'agent_id' => $agentId, 'email' => $mail]);
 
+    // Compte créé directement par la direction (pour soi, un associé, un agent sans smartphone…) : actif tout de suite
+    case 'equipe.compte.creer':
+      if (role_courant() !== 'admin') echec('Réservé à l’administrateur.', 403);
+      $b = corps();
+      $prenom = texte($b['prenom'] ?? '', 60);
+      $nom = texte($b['nom'] ?? '', 60);
+      $email = mb_strtolower(texte($b['email'] ?? '', 160));
+      $tel = texte($b['tel'] ?? '', 30);
+      $metier = in_array($b['metier'] ?? '', ['securite', 'ssiap', 'chauffeur', 'direction'], true) ? (string)$b['metier'] : '';
+      $identifiant = mb_strtolower(texte($b['identifiant'] ?? '', 40));
+      if (mb_strlen($prenom) < 2 || mb_strlen($nom) < 2) echec('Indiquez le prénom et le nom.');
+      if ($metier === '') echec('Choisissez le rôle.');
+      if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) echec('Adresse e-mail invalide.');
+      if (!preg_match('/^[a-z0-9][a-z0-9._-]{2,29}$/', $identifiant)) echec('Identifiant : 3 à 30 caractères, lettres sans accent, chiffres, point ou tiret.');
+      $st = db()->prepare('SELECT COUNT(*) FROM comptes_equipe WHERE identifiant = ?');
+      $st->execute([$identifiant]);
+      if ((int)$st->fetchColumn()) echec('Cet identifiant est déjà pris : choisissez-en un autre.', 409);
+      if ($email !== '') {
+        $st = db()->prepare("SELECT COUNT(*) FROM comptes_equipe WHERE email = ? AND statut IN ('actif', 'attente', 'bloque')");
+        $st->execute([$email]);
+        if ((int)$st->fetchColumn()) echec('Un compte utilise déjà cette adresse e-mail.', 409);
+      }
+      $agentId = (int)($b['agent_id'] ?? 0);
+      if ($agentId) {
+        $st = db()->prepare('SELECT id FROM agents WHERE id = ?');
+        $st->execute([$agentId]);
+        if (!$st->fetchColumn()) echec('Fiche agent introuvable.', 404);
+        $pris = db()->prepare("SELECT prenom || ' ' || nom FROM comptes_equipe WHERE agent_id = ? AND statut IN ('actif', 'bloque')");
+        $pris->execute([$agentId]);
+        if ($autre = $pris->fetchColumn()) echec("Cette fiche agent est déjà reliée au compte de $autre.", 409);
+        db()->prepare("UPDATE agents SET actif = 1, tel = CASE WHEN tel = '' THEN ? ELSE tel END WHERE id = ?")->execute([$tel, $agentId]);
+      } else {
+        db()->prepare('INSERT INTO agents (nom, poste, tel, actif, cree) VALUES (?, ?, ?, 1, ?)')->execute([mb_strtoupper($nom) . ' ' . $prenom, EQ_POSTE_METIER[$metier] ?? 'ADS', $tel, maintenant()]);
+        $agentId = (int)db()->lastInsertId();
+      }
+      // mot de passe provisoire (lettres et chiffres), montré une seule fois à la direction
+      $mdp = 'Bda-' . substr(strtr(bin2hex(random_bytes(4)), '01', 'km'), 0, 5) . '-' . random_int(1000, 9999);
+      $provisoire = !empty($b['changer']) ? 1 : 0;
+      db()->prepare("INSERT INTO comptes_equipe (agent_id, identifiant, email, prenom, nom, tel, metier, hash, statut, cree, valide, mdp_provisoire) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'actif', ?, ?, ?)")
+        ->execute([$agentId, $identifiant, $email, $prenom, $nom, $tel, $metier, password_hash($mdp, PASSWORD_DEFAULT), maintenant(), maintenant(), $provisoire]);
+      $mail = false;
+      if (!empty($b['envoyer']) && $email !== '') {
+        $mail = envoyer_mail('Votre accès à BDA Équipe', "Bonjour $prenom,\n\nLa direction vous a créé un accès à BDA Équipe, l'appli de BDA Security Group.\n\nIdentifiant : $identifiant\nMot de passe provisoire : $mdp\n"
+          . ($provisoire ? "À la première connexion, vous choisirez votre propre mot de passe.\n" : '')
+          . "\niPhone : https://apps.apple.com/fr/app/id6830229089\nAutres téléphones et ordinateur : https://bdasecurite.com/espace-equipe\n\nBDA Security Group", BDA_EMAIL, $email);
+      }
+      journal('equipe', "Espace équipe : compte créé par la direction pour $prenom " . mb_strtoupper($nom) . " ($identifiant)");
+      repondre(['ok' => true, 'identifiant' => $identifiant, 'motdepasse' => $mdp, 'email' => $mail, 'agent_id' => $agentId]);
+
     case 'equipe.compte.statut':
       $b = corps();
       $c = eq_compte_admin((int)($b['id'] ?? 0));

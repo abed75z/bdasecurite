@@ -596,19 +596,19 @@ function installerRaccourcis() {
 }
 
 /* ---------- Nouveautés : une fenêtre à la première ouverture de chaque version ---------- */
-const VERSION = '18';
+const VERSION = '19';
 function montrerNouveautes() {
   try { if (localStorage.getItem('bda-nouveautes') === VERSION) return; localStorage.setItem('bda-nouveautes', VERSION); } catch (e) { return; }
   const point = (ic, dom, titre, texte) => h('li', null, h('span', { class: 'creer-liste__ic', dataset: { dom } }, icone(ic)), h('span', null, h('b', null, titre), h('small', null, texte)));
   setTimeout(() => modale({
     titre: 'Nouveautés de BDA Admin',
     contenu: h('div', { class: 'nouveautes' },
-      h('p', { class: 'nouveautes__intro' }, 'Version 18 : la main courante passe sur l’appli. Fini le cahier papier, les heures se notent toutes seules.'),
+      h('p', { class: 'nouveautes__intro' }, 'Version 19 : l’appli BDA Équipe passe en blanc premium, et vous pouvez créer les comptes vous-même.'),
       h('ul', null,
-        point('note', 'equipe', 'Main courante des sites', 'Exploitation › Main courante des sites : le cahier de chaque site, en direct, jour par jour, imprimable en PDF.'),
-        point('mobile', 'equipe', 'Dans l’appli des agents', 'Pendant le service : « Noter » (ouverture, fermeture, ronde, visiteur ou livraison, note avec photo) et un compteur « Personnes reçues ». Prise et fin de service et incidents s’ajoutent seuls.'),
-        point('reglages', 'equipe', 'Réglable par site', 'Boutons rapides de l’agent, compteur de l’accueil, et visibilité dans l’espace du client.'),
-        point('clients', 'clients', 'Vu par le client', 'Le client suit la main courante de son site dans son espace, en direct, sans les photos.'))),
+        point('plus', 'equipe', 'Créer un compte', 'Espace équipe › « Créer un compte » : pour vous, le gérant ou un agent. Actif tout de suite, rôle « Direction » possible, mot de passe provisoire.'),
+        point('cadenas', 'equipe', 'Mot de passe provisoire', 'Affiché une seule fois, à copier ou envoyer par WhatsApp ou e-mail. L’agent choisit le sien à la première connexion.'),
+        point('mobile', 'equipe', 'Nouvelle appli des agents', 'Fond blanc, bandeau bleu nuit et touches dorées, police du téléphone. Accueil : prochain poste, « Prendre mon service », consignes, messages.'),
+        point('note', 'equipe', 'En service, plus simple', 'Quatre gros boutons : Noter, Visiteur, Note libre, Incident. Les dernières lignes de la main courante juste en dessous.'))),
     actions: [{ libelle: 'C’est parti', classe: 'btn--gold', submit: true }],
   }), 900);
 }

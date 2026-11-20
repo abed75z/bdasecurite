@@ -373,6 +373,7 @@ try {
         'semaine' => eq_minutes($aid, date('Y-m-d 00:00:00', strtotime('monday this week'))),
         'mois' => eq_minutes($aid, date('Y-m-01 00:00:00')),
         'fichesNonVues' => $q("SELECT COUNT(*) FROM equipe_paies WHERE agent_id = ? AND vu = ''", [$aid]),
+        'fiches' => $q('SELECT COUNT(*) FROM equipe_paies WHERE agent_id = ?', [$aid]),
         'absencesAttente' => $q("SELECT COUNT(*) FROM absences WHERE agent_id = ? AND statut = 'attente'", [$aid]),
         'incidentsOuverts' => $q("SELECT COUNT(*) FROM main_courante WHERE agent_id = ? AND statut <> 'traite'", [$aid]),
         'consignes' => $cons->fetchAll(),

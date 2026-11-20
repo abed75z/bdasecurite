@@ -406,3 +406,42 @@ html body.eq:not(.eq--app) .eq-chargement { background: #0F1E36; }
 body.ap-v2 .eqbg-carte .eqbg-infos, body.ap-v2 .eqbg-carte .eqbg-infos * { color: rgba(255, 255, 255, .82); border-color: rgba(255, 255, 255, .16); }
 body.ap-v2 .eqbg-carte .eqbg-infos dt { color: rgba(255, 255, 255, .58); }
 body.ap-v2 .eqbg-carte .eqbg-infos dd { color: #fff; }
+
+/* ---------- 1.2 : plus fluide ---------- */
+/* transitions plus courtes ; onglet déjà vu : simple fondu rapide ; mise à jour sur place : sans animation */
+.ap-page--fondu { animation-duration: .28s; }
+.ap-page--avant, .ap-page--arriere { animation-duration: .3s; }
+body.ap-v2 .eq-anim > * { animation-duration: .34s; animation-delay: calc(var(--i, 0) * 28ms); }
+.ap-page--memoire { animation: ap-apparait .14s ease both; }
+.ap-page--maj { animation: none; }
+.ap-ecran.is-attente { opacity: .72; transition: opacity .15s ease .08s; }
+/* réponse immédiate au toucher */
+body.ap-v2 .ap-btn, body.ap-v2 .ap-ligne, body.ap-v2 .ap-onglet, body.ap-v2 .ap-rapide, .au-page .eq-btn, .au-page .eq-lien { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+body.ap-v2 .ap-btn { transition: transform .12s ease, background-color .15s ease, opacity .15s ease; }
+body.ap-v2 .ap-btn:active:not(:disabled) { transform: scale(.98); }
+body.ap-v2 .ap-btn:disabled { opacity: .6; }
+.ap-onglet:active .ap-onglet__ic { transform: scale(.9); transition: transform .1s ease; }
+/* fin de service : confirmation */
+.ap-confirmer { display: grid; gap: 12px; padding: 4px 0 8px; }
+.ap-confirmer .ap-fiche__texte { margin: 0 0 6px; color: var(--ap-doux); }
+
+/* ---------- Écran de connexion : grand bandeau bleu nuit, la carte au milieu ---------- */
+.au-page--connexion .au-bandeau {
+  display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: clamp(250px, 42svh, 400px); padding-bottom: 78px;
+}
+.au-page--connexion .au-bandeau > * { width: 100%; }
+.au-page--connexion .au-marque { margin-bottom: auto; padding-top: 8px; }
+.au-page--connexion .au-marque b { font-size: 15px; }
+.au-page--connexion .au-marque span { font-size: 11px; }
+.au-page--connexion .au-bandeau h1 { margin-top: 0; font-size: clamp(30px, 9vw, 36px); }
+.au-page--connexion .au-bandeau::after { bottom: 62px; }
+.au-page--connexion .au-blason { margin-bottom: 16px; line-height: 0; }
+.au-page--connexion .au-blason img { width: 30px; height: auto; }
+.au-page--connexion .au-carte { margin-top: -46px; }
+@media (max-height: 700px) {
+  .au-page--connexion .au-bandeau { min-height: 210px; padding-bottom: 64px; }
+  .au-page--connexion .au-bandeau::after { bottom: 52px; }
+  .au-page--connexion .au-blason { display: none; }
+  .au-page--connexion .au-carte { margin-top: -38px; }
+}

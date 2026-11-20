@@ -321,7 +321,10 @@ function ecranConnexion(message) {
     h('div', { class: 'au-ligne' }, h('label', { class: 'eq-case' }, memo, 'Rester connecté'), h('button', { class: 'eq-lien', type: 'button', onclick: ecranOubli }, 'Mot de passe oublié ?')),
     msg, btn);
   carteAuth('Connexion', 'Votre espace agent : planning, main courante, fiches de paie.', form,
-    h('div', { class: 'au-bascule' }, h('span', null, 'Nouveau dans l’équipe ?'), h('button', { class: 'eq-btn eq-btn--ghost', type: 'button', onclick: () => { history.replaceState(null, '', '#inscription'); ecranInscription(); } }, 'Créer mon compte')));
+    h('div', { class: 'au-bascule' }, h('span', null, 'Nouveau dans l’équipe ?'), h('button', { class: 'eq-btn eq-btn--ghost', type: 'button', onclick: () => { history.replaceState(null, '', '#inscription'); ecranInscription(); } }, 'Créer mon compte')));
+  const page = racine.querySelector('.au-page');
+  page?.classList.add('au-page--connexion');
+  page?.querySelector('.au-bandeau h1')?.before(h('div', { class: 'au-blason' }, h('img', { src: 'assets/img/blason.svg?v=1', alt: '', width: 30, height: 49 })));
 }
 // Création de compte : 3 étapes courtes (qui vous êtes, comment vous joindre, votre mot de passe)
 function ecranInscription() {
@@ -534,7 +537,7 @@ async function pageMoi() {
   const r = (href, icone, titre, sous, droite) => ligne({ href }, icLigne(icone, titre, sous), droite);
   const lignes = [
     h('div', { class: 'ap-ligne' }, h('span', { class: 'ap-ligne__g' }, icLigne('horloge', 'Mes heures', `Cette semaine ${fmtMin(d.semaine)} · ce mois ${fmtMin(d.mois)}`))),
-    r('#/paie', 'paie', 'Fiches de paie', d.fichesNonVues ? `${d.fichesNonVues} nouvelle${d.fichesNonVues > 1 ? 's' : ''} fiche${d.fichesNonVues > 1 ? 's' : ''}` : 'Espace privé, en PDF', d.fichesNonVues ? h('span', { class: 'ap-compte' }, d.fichesNonVues) : null),
+    d.moi.metier === 'direction' && !d.fiches ? null : r('#/paie', 'paie', 'Fiches de paie', d.fichesNonVues ? `${d.fichesNonVues} nouvelle${d.fichesNonVues > 1 ? 's' : ''} fiche${d.fichesNonVues > 1 ? 's' : ''}` : 'Espace privé, en PDF', d.fichesNonVues ? h('span', { class: 'ap-compte' }, d.fichesNonVues) : null),
     r('#/absences', 'absences', 'Congés et absences', d.absencesAttente ? `${pluriel(d.absencesAttente, 'demande')} en attente` : 'Faire une demande, suivre la réponse'),
     r('#/documents', 'documents', 'Contrats et documents', 'Contrat, carte pro, attestations'),
     moi.metier === 'chauffeur' ? r('#/courses', 'voiture', 'Mes courses', 'Les courses confiées par la direction')
@@ -586,6 +589,10 @@ const vibrer = (motif) => { try { navigator.vibrate?.(motif); } catch (e) { /* p
 let ecouteSaisie = false;
 function ouvrirApplication() {
   document.body.classList.add('eq--app', 'ap-v2');
+  ecransGardes.clear();
+  clearTimeout(prechargement);
+  prechargement = null;
+  routePrecedente = null;
   principal = h('main', { class: 'ap-ecran', id: 'contenu' });
   ongletsNav = h('nav', { class: 'ap-onglets', 'aria-label': 'Navigation principale' });
   const dessinerMenus = () => {
@@ -693,6 +700,26 @@ async function deconnexion() {
   ecranConnexion();
 }
 let routePrecedente = null;
+const ecransGardes = new Map(); // onglet → dernier écran affiché (montré tout de suite quand on y revient)
+let prechargement = null;
+// écran complet d'une route : bandeau bleu nuit + corps
+function construireEcran(route, contenu, classe, cascade) {
+  const parent = ongletDe(route);
+  const retour = estOnglet(route) ? null : h('a', { class: 'ap-retour', href: `#/${parent}` }, ic('retour'), ONGLETS.find(([k]) => k === parent)?.[1] || 'Retour');
+  const corps = cascade ? anim(contenu) : contenu;
+  return h('div', { class: `ap-page ${classe}` }, poserBandeau(corps, retour), corps);
+}
+// après la première page : Planning et Moi se préparent en silence (Messages non : l'ouvrir marque les messages comme lus)
+function prechargerOnglets() {
+  if (prechargement) return;
+  prechargement = setTimeout(async () => {
+    for (const r of ['planning', 'moi']) {
+      if (ecransGardes.has(r) || routeActuelle() === r) continue;
+      try { ecransGardes.set(r, construireEcran(r, await PAGES[r].rendu(), 'ap-page--memoire', false)); } catch (e) { /* hors ligne : chargé à la demande */ }
+    }
+    ouvrirApplication.menus?.();
+  }, 1500);
+}
 const squelette = () => h('div', { class: 'ap-squelette', 'aria-hidden': 'true' }, h('i', { class: 'is-court' }), h('i', { class: 'is-titre' }), h('i', { class: 'is-bloc' }), h('i'), h('i'));
 async function naviguer() {
   if (!document.body.classList.contains('eq--app')) return;
@@ -707,22 +734,38 @@ async function naviguer() {
   // onglet ↔ onglet : fondu ; vers une sous-page : glisse depuis la droite ; retour : depuis la gauche
   const sens = avant === null || (estOnglet(route) && estOnglet(avant)) ? 'fondu' : !estOnglet(route) ? 'avant' : 'arriere';
   ouvrirApplication.menus?.();
-  principal.classList.add('is-attente');
-  const lent = setTimeout(() => { principal.classList.remove('is-attente'); principal.replaceChildren(squelette()); }, 260);
+  const page0 = principal.firstElementChild;
+  // même écran (après une action) : on garde l'écran affiché pendant la mise à jour
+  const surPlace = avant === route && page0 && page0.matches('.ap-page') && !page0.querySelector('.ap-erreur');
+  // onglet déjà vu : son dernier écran revient tout de suite, puis se met à jour en silence
+  const deja = !surPlace && estOnglet(route) ? ecransGardes.get(route) : null;
+  let lent = null;
+  if (deja) {
+    deja.className = 'ap-page ap-page--memoire';
+    principal.classList.remove('is-attente');
+    principal.replaceChildren(deja);
+    if (route === 'messages') requestAnimationFrame(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    else window.scrollTo(0, 0);
+  } else if (!surPlace) {
+    principal.classList.add('is-attente');
+    lent = setTimeout(() => { principal.classList.remove('is-attente'); principal.replaceChildren(squelette()); }, 220);
+  }
   try {
     const contenu = await page.rendu();
     clearTimeout(lent);
     if (routeActuelle() !== route) return;
-    const parent = ongletDe(route);
-    const retour = estOnglet(route) ? null : h('a', { class: 'ap-retour', href: `#/${parent}` }, ic('retour'), ONGLETS.find(([k]) => k === parent)?.[1] || 'Retour');
-    const corps = anim(contenu);
-    const ecran = h('div', { class: `ap-page ap-page--${sens}` }, poserBandeau(corps, retour), corps);
+    const instantane = deja || surPlace;
+    const ecran = construireEcran(route, contenu, instantane ? 'ap-page--maj' : `ap-page--${sens}`, !instantane);
     principal.classList.remove('is-attente');
     principal.replaceChildren(ecran);
-    // la conversation s'ouvre sur le dernier message ; les autres écrans en haut
+    if (estOnglet(route)) ecransGardes.set(route, ecran);
+    // la conversation s'ouvre sur le dernier message ; les autres écrans en haut (une mise à jour garde la position)
     if (route === 'messages') requestAnimationFrame(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    else window.scrollTo(0, 0);
+    else if (!instantane) window.scrollTo(0, 0);
+    prechargerOnglets();
   } catch (e) {
+    // pas de réseau pendant une mise à jour : l'écran déjà affiché reste, un message prévient
+    if ((deja || surPlace) && routeActuelle() === route) { clearTimeout(lent); principal.classList.remove('is-attente'); if (e.message !== 'Connexion requise.') toast(e.message, true); return; }
     clearTimeout(lent);
     principal.classList.remove('is-attente');
     if (e.message !== 'Connexion requise.') principal.replaceChildren(h('div', { class: 'ap-page ap-page--fondu' }, h('div', { class: 'ap-v ap-erreur' }, vide('alerte', 'Impossible de charger cette page', e.message))));
@@ -807,7 +850,8 @@ async function pageAccueil() {
       const pos = await position();
       const r = await api(quoi === 'fin' ? 'pointer.fin' : 'pointer.debut', pos);
       toast(quoi === 'fin' ? `Fin de service enregistrée (${fmtMin(r.minutes)}). Bon repos !` : 'Prise de service enregistrée. Bon courage !');
-      recharger();
+      await recharger();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) { toast(e.message, true); bouton.disabled = false; bouton.textContent = texte; }
   };
 
@@ -838,8 +882,15 @@ async function pageAccueil() {
     };
     tic();
     minuteur = setInterval(tic, 1000);
-    const finir = maintenir(h('button', { class: 'ap-btn ap-btn--contour ap-btn--fin', type: 'button' }, 'Terminer mon service'), 2000, () => pointer('fin', finir));
     const site = d.enCours.site || p?.site || '';
+    const confirmerFin = () => {
+      const t = new Date(Date.now() + decalage);
+      const oui = h('button', { class: 'ap-btn', type: 'button', onclick: () => { fermer(); vibrer(15); pointer('fin', finir); } }, 'Oui, terminer mon service');
+      const fermer = tiroir('Terminer le service ?', h('div', { class: 'ap-confirmer' },
+        h('p', { class: 'ap-fiche__texte' }, `En service depuis ${frHeure(d.enCours.debut)}. La fin sera enregistrée à ${t.getHours()}h${pad(t.getMinutes())}.`),
+        oui, h('button', { class: 'ap-btn ap-btn--contour', type: 'button', onclick: () => fermer() }, 'Continuer mon service')), { sur: site ? site.toUpperCase() : 'FIN DE SERVICE' });
+    };
+    const finir = h('button', { class: 'ap-btn ap-btn--contour ap-btn--fin', type: 'button', onclick: confirmerFin }, 'Terminer mon service');
     if (p && (p.consignes || p.contact)) lignes.push(ligne({ onclick: () => detailPostes([p]) }, icLigne('documents', 'Consignes du site', 'Contact, consignes, adresse'), null));
     const exemples = (cahier?.boutons || []).slice(0, 2).join(' · ');
     return h('div', { class: 'ap-v ap-aujourdhui is-service' },
@@ -863,7 +914,7 @@ async function pageAccueil() {
             tuileRapide('documents', 'Consignes', 'Du site', () => (p ? detailPostes([p]) : formulaireIncident(site))))),
       cahier ? vueJournal(cahier) : null,
       lignes.length ? h('section', { class: 'ap-carte ap-carte--liste' }, h('nav', { class: 'ap-lignes', 'aria-label': 'Pendant le service' }, lignes)) : null,
-      h('div', { class: 'ap-bas' }, finir, h('p', { class: 'ap-aide' }, 'Appui long pour terminer · l’heure est enregistrée')));
+      h('div', { class: 'ap-bas' }, finir, h('p', { class: 'ap-aide' }, 'Une confirmation vous est demandée · l’heure est enregistrée')));
   }
 
   // ----- avant le poste -----
@@ -871,9 +922,8 @@ async function pageAccueil() {
   const salut = heure < 5 || heure >= 18 ? 'Bonsoir' : 'Bonjour';
   const termine = posteDuJour && fini(posteDuJour) && !(prochain && prochain.jour === aujIso);
   let statut = termine ? ['fin', 'Service terminé'] : ['repos', 'En repos'];
-  const prendre = h('button', { class: 'ap-btn', type: 'button' }, 'Prendre mon service');
-  maintenir(prendre, 1200, () => pointer('debut', prendre));
-  const aidePointer = h('p', { class: 'ap-aide' }, 'Appui long pour pointer · votre position est enregistrée');
+  const prendre = h('button', { class: 'ap-btn', type: 'button', onclick: () => { vibrer(15); pointer('debut', prendre); } }, 'Prendre mon service');
+  const aidePointer = h('p', { class: 'ap-aide' }, 'Un toucher suffit · heure et position enregistrées');
   let infos;
   if (prochain) {
     const ecart = Math.round((versDate(`${prochain.jour}T${prochain.debut.slice(0, 5)}:00`) - maintenant) / 60000);

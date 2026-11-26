@@ -607,9 +607,9 @@ function construireFeuille(type, data, change, r = {}) {
     totaux.replaceChildren(ligneTotal('ht', 'Total HT'), ligneTva, ligneTotal('net', 'Net à payer', 'grand'));
   } else {
     v.pct = h('span', { class: 'f-print' });
-    totaux.replaceChildren(ligneTotal('ht', 'Total HT'), ligneTva, ligneTotal('net', 'Total à payer', 'grand'),
-      h('div', { class: 'sub' }, h('span', null, 'Acompte à la commande (', el.acompte, v.pct, ' %)'), (v.ac = h('b'))),
-      ligneTotal('solde', 'Solde en fin de mission', 'sub'));
+    v.ligneAc = h('div', { class: 'sub' }, h('span', null, 'Acompte à la commande (', el.acompte, v.pct, ' %)'), (v.ac = h('b')));
+    v.ligneSolde = ligneTotal('solde', 'Solde en fin de mission', 'sub');
+    totaux.replaceChildren(ligneTotal('ht', 'Total HT'), ligneTva, ligneTotal('net', 'Total à payer', 'grand'), v.ligneAc, v.ligneSolde);
   }
   function majTotaux() {
     data.lignes.forEach((l, i) => { const c = $(`.f-total__val[data-i="${i}"]`, corps); if (c) c.textContent = euro.format(arrondi((+l.qte || 0) * (+l.pu || 0))); });
@@ -626,6 +626,10 @@ function construireFeuille(type, data, change, r = {}) {
       v.pct.textContent = nombre.format(+data.acompte || 0);
       v.ac.textContent = euro.format(ac);
       v.solde.textContent = euro.format(arrondi(t.ttc - ac));
+      // Sans acompte : les lignes Acompte / Solde restent modifiables à l'écran mais disparaissent du PDF et de l'impression
+      const sansAcompte = !(+data.acompte > 0);
+      v.ligneAc.classList.toggle('f-acompte--zero', sansAcompte);
+      v.ligneSolde.classList.toggle('f-acompte--zero', sansAcompte);
     }
   }
 

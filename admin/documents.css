@@ -150,6 +150,7 @@
   .f-outils, .f-ajout, .f-outil-agent, .f-pct { display: none !important; }
   .f-print { display: inline; }
   .f-ligne-tva--zero .f-taux { display: none !important; }
+  .f-acompte--zero { display: none !important; }
   .plan .cell input { display: none; }
   .plan .cell .pv { font-size: 6.4pt; }
   .plan { font-size: 7pt; }
@@ -165,6 +166,8 @@
 .capture-pdf .f-outils, .capture-pdf .f-ajout, .capture-pdf .f-outil-agent, .capture-pdf .f-pct { display: none !important; }
 .capture-pdf .f-print { display: inline; }
 .capture-pdf .f-ligne-tva--zero .f-taux { display: none !important; }
+.capture-pdf .f-acompte--zero { display: none !important; }
+.f-acompte--zero { opacity: .45; }
 .capture-pdf .plan .cell input { display: none; }
 .capture-pdf .plan .cell .pv { font-size: 6.4pt; }
 .capture-pdf .plan { font-size: 7pt; }

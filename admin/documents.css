@@ -435,6 +435,9 @@
 .fx-releve-infos { display: grid; grid-template-columns: 1fr 1fr; gap: 14mm; margin-bottom: 6mm; }
 .fx-releve-infos b { font: 600 13.5pt/1.2 "Cormorant Garamond", Georgia, "Times New Roman", serif; letter-spacing: 0.02em; color: var(--lx-noir); }
 .fx-releve col.c-t { width: 26mm; }
+.fx-releve col.c-date { width: 36mm; }
+.fx-releve col.c-agent { width: 50mm; }
+.fx-par-agent { display: contents; }
 .feuille--lux.feuille--releve .f-table.fx-releve td { padding-top: 1.25mm; padding-bottom: 1.25mm; }
 .feuille--lux.feuille--releve.feuille--compacte .f-table.fx-releve td { padding-top: 0.55mm; padding-bottom: 0.55mm; font-size: 8.4pt; }
 .fx-jour { display: inline-block; width: 9mm; color: var(--lx-gris); font-size: 8pt; }

@@ -282,7 +282,7 @@ export async function editeurDocument(ctx, type, param) {
   };
   const blocMail = blocMailDocument({ id: () => id, type, onEnvoyer: () => envoyerParMail(), onRelancer: relancer });
   const btnReleve = type === 'facture' ? h('button', { class: 'btn btn--ghost btn--bloc', type: 'button', onclick: () => {
-    if (data.releve?.lignes?.length) { delete data.releve; } else { data.releve = { lignes: [{ date: '', matin: '', apm: '' }] }; }
+    if (data.releve?.lignes?.length) { delete data.releve; } else { data.releve = { colAgent: true, lignes: [{ date: '', agent: '', matin: '', apm: '' }] }; }
     feuille.majReleve(); majBtnReleve(); change();
   } }) : null;
   const majBtnReleve = () => { if (btnReleve) btnReleve.replaceChildren(icone('planning'), data.releve?.lignes?.length ? 'Retirer le relevé d’heures' : 'Ajouter un relevé d’heures (page 2)'); };
@@ -642,6 +642,9 @@ function construireFeuille(type, data, change, r = {}) {
   if (type === 'facture') {
     const rCorps = h('tbody'), rNumero = h('span', { class: 'fx-doc__val' }), rInfos = h('div', { class: 'fx-releve-infos' });
     const rTotal = h('b'), rJours = h('b'), rPied = h('div', { class: 'f-pied' });
+    // colonne « Agent » : relevés créés depuis la v81, ou dès qu'un nom d'agent est saisi ; total par agent sous le tableau
+    const rCols = h('colgroup'), rTete = h('thead'), rParAgent = h('div', { class: 'fx-par-agent' });
+    const avecAgent = () => !!(data.releve?.colAgent || (data.releve?.lignes || []).some((l) => String(l.agent || '').trim()));
     const cellule = (l, k, ph) => {
       const c = h('div', { class: 'fx-cell', contenteditable: 'plaintext-only', spellcheck: 'false', 'data-ph': ph });
       c.textContent = l[k] || '';
@@ -651,10 +654,13 @@ function construireFeuille(type, data, change, r = {}) {
     };
     const calculer = () => {
       let total = 0, jours = 0;
+      const parAgent = new Map();
       (data.releve?.lignes || []).forEach((l, i) => {
         const m = minutesPlages(l.matin) + minutesPlages(l.apm);
         total += m;
         if (m > 0) jours++;
+        const nom = String(l.agent || '').trim();
+        if (nom && m > 0) parAgent.set(nom, (parAgent.get(nom) || 0) + m);
         const c = $(`.fx-h[data-i="${i}"]`, rCorps);
         if (c) c.textContent = m ? fmtHeures(m / 60) : '—';
         const j = $(`.fx-jour[data-i="${i}"]`, rCorps);
@@ -663,6 +669,7 @@ function construireFeuille(type, data, change, r = {}) {
       });
       rTotal.textContent = fmtHeures(total / 60);
       rJours.textContent = String(jours);
+      rParAgent.replaceChildren(...(avecAgent() ? [...parAgent].map(([nom, m]) => h('div', null, h('span', null, nom), h('b', null, fmtHeures(m / 60)))) : []));
     };
     const majEntete = () => {
       rNumero.textContent = data.numero || '';
@@ -675,8 +682,12 @@ function construireFeuille(type, data, change, r = {}) {
       const L = data.releve?.lignes || [];
       releve.hidden = !L.length;
       releve.classList.toggle('feuille--compacte', L.length > 24);
+      const ag = avecAgent();
+      rCols.replaceChildren(...[h('col', { class: 'c-date' }), ag ? h('col', { class: 'c-agent' }) : null, h('col'), h('col'), h('col', { class: 'c-t' })].filter(Boolean));
+      rTete.replaceChildren(h('tr', null, h('th', null, 'Date'), ag ? h('th', null, 'Agent') : null, h('th', null, 'Matin'), h('th', null, 'Après-midi'), h('th', { class: 'r' }, 'Heures')));
       rCorps.replaceChildren(...L.map((l, i) => h('tr', null,
         h('td', null, h('span', { class: 'fx-jour', dataset: { i } }), cellule(l, 'date', 'JJ/MM/AAAA')),
+        ag ? h('td', null, cellule(l, 'agent', 'Nom de l’agent')) : null,
         h('td', null, cellule(l, 'matin', '08:30 - 13:30')),
         h('td', null, cellule(l, 'apm', '—')),
         h('td', { class: 'r' }, h('span', { class: 'fx-h', dataset: { i } }),
@@ -691,12 +702,9 @@ function construireFeuille(type, data, change, r = {}) {
           h('div', { class: 'fx-doc__num' }, h('span', { class: 'fx-doc__label' }, 'Annexe à la facture n°'), rNumero))),
       h('div', { class: 'fx-filet' }),
       rInfos,
-      h('table', { class: 'f-table fx-releve' },
-        h('colgroup', null, h('col'), h('col'), h('col'), h('col', { class: 'c-t' })),
-        h('thead', null, h('tr', null, h('th', null, 'Date'), h('th', null, 'Matin'), h('th', null, 'Après-midi'), h('th', { class: 'r' }, 'Heures'))),
-        rCorps),
-      h('button', { class: 'f-ajout', type: 'button', onclick: () => { data.releve.lignes.push({ date: '', matin: '', apm: '' }); dessinerReleve(); change(); $$('.fx-cell', rCorps).at(-3)?.focus(); } }, '+ Ajouter un jour'),
-      h('div', { class: 'f-totaux fx-releve-total' }, h('div', null, h('span', null, 'Jours travaillés'), rJours), h('div', { class: 'grand' }, h('span', null, 'Total du mois'), rTotal)),
+      h('table', { class: 'f-table fx-releve' }, rCols, rTete, rCorps),
+      h('button', { class: 'f-ajout', type: 'button', onclick: () => { const L = data.releve.lignes; L.push({ date: '', agent: avecAgent() ? (L.at(-1)?.agent || '') : '', matin: '', apm: '' }); dessinerReleve(); change(); $$('.fx-cell', rCorps).at(avecAgent() ? -4 : -3)?.focus(); } }, '+ Ajouter un jour'),
+      h('div', { class: 'f-totaux fx-releve-total' }, h('div', null, h('span', null, 'Jours travaillés'), rJours), rParAgent, h('div', { class: 'grand' }, h('span', null, 'Total du mois'), rTotal)),
       h('div', { class: 'f-espace' }),
       rPied);
     majReleve = dessinerReleve;

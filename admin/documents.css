@@ -437,7 +437,9 @@
 .fx-releve col.c-t { width: 26mm; }
 .fx-releve col.c-date { width: 36mm; }
 .fx-releve col.c-agent { width: 50mm; }
-.fx-par-agent { display: contents; }
+.feuille--releve .f-totaux > div.fx-par-agent { display: block; padding: 0; border: 0; }
+.fx-par-agent > div { display: flex; justify-content: space-between; align-items: center; gap: 4mm; padding: 1.6mm 0 1.6mm 3mm; border-bottom: 0.25mm solid var(--lx-trait); color: var(--lx-gris); font-size: 8.6pt; }
+.fx-par-agent b { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .feuille--lux.feuille--releve .f-table.fx-releve td { padding-top: 1.25mm; padding-bottom: 1.25mm; }
 .feuille--lux.feuille--releve.feuille--compacte .f-table.fx-releve td { padding-top: 0.55mm; padding-bottom: 0.55mm; font-size: 8.4pt; }
 .fx-jour { display: inline-block; width: 9mm; color: var(--lx-gris); font-size: 8pt; }
